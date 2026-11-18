@@ -1,0 +1,11 @@
+@import 'tailwindcss';
+@import '@rectio/tokens/tailwind.css';
+@import '@rectio/tokens/fonts.css';
+
+/* Components live in another package: tell Tailwind to read their class names too. */
+@source '../../../packages/ui/src';
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
