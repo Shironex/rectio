@@ -184,7 +184,7 @@ function tailwindCss(contract: string[], types: TokenMap): string {
     add(`--text-${size}`, `--rx-font-size-${size}`);
     add(`--text-${size}--line-height`, `--rx-font-line-height-${size}`);
   }
-  for (const weight of ['regular', 'medium', 'strong', 'display']) {
+  for (const weight of ['regular', 'medium', 'strong', 'heading']) {
     add(`--font-weight-${weight}`, `--rx-font-weight-${weight}`);
   }
   for (const tracking of ['tight', 'normal', 'caps'])
@@ -195,6 +195,8 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   for (const ease of ['standard', 'enter', 'exit'])
     add(`--ease-${ease}`, `--rx-motion-easing-${ease}`);
   add('--spacing', '--rx-space-unit');
+
+  map.push('--animate-spin: rx-spin var(--rx-motion-duration-loop) linear infinite;');
 
   const durations = ['fast', 'base', 'slow'].map(
     (d) => `@utility duration-${d} {\n  transition-duration: var(--rx-motion-duration-${d});\n}`,
@@ -214,6 +216,12 @@ function tailwindCss(contract: string[], types: TokenMap): string {
 /* Drop Tailwind's default palette, type, radii, shadows and easings: only tokens remain. */
 @theme {
 ${resets.map((r) => `  ${r}`).join('\n')}
+
+  @keyframes rx-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 
 @theme inline {

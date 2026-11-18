@@ -76,7 +76,7 @@
       "strong": {
         "$value": "{font-weight.semibold}"
       },
-      "display": {
+      "heading": {
         "$value": "{font-weight.regular}"
       }
     },
@@ -160,6 +160,10 @@
       },
       "slow": {
         "$value": "{duration.320}"
+      },
+      "loop": {
+        "$value": "{duration.900}",
+        "$description": "One turn of a looping indicator such as a spinner."
       }
     },
     "easing": {
