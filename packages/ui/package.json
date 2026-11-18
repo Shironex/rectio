@@ -22,5 +22,21 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "vitest": "^5.1.0"
+  },
+  "description": "rectio components: finance and back-office UI on Base UI, styled only through @rectio/tokens.",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }
