@@ -16,8 +16,14 @@ export const controlSurface = cn(
   'data-disabled:cursor-not-allowed data-disabled:border-line data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
 );
 
-/** Focus ring for the element that holds keyboard focus (or contains it). */
-export const controlFocus = 'focus-visible:outline-2 focus-visible:outline-focus';
+/**
+ * Focus ring for the element that holds keyboard focus. It sits outside the border, so an invalid
+ * field keeps its red edge while focused, and turns negative too so focus never reads as valid.
+ */
+export const controlFocus = cn(
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+  'data-invalid:focus-visible:outline-negative',
+);
 
 export type FieldProps = WithClassName<ComponentProps<typeof BaseField.Root>>;
 

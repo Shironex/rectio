@@ -103,7 +103,7 @@ export function DialogFooter({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center justify-end gap-2 border-t border-line bg-surface-sunken px-6 py-3',
+        'flex flex-wrap items-center justify-end gap-2 border-t border-line bg-(--rx-dialog-footer-background) px-6 py-3',
         'rounded-b-(--rx-dialog-radius)',
         className,
       )}

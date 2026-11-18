@@ -31,7 +31,8 @@ export function SelectTrigger({ className, placeholder, children, ...props }: Se
         controlSurface,
         controlFocus,
         'flex cursor-pointer items-center justify-between gap-2 px-(--rx-field-padding-x) text-start',
-        'data-popup-open:border-fg-subtle',
+        // While the list is open the user is fixing the field: show it neutral, not still wrong.
+        'data-popup-open:border-fg-subtle data-popup-open:data-invalid:border-fg-subtle data-popup-open:data-invalid:ring-0',
         className,
       )}
       {...props}
