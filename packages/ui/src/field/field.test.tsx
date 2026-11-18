@@ -42,3 +42,19 @@ describe('Field and Input', () => {
     expect(error).toBeVisible();
   });
 });
+
+describe('Field invalid set by the app', () => {
+  it('shows the error message, not only a red border', () => {
+    render(
+      <Field invalid>
+        <FieldLabel>Cost centre</FieldLabel>
+        <Input defaultValue="CC-9" />
+        <FieldError>No cost centre CC-9.</FieldError>
+      </Field>,
+    );
+    const input = screen.getByRole('textbox', { name: 'Cost centre' });
+    expect(screen.getByText('No cost centre CC-9.')).toBeVisible();
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAccessibleDescription('No cost centre CC-9.');
+  });
+});

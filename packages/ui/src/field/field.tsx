@@ -1,6 +1,6 @@
 import { Field as BaseField } from '@base-ui/react/field';
 import { WarningCircleIcon } from '@phosphor-icons/react';
-import type { ComponentProps, ReactNode } from 'react';
+import { createContext, use, type ComponentProps, type ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
 
@@ -12,7 +12,7 @@ export const controlSurface = cn(
   'border border-(--rx-field-border) bg-(--rx-field-background) text-base text-fg',
   'transition-[border-color,outline-color] duration-fast ease-standard',
   'outline-0 -outline-offset-1 outline-transparent hover:border-fg-subtle',
-  'data-invalid:border-negative',
+  'data-invalid:border-negative data-invalid:ring-1 data-invalid:ring-negative data-invalid:ring-inset',
   'data-disabled:cursor-not-allowed data-disabled:border-line data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
 );
 
@@ -21,14 +21,20 @@ export const controlFocus = 'focus-visible:outline-2 focus-visible:outline-focus
 
 export type FieldProps = WithClassName<ComponentProps<typeof BaseField.Root>>;
 
+/** True when the app marked the field invalid itself (server errors, form libraries). */
+const ExternalInvalidContext = createContext(false);
+
 /** Groups a label, a control, its description and its error, and wires their ARIA links. */
-export function Field({ className, ...props }: FieldProps) {
+export function Field({ className, invalid, ...props }: FieldProps) {
   return (
-    <BaseField.Root
-      data-slot="field"
-      className={cn('flex flex-col gap-1.5', className)}
-      {...props}
-    />
+    <ExternalInvalidContext value={invalid === true}>
+      <BaseField.Root
+        data-slot="field"
+        invalid={invalid}
+        className={cn('flex flex-col gap-1.5', className)}
+        {...props}
+      />
+    </ExternalInvalidContext>
   );
 }
 
@@ -53,10 +59,16 @@ export type FieldErrorProps = WithClassName<ComponentProps<typeof BaseField.Erro
   children: ReactNode;
 };
 
-/** Shown when the control is invalid. Colour is never the only signal: it carries an icon. */
-export function FieldError({ className, children, ...props }: FieldErrorProps) {
+/**
+ * Shown when the control is invalid. Colour is never the only signal: it carries an icon and text.
+ * Base UI shows an error only for a failed native or `validate` check; when the app sets
+ * `<Field invalid>` itself, the error shows too, so a server message is never a bare red border.
+ */
+export function FieldError({ className, children, match, ...props }: FieldErrorProps) {
+  const externalInvalid = use(ExternalInvalidContext);
   return (
     <BaseField.Error
+      match={match ?? (externalInvalid ? true : undefined)}
       className={cn(
         'flex items-start gap-1.5 text-sm text-negative-strong',
         'transition-[opacity,translate] duration-fast ease-enter',
