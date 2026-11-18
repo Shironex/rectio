@@ -190,6 +190,10 @@
       "from": {
         "$value": 0.97,
         "$description": "Scale a popup starts from as it enters. One under reduced motion."
+      },
+      "press": {
+        "$value": 0.98,
+        "$description": "Scale of a pressed button. One under reduced motion."
       }
     }
   }

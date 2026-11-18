@@ -3,11 +3,21 @@
   "motion": {
     "distance": {
       "$type": "dimension",
-      "shift": { "$value": { "value": 0, "unit": "px" } }
+      "shift": {
+        "$value": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
     },
     "scale": {
       "$type": "number",
-      "from": { "$value": 1 }
+      "from": {
+        "$value": 1
+      },
+      "press": {
+        "$value": 1
+      }
     }
   }
 }
