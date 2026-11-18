@@ -34,6 +34,8 @@ const PAIRS: [string, string, number][] = [
   ['text-muted', 'surface-sunken', 4.5],
   ['text-subtle', 'surface', 4.5],
   ['text-subtle', 'surface-overlay', 4.5],
+  ['text-subtle', 'surface-inset', 4.5],
+  ['text', 'surface-inset', 4.5],
   ['accent-contrast', 'accent', 4.5],
   ['accent-contrast', 'accent-hover', 4.5],
   ['accent-strong', 'surface', 4.5],

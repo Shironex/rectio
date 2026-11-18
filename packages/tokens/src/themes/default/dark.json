@@ -21,6 +21,10 @@
     },
     "selected": {
       "$value": "{palette.cobalt.900}"
+    },
+    "inset": {
+      "$value": "{palette.stone.900}",
+      "$description": "A band inside an overlay, such as a dialog footer. Sits above the overlay in dark mode, below it in light."
     }
   },
   "text": {
