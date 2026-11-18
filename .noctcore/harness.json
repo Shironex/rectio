@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "checks": [
+    { "name": "format", "kind": "format", "command": "pnpm run format:check" },
+    { "name": "lint", "kind": "lint", "command": "pnpm run lint", "timeoutMs": 600000 },
+    {
+      "name": "typecheck",
+      "kind": "typecheck",
+      "command": "pnpm run typecheck",
+      "timeoutMs": 600000
+    },
+    { "name": "test", "kind": "test", "command": "pnpm run test", "timeoutMs": 600000 },
+    { "name": "build", "kind": "build", "command": "pnpm run build", "timeoutMs": 600000 },
+    { "name": "repo-rules", "kind": "lint-meta", "command": "pnpm exec harness lint-meta" }
+  ]
+}
