@@ -42,13 +42,13 @@ export function Gallery() {
   return (
     <div className="flex flex-col gap-6">
       <Section title="Button">
-        <Row label="Variants">
+        <Row label="Variants" center>
           <Button>Approve</Button>
           <Button variant="secondary">Export</Button>
           <Button variant="ghost">Cancel</Button>
           <Button variant="danger">Reject</Button>
         </Row>
-        <Row label="Sizes">
+        <Row label="Sizes" center>
           <Button size="sm">Small</Button>
           <Button size="md">Medium</Button>
           <Button size="lg">Large</Button>
@@ -56,7 +56,7 @@ export function Gallery() {
             <DownloadSimpleIcon aria-hidden weight="bold" className="size-4" />
           </Button>
         </Row>
-        <Row label="States">
+        <Row label="Loading, disabled" center>
           <Button loading>Approve</Button>
           <Button variant="secondary" loading>
             Export
@@ -67,7 +67,7 @@ export function Gallery() {
             Add line
           </Button>
         </Row>
-        <Row label="Compact">
+        <Row label="Compact" center>
           <div data-density="compact" className="flex flex-wrap gap-3">
             <Button size="sm">Approve</Button>
             <Button size="sm" variant="secondary">

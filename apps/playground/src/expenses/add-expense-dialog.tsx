@@ -29,6 +29,9 @@ import { CATEGORIES, type Expense } from './data';
 const GROUPS = ['Travel', 'Operations'] as const;
 const ITEMS = CATEGORIES.map((c) => ({ value: c.value, label: c.label }));
 const SAVE_DELAY_MS = 700;
+const IS_APPLE = /Mac|iPhone|iPad/.test(navigator.userAgent);
+const KBD =
+  'rounded-badge border border-line bg-surface px-1.5 py-0.5 font-sans text-xs text-fg-muted';
 
 interface Draft {
   merchant: string;
@@ -179,9 +182,10 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
             </Field>
           </DialogBody>
           <DialogFooter>
-            <p className="me-auto text-sm text-fg-subtle">
-              <kbd className="font-sans">Ctrl</kbd> or <kbd className="font-sans">⌘</kbd> +{' '}
-              <kbd className="font-sans">Enter</kbd> to save
+            <p className="me-auto flex items-center gap-1 text-sm text-fg-subtle">
+              <kbd className={KBD}>{IS_APPLE ? '⌘' : 'Ctrl'}</kbd>
+              <kbd className={KBD}>Enter</kbd>
+              <span className="ms-1">to save</span>
             </p>
             <DialogClose render={<Button variant="ghost" disabled={saving} />}>Cancel</DialogClose>
             <Button type="submit" loading={saving}>

@@ -11,11 +11,24 @@ export function Section({ title, children }: { title: string; children: ReactNod
 }
 
 /** A labelled row of specimens. The label names the state shown, so screenshots read alone. */
-export function Row({ label, children }: { label: string; children: ReactNode }) {
+export function Row({
+  label,
+  children,
+  center = false,
+}: {
+  label: string;
+  children: ReactNode;
+  /** Centre specimens of different heights, such as button sizes. */
+  center?: boolean;
+}) {
   return (
     <div className="grid items-start gap-2 sm:grid-cols-6 sm:gap-4">
       <span className="text-sm text-fg-muted sm:col-span-1 sm:pt-2">{label}</span>
-      <div className="flex flex-wrap items-start gap-3 sm:col-span-5">{children}</div>
+      <div
+        className={`flex flex-wrap gap-3 sm:col-span-5 ${center ? 'items-center' : 'items-start'}`}
+      >
+        {children}
+      </div>
     </div>
   );
 }

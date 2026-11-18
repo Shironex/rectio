@@ -122,6 +122,14 @@ try {
       await app.keyboard.press('Tab');
       await settle(app);
       await app.screenshot({ path: join(out, `focus-${name}.png`) });
+
+      // Finish the form from the keyboard and save: the row and the status line appear.
+      await app.getByRole('combobox', { name: 'Category' }).click();
+      await app.getByRole('option', { name: 'Rail' }).click();
+      await app.getByRole('textbox', { name: 'Merchant' }).press('ControlOrMeta+Enter');
+      await app.getByRole('dialog').waitFor({ state: 'detached' });
+      await settle(app);
+      await app.screenshot({ path: join(out, `saved-${name}.png`) });
       await app.close();
     }
   }
