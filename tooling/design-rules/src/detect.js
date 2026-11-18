@@ -71,6 +71,8 @@ const CHECKS = [
     // arbitrary variant such as `data-[side=top]:` is fine, so a match followed by `:` passes.
     pattern: /(?:^|[\s"'`:])!?(?:[a-z][\w-]*-)?\[[^\]\s]+\](?![\w-]*:)/g,
     reason: 'arbitrary Tailwind value: add a token, or use a token utility',
+    // A transition property list (`transition-[opacity,scale]`) names properties, not values.
+    accept: (m) => /transition-\[[a-z-]+(?:,[a-z-]+)*\]$/.test(m[0]),
   },
   {
     pattern: /-\((--[\w-]+)\)/g,

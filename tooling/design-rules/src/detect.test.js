@@ -14,6 +14,7 @@ describe('findDesignValueViolations', () => {
     ['origin-(--transform-origin) h-control-md translate-y-(--rx-motion-shift)'],
     ['font-sans font-numeric tabular-nums text-sm'],
     ['Interest is charged monthly'],
+    ['transition-[opacity,scale,translate] duration-fast'],
   ])('accepts token-only classes: %s', (text) => {
     expect(matches(text)).toEqual([]);
   });
@@ -41,6 +42,7 @@ describe('findDesignValueViolations', () => {
     ['"IBM Plex Sans"', 'IBM Plex'],
     ['dark:bg-surface', 'dark:'],
     ['scale-(--my-scale)', '-(--my-scale)'],
+    ['transition-[opacity_200ms]', 'transition-[opacity_200ms]'],
   ])('flags %s', (text, expected) => {
     expect(matches(text)).toContain(expected);
   });
