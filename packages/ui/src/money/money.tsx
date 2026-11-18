@@ -78,7 +78,7 @@ export function Money({
       data-slot="money"
       data-direction={direction}
       className={cn(
-        'font-(--rx-money-family) whitespace-nowrap tabular-nums lining-nums',
+        'font-(family-name:--rx-money-family) whitespace-nowrap tabular-nums lining-nums',
         tone === 'auto' && direction === 'credit' && 'text-positive-strong',
         tone === 'auto' && direction === 'debit' && 'text-negative-strong',
         className,

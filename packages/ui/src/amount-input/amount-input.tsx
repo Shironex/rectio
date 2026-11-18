@@ -74,7 +74,9 @@ export function AmountInput({
           placeholder={placeholder}
           aria-label={ariaLabel}
           className={cn(
-            'h-full min-w-0 flex-1 bg-transparent text-end outline-none placeholder:text-fg-subtle',
+            'h-full min-w-0 flex-1 bg-transparent outline-none placeholder:text-fg-subtle',
+            // The figures sit against the symbol, so "€ 129.40" and "129,40 €" each read as one.
+            before ? 'text-start' : 'text-end',
             'data-disabled:cursor-not-allowed',
           )}
         />

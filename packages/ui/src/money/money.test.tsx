@@ -33,3 +33,10 @@ describe('Money', () => {
     expect(screen.getByText('$42.00').className).not.toContain('text-positive-strong');
   });
 });
+
+describe('Money font', () => {
+  it('sets the numeric family, not a weight (font-(--x) means font-weight in Tailwind v4)', () => {
+    render(<Money amount={1} currency="USD" locale="en-US" />);
+    expect(screen.getByText('$1.00').className).toContain('font-(family-name:--rx-money-family)');
+  });
+});
