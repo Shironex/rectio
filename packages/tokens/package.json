@@ -3,5 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "license": "UNLICENSED",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@fontsource-variable/ibm-plex-sans": "^5.3.0",
+    "@fontsource-variable/schibsted-grotesk": "^5.3.0",
+    "@fontsource-variable/source-serif-4": "^5.3.1",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "style-dictionary": "^5.8.0"
+  },
+  "devDependencies": {
+    "vitest": "^5.1.0"
+  }
 }

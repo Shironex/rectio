@@ -1,0 +1,22 @@
+{
+  "name": "@rectio/design-rules",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/detect.js",
+    "./eslint": "./src/eslint.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/eslint": "^9.6.1",
+    "@types/estree": "^1.0.10",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.14.0",
+    "vitest": "^5.1.0"
+  }
+}

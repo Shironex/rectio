@@ -10,7 +10,46 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --filter=@rectio/playground",
-    "typecheck": "turbo run typecheck",
-    "test": "turbo run test"
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json && turbo run typecheck",
+    "test": "turbo run test",
+    "gate": "harness check",
+    "changeset": "changeset",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@eslint/js": "^10.0.1",
+    "@noctcore/eslint-plugin-architecture": "^1.1.0",
+    "@noctcore/eslint-plugin-async-safety": "^1.0.0",
+    "@noctcore/eslint-plugin-code-quality": "^1.0.0",
+    "@noctcore/eslint-plugin-monorepo": "^1.0.0",
+    "@noctcore/eslint-plugin-react": "^1.1.0",
+    "@noctcore/eslint-plugin-security": "^1.1.0",
+    "@noctcore/harness": "^0.8.0",
+    "@rectio/design-rules": "workspace:*",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.10.0",
+    "turbo": "^2.11.11",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mts,js,mjs}": [
+      "eslint --max-warnings=0",
+      "prettier --write"
+    ],
+    "*.{json,md,css,yaml,yml}": [
+      "prettier --write"
+    ]
   }
 }
