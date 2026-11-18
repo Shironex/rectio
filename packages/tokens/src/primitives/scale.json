@@ -1,0 +1,365 @@
+{
+  "size": {
+    "0": {
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      }
+    },
+    "1": {
+      "$value": {
+        "value": 0.0625,
+        "unit": "rem"
+      }
+    },
+    "2": {
+      "$value": {
+        "value": 0.125,
+        "unit": "rem"
+      }
+    },
+    "4": {
+      "$value": {
+        "value": 0.25,
+        "unit": "rem"
+      }
+    },
+    "6": {
+      "$value": {
+        "value": 0.375,
+        "unit": "rem"
+      }
+    },
+    "8": {
+      "$value": {
+        "value": 0.5,
+        "unit": "rem"
+      }
+    },
+    "10": {
+      "$value": {
+        "value": 0.625,
+        "unit": "rem"
+      }
+    },
+    "12": {
+      "$value": {
+        "value": 0.75,
+        "unit": "rem"
+      }
+    },
+    "14": {
+      "$value": {
+        "value": 0.875,
+        "unit": "rem"
+      }
+    },
+    "16": {
+      "$value": {
+        "value": 1,
+        "unit": "rem"
+      }
+    },
+    "18": {
+      "$value": {
+        "value": 1.125,
+        "unit": "rem"
+      }
+    },
+    "20": {
+      "$value": {
+        "value": 1.25,
+        "unit": "rem"
+      }
+    },
+    "24": {
+      "$value": {
+        "value": 1.5,
+        "unit": "rem"
+      }
+    },
+    "28": {
+      "$value": {
+        "value": 1.75,
+        "unit": "rem"
+      }
+    },
+    "32": {
+      "$value": {
+        "value": 2,
+        "unit": "rem"
+      }
+    },
+    "34": {
+      "$value": {
+        "value": 2.125,
+        "unit": "rem"
+      }
+    },
+    "36": {
+      "$value": {
+        "value": 2.25,
+        "unit": "rem"
+      }
+    },
+    "40": {
+      "$value": {
+        "value": 2.5,
+        "unit": "rem"
+      }
+    },
+    "44": {
+      "$value": {
+        "value": 2.75,
+        "unit": "rem"
+      }
+    },
+    "48": {
+      "$value": {
+        "value": 3,
+        "unit": "rem"
+      }
+    },
+    "480": {
+      "$value": {
+        "value": 30,
+        "unit": "rem"
+      }
+    },
+    "560": {
+      "$value": {
+        "value": 35,
+        "unit": "rem"
+      }
+    },
+    "$type": "dimension",
+    "$description": "Length steps named by their pixel size at a 16px root.",
+    "full": {
+      "$value": {
+        "value": 9999,
+        "unit": "px"
+      }
+    }
+  },
+  "font-family": {
+    "$type": "fontFamily",
+    "plex-sans": {
+      "$value": [
+        "IBM Plex Sans Variable",
+        "IBM Plex Sans",
+        "ui-sans-serif",
+        "system-ui",
+        "sans-serif"
+      ],
+      "$description": "IBM Plex Sans, SIL OFL 1.1."
+    },
+    "plex-mono": {
+      "$value": ["IBM Plex Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+      "$description": "IBM Plex Mono, SIL OFL 1.1."
+    },
+    "schibsted-grotesk": {
+      "$value": [
+        "Schibsted Grotesk Variable",
+        "Schibsted Grotesk",
+        "ui-sans-serif",
+        "system-ui",
+        "sans-serif"
+      ],
+      "$description": "Schibsted Grotesk, SIL OFL 1.1."
+    },
+    "source-serif": {
+      "$value": ["Source Serif 4 Variable", "Source Serif 4", "ui-serif", "Georgia", "serif"],
+      "$description": "Source Serif 4, SIL OFL 1.1."
+    }
+  },
+  "font-size": {
+    "12": {
+      "$value": {
+        "value": 0.75,
+        "unit": "rem"
+      }
+    },
+    "13": {
+      "$value": {
+        "value": 0.8125,
+        "unit": "rem"
+      }
+    },
+    "14": {
+      "$value": {
+        "value": 0.875,
+        "unit": "rem"
+      }
+    },
+    "15": {
+      "$value": {
+        "value": 0.9375,
+        "unit": "rem"
+      }
+    },
+    "16": {
+      "$value": {
+        "value": 1,
+        "unit": "rem"
+      }
+    },
+    "18": {
+      "$value": {
+        "value": 1.125,
+        "unit": "rem"
+      }
+    },
+    "20": {
+      "$value": {
+        "value": 1.25,
+        "unit": "rem"
+      }
+    },
+    "22": {
+      "$value": {
+        "value": 1.375,
+        "unit": "rem"
+      }
+    },
+    "24": {
+      "$value": {
+        "value": 1.5,
+        "unit": "rem"
+      }
+    },
+    "28": {
+      "$value": {
+        "value": 1.75,
+        "unit": "rem"
+      }
+    },
+    "30": {
+      "$value": {
+        "value": 1.875,
+        "unit": "rem"
+      }
+    },
+    "32": {
+      "$value": {
+        "value": 2,
+        "unit": "rem"
+      }
+    },
+    "36": {
+      "$value": {
+        "value": 2.25,
+        "unit": "rem"
+      }
+    },
+    "40": {
+      "$value": {
+        "value": 2.5,
+        "unit": "rem"
+      }
+    },
+    "$type": "dimension"
+  },
+  "font-weight": {
+    "$type": "fontWeight",
+    "regular": {
+      "$value": 400
+    },
+    "medium": {
+      "$value": 500
+    },
+    "semibold": {
+      "$value": 600
+    },
+    "bold": {
+      "$value": 700
+    }
+  },
+  "duration": {
+    "0": {
+      "$value": {
+        "value": 0,
+        "unit": "ms"
+      }
+    },
+    "100": {
+      "$value": {
+        "value": 100,
+        "unit": "ms"
+      }
+    },
+    "120": {
+      "$value": {
+        "value": 120,
+        "unit": "ms"
+      }
+    },
+    "140": {
+      "$value": {
+        "value": 140,
+        "unit": "ms"
+      }
+    },
+    "160": {
+      "$value": {
+        "value": 160,
+        "unit": "ms"
+      }
+    },
+    "180": {
+      "$value": {
+        "value": 180,
+        "unit": "ms"
+      }
+    },
+    "200": {
+      "$value": {
+        "value": 200,
+        "unit": "ms"
+      }
+    },
+    "220": {
+      "$value": {
+        "value": 220,
+        "unit": "ms"
+      }
+    },
+    "260": {
+      "$value": {
+        "value": 260,
+        "unit": "ms"
+      }
+    },
+    "280": {
+      "$value": {
+        "value": 280,
+        "unit": "ms"
+      }
+    },
+    "320": {
+      "$value": {
+        "value": 320,
+        "unit": "ms"
+      }
+    },
+    "$type": "duration"
+  },
+  "easing": {
+    "$type": "cubicBezier",
+    "standard": {
+      "$value": [0.2, 0, 0, 1],
+      "$description": "Moves between two resting states."
+    },
+    "out-quart": {
+      "$value": [0.25, 1, 0.5, 1]
+    },
+    "out-quint": {
+      "$value": [0.22, 1, 0.36, 1]
+    },
+    "out-expo": {
+      "$value": [0.16, 1, 0.3, 1]
+    },
+    "in-cubic": {
+      "$value": [0.32, 0, 0.67, 0]
+    }
+  }
+}

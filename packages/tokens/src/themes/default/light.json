@@ -1,0 +1,117 @@
+{
+  "surface": {
+    "$type": "color",
+    "canvas": { "$value": "{palette.stone.75}", "$description": "App background behind panels." },
+    "default": { "$value": "{palette.stone.25}", "$description": "Panels, cards, tables, inputs." },
+    "raised": { "$value": "{palette.stone.0}" },
+    "sunken": {
+      "$value": "{palette.stone.100}",
+      "$description": "Wells, table headers, hover rows."
+    },
+    "overlay": { "$value": "{palette.stone.0}", "$description": "Popovers and dialogs." },
+    "hover": { "$value": "{palette.stone.100}" },
+    "selected": { "$value": "{palette.cobalt.50}" }
+  },
+  "text": {
+    "$type": "color",
+    "default": { "$value": "{palette.stone.950}" },
+    "muted": { "$value": "{palette.stone.700}" },
+    "subtle": { "$value": "{palette.stone.600}" },
+    "disabled": { "$value": "{palette.stone.400}" }
+  },
+  "border": {
+    "$type": "color",
+    "default": { "$value": "{palette.stone.200}", "$description": "Dividers and panel edges." },
+    "strong": {
+      "$value": "{palette.stone.500}",
+      "$description": "Edges that identify a control: at least 3:1 against surface."
+    }
+  },
+  "accent": {
+    "$type": "color",
+    "default": { "$value": "{palette.cobalt.600}" },
+    "hover": { "$value": "{palette.cobalt.700}" },
+    "active": { "$value": "{palette.cobalt.800}" },
+    "subtle": { "$value": "{palette.cobalt.50}" },
+    "strong": { "$value": "{palette.cobalt.700}", "$description": "Accent text on surface." },
+    "contrast": { "$value": "{palette.stone.0}", "$description": "Text on an accent fill." }
+  },
+  "positive": {
+    "$type": "color",
+    "default": { "$value": "{palette.green.600}" },
+    "subtle": { "$value": "{palette.green.50}" },
+    "strong": { "$value": "{palette.green.700}" },
+    "contrast": { "$value": "{palette.stone.0}" }
+  },
+  "negative": {
+    "$type": "color",
+    "default": { "$value": "{palette.red.600}" },
+    "hover": { "$value": "{palette.red.700}" },
+    "subtle": { "$value": "{palette.red.50}" },
+    "strong": { "$value": "{palette.red.700}" },
+    "contrast": { "$value": "{palette.stone.0}" }
+  },
+  "warning": {
+    "$type": "color",
+    "default": { "$value": "{palette.amber.400}" },
+    "subtle": { "$value": "{palette.amber.50}" },
+    "strong": { "$value": "{palette.amber.800}" },
+    "contrast": { "$value": "{palette.stone.975}" }
+  },
+  "info": {
+    "$type": "color",
+    "default": { "$value": "{palette.sky.600}" },
+    "subtle": { "$value": "{palette.sky.50}" },
+    "strong": { "$value": "{palette.sky.700}" },
+    "contrast": { "$value": "{palette.stone.0}" }
+  },
+  "focus": {
+    "$type": "color",
+    "default": { "$value": "{palette.cobalt.500}" }
+  },
+  "scrim": {
+    "$type": "color",
+    "default": {
+      "$value": { "colorSpace": "oklch", "components": [0.21, 0.01, 75], "alpha": 0.32 }
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "raised": {
+      "$value": [
+        {
+          "color": { "colorSpace": "oklch", "components": [0.3, 0.02, 75], "alpha": 0.06 },
+          "offsetX": { "value": 0, "unit": "px" },
+          "offsetY": { "value": 1, "unit": "px" },
+          "blur": { "value": 2, "unit": "px" },
+          "spread": { "value": 0, "unit": "px" }
+        },
+        {
+          "color": { "colorSpace": "oklch", "components": [0.3, 0.02, 75], "alpha": 0.04 },
+          "offsetX": { "value": 0, "unit": "px" },
+          "offsetY": { "value": 2, "unit": "px" },
+          "blur": { "value": 8, "unit": "px" },
+          "spread": { "value": -2, "unit": "px" }
+        }
+      ]
+    },
+    "overlay": {
+      "$value": [
+        {
+          "color": { "colorSpace": "oklch", "components": [0.3, 0.02, 75], "alpha": 0.08 },
+          "offsetX": { "value": 0, "unit": "px" },
+          "offsetY": { "value": 2, "unit": "px" },
+          "blur": { "value": 6, "unit": "px" },
+          "spread": { "value": 0, "unit": "px" }
+        },
+        {
+          "color": { "colorSpace": "oklch", "components": [0.3, 0.02, 75], "alpha": 0.16 },
+          "offsetX": { "value": 0, "unit": "px" },
+          "offsetY": { "value": 16, "unit": "px" },
+          "blur": { "value": 40, "unit": "px" },
+          "spread": { "value": -12, "unit": "px" }
+        }
+      ]
+    }
+  }
+}

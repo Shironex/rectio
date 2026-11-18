@@ -1,0 +1,103 @@
+{
+  "$description": "Default theme: calm, precise back-office. Type, shape, density and motion; colour lives in light.json and dark.json.",
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "sans": { "$value": "{font-family.plex-sans}" },
+      "display": { "$value": "{font-family.plex-sans}" },
+      "mono": { "$value": "{font-family.plex-mono}" },
+      "numeric": {
+        "$value": "{font-family.plex-sans}",
+        "$description": "Money and quantities. Always set with tabular, lining figures."
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "xs": { "$value": "{font-size.12}" },
+      "sm": { "$value": "{font-size.13}" },
+      "base": { "$value": "{font-size.14}" },
+      "lg": { "$value": "{font-size.16}" },
+      "xl": { "$value": "{font-size.20}" },
+      "2xl": { "$value": "{font-size.24}" },
+      "3xl": { "$value": "{font-size.30}" }
+    },
+    "line-height": {
+      "$type": "number",
+      "xs": { "$value": 1.333 },
+      "sm": { "$value": 1.538 },
+      "base": { "$value": 1.429 },
+      "lg": { "$value": 1.5 },
+      "xl": { "$value": 1.4 },
+      "2xl": { "$value": 1.333 },
+      "3xl": { "$value": 1.2 }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "regular": { "$value": "{font-weight.regular}" },
+      "medium": { "$value": "{font-weight.medium}" },
+      "strong": { "$value": "{font-weight.semibold}" },
+      "display": { "$value": "{font-weight.semibold}" }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "tight": { "$value": { "value": -0.015, "unit": "rem" } },
+      "normal": { "$value": { "value": 0, "unit": "rem" } },
+      "caps": { "$value": { "value": 0.05, "unit": "rem" } }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "control": { "$value": "{size.6}" },
+    "panel": { "$value": "{size.10}" },
+    "badge": { "$value": "{size.4}" },
+    "full": { "$value": "{size.full}" }
+  },
+  "space": {
+    "$type": "dimension",
+    "unit": {
+      "$value": "{size.4}",
+      "$description": "Base of the spacing scale: every Tailwind spacing step is a multiple of it."
+    }
+  },
+  "control": {
+    "$type": "dimension",
+    "height": {
+      "sm": { "$value": "{size.28}" },
+      "md": { "$value": "{size.36}" },
+      "lg": { "$value": "{size.44}" }
+    },
+    "padding-x": {
+      "sm": { "$value": "{size.10}" },
+      "md": { "$value": "{size.14}" },
+      "lg": { "$value": "{size.18}" }
+    }
+  },
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "fast": { "$value": "{duration.120}" },
+      "base": { "$value": "{duration.180}" },
+      "slow": { "$value": "{duration.260}" }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "standard": { "$value": "{easing.standard}" },
+      "enter": { "$value": "{easing.out-quart}" },
+      "exit": { "$value": "{easing.in-cubic}" }
+    },
+    "distance": {
+      "$type": "dimension",
+      "shift": {
+        "$value": "{size.4}",
+        "$description": "How far a popup travels as it enters. Zero under reduced motion."
+      }
+    },
+    "scale": {
+      "$type": "number",
+      "from": {
+        "$value": 0.97,
+        "$description": "Scale a popup starts from as it enters. One under reduced motion."
+      }
+    }
+  }
+}

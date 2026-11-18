@@ -1,0 +1,207 @@
+{
+  "surface": {
+    "$type": "color",
+    "canvas": {
+      "$value": "{palette.ink.1000}"
+    },
+    "default": {
+      "$value": "{palette.ink.975}"
+    },
+    "raised": {
+      "$value": "{palette.ink.950}"
+    },
+    "sunken": {
+      "$value": "{palette.ink.1000}"
+    },
+    "overlay": {
+      "$value": "{palette.ink.925}"
+    },
+    "hover": {
+      "$value": "{palette.ink.925}"
+    },
+    "selected": {
+      "$value": "{palette.citron.900}"
+    }
+  },
+  "text": {
+    "$type": "color",
+    "default": {
+      "$value": "{palette.paper.75}"
+    },
+    "muted": {
+      "$value": "{palette.paper.300}"
+    },
+    "subtle": {
+      "$value": "{palette.paper.400}"
+    },
+    "disabled": {
+      "$value": "{palette.paper.600}"
+    }
+  },
+  "border": {
+    "$type": "color",
+    "default": {
+      "$value": "{palette.ink.850}"
+    },
+    "strong": {
+      "$value": "{palette.ink.600}"
+    }
+  },
+  "accent": {
+    "$type": "color",
+    "default": {
+      "$value": "{palette.citron.200}"
+    },
+    "hover": {
+      "$value": "{palette.citron.300}"
+    },
+    "active": {
+      "$value": "{palette.citron.400}"
+    },
+    "subtle": {
+      "$value": "{palette.citron.900}"
+    },
+    "strong": {
+      "$value": "{palette.citron.200}"
+    },
+    "contrast": {
+      "$value": "{palette.ink.1000}"
+    }
+  },
+  "positive": {
+    "$type": "color",
+    "default": {
+      "$value": "{palette.green.400}"
+    },
+    "subtle": {
+      "$value": "{palette.green.900}"
+    },
+    "strong": {
+      "$value": "{palette.green.300}"
+    },
+    "contrast": {
+      "$value": "{palette.ink.1000}"
+    }
+  },
+  "negative": {
+    "$type": "color",
+    "default": {
+      "$value": "{palette.red.400}"
+    },
+    "hover": {
+      "$value": "{palette.red.500}"
+    },
+    "subtle": {
+      "$value": "{palette.red.900}"
+    },
+    "strong": {
+      "$value": "{palette.red.300}"
+    },
+    "contrast": {
+      "$value": "{palette.ink.1000}"
+    }
+  },
+  "warning": {
+    "$type": "color",
+    "default": {
+      "$value": "{palette.amber.300}"
+    },
+    "subtle": {
+      "$value": "{palette.amber.900}"
+    },
+    "strong": {
+      "$value": "{palette.amber.200}"
+    },
+    "contrast": {
+      "$value": "{palette.ink.1000}"
+    }
+  },
+  "info": {
+    "$type": "color",
+    "default": {
+      "$value": "{palette.sky.400}"
+    },
+    "subtle": {
+      "$value": "{palette.sky.900}"
+    },
+    "strong": {
+      "$value": "{palette.sky.300}"
+    },
+    "contrast": {
+      "$value": "{palette.ink.1000}"
+    }
+  },
+  "focus": {
+    "$type": "color",
+    "default": {
+      "$value": "{palette.citron.200}"
+    }
+  },
+  "scrim": {
+    "$type": "color",
+    "default": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [0.08, 0.01, 172],
+        "alpha": 0.7
+      }
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "raised": {
+      "$value": [
+        {
+          "color": {
+            "colorSpace": "oklch",
+            "components": [0.1, 0.012, 172],
+            "alpha": 0
+          },
+          "offsetX": {
+            "value": 0,
+            "unit": "px"
+          },
+          "offsetY": {
+            "value": 0,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "unit": "px"
+          },
+          "spread": {
+            "value": 0,
+            "unit": "px"
+          }
+        }
+      ]
+    },
+    "overlay": {
+      "$value": [
+        {
+          "color": {
+            "colorSpace": "oklch",
+            "components": [0.06, 0.012, 172],
+            "alpha": 0.7
+          },
+          "offsetX": {
+            "value": 0,
+            "unit": "px"
+          },
+          "offsetY": {
+            "value": 24,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 56,
+            "unit": "px"
+          },
+          "spread": {
+            "value": -16,
+            "unit": "px"
+          }
+        }
+      ]
+    }
+  }
+}

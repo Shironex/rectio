@@ -1,0 +1,192 @@
+{
+  "$description": "Ledger theme: dark editorial finance. Serif display and figures, square corners, slower and quieter motion.",
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "sans": {
+        "$value": "{font-family.schibsted-grotesk}"
+      },
+      "display": {
+        "$value": "{font-family.source-serif}"
+      },
+      "mono": {
+        "$value": "{font-family.plex-mono}"
+      },
+      "numeric": {
+        "$value": "{font-family.source-serif}",
+        "$description": "Money and quantities. Always set with tabular, lining figures."
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "xs": {
+        "$value": "{font-size.12}"
+      },
+      "sm": {
+        "$value": "{font-size.13}"
+      },
+      "base": {
+        "$value": "{font-size.14}"
+      },
+      "lg": {
+        "$value": "{font-size.16}"
+      },
+      "xl": {
+        "$value": "{font-size.22}"
+      },
+      "2xl": {
+        "$value": "{font-size.28}"
+      },
+      "3xl": {
+        "$value": "{font-size.36}"
+      }
+    },
+    "line-height": {
+      "$type": "number",
+      "xs": {
+        "$value": 1.333
+      },
+      "sm": {
+        "$value": 1.538
+      },
+      "base": {
+        "$value": 1.429
+      },
+      "lg": {
+        "$value": 1.5
+      },
+      "xl": {
+        "$value": 1.364
+      },
+      "2xl": {
+        "$value": 1.286
+      },
+      "3xl": {
+        "$value": 1.111
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "regular": {
+        "$value": "{font-weight.regular}"
+      },
+      "medium": {
+        "$value": "{font-weight.medium}"
+      },
+      "strong": {
+        "$value": "{font-weight.semibold}"
+      },
+      "display": {
+        "$value": "{font-weight.regular}"
+      }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "tight": {
+        "$value": {
+          "value": -0.02,
+          "unit": "rem"
+        }
+      },
+      "normal": {
+        "$value": {
+          "value": 0,
+          "unit": "rem"
+        }
+      },
+      "caps": {
+        "$value": {
+          "value": 0.07,
+          "unit": "rem"
+        }
+      }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "control": {
+      "$value": "{size.2}"
+    },
+    "panel": {
+      "$value": "{size.4}"
+    },
+    "badge": {
+      "$value": "{size.2}"
+    },
+    "full": {
+      "$value": "{size.full}"
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "unit": {
+      "$value": "{size.4}",
+      "$description": "Base of the spacing scale: every Tailwind spacing step is a multiple of it."
+    }
+  },
+  "control": {
+    "$type": "dimension",
+    "height": {
+      "sm": {
+        "$value": "{size.28}"
+      },
+      "md": {
+        "$value": "{size.34}"
+      },
+      "lg": {
+        "$value": "{size.40}"
+      }
+    },
+    "padding-x": {
+      "sm": {
+        "$value": "{size.10}"
+      },
+      "md": {
+        "$value": "{size.16}"
+      },
+      "lg": {
+        "$value": "{size.20}"
+      }
+    }
+  },
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "fast": {
+        "$value": "{duration.140}"
+      },
+      "base": {
+        "$value": "{duration.220}"
+      },
+      "slow": {
+        "$value": "{duration.320}"
+      }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "standard": {
+        "$value": "{easing.standard}"
+      },
+      "enter": {
+        "$value": "{easing.out-quint}"
+      },
+      "exit": {
+        "$value": "{easing.in-cubic}"
+      }
+    },
+    "distance": {
+      "$type": "dimension",
+      "shift": {
+        "$value": "{size.6}",
+        "$description": "How far a popup travels as it enters. Zero under reduced motion."
+      }
+    },
+    "scale": {
+      "$type": "number",
+      "from": {
+        "$value": 0.985,
+        "$description": "Scale a popup starts from as it enters. One under reduced motion."
+      }
+    }
+  }
+}

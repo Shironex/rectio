@@ -1,0 +1,41 @@
+{
+  "component": {
+    "$description": "Component tokens (tier 3): knobs a theme may turn for one component. They alias semantic tokens by default.",
+    "button": {
+      "height": {
+        "$type": "dimension",
+        "sm": { "$value": "{control.height.sm}" },
+        "md": { "$value": "{control.height.md}" },
+        "lg": { "$value": "{control.height.lg}" }
+      },
+      "padding-x": {
+        "$type": "dimension",
+        "sm": { "$value": "{control.padding-x.sm}" },
+        "md": { "$value": "{control.padding-x.md}" },
+        "lg": { "$value": "{control.padding-x.lg}" }
+      },
+      "radius": { "$type": "dimension", "$value": "{radius.control}" },
+      "weight": { "$type": "fontWeight", "$value": "{font.weight.medium}" },
+      "tracking": { "$type": "dimension", "$value": "{font.tracking.normal}" }
+    },
+    "field": {
+      "height": { "$type": "dimension", "$value": "{control.height.md}" },
+      "padding-x": { "$type": "dimension", "$value": "{size.10}" },
+      "radius": { "$type": "dimension", "$value": "{radius.control}" },
+      "background": { "$type": "color", "$value": "{surface.default}" },
+      "border": { "$type": "color", "$value": "{border.strong}" }
+    },
+    "popover": {
+      "radius": { "$type": "dimension", "$value": "{radius.panel}" },
+      "shadow": { "$type": "shadow", "$value": "{shadow.overlay}" }
+    },
+    "dialog": {
+      "radius": { "$type": "dimension", "$value": "{radius.panel}" },
+      "shadow": { "$type": "shadow", "$value": "{shadow.overlay}" },
+      "width": { "$type": "dimension", "$value": "{size.480}" }
+    },
+    "money": {
+      "family": { "$type": "fontFamily", "$value": "{font.family.numeric}" }
+    }
+  }
+}

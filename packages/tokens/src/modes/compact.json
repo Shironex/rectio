@@ -1,0 +1,20 @@
+{
+  "$description": "Compact density, applied with data-density=\"compact\". Overrides spacing and control sizes for dense tables and panels.",
+  "space": {
+    "$type": "dimension",
+    "unit": { "$value": { "value": 0.2125, "unit": "rem" } }
+  },
+  "control": {
+    "$type": "dimension",
+    "height": {
+      "sm": { "$value": "{size.24}" },
+      "md": { "$value": "{size.32}" },
+      "lg": { "$value": "{size.36}" }
+    },
+    "padding-x": {
+      "sm": { "$value": "{size.8}" },
+      "md": { "$value": "{size.12}" },
+      "lg": { "$value": "{size.14}" }
+    }
+  }
+}

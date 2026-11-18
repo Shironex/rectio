@@ -1,0 +1,10 @@
+{
+  "component": {
+    "button": {
+      "weight": { "$type": "fontWeight", "$value": "{font.weight.strong}" }
+    },
+    "dialog": {
+      "width": { "$type": "dimension", "$value": "{size.560}" }
+    }
+  }
+}

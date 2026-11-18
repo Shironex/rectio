@@ -1,0 +1,13 @@
+{
+  "$description": "Applied under prefers-reduced-motion: reduce. Popups fade in place instead of moving or scaling.",
+  "motion": {
+    "distance": {
+      "$type": "dimension",
+      "shift": { "$value": { "value": 0, "unit": "px" } }
+    },
+    "scale": {
+      "$type": "number",
+      "from": { "$value": 1 }
+    }
+  }
+}
