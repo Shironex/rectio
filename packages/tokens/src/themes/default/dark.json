@@ -35,7 +35,7 @@
       "$value": "{palette.stone.400}"
     },
     "disabled": {
-      "$value": "{palette.stone.600}"
+      "$value": "{palette.stone.500}"
     }
   },
   "border": {

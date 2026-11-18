@@ -52,6 +52,9 @@ const PAIRS: [string, string, number][] = [
   ['info-contrast', 'info', 4.5],
   ['info-strong', 'surface', 4.5],
   ['info-strong', 'info-subtle', 4.5],
+  // Disabled values a user may still need to read (a limit, an approver): 3:1, beyond WCAG's exemption.
+  ['text-disabled', 'surface', 3],
+  ['text-disabled', 'surface-sunken', 3],
   ['border-strong', 'surface', 3],
   ['border-strong', 'surface-canvas', 3],
   ['focus', 'surface', 3],

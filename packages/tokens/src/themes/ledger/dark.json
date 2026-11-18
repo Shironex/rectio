@@ -35,7 +35,7 @@
       "$value": "{palette.paper.400}"
     },
     "disabled": {
-      "$value": "{palette.paper.600}"
+      "$value": "{palette.paper.500}"
     }
   },
   "border": {

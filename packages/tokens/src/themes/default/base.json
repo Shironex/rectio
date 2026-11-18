@@ -105,13 +105,13 @@
   "radius": {
     "$type": "dimension",
     "control": {
-      "$value": "{size.6}"
+      "$value": "{size.4}"
     },
     "panel": {
-      "$value": "{size.10}"
+      "$value": "{size.8}"
     },
     "badge": {
-      "$value": "{size.4}"
+      "$value": "{size.2}"
     },
     "full": {
       "$value": "{size.full}"

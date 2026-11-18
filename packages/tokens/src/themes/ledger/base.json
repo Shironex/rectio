@@ -13,8 +13,8 @@
         "$value": "{font-family.plex-mono}"
       },
       "numeric": {
-        "$value": "{font-family.source-serif}",
-        "$description": "Money and quantities. Always set with tabular, lining figures."
+        "$value": "{font-family.plex-sans}",
+        "$description": "Money and quantities: IBM Plex Sans tabular, lining figures. Source Serif 4 and Schibsted Grotesk both give punctuation the figure width under tnum, which spaces out every amount."
       }
     },
     "size": {

@@ -35,7 +35,7 @@
       "$value": "{palette.ink.600}"
     },
     "disabled": {
-      "$value": "{palette.ink.400}"
+      "$value": "{palette.ink.500}"
     }
   },
   "border": {
