@@ -399,6 +399,8 @@ function Notifications({ PopoverContent }: { PopoverContent: typeof PlainPopover
   );
 }
 
+const APPEARANCE: Record<string, string> = { system: 'System', light: 'Light', dark: 'Dark' };
+
 /** The account: initials on the trigger, and the appearance choice shown where it is made. */
 function AccountMenu({
   MenuContent,
@@ -429,7 +431,7 @@ function AccountMenu({
           <MenuSub>
             <MenuSubTrigger icon={icon(MoonIcon)}>
               Appearance
-              <span className="ms-2 text-sm text-fg-subtle capitalize">{appearance}</span>
+              <span className="ms-2 text-sm text-fg-subtle">{APPEARANCE[appearance]}</span>
             </MenuSubTrigger>
             <MenuSubContent>
               <MenuRadioGroup value={appearance} onValueChange={setAppearance}>
