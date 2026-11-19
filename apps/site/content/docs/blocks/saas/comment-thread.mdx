@@ -59,6 +59,7 @@ Reply buttons give way, and `onReopen` adds a Reopen button.
     resolved: { type: '{ by: string; at: Date }' },
     onResolve: { type: '() => void' },
     onReopen: { type: '() => void' },
+    onAttach: { type: '() => void', description: 'Adds an attach button to the composer.' },
     now: { type: 'Date', description: 'The moment comment times are measured from.' },
     locale: { type: 'string', default: 'the runtime locale' },
     title: { type: 'string', default: "'Discussion'" },

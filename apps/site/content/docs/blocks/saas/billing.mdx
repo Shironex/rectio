@@ -64,6 +64,10 @@ never moves money itself.
     onCancelPlan: { type: '() => void' },
     onUpdatePaymentMethod: { type: '() => void' },
     onDownloadInvoice: { type: '(invoice: BillingInvoice) => void' },
+    onAddSeats: {
+      type: '() => void',
+      description: 'Offered under the seats meter once it is full.',
+    },
     title: { type: 'string', default: "'Billing'" },
     className: { type: 'string' },
   }}

@@ -61,6 +61,8 @@ under the name.
       description: 'Makes the empty folder a drop target for files.',
     },
     now: { type: 'Date', description: 'The moment "modified" is measured from.' },
+    onUpgrade: { type: '() => void', description: 'Offered beside the storage note.' },
+    defaultSelectedIds: { type: 'string[]', description: 'Entries selected on first render.' },
     locale: { type: 'string', default: 'the runtime locale' },
     title: { type: 'string', default: 'the current folder' },
     className: { type: 'string' },

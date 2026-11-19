@@ -43,13 +43,17 @@ nothing in them; on narrow widths it becomes one select. For older pages, pass `
   type={{
     events: {
       type: 'readonly ActivityEvent[]',
-      description: 'id, at, actor, kind, verb, optional target and detail.',
+      description: 'id, at, actor, kind, verb, optional target, detail and a from and to change.',
     },
     filterable: { type: 'boolean', default: 'false' },
     hasMore: { type: 'boolean', default: 'false' },
     loadingMore: { type: 'boolean', default: 'false' },
     onLoadMore: { type: '() => void' },
     onInvite: { type: '() => void', description: 'Offered in the empty state when set.' },
+    lastSeen: {
+      type: 'Date',
+      description: 'Marks the events after it as new, under a last visit rule.',
+    },
     now: { type: 'Date', description: 'The moment relative times and Today are measured from.' },
     locale: { type: 'string', default: 'the runtime locale' },
     title: { type: 'string', default: "'Activity'" },
