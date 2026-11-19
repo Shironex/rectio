@@ -249,6 +249,7 @@ export function ExpenseApproval({
                     {/* Narrow: the decision sits under the expense, where the thumb reaches it. */}
                     <span className="mt-2 flex @xl:hidden">
                       <Decide
+                        wide
                         request={request}
                         onApprove={() => {
                           approve([request.id]);
@@ -377,21 +378,33 @@ function Decide({
   request,
   onApprove,
   onReject,
+  wide = false,
 }: {
   request: ExpenseRequest;
   onApprove: () => void;
   onReject: () => void;
+  /** Narrow rows: the two buttons share the row's width, in reach of either thumb. */
+  wide?: boolean;
 }) {
   const { Button } = useBlockParts();
   const name = `${request.merchant}, ${request.employee}`;
+  const share = wide ? 'flex-1' : '';
   return (
-    <span className="flex items-center justify-end gap-2 pointer-coarse:gap-3">
+    <span
+      className={cn('flex items-center justify-end gap-2 pointer-coarse:gap-3', wide && 'w-full')}
+    >
       {/* Named in words: a bare cross reads as dismiss, and rejecting asks for a reason. */}
-      <Button variant="secondary" size="sm" aria-label={`Reject ${name}`} onClick={onReject}>
+      <Button
+        variant="secondary"
+        size="sm"
+        aria-label={`Reject ${name}`}
+        className={share}
+        onClick={onReject}
+      >
         <XIcon aria-hidden weight="bold" className="size-3.5" />
         Reject
       </Button>
-      <Button size="sm" aria-label={`Approve ${name}`} onClick={onApprove}>
+      <Button size="sm" aria-label={`Approve ${name}`} className={share} onClick={onApprove}>
         <CheckIcon aria-hidden weight="bold" className="size-3.5" />
         Approve
       </Button>
