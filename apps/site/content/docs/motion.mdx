@@ -33,18 +33,19 @@ import { Button, Money, SelectContent } from '@rectio/motion';
 
 ## Components with a motion twin
 
-| Component                                                                    | Motion                                                                           |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [Button](/docs/components/button)                                            | Presses with a spring; the label and the spinner trade places when loading.      |
-| [AmountInput](/docs/components/amount-input)                                 | The figures nudge in the direction of a stepped change. Typing never moves them. |
-| [Money](/docs/components/money)                                              | Counts to a new amount, after the change that caused it has landed.              |
-| [Dialog, DialogTrigger, DialogContent](/docs/components/dialog)              | The popup grows from the trigger that opened it, and returns there on close.     |
-| [SelectContent, SelectItem](/docs/components/select)                         | The list opens with a spring; the highlight glides between items.                |
-| [DataTableBody, TableRow, TableCell, TableRows](/docs/components/data-table) | New rows open in place; removed rows fade, then close the gap.                   |
-| [ToastProvider, useToast](/docs/components/toast)                            | Toasts rise into the stack and leave faster, dropping toward the corner.         |
+| Component                                                                    | Motion                                                                         |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| [Button](/docs/components/button)                                            | Presses with a spring; the label and the spinner trade places when loading.    |
+| [AmountInput](/docs/components/amount-input)                                 | The figures nudge in the direction of a button step. Typing never moves them.  |
+| [Money](/docs/components/money)                                              | Counts to a new amount, after the change that caused it has landed.            |
+| [Dialog, DialogTrigger, DialogContent](/docs/components/dialog)              | Opens centred from just under full size on a spring; closes faster on a tween. |
+| [SelectContent, SelectItem](/docs/components/select)                         | The list opens with a spring; the highlight glides under the pointer.          |
+| [DataTableBody, TableRow, TableCell, TableRows](/docs/components/data-table) | New rows fade in as the rows below make way; removed rows fade, then close up. |
+| [ToastProvider, useToast](/docs/components/toast)                            | Toasts rise into the stack and leave faster, dropping toward the corner.       |
 
 `TableRows`, `TableRow` and `TableCell` are for tables you build from the Table parts: wrap the rows
-in `TableRows` and use the motion `TableRow` and `TableCell` inside it.
+in `TableRows` and use the motion `TableRow` inside it (`TableCell` is the plain cell, exported again
+for one import path).
 
 ## Reduced motion
 
@@ -77,7 +78,7 @@ motion at all, never a guessed duration.
 ## Bundle cost
 
 The add-on is built on `motion/mini` (Web Animations), Motion's spring generator and
-`AnimatePresence` for row exits. It adds about 12.7 kB gzip over the plain components, measured by
+`AnimatePresence` for row exits. It adds about 12.9 kB gzip over the plain components, measured by
 the add-on's bundle test. An app that imports only the plain components loads no Motion code; the
 same test checks that.
 

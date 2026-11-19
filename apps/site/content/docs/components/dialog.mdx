@@ -59,9 +59,9 @@ puts actions at the end; the primary action goes last.
 
 The dialog portals into the nearest `ThemeScope`, so it keeps that scope's theme and mode.
 
-The motion variant grows the popup from the trigger that opened it and returns it there on close.
-Use the motion `Dialog`, `DialogTrigger` and `DialogContent` together; the other parts are the plain
-ones.
+The motion variant opens the popup in the centre, growing from just under full size on a short
+spring, and closes it faster on a tween. Its `Dialog` and `DialogTrigger` are the plain ones, exported
+again so one import path covers the dialog; the other parts are the plain ones too.
 
 ## Props
 

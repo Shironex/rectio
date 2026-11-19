@@ -41,8 +41,9 @@ as `0.00` or `0,00`.
 Figures are right-aligned and tabular, like the column the amount feeds. `min` defaults to `0` and
 `step` to `0.01`; pass a lower `min` for an amount that can be negative, such as a refund.
 
-The motion variant nudges the figures in the direction of a stepped change (arrow keys, the wheel,
-or a value set by the app) and settles. Typed changes never move.
+The motion variant nudges the figures in the direction of a discrete step (a stepper button or a
+value set by the app) and settles. Typing, arrow keys and the wheel never move them: they repeat
+too often to wait for motion.
 
 ## Props
 

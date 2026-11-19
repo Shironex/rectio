@@ -77,8 +77,9 @@ The body has a `loading` state with skeleton rows in the shape of the table, and
 message; say why there are no rows and what to do next. The footer renders each column's `footer`
 and leaves an empty cell where a column has none, so totals stay under their headers.
 
-The motion variant opens new rows in place and fades removed rows before closing the gap, so the
-rows below slide instead of jumping. With the motion `Money` in the footer, the total counts to its
+The motion variant fades new rows in as the rows below slide out of their way, and fades removed
+rows before closing the gap, so the rows below slide instead of jumping. Only transform and opacity
+move; the table lays itself out once per change. With the motion `Money` in the footer, the total counts to its
 new figure. Rows present on the first render never animate.
 
 ### Pagination
