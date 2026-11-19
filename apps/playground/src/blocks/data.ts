@@ -48,6 +48,42 @@ export function copy(locale: Locale) {
 
 const INVOICES: InvoiceSummary[] = [
   {
+    id: 'i00a',
+    number: 'INV-2025-0071',
+    customer: 'Vantaa Foods Oy',
+    issued: d(10, 21, 2025),
+    due: d(11, 20, 2025),
+    total: 2_315.6,
+    status: 'sent',
+  },
+  {
+    id: 'i00b',
+    number: 'INV-2025-0088',
+    customer: 'Pardo & Hijos SL',
+    issued: d(11, 12, 2025),
+    due: d(12, 12, 2025),
+    total: 1_940,
+    status: 'sent',
+  },
+  {
+    id: 'i00c',
+    number: 'INV-2026-0097',
+    customer: 'Halvorsen Marine AS',
+    issued: d(12, 10, 2025),
+    due: d(1, 9),
+    total: 3_208.75,
+    status: 'sent',
+  },
+  {
+    id: 'i00d',
+    number: 'INV-2026-0102',
+    customer: 'Borowik Meble sp. z o.o.',
+    issued: d(12, 29, 2025),
+    due: d(1, 28),
+    total: 4_410,
+    status: 'sent',
+  },
+  {
     id: 'i01',
     number: 'INV-2026-0118',
     customer: 'Nordwind Logistik GmbH',
@@ -275,7 +311,7 @@ const ENTRIES: {
   {
     id: 'e1',
     date: d(3, 2),
-    reference: 'INV-0139',
+    reference: 'INV-2026-0139',
     description: 'Invoice to Greywell Partners',
     descriptionPl: 'Faktura dla Greywell Partners',
     lines: [
@@ -442,11 +478,11 @@ export function kpis(rate: number, pl = false): Kpi[] {
       label: pick(pl, 'Receivables', 'Należności'),
       format: 'money',
       better: 'down',
-      value: scale(53_615.9, rate),
-      previous: scale(57_202.4, rate),
+      value: scale(65_490.25, rate),
+      previous: scale(69_114.8, rate),
       series: money([
-        48_100, 51_900, 55_300, 60_200, 58_700, 54_100, 52_800, 56_400, 61_900, 59_300, 57_202.4,
-        53_615.9,
+        58_100, 61_900, 65_300, 70_200, 68_700, 64_100, 62_800, 66_400, 71_900, 70_300, 69_114.8,
+        65_490.25,
       ]),
     },
   ];
@@ -454,17 +490,17 @@ export function kpis(rate: number, pl = false): Kpi[] {
 
 export function receivables(rate: number): Receivable[] {
   const rows: [string, string, Date, number][] = [
-    ['Kestrel Analytics Ltd', 'INV-0121', d(2, 19), 6_240],
-    ['Borowik Meble sp. z o.o.', 'INV-0124', d(2, 27), 6_872.5],
-    ['Atelier Lune SARL', 'INV-0127', d(3, 5), 3_915],
-    ['Cobham Rail Services', 'INV-0133', d(3, 19), 9_480],
-    ['Pardo & Hijos SL', 'INV-0136', d(3, 26), 4_128.4],
-    ['Greywell Partners LLP', 'INV-0139', d(4, 1), 15_600],
-    ['Kestrel Analytics Ltd', 'INV-0142', d(4, 8), 7_380],
-    ['Halvorsen Marine AS', 'INV-0097', d(1, 9), 3_208.75],
-    ['Pardo & Hijos SL', 'INV-0088', d(12, 12, 2025), 1_940],
-    ['Vantaa Foods Oy', 'INV-0071', d(11, 20, 2025), 2_315.6],
-    ['Borowik Meble sp. z o.o.', 'INV-0102', d(1, 28), 4_410],
+    ['Kestrel Analytics Ltd', 'INV-2026-0121', d(2, 19), 6_240],
+    ['Borowik Meble sp. z o.o.', 'INV-2026-0124', d(2, 27), 6_872.5],
+    ['Atelier Lune SARL', 'INV-2026-0127', d(3, 5), 3_915],
+    ['Cobham Rail Services', 'INV-2026-0133', d(3, 19), 9_480],
+    ['Pardo & Hijos SL', 'INV-2026-0136', d(3, 26), 4_128.4],
+    ['Greywell Partners LLP', 'INV-2026-0139', d(4, 1), 15_600],
+    ['Kestrel Analytics Ltd', 'INV-2026-0142', d(4, 8), 7_380],
+    ['Halvorsen Marine AS', 'INV-2026-0097', d(1, 9), 3_208.75],
+    ['Pardo & Hijos SL', 'INV-2025-0088', d(12, 12, 2025), 1_940],
+    ['Vantaa Foods Oy', 'INV-2025-0071', d(11, 20, 2025), 2_315.6],
+    ['Borowik Meble sp. z o.o.', 'INV-2026-0102', d(1, 28), 4_410],
   ];
   return rows.map(([customer, invoice, due, outstanding], index) => ({
     id: `r${String(index)}`,

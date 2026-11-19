@@ -106,6 +106,7 @@ function renderBlock(
           {...common}
           {...(pl ? { messages: invoiceListPl } : {})}
           invoices={data.invoices(locale.rate)}
+          defaultPeriod="all"
           today={data.TODAY}
           onOpenInvoice={() => undefined}
           onCreateInvoice={() => undefined}
@@ -308,36 +309,102 @@ export function BlocksPage({
 }
 
 function Dashboard({ blocks, locale }: { blocks: Blocks; locale: data.Locale }) {
+  const pl = locale.id === 'pl-PL';
+  const block = (name: BlockName) => renderBlock(name, blocks, locale);
+  const pair = (a: BlockName, b: BlockName) => (
+    <div className="grid items-start gap-6 xl:grid-cols-2">
+      {block(a)}
+      {block(b)}
+    </div>
+  );
+  const sections: { id: string; label: string; body: ReactNode }[] = [
+    {
+      id: 'overview',
+      label: pl ? 'Przegląd' : 'Overview',
+      body: (
+        <>
+          {block('kpi-row')}
+          {block('cash-flow')}
+        </>
+      ),
+    },
+    {
+      id: 'receivables',
+      label: pl ? 'Należności i wydatki' : 'Receivables and spend',
+      body: (
+        <>
+          {pair('expense-approval', 'ar-aging')}
+          {block('invoice-list')}
+          {block('budget-vs-actual')}
+        </>
+      ),
+    },
+    {
+      id: 'books',
+      label: pl ? 'Księgi' : 'Books',
+      body: pair('ledger', 'invoice-detail'),
+    },
+    {
+      id: 'reporting',
+      label: pl ? 'Raporty' : 'Reporting',
+      body: (
+        <>
+          {pair('cash-runway', 'tax-summary')}
+          {block('profit-and-loss')}
+        </>
+      ),
+    },
+    {
+      id: 'operations',
+      label: pl ? 'Operacje' : 'Operations',
+      body: (
+        <>
+          {block('bank-reconciliation')}
+          {pair('payouts', 'vendors-list')}
+        </>
+      ),
+    },
+  ];
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-8">
-      <header className="flex flex-col gap-1">
-        <p className="text-sm text-fg-muted">Fernhill Systems Ltd</p>
-        <h1 className="font-display text-3xl font-heading tracking-tight">
-          {data.copy(locale).dashboardTitle}
-        </h1>
+      <header className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-fg-muted">Fernhill Systems Ltd</p>
+          <h1 className="font-display text-3xl font-heading tracking-tight">
+            {data.copy(locale).dashboardTitle}
+          </h1>
+        </div>
+        <nav aria-label={pl ? 'Sekcje' : 'Sections'}>
+          <ul className="flex flex-wrap gap-x-1 gap-y-1">
+            {sections.map((section) => (
+              <li key={section.id}>
+                <a
+                  href={`#${section.id}`}
+                  className="inline-flex min-h-8 items-center rounded-md px-2 text-sm text-fg-muted hover:bg-surface-sunken hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus pointer-coarse:min-h-(--rx-control-height-touch)"
+                >
+                  {section.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </header>
-      {renderBlock('kpi-row', blocks, locale)}
-      {renderBlock('cash-flow', blocks, locale)}
-      <div className="grid items-start gap-6 xl:grid-cols-2">
-        {renderBlock('expense-approval', blocks, locale)}
-        {renderBlock('ar-aging', blocks, locale)}
-      </div>
-      {renderBlock('invoice-list', blocks, locale)}
-      {renderBlock('budget-vs-actual', blocks, locale)}
-      <div className="grid items-start gap-6 xl:grid-cols-2">
-        {renderBlock('ledger', blocks, locale)}
-        {renderBlock('invoice-detail', blocks, locale)}
-      </div>
-      <div className="grid items-start gap-6 xl:grid-cols-2">
-        {renderBlock('cash-runway', blocks, locale)}
-        {renderBlock('tax-summary', blocks, locale)}
-      </div>
-      {renderBlock('profit-and-loss', blocks, locale)}
-      {renderBlock('bank-reconciliation', blocks, locale)}
-      <div className="grid items-start gap-6 xl:grid-cols-2">
-        {renderBlock('payouts', blocks, locale)}
-        {renderBlock('vendors-list', blocks, locale)}
-      </div>
+      {sections.map((section) => (
+        <section
+          key={section.id}
+          id={section.id}
+          aria-labelledby={`${section.id}-heading`}
+          className="flex scroll-mt-4 flex-col gap-6"
+        >
+          <h2
+            id={`${section.id}-heading`}
+            className="text-sm font-medium tracking-wide text-fg-muted uppercase"
+          >
+            {section.label}
+          </h2>
+          {section.body}
+        </section>
+      ))}
     </div>
   );
 }
