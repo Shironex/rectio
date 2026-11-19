@@ -57,6 +57,10 @@ export interface CommandMenuProps {
   emptyState?: (query: string) => ReactNode;
   /** Shows the keyboard hints under the list on screens with a pointer. Default true. */
   showHints?: boolean;
+  /** Name of the close button screen readers find in the dialog. Default "Close". */
+  closeLabel?: string;
+  /** What is announced as the results change. Default "1 result", "3 results", "No results". */
+  formatCount?: (count: number) => string;
   /** A `CommandMenuTrigger`, or anything rendered inside the dialog's root. */
   children?: ReactNode;
   className?: string;
@@ -129,6 +133,9 @@ function Highlighted({ text, indices }: { text: string; indices: number[] }) {
  * without an entrance on purpose: it is used dozens of times a day, and the field is ready the
  * moment the shortcut is pressed.
  */
+const defaultCount = (count: number) =>
+  count === 0 ? 'No results' : count === 1 ? '1 result' : `${String(count)} results`;
+
 export function CommandMenu({
   groups,
   open: openProp,
@@ -139,6 +146,8 @@ export function CommandMenu({
   placeholder = 'Search pages and actions',
   emptyState,
   showHints = true,
+  closeLabel = 'Close',
+  formatCount = defaultCount,
   children,
   className,
 }: CommandMenuProps) {
@@ -159,6 +168,7 @@ export function CommandMenu({
   });
 
   const results = useMemo(() => filterCommands(groups, query), [groups, query]);
+  const resultCount = results.reduce((sum, group) => sum + group.items.length, 0);
   const indicesById = useMemo(
     () => new Map(results.flatMap((group) => group.items.map((r) => [r.item.id, r.indices]))),
     [results],
@@ -223,10 +233,16 @@ export function CommandMenu({
                     'placeholder:text-fg-subtle pointer-coarse:text-lg',
                   )}
                 />
-                <BaseDialog.Close className="sr-only">Close</BaseDialog.Close>
+                {/* For screen readers browsing the dialog; Tab skips it, Escape and the backdrop close. */}
+                <BaseDialog.Close tabIndex={-1} className="sr-only">
+                  {closeLabel}
+                </BaseDialog.Close>
               </div>
 
               <div className="max-h-(--rx-command-list-height) min-h-0 overflow-y-auto overscroll-contain">
+                <Autocomplete.Status className="sr-only">
+                  {query.trim() === '' ? null : formatCount(resultCount)}
+                </Autocomplete.Status>
                 <Autocomplete.Empty>
                   <div className="flex flex-col items-center gap-1 px-4 py-10 text-center">
                     {emptyState === undefined ? (
@@ -379,7 +395,9 @@ export function CommandMenuTrigger({
         'border border-line bg-surface text-sm text-fg-subtle',
         'transition-colors duration-fast ease-standard hover:border-line-strong hover:text-fg-muted',
         'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
-        'max-sm:size-(--rx-button-height-md) max-sm:justify-center max-sm:px-0 pointer-coarse:max-sm:size-(--rx-button-height-touch)',
+        'pointer-coarse:h-(--rx-button-height-touch)',
+        // On a phone it is one more icon button in the header, drawn like its neighbours.
+        'max-sm:size-(--rx-button-height-md) max-sm:justify-center max-sm:border-transparent max-sm:bg-transparent max-sm:px-0 max-sm:text-fg-muted max-sm:hover:bg-surface-hover pointer-coarse:max-sm:size-(--rx-button-height-touch)',
         className,
       )}
       {...props}
