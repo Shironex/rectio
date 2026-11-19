@@ -12,7 +12,7 @@
     "dev": "turbo run dev --filter=@rectio/playground",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint .",
+    "lint": "node --max-old-space-size=8192 node_modules/eslint/bin/eslint.js .",
     "typecheck": "tsc -p tsconfig.json && turbo run typecheck",
     "test": "turbo run test",
     "gate": "harness check",

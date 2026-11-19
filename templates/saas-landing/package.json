@@ -1,0 +1,35 @@
+{
+  "name": "@rectio/template-saas-landing",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "description": "SaaS landing: a multi-page marketing site for a fictional team scheduling product, built from the rectio marketing blocks.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "typecheck": "next typegen && tsc -p tsconfig.json",
+    "preview": "node scripts/serve.ts",
+    "shoot": "node scripts/shoot.ts"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.9.0",
+    "@phosphor-icons/react": "^2.1.10",
+    "@rectio/blocks": "workspace:*",
+    "@rectio/motion": "workspace:*",
+    "@rectio/tokens": "workspace:*",
+    "@rectio/ui": "workspace:*",
+    "next": "16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "playwright": "^1.65.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.3.5"
+  }
+}

@@ -104,14 +104,14 @@ export default tseslint.config(
           layers: [
             { files: ['packages/**'], bans: ['noApps'] },
             { files: ['packages/tokens/**'], bans: ['noUi', 'noReact'] },
-            { files: ['apps/**'], bans: ['noPackageSources'] },
+            { files: ['apps/**', 'templates/**'], bans: ['noPackageSources'] },
           ],
         },
       ],
     },
   },
   {
-    files: ['apps/**/*.{ts,tsx}'],
+    files: ['apps/**/*.{ts,tsx}', 'templates/**/*.{ts,tsx}'],
     rules: {
       // `@rectio/blocks/motion` is a declared entry: each block's motioned twin, picked by import path.
       // `@rectio/blocks/marketing` (and its `/motion`) is the declared entry of the marketing group.
@@ -133,6 +133,7 @@ export default tseslint.config(
       'packages/motion/src/**/*.{ts,tsx}',
       'packages/blocks/src/**/*.{ts,tsx}',
       'apps/site/{app,components,demos,lib}/**/*.{ts,tsx}',
+      'templates/*/{app,components,data,lib}/**/*.{ts,tsx}',
     ],
     ignores: ['**/*.test.{ts,tsx}'],
     plugins: { rectio: designRules },

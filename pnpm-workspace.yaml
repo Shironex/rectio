@@ -2,6 +2,7 @@ packages:
   - packages/*
   - apps/*
   - tooling/*
+  - templates/*
 
 # Releases younger than 7 days are held back. The owner's own @noctcore scope is first party.
 minimumReleaseAge: 10080
