@@ -11,7 +11,17 @@ export default function Layout({ children }: { children: ReactNode }) {
       {...base}
       links={[
         ...(base.links ?? []),
-        { type: 'custom', on: 'nav', secondary: true, children: <ThemeSwitch /> },
+        {
+          type: 'custom',
+          on: 'nav',
+          secondary: true,
+          children: (
+            // The secondary nav is a list: its custom item must be a list item.
+            <li className="list-none">
+              <ThemeSwitch />
+            </li>
+          ),
+        },
       ]}
     >
       {children}

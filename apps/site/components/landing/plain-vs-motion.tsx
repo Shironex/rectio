@@ -112,10 +112,10 @@ function Panel({ kind }: { kind: keyof typeof KITS }) {
 export function PlainVsMotion() {
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <div className="site-reveal">
+      <div className="site-reveal min-w-0">
         <Panel kind="plain" />
       </div>
-      <div className="site-reveal site-step-1">
+      <div className="site-reveal site-step-1 min-w-0">
         <Panel kind="motion" />
       </div>
     </div>

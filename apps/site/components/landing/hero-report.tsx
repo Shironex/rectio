@@ -29,6 +29,9 @@ const columns: DataTableColumnDef<Line>[] = [
       <>
         <span className="block text-fg">{row.original.merchant}</span>
         <span className="block text-sm text-fg-subtle">{row.original.note}</span>
+        <span className="mt-1.5 block sm:hidden">
+          <Badge tone={STATUS[row.original.status].tone}>{STATUS[row.original.status].label}</Badge>
+        </span>
       </>
     ),
     footer: ({ table }) => (

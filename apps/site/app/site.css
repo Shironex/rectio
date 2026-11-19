@@ -100,3 +100,11 @@
 .site-caret {
   animation: site-caret var(--rx-motion-duration-loop) var(--rx-motion-easing-standard) infinite;
 }
+
+/* Print shows the page as it rests, without the entrance states. */
+@media print {
+  .site-enter,
+  .site-reveal {
+    animation: none;
+  }
+}

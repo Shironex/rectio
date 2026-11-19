@@ -34,8 +34,6 @@ import {
 } from '@rectio/ui';
 import { useState, type ReactNode } from 'react';
 
-import { STATUS } from './data';
-
 const CATEGORIES = [
   { value: 'rail', label: 'Rail' },
   { value: 'flights', label: 'Flights' },
@@ -148,16 +146,24 @@ function MoneyFormats() {
   );
 }
 
+const STATES = [
+  { tone: 'neutral', label: 'Draft', next: 'Only you can see it' },
+  { tone: 'info', label: 'In review', next: 'Waiting on Marta Nowak' },
+  { tone: 'warning', label: 'Receipt missing', next: 'Attach one to submit' },
+  { tone: 'positive', label: 'Approved', next: 'Paid with the next run' },
+  { tone: 'negative', label: 'Rejected', next: 'Reason sent to you' },
+] as const;
+
 function Statuses() {
   return (
-    <div className="flex flex-wrap gap-2">
-      <Badge tone="neutral">Draft</Badge>
-      {Object.values(STATUS).map((s) => (
-        <Badge key={s.label} tone={s.tone}>
-          {s.label}
-        </Badge>
+    <ul className="flex flex-col divide-y divide-line">
+      {STATES.map((s) => (
+        <li key={s.label} className="flex flex-col items-start gap-1 py-2.5">
+          <Badge tone={s.tone}>{s.label}</Badge>
+          <span className="text-sm text-fg-muted">{s.next}</span>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 

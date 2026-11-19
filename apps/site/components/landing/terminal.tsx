@@ -90,9 +90,9 @@ export function Terminal() {
         }
         timer = setTimeout(() => {
           tick(1);
-        }, stagger * 6);
+        }, stagger * 2);
       },
-      { threshold: 0.5 },
+      { threshold: 0.2 },
     );
     observer.observe(element);
     return () => {

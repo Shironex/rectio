@@ -50,11 +50,11 @@ export function ThemeShowcase({ values }: { values: Readout }) {
             className="text-3xl font-strong text-fg md:text-4xl"
           />
         </div>
-        <dl className="grid grid-cols-1 gap-x-8 px-6 py-5 sm:grid-cols-2 sm:px-8">
+        <dl className="flex flex-col px-6 py-3 sm:px-8">
           {READOUT.map((item) => (
             <div
               key={item.token}
-              className="flex items-center justify-between gap-4 border-b border-line py-3 last:border-b-0 sm:nth-last-2:border-b-0"
+              className="flex items-center justify-between gap-4 border-b border-line py-3 last:border-b-0"
             >
               <dt className="flex flex-col">
                 <span className="text-sm text-fg">{item.label}</span>
@@ -67,7 +67,7 @@ export function ThemeShowcase({ values }: { values: Readout }) {
                     className={`size-4 shrink-0 rounded-badge border border-line-strong ${item.swatch}`}
                   />
                 )}
-                <span className="truncate">{shown?.[item.token] ?? ''}</span>
+                <span className="text-pretty break-words">{shown?.[item.token] ?? ''}</span>
               </dd>
             </div>
           ))}

@@ -8,7 +8,7 @@ const TIERS = [
     who: 'One developer',
     terms: '12 months of updates',
     features: ['Motion add-on', 'Theme packs as they ship', 'Pro finance blocks as they ship'],
-    cta: 'Choose Solo',
+    cta: 'Start with the free tier',
   },
   {
     name: 'Lifetime',
@@ -16,7 +16,7 @@ const TIERS = [
     who: 'One developer',
     terms: 'Updates for as long as rectio ships them',
     features: ['Everything in Solo', 'Every future Pro release', 'One payment, no renewal'],
-    cta: 'Choose Lifetime',
+    cta: 'Start with the free tier',
     recommended: true,
   },
   {
@@ -25,7 +25,7 @@ const TIERS = [
     who: 'Five developers',
     terms: 'One license for the team',
     features: ['Everything in Solo', 'Five developer seats', 'One invoice'],
-    cta: 'Choose Team',
+    cta: 'Start with the free tier',
   },
 ] as const;
 
@@ -94,14 +94,15 @@ export function Pricing() {
                 className={`${ACTION} mt-auto ${recommended ? 'bg-accent text-accent-contrast shadow-raised pointer-fine:hover:bg-accent-hover' : 'border border-line bg-surface-raised text-fg shadow-raised pointer-fine:hover:bg-surface-hover'}`}
               >
                 {tier.cta}
+                <span className="sr-only">, {tier.name} at launch</span>
               </Link>
             </article>
           );
         })}
       </div>
       <p className="site-reveal text-sm text-fg-muted">
-        One-time prices in US dollars, per developer. Checkout opens at launch; until then the
-        buttons lead to the install guide.
+        One-time prices in US dollars, per developer. Checkout opens at launch; until then every
+        tier starts from the free install.
       </p>
     </div>
   );

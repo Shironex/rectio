@@ -24,7 +24,9 @@ export function readoutValues(): Readout {
             READOUT.map(({ token, format }) => {
               const value = values[token] ?? '';
               const shown =
-                format === 'family' ? (value.split(',')[0] ?? '').replaceAll('"', '') : value;
+                format === 'family'
+                  ? (value.split(',')[0] ?? '').replaceAll('"', '').replace(/ Variable$/, '')
+                  : value;
               return [token, shown];
             }),
           ) as Record<ReadoutToken, string>,

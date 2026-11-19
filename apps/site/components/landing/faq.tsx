@@ -31,8 +31,8 @@ const QUESTIONS = [
 export function Faq() {
   return (
     <div className="flex flex-col border-t border-line">
-      {QUESTIONS.map(({ q, a }) => (
-        <details key={q} className="group site-reveal border-b border-line">
+      {QUESTIONS.map(({ q, a }, i) => (
+        <details key={q} open={i === 0} className="group site-reveal border-b border-line">
           <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-6 py-4 text-lg font-medium text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden">
             {q}
             <CaretDownIcon

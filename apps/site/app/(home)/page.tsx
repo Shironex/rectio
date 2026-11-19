@@ -13,10 +13,10 @@ import { readoutValues } from '@/components/landing/theme-tokens';
 export default function Home() {
   return (
     <>
-      <main className="flex flex-col">
+      <div className="flex flex-col">
         <Hero />
 
-        <Section className="flex flex-col gap-12 py-16 md:py-24">
+        <Section className="flex flex-col gap-12 py-14 md:py-16">
           <SectionIntro title="The parts of finance UI that are easy to get wrong.">
             Amounts, currencies, periods, states and confirmation: live below, each accessible from
             the keyboard and themed by tokens alone.
@@ -24,11 +24,11 @@ export default function Home() {
           <Bento />
         </Section>
 
-        <Section className="py-16 md:py-24">
+        <Section className="py-14 md:py-16">
           <ThemeShowcase values={readoutValues()} />
         </Section>
 
-        <Section className="flex flex-col gap-12 py-16 md:py-24">
+        <Section className="flex flex-col gap-12 py-14 md:py-16">
           <SectionIntro title="Plain where it should be still. Motion where it helps.">
             The motion add-on has the same names and props as the plain components. Choose per
             component by import path, and mix both on one screen.
@@ -36,7 +36,7 @@ export default function Home() {
           <PlainVsMotion />
         </Section>
 
-        <Section className="grid gap-12 py-16 md:py-24 lg:grid-cols-12 lg:gap-16">
+        <Section className="grid gap-12 py-14 md:py-16 lg:grid-cols-12 lg:gap-16">
           <div className="flex flex-col gap-8 lg:col-span-5">
             <SectionIntro title="Source you own, from a registry you trust.">
               rectio installs components as files in your project, records what it wrote, and shows
@@ -66,11 +66,11 @@ export default function Home() {
           </div>
         </Section>
 
-        <Section className="py-20 md:py-24">
+        <Section className="py-14 md:py-16">
           <Principles />
         </Section>
 
-        <Section id="pricing" className="flex flex-col gap-12 py-16 md:py-24">
+        <Section id="pricing" className="flex flex-col gap-12 py-14 md:py-16">
           <SectionIntro title="Pay once.">
             The free tier is the whole component library. Pro adds motion, theme packs and the
             finance blocks as they ship.
@@ -78,7 +78,7 @@ export default function Home() {
           <Pricing />
         </Section>
 
-        <Section className="grid gap-12 py-16 md:py-24 lg:grid-cols-12">
+        <Section className="grid gap-12 py-14 md:py-16 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <SectionIntro title="Questions" />
           </div>
@@ -86,7 +86,7 @@ export default function Home() {
             <Faq />
           </div>
         </Section>
-      </main>
+      </div>
       <Footer />
     </>
   );
