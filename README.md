@@ -7,16 +7,16 @@ Private and unlicensed. Nothing here is published.
 
 ## Packages
 
-| Package                | What it is                                                                                                                                                                                                                               |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@rectio/tokens`       | DTCG token sources, built with Style Dictionary into CSS variables, a Tailwind v4 theme, font faces and resolved JSON                                                                                                                    |
-| `@rectio/ui`           | Button, Field and Input, AmountInput, Select, Dialog, Money, ThemeScope, Badge, Checkbox, DataTable, Calendar, DatePicker, DateRangePicker, Toast                                                                                        |
-| `@rectio/motion`       | The motion add-on: motioned Button, AmountInput, Money, Dialog, Select popup, DataTable rows and Toast, same props as the plain                                                                                                          |
-| `@rectio/blocks`       | Pro finance blocks built on ui and motion: KPI row, cash flow chart, invoice list and detail, general journal, expense approval, receivables aging, budget vs actual. Plain from `@rectio/blocks`, motioned from `@rectio/blocks/motion` |
-| `@rectio/playground`   | Vite app: every component in every state, both themes, both modes, plus an expense report composition                                                                                                                                    |
-| `@rectio/design-rules` | The check that keeps hardcoded design values out of `packages/ui/src`, `packages/motion/src` and `packages/blocks/src` (in `tooling/`)                                                                                                   |
-| `@rectio/registry`     | Registry item schema, the build that turns ui and tokens into static registry JSON, a local dev server                                                                                                                                   |
-| `@rectio/cli`          | The `rectio` command: `init`, `add`, `diff`, `list`, `search`, `update` (report only for now), `mcp` (read-only MCP server)                                                                                                              |
+| Package                | What it is                                                                                                                                                                                                                                                                                                                               |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@rectio/tokens`       | DTCG token sources, built with Style Dictionary into CSS variables, a Tailwind v4 theme, font faces and resolved JSON                                                                                                                                                                                                                    |
+| `@rectio/ui`           | Button, Field and Input, AmountInput, Select, Dialog, Money, ThemeScope, Badge, Checkbox, DataTable, Calendar, DatePicker, DateRangePicker, Toast, and the form set: Switch, RadioGroup, Toggle, Slider, Textarea, InputGroup, SearchInput, NumberField, OtpInput, Combobox, MultiSelect, TagInput, FileUpload, Fieldset and FormSection |
+| `@rectio/motion`       | The motion add-on: motioned Button, AmountInput, Money, Dialog, Select popup, DataTable rows, Toast, Switch, ToggleGroup, NumberField, Combobox, MultiSelect and FileUpload, same props as the plain                                                                                                                                     |
+| `@rectio/blocks`       | Pro finance blocks built on ui and motion: KPI row, cash flow chart, invoice list and detail, general journal, expense approval, receivables aging, budget vs actual. Plain from `@rectio/blocks`, motioned from `@rectio/blocks/motion`                                                                                                 |
+| `@rectio/playground`   | Vite app: every component in every state, both themes, both modes, plus an expense report composition                                                                                                                                                                                                                                    |
+| `@rectio/design-rules` | The check that keeps hardcoded design values out of `packages/ui/src`, `packages/motion/src` and `packages/blocks/src` (in `tooling/`)                                                                                                                                                                                                   |
+| `@rectio/registry`     | Registry item schema, the build that turns ui and tokens into static registry JSON, a local dev server                                                                                                                                                                                                                                   |
+| `@rectio/cli`          | The `rectio` command: `init`, `add`, `diff`, `list`, `search`, `update` (report only for now), `mcp` (read-only MCP server)                                                                                                                                                                                                              |
 
 ## Tokens
 
@@ -83,6 +83,11 @@ reduced motion and keyboard shot to `.rounds/round-3/blocks/`.
 The playground's `/?view=motion` puts each plain component beside its motioned one;
 `pnpm --filter @rectio/playground shoot:motion 3` writes frame sheets and a video of every
 interaction to `.rounds/round-3/motion/`.
+
+The playground's `/?view=forms` shows a workspace settings form built from the form components
+(`&motion=on`, `&invalid=1` for the error states, `&density=compact`);
+`pnpm --filter @rectio/playground shoot:forms 3` writes desktop and phone shots in every theme and
+mode, open popups and the invalid state to `.rounds/round-3/forms/`.
 
 ## The token rule
 
