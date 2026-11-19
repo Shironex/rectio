@@ -20,8 +20,13 @@ export interface SignUpProps {
   /** Your provider buttons (see `SocialButton`), shown above the email form. */
   social?: ReactNode;
   pending?: boolean;
-  /** Why the server refused, such as "An account with this email already exists". */
+  /** Why the server refused, above the form, such as "We could not reach the server". */
   error?: ReactNode;
+  /**
+   * The email is already registered: said under the email field, with a link to `signIn`. It
+   * clears as soon as the address is changed.
+   */
+  emailTaken?: boolean;
   /** The shortest password accepted. */
   minPasswordLength?: number;
   /** Links to your terms and privacy notice; a checkbox to accept them appears when given. */
@@ -46,6 +51,7 @@ export function SignUp({
   social,
   pending = false,
   error,
+  emailTaken = false,
   minPasswordLength = 12,
   terms,
   privacy,
@@ -62,13 +68,19 @@ export function SignUp({
     acceptedTerms: false,
   });
   const [tried, setTried] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  // The address that was refused as taken; editing it away clears the message.
+  const [takenEmail, setTakenEmail] = useState(defaultEmail.trim());
   const options = { minLength: minPasswordLength, requireTerms: terms !== undefined };
   const errors: SignUpErrors = tried ? signUpErrors(values, options) : {};
+  const showTaken = emailTaken && errors.email === undefined && takenEmail === values.email.trim();
+  const showRules = passwordFocused || values.password !== '';
 
   const submit = (event: SyntheticEvent) => {
     event.preventDefault();
     setTried(true);
     if (pending || hasErrors(signUpErrors(values, options))) return;
+    setTakenEmail(values.email.trim());
     onSubmit({ ...values, name: values.name.trim(), email: values.email.trim() });
   };
 
@@ -110,7 +122,7 @@ export function SignUp({
           {errors.name !== undefined && <FieldError>{errors.name}</FieldError>}
         </Field>
 
-        <Field invalid={errors.email !== undefined}>
+        <Field invalid={errors.email !== undefined || showTaken}>
           <FieldLabel>Work email</FieldLabel>
           <Input
             type="email"
@@ -124,6 +136,19 @@ export function SignUp({
             }}
           />
           {errors.email !== undefined && <FieldError>{errors.email}</FieldError>}
+          {showTaken && (
+            <FieldError>
+              An account with this email already exists.
+              {signIn !== undefined && (
+                <>
+                  {' '}
+                  <AuthLink to={signIn} className="pointer-coarse:py-0">
+                    Sign in
+                  </AuthLink>
+                </>
+              )}
+            </FieldError>
+          )}
         </Field>
 
         <Field invalid={errors.password !== undefined}>
@@ -131,19 +156,27 @@ export function SignUp({
           <PasswordInput
             name="password"
             autoComplete="new-password"
-            aria-describedby={rulesId}
+            aria-describedby={showRules ? rulesId : undefined}
             value={values.password}
+            onFocus={() => {
+              setPasswordFocused(true);
+            }}
+            onBlur={() => {
+              setPasswordFocused(false);
+            }}
             onChange={(event) => {
               setValues({ ...values, password: event.target.value });
             }}
           />
           {errors.password !== undefined && <FieldError>{errors.password}</FieldError>}
-          <PasswordRules id={rulesId} password={values.password} minLength={minPasswordLength} />
+          {showRules && (
+            <PasswordRules id={rulesId} password={values.password} minLength={minPasswordLength} />
+          )}
         </Field>
 
         {terms !== undefined && (
           <Field invalid={errors.acceptedTerms !== undefined}>
-            <label className="flex cursor-pointer items-start gap-2.5 text-sm text-fg-muted">
+            <label className="flex cursor-pointer items-start gap-2.5 text-sm text-fg">
               <span className="flex h-5 items-center">
                 <Checkbox
                   checked={values.acceptedTerms}
@@ -152,7 +185,7 @@ export function SignUp({
                   }}
                 />
               </span>
-              <span>
+              <span className="text-pretty">
                 I agree to the{' '}
                 <AuthLink to={terms} className="pointer-coarse:py-0">
                   terms of service
@@ -173,7 +206,7 @@ export function SignUp({
           </Field>
         )}
 
-        <Button type="submit" loading={pending} className="mt-1 w-full">
+        <Button type="submit" loading={pending} className="mt-2 w-full">
           Create account
         </Button>
       </form>

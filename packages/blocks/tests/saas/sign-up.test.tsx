@@ -53,7 +53,31 @@ describe('SignUp', () => {
   });
 
   it('announces a refusal from the server', () => {
-    render(<SignUp onSubmit={vi.fn()} error="An account with this email already exists." />);
-    expect(screen.getByRole('alert')).toHaveTextContent('already exists');
+    render(<SignUp onSubmit={vi.fn()} error="We could not reach the server." />);
+    expect(screen.getByRole('alert')).toHaveTextContent('could not reach');
+  });
+
+  it('shows the rules only once the password is in use', async () => {
+    render(<SignUp onSubmit={vi.fn()} />);
+    expect(screen.queryByText(/At least 12 characters/)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByLabelText('Password'));
+    expect(screen.getByText(/At least 12 characters/)).toBeInTheDocument();
+  });
+
+  it('says a taken email under the field with a way to sign in, until it changes', async () => {
+    const signIn = vi.fn();
+    render(
+      <SignUp onSubmit={vi.fn()} emailTaken signIn={signIn} defaultEmail="margot@fernhill.io" />,
+    );
+    const email = screen.getByLabelText('Work email');
+    expect(email).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByText(/already exists/)).toBeInTheDocument();
+    // The first "Sign in" is the one under the field; the footer holds the second.
+    const [inline] = screen.getAllByRole('button', { name: 'Sign in' });
+    if (inline === undefined) throw new Error('No sign-in link under the email field');
+    await userEvent.click(inline);
+    expect(signIn).toHaveBeenCalled();
+    await userEvent.type(email, 'x');
+    expect(screen.queryByText(/already exists/)).not.toBeInTheDocument();
   });
 });
