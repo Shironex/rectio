@@ -19,6 +19,7 @@ import { useState, type ReactNode } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
+import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { Segmented } from '../../lib/segmented';
 import type { LinkTarget } from '../lib/auth';
@@ -85,7 +86,7 @@ export function NotificationsCenter({
           </span>
         }
         actions={<MarkAllButton unread={unread} onMarkAllRead={props.onMarkAllRead} />}
-        className={cn('overflow-hidden', className)}
+        className={cn('overflow-clip', className)}
         bodyClassName="gap-3 px-0 pb-0"
       >
         <NotificationsBody {...props} inline />
@@ -112,7 +113,7 @@ export function NotificationsCenter({
           {unread > 0 && (
             <span
               aria-hidden
-              className="absolute end-0.5 top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-xs font-medium text-accent-contrast numeric ring-2 ring-surface"
+              className="absolute -end-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-xs font-medium text-accent-contrast numeric ring-2 ring-surface"
             >
               {unreadBadgeText(unread)}
             </span>
@@ -172,35 +173,32 @@ function NotificationsBody({
     const none = notifications.length === 0;
     const EmptyIcon = none ? BellSlashIcon : CheckCircleIcon;
     content = (
-      <div role="status" className="flex flex-col items-center gap-3 px-6 py-10 text-center">
-        <span
-          aria-hidden
-          className={cn(
-            'inline-flex size-10 items-center justify-center rounded-full ring-1 ring-line',
-            none ? 'bg-surface-sunken text-fg-muted' : 'bg-positive-subtle text-positive-strong',
-          )}
+      <div className="px-5 py-4">
+        <EmptyNote
+          title={
+            <span className="flex flex-col items-center gap-3">
+              <EmptyIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
+              {none ? 'No notifications yet' : 'You are all caught up'}
+            </span>
+          }
         >
-          <EmptyIcon weight="bold" className="size-5" />
-        </span>
-        <div className="flex flex-col gap-1">
-          <p className="font-medium">{none ? 'No notifications yet' : 'You are all caught up'}</p>
-          <p className="max-w-xs text-sm text-pretty text-fg-muted">
-            {none
-              ? 'You will hear here when someone mentions you, assigns you work or your plan changes.'
-              : 'Every notification is read. Earlier ones stay under All.'}
-          </p>
-        </div>
-        {!none && (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setFilter('all');
-            }}
-          >
-            Show all
-          </Button>
-        )}
+          {none
+            ? 'You will hear here when someone mentions you, assigns you work or your plan changes.'
+            : 'Every notification is read. Earlier ones stay under All.'}
+          {!none && (
+            <span className="mt-4 flex justify-center">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setFilter('all');
+                }}
+              >
+                Show all
+              </Button>
+            </span>
+          )}
+        </EmptyNote>
       </div>
     );
   } else {
@@ -231,7 +229,8 @@ function NotificationsBody({
   return (
     <div className="flex min-h-0 flex-col">
       {notifications.length > 0 && (
-        <div className="px-5 pb-3">
+        // Sticks under the panel title on a long page, so the filter stays in reach.
+        <div className="sticky top-0 z-10 bg-surface px-5 pb-3">
           <Segmented
             label="Show"
             value={filter}
@@ -298,22 +297,23 @@ function NotificationRow({
       type="button"
       onClick={onPress}
       className={cn(
-        'relative flex w-full cursor-pointer gap-3 px-5 py-3 text-start',
+        'flex w-full cursor-pointer gap-3 py-3 ps-1 pe-5 text-start',
         'transition-colors duration-fast ease-standard hover:bg-surface-hover',
+        !notification.read && 'bg-surface-sunken',
         '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
       )}
     >
-      {/* The unread dot sits in the row's own start padding, so it takes no width from the text. */}
-      {!notification.read && (
-        <span aria-hidden className="absolute start-2 top-6 size-2 rounded-full bg-accent" />
-      )}
+      {/* A gutter of its own for the unread dot, the same width on every row. */}
+      <span aria-hidden className="flex w-4 shrink-0 justify-center pt-3">
+        {!notification.read && <span className="size-2 rounded-full bg-accent" />}
+      </span>
       <span className="relative inline-flex size-8 shrink-0">
         {notification.actor === undefined ? (
           <span
             aria-hidden
             className={cn(
               'inline-flex size-8 items-center justify-center rounded-full bg-surface-sunken ring-1 ring-line-strong ring-inset',
-              notification.kind === 'security' ? 'text-negative-strong' : 'text-fg-muted',
+              notification.kind === 'security' ? 'text-warning-strong' : 'text-fg-muted',
             )}
           >
             <KindIcon weight="bold" className="size-4" />
@@ -342,13 +342,19 @@ function NotificationRow({
   );
 }
 
-/** Only the actor's name carries weight; the rest of the title stays at body weight. */
+/** The lead carries the weight: the actor's name, or the whole title when no one sent it. */
 function NotificationTitle({ notification }: { notification: AppNotification }) {
   const name = notification.actor?.name;
-  if (name === undefined || !notification.title.startsWith(name)) return notification.title;
+  if (name === undefined || !notification.title.startsWith(name)) {
+    return notification.read ? (
+      notification.title
+    ) : (
+      <span className="font-semibold">{notification.title}</span>
+    );
+  }
   return (
     <>
-      <span className="font-medium">{name}</span>
+      <span className={notification.read ? 'font-medium' : 'font-semibold'}>{name}</span>
       {notification.title.slice(name.length)}
     </>
   );
