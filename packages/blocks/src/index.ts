@@ -104,3 +104,47 @@ export { SignIn, type SignInProps } from './saas/sign-in/sign-in';
 export * from './saas/sign-in/sign-in.logic';
 export { TeamMembers, type TeamMembersProps } from './saas/team-members/team-members';
 export * from './saas/team-members/team-members.logic';
+export { SignUp, type SignUpProps } from './saas/sign-up/sign-up';
+export * from './saas/sign-up/sign-up.logic';
+export { TwoFactor, type TwoFactorProps } from './saas/two-factor/two-factor';
+export * from './saas/two-factor/two-factor.logic';
+export { ResetPassword, type ResetPasswordProps } from './saas/reset-password/reset-password';
+export * from './saas/reset-password/reset-password.logic';
+export {
+  ProfileSettings,
+  type ProfileSettingsProps,
+} from './saas/profile-settings/profile-settings';
+export * from './saas/profile-settings/profile-settings.logic';
+export { Billing, type BillingProps } from './saas/billing/billing';
+export * from './saas/billing/billing.logic';
+export { ApiKeys, type ApiKeysProps } from './saas/api-keys/api-keys';
+export * from './saas/api-keys/api-keys.logic';
+export {
+  NotificationPreferences,
+  type NotificationPreferencesProps,
+} from './saas/notification-preferences/notification-preferences';
+export * from './saas/notification-preferences/notification-preferences.logic';
+export { PricingTable, type PricingTableProps } from './saas/pricing-table/pricing-table';
+export * from './saas/pricing-table/pricing-table.logic';
+export {
+  OnboardingChecklist,
+  type OnboardingChecklistProps,
+} from './saas/onboarding-checklist/onboarding-checklist';
+export * from './saas/onboarding-checklist/onboarding-checklist.logic';
+export { ActivityFeed, type ActivityFeedProps } from './saas/activity-feed/activity-feed';
+export * from './saas/activity-feed/activity-feed.logic';
+export {
+  NotificationsCenter,
+  type NotificationsCenterProps,
+} from './saas/notifications-center/notifications-center';
+export * from './saas/notifications-center/notifications-center.logic';
+export { Changelog, type ChangelogProps } from './saas/changelog/changelog';
+export * from './saas/changelog/changelog.logic';
+export { UsersTable, type UsersTableProps } from './saas/users-table/users-table';
+export * from './saas/users-table/users-table.logic';
+export { KanbanBoard, type KanbanBoardProps } from './saas/kanban-board/kanban-board';
+export * from './saas/kanban-board/kanban-board.logic';
+export { CommentThread, type CommentThreadProps } from './saas/comment-thread/comment-thread';
+export * from './saas/comment-thread/comment-thread.logic';
+export { FileManager, type FileManagerProps } from './saas/file-manager/file-manager';
+export * from './saas/file-manager/file-manager.logic';
