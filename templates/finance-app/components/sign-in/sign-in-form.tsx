@@ -17,7 +17,7 @@ import {
 } from '@rectio/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type SubmitEvent } from 'react';
+import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 
 import { COMPANY } from '@/data/company';
 import { CompanyMark } from '../shell/app-sidebar';
@@ -76,6 +76,12 @@ function SignInScreen({
   const [failure, setFailure] = useState<string | null>(null);
   const message =
     failure ?? (failedFromUrl ? 'That email and password do not match an account.' : null);
+
+  // After a failed sign-in the cursor goes to the password, the field to retype.
+  const passwordRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (message !== null) passwordRef.current?.focus();
+  }, [message]);
 
   // A failed sign-in marks both fields, pointing at the banner that says why.
   const failedProps =
@@ -160,7 +166,7 @@ function SignInScreen({
                 type="email"
                 value={email}
                 autoComplete="username"
-                autoFocus
+                autoFocus={!failedFromUrl}
                 {...failedProps}
                 onChange={(event) => {
                   setEmail(event.target.value);
@@ -180,6 +186,7 @@ function SignInScreen({
               </div>
               <InputGroup>
                 <InputGroupInput
+                  ref={passwordRef}
                   type={reveal ? 'text' : 'password'}
                   value={password}
                   autoComplete="current-password"
