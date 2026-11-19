@@ -1,6 +1,6 @@
-import { CheckIcon, MinusIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, CheckIcon, MinusIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
-import { Fragment, useState } from 'react';
+import { Fragment, useId, useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -66,39 +66,41 @@ export function PricingTable({
   const hasYearly = plans.some((plan) => plan.yearly !== undefined);
 
   return (
-    <BlockPanel
-      {...panel}
-      title={panel.title ?? 'Plans and pricing'}
-      actions={
-        hasYearly ? (
-          <Segmented
-            label="Billing cycle"
-            value={cycle}
-            onValueChange={setCycle}
-            options={[
-              { value: 'monthly', label: 'Monthly' },
-              {
-                value: 'yearly',
-                label: 'Yearly',
-                ...(saving > 0
-                  ? { hint: `Save up to ${formatPercent(saving, locale, { digits: 0 })}` }
-                  : {}),
-              },
-            ]}
-          />
-        ) : undefined
-      }
-      bodyClassName="gap-8"
-    >
+    <BlockPanel {...panel} title={panel.title ?? 'Plans and pricing'} bodyClassName="gap-8">
       {plans.length === 0 ? (
         <EmptyNote title="No plans to show">
           Add a plan to show its price and features here.
         </EmptyNote>
       ) : (
         <>
+          {hasYearly && (
+            <div className="flex justify-center">
+              <Segmented
+                label="Billing cycle"
+                value={cycle}
+                onValueChange={setCycle}
+                options={[
+                  { value: 'monthly', label: 'Monthly' },
+                  {
+                    value: 'yearly',
+                    label: 'Yearly',
+                    ...(saving > 0
+                      ? {
+                          hint: (
+                            <span className="rounded-badge bg-positive-subtle px-1.5 py-px text-xs text-positive-strong">
+                              Save up to {formatPercent(saving, locale, { digits: 0 })}
+                            </span>
+                          ),
+                        }
+                      : {}),
+                  },
+                ]}
+              />
+            </div>
+          )}
           <ul
             aria-label={`Plans, prices per month, billed ${cycle}`}
-            className={cn('grid items-stretch gap-4', COLUMNS[Math.min(plans.length, 4)])}
+            className={cn('-mt-2 grid gap-4', COLUMNS[Math.min(plans.length, 4)])}
           >
             {plans.map((plan) => {
               const price = pricingMonthlyPrice(plan, cycle, currency);
@@ -110,7 +112,9 @@ export function PricingTable({
                   key={plan.id}
                   aria-label={recommended ? `${plan.name}, recommended` : plan.name}
                   className={cn(
-                    'relative flex flex-col gap-5 rounded-panel border p-5',
+                    // Three shared rows (name, price and button, highlights), so prices and buttons
+                    // line up across the cards in a row whatever the descriptions say.
+                    'row-span-3 grid grid-rows-subgrid gap-5 rounded-panel border p-5',
                     recommended
                       ? 'border-accent bg-surface-raised shadow-raised ring-1 ring-accent'
                       : 'border-line bg-surface',
@@ -137,65 +141,70 @@ export function PricingTable({
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    {price === null || price === 0 ? (
-                      <span className="font-display text-4xl font-strong tracking-tight">
-                        {price === null ? 'Custom' : 'Free'}
-                      </span>
-                    ) : (
-                      <span className="flex flex-wrap items-baseline gap-x-1.5">
-                        <Money
-                          amount={price}
-                          currency={currency}
-                          locale={locale}
-                          quietCurrency
-                          className="text-4xl font-strong tracking-tight"
-                        />
-                        <span className="text-sm text-fg-muted">
-                          per month{plan.unit !== undefined && `, ${plan.unit}`}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      {price === null || price === 0 ? (
+                        <span className="text-4xl leading-none font-strong tracking-tight">
+                          {price === null ? 'Custom' : 'Free'}
                         </span>
-                      </span>
-                    )}
-                    <span className="text-sm text-fg-muted">
-                      {price === null ? (
-                        'Priced for your volume, billed yearly'
-                      ) : price === 0 ? (
-                        'Free for as long as you like'
-                      ) : cycle === 'yearly' && plan.yearly !== undefined ? (
-                        <>
-                          <Money amount={plan.yearly} currency={currency} locale={locale} /> billed
-                          yearly
-                          {planSaving > 0 && (
-                            <span className="text-positive-strong">
-                              , you save {formatPercent(planSaving, locale, { digits: 0 })}
-                            </span>
-                          )}
-                        </>
                       ) : (
-                        'Billed monthly, cancel any time'
+                        <span className="flex flex-wrap items-baseline gap-x-1.5">
+                          <Money
+                            amount={price}
+                            currency={currency}
+                            locale={locale}
+                            className="text-4xl leading-none font-strong tracking-tight"
+                          />
+                          <span className="text-sm text-fg-muted">
+                            per month{plan.unit !== undefined && `, ${plan.unit}`}
+                          </span>
+                        </span>
                       )}
-                    </span>
+                      <span className="text-sm text-fg-muted">
+                        {price === null ? (
+                          'Priced for your volume, billed yearly'
+                        ) : price === 0 ? (
+                          'Free for as long as you like'
+                        ) : cycle === 'yearly' && plan.yearly !== undefined ? (
+                          <>
+                            <Money amount={plan.yearly} currency={currency} locale={locale} />{' '}
+                            billed yearly
+                            {planSaving > 0 && (
+                              <span className="text-positive-strong">
+                                , you save {formatPercent(planSaving, locale, { digits: 0 })}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          'Billed monthly, cancel any time'
+                        )}
+                      </span>
+                    </div>
+
+                    {current ? (
+                      <p className="flex min-h-(--rx-control-height-md) items-center justify-center gap-2 rounded-control bg-surface-sunken text-sm font-medium text-fg-muted pointer-coarse:min-h-(--rx-control-height-touch)">
+                        <CheckIcon
+                          aria-hidden
+                          weight="bold"
+                          className="size-4 text-positive-strong"
+                        />
+                        You are on this plan
+                      </p>
+                    ) : (
+                      <Button
+                        variant={recommended ? 'primary' : 'secondary'}
+                        className="w-full"
+                        aria-label={`${plan.cta ?? `Choose ${plan.name}`}, ${plan.name} plan`}
+                        onClick={() => {
+                          onSelectPlan(plan, cycle);
+                        }}
+                      >
+                        {plan.cta ?? `Choose ${plan.name}`}
+                      </Button>
+                    )}
                   </div>
 
-                  {current ? (
-                    <Button variant="secondary" disabled className="w-full">
-                      <CheckIcon aria-hidden weight="bold" className="size-4" />
-                      Current plan
-                    </Button>
-                  ) : (
-                    <Button
-                      variant={recommended ? 'primary' : 'secondary'}
-                      className="w-full"
-                      aria-label={`${plan.cta ?? `Choose ${plan.name}`}, ${plan.name} plan`}
-                      onClick={() => {
-                        onSelectPlan(plan, cycle);
-                      }}
-                    >
-                      {plan.cta ?? `Choose ${plan.name}`}
-                    </Button>
-                  )}
-
-                  {plan.highlights !== undefined && plan.highlights.length > 0 && (
+                  {plan.highlights !== undefined && plan.highlights.length > 0 ? (
                     <ul className="flex flex-col gap-2 border-t border-line pt-4 text-sm">
                       {plan.highlights.map((line) => (
                         <li key={line} className="flex items-start gap-2">
@@ -208,6 +217,8 @@ export function PricingTable({
                         </li>
                       ))}
                     </ul>
+                  ) : (
+                    <span aria-hidden />
                   )}
                 </li>
               );
@@ -250,72 +261,113 @@ function Comparison({
   features: readonly PricingFeature[];
 }) {
   const groups = groupPricingFeatures(features);
+  const narrowId = useId();
   return (
-    <div
-      role="region"
-      aria-label="Compare plans"
-      tabIndex={0}
-      className="-mx-1 overflow-x-auto rounded-control px-1 outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus"
-    >
-      <table className="w-full min-w-xl border-collapse text-sm">
-        <caption className="pb-3 text-start font-display text-lg font-heading tracking-tight text-fg">
+    <>
+      {/* Narrow: one section per plan, every feature with its value, nothing to scroll sideways. */}
+      <section aria-labelledby={narrowId} className="flex flex-col gap-4 @2xl:hidden">
+        <h3 id={narrowId} className="font-display text-lg font-heading tracking-tight">
           Compare plans
-        </caption>
-        <thead>
-          <tr className="border-b border-line-strong">
-            <th
-              scope="col"
-              className="sticky start-0 bg-surface py-2 pe-4 text-start font-medium text-fg-muted"
-            >
-              <span className="sr-only">Feature</span>
-            </th>
-            {plans.map((plan) => (
-              <th
-                key={plan.id}
-                scope="col"
-                className={cn(
-                  'w-1/6 px-2 py-2 text-center font-medium',
-                  plan.recommended === true && 'text-accent-strong',
-                )}
-              >
-                {plan.name}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {groups.map((group) => (
-            <Fragment key={group.name ?? 'features'}>
-              {group.name !== null && (
-                <tr>
-                  <th
-                    scope="colgroup"
-                    colSpan={plans.length + 1}
-                    className="pt-5 pb-1.5 text-start text-xs font-medium tracking-caps text-fg-subtle uppercase"
-                  >
-                    {group.name}
-                  </th>
-                </tr>
-              )}
-              {group.features.map((feature) => (
-                <tr key={feature.id} className="border-b border-line last:border-b-0">
-                  <th
-                    scope="row"
-                    className="sticky start-0 bg-surface py-2.5 pe-4 text-start font-regular text-fg"
-                  >
-                    {feature.label}
-                  </th>
-                  {plans.map((plan) => (
-                    <td key={plan.id} className="px-2 py-2.5 text-center text-fg-muted">
-                      <FeatureValue value={feature.values[plan.id]} />
-                    </td>
-                  ))}
-                </tr>
+        </h3>
+        {plans.map((plan) => (
+          <details
+            key={plan.id}
+            open={plan.recommended === true}
+            className="group rounded-control border border-line open:bg-surface-sunken"
+          >
+            <summary className="flex min-h-(--rx-control-height-touch) cursor-pointer list-none items-center justify-between gap-3 rounded-control px-4 font-medium outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus">
+              <span className={cn(plan.recommended === true && 'text-accent-strong')}>
+                Everything in {plan.name}
+              </span>
+              <CaretDownIcon
+                aria-hidden
+                weight="bold"
+                className="size-4 text-fg-muted transition-transform duration-fast ease-standard group-open:rotate-180"
+              />
+            </summary>
+            <dl className="flex flex-col px-4 pb-3 text-sm">
+              {features.map((feature) => (
+                <div
+                  key={feature.id}
+                  className="flex items-center justify-between gap-4 border-t border-line py-2"
+                >
+                  <dt className="text-fg">{feature.label}</dt>
+                  <dd className="text-end text-fg-muted">
+                    <FeatureValue value={feature.values[plan.id]} />
+                  </dd>
+                </div>
               ))}
-            </Fragment>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            </dl>
+          </details>
+        ))}
+      </section>
+
+      <div
+        role="region"
+        aria-label="Compare plans"
+        tabIndex={0}
+        className="-mx-1 hidden overflow-x-auto rounded-control px-1 outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus @2xl:block"
+      >
+        <table className="w-full min-w-xl border-collapse text-sm">
+          <caption className="pb-3 text-start font-display text-lg font-heading tracking-tight text-fg">
+            Compare plans
+          </caption>
+          <thead>
+            <tr className="border-b border-line-strong">
+              <th
+                scope="col"
+                className="sticky start-0 bg-surface py-2 pe-4 text-start font-medium text-fg-muted"
+              >
+                <span className="sr-only">Feature</span>
+              </th>
+              {plans.map((plan) => (
+                <th
+                  key={plan.id}
+                  scope="col"
+                  className={cn(
+                    'w-1/6 px-2 py-2 text-center font-medium',
+                    plan.recommended === true && 'text-accent-strong',
+                  )}
+                >
+                  {plan.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map((group) => (
+              <Fragment key={group.name ?? 'features'}>
+                {group.name !== null && (
+                  <tr>
+                    <th
+                      scope="colgroup"
+                      colSpan={plans.length + 1}
+                      className="pt-5 pb-1.5 text-start text-xs font-medium tracking-caps text-fg-subtle uppercase"
+                    >
+                      {group.name}
+                    </th>
+                  </tr>
+                )}
+                {group.features.map((feature) => (
+                  <tr key={feature.id} className="border-b border-line last:border-b-0">
+                    <th
+                      scope="row"
+                      className="sticky start-0 bg-surface py-2.5 pe-4 text-start font-regular text-fg"
+                    >
+                      {feature.label}
+                    </th>
+                    {plans.map((plan) => (
+                      <td key={plan.id} className="px-2 py-2.5 text-center text-fg-muted">
+                        <FeatureValue value={feature.values[plan.id]} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }

@@ -73,7 +73,8 @@ describe('PricingTable', () => {
         onSelectPlan={vi.fn()}
       />,
     );
-    expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled();
+    expect(screen.getByText('You are on this plan')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Starter plan/ })).not.toBeInTheDocument();
     expect(screen.getByRole('listitem', { name: 'Growth, recommended' })).toBeInTheDocument();
     expect(screen.getByText('Free')).toBeInTheDocument();
     expect(screen.getByText('Custom')).toBeInTheDocument();
