@@ -2,6 +2,7 @@ import {
   CalendarBlankIcon,
   DownloadSimpleIcon,
   FileTextIcon,
+  PercentIcon,
   WarningCircleIcon,
 } from '@phosphor-icons/react';
 import {
@@ -149,14 +150,14 @@ export const TAX_SUMMARY_MESSAGES: TaxSummaryMessages = {
   total: 'Total',
   foldedOutput: (tax, base) => (
     <>
-      <span className="whitespace-nowrap">Output {tax}</span>{' '}
-      <span className="whitespace-nowrap">on {base}</span>
+      <span className="whitespace-nowrap">Output tax {tax}</span>{' '}
+      <span className="whitespace-nowrap text-fg-subtle">base {base}</span>
     </>
   ),
   foldedInput: (tax, base) => (
     <>
-      <span className="whitespace-nowrap">Input {tax}</span>{' '}
-      <span className="whitespace-nowrap">on {base}</span>
+      <span className="whitespace-nowrap">Input tax {tax}</span>{' '}
+      <span className="whitespace-nowrap text-fg-subtle">base {base}</span>
     </>
   ),
   prepare: 'Prepare return',
@@ -285,7 +286,7 @@ export function TaxSummary({
         </span>
       </p>
       {entries.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={PercentIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (

@@ -1,4 +1,4 @@
-import { WarningCircleIcon } from '@phosphor-icons/react';
+import { TrendDownIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import {
   Table,
   TableBody,
@@ -435,7 +435,7 @@ export function CashRunway({
       bodyClassName="gap-4"
     >
       {history.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={TrendDownIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (
@@ -599,7 +599,7 @@ export function CashRunway({
                   y={Math.max(0, thresholdDatum.point.balance)}
                   r={4}
                   fill="var(--rx-chart-halo)"
-                  stroke="var(--rx-warning)"
+                  stroke={chartColor('reference')}
                   strokeWidth={2}
                 />
               )}

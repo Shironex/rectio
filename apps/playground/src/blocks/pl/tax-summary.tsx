@@ -50,14 +50,14 @@ export const taxSummaryPl: TaxSummaryMessages = {
   total: 'Razem',
   foldedOutput: (tax, base) => (
     <>
-      <span className="whitespace-nowrap">Należny {tax}</span>{' '}
-      <span className="whitespace-nowrap">od {base}</span>
+      <span className="whitespace-nowrap">VAT należny {tax}</span>{' '}
+      <span className="whitespace-nowrap text-fg-subtle">podstawa {base}</span>
     </>
   ),
   foldedInput: (tax, base) => (
     <>
-      <span className="whitespace-nowrap">Naliczony {tax}</span>{' '}
-      <span className="whitespace-nowrap">od {base}</span>
+      <span className="whitespace-nowrap">VAT naliczony {tax}</span>{' '}
+      <span className="whitespace-nowrap text-fg-subtle">podstawa {base}</span>
     </>
   ),
   prepare: 'Przygotuj deklarację',
