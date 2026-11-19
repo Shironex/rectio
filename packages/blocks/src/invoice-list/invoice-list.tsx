@@ -13,6 +13,7 @@ import { useMemo, useState } from 'react';
 
 import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
+import { EmptyNote } from '../lib/empty-note';
 import { ChoiceSelect, type Choice } from '../lib/choice-select';
 import { Figures } from '../lib/figures';
 import { formatShortDate, sumMoney, resolveLocale } from '../lib/finance';
@@ -250,7 +251,7 @@ export function InvoiceList({
               />
               {partial && (
                 <span className="text-sm whitespace-nowrap text-fg-muted">
-                  of <Money amount={invoice.total} currency={currency} locale={locale} />
+                  left of <Money amount={invoice.total} currency={currency} locale={locale} />
                 </span>
               )}
               <span className="mt-1 @xl:hidden">
@@ -293,7 +294,14 @@ export function InvoiceList({
       description={`${periodLabel}, ${String(inRange.length)} ${inRange.length === 1 ? 'invoice' : 'invoices'}`}
       actions={
         <>
-          <ChoiceSelect label="Period" value={period} onValueChange={setPeriod} choices={PERIODS} />
+          {invoices.length > 0 && (
+            <ChoiceSelect
+              label="Period"
+              value={period}
+              onValueChange={setPeriod}
+              choices={PERIODS}
+            />
+          )}
           {onCreateInvoice !== undefined && (
             <Button onClick={onCreateInvoice}>
               <PlusIcon aria-hidden weight="bold" className="size-4" />
@@ -305,84 +313,86 @@ export function InvoiceList({
       className={className}
       bodyClassName="gap-4"
     >
-      <Figures
-        currency={currency}
-        locale={locale}
-        items={[
-          {
-            label: 'Outstanding',
-            amount: totals.outstanding,
-            note: `${String(totals.counts.outstanding)} open`,
-          },
-          {
-            label: 'Overdue',
-            amount: totals.overdue,
-            note:
-              totals.overdueCount === 0
-                ? 'Nothing overdue'
-                : `${String(totals.overdueCount)} past due date`,
-            ...(totals.overdueCount > 0 ? { emphasis: 'negative' as const } : {}),
-          },
-          {
-            label: 'Paid',
-            amount: totals.paid,
-            note: `${String(totals.counts.paid)} settled`,
-          },
-        ]}
-      />
+      {invoices.length === 0 ? (
+        <EmptyNote title="No invoices yet">
+          Invoices you create appear here with what is outstanding, overdue and paid.
+        </EmptyNote>
+      ) : (
+        <>
+          <Figures
+            currency={currency}
+            locale={locale}
+            items={[
+              {
+                label: 'Outstanding',
+                amount: totals.outstanding,
+                note: `${String(totals.counts.outstanding)} open`,
+              },
+              {
+                label: 'Overdue',
+                amount: totals.overdue,
+                note:
+                  totals.overdueCount === 0
+                    ? 'Nothing overdue'
+                    : `${String(totals.overdueCount)} past due date`,
+                ...(totals.overdueCount > 0 ? { emphasis: 'negative' as const } : {}),
+              },
+              {
+                label: 'Paid',
+                amount: totals.paid,
+                note: `${String(totals.counts.paid)} settled`,
+              },
+            ]}
+          />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Segmented
-          label="Status"
-          value={filter}
-          onValueChange={setFilter}
-          options={(Object.keys(FILTER_LABELS) as StatusFilter[]).map((value) => ({
-            value,
-            label: FILTER_LABELS[value],
-            hint: totals.counts[value],
-          }))}
-        />
-        <DataTableSort table={table} className="w-full @xl:hidden" />
-      </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Segmented
+              label="Status"
+              value={filter}
+              onValueChange={setFilter}
+              options={(Object.keys(FILTER_LABELS) as StatusFilter[]).map((value) => ({
+                value,
+                label: FILTER_LABELS[value],
+                hint: totals.counts[value],
+              }))}
+            />
+            <DataTableSort table={table} className="w-full @xl:hidden" />
+          </div>
 
-      <DataTable caption={`${title}, ${FILTER_LABELS[filter].toLowerCase()}`} hideCaption>
-        {/* On a narrow block the Sort by control above sorts; the header stays for screen readers. */}
-        <DataTableHeader table={table} className="@max-xl:sr-only" />
-        <DataTableBody
-          table={table}
-          empty={
-            <span className="flex flex-col items-center gap-3">
-              <span className="flex flex-col items-center gap-1">
-                <span className="font-medium text-fg">
-                  {invoices.length === 0
-                    ? 'No invoices yet'
-                    : filter === 'overdue'
-                      ? 'Nothing is overdue'
-                      : `No ${filter === 'all' ? '' : `${FILTER_LABELS[filter].toLowerCase()} `}invoices in this period`}
+          <DataTable caption={`${title}, ${FILTER_LABELS[filter].toLowerCase()}`} hideCaption>
+            {/* On a narrow block the Sort by control above sorts; the header stays for screen readers. */}
+            <DataTableHeader table={table} className="@max-xl:sr-only" />
+            <DataTableBody
+              table={table}
+              empty={
+                <span className="flex flex-col items-center gap-3">
+                  <span className="flex flex-col items-center gap-1">
+                    <span className="font-medium text-fg">
+                      {filter === 'overdue'
+                        ? 'Nothing is overdue'
+                        : `No ${filter === 'all' ? '' : `${FILTER_LABELS[filter].toLowerCase()} `}invoices in this period`}
+                    </span>
+                    <span>Widen the period or show every status.</span>
+                  </span>
+                  {(filter !== 'all' || period !== 'all') && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setFilter('all');
+                        setPeriod('all');
+                      }}
+                    >
+                      Show all invoices
+                    </Button>
+                  )}
                 </span>
-                <span>
-                  {invoices.length === 0
-                    ? 'Invoices you create appear here with their totals.'
-                    : 'Widen the period or show every status.'}
-                </span>
-              </span>
-              {invoices.length > 0 && (filter !== 'all' || period !== 'all') && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    setFilter('all');
-                    setPeriod('all');
-                  }}
-                >
-                  Show all invoices
-                </Button>
-              )}
-            </span>
-          }
-        />
-        {rows.length > 0 && <DataTableFooter table={table} />}
-      </DataTable>
+              }
+            />
+            {rows.length > 0 && <DataTableFooter table={table} />}
+          </DataTable>
+        </>
+      )}
     </BlockPanel>
   );
 }

@@ -33,6 +33,7 @@ import { useState, type SyntheticEvent, type KeyboardEvent } from 'react';
 
 import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
+import { EmptyNote } from '../lib/empty-note';
 import { formatShortDate, resolveLocale, sumMoney } from '../lib/finance';
 import { StateBadge } from '../lib/state-badge';
 import { reasonError, type AuditEvent, type ExpenseRequest } from './expense-approval.logic';
@@ -182,55 +183,89 @@ export function ExpenseApproval({
         )}
       </div>
 
-      <Table>
-        <TableCaption className="sr-only">Pending expenses, amounts in {currency}</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-0 pe-0">
-              <span className="sr-only">Select</span>
-            </TableHead>
-            <TableHead>Expense</TableHead>
-            <TableHead className="hidden @2xl:table-cell">Category</TableHead>
-            <TableHead align="end">Amount</TableHead>
-            <TableHead align="end" className="hidden w-0 @xl:table-cell">
-              <span className="sr-only">Decision</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <Rows>
-            {pending.map((request) => (
-              <Row key={request.id} data-selected={selected.has(request.id) || undefined}>
-                <TableCell className="w-0 pe-0">
-                  <span className="flex items-center">
-                    <Checkbox
-                      aria-label={`Select ${request.merchant}, ${request.employee}`}
-                      checked={selected.has(request.id)}
-                      onCheckedChange={(checked) => {
-                        toggle(request.id, checked);
-                      }}
-                    />
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <span className="block font-medium">{request.merchant}</span>
-                  <span className="block text-sm text-fg-muted">
-                    {request.employee},{' '}
-                    <span className="numeric">{formatShortDate(request.date, locale)}</span>
-                    <span className="@2xl:hidden">, {request.category}</span>
-                  </span>
-                  {request.flags !== undefined && request.flags.length > 0 && (
-                    <span className="mt-1 flex flex-wrap gap-1">
-                      {request.flags.map((flag) => (
-                        <Badge key={flag} tone="warning">
-                          <FlagIcon aria-hidden weight="bold" />
-                          {flag}
-                        </Badge>
-                      ))}
+      {pending.length === 0 ? (
+        <EmptyNote title="You are all caught up">
+          New expenses appear here when they are submitted.
+        </EmptyNote>
+      ) : (
+        <Table>
+          <TableCaption className="sr-only">Pending expenses, amounts in {currency}</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-0 pe-0">
+                <span className="sr-only">Select</span>
+              </TableHead>
+              <TableHead>Expense</TableHead>
+              <TableHead className="hidden @2xl:table-cell">Category</TableHead>
+              <TableHead align="end" className="hidden @xl:table-cell">
+                Amount
+              </TableHead>
+              <TableHead align="end" className="hidden w-0 @xl:table-cell">
+                <span className="sr-only">Decision</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <Rows>
+              {pending.map((request) => (
+                <Row key={request.id} data-selected={selected.has(request.id) || undefined}>
+                  <TableCell className="w-0 pe-0">
+                    <span className="flex items-center">
+                      <Checkbox
+                        aria-label={`Select ${request.merchant}, ${request.employee}`}
+                        checked={selected.has(request.id)}
+                        onCheckedChange={(checked) => {
+                          toggle(request.id, checked);
+                        }}
+                      />
                     </span>
-                  )}
-                  {/* Narrow: the decision sits under the expense, where the thumb reaches it. */}
-                  <span className="mt-2 flex @xl:hidden">
+                  </TableCell>
+                  <TableCell>
+                    {/* Narrow: the amount joins the merchant's line, leaving the row's width to the decision. */}
+                    <span className="flex items-baseline justify-between gap-3 font-medium">
+                      {request.merchant}
+                      <Money
+                        amount={request.amount}
+                        currency={currency}
+                        locale={locale}
+                        className="@xl:hidden"
+                      />
+                    </span>
+                    <span className="block text-sm text-fg-muted">
+                      {request.employee},{' '}
+                      <span className="numeric">{formatShortDate(request.date, locale)}</span>
+                      <span className="@2xl:hidden">, {request.category}</span>
+                    </span>
+                    {request.flags !== undefined && request.flags.length > 0 && (
+                      <span className="mt-1 flex flex-wrap gap-1">
+                        {request.flags.map((flag) => (
+                          <Badge key={flag} tone="warning">
+                            <FlagIcon aria-hidden weight="bold" />
+                            {flag}
+                          </Badge>
+                        ))}
+                      </span>
+                    )}
+                    {/* Narrow: the decision sits under the expense, where the thumb reaches it. */}
+                    <span className="mt-2 flex @xl:hidden">
+                      <Decide
+                        request={request}
+                        onApprove={() => {
+                          approve([request.id]);
+                        }}
+                        onReject={() => {
+                          setRejecting([request.id]);
+                        }}
+                      />
+                    </span>
+                  </TableCell>
+                  <TableCell className="hidden text-fg-muted @2xl:table-cell">
+                    {request.category}
+                  </TableCell>
+                  <TableCell align="end" className="hidden @xl:table-cell">
+                    <Money amount={request.amount} currency={currency} locale={locale} />
+                  </TableCell>
+                  <TableCell align="end" className="hidden w-0 @xl:table-cell">
                     <Decide
                       request={request}
                       onApprove={() => {
@@ -240,38 +275,13 @@ export function ExpenseApproval({
                         setRejecting([request.id]);
                       }}
                     />
-                  </span>
-                </TableCell>
-                <TableCell className="hidden text-fg-muted @2xl:table-cell">
-                  {request.category}
-                </TableCell>
-                <TableCell align="end">
-                  <Money amount={request.amount} currency={currency} locale={locale} />
-                </TableCell>
-                <TableCell align="end" className="hidden w-0 @xl:table-cell">
-                  <Decide
-                    request={request}
-                    onApprove={() => {
-                      approve([request.id]);
-                    }}
-                    onReject={() => {
-                      setRejecting([request.id]);
-                    }}
-                  />
-                </TableCell>
-              </Row>
-            ))}
-          </Rows>
-          {pending.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={5} className="h-auto py-10 text-center text-fg-muted">
-                <span className="block font-medium text-fg">You are all caught up</span>
-                New expenses appear here when they are submitted.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                  </TableCell>
+                </Row>
+              ))}
+            </Rows>
+          </TableBody>
+        </Table>
+      )}
 
       {trail.length > 0 && (
         <div className="flex flex-col gap-2">

@@ -108,15 +108,17 @@ export function CashFlowChart({
       title={title}
       description={span}
       actions={
-        <Segmented
-          label="Group by"
-          value={granularity}
-          onValueChange={setGranularity}
-          options={[
-            { value: 'month', label: 'Monthly' },
-            { value: 'quarter', label: 'Quarterly' },
-          ]}
-        />
+        points.length > 0 && (
+          <Segmented
+            label="Group by"
+            value={granularity}
+            onValueChange={setGranularity}
+            options={[
+              { value: 'month', label: 'Monthly' },
+              { value: 'quarter', label: 'Quarterly' },
+            ]}
+          />
+        )
       }
       className={className}
       bodyClassName="gap-4"

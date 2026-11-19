@@ -55,6 +55,8 @@ export function Segmented<Value extends string>({
             'text-sm font-medium whitespace-nowrap text-fg-muted',
             'transition-[background-color,color,box-shadow] duration-fast ease-standard',
             'hover:text-fg data-pressed:bg-surface-raised data-pressed:text-fg data-pressed:shadow-raised',
+            // A hairline as well as the fill, so the chosen option holds in dark mode too.
+            'data-pressed:ring-1 data-pressed:ring-line-strong',
             '-outline-offset-1 focus-visible:outline-2 focus-visible:outline-focus',
           )}
         >

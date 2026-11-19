@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
 import { ChoiceSelect } from '../lib/choice-select';
+import { EmptyNote } from '../lib/empty-note';
 import { formatShortDate, resolveLocale } from '../lib/finance';
 import {
   journalTotals,
@@ -105,203 +106,211 @@ export function Ledger({
       className={className}
       bodyClassName="gap-4"
     >
-      <Table>
-        <TableCaption className="sr-only">
-          {account === undefined ? 'Journal lines' : `Ledger of ${account.name}`}, amounts in{' '}
-          {currency}
-        </TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="hidden w-20 @xl:table-cell">Date</TableHead>
-            <TableHead className="hidden w-28 @2xl:table-cell">Reference</TableHead>
-            <TableHead>{account === undefined ? 'Entry and account' : 'Description'}</TableHead>
-            <TableHead align="end" className="hidden @xl:table-cell">
-              Debit
-            </TableHead>
-            <TableHead align="end" className="hidden @xl:table-cell">
-              Credit
-            </TableHead>
-            {/* Narrow: one amount column, each figure marked Dr or Cr. */}
-            <TableHead align="end" className="@xl:hidden">
-              Amount
-            </TableHead>
-            {account !== undefined && <TableHead align="end">Balance</TableHead>}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {account !== undefined && (
+      {account === undefined && ordered.length === 0 ? (
+        <EmptyNote title="No entries in the period">
+          Journal entries appear here as they are posted.
+        </EmptyNote>
+      ) : (
+        <Table>
+          <TableCaption className="sr-only">
+            {account === undefined ? 'Journal lines' : `Ledger of ${account.name}`}, amounts in{' '}
+            {currency}
+          </TableCaption>
+          <TableHeader>
             <TableRow>
-              <TableCell className="hidden @xl:table-cell" />
-              <TableCell className="hidden @2xl:table-cell" />
-              <TableCell className="text-fg-muted">Opening balance</TableCell>
-              <TableCell className="hidden @xl:table-cell" />
-              <TableCell className="hidden @xl:table-cell" />
-              <TableCell className="@xl:hidden" />
-              <TableCell align="end">
-                <Money amount={opening} currency={currency} locale={locale} tone="auto" />
-              </TableCell>
+              <TableHead className="hidden w-20 @xl:table-cell">Date</TableHead>
+              <TableHead className="hidden w-28 @2xl:table-cell">Reference</TableHead>
+              <TableHead>{account === undefined ? 'Entry and account' : 'Description'}</TableHead>
+              <TableHead align="end" className="hidden @xl:table-cell">
+                Debit
+              </TableHead>
+              <TableHead align="end" className="hidden @xl:table-cell">
+                Credit
+              </TableHead>
+              {/* Narrow: one amount column, each figure marked Dr or Cr. */}
+              <TableHead align="end" className="@xl:hidden">
+                Amount
+              </TableHead>
+              {account !== undefined && <TableHead align="end">Balance</TableHead>}
             </TableRow>
-          )}
-          {ordered.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={columns} className="h-auto py-10 text-center text-fg-muted">
-                {account === undefined
-                  ? 'No entries in the period.'
-                  : 'No postings to this account in the period.'}
-              </TableCell>
-            </TableRow>
-          )}
-          {ordered.map((line, index) => {
-            const firstOfEntry =
-              account !== undefined || ordered[index - 1]?.entryId !== line.entryId;
-            const lastOfEntry =
-              account !== undefined || ordered[index + 1]?.entryId !== line.entryId;
-            const unbalanced = broken.some((b) => b.entryId === line.entryId);
-            // Hairlines between entries only, so the lines of one entry read as one record, and
-            // the lines inside an entry sit close, the rule's gap only between entries.
-            const rule = cn(
-              account === undefined && 'h-auto',
-              account === undefined && !firstOfEntry && 'pt-1',
-              !lastOfEntry && 'border-b-0 pb-1',
-            );
-            return (
-              <TableRow key={line.id} data-entry={line.entryId}>
-                <TableCell
-                  className={cn('hidden align-top whitespace-nowrap @xl:table-cell', rule)}
-                >
-                  {firstOfEntry && (
-                    <span className="text-fg-muted numeric">
-                      {formatShortDate(line.date, locale)}
-                    </span>
-                  )}
+          </TableHeader>
+          <TableBody>
+            {account !== undefined && (
+              <TableRow>
+                <TableCell className="hidden @xl:table-cell" />
+                <TableCell className="hidden @2xl:table-cell" />
+                <TableCell className="text-fg-muted">Opening balance</TableCell>
+                <TableCell className="hidden @xl:table-cell" />
+                <TableCell className="hidden @xl:table-cell" />
+                <TableCell className="@xl:hidden" />
+                <TableCell align="end">
+                  <Money amount={opening} currency={currency} locale={locale} tone="auto" />
                 </TableCell>
-                <TableCell
-                  className={cn('hidden align-top whitespace-nowrap @2xl:table-cell', rule)}
-                >
-                  {firstOfEntry && <span className="text-fg-muted numeric">{line.reference}</span>}
+              </TableRow>
+            )}
+            {ordered.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={columns} className="h-auto py-10 text-center text-fg-muted">
+                  No postings to this account in the period.
                 </TableCell>
-                <TableCell className={cn('align-top', rule)}>
-                  {account === undefined ? (
-                    <>
-                      {firstOfEntry && (
-                        <span className="mb-1 flex flex-wrap items-baseline gap-x-2">
-                          <span className="font-medium">{line.description}</span>
-                          <span className="text-sm text-fg-muted numeric @xl:hidden">
-                            {formatShortDate(line.date, locale)}
+              </TableRow>
+            )}
+            {ordered.map((line, index) => {
+              const firstOfEntry =
+                account !== undefined || ordered[index - 1]?.entryId !== line.entryId;
+              const lastOfEntry =
+                account !== undefined || ordered[index + 1]?.entryId !== line.entryId;
+              const unbalanced = broken.some((b) => b.entryId === line.entryId);
+              // Hairlines between entries only, so the lines of one entry read as one record, and
+              // the lines inside an entry sit close, the rule's gap only between entries.
+              const rule = cn(
+                account === undefined && 'h-auto',
+                account === undefined && !firstOfEntry && 'pt-1',
+                !lastOfEntry && 'border-b-0 pb-1',
+              );
+              return (
+                <TableRow key={line.id} data-entry={line.entryId}>
+                  <TableCell
+                    className={cn('hidden align-top whitespace-nowrap @xl:table-cell', rule)}
+                  >
+                    {firstOfEntry && (
+                      <span className="text-fg-muted numeric">
+                        {formatShortDate(line.date, locale)}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell
+                    className={cn('hidden align-top whitespace-nowrap @2xl:table-cell', rule)}
+                  >
+                    {firstOfEntry && (
+                      <span className="text-fg-muted numeric">{line.reference}</span>
+                    )}
+                  </TableCell>
+                  <TableCell className={cn('align-top', rule)}>
+                    {account === undefined ? (
+                      <>
+                        {firstOfEntry && (
+                          <span className="mb-1 flex flex-wrap items-baseline gap-x-2">
+                            <span className="font-medium">{line.description}</span>
+                            <span className="text-sm text-fg-muted numeric @xl:hidden">
+                              {formatShortDate(line.date, locale)}
+                            </span>
+                            {unbalanced && (
+                              <Badge tone="negative">
+                                <WarningCircleIcon aria-hidden weight="bold" />
+                                Does not balance
+                              </Badge>
+                            )}
                           </span>
-                          {unbalanced && (
-                            <Badge tone="negative">
-                              <WarningCircleIcon aria-hidden weight="bold" />
-                              Does not balance
-                            </Badge>
-                          )}
+                        )}
+                        {/* Credit lines indent under the debits, as a journal is written by hand. */}
+                        <span
+                          className={cn('flex items-baseline gap-2', line.credit > 0 && 'ps-6')}
+                        >
+                          <span className="text-fg-muted numeric">{line.accountCode}</span>
+                          <span>{nameOf(line.accountCode)}</span>
                         </span>
-                      )}
-                      {/* Credit lines indent under the debits, as a journal is written by hand. */}
-                      <span className={cn('flex items-baseline gap-2', line.credit > 0 && 'ps-6')}>
-                        <span className="text-fg-muted numeric">{line.accountCode}</span>
-                        <span>{nameOf(line.accountCode)}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="block">{line.description}</span>
+                        <span className="block text-sm text-fg-muted @2xl:hidden">
+                          <span className="numeric">{formatShortDate(line.date, locale)}</span>,{' '}
+                          <span className="numeric">{line.reference}</span>
+                        </span>
+                      </>
+                    )}
+                  </TableCell>
+                  <TableCell align="end" className={cn('hidden align-bottom @xl:table-cell', rule)}>
+                    {money(line.debit)}
+                  </TableCell>
+                  <TableCell align="end" className={cn('hidden align-bottom @xl:table-cell', rule)}>
+                    {money(line.credit)}
+                  </TableCell>
+                  <TableCell align="end" className={cn('align-bottom @xl:hidden', rule)}>
+                    <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+                      {money(line.debit > 0 ? line.debit : line.credit)}
+                      <span className="text-sm text-fg-muted">
+                        <span aria-hidden>{line.debit > 0 ? 'Dr' : 'Cr'}</span>
+                        <span className="sr-only">{line.debit > 0 ? 'debit' : 'credit'}</span>
                       </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="block">{line.description}</span>
-                      <span className="block text-sm text-fg-muted @2xl:hidden">
-                        <span className="numeric">{formatShortDate(line.date, locale)}</span>,{' '}
-                        <span className="numeric">{line.reference}</span>
-                      </span>
-                    </>
-                  )}
-                </TableCell>
-                <TableCell align="end" className={cn('hidden align-bottom @xl:table-cell', rule)}>
-                  {money(line.debit)}
-                </TableCell>
-                <TableCell align="end" className={cn('hidden align-bottom @xl:table-cell', rule)}>
-                  {money(line.credit)}
-                </TableCell>
-                <TableCell align="end" className={cn('align-bottom @xl:hidden', rule)}>
-                  <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
-                    {money(line.debit > 0 ? line.debit : line.credit)}
-                    <span className="text-sm text-fg-muted">
-                      <span aria-hidden>{line.debit > 0 ? 'Dr' : 'Cr'}</span>
-                      <span className="sr-only">{line.debit > 0 ? 'debit' : 'credit'}</span>
                     </span>
+                  </TableCell>
+                  {account !== undefined && (
+                    <TableCell align="end" className={cn('align-bottom', rule)}>
+                      <Money
+                        amount={balances[index]?.balance ?? 0}
+                        currency={currency}
+                        locale={locale}
+                        tone="auto"
+                      />
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+          {ordered.length > 0 && (
+            <TableFooter>
+              <TableRow>
+                <TableHead scope="row" className="hidden @xl:table-cell" />
+                <TableHead scope="row" className="hidden @2xl:table-cell" />
+                <TableHead scope="row" className="text-fg">
+                  {account === undefined ? 'Totals' : 'Closing balance'}
+                </TableHead>
+                <TableCell align="end" className="hidden @xl:table-cell">
+                  <Money
+                    amount={totals.debit}
+                    currency={currency}
+                    locale={locale}
+                    className="font-strong"
+                  />
+                </TableCell>
+                <TableCell align="end" className="hidden @xl:table-cell">
+                  <Money
+                    amount={totals.credit}
+                    currency={currency}
+                    locale={locale}
+                    className="font-strong"
+                  />
+                </TableCell>
+                <TableCell align="end" className="@xl:hidden">
+                  <span className="flex flex-col items-end">
+                    {(['debit', 'credit'] as const).map((side) => (
+                      <span
+                        key={side}
+                        className="inline-flex items-baseline gap-1.5 whitespace-nowrap"
+                      >
+                        <Money
+                          amount={totals[side]}
+                          currency={currency}
+                          locale={locale}
+                          className="font-strong"
+                        />
+                        <span className="text-sm text-fg-muted">
+                          <span aria-hidden>{side === 'debit' ? 'Dr' : 'Cr'}</span>
+                          <span className="sr-only">{side}</span>
+                        </span>
+                      </span>
+                    ))}
                   </span>
                 </TableCell>
                 {account !== undefined && (
-                  <TableCell align="end" className={cn('align-bottom', rule)}>
+                  <TableCell align="end">
                     <Money
-                      amount={balances[index]?.balance ?? 0}
+                      amount={closing}
                       currency={currency}
                       locale={locale}
                       tone="auto"
+                      className="font-strong"
                     />
                   </TableCell>
                 )}
               </TableRow>
-            );
-          })}
-        </TableBody>
-        {ordered.length > 0 && (
-          <TableFooter>
-            <TableRow>
-              <TableHead scope="row" className="hidden @xl:table-cell" />
-              <TableHead scope="row" className="hidden @2xl:table-cell" />
-              <TableHead scope="row" className="text-fg">
-                {account === undefined ? 'Totals' : 'Closing balance'}
-              </TableHead>
-              <TableCell align="end" className="hidden @xl:table-cell">
-                <Money
-                  amount={totals.debit}
-                  currency={currency}
-                  locale={locale}
-                  className="font-strong"
-                />
-              </TableCell>
-              <TableCell align="end" className="hidden @xl:table-cell">
-                <Money
-                  amount={totals.credit}
-                  currency={currency}
-                  locale={locale}
-                  className="font-strong"
-                />
-              </TableCell>
-              <TableCell align="end" className="@xl:hidden">
-                <span className="flex flex-col items-end">
-                  {(['debit', 'credit'] as const).map((side) => (
-                    <span
-                      key={side}
-                      className="inline-flex items-baseline gap-1.5 whitespace-nowrap"
-                    >
-                      <Money
-                        amount={totals[side]}
-                        currency={currency}
-                        locale={locale}
-                        className="font-strong"
-                      />
-                      <span className="text-sm text-fg-muted">
-                        <span aria-hidden>{side === 'debit' ? 'Dr' : 'Cr'}</span>
-                        <span className="sr-only">{side}</span>
-                      </span>
-                    </span>
-                  ))}
-                </span>
-              </TableCell>
-              {account !== undefined && (
-                <TableCell align="end">
-                  <Money
-                    amount={closing}
-                    currency={currency}
-                    locale={locale}
-                    tone="auto"
-                    className="font-strong"
-                  />
-                </TableCell>
-              )}
-            </TableRow>
-          </TableFooter>
-        )}
-      </Table>
+            </TableFooter>
+          )}
+        </Table>
+      )}
 
       {account === undefined && ordered.length > 0 && (
         <p role="status" className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">

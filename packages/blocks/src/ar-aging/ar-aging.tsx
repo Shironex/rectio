@@ -281,7 +281,9 @@ export function ArAging({
             <TableFooter>
               <TableRow>
                 <TableHead scope="row" className="text-fg">
-                  Total{others > 0 && `, with ${String(others)} more`}
+                  Total
+                  {others > 0 &&
+                    `, including ${String(others)} other ${others === 1 ? 'customer' : 'customers'}`}
                 </TableHead>
                 {AGING_BUCKETS.map((bucket) => (
                   <TableCell key={bucket} align="end" className="hidden @4xl:table-cell">

@@ -17,6 +17,7 @@ import { EmptyNote } from '../lib/empty-note';
 import { Swatch } from '../lib/chart';
 import { formatPercent, resolveLocale } from '../lib/finance';
 import {
+  ON_BUDGET,
   budgetSummary,
   variance,
   type BudgetKind,
@@ -81,7 +82,8 @@ function VarianceCell({ v, currency, locale }: { v: Variance; currency: string; 
 function Meter({ budget, actual, track }: { budget: number; actual: number; track: number }) {
   const ratio = budget <= 0 ? 0 : actual / budget;
   const within = Math.min(ratio, 1) / track;
-  const past = Math.max(ratio - 1, 0) / track;
+  // Within the on-budget tolerance there is no overrun to draw, matching the "On budget" label.
+  const past = ratio - 1 < ON_BUDGET ? 0 : (ratio - 1) / track;
   return (
     <span aria-hidden className="relative block h-3 w-full">
       <span
