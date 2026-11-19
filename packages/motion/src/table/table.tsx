@@ -36,13 +36,8 @@ function cssEasing(element: Element, name: keyof MotionTokens['easing']): string
   );
 }
 
-/** Moves a row vertically between two offsets, in pixels, on the standard easing. */
-function slide(
-  row: HTMLTableRowElement,
-  from: number,
-  to: number,
-  tokens: MotionTokens,
-): Animation {
+/** Moves a row (or what follows the table) vertically between two offsets, in pixels. */
+function slide(row: HTMLElement, from: number, to: number, tokens: MotionTokens): Animation {
   return row.animate(
     [{ transform: `translateY(${String(from)}px)` }, { transform: `translateY(${String(to)}px)` }],
     { duration: tokens.duration.base * 1000, easing: cssEasing(row, 'standard'), fill: 'both' },
@@ -54,6 +49,38 @@ function followers(body: HTMLTableSectionElement): HTMLTableRowElement[] {
   const table = body.parentElement;
   const footer = table instanceof HTMLTableElement ? table.tFoot : null;
   return [...body.rows, ...(footer?.rows ?? [])];
+}
+
+/** How many levels above the table its following content is moved with it. */
+const BELOW_LEVELS = 3;
+
+/**
+ * What follows the table on the page and moves when it grows or shrinks: the next siblings of the
+ * table and of a few of its ancestors, up to a scroll container. Only content in the flow;
+ * positioned and hidden elements stay where they are.
+ */
+function below(body: HTMLTableSectionElement): HTMLElement[] {
+  const found: HTMLElement[] = [];
+  let level: Element | null = body.closest('table');
+  for (
+    let depth = 0;
+    level !== null && level !== document.body && depth <= BELOW_LEVELS;
+    depth += 1
+  ) {
+    for (let next = level.nextElementSibling; next !== null; next = next.nextElementSibling) {
+      if (!(next instanceof HTMLElement)) continue;
+      const style = getComputedStyle(next);
+      if (
+        style.display !== 'none' &&
+        (style.position === 'static' || style.position === 'relative')
+      )
+        found.push(next);
+    }
+    const parent: Element | null = level.parentElement;
+    if (parent === null || /auto|scroll/.test(getComputedStyle(parent).overflowY)) break;
+    level = parent;
+  }
+  return found;
 }
 
 interface Leaving {
@@ -77,10 +104,14 @@ function openGaps(body: HTMLTableSectionElement, tokens: MotionTokens) {
     if (added.has(row)) above += row.offsetHeight;
     else if (above > 0) slide(row, -above, 0, tokens).finished.then(cancel, ignore);
   }
+  if (above === 0) return;
+  for (const element of below(body))
+    slide(element, -above, 0, tokens).finished.then(cancel, ignore);
 }
 
 /**
- * The rows after the faded ones slide up by the faded rows' heights while the layout stays; when
+ * The rows after the faded ones (and the content after the table) slide up by the faded rows'
+ * heights while the layout stays; when
  * the slide ends, the faded rows leave the layout and the slides are dropped in the same frame, so
  * every row is already drawn where the new layout puts it.
  */
@@ -94,6 +125,8 @@ function closeGaps(body: HTMLTableSectionElement, tokens: MotionTokens) {
     if (gone.has(row)) above += row.offsetHeight;
     else if (above > 0) slides.push(slide(row, 0, -above, tokens));
   }
+  // What follows the table moves up with the rows, so it is never left behind for the last frame.
+  if (above > 0) for (const element of below(body)) slides.push(slide(element, 0, -above, tokens));
   const finish = () => {
     for (const row of gone) row.style.display = 'none';
     for (const animation of slides) animation.cancel();
