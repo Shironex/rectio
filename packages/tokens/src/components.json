@@ -125,6 +125,11 @@
         "$value": "{control.height.md}",
         "$description": "Width and height of a day button. Follows density."
       },
+      "day-size-touch": {
+        "$type": "dimension",
+        "$value": "{control.height.lg}",
+        "$description": "Day button size on touch screens, so each day is a 44px target."
+      },
       "radius": {
         "$type": "dimension",
         "$value": "{radius.control}"
