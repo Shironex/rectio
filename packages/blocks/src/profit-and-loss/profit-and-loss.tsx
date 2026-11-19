@@ -197,7 +197,6 @@ function ChangeCell({
   m: ProfitAndLossMessages;
 }) {
   const { Money } = useBlockParts();
-  const Icon = ARROW[change.direction];
   return (
     // Stacked in a mid-width column; on one line once the block is wide enough, the amount ends
     // the row under the Change heading and the words sit before it.
@@ -208,8 +207,8 @@ function ChangeCell({
       )}
     >
       <Money amount={change.amount} currency={currency} locale={locale} signDisplay="exceptZero" />
-      <span className="inline-flex min-w-30 items-center justify-end gap-1 text-sm whitespace-nowrap">
-        <Icon aria-hidden weight="bold" className="size-3" />
+      {/* Words and tone carry the direction; an arrow here would say it a third time. */}
+      <span className="min-w-30 text-end text-sm whitespace-nowrap">
         {words(change, locale, m)}
       </span>
     </span>
