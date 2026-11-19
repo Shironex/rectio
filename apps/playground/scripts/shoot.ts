@@ -22,6 +22,8 @@ const MODES = ['light', 'dark'] as const;
 
 /** Wait until no CSS transition or animation is running, so shots never catch a half state. */
 async function settle(page: Page) {
+  // Views load lazily: wait for the view itself, not just the empty root.
+  await page.waitForFunction(() => (document.getElementById('root')?.childElementCount ?? 0) > 0);
   await page.evaluate(() => document.fonts.ready);
   // Spinners loop forever; only finite transitions have to finish.
   await page.waitForFunction(() =>
