@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -59,12 +60,29 @@ describe('OnboardingChecklist', () => {
   it('marks a step done by hand', async () => {
     const onToggleStep = vi.fn();
     render(<OnboardingChecklist steps={STEPS} onToggleStep={onToggleStep} />);
-    await userEvent.click(screen.getByRole('button', { name: 'More for Invite your team' }));
-    await userEvent.click(await screen.findByRole('menuitem', { name: 'Mark as done' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Mark Invite your team as done' }));
     expect(onToggleStep).toHaveBeenCalledWith('c', true);
-    await userEvent.click(screen.getByRole('button', { name: 'More for Name your workspace' }));
-    await userEvent.click(await screen.findByRole('menuitem', { name: 'Mark as not done' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Mark Name your workspace as not done' }),
+    );
     expect(onToggleStep).toHaveBeenCalledWith('a', false);
+  });
+
+  it('moves focus to the finished note when the last step is done by hand', async () => {
+    function Harness() {
+      const [steps, setSteps] = useState(STEPS.map((step) => ({ ...step, done: step.id !== 'c' })));
+      return (
+        <OnboardingChecklist
+          steps={steps}
+          onToggleStep={(id, done) => {
+            setSteps(steps.map((step) => (step.id === id ? { ...step, done } : step)));
+          }}
+        />
+      );
+    }
+    render(<Harness />);
+    await userEvent.click(screen.getByRole('button', { name: 'Mark Invite your team as done' }));
+    expect(screen.getByRole('heading', { name: 'You are all set up' })).toHaveFocus();
   });
 
   it('gives a reason to start before anything is done, and keeps the next step primary', () => {

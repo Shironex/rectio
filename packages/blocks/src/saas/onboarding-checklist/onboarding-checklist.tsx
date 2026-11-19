@@ -8,12 +8,11 @@ import {
   ListChecksIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
-import { useId, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
 import { EmptyNote } from '../../lib/empty-note';
-import { ActionMenu } from '../lib/action-menu';
 import { focusRing, inlineLink, touchTarget } from '../lib/styles';
 import {
   onboardingProgress,
@@ -24,7 +23,7 @@ import {
 
 export interface OnboardingChecklistProps {
   steps: readonly OnboardingStep[];
-  /** Offers "Mark as done" and its undo, in a menu on each row, for steps the app cannot detect. */
+  /** Offers "Mark as done" and its undo, a quiet button on each row, for steps the app cannot detect. */
   onToggleStep?: ((stepId: string, done: boolean) => void) | undefined;
   /** Offers Hide once every step is done, and on the finished state. */
   onDismiss?: (() => void) | undefined;
@@ -55,6 +54,7 @@ export function OnboardingChecklist({
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const progress = onboardingProgress(steps);
   const summary = onboardingSummary(progress);
+  const { headingRef, toggle } = useCompletionFocus(progress.complete, onToggleStep);
 
   return (
     <BlockPanel
@@ -126,7 +126,9 @@ export function OnboardingChecklist({
             <ConfettiIcon weight="bold" className="size-5" />
           </span>
           <div className="flex flex-1 flex-col gap-0.5">
-            <p className="font-medium">You are all set up</p>
+            <h3 ref={headingRef} tabIndex={-1} className="font-medium outline-none">
+              You are all set up
+            </h3>
             <p className="text-sm text-fg-muted">
               Every step is done. You can come back to these settings at any time.
             </p>
@@ -139,17 +141,31 @@ export function OnboardingChecklist({
         </div>
       ) : (
         <>
-          {/* The count is said once, in the panel description; the bar only shows it. */}
-          <Meter.Root
-            value={progress.done}
-            max={progress.total}
-            aria-label="Setup progress"
-            getAriaValueText={() => summary}
-          >
-            <Meter.Track className="h-1.5 w-full overflow-hidden rounded-full bg-surface-sunken ring-1 ring-line ring-inset">
-              <Meter.Indicator className="h-full rounded-full bg-accent" />
-            </Meter.Track>
-          </Meter.Root>
+          {/* One segment per step, so the bar counts steps the way the description does. */}
+          <div className="flex items-center gap-3">
+            <Meter.Root
+              value={progress.done}
+              max={progress.total}
+              aria-label="Setup progress"
+              getAriaValueText={() => summary}
+              className="flex-1"
+            >
+              <Meter.Track className="flex h-2 w-full gap-1">
+                {steps.map((step) => (
+                  <span
+                    key={step.id}
+                    className={cn(
+                      'h-full flex-1 rounded-full',
+                      step.done ? 'bg-accent' : 'bg-surface-sunken ring-1 ring-line ring-inset',
+                    )}
+                  />
+                ))}
+              </Meter.Track>
+            </Meter.Root>
+            <span aria-hidden className="text-sm text-fg-muted numeric">
+              {progress.percent}%
+            </span>
+          </div>
           <ol id={listId} hidden={collapsed} className="flex flex-col gap-1.5">
             {steps.map((step, index) => (
               <StepRow
@@ -157,7 +173,7 @@ export function OnboardingChecklist({
                 step={step}
                 number={index + 1}
                 current={progress.next?.id === step.id}
-                onToggleStep={onToggleStep}
+                onToggleStep={toggle}
               />
             ))}
           </ol>
@@ -189,7 +205,7 @@ function StepRow({
       aria-current={current ? 'step' : undefined}
       className={cn(
         'flex items-start gap-3 rounded-control px-3 py-3',
-        current && 'bg-surface-raised shadow-raised ring-1 ring-line-strong',
+        current && 'bg-surface-sunken',
       )}
     >
       <span
@@ -217,31 +233,7 @@ function StepRow({
               </span>
             )}
           </p>
-          {onToggleStep !== undefined && (
-            <ActionMenu
-              label={`More for ${step.title}`}
-              className="-my-2"
-              actions={[
-                step.done
-                  ? {
-                      id: 'undo',
-                      label: 'Mark as not done',
-                      icon: ArrowCounterClockwiseIcon,
-                      onSelect: () => {
-                        onToggleStep(step.id, false);
-                      },
-                    }
-                  : {
-                      id: 'done',
-                      label: 'Mark as done',
-                      icon: CheckIcon,
-                      onSelect: () => {
-                        onToggleStep(step.id, true);
-                      },
-                    },
-              ]}
-            />
-          )}
+          {onToggleStep !== undefined && <ToggleButton step={step} onToggleStep={onToggleStep} />}
         </div>
         {step.done ? (
           <p aria-hidden className="text-sm text-fg-muted">
@@ -266,6 +258,34 @@ function StepRow({
         )}
       </div>
     </li>
+  );
+}
+
+/** The one hand-made action of a row, as a direct quiet button: mark done, or take it back. */
+function ToggleButton({
+  step,
+  onToggleStep,
+}: {
+  step: OnboardingStep;
+  onToggleStep: (stepId: string, done: boolean) => void;
+}) {
+  const { Button } = useBlockParts();
+  const label = step.done ? `Mark ${step.title} as not done` : `Mark ${step.title} as done`;
+  const ToggleIcon = step.done ? ArrowCounterClockwiseIcon : CheckIcon;
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      iconOnly
+      aria-label={label}
+      title={step.done ? 'Mark as not done' : 'Mark as done'}
+      onClick={() => {
+        onToggleStep(step.id, !step.done);
+      }}
+      className="-my-1 text-fg-muted"
+    >
+      <ToggleIcon aria-hidden weight="bold" className="size-4" />
+    </Button>
   );
 }
 
@@ -312,4 +332,35 @@ function StepAction({ action, primary }: { action: OnboardingAction; primary: bo
       {content}
     </Button>
   );
+}
+
+/**
+ * When the reader finishes the last step by hand, the list gives way to the finished note and the
+ * button they pressed disappears; this moves focus to the note's heading so it does not drop to
+ * the page. Completion that arrives from the app on its own leaves focus where it is.
+ */
+function useCompletionFocus(
+  complete: boolean,
+  onToggleStep: ((stepId: string, done: boolean) => void) | undefined,
+) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const byHand = useRef(false);
+  const wasComplete = useRef(complete);
+
+  // Runs after every render: a press is only counted for the render it caused.
+  useEffect(() => {
+    if (complete && !wasComplete.current && byHand.current) headingRef.current?.focus();
+    wasComplete.current = complete;
+    byHand.current = false;
+  });
+
+  const handler = useCallback(
+    (stepId: string, done: boolean) => {
+      byHand.current = true;
+      onToggleStep?.(stepId, done);
+    },
+    [onToggleStep],
+  );
+
+  return { headingRef, toggle: onToggleStep === undefined ? undefined : handler };
 }
