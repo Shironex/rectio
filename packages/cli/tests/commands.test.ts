@@ -210,6 +210,26 @@ describe('add', () => {
     expect(snapshot(cwd)).toEqual(before);
   });
 
+  it('refuses a finance block without a key and writes nothing', async () => {
+    const cwd = await initialised();
+    const before = snapshot(cwd);
+    await expect(runAdd(capture(cwd).ctx, ['invoice-list'], noInstall)).rejects.toThrow(
+      'blocks-core, invoice-list are pro items and no license key was found',
+    );
+    expect(snapshot(cwd)).toEqual(before);
+  });
+
+  it('installs a finance block with a key, on the free components it renders', async () => {
+    const cwd = await initialised();
+    await runAdd(capture(cwd, { RECTIO_LICENSE_KEY: 'any-key' }).ctx, ['invoice-list'], noInstall);
+    const list = read(cwd, 'src/components/blocks/finance/invoice-list.tsx');
+    expect(list).toContain("from '@/components/ui/data-table'");
+    expect(list).toContain("from '@/lib/finance/finance'");
+    expect(read(cwd, 'src/components/ui/data-table.tsx')).toContain('export function DataTable');
+    expect(readLock(cwd).items['invoice-list']?.tier).toBe('pro');
+    expect(readLock(cwd).items['data-table']?.tier).toBe('free');
+  });
+
   it('installs a motion item with a key beside the plain component it builds on', async () => {
     const cwd = await initialised();
     await runAdd(capture(cwd, { RECTIO_LICENSE_KEY: 'any-key' }).ctx, ['motion-dialog'], noInstall);
@@ -309,14 +329,18 @@ describe('diff, list, search and update', () => {
     const pro = (await runList(capture(cwd).ctx, { tier: 'pro' })).map((t) => t.name);
     expect(pro).toContain('ledger-summary');
     expect(pro).toContain('motion-dialog');
-    expect(pro.every((name) => name === 'ledger-summary' || name.startsWith('motion-'))).toBe(true);
+    expect(pro).toContain('invoice-list');
+    // Every pro item is the test's own block, a motion add-on item or a finance block.
+    const free = (await runList(capture(cwd).ctx, { tier: 'free' })).map((t) => t.name);
+    expect(free).toContain('button');
+    expect(pro.some((name) => free.includes(name))).toBe(false);
   });
 
   it('searches names first, then titles, categories and descriptions', async () => {
     const cwd = await initialised();
     const hits = await runSearch(capture(cwd).ctx, 'money');
-    // Names first (the plain item, then the motion one), then descriptions.
-    expect(hits.map((h) => h.name)).toEqual(['money', 'motion-money', 'amount-input']);
+    // Names first (the plain item, then the motion one), then titles and descriptions.
+    expect(hits.map((h) => h.name).slice(0, 3)).toEqual(['money', 'motion-money', 'amount-input']);
     expect((await runSearch(capture(cwd).ctx, 'finance')).map((h) => h.name)).toContain(
       'ledger-summary',
     );

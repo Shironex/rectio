@@ -37,10 +37,11 @@ const withKey = () => deps({ RECTIO_LICENSE_KEY: KEY });
 
 describe('list_items', () => {
   it('lists every item with its tier and never any source', async () => {
-    const { text, isError } = await listItems(deps(), {});
+    const { text, isError } = await listItems(deps(), { limit: 200 });
     expect(isError).toBeUndefined();
     expect(text).toContain('button | component | free |');
     expect(text).toContain('ledger-summary | block | pro |');
+    expect(text).toContain('invoice-list | block | pro |');
     expect(text).not.toContain('export ');
   });
 
