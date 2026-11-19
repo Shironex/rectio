@@ -11,8 +11,9 @@ Private and unlicensed. Nothing here is published.
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@rectio/tokens`       | DTCG token sources, built with Style Dictionary into CSS variables, a Tailwind v4 theme, font faces and resolved JSON                             |
 | `@rectio/ui`           | Button, Field and Input, AmountInput, Select, Dialog, Money, ThemeScope, Badge, Checkbox, DataTable, Calendar, DatePicker, DateRangePicker, Toast |
+| `@rectio/motion`       | The motion add-on: motioned Button, AmountInput, Money, Dialog, Select popup and DataTable rows, same props as the plain                          |
 | `@rectio/playground`   | Vite app: every component in every state, both themes, both modes, plus an expense report composition                                             |
-| `@rectio/design-rules` | The check that keeps hardcoded design values out of `packages/ui/src` (in `tooling/`)                                                             |
+| `@rectio/design-rules` | The check that keeps hardcoded design values out of `packages/ui/src` and `packages/motion/src` (in `tooling/`)                                   |
 | `@rectio/registry`     | Registry item schema, the build that turns ui and tokens into static registry JSON, a local dev server                                            |
 | `@rectio/cli`          | The `rectio` command: `init`, `add`, `diff`, `list`, `search`, `update` (report only for now)                                                     |
 
@@ -41,10 +42,34 @@ Tests check the token contract and WCAG contrast of every semantic pair in every
 
 Figures are always tabular and lining (`numeric` utility, `Money`). Money uses the true minus sign.
 
+## Motion add-on
+
+`@rectio/motion` exports the same names and props as `@rectio/ui` for the parts that move. An app
+picks motion per component by import path, and plain and motioned parts mix in one screen:
+
+```tsx
+import { Field, Select, SelectTrigger } from '@rectio/ui';
+import { Button, Money, SelectContent } from '@rectio/motion';
+```
+
+- **Reduced motion** collapses every motioned component to its plain twin: the system setting,
+  `<MotionPreferenceProvider value="off">` for an in-app preference, or a browser without the Web
+  Animations API.
+- **Tokens only.** Durations, easings, distances and springs (`--rx-motion-spring-*`, damping ratio
+  at or near 1, so nothing bounces) are read from the theme at the moment an animation starts.
+- **Bundle cost.** Built on `motion/mini` (Web Animations), Motion's spring generator and
+  `AnimatePresence` for row exits: about 12.7 kB gzip over the plain components, measured by
+  `packages/motion/tests/bundle.test.ts`. An app that imports only `@rectio/ui` pulls in no Motion
+  code; the same test checks that.
+
+The playground's `/?view=motion` puts each plain component beside its motioned one;
+`pnpm --filter @rectio/playground shoot:motion 3` writes frame sheets and a video of every
+interaction to `.rounds/round-3/motion/`.
+
 ## The token rule
 
 Components never hardcode colour, radius, font, shadow, duration or easing. In `packages/ui/src`
-these fail the lint (`rectio/no-hardcoded-design-values`) and the repo check (`harness lint-meta`):
+(and `packages/motion/src`) these fail the lint (`rectio/no-hardcoded-design-values`) and the repo check (`harness lint-meta`):
 
 - hex colours and colour functions (`#fff`, `rgb(`, `oklch(`)
 - arbitrary Tailwind values (`rounded-[6px]`, `duration-[200ms]`, `[color:red]`)
