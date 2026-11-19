@@ -77,8 +77,8 @@ export function AuthFrame({
 }
 
 /**
- * A password input with a show and hide button inside its right edge. The button says what it
- * will do and keeps its place in the tab order after the input.
+ * A password input with a show and hide button inside its right edge: a toggle with one name,
+ * "Show password", pressed while the password shows. It keeps its place after the input.
  */
 export function PasswordInput({
   autoComplete,
@@ -100,7 +100,7 @@ export function PasswordInput({
       />
       <button
         type="button"
-        aria-label={visible ? 'Hide password' : 'Show password'}
+        aria-label="Show password"
         aria-pressed={visible}
         onClick={() => {
           setVisible((current) => !current);
@@ -121,10 +121,10 @@ export function PasswordInput({
 /** "or", centred on a hairline between the social buttons and the email form. */
 export function OrDivider({ children = 'or' }: { children?: ReactNode }) {
   return (
-    <div className="flex items-center gap-3 text-sm text-fg-subtle" role="separator">
-      <span className="h-px flex-1 bg-line" />
+    <div className="flex items-center gap-3 text-sm text-fg-muted">
+      <span aria-hidden className="h-px flex-1 bg-line" />
       <span>{children}</span>
-      <span className="h-px flex-1 bg-line" />
+      <span aria-hidden className="h-px flex-1 bg-line" />
     </div>
   );
 }
@@ -146,12 +146,13 @@ export function FormMessage({
   return (
     <div
       role={tone === 'error' ? 'alert' : 'status'}
-      // A toned hairline on the sunken surface: a full status fill shouts in the dark themes.
+      // Half the status tint under a toned hairline: warm enough to read as a status in light,
+      // without the full fill that shouts in the dark themes.
       className={cn(
         'flex items-start gap-2.5 rounded-control border px-3 py-2.5 text-sm',
         tone === 'error'
-          ? 'border-negative-strong/40 bg-surface-sunken text-negative-strong'
-          : 'border-positive-strong/40 bg-surface-sunken text-positive-strong',
+          ? 'border-negative-strong/30 bg-negative-subtle/50 text-negative-strong'
+          : 'border-positive-strong/30 bg-positive-subtle/50 text-positive-strong',
       )}
     >
       <Icon aria-hidden weight="bold" className="mt-0.5 size-4 shrink-0" />

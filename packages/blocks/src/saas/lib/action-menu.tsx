@@ -19,7 +19,10 @@ export interface ActionMenuProps {
   /** Names the trigger, such as "Actions for Ines Duarte". */
   label: string;
   actions: readonly MenuAction[];
-  /** Replaces the three-dot icon trigger with your own content (still a button). */
+  /**
+   * Replaces the three-dot icon trigger with your own content (still a button). It must carry
+   * visible text, which then names the button; `label` names only the icon trigger.
+   */
   trigger?: ReactNode;
   align?: 'start' | 'end';
   className?: string;
