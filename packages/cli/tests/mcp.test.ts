@@ -279,6 +279,13 @@ describe('get_add_command', () => {
     expect(text).toContain('does not write files');
   });
 
+  it('answers a template with the init --template command', async () => {
+    const { text } = await getAddCommand(deps(), { items: ['books'] });
+    expect(text.split('\n')[0]).toBe('rectio init --template books books');
+    expect(text).toContain('is a template');
+    expect(text).not.toContain('rectio add');
+  });
+
   it('adds flags and the registry that was passed to the server', async () => {
     const { text } = await getAddCommand(
       { ...deps(), registryFlag: 'https://example.test/r' },

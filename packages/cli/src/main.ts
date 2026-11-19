@@ -5,6 +5,7 @@ import { parseArgs } from 'node:util';
 import { runAdd } from './commands/add.ts';
 import { runDiff } from './commands/diff.ts';
 import { runInit } from './commands/init.ts';
+import { runInitTemplate } from './commands/init-template.ts';
 import { runList, runSearch } from './commands/list.ts';
 import { runMcp } from './commands/mcp.ts';
 import { runUpdate } from './commands/update.ts';
@@ -16,9 +17,11 @@ Usage: rectio <command> [options]
 
 Commands
   init                 Set up rectio: rectio.json, tokens, a theme and the cn helper
+  init --template <name> [folder]
+                       Start a new project from a template (pro: needs the license key)
   add <items...>       Add items and everything they depend on
   diff <item>          Compare an installed item with the registry
-  list                 List registry items (--type, --tier)
+  list                 List registry items (--type, --tier, --templates)
   search <query>       Search registry items
   update               Show items with a newer version (merging is not built yet)
   mcp                  Run the read-only MCP server on stdio (for Claude Code, Cursor, VS Code)
@@ -29,12 +32,14 @@ Options
   --theme <id>         init: theme to install (default: default)
   --css <path>         init: CSS file that imports Tailwind
   --framework <name>   init: vite, next or tanstack-start, when detection fails
-  --force              init: rewrite rectio.json
+  --template <name>    init: create a new project from this template, in [folder]
+  --force              init: rewrite rectio.json; with --template, write into a folder that is not empty
   --overwrite          add: replace files you changed
   --dry-run            init, add: show the plan, write nothing
   --no-install         init, add: do not run the package manager
   --type <type>        list: component, block, theme, lib, hook or style
   --tier <tier>        list: free or pro
+  --templates          list: templates only
   -h, --help           Show this help
   -v, --version        Show the version
 
@@ -49,6 +54,8 @@ const OPTIONS = {
   framework: { type: 'string' },
   type: { type: 'string' },
   tier: { type: 'string' },
+  template: { type: 'string' },
+  templates: { type: 'boolean' },
   force: { type: 'boolean' },
   overwrite: { type: 'boolean' },
   'dry-run': { type: 'boolean' },
@@ -96,6 +103,22 @@ export async function main(argv: readonly string[], base: CliContext): Promise<n
   try {
     switch (command) {
       case 'init':
+        if (values.template !== undefined) {
+          if (rest.length > 1) throw new CliError('init --template takes one folder name');
+          await runInitTemplate(ctx, values.template, {
+            ...install,
+            force: values.force === true,
+            ...(rest[0] === undefined ? {} : { dir: rest[0] }),
+            ...(values.theme === undefined ? {} : { theme: values.theme }),
+          });
+          return 0;
+        }
+        if (rest.length > 0) {
+          throw new CliError(
+            `init takes no folder without --template (got "${rest.join(' ')}")`,
+            'Run it in the project root, or pass --cwd <dir>.',
+          );
+        }
         await runInit(ctx, {
           ...install,
           force: values.force === true,
@@ -115,6 +138,7 @@ export async function main(argv: readonly string[], base: CliContext): Promise<n
           ...shared,
           ...(values.type === undefined ? {} : { type: values.type }),
           ...(values.tier === undefined ? {} : { tier: values.tier }),
+          templates: values.templates === true,
         });
         return 0;
       case 'search':

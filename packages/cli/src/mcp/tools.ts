@@ -400,7 +400,22 @@ export interface AddArgs {
 
 export async function getAddCommand(deps: McpDeps, args: AddArgs): Promise<ToolResult> {
   const index = await deps.client.index();
-  for (const name of args.items) findEntry(index, name);
+  const templates = args.items
+    .map((name) => findEntry(index, name))
+    .filter((e) => e.type === 'template');
+  if (templates.length > 0) {
+    // A template starts a new project; it is never added to an existing one.
+    return {
+      text: [
+        ...templates.map(
+          (t) =>
+            `rectio init --template ${t.name} ${t.name}${deps.registryFlag === undefined ? '' : ` --registry ${JSON.stringify(deps.registryFlag)}`}`,
+        ),
+        `${templates.map((t) => t.name).join(', ')} ${templates.length === 1 ? 'is a template' : 'are templates'}: the command creates a new project folder (the last argument). Templates are pro: a license key is needed (${LICENSE_ENV} or ${authFile(deps.env)}).`,
+        'Run it in the parent folder of the new project. This server does not write files.',
+      ].join('\n'),
+    };
+  }
   const set = installSet(index, args.items);
   const flags = [
     ...(args.overwrite === true ? ['--overwrite'] : []),

@@ -89,6 +89,27 @@ function parse<T>(schema: z.ZodType<T>, text: string, what: string): T {
 
 export function createRegistryClient(url: string): RegistryClient {
   let cached: Promise<RegistryIndex> | undefined;
+  // One fetch per item per run: `init --template` checks every item before writing, then installs.
+  const items = new Map<string, Promise<RegistryItem>>();
+  const fetchItem = async (entry: IndexEntry, licenseKey?: string): Promise<RegistryItem> => {
+    const path = itemPath(entry.name, entry.tier);
+    const item = parse(
+      registryItemSchema,
+      await readRaw(url, path, entry.tier === 'pro' ? licenseKey : undefined),
+      path,
+    );
+    if (item.name !== entry.name || item.tier !== entry.tier) {
+      throw new CliError(`${path} holds "${item.name}" (${item.tier}), not "${entry.name}"`);
+    }
+    const problems = verifyItem(item);
+    if (problems.length > 0) {
+      throw new CliError(
+        `${entry.name} failed its integrity check: ${problems.map((p) => p.message).join('; ')}`,
+        'The download was altered or corrupted. Nothing was written.',
+      );
+    }
+    return item;
+  };
   return {
     url,
     index: () => {
@@ -97,22 +118,14 @@ export function createRegistryClient(url: string): RegistryClient {
       );
       return cached;
     },
-    item: async (entry, licenseKey) => {
-      const path = itemPath(entry.name, entry.tier);
-      const item = parse(
-        registryItemSchema,
-        await readRaw(url, path, entry.tier === 'pro' ? licenseKey : undefined),
-        path,
-      );
-      if (item.name !== entry.name || item.tier !== entry.tier) {
-        throw new CliError(`${path} holds "${item.name}" (${item.tier}), not "${entry.name}"`);
-      }
-      const problems = verifyItem(item);
-      if (problems.length > 0) {
-        throw new CliError(
-          `${entry.name} failed its integrity check: ${problems.map((p) => p.message).join('; ')}`,
-          'The download was altered or corrupted. Nothing was written.',
-        );
+    item: (entry, licenseKey) => {
+      const id = `${entry.tier}/${entry.name}@${entry.version}`;
+      let item = items.get(id);
+      if (item === undefined) {
+        item = fetchItem(entry, licenseKey);
+        // A failed fetch is not remembered: a retry with a key, or after a network error, refetches.
+        void item.catch(() => items.delete(id));
+        items.set(id, item);
       }
       return item;
     },

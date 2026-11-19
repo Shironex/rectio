@@ -59,7 +59,7 @@ export async function resolveItems(client: RegistryClient, names: readonly strin
 }
 
 /** Pro items need a key before anything is fetched or written. */
-function requireKeyFor(ctx: CliContext, entries: readonly IndexEntry[]): string | undefined {
+export function requireKeyFor(ctx: CliContext, entries: readonly IndexEntry[]): string | undefined {
   const pro = entries.filter((e) => e.tier === 'pro');
   if (pro.length === 0) return undefined;
   const key = findLicenseKey(ctx.env);
@@ -129,6 +129,14 @@ export async function installItems(
   options: InstallOptions = {},
 ): Promise<InstallReport> {
   const entries = await resolveItems(client, names);
+  const templates = entries.filter((entry) => entry.type === 'template');
+  if (templates.length > 0) {
+    // A template is a whole project, not files to add to this one.
+    throw new CliError(
+      `${templates.map((t) => t.name).join(', ')} ${templates.length === 1 ? 'is a template' : 'are templates'}`,
+      `Start a new project with \`rectio init --template ${templates[0]?.name ?? '<name>'}\`.`,
+    );
+  }
   const key = requireKeyFor(ctx, entries);
   const items = await Promise.all(entries.map((entry) => client.item(entry, key)));
   const files = plan(ctx, config, items, options.overwrite ?? false);
