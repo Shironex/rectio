@@ -1258,7 +1258,7 @@ export default defineRegistry({
           version: '0.1.0',
           title: 'SaaS blocks core',
           description:
-            'Account form frame, password and email rules, relative time and sizes, focus helpers, and the switch, avatar, menu, popover and meter the SaaS blocks share.',
+            'Account form frame, password and email rules, relative time and sizes, focus helpers, and the avatar, menu, popover and meter the SaaS blocks share.',
           categories: ['saas', 'blocks'],
           files: [
             'lib/saas.ts',
@@ -1266,7 +1266,6 @@ export default defineRegistry({
             'lib/styles.ts',
             'lib/auth.tsx',
             'lib/avatar.tsx',
-            'lib/switch.tsx',
             'lib/action-menu.tsx',
             'lib/popover.tsx',
             'lib/meter.tsx',
