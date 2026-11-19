@@ -136,9 +136,10 @@ describe('NotificationPreferences', () => {
         onChange={vi.fn()}
       />,
     );
-    const locked = screen.getByRole('checkbox', { name: 'New sign in by Email' });
-    expect(locked).toHaveAttribute('aria-checked', 'true');
-    expect(locked).toHaveAttribute('aria-disabled', 'true');
-    expect(locked).toHaveAccessibleDescription('Email always on');
+    expect(screen.getByText('New sign in, Email, always on')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('checkbox', { name: 'New sign in by Email' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByText('Email always on').length).toBeGreaterThan(0);
   });
 });
