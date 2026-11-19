@@ -1,6 +1,6 @@
 import { EnvelopeSimpleIcon, KeyIcon } from '@phosphor-icons/react';
 import { Checkbox, Field, FieldError, FieldLabel, Input } from '@rectio/ui';
-import { useState, type ReactNode, type SyntheticEvent } from 'react';
+import { useId, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import {
@@ -72,6 +72,7 @@ export function SignIn({
   const [tried, setTried] = useState(false);
   // A refusal marks the password field until the password is edited.
   const [answered, setAnswered] = useState<ReactNode>(undefined);
+  const refusalId = useId();
   const refused = error !== undefined && error !== null && error !== false && error !== answered;
   const errors: SignInErrors = tried ? signInErrors(values, method) : {};
 
@@ -167,6 +168,7 @@ export function SignIn({
             <PasswordInput
               name="password"
               autoComplete="current-password"
+              aria-describedby={refused ? refusalId : undefined}
               value={values.password}
               onChange={(event) => {
                 setValues({ ...values, password: event.target.value });
@@ -191,16 +193,16 @@ export function SignIn({
 
         {/* The refusal sits by the button that will retry it, after the fields it is about. */}
         {error !== undefined && error !== null && error !== false && (
-          <FormMessage tone="error" title={error} />
+          <FormMessage id={refusalId} tone="error" title={error} />
         )}
 
-        <div className="flex flex-col gap-2 pt-1">
+        <div className="flex flex-col gap-3 pt-1">
           <Button type="submit" loading={pending} className="w-full">
             {method === 'password' ? 'Sign in' : 'Email me a link'}
           </Button>
           {onMagicLink !== undefined && (
             <Button
-              variant="secondary"
+              variant="ghost"
               className="w-full"
               onClick={() => {
                 setMethod(method === 'password' ? 'magic-link' : 'password');

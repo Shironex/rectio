@@ -177,10 +177,13 @@ export function OrDivider({ children = 'or' }: { children?: ReactNode }) {
  * announced at once; confirmations politely. Icon and words, never colour alone.
  */
 export function FormMessage({
+  id,
   tone,
   title,
   children,
 }: {
+  /** Lets a field point at the message with `aria-describedby`. */
+  id?: string;
   tone: 'error' | 'success';
   title: ReactNode;
   children?: ReactNode;
@@ -188,6 +191,7 @@ export function FormMessage({
   const Icon = tone === 'error' ? WarningCircleIcon : CheckCircleIcon;
   return (
     <div
+      id={id}
       role={tone === 'error' ? 'alert' : 'status'}
       // Half the status tint under a toned hairline: warm enough to read as a status in light,
       // without the full fill that shouts in the dark themes.

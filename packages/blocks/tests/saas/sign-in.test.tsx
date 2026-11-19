@@ -34,6 +34,8 @@ describe('SignIn', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('That email and password do not match.');
     const password = screen.getByLabelText('Password');
     expect(password).toHaveAttribute('aria-invalid', 'true');
+    const describedBy = password.getAttribute('aria-describedby') ?? '';
+    expect(describedBy).toContain(screen.getByRole('alert').id);
     await userEvent.type(password, 'x');
     expect(password).not.toHaveAttribute('aria-invalid', 'true');
   });
