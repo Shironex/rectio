@@ -26,13 +26,14 @@ import {
   SelectTrigger,
   cn,
 } from '@rectio/ui';
-import { useId, useState, type SyntheticEvent } from 'react';
+import { useId, useRef, useState, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
+import { focusFirstInvalid, useNow, useReturnFocus } from '../lib/focus';
 import { plural, relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import {
@@ -85,11 +86,13 @@ export function TeamMembers({
   onRemove,
   onResendInvite,
   onRevokeInvite,
-  now = new Date(),
+  now: requestedNow,
   locale: requestedLocale,
   title = 'Team members',
   className,
 }: TeamMembersProps) {
+  const now = useNow(requestedNow);
+  const invitePanel = useReturnFocus();
   const locale = resolveLocale(requestedLocale);
   const { Button } = useBlockParts();
   const { Items, Item } = useSaasParts();
@@ -116,6 +119,7 @@ export function TeamMembers({
         canInvite && !inviting && !alone ? (
           <Button
             onClick={() => {
+              invitePanel.remember();
               setInviting(true);
             }}
           >
@@ -135,14 +139,28 @@ export function TeamMembers({
           seatsLeft={usage.left}
           onCancel={() => {
             setInviting(false);
+            invitePanel.restore();
           }}
           onInvite={(emails, role) => {
             onInvite(emails, role);
             setInviting(false);
+            invitePanel.restore();
           }}
         />
       )}
 
+      {/* Column names over the wide layout; the rows carry their own labels for assistive tech. */}
+      {!alone && (
+        <div
+          aria-hidden
+          className="-mb-3 hidden items-center gap-3 border-b border-line pb-2 text-xs font-medium tracking-caps text-fg-muted uppercase @xl:flex"
+        >
+          <span className="flex-1">Member</span>
+          <span className="hidden w-36 @2xl:block">Last active</span>
+          <span className="w-32 px-(--rx-field-padding-x)">Role</span>
+          <span className="w-(--rx-button-height-sm)" />
+        </div>
+      )}
       <ul aria-label="Members" className="flex flex-col">
         <Items>
           {sorted.map((member) => {
@@ -155,14 +173,16 @@ export function TeamMembers({
                 <Avatar name={member.name} src={member.avatarUrl} />
                 <div className="flex min-w-0 flex-1 flex-col">
                   <span className="flex items-center gap-2">
-                    <span className="truncate font-medium">{member.name}</span>
+                    <span className="truncate font-medium" title={member.name}>
+                      {member.name}
+                    </span>
                     {member.you === true && <Badge>You</Badge>}
                     {/* Narrow: the role column folds into a tag beside the name. */}
                     <Badge className="@xl:hidden">{ROLE_LABELS[member.role]}</Badge>
                   </span>
                   <span className="truncate text-sm text-fg-muted">{member.email}</span>
                 </div>
-                <span className="hidden text-sm whitespace-nowrap text-fg-subtle @2xl:block">
+                <span className="hidden w-36 text-sm whitespace-nowrap text-fg-muted @2xl:block">
                   {member.lastActive === undefined
                     ? 'Never signed in'
                     : `Active ${relativeTime(member.lastActive, now, locale)}`}
@@ -241,7 +261,9 @@ export function TeamMembers({
                     <EnvelopeSimpleIcon weight="bold" className="size-4" />
                   </span>
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate font-medium">{invite.email}</span>
+                    <span className="truncate font-medium" title={invite.email}>
+                      {invite.email}
+                    </span>
                     {/* The who and when wrap rather than cut the inviter's name. */}
                     <span className="text-sm text-pretty text-fg-muted">
                       {ROLE_LABELS[invite.role]}, invited{' '}
@@ -336,6 +358,7 @@ export function TeamMembers({
           {canInvite && (
             <Button
               onClick={() => {
+                invitePanel.remember();
                 setInviting(true);
               }}
             >
@@ -425,15 +448,21 @@ function InviteForm({
   const parse = parseInviteEmails(text, members, invites);
   const error = inviteError(parse, seatsLeft);
 
+  const form = useRef<HTMLFormElement | null>(null);
+
   const submit = (event: SyntheticEvent) => {
     event.preventDefault();
     setTried(true);
-    if (error !== null) return;
+    if (error !== null) {
+      focusFirstInvalid(form.current);
+      return;
+    }
     onInvite(parse.valid, role);
   };
 
   return (
     <form
+      ref={form}
       onSubmit={submit}
       noValidate
       aria-labelledby={headingId}
