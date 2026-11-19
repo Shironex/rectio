@@ -40,7 +40,9 @@ export function Switch({ className, thumbClassName, ...props }: SwitchProps) {
       <BaseSwitch.Thumb
         data-slot="switch-thumb"
         className={cn(
-          'block size-3.5 rounded-full bg-surface-raised shadow-raised',
+          // Off, the thumb is ink on the sunken track, so the state never rests on the accent alone.
+          'block size-3.5 rounded-full bg-fg-muted',
+          'data-checked:bg-surface-raised data-checked:shadow-raised',
           'transition-[translate,background-color] duration-fast ease-standard',
           // Track 36 wide, 1px border and 2px padding each side, a 14px thumb: 16px of travel.
           'data-checked:translate-x-4 rtl:data-checked:-translate-x-4',
