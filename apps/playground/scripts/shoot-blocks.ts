@@ -124,6 +124,20 @@ try {
     }
   }
 
+  for (const block of [
+    'invoice-list',
+    'ledger',
+    'cash-flow',
+    'expense-approval',
+    'ar-aging',
+    'budget-vs-actual',
+  ]) {
+    const page = await shoot(browser, base, `empty-${block}`, `block=${block}&empty=1`, {
+      width: 1180,
+    });
+    await page?.close();
+  }
+
   const compact = await shoot(browser, base, 'dashboard-compact', 'density=compact&locale=pl-PL');
   await compact?.close();
   const calm = await shoot(browser, base, 'dashboard-reduced-motion', 'motion=on', {

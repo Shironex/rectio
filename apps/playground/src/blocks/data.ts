@@ -448,7 +448,14 @@ export function expenses(rate: number): ApprovalState {
   const at = (day: number, hour: number, minute: number) => new Date(2026, 2, day, hour, minute);
   const rows: [string, string, string, Date, number, string[]?][] = [
     ['Marta Zielińska', 'Lufthansa', 'Travel', d(3, 16), 412.8],
-    ['Tom Avery', 'The Shelbourne', 'Accommodation', d(3, 14), 689, ['Over the 450 nightly limit']],
+    [
+      'Tom Avery',
+      'The Shelbourne',
+      'Accommodation',
+      d(3, 14),
+      689,
+      ['Over the nightly hotel limit'],
+    ],
     ['Marta Zielińska', 'Uber', 'Travel', d(3, 17), 23.4],
     ['Jonas Berg', 'JetBrains', 'Software', d(3, 12), 289],
     ['Aoife Byrne', 'Wagamama', 'Meals', d(3, 18), 64.5, ['No receipt']],

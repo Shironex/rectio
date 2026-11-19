@@ -37,10 +37,17 @@ function readParams(search: string) {
   const locale = data.LOCALES[params.get('locale') === 'pl-PL' ? 'pl-PL' : 'en-GB'];
   const block = BLOCK_NAMES.find((name) => name === params.get('block'));
   const compact = params.get('density') === 'compact';
-  return { locale, block, compact };
+  const empty = params.get('empty') === '1';
+  return { locale, block, compact, empty };
 }
 
-function renderBlock(name: BlockName, blocks: Blocks, locale: data.Locale): ReactNode {
+function renderBlock(
+  name: BlockName,
+  blocks: Blocks,
+  locale: data.Locale,
+  empty = false,
+): ReactNode {
+  if (empty) return renderEmpty(name, blocks, locale);
   const common = { currency: locale.currency, locale: locale.locale };
   switch (name) {
     case 'invoice-list':
@@ -105,6 +112,43 @@ function renderBlock(name: BlockName, blocks: Blocks, locale: data.Locale): Reac
   }
 }
 
+/** Each block with nothing to show, as a new company's first day would have it. */
+function renderEmpty(name: BlockName, blocks: Blocks, locale: data.Locale): ReactNode {
+  const common = { currency: locale.currency, locale: locale.locale };
+  switch (name) {
+    case 'invoice-list':
+      return (
+        <blocks.InvoiceList
+          {...common}
+          invoices={[]}
+          today={data.TODAY}
+          onCreateInvoice={() => undefined}
+        />
+      );
+    case 'ledger':
+      return <blocks.Ledger {...common} accounts={data.ACCOUNTS} lines={[]} period="March 2026" />;
+    case 'cash-flow':
+      return <blocks.CashFlowChart {...common} points={[]} />;
+    case 'expense-approval':
+      return (
+        <blocks.ExpenseApproval
+          {...common}
+          requests={[]}
+          events={[]}
+          onApprove={() => undefined}
+          onReject={() => undefined}
+        />
+      );
+    case 'ar-aging':
+      return <blocks.ArAging {...common} receivables={[]} today={data.TODAY} />;
+    case 'budget-vs-actual':
+      return <blocks.BudgetVsActual {...common} lines={[]} period="Q1 2026" />;
+    case 'kpi-row':
+    case 'invoice-detail':
+      return renderBlock(name, blocks, locale);
+  }
+}
+
 /** The approval block holds no decisions itself: the app keeps them, here with the exported reducer. */
 function Approvals({ blocks, locale }: { blocks: Blocks; locale: data.Locale }) {
   const [state, dispatch] = useReducer(plain.approvalReducer, locale.rate, data.expenses);
@@ -137,7 +181,7 @@ export function BlocksPage({
   mode: Mode;
   motion: boolean;
 }) {
-  const { locale, block, compact } = readParams(window.location.search);
+  const { locale, block, compact, empty } = readParams(window.location.search);
   const blocks: Blocks = motion ? moving : plain;
   const canvas = usePageCanvas(theme, mode);
   return (
@@ -150,7 +194,7 @@ export function BlocksPage({
     >
       {block !== undefined ? (
         <main className="mx-auto max-w-5xl px-4 py-8 sm:px-8">
-          {renderBlock(block, blocks, locale)}
+          {renderBlock(block, blocks, locale, empty)}
         </main>
       ) : (
         <Dashboard blocks={blocks} locale={locale} />
