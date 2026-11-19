@@ -257,6 +257,8 @@ export function DataTableSection() {
 }
 
 const FIXED_MONTH = new Date(2026, 2, 1);
+/** A fixed today, so the today marker lands in the shown month in every screenshot. */
+const FIXED_TODAY = new Date(2026, 2, 19);
 
 export function DateSection() {
   const [gb, setGb] = useState<Date | null>(new Date(2026, 2, 19));
@@ -295,22 +297,23 @@ export function DateSection() {
           onValueChange={setPeriod}
         />
       </Row>
-      <Row label="Range, weekends closed">
+      <Row label="Range, closed days">
         <div className="flex flex-col gap-2">
           <div className="w-fit rounded-(--rx-popover-radius) border border-line bg-surface-overlay">
             <Calendar
               mode="range"
               locale="en-GB"
               defaultMonth={FIXED_MONTH}
+              today={FIXED_TODAY}
               selected={period}
               onSelect={setPeriod}
-              disabled={{ dayOfWeek: [0, 6] }}
-              showOutsideDays={false}
+              disabled={{ after: FIXED_TODAY }}
               required={false}
             />
           </div>
-          <p className="text-sm text-fg-muted">
-            Struck days are closed: settlement runs on weekdays only.
+          <p className="max-w-72 text-sm text-fg-muted">
+            Boxed is today. Struck days have no statement yet; muted days belong to the months
+            around.
           </p>
         </div>
       </Row>

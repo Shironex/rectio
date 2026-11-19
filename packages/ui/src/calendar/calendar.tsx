@@ -57,10 +57,11 @@ const CLASS_NAMES: DayPickerProps['classNames'] = {
     'transition-colors duration-fast ease-standard hover:bg-surface-hover',
     'outline-offset-2 focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-focus',
   ),
-  // Today is marked by weight and an underline, not colour alone.
+  // Today: a hairline box drawn inside the day and a stronger weight, never colour alone. It differs
+  // from the selected fill and from the focus outline, which sits outside the day.
   today: cn(
-    '[&>button]:font-strong [&>button]:underline [&>button]:decoration-2 [&>button]:underline-offset-4',
-    'not-data-selected:[&>button]:text-accent-strong',
+    '[&>button]:font-strong',
+    'not-data-selected:[&>button]:ring-1 not-data-selected:[&>button]:ring-line-strong not-data-selected:[&>button]:ring-inset',
   ),
   selected: cn(
     '[&>button]:bg-accent [&>button]:font-medium [&>button]:text-accent-contrast',
@@ -74,12 +75,13 @@ const CLASS_NAMES: DayPickerProps['classNames'] = {
     '[&>button]:rounded-none! [&>button]:bg-transparent! [&>button]:font-regular! [&>button]:text-fg!',
     '[&>button]:hover:bg-surface-hover!',
   ),
+  // Days of the months around are muted, never struck: they are not closed, only elsewhere.
   outside: 'not-data-selected:[&>button]:text-fg-subtle',
-  // Dimmed and struck, so a closed day never relies on colour alone to differ from the days of
-  // the next month. Explain why days are closed beside the calendar.
+  // A closed day of this month is dimmed and struck, so it never relies on colour alone. The strike
+  // is reserved for it; explain why days are closed beside the calendar.
   disabled: cn(
-    '[&>button]:cursor-not-allowed [&>button]:text-fg-disabled [&>button]:line-through',
-    '[&>button]:hover:bg-transparent',
+    '[&>button]:cursor-not-allowed [&>button]:text-fg-disabled [&>button]:hover:bg-transparent',
+    'not-data-outside:[&>button]:line-through',
   ),
   hidden: 'invisible',
 };
