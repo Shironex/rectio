@@ -284,6 +284,10 @@ try {
   );
   await slow.send('Animation.setPlaybackRate', { playbackRate: 1 });
   await settle(page);
+  // The strip outlives the toasts' timer: remove two more rows for a still of a settled stack.
+  await remove(/^Select Lufthansa/);
+  await remove(/^Select Atelier/);
+  await settle(page);
   await page.screenshot({ path: join(out, 'report-toasts-ledger-dark.png') });
   await page.close();
   await context.close();
