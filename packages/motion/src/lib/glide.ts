@@ -45,6 +45,9 @@ export function useGlidingHighlight(
         return;
       }
       const to = `translateY(${String(item.offsetTop)}px)`;
+      // A row may ask for its own tint, such as a destructive action.
+      if (item.dataset.tone === undefined) delete mark.dataset.tone;
+      else mark.dataset.tone = item.dataset.tone;
       Object.assign(mark.style, {
         transform: to,
         height: `${String(item.offsetHeight)}px`,

@@ -29,7 +29,7 @@ function MotionMenuPopup({
         ref={highlight}
         aria-hidden
         data-part="highlight"
-        className="pointer-events-none absolute inset-x-1 top-0 rounded-(--rx-field-radius) bg-accent-subtle opacity-0"
+        className="pointer-events-none absolute inset-x-1 top-0 rounded-(--rx-field-radius) bg-accent-subtle opacity-0 data-[tone=danger]:bg-negative-subtle"
       />
       {children}
     </div>
