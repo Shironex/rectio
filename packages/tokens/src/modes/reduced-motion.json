@@ -8,6 +8,12 @@
           "value": 0,
           "unit": "px"
         }
+      },
+      "tick": {
+        "$value": {
+          "value": 0,
+          "unit": "px"
+        }
       }
     },
     "scale": {

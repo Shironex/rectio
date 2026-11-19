@@ -347,6 +347,18 @@
         "unit": "ms"
       }
     },
+    "640": {
+      "$value": {
+        "value": 640,
+        "unit": "ms"
+      }
+    },
+    "760": {
+      "$value": {
+        "value": 760,
+        "unit": "ms"
+      }
+    },
     "900": {
       "$value": {
         "value": 900,

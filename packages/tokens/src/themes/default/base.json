@@ -164,6 +164,10 @@
       "loop": {
         "$value": "{duration.900}",
         "$description": "One turn of a looping indicator such as a spinner."
+      },
+      "count": {
+        "$value": "{duration.640}",
+        "$description": "A figure counting to its new value, such as a total. The one long movement: it is the signature moment."
       }
     },
     "easing": {
@@ -176,6 +180,10 @@
       },
       "exit": {
         "$value": "{easing.in-cubic}"
+      },
+      "settle": {
+        "$value": "{easing.out-expo}",
+        "$description": "Decelerates hard at the end, so a counting figure settles instead of stopping."
       }
     },
     "distance": {
@@ -183,6 +191,10 @@
       "shift": {
         "$value": "{size.4}",
         "$description": "How far a popup travels as it enters. Zero under reduced motion."
+      },
+      "tick": {
+        "$value": "{size.2}",
+        "$description": "How far an amount nudges in the direction of a change. Zero under reduced motion."
       }
     },
     "scale": {
@@ -194,6 +206,34 @@
       "press": {
         "$value": 0.98,
         "$description": "Scale of a pressed button. One under reduced motion."
+      }
+    },
+    "spring": {
+      "$type": "number",
+      "$description": "Spring physics for the motion add-on (stiffness, damping, mass). Damping ratio at or near 1: settles without overshoot, never bounces.",
+      "press": {
+        "stiffness": {
+          "$value": 720
+        },
+        "damping": {
+          "$value": 52
+        },
+        "mass": {
+          "$value": 1
+        },
+        "$description": "A pressed button returning to rest."
+      },
+      "overlay": {
+        "stiffness": {
+          "$value": 420
+        },
+        "damping": {
+          "$value": 41
+        },
+        "mass": {
+          "$value": 1
+        },
+        "$description": "A dialog travelling from its trigger, and back on close."
       }
     }
   }
