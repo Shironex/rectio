@@ -111,8 +111,11 @@ try {
           await walk(page);
           await settle(page);
           const file = `${entry.name}-${theme}-${view.name}-${mode}.png`;
-          await page.screenshot({ path: join(out, file), fullPage: true });
           await page.screenshot({ path: join(out, `fold-${file}`) });
+          // A full-page still is taken in one frame, so scroll-linked reveals below the fold have
+          // not run in it. Show them at rest for this still; the fold shot and video keep motion.
+          await page.addStyleTag({ content: '.site-reveal { animation: none !important; }' });
+          await page.screenshot({ path: join(out, file), fullPage: true });
           shots.push(file);
           await context.close();
         }
