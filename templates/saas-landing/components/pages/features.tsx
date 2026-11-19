@@ -6,6 +6,8 @@ import {
   FeatureIconGrid,
   FeatureRows,
   HeroSplit,
+  Section,
+  SectionHeader,
   TestimonialQuote,
 } from '@rectio/blocks/marketing/motion';
 
@@ -14,7 +16,6 @@ import {
   AvailabilityCard,
   HoursCard,
   OpenShiftBoard,
-  RequestCard,
   SwapCard,
   TimeOffCard,
 } from '@/components/visuals/cards';
@@ -46,7 +47,7 @@ export function FeaturesPage() {
         columns={3}
       />
       <FeatureRows
-        title="Plan the week in three steps"
+        title="Plan the week, then fill the gaps"
         rows={[
           {
             id: 'availability',
@@ -66,52 +67,37 @@ export function FeaturesPage() {
           },
         ]}
       />
-      <section id="requests" aria-labelledby="requests-title" className="py-16 text-fg sm:py-24">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
-          <div className="flex flex-col gap-4 lg:col-span-4">
-            <h2
-              id="requests-title"
-              className="font-display text-3xl font-regular tracking-tight text-balance sm:text-4xl"
-            >
-              Requests, <Em>settled in a tap</Em>
-            </h2>
-            <p className="max-w-prose text-lg text-pretty text-fg-muted">
-              Swaps and time off arrive with the rota beside them. Approve, decline, and everyone
-              affected hears at once.
-            </p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:col-span-8">
-            <Panel>
+      <Section labelledBy="after-title">
+        <SectionHeader
+          id="after-title"
+          title={
+            <>
+              After the rota is out, <Em>it stays right</Em>
+            </>
+          }
+          description="Swaps and time off arrive with the rota beside them, and hours add up against each site's budget as the week changes."
+        />
+        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div id="requests" className="flex flex-col gap-3">
+            <h3 className="text-lg font-strong text-fg">Swaps in a tap</h3>
+            <Panel className="flex-1">
               <SwapCard />
             </Panel>
-            <Panel>
-              <div className="flex flex-col gap-5">
-                <RequestCard />
-                <TimeOffCard />
-              </div>
+          </div>
+          <div className="flex flex-col gap-3">
+            <h3 className="text-lg font-strong text-fg">Time off, approved in place</h3>
+            <Panel className="flex-1">
+              <TimeOffCard />
+            </Panel>
+          </div>
+          <div id="hours" className="flex flex-col gap-3 md:col-span-2 lg:col-span-1">
+            <h3 className="text-lg font-strong text-fg">Hours against budget</h3>
+            <Panel className="flex-1">
+              <HoursCard />
             </Panel>
           </div>
         </div>
-      </section>
-      <section id="hours" aria-labelledby="hours-title" className="pb-16 text-fg sm:pb-24">
-        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
-          <Panel className="lg:col-span-5">
-            <HoursCard />
-          </Panel>
-          <div className="flex flex-col gap-4 lg:col-span-6 lg:col-start-7">
-            <h2
-              id="hours-title"
-              className="font-display text-3xl font-regular tracking-tight text-balance sm:text-4xl"
-            >
-              Hours and budgets, <Em>before payroll</Em>
-            </h2>
-            <p className="max-w-prose text-lg text-pretty text-fg-muted">
-              Each site gets a weekly labour budget. Rostra adds up hours, breaks and overtime as
-              you plan and flags a shift that breaks a rest rule before it is published.
-            </p>
-          </div>
-        </div>
-      </section>
+      </Section>
       {FEATURED !== undefined && (
         <TestimonialQuote
           testimonial={FEATURED}

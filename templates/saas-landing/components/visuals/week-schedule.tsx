@@ -11,6 +11,14 @@ const ROLE_TONE: Record<Role['identity'], string> = {
   4: 'bg-identity-4-subtle text-identity-4-strong',
 };
 
+/** The legend's swatch: the strong half of the pair, so it reads at swatch size. */
+const ROLE_DOT: Record<Role['identity'], string> = {
+  1: 'bg-identity-1-strong',
+  2: 'bg-identity-2-strong',
+  3: 'bg-identity-3-strong',
+  4: 'bg-identity-4-strong',
+};
+
 /**
  * Days that drop out as the schedule narrows, so a phone still shows whole shifts: the first three
  * days always, the rest as the container widens.
@@ -70,10 +78,7 @@ export function WeekSchedule({ className }: { className?: string }) {
         <ul aria-label="Roles" className="flex flex-wrap gap-x-3 gap-y-1">
           {ROLES.map((role) => (
             <li key={role.id} className="inline-flex items-center gap-1.5 text-xs text-fg-muted">
-              <span
-                aria-hidden
-                className={cn('size-2.5 rounded-badge', ROLE_TONE[role.identity])}
-              />
+              <span aria-hidden className={cn('size-2.5 rounded-badge', ROLE_DOT[role.identity])} />
               {role.label}
             </li>
           ))}

@@ -82,17 +82,21 @@ function PlanCard({ plan, billing }: { plan: Plan; billing: Billing }) {
       </div>
       <div className="flex flex-col gap-1">
         <p className="flex items-baseline gap-2">
-          <Money
-            amount={price}
-            currency={CURRENCY}
-            locale={LOCALE}
-            className="font-display text-5xl font-strong tracking-tight text-fg"
-          />
+          {free ? (
+            <span className="font-display text-5xl font-strong tracking-tight text-fg">Free</span>
+          ) : (
+            <Money
+              amount={price}
+              currency={CURRENCY}
+              locale={LOCALE}
+              className="font-display text-5xl font-strong tracking-tight text-fg"
+            />
+          )}
           {!free && <span className="text-base text-fg-muted">per person a month</span>}
         </p>
         <p className="text-sm text-fg-muted">
           {free
-            ? `Free for up to ${String(plan.limit ?? 0)} people, for as long as you like.`
+            ? `Up to ${String(plan.limit ?? 0)} people, for as long as you like.`
             : billing === 'yearly'
               ? 'Billed yearly.'
               : 'Billed monthly, cancel any time.'}
@@ -220,14 +224,17 @@ function Comparison() {
                   <TableHead
                     scope="colgroup"
                     colSpan={PLANS.length + 1}
-                    className="bg-surface-sunken text-sm font-strong text-fg"
+                    className="border-line bg-surface-sunken pt-4 text-sm font-strong text-fg"
                   >
                     {group.title}
                   </TableHead>
                 </TableRow>
                 {group.rows.map((row) => (
                   <TableRow key={row.feature}>
-                    <TableHead scope="row" className="font-regular text-fg-muted">
+                    <TableHead
+                      scope="row"
+                      className="h-(--rx-table-row-height) border-line bg-transparent text-base font-regular whitespace-normal text-fg"
+                    >
                       {row.feature}
                     </TableHead>
                     {PLANS.map((plan) => (
@@ -261,9 +268,9 @@ export function PricingPage() {
       >
         <BillingSwitch value={billing} onChange={setBilling} />
       </PageIntro>
-      <section id="plans" aria-label="Plans" className="pb-16 text-fg sm:pb-24">
+      <section id="plans" aria-label="Plans" className="pb-4 text-fg">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 sm:px-6 lg:px-8">
-          <ul className="grid gap-4 lg:grid-cols-3 lg:items-start">
+          <ul className="grid gap-4 lg:grid-cols-3">
             {PLANS.map((plan) => (
               <PlanCard key={plan.id} plan={plan} billing={billing} />
             ))}
