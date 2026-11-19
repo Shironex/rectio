@@ -171,7 +171,7 @@ function AmountSpecimen() {
       plainSpec={() => 'Figures change in place, no movement.'}
       spec={(t) => `Nudge: ${t.distance.tick} over ${ms(t.duration.base)}, ease out. Steps only.`}
       plain="A stepped change replaces the figures in place."
-      motion="A stepped change nudges the figures a hair toward its direction. Typing never moves them."
+      motion="A button step nudges the figures a hair toward its direction. Typing, arrow keys and the wheel never move them."
     >
       <Field className="w-44">
         <FieldLabel>Amount, EUR</FieldLabel>
