@@ -21,7 +21,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useMemo, useState, type ReactNode } from 'react';
 
 import { COMPANY } from '@/data/company';
-import { setAppearance } from '../use-appearance';
+import { setAppearance, useDarkMode } from '../use-appearance';
 import { AppDataProvider, useAppData } from './app-data';
 import { AppSidebar } from './app-sidebar';
 import { buildCommands } from './commands';
@@ -56,6 +56,7 @@ function Frame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { openNewInvoice, openSubmitExpense } = useAppData();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const dark = useDarkMode();
 
   const commands = useMemo(
     () =>
@@ -73,8 +74,9 @@ function Frame({ children }: { children: ReactNode }) {
         setMode: (mode) => {
           setAppearance({ mode });
         },
+        dark,
       }),
-    [router, openNewInvoice, openSubmitExpense],
+    [router, openNewInvoice, openSubmitExpense, dark],
   );
 
   // The shortcut the command menu advertises is the app's to bind.

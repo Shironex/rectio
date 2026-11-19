@@ -25,6 +25,8 @@ export interface CommandActions {
   submitExpense: () => void;
   toggleTheme: () => void;
   setMode: (mode: 'light' | 'dark') => void;
+  /** Whether the app shows dark right now, so only the switch to the other mode is offered. */
+  dark: boolean;
 }
 
 /** Invoices the user is likely to want again: the largest overdue ones and the latest draft. */
@@ -88,29 +90,30 @@ export function buildCommands(run: CommandActions): CommandGroup[] {
           keywords: ['ledger', 'default', 'appearance'],
           onSelect: run.toggleTheme,
         },
-        {
-          id: 'dark',
-          label: 'Use dark mode',
-          icon: icon(MoonIcon),
-          keywords: ['appearance', 'night'],
-          onSelect: () => {
-            run.setMode('dark');
-          },
-        },
-        {
-          id: 'light',
-          label: 'Use light mode',
-          icon: icon(SunIcon),
-          keywords: ['appearance', 'day'],
-          onSelect: () => {
-            run.setMode('light');
-          },
-        },
+        run.dark
+          ? {
+              id: 'light',
+              label: 'Use light mode',
+              icon: icon(SunIcon),
+              keywords: ['appearance', 'day', 'mode'],
+              onSelect: () => {
+                run.setMode('light');
+              },
+            }
+          : {
+              id: 'dark',
+              label: 'Use dark mode',
+              icon: icon(MoonIcon),
+              keywords: ['appearance', 'night', 'mode'],
+              onSelect: () => {
+                run.setMode('dark');
+              },
+            },
         page('sign-out', 'Sign out', '/sign-in', SignOutIcon, ['log out', 'leave']),
       ],
     },
     {
-      label: 'Go to',
+      label: 'Pages',
       items: [
         page('overview', 'Overview', '/', HouseIcon, ['dashboard', 'home', 'cash']),
         page('invoices', 'Invoices', '/invoices', FileTextIcon, ['receivables', 'sales', 'AR']),

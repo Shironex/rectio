@@ -40,6 +40,28 @@ export function useAppearance(): Appearance {
   };
 }
 
+const DARK_QUERY = '(prefers-color-scheme: dark)';
+
+function subscribeToScheme(onChange: () => void) {
+  const query = matchMedia(DARK_QUERY);
+  query.addEventListener('change', onChange);
+  const stopAttributes = subscribe(onChange);
+  return () => {
+    query.removeEventListener('change', onChange);
+    stopAttributes();
+  };
+}
+
+const readDark = () => {
+  const { mode } = document.documentElement.dataset;
+  return mode === undefined ? matchMedia(DARK_QUERY).matches : mode === 'dark';
+};
+
+/** Whether the app is dark right now: the chosen mode, or the system's when none is chosen. */
+export function useDarkMode(): boolean {
+  return useSyncExternalStore(subscribeToScheme, readDark, () => false);
+}
+
 /** Changes the theme, the mode or both, applies them to <html> and remembers them. */
 export function setAppearance(next: Partial<Appearance>) {
   const root = document.documentElement;
