@@ -24,7 +24,7 @@ import {
 import { createContext, use, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { CATEGORIES } from '../expenses/data';
-import { KitProvider, useKit } from '../expenses/kit';
+import { KitProvider, useHeldUntilCount, useKit } from '../expenses/kit';
 import { MODES, THEMES, type Mode, type ThemeId } from '../themes';
 
 const CURRENCY = 'EUR';
@@ -82,11 +82,14 @@ function Specimen({
   plain,
   motion,
   spec,
+  plainSpec,
   children,
 }: {
   title: string;
   /** The motioned timing, from tokens. */
   spec: Spec;
+  /** The plain timing, from the same tokens. */
+  plainSpec: Spec;
   /** What the plain base does. */
   plain: string;
   /** What the add-on changes. */
@@ -104,13 +107,14 @@ function Specimen({
         </h2>
         {/* Two lines kept for every note, so plain and motion specimens start level. */}
         <p className="min-h-[2lh] max-w-prose text-sm text-fg-muted">{note}</p>
+        {/* One fixed slot for the timing in both columns, so each pair starts level. */}
         <p
-          aria-hidden={!inMotion}
-          className={`font-mono text-xs text-fg-subtle ${inMotion ? '' : 'invisible'}`}
+          className="min-h-[2lh] font-mono text-xs text-fg-muted"
           ref={(element) => {
             if (element === null) return;
             const tokens = readMotionTokens(element);
-            element.textContent = tokens === null ? 'Motion tokens missing.' : spec(tokens);
+            element.textContent =
+              tokens === null ? 'Motion tokens missing.' : (inMotion ? spec : plainSpec)(tokens);
           }}
         />
       </div>
@@ -125,8 +129,9 @@ function ButtonSpecimen() {
   return (
     <Specimen
       title="Button"
+      plainSpec={(t) => `Press: CSS scale, ${ms(t.duration.fast)}. Loading: instant swap.`}
       spec={(t) =>
-        `Press: ${springSpec(t.spring.press)}. Loading: label out in ${ms(t.duration.fast)}, spinner in from ${ms(t.duration.fast * 0.75)}.`
+        `Press: ${springSpec(t.spring.press)}. Loading: label out in ${ms(t.duration.fast)}, spinner in from ${ms(t.duration.fast * 0.4)}.`
       }
       plain="Press scales in CSS. Loading swaps the label for a spinner, same width."
       motion="Press returns to rest on a spring. Loading lifts the label out and the spinner in."
@@ -156,6 +161,7 @@ function AmountSpecimen() {
   return (
     <Specimen
       title="Amount input"
+      plainSpec={() => 'Figures change in place, no movement.'}
       spec={(t) => `Nudge: ${t.distance.tick} over ${ms(t.duration.base)}, ease out. Steps only.`}
       plain="A stepped change replaces the figures in place."
       motion="A stepped change nudges the figures a hair toward its direction. Typing never moves them."
@@ -207,10 +213,12 @@ function RowsSpecimen() {
     tableRef.current?.querySelector<HTMLElement>(`[data-focus="${id}"]`)?.focus();
   }, [lines]);
   const total = lines.reduce((sum, line) => sum + line.amount, 0);
+  const [count, countRef] = useHeldUntilCount(lines.length);
   const next = EXTRA[added % EXTRA.length];
   return (
     <Specimen
       title="Rows and total"
+      plainSpec={() => 'Rows and total change at once.'}
       spec={(t) =>
         `Row: ${ms(t.duration.base)}. Total: waits ${ms(t.duration.base)}, counts ${ms(t.duration.count)}, ease out.`
       }
@@ -251,8 +259,12 @@ function RowsSpecimen() {
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-line-strong">
-              <th scope="row" className="pt-3 pe-4 text-start text-sm font-medium text-fg-muted">
-                Total, {lines.length} lines
+              <th
+                ref={countRef}
+                scope="row"
+                className="pt-3 pe-4 text-start text-sm font-medium text-fg-muted"
+              >
+                Total, {count} lines
               </th>
               <td className="pt-3 text-end text-xl font-strong">
                 <Money amount={total} currency={CURRENCY} locale={LOCALE} />
@@ -286,6 +298,9 @@ function DialogSpecimen() {
   return (
     <Specimen
       title="Dialog"
+      plainSpec={(t) =>
+        `Open: CSS rise and fade, ${ms(t.duration.slow)}. Close: ${ms(t.duration.fast)}.`
+      }
       spec={(t) =>
         `Open: ${springSpec(t.spring.overlay)}, from ${String(t.scale.origin)} and ${t.distance.origin} toward the trigger. Close: ${ms(t.duration.fast)} fade.`
       }
@@ -319,6 +334,7 @@ function SelectSpecimen() {
   return (
     <Specimen
       title="Select"
+      plainSpec={(t) => `List: CSS fade and scale, ${ms(t.duration.base)}. Highlight: instant.`}
       spec={(t) =>
         `List: ${springSpec(t.spring.overlay)}. Highlight: ${springSpec(t.spring.press)}.`
       }

@@ -1,7 +1,15 @@
 import * as motion from '@rectio/motion';
 import type { TableCellProps } from '@rectio/motion';
 import * as ui from '@rectio/ui';
-import { createContext, use, type ComponentProps, type ReactNode } from 'react';
+import {
+  createContext,
+  use,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 
 /**
  * The playground shows one composition twice, plain and motioned, so it swaps components through
@@ -67,4 +75,36 @@ export function KitProvider({ motion: on, children }: { motion: boolean; childre
 
 export function useKit(): Kit {
   return use(KitContext);
+}
+
+/**
+ * A label that belongs to a counting total (such as "Total, 4 lines") changes when the count
+ * starts, not when the rows do, so the line count and the figure never disagree on screen. With
+ * the plain kit or reduced motion it changes at once. Put the returned ref on an element inside
+ * the theme, where the motion tokens are.
+ */
+export function useHeldUntilCount<T>(value: T) {
+  const on = useKit() === MOTION_KIT && !motion.usePlainMotion();
+  const [held, setHeld] = useState(value);
+  const node = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!on) return;
+    const tokens = node.current === null ? null : motion.readMotionTokens(node.current);
+    // Waits on the animation clock, as the count does, so slowed captures stay in step.
+    const hold = new Animation(
+      new KeyframeEffect(null, null, (tokens?.duration.base ?? 0) * 1000),
+      document.timeline,
+    );
+    hold.onfinish = () => {
+      setHeld(value);
+    };
+    hold.play();
+    return () => {
+      hold.cancel();
+    };
+  }, [value, on]);
+  const ref = (element: HTMLElement | null) => {
+    node.current = element;
+  };
+  return [on ? held : value, ref] as const;
 }
