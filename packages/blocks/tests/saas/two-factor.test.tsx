@@ -131,4 +131,13 @@ describe('TwoFactor', () => {
     render(<TwoFactor onVerify={vi.fn()} method="sms" destination="+44 7700 900829" />);
     expect(screen.getByText('+44 ••• 829')).toHaveClass('whitespace-nowrap');
   });
+
+  it('puts the error straight under the slots, before the paste hint', () => {
+    render(<TwoFactor onVerify={vi.fn()} error="That code has expired." />);
+    const error = screen.getByText('That code has expired.');
+    const hint = screen.getByText(/Paste the whole code/);
+    expect(error.compareDocumentPosition(hint) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
 });

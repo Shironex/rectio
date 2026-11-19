@@ -193,21 +193,24 @@ export function TwoFactor({
                     // The focus ring stands off the slot, so it reads apart from the border.
                     'outline-0 outline-transparent focus:border-accent focus:outline-2 focus:outline-offset-3 focus:outline-focus',
                     // A refused code marks every slot, the focused one included: no slot reads as valid.
-                    'group-data-invalid/otp:border-negative group-data-invalid/otp:focus:border-negative group-data-invalid/otp:focus:outline-negative',
+                    // Softened outlines: the message under the slots carries the error, six red
+                    // boxes would read as broken.
+                    'group-data-invalid/otp:border-negative/60 group-data-invalid/otp:focus:border-negative/60 group-data-invalid/otp:focus:outline-negative',
                     'group-data-readonly/otp:text-fg-muted',
                   )}
                 />
               </Fragment>
             ))}
           </OTPField.Root>
-          <FieldDescription>
-            Paste the whole code into the first box if you copied it.
-          </FieldDescription>
+          {/* The error sits right under the slots; the paste hint follows it. */}
           {hasError ? (
             <FieldError>{error}</FieldError>
           ) : (
             incomplete && <FieldError>Enter all {length} digits.</FieldError>
           )}
+          <FieldDescription>
+            Paste the whole code into the first box if you copied it.
+          </FieldDescription>
         </Field>
 
         {rememberLabel !== undefined && (
