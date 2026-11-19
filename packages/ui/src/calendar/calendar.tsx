@@ -57,11 +57,14 @@ const CLASS_NAMES: DayPickerProps['classNames'] = {
     'transition-colors duration-fast ease-standard hover:bg-surface-hover',
     'outline-offset-2 focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-focus',
   ),
-  // Today: a hairline box drawn inside the day and a stronger weight, never colour alone. It differs
-  // from the selected fill and from the focus outline, which sits outside the day.
+  // Today: a hairline box drawn inside the day, in the muted text colour so it holds its contrast in
+  // dark themes too, and a stronger weight: never colour alone. An outline, not a shadow, so forced
+  // colours keep it. It differs from the selected fill and from the focus outline, which is thicker
+  // and sits outside the day.
   today: cn(
     '[&>button]:font-strong',
-    'not-data-selected:[&>button]:ring-1 not-data-selected:[&>button]:ring-line-strong not-data-selected:[&>button]:ring-inset',
+    'not-data-selected:[&>button]:outline-1 not-data-selected:[&>button]:-outline-offset-1',
+    'not-data-selected:[&>button]:outline-fg-muted',
   ),
   selected: cn(
     '[&>button]:bg-accent [&>button]:font-medium [&>button]:text-accent-contrast',
