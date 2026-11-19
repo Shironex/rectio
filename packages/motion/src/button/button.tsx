@@ -13,11 +13,11 @@ export type { ButtonProps };
 const PRESS_KEYS = new Set([' ', 'Enter']);
 
 /**
- * The arriving part starts three quarters through the leaving one, which fades on a fast-out
- * curve: by then it is nearly gone, so the two never read on top of each other, and the slot is
- * never empty for more than a frame.
+ * The arriving part starts 40 percent into the leaving one, which fades on a fast-out curve: by
+ * then the leaving part is mostly gone, so the two never read on top of each other, and the slot
+ * is never empty.
  */
-const AFTER_EXIT = { transitionDelay: 'calc(var(--rx-motion-duration-fast) * 0.75)' };
+const AFTER_EXIT = { transitionDelay: 'calc(var(--rx-motion-duration-fast) * 0.4)' };
 
 /**
  * The label leaves upward and the spinner arrives from below, then the reverse when the work is

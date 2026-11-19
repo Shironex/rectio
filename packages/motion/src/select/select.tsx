@@ -48,6 +48,10 @@ function useGlidingHighlight(popup: RefObject<HTMLDivElement | null>, open: bool
             el.dataset.highlighted !== undefined,
         ) ?? null;
       const tokens = readMotionTokens(list);
+      // Where the highlight is now, mid glide if a key came quickly: read before stopping it, so
+      // the next glide starts from there instead of hopping to the last target first.
+      const now = getComputedStyle(mark);
+      const from = { transform: now.transform, height: now.height };
       glide?.stop();
       if (item === null || tokens === null) {
         mark.style.opacity = '0';
@@ -57,10 +61,6 @@ function useGlidingHighlight(popup: RefObject<HTMLDivElement | null>, open: bool
       const to = {
         transform: `translateY(${String(item.offsetTop)}px)`,
         height: `${String(item.offsetHeight)}px`,
-      };
-      const from = {
-        transform: getComputedStyle(mark).transform,
-        height: getComputedStyle(mark).height,
       };
       Object.assign(mark.style, to, { opacity: '1' });
       if (shown) {
