@@ -68,7 +68,7 @@ tab shows the preview's usage. The block's own source comes with the license.
     title: { type: 'string', default: "'General journal'" },
     messages: {
       type: 'Partial<LedgerMessages>',
-      description: 'The block\'s words. Pass the keys you change; see `LEDGER_MESSAGES`.',
+      description: "The block's words. Pass the keys you change; see `LEDGER_MESSAGES`.",
     },
     emptyAction: {
       type: 'ReactNode',
@@ -98,11 +98,14 @@ import { plural } from '@rectio/blocks';
     debit: 'Winien',
     credit: 'Ma',
     journalDescription: (period, entries) =>
-      [period, `${entries} ${plural(entries, { one: 'zapis', few: 'zapisy', many: 'zapisów', other: 'zapisu' }, 'pl-PL')}`]
+      [
+        period,
+        `${entries} ${plural(entries, { one: 'zapis', few: 'zapisy', many: 'zapisów', other: 'zapisu' }, 'pl-PL')}`,
+      ]
         .filter(Boolean)
         .join(', '),
   }}
-/>
+/>;
 ```
 
 A complete set typed as `LedgerMessages` fails to compile when a key is missing.

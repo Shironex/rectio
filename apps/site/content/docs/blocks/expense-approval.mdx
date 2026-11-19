@@ -65,11 +65,12 @@ tab shows the preview's usage. The block's own source comes with the license.
     title: { type: 'string', default: "'Expense approvals'" },
     messages: {
       type: 'Partial<ExpenseApprovalMessages>',
-      description: 'The block\'s words. Pass the keys you change; see `EXPENSE_APPROVAL_MESSAGES`.',
+      description: "The block's words. Pass the keys you change; see `EXPENSE_APPROVAL_MESSAGES`.",
     },
     emptyAction: {
       type: 'ReactNode',
-      description: 'A link or button to the submitted expenses.. Shown in the empty state under its note.',
+      description:
+        'A link or button to the submitted expenses.. Shown in the empty state under its note.',
     },
     className: { type: 'string' },
   }}
@@ -99,7 +100,7 @@ import { plural } from '@rectio/blocks';
     rejectManyTitle: (count) =>
       `Odrzuć ${count} ${plural(count, { one: 'wydatek', few: 'wydatki', many: 'wydatków', other: 'wydatku' }, 'pl-PL')}`,
   }}
-/>
+/>;
 ```
 
 A complete set typed as `ExpenseApprovalMessages` fails to compile when a key is missing.

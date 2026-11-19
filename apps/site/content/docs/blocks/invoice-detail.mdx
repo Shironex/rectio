@@ -57,7 +57,7 @@ tab shows the preview's usage. The block's own source comes with the license.
     onDownload: { type: '() => void', description: 'Shows a PDF button.' },
     messages: {
       type: 'Partial<InvoiceDetailMessages>',
-      description: 'The block\'s words. Pass the keys you change; see `INVOICE_DETAIL_MESSAGES`.',
+      description: "The block's words. Pass the keys you change; see `INVOICE_DETAIL_MESSAGES`.",
     },
     className: { type: 'string' },
   }}
@@ -84,7 +84,7 @@ import { plural } from '@rectio/blocks';
     overdueDescription: (days, due) =>
       `${days} ${plural(days, { one: 'dzień', other: 'dni' }, 'pl-PL')} po terminie, termin ${due}`,
   }}
-/>
+/>;
 ```
 
 A complete set typed as `InvoiceDetailMessages` fails to compile when a key is missing.

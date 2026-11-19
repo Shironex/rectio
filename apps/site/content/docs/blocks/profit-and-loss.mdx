@@ -70,7 +70,10 @@ The block is data-agnostic: it takes plain records and never fetches.
       default: 'the runtime locale',
       description: 'BCP 47 locale for figures, such as en-GB or pl-PL.',
     },
-    period: { type: 'string', description: 'The period, such as "Q1 2026". Heads the amount column.' },
+    period: {
+      type: 'string',
+      description: 'The period, such as "Q1 2026". Heads the amount column.',
+    },
     comparisonPeriod: {
       type: 'string',
       description: 'The comparison period, such as "Q1 2025". Heads its column.',
@@ -87,7 +90,8 @@ The block is data-agnostic: it takes plain records and never fetches.
     },
     emptyAction: {
       type: 'ReactNode',
-      description: 'Shown in the empty state under its note, such as a button that connects the books.',
+      description:
+        'Shown in the empty state under its note, such as a button that connects the books.',
     },
     className: { type: 'string' },
   }}

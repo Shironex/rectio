@@ -63,7 +63,10 @@ adds an Export button.
     due: { type: 'Date', description: 'When the return and any tax due must be in.' },
     status: { type: "'open' | 'ready' | 'filed' | 'paid'" },
     today: { type: 'Date', default: 'new Date()' },
-    onFile: { type: '() => void', description: 'Prepares the return while open, files it once ready.' },
+    onFile: {
+      type: '() => void',
+      description: 'Prepares the return while open, files it once ready.',
+    },
     onExport: { type: '() => void', description: 'Adds an Export button.' },
     title: { type: 'string', default: "'VAT return'" },
     messages: {

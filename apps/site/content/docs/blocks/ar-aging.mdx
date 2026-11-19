@@ -59,11 +59,12 @@ tab shows the preview's usage. The block's own source comes with the license.
     title: { type: 'string', default: "'Receivables aging'" },
     messages: {
       type: 'Partial<ArAgingMessages>',
-      description: 'The block\'s words. Pass the keys you change; see `AR_AGING_MESSAGES`.',
+      description: "The block's words. Pass the keys you change; see `AR_AGING_MESSAGES`.",
     },
     emptyAction: {
       type: 'ReactNode',
-      description: 'A button that creates the first invoice.. Shown in the empty state under its note.',
+      description:
+        'A button that creates the first invoice.. Shown in the empty state under its note.',
     },
     className: { type: 'string' },
   }}
@@ -89,7 +90,7 @@ import { plural } from '@rectio/blocks';
     oldestPastDue: (days) =>
       `Najstarsza: ${days} ${plural(days, { one: 'dzień', other: 'dni' }, 'pl-PL')} po terminie`,
   }}
-/>
+/>;
 ```
 
 A complete set typed as `ArAgingMessages` fails to compile when a key is missing.

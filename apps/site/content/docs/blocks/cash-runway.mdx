@@ -64,7 +64,11 @@ balance drops below it. A runway under `alertMonths` (6 by default) is emphasise
     threshold: { type: 'number', description: 'Cash you do not want to go below.' },
     alertMonths: { type: 'number', default: '6', description: 'Runway under this is a warning.' },
     defaultWindow: { type: '3 | 6 | 12', default: '3' },
-    horizon: { type: 'number', default: '24', description: 'Months the projection may run at most.' },
+    horizon: {
+      type: 'number',
+      default: '24',
+      description: 'Months the projection may run at most.',
+    },
     title: { type: 'string', default: "'Cash runway'" },
     messages: {
       type: 'Partial<CashRunwayMessages>',
@@ -72,7 +76,8 @@ balance drops below it. A runway under `alertMonths` (6 by default) is emphasise
     },
     emptyAction: {
       type: 'ReactNode',
-      description: 'Shown in the empty state under its note, such as a button that connects a bank.',
+      description:
+        'Shown in the empty state under its note, such as a button that connects a bank.',
     },
     className: { type: 'string' },
   }}
