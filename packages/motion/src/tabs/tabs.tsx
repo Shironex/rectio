@@ -48,18 +48,18 @@ function GlidingIndicator({ ref, style, ...props }: ComponentProps<'span'>) {
     if (previous === null || (previous.left === left && previous.width === width)) return;
     const tokens = readMotionTokens(element);
     if (tokens === null) return;
-    // Where it is drawn now (mid glide if interrupted), then where it lands once nothing moves it.
-    const from = element.getBoundingClientRect();
+    // Base UI has already moved it by the time this runs, so where it was drawn comes from the last
+    // place plus whatever glide is still running there (origin left: x, then a horizontal scale).
+    const now = new DOMMatrix(getComputedStyle(element).transform);
+    const fromLeft = previous.left + now.e;
+    const fromWidth = previous.width * now.a;
     running.current?.stop();
     for (const animation of element.getAnimations()) animation.cancel();
-    element.style.removeProperty('transform');
-    const to = element.getBoundingClientRect();
-    if (to.width === 0) return;
     running.current = springTo(
       element,
       {
         transform: [
-          `translateX(${String(from.left - to.left)}px) scaleX(${String(from.width / to.width)})`,
+          `translateX(${String(fromLeft - left)}px) scaleX(${String(fromWidth / width)})`,
           'translateX(0px) scaleX(1)',
         ],
       },
