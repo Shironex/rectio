@@ -62,7 +62,8 @@ const ms = (seconds: number) => `${String(Math.round(seconds * 1000))} ms`;
 function springSpec({ stiffness, damping, mass }: SpringToken) {
   const omega = Math.sqrt(stiffness / mass);
   const ratio = damping / (2 * Math.sqrt(stiffness * mass));
-  const settle = ratio >= 1 ? 5.8 / omega : 4 / (ratio * omega);
+  // Near critical damping the 2 percent settling time is about 5.8 / omega.
+  const settle = ratio >= 0.95 ? 5.8 / omega : 4 / (ratio * omega);
   return `${ms(settle)}, ${ratio >= 0.95 ? 'no overshoot' : 'slight overshoot'}`;
 }
 
