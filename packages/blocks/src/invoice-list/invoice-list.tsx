@@ -271,7 +271,7 @@ export function InvoiceList({
               <span className="block @xl:hidden">
                 <InvoiceNumber invoice={invoice} onOpen={onOpenInvoice} />
               </span>
-              <span className="block min-w-36">{invoice.customer}</span>
+              <span className="block">{invoice.customer}</span>
               <span className="block text-sm text-fg-muted @4xl:hidden">
                 {m.issuedOn(
                   <span className="numeric">{formatShortDate(invoice.issued, locale)}</span>,
@@ -367,7 +367,7 @@ export function InvoiceList({
                 className={cn(state === 'void' && 'text-fg-muted line-through')}
               />
               {partial && (
-                <span className="text-end text-sm text-fg-muted @3xl:whitespace-nowrap">
+                <span className="max-w-48 text-end text-sm text-fg-muted">
                   {m.paidOf(
                     <Money amount={invoice.total - balance} currency={currency} locale={locale} />,
                     <Money amount={invoice.total} currency={currency} locale={locale} />,
