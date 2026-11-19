@@ -138,6 +138,9 @@ importers:
       '@rectio/motion':
         specifier: workspace:*
         version: link:../../packages/motion
+      '@rectio/registry':
+        specifier: workspace:*
+        version: link:../../packages/registry
       '@rectio/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens

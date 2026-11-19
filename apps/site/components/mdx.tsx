@@ -9,6 +9,9 @@ import { Demo } from '@/demos';
 import { ComponentSource } from './preview/component-source';
 import { Preview } from './preview/preview';
 import { ProBadge } from './pro-badge';
+import { TemplateGrid } from './templates/template-grid';
+import { TemplateShots } from './templates/template-shots';
+import { TemplateUses } from './templates/template-uses';
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -22,6 +25,9 @@ export function getMDXComponents(components?: MDXComponents) {
     Steps,
     Step,
     ProBadge,
+    TemplateGrid,
+    TemplateShots,
+    TemplateUses,
     ...components,
   } satisfies MDXComponents;
 }
