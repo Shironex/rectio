@@ -169,4 +169,31 @@ describe('DateRangePicker', () => {
     });
     expect(trigger).toHaveTextContent('10 Mar 2026 to 14 Mar 2026');
   });
+
+  it('picks a whole period from a preset and marks the one in use', async () => {
+    const onChange = vi.fn();
+    render(
+      <DateRangePicker
+        aria-label="Period"
+        locale="en-GB"
+        value={{ from: new Date(2026, 2, 1), to: new Date(2026, 2, 31) }}
+        onValueChange={onChange}
+        presets={[
+          { label: 'March', range: { from: new Date(2026, 2, 1), to: new Date(2026, 2, 31) } },
+          { label: 'February', range: { from: new Date(2026, 1, 1), to: new Date(2026, 1, 28) } },
+        ]}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /^Period/ }));
+    expect(await screen.findByRole('button', { name: 'March' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'February' }));
+    const last = onChange.mock.lastCall?.[0] as DateRange;
+    expect([ymd(last.from), ymd(last.to)]).toEqual(['2026-02-01', '2026-02-28']);
+    await waitFor(() => {
+      expect(screen.queryByRole('grid')).not.toBeInTheDocument();
+    });
+  });
 });

@@ -91,6 +91,7 @@ export {
   parseDate,
   type DatePickerProps,
   type DateRangePickerProps,
+  type DateRangePreset,
 } from './date-picker/date-picker';
 export type { DateRange } from '@daypicker/react';
 export { ToastProvider, useToast, type ToastProviderProps, type ToastType } from './toast/toast';

@@ -2,7 +2,7 @@ import type { DateRange, DayPickerLocale } from '@daypicker/react';
 import { Field as BaseField } from '@base-ui/react/field';
 import { Popover } from '@base-ui/react/popover';
 import { CalendarBlankIcon } from '@phosphor-icons/react';
-import { format, isValid, parse } from 'date-fns';
+import { format, isSameDay, isValid, parse } from 'date-fns';
 import {
   useRef,
   useState,
@@ -243,7 +243,20 @@ export interface DateRangePickerProps {
   className?: string;
   /** Names the trigger, such as "Statement period". Required: the button has no Field label. */
   'aria-label': string;
+  /**
+   * Common periods beside the calendar, such as This month or Last quarter. One press picks the
+   * whole range and closes. The preset matching the current value shows as pressed.
+   */
+  presets?: DateRangePreset[];
 }
+
+export interface DateRangePreset {
+  label: string;
+  range: { from: Date; to: Date };
+}
+
+const sameRange = (a: DateRange | undefined, b: DateRangePreset['range']) =>
+  a?.from !== undefined && a.to !== undefined && isSameDay(a.from, b.from) && isSameDay(a.to, b.to);
 
 /**
  * A period picker for filters and reports: a button showing the range, opening two months. The
@@ -260,6 +273,7 @@ export function DateRangePicker({
   disabled = false,
   className,
   'aria-label': ariaLabel,
+  presets,
 }: DateRangePickerProps) {
   const dateLocale = dateLocaleProp ?? resolveDateLocale(locale);
   const [open, setOpen] = useState(false);
@@ -297,28 +311,58 @@ export function DateRangePicker({
         <span className="truncate numeric">{label}</span>
       </Popover.Trigger>
       <CalendarPopup popupRef={popupRef}>
-        <Calendar
-          mode="range"
-          required={false}
-          dateLocale={dateLocale}
-          numberOfMonths={numberOfMonths}
-          // Side by side months would repeat the days where they meet.
-          showOutsideDays={numberOfMonths === 1}
-          selected={value}
-          {...(from === undefined ? {} : { defaultMonth: from })}
-          disabled={disabledDays}
-          onSelect={(range, picked) => {
-            // Each opening picks a fresh period: the first press is the start, the second the end.
-            if (!pickingEnd.current) {
-              pickingEnd.current = true;
-              onValueChange({ from: picked, to: undefined });
-              return;
-            }
-            onValueChange(range);
-            pickingEnd.current = false;
-            setOpen(false);
-          }}
-        />
+        <div className="flex flex-col sm:flex-row">
+          {presets !== undefined && presets.length > 0 && (
+            <ul
+              aria-label="Common periods"
+              className="flex flex-wrap gap-1 border-b border-line p-2 sm:w-40 sm:flex-col sm:flex-nowrap sm:border-e sm:border-b-0"
+            >
+              {presets.map((preset) => (
+                <li key={preset.label}>
+                  <button
+                    type="button"
+                    aria-pressed={sameRange(value, preset.range)}
+                    onClick={() => {
+                      onValueChange({ ...preset.range });
+                      onOpenChange(false);
+                    }}
+                    className={cn(
+                      'flex h-(--rx-button-height-sm) w-full cursor-pointer items-center rounded-(--rx-button-radius) px-(--rx-button-padding-x-sm)',
+                      'text-start text-sm whitespace-nowrap text-fg-muted hover:bg-surface-hover hover:text-fg',
+                      'aria-pressed:bg-surface-selected aria-pressed:font-medium aria-pressed:text-fg',
+                      'transition-colors duration-fast ease-standard',
+                      'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
+                    )}
+                  >
+                    {preset.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <Calendar
+            mode="range"
+            required={false}
+            dateLocale={dateLocale}
+            numberOfMonths={numberOfMonths}
+            // Side by side months would repeat the days where they meet.
+            showOutsideDays={numberOfMonths === 1}
+            selected={value}
+            {...(from === undefined ? {} : { defaultMonth: from })}
+            disabled={disabledDays}
+            onSelect={(range, picked) => {
+              // Each opening picks a fresh period: the first press is the start, the second the end.
+              if (!pickingEnd.current) {
+                pickingEnd.current = true;
+                onValueChange({ from: picked, to: undefined });
+                return;
+              }
+              onValueChange(range);
+              pickingEnd.current = false;
+              setOpen(false);
+            }}
+          />
+        </div>
       </CalendarPopup>
     </Popover.Root>
   );
