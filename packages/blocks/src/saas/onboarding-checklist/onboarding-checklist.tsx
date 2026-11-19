@@ -261,7 +261,10 @@ function StepRow({
   );
 }
 
-/** The one hand-made action of a row, as a direct quiet button: mark done, or take it back. */
+/**
+ * The one hand-made action of a row, as a direct quiet button: "Mark done" in words on a step
+ * still to do, and a small undo icon on a finished one.
+ */
 function ToggleButton({
   step,
   onToggleStep,
@@ -270,21 +273,33 @@ function ToggleButton({
   onToggleStep: (stepId: string, done: boolean) => void;
 }) {
   const { Button } = useBlockParts();
-  const label = step.done ? `Mark ${step.title} as not done` : `Mark ${step.title} as done`;
-  const ToggleIcon = step.done ? ArrowCounterClockwiseIcon : CheckIcon;
+  const toggle = () => {
+    onToggleStep(step.id, !step.done);
+  };
+  if (!step.done) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label={`Mark ${step.title} as done`}
+        onClick={toggle}
+        className="-my-1 shrink-0 text-fg-muted"
+      >
+        Mark done
+      </Button>
+    );
+  }
   return (
     <Button
       variant="ghost"
       size="sm"
       iconOnly
-      aria-label={label}
-      title={step.done ? 'Mark as not done' : 'Mark as done'}
-      onClick={() => {
-        onToggleStep(step.id, !step.done);
-      }}
-      className="-my-1 text-fg-muted"
+      aria-label={`Mark ${step.title} as not done`}
+      title="Mark as not done"
+      onClick={toggle}
+      className="-my-1 shrink-0 text-fg-muted"
     >
-      <ToggleIcon aria-hidden weight="bold" className="size-4" />
+      <ArrowCounterClockwiseIcon aria-hidden weight="bold" className="size-4" />
     </Button>
   );
 }
