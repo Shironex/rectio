@@ -41,6 +41,7 @@ function useGlidingHighlight(popup: RefObject<HTMLDivElement | null>, open: bool
     let shown = false;
     let fromKeyboard = false;
     let glide: Controls | null = null;
+    let hiding = 0;
 
     const follow = () => {
       const item = list.querySelector<HTMLElement>('[data-slot="select-item"][data-highlighted]');
@@ -49,9 +50,15 @@ function useGlidingHighlight(popup: RefObject<HTMLDivElement | null>, open: bool
       // stopping it, so the next glide starts from there instead of hopping to the last target.
       const from = getComputedStyle(mark).transform;
       glide?.stop();
+      cancelAnimationFrame(hiding);
       if (item === null || tokens === null) {
-        mark.style.opacity = '0';
-        shown = false;
+        // The pointer crossing from one option to the next clears the highlight a moment before
+        // the next option takes it: hide only if nothing is highlighted a frame later, so the
+        // highlight glides across instead of reappearing.
+        hiding = requestAnimationFrame(() => {
+          mark.style.opacity = '0';
+          shown = false;
+        });
         return;
       }
       const to = `translateY(${String(item.offsetTop)}px)`;
@@ -87,6 +94,7 @@ function useGlidingHighlight(popup: RefObject<HTMLDivElement | null>, open: bool
       document.removeEventListener('keydown', onKey, true);
       list.removeEventListener('pointermove', onPointer);
       glide?.stop();
+      cancelAnimationFrame(hiding);
       mark.style.opacity = '0';
     };
   }, [popup, open]);
