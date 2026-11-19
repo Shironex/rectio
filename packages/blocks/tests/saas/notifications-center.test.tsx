@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -107,5 +108,29 @@ describe('NotificationsCenter', () => {
     );
     expect(screen.getByText('No notifications yet')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Mark all as read' })).not.toBeInTheDocument();
+  });
+
+  it('keeps "Mark all as read" in place, disabled, so focus stays after pressing it', async () => {
+    function Harness() {
+      const [items, setItems] = useState(LIST);
+      return (
+        <NotificationsCenter
+          inline
+          notifications={items}
+          now={NOW}
+          onMarkRead={(id) => {
+            setItems(markNotificationRead(items, id));
+          }}
+          onMarkAllRead={() => {
+            setItems(markAllNotificationsRead(items));
+          }}
+        />
+      );
+    }
+    render(<Harness />);
+    const button = screen.getByRole('button', { name: 'Mark all as read' });
+    await userEvent.click(button);
+    expect(button).toHaveFocus();
+    expect(button).toHaveAttribute('aria-disabled', 'true');
   });
 });

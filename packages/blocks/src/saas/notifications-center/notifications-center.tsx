@@ -85,7 +85,13 @@ export function NotificationsCenter({
             {props.notifications.length === 0 ? 'Nothing yet' : unreadText(unread)}
           </span>
         }
-        actions={<MarkAllButton unread={unread} onMarkAllRead={props.onMarkAllRead} />}
+        actions={
+          <MarkAllButton
+            total={props.notifications.length}
+            unread={unread}
+            onMarkAllRead={props.onMarkAllRead}
+          />
+        }
         className={cn('overflow-clip', className)}
         bodyClassName="gap-3 px-0 pb-0"
       >
@@ -126,7 +132,11 @@ export function NotificationsCenter({
         <p aria-hidden className="font-display text-lg font-heading tracking-tight">
           {title}
         </p>
-        <MarkAllButton unread={unread} onMarkAllRead={props.onMarkAllRead} />
+        <MarkAllButton
+          total={props.notifications.length}
+          unread={unread}
+          onMarkAllRead={props.onMarkAllRead}
+        />
       </div>
       <p role="status" className="sr-only">
         {unreadText(unread)}
@@ -141,11 +151,26 @@ function unreadText(count: number): string {
   return `${String(count)} unread`;
 }
 
-function MarkAllButton({ unread, onMarkAllRead }: { unread: number; onMarkAllRead: () => void }) {
+function MarkAllButton({
+  total,
+  unread,
+  onMarkAllRead,
+}: {
+  total: number;
+  unread: number;
+  onMarkAllRead: () => void;
+}) {
   const { Button } = useBlockParts();
-  if (unread === 0) return null;
+  if (total === 0) return null;
+  // Stays mounted when all is read, disabled but focusable, so focus has somewhere to stay.
   return (
-    <Button variant="ghost" size="sm" onClick={onMarkAllRead}>
+    <Button
+      variant="ghost"
+      size="sm"
+      disabled={unread === 0}
+      focusableWhenDisabled
+      onClick={onMarkAllRead}
+    >
       <CheckIcon aria-hidden weight="bold" className="size-3.5" />
       Mark all as read
     </Button>
@@ -248,7 +273,7 @@ function NotificationsBody({
 /** The footer row to the notification settings: a full-width target, not a small link. */
 function SettingsFooter({ to }: { to: LinkTarget }) {
   const classes = cn(
-    'flex w-full cursor-pointer items-center gap-2.5 border-t border-line bg-surface-sunken px-5 py-3 text-start text-sm font-medium text-fg',
+    'flex w-full cursor-pointer items-center gap-2.5 border-t border-line px-5 py-3 text-start text-sm font-medium text-fg',
     'transition-colors duration-fast ease-standard hover:bg-surface-hover',
     '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
   );
@@ -294,16 +319,20 @@ function NotificationRow({
       type="button"
       onClick={onPress}
       className={cn(
-        'flex w-full cursor-pointer gap-3 py-3 ps-1 pe-5 text-start',
+        'flex w-full cursor-pointer gap-3 px-5 py-3 text-start',
         'transition-colors duration-fast ease-standard hover:bg-surface-hover',
+        !notification.read && 'bg-surface-sunken',
         '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
       )}
     >
-      {/* A gutter of its own for the unread dot, the same width on every row. */}
-      <span aria-hidden className="flex w-4 shrink-0 justify-center pt-3">
-        {!notification.read && <span className="size-2 rounded-full bg-accent" />}
-      </span>
       <span className="relative inline-flex size-8 shrink-0">
+        {/* The unread dot rides the avatar's top corner, ringed in the row's tint. */}
+        {!notification.read && (
+          <span
+            aria-hidden
+            className="absolute -start-0.5 -top-0.5 z-10 size-2.5 rounded-full bg-accent ring-2 ring-surface-sunken"
+          />
+        )}
         {notification.actor === undefined ? (
           <span
             aria-hidden
