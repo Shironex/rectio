@@ -10,6 +10,7 @@ import { ComponentSource } from './preview/component-source';
 import { Preview } from './preview/preview';
 import { ProBadge } from './pro-badge';
 import { TemplateGrid } from './templates/template-grid';
+import { TemplatePages } from './templates/template-pages';
 import { TemplateShots } from './templates/template-shots';
 import { TemplateUses } from './templates/template-uses';
 
@@ -26,6 +27,7 @@ export function getMDXComponents(components?: MDXComponents) {
     Step,
     ProBadge,
     TemplateGrid,
+    TemplatePages,
     TemplateShots,
     TemplateUses,
     ...components,

@@ -50,7 +50,7 @@ for (const template of templates) {
     '',
     '## Pages',
     '',
-    ...template.pages.map((route) => `- \`${route}\``),
+    `<TemplatePages routes={${JSON.stringify(template.pages)}} />`,
     '',
     '## Built with',
     '',

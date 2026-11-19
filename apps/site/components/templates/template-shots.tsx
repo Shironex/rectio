@@ -9,7 +9,7 @@ export function TemplateShots({ name }: { name: string }) {
     <figure className="not-prose my-8">
       <TemplateFrame template={template} phone eager />
       <figcaption className="mt-3 text-sm text-fg-muted">
-        The overview page in light and dark (it follows this page), and on a phone.
+        The first page of the template on desktop, in the mode this page uses, and on a phone.
       </figcaption>
     </figure>
   );

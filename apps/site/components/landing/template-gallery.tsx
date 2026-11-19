@@ -5,6 +5,7 @@ import { cn } from '@rectio/ui';
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { ProBadge } from '@/components/pro-badge';
 import { Segmented } from '@/components/segmented';
 import { TemplateFrame } from '@/components/templates/template-frame';
 import {
@@ -54,7 +55,7 @@ function TemplateCard({ template }: { template: SiteTemplate }) {
       <Link href={template.href} tabIndex={-1} aria-hidden className="site-gallery-frame">
         <TemplateFrame template={template} />
       </Link>
-      <TemplateText template={template} />
+      <TemplateText template={template} className="flex-1" />
     </article>
   );
 }
@@ -70,8 +71,10 @@ function TemplateText({
 }) {
   return (
     <div className={cn('flex flex-col items-start gap-4', className)}>
-      <p className="text-sm text-fg-muted">
-        {CATEGORY_LABELS[template.category]}, {template.pages.length} pages
+      <p className="flex items-center gap-2 text-sm text-fg-muted">
+        <ProBadge />
+        {CATEGORY_LABELS[template.category]}, {template.pages.length}{' '}
+        {template.pages.length === 1 ? 'page' : 'pages'}
       </p>
       <h3
         id={`template-${template.name}`}
@@ -83,14 +86,20 @@ function TemplateText({
         {template.title}
       </h3>
       <p className="max-w-prose text-base text-pretty text-fg-muted">{template.description}</p>
-      {large && <CopyCommand command={template.command} className="max-w-full overflow-x-auto" />}
-      <Link
-        href={template.href}
-        className="site-press inline-flex min-h-11 items-center gap-2 rounded-control text-base font-medium text-fg underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-      >
-        See the {template.title.toLowerCase()} template
-        <ArrowRightIcon aria-hidden weight="bold" className="size-4 rtl:-scale-x-100" />
-      </Link>
+      {/* The command and the link sit at the foot, so cards side by side line up. */}
+      <div className="mt-auto flex max-w-full flex-col items-start gap-4">
+        <div className="flex max-w-full flex-col gap-2">
+          <CopyCommand command={template.command} className="max-w-full overflow-x-auto" />
+          <p className="text-sm text-fg-muted">Needs your rectio Pro license key.</p>
+        </div>
+        <Link
+          href={template.href}
+          className="site-press inline-flex min-h-11 items-center gap-2 rounded-control text-base font-medium text-fg underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        >
+          See the {template.title.toLowerCase()} template
+          <ArrowRightIcon aria-hidden weight="bold" className="size-4 rtl:-scale-x-100" />
+        </Link>
+      </div>
     </div>
   );
 }
@@ -107,15 +116,18 @@ export function TemplateGallery({ templates }: { templates: SiteTemplate[] }) {
   const shown = filter === 'all' ? templates : templates.filter((t) => t.category === filter);
   const [first, ...rest] = shown;
   const lastWide = rest.length % 2 === 1;
-  const options = (['all', ...TEMPLATE_CATEGORIES] as const).map((value) => ({
-    value,
-    label: (
-      <>
-        {value === 'all' ? 'All' : CATEGORY_LABELS[value]}
-        <span className="numeric text-fg-subtle">{count(value)}</span>
-      </>
-    ),
-  }));
+  // A category with no template yet stays out of the filter; it appears with its first template.
+  const options = (['all', ...TEMPLATE_CATEGORIES] as const)
+    .filter((value) => count(value) > 0)
+    .map((value) => ({
+      value,
+      label: (
+        <>
+          {value === 'all' ? 'All' : CATEGORY_LABELS[value]}
+          <span className="numeric text-fg-subtle">{count(value)}</span>
+        </>
+      ),
+    }));
 
   return (
     <div className="flex flex-col gap-10">
