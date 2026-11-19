@@ -12,11 +12,12 @@ import {
   ReceiptIcon,
   SignOutIcon,
   SunIcon,
+  UserCircleIcon,
   UsersThreeIcon,
 } from '@phosphor-icons/react';
 import type { CommandGroup } from '@rectio/ui';
 
-import { INVOICES, OVERDUE_INVOICES } from '@/data/invoices';
+import { OVERDUE_INVOICES } from '@/data/invoices';
 import { icon } from './icon';
 
 export interface CommandActions {
@@ -27,13 +28,12 @@ export interface CommandActions {
   setMode: (mode: 'light' | 'dark') => void;
   /** Whether the app shows dark right now, so only the switch to the other mode is offered. */
   dark: boolean;
+  /** The theme shown now, so the theme command names the one it switches to. */
+  ledger: boolean;
 }
 
-/** Invoices the user is likely to want again: the largest overdue ones and the latest draft. */
-const RECENT = [
-  ...OVERDUE_INVOICES.slice(0, 2),
-  ...INVOICES.filter((i) => i.status === 'draft').slice(0, 1),
-];
+/** Invoices the user is likely to want again: the overdue ones the invoice list opens on. */
+const RECENT = OVERDUE_INVOICES.slice(0, 3);
 
 /** The command menu's contents: every page, the common actions, and recent invoices. */
 export function buildCommands(run: CommandActions): CommandGroup[] {
@@ -85,7 +85,7 @@ export function buildCommands(run: CommandActions): CommandGroup[] {
         },
         {
           id: 'theme',
-          label: 'Switch theme',
+          label: run.ledger ? 'Use the Default theme' : 'Use the Ledger theme',
           icon: icon(PaletteIcon),
           keywords: ['ledger', 'default', 'appearance'],
           onSelect: run.toggleTheme,
@@ -109,6 +109,12 @@ export function buildCommands(run: CommandActions): CommandGroup[] {
                 run.setMode('dark');
               },
             },
+      ],
+    },
+    {
+      label: 'Account',
+      items: [
+        page('profile', 'Profile', '/settings', UserCircleIcon, ['account', 'me']),
         page('sign-out', 'Sign out', '/sign-in', SignOutIcon, ['log out', 'leave']),
       ],
     },
