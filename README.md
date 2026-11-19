@@ -102,8 +102,9 @@ pnpm --filter @rectio/playground shoot 3
 
 ## Registry
 
-rectio ships as source: users own the code they add. `packages/registry` turns `packages/ui` and
-`packages/tokens` into a static registry, served as files today and behind a license server later.
+rectio ships as source: users own the code they add. `packages/registry` turns `packages/ui`,
+`packages/tokens` and the motion add-on (`packages/motion`) into a static registry, served as files
+today and behind a license server later.
 
 ```sh
 pnpm --filter @rectio/registry build    # writes packages/registry/dist/registry
@@ -146,6 +147,15 @@ names match shadcn's registry item where they overlap.
 
 Adding a component to `packages/ui/src` fails the registry build until it is listed in
 `registry.config.ts`. Bump an item's version whenever its content changes.
+
+**The motion add-on** is an add-on tree in the same config: every `packages/motion/src` folder is
+a pro item named `motion-<name>` (`motion-core` holds the shared token reader and animator), and
+its files install under their own folder (`@ui/motion/dialog.tsx`, `@lib/motion/animate.ts`) so
+they sit beside the plain components. An import of `@rectio/ui` is split by the names it takes,
+through the package's `index.ts`, into one registry import and one registry dependency per plain
+item (`motion-dialog` depends on `dialog` and `cn`); `motion` and other npm packages come from the
+imports as for any item. `rectio add motion-dialog` without a key names the pro items and writes
+nothing.
 
 ## CLI
 

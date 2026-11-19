@@ -1,6 +1,8 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { basename, dirname, extname, relative, resolve, sep } from 'node:path';
 
+import ts from 'typescript';
+
 import { normalizeLineEndings } from '../integrity.ts';
 import { REGISTRY_IMPORT_PREFIX, type AliasKey, type FileType } from '../schema.ts';
 import type { SourceItemConfig, SourceItemType } from './config.ts';
@@ -61,9 +63,98 @@ export function readRanges(packageJsons: readonly string[]): Map<string, string>
   return ranges;
 }
 
-/** Registry path of a source file: alias key plus base name, `button/button.tsx` -> `ui/button.tsx`. */
-function registryPath(type: SourceItemType, file: string): string {
-  return `${ALIAS_FOR[type]}/${basename(file)}`;
+/** One source tree: the base package, or an add-on that installs into its own folder. */
+export interface SourceRoot {
+  sourceDir: string;
+  items: readonly SourceItemConfig[];
+  requireEveryFolder: boolean;
+  /** Folder under the alias, for an add-on: `motion` -> `ui/motion/button.tsx`. */
+  targetFolder?: string | undefined;
+}
+
+/**
+ * Registry path of a source file: alias key, the tree's folder if any, and the base name:
+ * `button/button.tsx` -> `ui/button.tsx`, or `ui/motion/button.tsx` in the motion tree.
+ */
+function registryPath(type: SourceItemType, file: string, folder?: string): string {
+  return [ALIAS_FOR[type], folder, basename(file)].filter((part) => part !== undefined).join('/');
+}
+
+/** Which source file each name of a barrel (a package's index.ts) comes from. */
+function readBarrel(file: string): Map<string, string> {
+  const names = new Map<string, string>();
+  const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest);
+  for (const statement of source.statements) {
+    if (!ts.isExportDeclaration(statement)) continue;
+    const specifier = statement.moduleSpecifier;
+    const clause = statement.exportClause;
+    if (specifier === undefined || !ts.isStringLiteral(specifier)) continue;
+    if (!isRelative(specifier.text) || clause === undefined || !ts.isNamedExports(clause)) continue;
+    const target = resolveRelative(file, specifier.text);
+    if (target === undefined) continue;
+    for (const element of clause.elements) names.set(element.name.text, target);
+  }
+  return names;
+}
+
+/**
+ * Splits each import of a workspace package into one registry import per owning item:
+ * `import { Dialog, cn } from '@rectio/ui'` becomes imports from `@registry/ui/dialog` and
+ * `@registry/lib/cn`. Returns the new source and the items it now depends on.
+ */
+function rewriteWorkspaceImports(
+  file: string,
+  source: string,
+  barrels: ReadonlyMap<string, ReadonlyMap<string, string>>,
+  owner: ReadonlyMap<string, { item: SourceItemConfig; path: string }>,
+  problems: string[],
+): { source: string; items: string[] } {
+  if (barrels.size === 0) return { source, items: [] };
+  const tree = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const edits: { start: number; end: number; text: string }[] = [];
+  const items = new Set<string>();
+  for (const statement of tree.statements) {
+    if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier))
+      continue;
+    const pkg = statement.moduleSpecifier.text;
+    const barrel = barrels.get(pkg);
+    if (barrel === undefined) continue;
+    const clause = statement.importClause;
+    const named = clause?.namedBindings;
+    if (
+      clause === undefined ||
+      clause.name !== undefined ||
+      named === undefined ||
+      !ts.isNamedImports(named)
+    ) {
+      problems.push(`${file}: import only named exports from ${pkg}`);
+      continue;
+    }
+    const groups = new Map<string, string[]>();
+    for (const element of named.elements) {
+      const name = (element.propertyName ?? element.name).text;
+      const target = barrel.get(name);
+      const hit = target === undefined ? undefined : owner.get(target);
+      if (hit === undefined) {
+        problems.push(`${file}: ${pkg} exports ${name} from no registry item`);
+        continue;
+      }
+      items.add(hit.item.name);
+      const path = REGISTRY_IMPORT_PREFIX + stripExtension(hit.path);
+      groups.set(path, [...(groups.get(path) ?? []), element.getText(tree)]);
+    }
+    const typeOnly = clause.phaseModifier === ts.SyntaxKind.TypeKeyword;
+    const keyword = typeOnly ? 'import type' : 'import';
+    const text = [...groups]
+      .map(([path, names]) => `${keyword} { ${names.join(', ')} } from '${path}';`)
+      .join('\n');
+    edits.push({ start: statement.getStart(tree), end: statement.end, text });
+  }
+  let out = source;
+  for (const edit of edits.sort((a, b) => b.start - a.start)) {
+    out = out.slice(0, edit.start) + edit.text + out.slice(edit.end);
+  }
+  return { source: out, items: [...items] };
 }
 
 const stripExtension = (path: string) => path.slice(0, path.length - extname(path).length);
@@ -84,16 +175,19 @@ function resolveRelative(fromFile: string, specifier: string): string | undefine
  * derives npm and registry dependencies from the imports. Throws with every problem at once.
  */
 export function buildSourceItems(
-  sourceDir: string,
-  items: readonly SourceItemConfig[],
+  roots: readonly SourceRoot[],
   ranges: ReadonlyMap<string, string>,
-  requireEveryFolder: boolean,
+  workspacePackages: Readonly<Record<string, string>> = {},
 ): BuiltSourceItem[] {
   const problems: string[] = [];
   const owner = new Map<string, { item: SourceItemConfig; path: string }>();
   const targets = new Map<string, string>();
+  const rootOf = new Map<SourceItemConfig, SourceRoot>();
 
-  for (const item of items) {
+  for (const root of roots) {
+    for (const item of root.items) rootOf.set(item, root);
+  }
+  for (const [item, { sourceDir, targetFolder }] of rootOf) {
     for (const file of item.files) {
       const absolute = resolve(sourceDir, file);
       if (TEST_FILE.test(file)) problems.push(`${item.name}: ${file} is a test or story file`);
@@ -102,7 +196,7 @@ export function buildSourceItems(
       if (previous !== undefined) {
         problems.push(`${file} is listed by both "${previous.item.name}" and "${item.name}"`);
       }
-      const path = registryPath(item.type, file);
+      const path = registryPath(item.type, file, targetFolder);
       const clash = targets.get(path);
       if (clash !== undefined)
         problems.push(`${item.name}: ${file} and ${clash} both map to ${path}`);
@@ -111,7 +205,8 @@ export function buildSourceItems(
     }
   }
 
-  if (requireEveryFolder) {
+  for (const { sourceDir, requireEveryFolder } of roots) {
+    if (!requireEveryFolder) continue;
     const listedFolders = new Set(
       [...owner.keys()].map((file) => toPosix(relative(sourceDir, file)).split('/')[0]),
     );
@@ -123,16 +218,29 @@ export function buildSourceItems(
   }
   if (problems.length > 0) throw new Error(`registry sources:\n  ${problems.join('\n  ')}`);
 
-  const built = items.map((item) => {
+  const barrels = new Map(
+    Object.entries(workspacePackages).map(([pkg, barrel]) => [pkg, readBarrel(barrel)] as const),
+  );
+  const built = [...rootOf].map(([item, { sourceDir, targetFolder }]) => {
     const dependencies: Record<string, string> = {};
     const registryDependencies = new Set<string>();
     let usesReact = false;
     const files = item.files.map((file): BuiltFile => {
       const absolute = resolve(sourceDir, file);
-      const source = normalizeLineEndings(readFileSync(absolute, 'utf8'));
+      const workspace = rewriteWorkspaceImports(
+        file,
+        normalizeLineEndings(readFileSync(absolute, 'utf8')),
+        barrels,
+        owner,
+        problems,
+      );
+      const source = workspace.source;
+      for (const name of workspace.items) registryDependencies.add(name);
       const sites = findImports(source);
-      let client = false;
+      // A component of the base package makes a file a client module, as the package did.
+      let client = workspace.items.length > 0;
       const content = replaceImports(source, sites, (specifier) => {
+        if (specifier.startsWith(REGISTRY_IMPORT_PREFIX)) return specifier;
         if (isRelative(specifier)) {
           const target = resolveRelative(absolute, specifier);
           const hit = target === undefined ? undefined : owner.get(target);
@@ -167,7 +275,7 @@ export function buildSourceItems(
       const isTsx = file.endsWith('.tsx');
       const wantsClient = isTsx && (item.client ?? client);
       const hasDirective = /^\s*['"]use client['"]/.test(content);
-      const path = registryPath(item.type, file);
+      const path = registryPath(item.type, file, targetFolder);
       return {
         path,
         type: item.type,

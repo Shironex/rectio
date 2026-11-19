@@ -38,6 +38,23 @@ export interface TokensItemConfig {
   description: string;
 }
 
+/**
+ * A second source tree, such as an add-on package built on the first. Its imports of a package in
+ * `workspacePackages` become registry dependencies on the items that export each name.
+ */
+export interface AddonSourceConfig {
+  /** Root of the add-on sources, such as packages/motion/src. */
+  sourceDir: string;
+  /**
+   * Folder its files install into under their alias, so they never clash with the base items:
+   * `motion` puts motion's button/button.tsx at `@ui/motion/button.tsx`.
+   */
+  targetFolder: string;
+  /** Same rule as the base tree: every folder directly under `sourceDir` belongs to an item. */
+  requireEveryFolder?: boolean;
+  items: SourceItemConfig[];
+}
+
 export interface RegistryConfig {
   name: string;
   homepage?: string;
@@ -57,6 +74,13 @@ export interface RegistryConfig {
     themes: ThemeItemConfig[];
   };
   items: SourceItemConfig[];
+  /** Add-on trees built on top of `sourceDir`. */
+  addons?: AddonSourceConfig[];
+  /**
+   * Workspace packages an add-on imports, each mapped to its barrel file (the package's index.ts).
+   * The barrel's re-exports say which base item owns each imported name.
+   */
+  workspacePackages?: Record<string, string>;
 }
 
 export function defineRegistry(config: RegistryConfig): RegistryConfig {

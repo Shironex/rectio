@@ -6,6 +6,25 @@ import { defineRegistry } from './src/build/config.ts';
 const packages = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ui = join(packages, 'ui');
 const tokens = join(packages, 'tokens');
+const motion = join(packages, 'motion');
+
+/** A motion add-on item: pro, installed under `@ui/motion/` beside the plain components. */
+const motionItem = (
+  name: string,
+  title: string,
+  description: string,
+  files: string[],
+  type: 'component' | 'lib' = 'component',
+) => ({
+  name: `motion-${name}`,
+  type,
+  tier: 'pro' as const,
+  version: '0.1.0',
+  title,
+  description,
+  categories: ['motion'],
+  files,
+});
 
 /**
  * What the registry publishes. Every folder in packages/ui/src must belong to an item, so a new
@@ -16,7 +35,11 @@ export default defineRegistry({
   name: 'rectio',
   homepage: 'https://rectio.dev',
   sourceDir: join(ui, 'src'),
-  packageJsons: [join(ui, 'package.json'), join(tokens, 'package.json')],
+  packageJsons: [
+    join(ui, 'package.json'),
+    join(tokens, 'package.json'),
+    join(motion, 'package.json'),
+  ],
   requireEveryFolder: true,
   tokens: {
     dir: tokens,
@@ -190,6 +213,57 @@ export default defineRegistry({
       description: 'Success, error and info toasts with an action such as Undo, on Base UI Toast.',
       categories: ['feedback'],
       files: ['toast/toast.tsx'],
+    },
+  ],
+  // The motion add-on: imports of @rectio/ui become registry dependencies on the plain items.
+  workspacePackages: { '@rectio/ui': join(ui, 'src', 'index.ts') },
+  addons: [
+    {
+      sourceDir: join(motion, 'src'),
+      targetFolder: 'motion',
+      requireEveryFolder: true,
+      items: [
+        motionItem(
+          'core',
+          'Motion core',
+          'Token reader, reduced motion switch and the Web Animations runner the motioned components share.',
+          ['lib/animate.ts', 'lib/mode.tsx', 'lib/ref.ts', 'lib/tokens.ts'],
+          'lib',
+        ),
+        motionItem(
+          'button',
+          'Motion Button',
+          'Button with a spring press and a morphing loading state.',
+          ['button/button.tsx'],
+        ),
+        motionItem(
+          'amount-input',
+          'Motion AmountInput',
+          'AmountInput whose figures nudge in the direction of a step.',
+          ['amount-input/amount-input.tsx'],
+        ),
+        motionItem('money', 'Motion Money', 'Money that counts to a new figure.', [
+          'money/money.tsx',
+        ]),
+        motionItem('dialog', 'Motion Dialog', 'Dialog that springs out of its trigger and back.', [
+          'dialog/dialog.tsx',
+        ]),
+        motionItem('select', 'Motion Select', 'Select popup with a gliding highlight.', [
+          'select/select.tsx',
+        ]),
+        motionItem(
+          'data-table',
+          'Motion DataTable rows',
+          'Rows that open and close in place, for DataTable or a plain Table.',
+          ['table/table.tsx'],
+        ),
+        motionItem(
+          'toast',
+          'Motion Toast',
+          'Toasts with a calm entrance and a stack that glides.',
+          ['toast/toast.tsx'],
+        ),
+      ],
     },
   ],
 });

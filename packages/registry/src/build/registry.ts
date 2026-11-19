@@ -57,12 +57,20 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
   const items: RegistryItem[] = [];
   const hasTokens = config.tokens !== undefined;
 
-  for (const built of buildSourceItems(
-    config.sourceDir,
-    config.items,
-    ranges,
-    config.requireEveryFolder ?? false,
-  )) {
+  const roots = [
+    {
+      sourceDir: config.sourceDir,
+      items: config.items,
+      requireEveryFolder: config.requireEveryFolder ?? false,
+    },
+    ...(config.addons ?? []).map((addon) => ({
+      sourceDir: addon.sourceDir,
+      items: addon.items,
+      requireEveryFolder: addon.requireEveryFolder ?? false,
+      targetFolder: addon.targetFolder,
+    })),
+  ];
+  for (const built of buildSourceItems(roots, ranges, config.workspacePackages)) {
     const { config: item } = built;
     const styled = item.type === 'component' || item.type === 'block';
     const registryDependencies = [

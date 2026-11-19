@@ -145,6 +145,55 @@ describe('buildRegistry on a fixture', () => {
     );
   });
 
+  it('builds an add-on tree on the base items through the base package barrel', () => {
+    const dir = fixture({
+      'base/index.ts':
+        "export { Badge } from '../src/badge/badge';\nexport { cn } from '../src/lib/cn';\n",
+      'addon/badge/badge.tsx':
+        "import { Badge as Plain, cn } from '@fixture/base';\nexport const Badge = () => <Plain>{cn('x')}</Plain>;\n",
+    });
+    const result = buildRegistry({
+      ...fixtureConfig(dir),
+      workspacePackages: { '@fixture/base': join(dir, 'base/index.ts') },
+      addons: [
+        {
+          sourceDir: join(dir, 'addon'),
+          targetFolder: 'extra',
+          requireEveryFolder: true,
+          items: [fixtureItem({ name: 'extra-badge', tier: 'pro', files: ['badge/badge.tsx'] })],
+        },
+      ],
+    });
+    const extra = result.items.find((i) => i.name === 'extra-badge');
+    expect(extra?.registryDependencies).toEqual(['badge', 'cn']);
+    expect(extra?.files[0]?.target).toBe('@ui/extra/badge.tsx');
+    expect(extra?.files[0]?.content).toContain(
+      "import { Badge as Plain } from '@registry/ui/badge';",
+    );
+    expect(extra?.files[0]?.content).toContain("import { cn } from '@registry/lib/cn';");
+  });
+
+  it('fails when a free add-on item depends on a pro one', () => {
+    const dir = fixture({
+      'base/index.ts': "export { LedgerCard } from '../src/ledger-card/ledger-card';\n",
+      'addon/card/card.tsx':
+        "import { LedgerCard } from '@fixture/base';\nexport const Card = LedgerCard;\n",
+    });
+    expect(() =>
+      buildRegistry({
+        ...fixtureConfig(dir),
+        workspacePackages: { '@fixture/base': join(dir, 'base/index.ts') },
+        addons: [
+          {
+            sourceDir: join(dir, 'addon'),
+            targetFolder: 'extra',
+            items: [fixtureItem({ name: 'extra-card', files: ['card/card.tsx'] })],
+          },
+        ],
+      }),
+    ).toThrow('free item extra-card depends on pro item ledger-card');
+  });
+
   it('fails on a test file in an item', () => {
     const dir = fixture({ 'src/badge/badge.test.tsx': 'export {};\n' });
     const items = [fixtureItem({ name: 'badge', files: ['badge/badge.test.tsx'] })];
@@ -211,6 +260,14 @@ describe('the rectio registry', () => {
       'dialog',
       'field',
       'money',
+      'motion-amount-input',
+      'motion-button',
+      'motion-core',
+      'motion-data-table',
+      'motion-dialog',
+      'motion-money',
+      'motion-select',
+      'motion-toast',
       'select',
       'theme-default',
       'theme-ledger',
@@ -220,12 +277,14 @@ describe('the rectio registry', () => {
     ]);
   });
 
-  it('links the data table to the checkbox and button it renders', () => {
+  it('links the data table to the checkbox, button, field and select it renders', () => {
     expect(byName.get('data-table')?.registryDependencies).toEqual([
       'tokens',
       'button',
       'checkbox',
       'cn',
+      'field',
+      'select',
     ]);
     expect(byName.get('data-table')?.dependencies).toMatchObject({
       '@tanstack/react-table': '^9.3.1',
@@ -245,6 +304,45 @@ describe('the rectio registry', () => {
       '@phosphor-icons/react': '^2.1.10',
     });
     expect(byName.get('cn')?.dependencies).toEqual({ clsx: '^2.1.1', 'tailwind-merge': '^3.7.0' });
+  });
+
+  it('publishes the motion add-on as pro items built on the plain ones', () => {
+    const motion = result.items.filter((item) => item.name.startsWith('motion-'));
+    expect(motion.length).toBeGreaterThan(0);
+    for (const item of motion) expect(item.tier, item.name).toBe('pro');
+    // The npm dependency is computed from the imports, not declared by hand.
+    expect(byName.get('motion-core')?.dependencies).toEqual({ motion: '^14.12.0' });
+    expect(byName.get('motion-core')?.files.map((f) => f.target)).toContain(
+      '@lib/motion/animate.ts',
+    );
+    // Imports of @rectio/ui became registry dependencies on the items that export each name.
+    expect(byName.get('motion-dialog')?.registryDependencies).toEqual([
+      'tokens',
+      'cn',
+      'dialog',
+      'motion-core',
+    ]);
+    const dialog = byName.get('motion-dialog')?.files[0];
+    expect(dialog?.target).toBe('@ui/motion/dialog.tsx');
+    expect(dialog?.content).toContain("from '@registry/ui/dialog'");
+    expect(dialog?.content).not.toContain('@rectio/ui');
+    expect(byName.get('motion-toast')?.registryDependencies).toContain('toast');
+  });
+
+  it('never lets a free item depend on a pro one', () => {
+    for (const item of result.items.filter((i) => i.tier === 'free')) {
+      for (const dep of item.registryDependencies)
+        expect(byName.get(dep)?.tier, `${item.name} -> ${dep}`).toBe('free');
+    }
+  });
+
+  it('writes the pro motion items under pro/ only', () => {
+    const dir = fixture();
+    const out = join(dir, 'registry');
+    writeRegistry(out, result);
+    expect(existsSync(join(out, 'pro/items/motion-dialog.json'))).toBe(true);
+    expect(existsSync(join(out, 'pro/items/motion-dialog@0.1.0.json'))).toBe(true);
+    expect(existsSync(join(out, 'items/motion-dialog.json'))).toBe(false);
   });
 
   it('keeps no relative import in published code', () => {
