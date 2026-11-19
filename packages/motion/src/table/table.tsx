@@ -141,10 +141,13 @@ export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
     }
 
     // Leaving: out of the tab order at once, then a quick fade to the side, faster than an entry.
+    // From the frame on screen: a row removed while it still arrives fades on from there.
     row.inert = true;
+    const now = getComputedStyle(row);
+    for (const animation of row.getAnimations()) animation.cancel();
     const exit = row.animate(
       [
-        { opacity: 1, transform: 'none' },
+        { opacity: now.opacity, transform: now.transform },
         { opacity: 0, transform: `translateX(${tokens.distance.shift})` },
       ],
       { duration: duration.fast * 1000, easing: cssEasing(row, 'exit'), fill: 'forwards' },
