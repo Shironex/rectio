@@ -95,6 +95,8 @@ export function SidebarProvider({
   const [collapsedState, setCollapsedState] = useState(defaultCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobile = useIsMobileLayout();
+  // A sheet left open on a phone layout stays closed when the window widens and narrows again.
+  if (!mobile && mobileOpen) setMobileOpen(false);
   const collapsed = collapsedProp ?? collapsedState;
 
   // The latest callback and state, read when called: the context keeps one identity, so items do
@@ -388,7 +390,7 @@ export function SidebarItem({
       {collapsed ? (
         <Tooltip>
           <TooltipTrigger render={element} />
-          <TooltipContent side="right">
+          <TooltipContent side="inline-end">
             {children}
             {badge !== undefined && <span className="ms-2 numeric">{badge}</span>}
           </TooltipContent>
@@ -447,13 +449,13 @@ export function SidebarSubmenu({
               <span className="sr-only">{label}</span>
               {badge !== undefined && <RailBadge>{badge}</RailBadge>}
             </TooltipTrigger>
-            <TooltipContent side="right">
+            <TooltipContent side="inline-end">
               {label}
               {badge !== undefined && <span className="ms-2 numeric">{badge}</span>}
             </TooltipContent>
           </Tooltip>
           {/* Clears the rail's padding and edge, so the flyout sits beside the rail, not on it. */}
-          <MenuContent side="right" align="start" sideOffset={14}>
+          <MenuContent side="inline-end" align="start" sideOffset={14}>
             <MenuGroup label={label}>
               <FlyoutContext value>{children}</FlyoutContext>
             </MenuGroup>
@@ -582,6 +584,7 @@ export function SidebarTrigger({
             // On desktop the label names the action, which already says the state; the phone
             // trigger keeps one name and reports whether the sheet is open.
             aria-expanded={mobile ? mobileOpen : undefined}
+            aria-haspopup={mobile ? 'dialog' : undefined}
             aria-keyshortcuts={
               shortcut === null || mobile ? undefined : ariaKeyShortcut(shortcut, mac)
             }
