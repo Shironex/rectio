@@ -32,6 +32,9 @@ const MARCH: DateRange = { from: new Date(2026, 2, 1), to: new Date(2026, 2, 31)
 const shortDate = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short' });
 const money = (amount: number) => formatMoney(amount, CURRENCY, { locale: LOCALE });
 const sum = (list: { amount: number }[]) => list.reduce((total, e) => total + e.amount, 0);
+/** Rejected lines stay on the report for the record but are never paid, so they leave the total. */
+const claimed = (list: Expense[]) => list.filter((e) => e.status !== 'rejected');
+const footRows = (rows: { original: Expense }[]) => rows.map((row) => row.original);
 
 const inPeriod = (date: Date, period: DateRange | undefined) =>
   period?.from === undefined || (date >= period.from && date <= (period.to ?? period.from));
@@ -77,11 +80,23 @@ const columns: DataTableColumnDef<Expense>[] = [
         </>
       );
     },
-    footer: ({ table }) => (
-      <span className="text-sm font-medium text-fg-muted">
-        Total, {table.getRowModel().rows.length} expenses
-      </span>
-    ),
+    footer: ({ table }) => {
+      const all = footRows(table.getRowModel().rows);
+      const counted = claimed(all);
+      const rejected = all.length - counted.length;
+      return (
+        <span className="flex flex-col text-sm">
+          <span className="font-medium text-fg">Total claimed, {counted.length} expenses</span>
+          {rejected > 0 && (
+            <span className="text-fg-muted">
+              {rejected} rejected,{' '}
+              <Money amount={sum(all) - sum(counted)} currency={CURRENCY} locale={LOCALE} /> not
+              counted
+            </span>
+          )}
+        </span>
+      );
+    },
   },
   {
     id: 'category',
@@ -113,7 +128,7 @@ const columns: DataTableColumnDef<Expense>[] = [
     ),
     footer: ({ table }) => (
       <Money
-        amount={sum(table.getRowModel().rows.map((row) => row.original))}
+        amount={sum(claimed(footRows(table.getRowModel().rows)))}
         currency={CURRENCY}
         locale={LOCALE}
         className="text-xl font-strong"
@@ -228,7 +243,7 @@ function Report() {
                 {selected.length} selected,{' '}
                 <Money amount={sum(selected)} currency={CURRENCY} locale={LOCALE} />
               </p>
-              <Button variant="secondary" size="sm" onClick={remove}>
+              <Button variant="danger" size="sm" onClick={remove}>
                 <TrashIcon aria-hidden weight="bold" className="size-3.5" />
                 Remove
               </Button>

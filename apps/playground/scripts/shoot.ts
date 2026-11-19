@@ -123,10 +123,6 @@ try {
       if (theme === 'default' && mode === 'light')
         console.log('focus trap', await focusTrapCheck(app));
 
-      await app.getByRole('button', { name: 'Save expense' }).click();
-      await settle(app);
-      await app.screenshot({ path: join(out, `dialog-errors-${name}.png`) });
-
       // Date field: open the calendar from its button; focus lands on the chosen day.
       await app.getByRole('button', { name: /^Choose date/ }).click();
       await app.getByRole('grid').waitFor();
@@ -140,6 +136,10 @@ try {
       await app.keyboard.press('ArrowLeft');
       await app.keyboard.press('Enter');
       await app.getByRole('grid').waitFor({ state: 'detached' });
+
+      await app.getByRole('button', { name: 'Save expense' }).click();
+      await settle(app);
+      await app.screenshot({ path: join(out, `dialog-errors-${name}.png`) });
 
       await app.getByRole('textbox', { name: 'Merchant' }).fill('Deutsche Bahn');
       await app.getByRole('textbox', { name: 'Amount, EUR' }).fill('129.40');
