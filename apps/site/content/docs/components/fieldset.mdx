@@ -1,0 +1,104 @@
+---
+title: Fieldset and FormSection
+description: Group related fields under a legend, and lay out a settings form in titled sections.
+---
+
+import FieldsetDemo from '@/demos/fieldset';
+
+<Preview name="fieldset" plain={<FieldsetDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add fieldset
+```
+
+## Usage
+
+```tsx
+import { Field, FieldLabel, Input } from '@/components/ui/field';
+import {
+  Fieldset,
+  FieldsetDescription,
+  FieldsetLegend,
+  FormActions,
+  FormSection,
+} from '@/components/ui/fieldset';
+
+<form>
+  <FormSection title="Billing details" description="Printed on every invoice.">
+    <Field>
+      <FieldLabel>Legal name</FieldLabel>
+      <Input />
+    </Field>
+    <Fieldset>
+      <FieldsetLegend>Send copies of invoices to</FieldsetLegend>
+      <FieldsetDescription>Each address gets the PDF.</FieldsetDescription>
+      {/* checkboxes */}
+    </Fieldset>
+  </FormSection>
+  <FormActions>
+    <Button variant="ghost" type="reset">
+      Discard
+    </Button>
+    <Button type="submit">Save changes</Button>
+  </FormActions>
+</form>;
+```
+
+`Fieldset` groups controls that answer one question under a legend: a radio group, a set of
+checkboxes, the parts of an address. `disabled` on it disables every field inside.
+
+`FormSection` is a titled block of a settings form. When its container is wide, the title and
+description sit in a column on the left and the fields on the right; when it is narrow, they stack.
+It responds to its own width, not the window's, so the same section works on a page and in a side
+panel. `FormActions` is the footer row, with the primary action last.
+
+## Props
+
+### Fieldset
+
+Every prop of Base UI's `Fieldset.Root` is accepted, including `disabled`.
+
+### FieldsetLegend, FieldsetDescription
+
+Every prop of Base UI's `Fieldset.Legend` and of a `p` is accepted.
+
+### FormSection
+
+Every prop of a `section` is accepted as well.
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode', required: true, description: 'The section heading.' },
+    description: { type: 'ReactNode', description: 'What the section controls.' },
+    headingLevel: {
+      type: '2 | 3 | 4',
+      default: '2',
+      description: 'Heading level, to fit the page outline.',
+    },
+  }}
+/>
+
+### FormActions
+
+Every prop of a `div` is accepted as well.
+
+<TypeTable
+  type={{
+    align: {
+      type: "'start' | 'end' | 'between'",
+      default: "'end'",
+      description: 'Where the buttons sit. between puts the first one at the start.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- `Fieldset` is a native `fieldset` named by its legend; a `FieldsetDescription` is linked to it,
+  so it is read when focus enters the group.
+- `FormSection` is a region named by its heading. Set `headingLevel` so headings follow the page.
+- Put the primary button last in `FormActions`, so Tab reaches it after the secondary actions.
+
+<ComponentSource path="fieldset/fieldset.tsx" />

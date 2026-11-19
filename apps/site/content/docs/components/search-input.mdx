@@ -1,0 +1,78 @@
+---
+title: SearchInput
+description: A search field with a clear button, Escape to clear, and an optional shortcut.
+---
+
+import SearchInputDemo from '@/demos/search-input';
+
+<Preview name="search-input" plain={<SearchInputDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add search-input
+```
+
+`input-group`, `field` and `button` install with it.
+
+## Usage
+
+```tsx
+import { Field, FieldLabel } from '@/components/ui/field';
+import { SearchInput } from '@/components/ui/search-input';
+
+<Field>
+  <FieldLabel>Search invoices</FieldLabel>
+  <SearchInput value={query} onValueChange={setQuery} shortcut="/" globalShortcut />
+</Field>;
+```
+
+A clear button appears once there is text. It and Escape empty the field and keep focus in it. The
+first Escape clears; on an empty field Escape passes through, so a dialog or menu around the field
+still closes on the second press. Clearing calls `onValueChange` with `""`, then `onClear`.
+
+`shortcut` shows a key hint while the field is empty: a single key such as `"/"`, or `"mod+k"`,
+shown as ⌘K on Apple devices and Ctrl K elsewhere. Add `globalShortcut` to make the key focus the
+field from anywhere on the page. It is off by default, and it never fires while focus is in another
+field, so typing a slash in a note stays a slash.
+
+## Props
+
+Every prop of `InputGroupInput` is accepted as well, except `type`, which is always `search`.
+
+<TypeTable
+  type={{
+    value: { type: 'string', description: 'The query, when controlled.' },
+    defaultValue: { type: 'string', description: 'The starting query, when uncontrolled.' },
+    onValueChange: {
+      type: '(value: string, details) => void',
+      description: 'Called on every change, and with "" when cleared.',
+    },
+    onClear: { type: '() => void', description: 'Called after the field is cleared.' },
+    clearLabel: {
+      type: 'string',
+      default: "'Clear search'",
+      description: 'Accessible name of the clear button.',
+    },
+    shortcut: { type: 'string', description: 'A key such as "/" or "mod+k", shown as a hint.' },
+    globalShortcut: {
+      type: 'boolean',
+      default: 'false',
+      description: 'The shortcut focuses the field from anywhere on the page.',
+    },
+    groupClassName: {
+      type: 'string',
+      description: 'Class names for the bordered group rather than the bare input.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- A `searchbox` named by its `FieldLabel`. The browser's own cancel button is hidden, since the
+  clear button does the same job and has a name.
+- The clear button is named "Clear search" (set `clearLabel` to translate it).
+- With `globalShortcut`, the input carries `aria-keyshortcuts`; the visible hint is decorative.
+- For live results, announce the count in a polite live region near the list.
+
+<ComponentSource path="search-input/search-input.tsx" />
