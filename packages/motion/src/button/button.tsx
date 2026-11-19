@@ -38,8 +38,8 @@ function MorphContent({ children, loading }: { children: ReactNode; loading: boo
           'inline-flex items-center',
           'transition-[opacity,translate] duration-base ease-enter',
           'in-data-loading:-translate-y-(--rx-motion-distance-shift) in-data-loading:opacity-0',
-          // Fast out, not ease-in: the label is mostly gone early instead of holding then vanishing.
-          'in-data-loading:duration-fast in-data-loading:ease-standard',
+          // Leaves on the exit easing: mostly gone early instead of holding, then vanishing.
+          'in-data-loading:duration-fast in-data-loading:ease-exit',
         )}
       >
         {children}
