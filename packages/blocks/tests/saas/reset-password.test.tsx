@@ -94,7 +94,7 @@ describe('ResetPassword', () => {
     render(<ResetPassword step="reset" onRequest={noop} onReset={noop} />);
     await userEvent.type(screen.getByLabelText('New password'), 'Ledger-Lines-42');
     await userEvent.type(screen.getByLabelText('Confirm new password'), 'Ledger');
-    expect(screen.getByText('Passwords do not match yet')).toBeInTheDocument();
+    expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText('Confirm new password'), '-Lines-42');
     expect(screen.getByText('Passwords match')).toBeInTheDocument();
     expect(screen.getByText('Signed out elsewhere.')).toBeInTheDocument();
@@ -119,7 +119,7 @@ describe('ResetPassword', () => {
     expect(live).toBeEmptyDOMElement();
     await userEvent.type(screen.getByLabelText('Confirm new password'), 'x');
     expect(container.querySelector('[aria-live="polite"]')).toBe(live);
-    expect(live).toHaveTextContent('Passwords do not match yet');
+    expect(live).toHaveTextContent('Passwords do not match');
   });
 
   it('moves focus to the heading of a step that replaces another', () => {

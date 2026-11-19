@@ -337,7 +337,7 @@ function NewPassword({
                 ) : (
                   <XIcon aria-hidden weight="bold" className="size-3.5 shrink-0" />
                 )}
-                {matches ? 'Passwords match' : 'Passwords do not match yet'}
+                {matches ? 'Passwords match' : 'Passwords do not match'}
               </>
             )}
           </p>
