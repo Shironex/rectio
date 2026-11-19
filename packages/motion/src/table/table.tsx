@@ -208,7 +208,9 @@ export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
     const tokens = row === null || plain || !inView(row) ? null : readMotionTokens(row);
     if (row === null || tokens === null || !(body instanceof HTMLTableSectionElement)) {
       settled.current = true;
-      if (!isPresent) safeToRemove();
+      // After the commit, not in this layout effect: AnimatePresence registers the leaving row in
+      // its own layout effect, which runs after this child's, and ignores an earlier completion.
+      if (!isPresent) queueMicrotask(safeToRemove);
       return;
     }
     const { duration } = tokens;
