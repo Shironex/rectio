@@ -1,11 +1,11 @@
 @import 'tailwindcss';
-@import '@rectio/tokens/tailwind.css';
-@import '@rectio/tokens/fonts.css';
+@import '@rectio/tokens/tailwind.css'; /* rectio:workspace */
+@import '@rectio/tokens/fonts.css'; /* rectio:workspace */
 
-/* The rectio packages ship source: tell Tailwind to read their class names too. */
-@source '../../../packages/ui/src';
-@source '../../../packages/motion/src';
-@source '../../../packages/blocks/src';
+/* In the rectio repo the components live in other packages: Tailwind reads their class names too. */
+@source '../../../packages/ui/src'; /* rectio:workspace */
+@source '../../../packages/motion/src'; /* rectio:workspace */
+@source '../../../packages/blocks/src'; /* rectio:workspace */
 
 html {
   color-scheme: light dark;
