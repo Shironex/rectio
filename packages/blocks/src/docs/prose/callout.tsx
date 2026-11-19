@@ -13,25 +13,25 @@ export type CalloutType = 'note' | 'tip' | 'warning' | 'danger';
 const STYLE: Record<CalloutType, { icon: Icon; frame: string; icon_: string; label: string }> = {
   note: {
     icon: InfoIcon,
-    frame: 'border-info-strong/25 bg-info-subtle/60',
+    frame: 'border-info-strong/25 bg-info-subtle/40',
     icon_: 'text-info-strong',
     label: 'Note',
   },
   tip: {
     icon: LightbulbIcon,
-    frame: 'border-positive-strong/25 bg-positive-subtle/60',
+    frame: 'border-positive-strong/25 bg-positive-subtle/40',
     icon_: 'text-positive-strong',
     label: 'Tip',
   },
   warning: {
     icon: WarningIcon,
-    frame: 'border-warning-strong/30 bg-warning-subtle/60',
+    frame: 'border-warning-strong/30 bg-warning-subtle/40',
     icon_: 'text-warning-strong',
     label: 'Warning',
   },
   danger: {
     icon: WarningCircleIcon,
-    frame: 'border-negative-strong/25 bg-negative-subtle/60',
+    frame: 'border-negative-strong/25 bg-negative-subtle/40',
     icon_: 'text-negative-strong',
     label: 'Danger',
   },

@@ -45,6 +45,8 @@ function TypeText({ children }: { children: string }) {
  */
 export function PropsTable({ rows, label, labels, className }: PropsTableProps) {
   const text = { ...DEFAULT_LABELS, ...labels };
+  // A table where no row has a default leaves the column out instead of a column of dashes.
+  const defaults = rows.some((row) => row.default !== undefined);
   return (
     <div data-slot="props-table" className={cn('@container min-w-0', className)}>
       <div className="hidden overflow-hidden rounded-panel border border-line @3xl:block">
@@ -57,9 +59,11 @@ export function PropsTable({ rows, label, labels, className }: PropsTableProps) 
               <th scope="col" className="px-4 py-2.5 text-start font-medium text-fg">
                 {text.type}
               </th>
-              <th scope="col" className="px-4 py-2.5 text-start font-medium text-fg">
-                {text.default}
-              </th>
+              {defaults && (
+                <th scope="col" className="px-4 py-2.5 text-start font-medium text-fg">
+                  {text.default}
+                </th>
+              )}
               <th scope="col" className="px-4 py-2.5 text-start font-medium text-fg">
                 {text.description}
               </th>
@@ -74,16 +78,18 @@ export function PropsTable({ rows, label, labels, className }: PropsTableProps) 
                 <td className="px-4 py-3">
                   <TypeText>{row.type}</TypeText>
                 </td>
-                <td className="px-4 py-3">
-                  {row.default === undefined ? (
-                    <span className="text-fg-subtle">
-                      <span aria-hidden>-</span>
-                      <span className="sr-only">None</span>
-                    </span>
-                  ) : (
-                    <code className="font-mono text-sm text-fg">{row.default}</code>
-                  )}
-                </td>
+                {defaults && (
+                  <td className="px-4 py-3">
+                    {row.default === undefined ? (
+                      <span className="text-fg-subtle">
+                        <span aria-hidden>-</span>
+                        <span className="sr-only">None</span>
+                      </span>
+                    ) : (
+                      <code className="font-mono text-sm text-fg">{row.default}</code>
+                    )}
+                  </td>
+                )}
                 <td className="px-4 py-3 text-pretty text-fg-muted">{row.description}</td>
               </tr>
             ))}
@@ -408,18 +414,7 @@ export function Endpoint({
           >
             <TabsList aria-label={`${title} responses`} className="px-2">
               {responses.map((response) => (
-                <TabsTab key={response.status} value={String(response.status)} className="gap-2">
-                  <span
-                    aria-hidden
-                    className={cn(
-                      'size-1.5 rounded-full',
-                      response.status < 300
-                        ? 'bg-positive'
-                        : response.status < 500
-                          ? 'bg-warning'
-                          : 'bg-negative',
-                    )}
-                  />
+                <TabsTab key={response.status} value={String(response.status)}>
                   <span className="font-mono">{response.status}</span>
                 </TabsTab>
               ))}
