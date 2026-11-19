@@ -4,8 +4,10 @@ import type { ReactNode } from 'react';
 
 export type MeterLevel = 'ok' | 'warning' | 'over';
 
+// A calm allowance is neutral ink; colour is kept for the levels that ask for attention, so a
+// theme whose accent sits near amber (ledger's citron) never reads as a warning.
 const FILL: Record<MeterLevel, string> = {
-  ok: 'bg-accent',
+  ok: 'bg-fg-muted',
   warning: 'bg-warning',
   over: 'bg-negative',
 };
