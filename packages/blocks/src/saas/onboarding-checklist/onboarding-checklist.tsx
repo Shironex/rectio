@@ -294,7 +294,7 @@ function ToggleButton({
       <Button
         variant={primary ? 'primary' : 'secondary'}
         size="sm"
-        aria-label={`Mark ${step.title} as done`}
+        aria-label={`Mark done, ${step.title}`}
         onClick={toggle}
       >
         {primary && <CheckIcon aria-hidden weight="bold" className="size-3.5" />}

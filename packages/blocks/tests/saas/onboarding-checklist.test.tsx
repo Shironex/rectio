@@ -60,7 +60,7 @@ describe('OnboardingChecklist', () => {
   it('marks a step done by hand', async () => {
     const onToggleStep = vi.fn();
     render(<OnboardingChecklist steps={STEPS} onToggleStep={onToggleStep} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Mark Invite your team as done' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Mark done, Invite your team' }));
     expect(onToggleStep).toHaveBeenCalledWith('c', true);
     await userEvent.click(
       screen.getByRole('button', { name: 'Mark Name your workspace as not done' }),
@@ -81,7 +81,7 @@ describe('OnboardingChecklist', () => {
       );
     }
     render(<Harness />);
-    await userEvent.click(screen.getByRole('button', { name: 'Mark Invite your team as done' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Mark done, Invite your team' }));
     expect(screen.getByRole('heading', { name: 'You are all set up' })).toHaveFocus();
   });
 
@@ -106,10 +106,10 @@ describe('OnboardingChecklist', () => {
     render(<OnboardingChecklist steps={fresh} onToggleStep={onToggleStep} />);
     const next = screen.getByText('Name your workspace').closest('li');
     expect(next).toHaveAttribute('aria-current', 'step');
-    const cta = screen.getByRole('button', { name: 'Mark Name your workspace as done' });
+    const cta = screen.getByRole('button', { name: 'Mark done, Name your workspace' });
     expect(cta).toHaveAttribute('data-variant', 'primary');
     // A later step with its own action keeps it, and Mark done stays secondary beside it.
-    expect(screen.getByRole('button', { name: 'Mark Connect your bank as done' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Mark done, Connect your bank' })).toHaveAttribute(
       'data-variant',
       'secondary',
     );
