@@ -156,7 +156,7 @@ export function NavigationMenuPanelLink({
   return (
     <BaseNavigationMenu.Link
       className={cn(
-        'flex gap-3 rounded-control p-2.5 text-start no-underline',
+        'flex gap-3 rounded-control p-2.5 text-start no-underline pointer-coarse:min-h-(--rx-control-height-touch)',
         'transition-colors duration-fast ease-standard hover:bg-surface-hover',
         '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         className,

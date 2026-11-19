@@ -98,7 +98,7 @@ export function SheetContent({
           data-side={side}
           className={cn(
             'fixed flex flex-col overflow-hidden border-line bg-surface-overlay text-fg shadow-(--rx-sheet-shadow) outline-none',
-            'transition-[translate,opacity] duration-base ease-enter will-change-transform',
+            'transition-[translate,opacity] duration-base ease-enter',
             // Under reduced motion the sheet fades in place instead of travelling across the screen.
             'motion-reduce:data-starting-style:translate-0 motion-reduce:data-ending-style:translate-0',
             'motion-reduce:data-starting-style:opacity-0 motion-reduce:data-ending-style:opacity-0',

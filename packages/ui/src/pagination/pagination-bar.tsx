@@ -153,7 +153,8 @@ export function Pagination({
 
   return (
     <nav aria-label={label} data-slot="pagination" className={className} {...props}>
-      <ul className="flex items-center gap-1">
+      {/* Touch hit areas reach past each control; the wider gap keeps them from overlapping. */}
+      <ul className="flex items-center gap-1 pointer-coarse:gap-4">
         <li>{previous}</li>
         {showFull &&
           paginationRange(current, total, siblings).map((item) =>
