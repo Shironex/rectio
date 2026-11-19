@@ -368,7 +368,7 @@
       "$description": "Code text without a token colour."
     },
     "highlight": {
-      "$value": "{palette.citron.100}",
+      "$value": "{palette.citron.50}",
       "$description": "A highlighted line."
     },
     "inserted": {

@@ -348,11 +348,11 @@
       "$description": "A highlighted line."
     },
     "inserted": {
-      "$value": "{palette.green.950}",
+      "$value": "{palette.green.975}",
       "$description": "A line a diff adds."
     },
     "deleted": {
-      "$value": "{palette.red.950}",
+      "$value": "{palette.red.975}",
       "$description": "A line a diff removes."
     },
     "inserted-mark": {
