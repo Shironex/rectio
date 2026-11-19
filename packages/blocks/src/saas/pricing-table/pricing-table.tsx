@@ -162,8 +162,8 @@ export function PricingTable({
                         </span>
                       </span>
                     )}
-                    {/* One short line on every card, never wrapping, so the price blocks match in height. */}
-                    <span className="text-sm whitespace-nowrap text-fg-muted">
+                    {/* One short line on every card; the subgrid row keeps the price blocks level if it wraps. */}
+                    <span className="text-sm text-fg-muted">
                       {price === null ? (
                         'Priced for your volume'
                       ) : price === 0 ? (
