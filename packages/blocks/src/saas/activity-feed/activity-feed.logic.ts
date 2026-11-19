@@ -22,6 +22,23 @@ export interface ActivityEvent {
   target?: string;
   /** A quote or a detail under the line, such as the comment itself. */
   detail?: string;
+  /** A state change, drawn as two states with an arrow between: In review to Approved. */
+  change?: { from: string; to: string };
+}
+
+/**
+ * The first event the reader has seen, in feed order, when newer ones come before it: the place
+ * for the "last visit" marker. Null when there is no last visit, or nothing is new, or all is.
+ */
+export function activityLastVisitBoundary(
+  events: readonly ActivityEvent[],
+  lastSeen: Date | undefined,
+): string | null {
+  if (lastSeen === undefined) return null;
+  const sorted = [...events].sort((a, b) => b.at.getTime() - a.at.getTime());
+  const index = sorted.findIndex((event) => event.at.getTime() <= lastSeen.getTime());
+  if (index <= 0) return null;
+  return sorted[index]?.id ?? null;
 }
 
 export type ActivityFilter = 'all' | 'comments' | 'changes' | 'people' | 'account';

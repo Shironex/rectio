@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   ActivityFeed,
   activityFilterCounts,
+  activityLastVisitBoundary,
   activityMatches,
   groupActivityByDay,
   type ActivityEvent,
@@ -59,7 +60,35 @@ describe('activity logic', () => {
   });
 });
 
+describe('activity last visit', () => {
+  it('marks the first seen event only when something newer comes before it', () => {
+    expect(activityLastVisitBoundary(EVENTS, new Date(2026, 2, 19, 12))).toBe('mid');
+    expect(activityLastVisitBoundary(EVENTS, undefined)).toBeNull();
+    expect(activityLastVisitBoundary(EVENTS, new Date(2026, 2, 20))).toBeNull();
+    expect(activityLastVisitBoundary(EVENTS, new Date(2026, 2, 1))).toBeNull();
+  });
+});
+
 describe('ActivityFeed', () => {
+  it('draws a state change as two states, and says what is new since the last visit', () => {
+    const events = EVENTS.map((event) =>
+      event.id === 'mid' ? { ...event, change: { from: 'In review', to: 'Approved' } } : event,
+    );
+    render(
+      <ActivityFeed
+        events={events}
+        lastSeen={new Date(2026, 2, 19, 12)}
+        now={NOW}
+        locale="en-GB"
+      />,
+    );
+    expect(screen.getByText('1 new since your last visit')).toBeInTheDocument();
+    expect(screen.getByText('Your last visit')).toBeInTheDocument();
+    const moved = screen.getByText('Approved').closest('p');
+    expect(moved).toHaveTextContent(/In review\s*to\s*Approved/);
+    expect(screen.getByText('Q1 board review').closest('p')).toHaveTextContent(/^New:/);
+  });
+
   it('reads as who did what, with the moment in words and the exact time', () => {
     render(<ActivityFeed events={EVENTS} now={NOW} locale="en-GB" />);
     const today = screen.getByRole('list', { name: 'Today' });
