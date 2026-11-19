@@ -175,6 +175,19 @@ try {
           await shoot(`02-sequence-${String(i)}`);
         }
       }
+      // The curtain, then the registry once its terminal session has typed out and the block landed.
+      for (const [name, text, wait] of [
+        ['03-curtain', 'Calm by day.', 900],
+        ['04-registry', 'One command, and', 9000],
+      ] as const) {
+        const heading = page.getByText(text).first();
+        await heading.evaluate((el) => {
+          el.scrollIntoView({ block: 'start', behavior: 'instant' });
+          scrollBy({ top: -96, behavior: 'instant' });
+        });
+        await page.waitForTimeout(wait);
+        await shoot(name);
+      }
       await context.close();
       // The contact sheet: every frame of this viewport and mode in one image.
       const sheet = await browser.newPage({ viewport: { width: 1800, height: 1200 } });
