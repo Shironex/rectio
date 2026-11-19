@@ -34,7 +34,7 @@ describe('billing logic', () => {
     expect(billingUsageLevel(10, 100)).toBe('ok');
     expect(billingUsageLevel(80, 100)).toBe('warning');
     expect(billingUsageLevel(90, 100)).toBe('warning');
-    expect(billingUsageLevel(100, 100)).toBe('over');
+    expect(billingUsageLevel(100, 100)).toBe('warning');
     expect(billingUsageLevel(101, 100)).toBe('over');
     expect(billingUsageLevel(0, 0)).toBe('ok');
   });

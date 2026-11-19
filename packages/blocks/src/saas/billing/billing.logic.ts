@@ -49,11 +49,11 @@ export interface BillingInvoice {
 
 export type BillingUsageLevel = 'ok' | 'warning' | 'over';
 
-/** Fine below 80 per cent, a warning from 80, over once the allowance is used up. */
+/** Fine below 80 per cent, a warning from 80 up to a full allowance, over only past it. */
 export function billingUsageLevel(used: number, limit: number): BillingUsageLevel {
   if (limit <= 0) return used > 0 ? 'over' : 'ok';
   const share = used / limit;
-  if (share >= 1) return 'over';
+  if (share > 1) return 'over';
   if (share >= 0.8) return 'warning';
   return 'ok';
 }
