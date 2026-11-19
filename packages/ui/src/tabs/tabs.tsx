@@ -81,7 +81,7 @@ export type TabsTabProps = WithClassName<ComponentProps<typeof BaseTabs.Tab>> & 
 const tabStyles: Record<TabsVariant, string> = {
   line: cn(
     'h-(--rx-tabs-height) px-3 pointer-coarse:h-(--rx-control-height-touch)',
-    'rounded-t-control hover:bg-surface-hover',
+    'rounded-t-control hover:bg-surface-hover data-active:hover:bg-transparent',
   ),
   segmented: cn(
     'h-(--rx-control-height-sm) grow justify-center rounded-control px-3',
