@@ -1,0 +1,159 @@
+import type { Dialog as BaseDialog } from '@base-ui/react/dialog';
+import {
+  Dialog as PlainDialog,
+  DialogContent as PlainDialogContent,
+  DialogTrigger as PlainDialogTrigger,
+  cn,
+  type DialogContentProps,
+} from '@rectio/ui';
+import {
+  createContext,
+  use,
+  useLayoutEffect,
+  useRef,
+  type ComponentProps,
+  type RefObject,
+} from 'react';
+
+import { springTo, tweenTo, type Controls } from '../lib/animate';
+import { usePlainMotion } from '../lib/mode';
+import { assignRef } from '../lib/ref';
+import { readMotionTokens, type MotionTokens } from '../lib/tokens';
+
+export type { DialogContentProps };
+
+/** The element that opened the dialog, so the popup can travel from it and back to it. */
+const OriginContext = createContext<RefObject<HTMLElement | null> | null>(null);
+
+type TriggerProps = ComponentProps<typeof PlainDialogTrigger>;
+type TriggerPointer = Parameters<NonNullable<TriggerProps['onPointerDown']>>[0];
+
+/** Same as the plain Dialog root, plus the trigger's position for the motioned popup. */
+export function Dialog<Payload>(props: BaseDialog.Root.Props<Payload>) {
+  const origin = useRef<HTMLElement | null>(null);
+  return (
+    <OriginContext value={origin}>
+      <PlainDialog {...props} />
+    </OriginContext>
+  );
+}
+
+/**
+ * Same as the plain trigger; remembers itself as the place the popup grows from. Recorded on mount
+ * and again on pointer down, never on click: Base UI opens the popup synchronously inside its own
+ * click handler, before a click listener here would run.
+ */
+export function DialogTrigger({ ref, onPointerDown, ...props }: TriggerProps) {
+  const originRef = use(OriginContext);
+  return (
+    <PlainDialogTrigger
+      {...props}
+      ref={(node: HTMLElement | null) => {
+        if (node !== null && originRef !== null) originRef.current = node;
+        assignRef(ref, node);
+      }}
+      onPointerDown={(event: TriggerPointer) => {
+        if (originRef !== null) originRef.current = event.currentTarget;
+        onPointerDown?.(event);
+      }}
+    />
+  );
+}
+
+/**
+ * Where the popup starts and ends: centred on the trigger, scaled uniformly to the trigger's width
+ * so text never squashes. Without a visible trigger (opened from code or a shortcut), the plain
+ * entrance: a short rise from the token shift and scale.
+ */
+function originTransform(popup: HTMLElement, trigger: HTMLElement | null, tokens: MotionTokens) {
+  const box = trigger?.getBoundingClientRect();
+  if (box === undefined || box.width === 0) {
+    return `translateY(${tokens.distance.shift}) scale(${String(tokens.scale.from)})`;
+  }
+  const self = popup.getBoundingClientRect();
+  const dx = box.left + box.width / 2 - (self.left + self.width / 2);
+  const dy = box.top + box.height / 2 - (self.top + self.height / 2);
+  const scale = Math.min(1, box.width / self.width);
+  return `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${scale.toFixed(3)})`;
+}
+
+type PopupState = Parameters<
+  Extract<DialogContentProps['render'], (...args: never[]) => unknown>
+>[1];
+
+function MotionPopup({ state, ref, ...props }: ComponentProps<'div'> & { state: PopupState }) {
+  const node = useRef<HTMLDivElement | null>(null);
+  const origin = use(OriginContext);
+  const running = useRef<Controls[]>([]);
+
+  useLayoutEffect(() => {
+    const element = node.current;
+    if (element === null) return;
+    const tokens = readMotionTokens(element);
+    if (tokens === null) return;
+    // Read where it is now (mid flight if interrupted) before stopping what moves it.
+    const now = getComputedStyle(element);
+    const from = { transform: now.transform, opacity: now.opacity };
+    // Measured only once nothing moves it: a popup caught mid flight would measure as its own
+    // origin. Motion's stop() keeps the current frame, so the animations are cancelled outright.
+    for (const controls of running.current) controls.stop();
+    for (const animation of element.getAnimations()) animation.cancel();
+    element.style.removeProperty('transform');
+    element.style.removeProperty('opacity');
+    const away = originTransform(element, origin?.current ?? null, tokens);
+    running.current = state.open
+      ? [
+          // Opens: travels out of the trigger on the overlay spring, opaque early.
+          springTo(element, { transform: [away, 'none'] }, tokens.spring.overlay),
+          tweenTo(element, { opacity: [0, 1] }, tokens.duration.base, tokens.easing.enter),
+        ]
+      : [
+          // Closes: returns toward the trigger on the same spring, gone within the fast duration.
+          springTo(element, { transform: [from.transform, away] }, tokens.spring.overlay),
+          tweenTo(
+            element,
+            { opacity: [from.opacity, 0] },
+            tokens.duration.fast,
+            tokens.easing.exit,
+          ),
+        ];
+  }, [state.open, origin]);
+
+  return (
+    <div
+      ref={(value) => {
+        node.current = value;
+        assignRef(ref, value);
+      }}
+      {...props}
+    />
+  );
+}
+
+/**
+ * The CSS entrance of the plain popup is replaced by the script one. Transitions must go: a running
+ * CSS transition outranks a Web Animation in the cascade. The ending opacity stays, so the popup is
+ * already invisible in the frame its exit animation ends.
+ */
+const REPLACES_CSS_MOTION = cn(
+  'transition-none',
+  'data-starting-style:translate-y-0 data-starting-style:scale-100 data-starting-style:opacity-100',
+);
+
+/**
+ * DialogContent that springs out of its trigger and back. Same props as the plain one; under
+ * reduced motion it is the plain one (a fade in place).
+ */
+export function DialogContent({ className, ...props }: DialogContentProps) {
+  const plain = usePlainMotion();
+  if (plain)
+    return <PlainDialogContent {...props} {...(className === undefined ? {} : { className })} />;
+  return (
+    <PlainDialogContent
+      {...props}
+      data-motion=""
+      className={cn(REPLACES_CSS_MOTION, className)}
+      render={(popupProps, state) => <MotionPopup {...popupProps} state={state} />}
+    />
+  );
+}
