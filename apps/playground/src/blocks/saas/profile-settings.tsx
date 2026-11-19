@@ -18,10 +18,12 @@ export function ProfileSettingsDemo({ motion, empty, locale }: DemoProps) {
     empty ? { ...PROFILE, jobTitle: '', emailVerified: true } : PROFILE,
   );
   const [pending, setPending] = useState(false);
+  const [savedAt, setSavedAt] = useState<Date | undefined>(empty ? undefined : NOW);
   return (
     <ProfileSettings
       profile={profile}
       pending={pending}
+      savedAt={savedAt}
       now={NOW}
       locale={locale}
       onAvatarChange={() => undefined}
@@ -33,6 +35,7 @@ export function ProfileSettingsDemo({ motion, empty, locale }: DemoProps) {
         setTimeout(() => {
           setPending(false);
           setProfile({ ...profile, ...values });
+          setSavedAt(new Date());
         }, 800);
       }}
     />

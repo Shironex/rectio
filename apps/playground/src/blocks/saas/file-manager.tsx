@@ -89,6 +89,19 @@ export function FileManagerDemo({ motion, empty, locale }: DemoProps) {
       onOpen={() => undefined}
       onNavigate={() => undefined}
       onUpload={() => undefined}
+      onDropFiles={(files) => {
+        setEntries([
+          ...entries,
+          ...files.map((file, index) => ({
+            id: `d${String(entries.length + index + 1)}`,
+            name: file.name,
+            type: 'file' as const,
+            size: file.size,
+            modified: NOW,
+            owner: 'Niamh Walsh',
+          })),
+        ]);
+      }}
       onCreateFolder={() => {
         setEntries([
           ...entries,

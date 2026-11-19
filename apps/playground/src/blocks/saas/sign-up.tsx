@@ -18,11 +18,17 @@ export function SignUpDemo({ motion, empty }: DemoProps) {
       social={
         empty ? undefined : (
           <>
-            <SocialButton icon={<GoogleLogoIcon aria-hidden weight="bold" />}>
-              Continue with Google
+            <SocialButton
+              aria-label="Continue with Google"
+              icon={<GoogleLogoIcon aria-hidden weight="bold" />}
+            >
+              Google
             </SocialButton>
-            <SocialButton icon={<GithubLogoIcon aria-hidden weight="bold" />}>
-              Continue with GitHub
+            <SocialButton
+              aria-label="Continue with GitHub"
+              icon={<GithubLogoIcon aria-hidden weight="bold" />}
+            >
+              GitHub
             </SocialButton>
           </>
         )

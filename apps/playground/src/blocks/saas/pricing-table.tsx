@@ -120,6 +120,7 @@ export function PricingTableDemo({ motion, empty, locale }: DemoProps) {
       currentPlanId="starter"
       description="Every plan starts with a 14 day trial of Growth. No card needed."
       onSelectPlan={() => undefined}
+      onAddPlan={() => undefined}
     />
   );
 }

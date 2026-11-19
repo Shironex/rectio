@@ -47,6 +47,7 @@ export function ChangelogDemo({ motion, empty, locale }: DemoProps) {
     <Changelog
       releases={empty ? [] : RELEASES}
       lastSeen={lastSeen}
+      onSubscribe={() => undefined}
       onMarkSeen={() => {
         setLastSeen(NOW);
       }}

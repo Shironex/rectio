@@ -51,6 +51,7 @@ export function OnboardingChecklistDemo({ motion, empty }: DemoProps) {
   return (
     <OnboardingChecklist
       steps={steps}
+      estimate="About 10 minutes"
       onToggleStep={(id, done) => {
         setSteps(steps.map((step) => (step.id === id ? { ...step, done } : step)));
       }}

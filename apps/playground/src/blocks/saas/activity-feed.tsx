@@ -39,6 +39,14 @@ const EVENTS: ActivityEvent[] = [
     target: 'April close',
   },
   {
+    id: 'e4b',
+    at: ago(60 * 21),
+    actor: { name: 'Billing', system: true },
+    kind: 'billing',
+    verb: 'issued the invoice for',
+    target: 'March',
+  },
+  {
     id: 'e5',
     at: ago(60 * 23),
     actor: { name: 'Niamh Walsh' },
@@ -71,6 +79,7 @@ export function ActivityFeedDemo({ motion, empty, locale }: DemoProps) {
       filterable
       hasMore
       onLoadMore={() => undefined}
+      onInvite={() => undefined}
       now={NOW}
       locale={locale}
     />
