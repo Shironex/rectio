@@ -9,9 +9,9 @@ import { useState } from 'react';
 
 import { NOW, ago, type DemoProps } from './demo';
 
-const NIAMH: CommentAuthor = { id: 'niamh', name: 'Niamh Walsh' };
-const INES: CommentAuthor = { id: 'ines', name: 'Ines Duarte' };
-const TOMASZ: CommentAuthor = { id: 'tomasz', name: 'Tomasz Wierzbicki' };
+const NIAMH: CommentAuthor = { id: 'niamh', name: 'Niamh Walsh', role: 'Owner' };
+const INES: CommentAuthor = { id: 'ines', name: 'Ines Duarte', role: 'Finance' };
+const TOMASZ: CommentAuthor = { id: 'tomasz', name: 'Tomasz Wierzbicki', role: 'Engineering' };
 const AIYANA: CommentAuthor = { id: 'aiyana', name: 'Aiyana Brooks' };
 
 const COMMENTS: ThreadComment[] = [
@@ -71,6 +71,7 @@ export function CommentThreadDemo({ motion, empty, locale }: DemoProps) {
       onEdit={(id, body) => {
         setComments(comments.map((c) => (c.id === id ? { ...c, body, editedAt: NOW } : c)));
       }}
+      onCopyLink={() => undefined}
       onDelete={(id) => {
         setComments(comments.filter((c) => c.id !== id));
       }}

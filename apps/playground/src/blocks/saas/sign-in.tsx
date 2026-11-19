@@ -3,7 +3,7 @@ import { SignIn as MotionSignIn } from '@rectio/blocks/motion';
 import { GithubLogoIcon, GoogleLogoIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
 
-import { Brand } from './brand';
+import { AuthAside, Brand } from './brand';
 import type { DemoProps } from './demo';
 
 export function SignInDemo({ motion, empty }: DemoProps) {
@@ -13,6 +13,7 @@ export function SignInDemo({ motion, empty }: DemoProps) {
   return (
     <SignIn
       brand={<Brand />}
+      aside={<AuthAside />}
       pending={pending}
       magicLinkSentTo={sentTo}
       error={empty ? undefined : 'That email and password do not match. Try again or reset it.'}

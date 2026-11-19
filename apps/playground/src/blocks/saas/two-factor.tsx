@@ -2,7 +2,7 @@ import { TwoFactor as PlainTwoFactor } from '@rectio/blocks';
 import { TwoFactor as MotionTwoFactor } from '@rectio/blocks/motion';
 import { useState } from 'react';
 
-import { Brand } from './brand';
+import { AuthAside, Brand } from './brand';
 import type { DemoProps } from './demo';
 
 export function TwoFactorDemo({ motion, empty }: DemoProps) {
@@ -12,6 +12,7 @@ export function TwoFactorDemo({ motion, empty }: DemoProps) {
   return (
     <TwoFactor
       brand={<Brand />}
+      aside={<AuthAside />}
       method={empty ? 'app' : 'sms'}
       destination="+44 7700 900829"
       sentAt={sentAt}

@@ -3,7 +3,7 @@ import { SignUp as MotionSignUp } from '@rectio/blocks/motion';
 import { GithubLogoIcon, GoogleLogoIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
 
-import { Brand } from './brand';
+import { AuthAside, Brand } from './brand';
 import type { DemoProps } from './demo';
 
 export function SignUpDemo({ motion, empty }: DemoProps) {
@@ -12,6 +12,7 @@ export function SignUpDemo({ motion, empty }: DemoProps) {
   return (
     <SignUp
       brand={<Brand />}
+      aside={<AuthAside />}
       pending={pending}
       emailTaken={!empty}
       defaultEmail={empty ? '' : 'margot.leclerc@fernhill.io'}

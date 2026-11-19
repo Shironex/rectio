@@ -40,6 +40,7 @@ const STEPS: OnboardingStep[] = [
     description: 'Snap receipts as you go; they attach to the right expense.',
     done: false,
     optional: true,
+    action: { label: 'Get the app', onSelect: () => undefined },
   },
 ];
 

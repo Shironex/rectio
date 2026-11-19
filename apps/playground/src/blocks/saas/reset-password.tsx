@@ -2,7 +2,7 @@ import { ResetPassword as PlainResetPassword, type ResetPasswordStep } from '@re
 import { ResetPassword as MotionResetPassword } from '@rectio/blocks/motion';
 import { useState } from 'react';
 
-import { Brand } from './brand';
+import { AuthAside, Brand } from './brand';
 import type { DemoProps } from './demo';
 
 /** `?step=sent|reset|done` opens a later step; the demo walks the flow from there. */
@@ -20,6 +20,7 @@ export function ResetPasswordDemo({ motion, empty }: DemoProps) {
     <ResetPassword
       step={step}
       brand={<Brand />}
+      aside={<AuthAside />}
       sentTo={sentTo}
       signIn={() => {
         setStep('request');

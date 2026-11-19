@@ -15,7 +15,7 @@ const COLUMNS: KanbanColumn[] = [
   { id: 'backlog', title: 'Backlog' },
   { id: 'doing', title: 'In progress', limit: 3 },
   { id: 'review', title: 'In review', limit: 2 },
-  { id: 'done', title: 'Done' },
+  { id: 'done', title: 'Done', done: true },
 ];
 
 const CARDS: KanbanCard[] = [

@@ -68,11 +68,27 @@ export function NotificationsCenterDemo({ motion, empty, locale }: DemoProps) {
       setItems(markAllNotificationsRead(items));
     },
   };
-  // The bell, and under it the same centre drawn open, so the panel reads as its popover.
+  // A stub app frame: the top bar with the bell, and the centre drawn open under it over a faint
+  // page, so the panel reads as the bell's popover rather than a card on its own.
   return (
-    <div className="flex flex-col items-end gap-2">
-      <NotificationsCenter {...common} />
-      <NotificationsCenter {...common} inline className="w-full max-w-md shadow-raised" />
+    <div className="overflow-hidden rounded-panel border border-line bg-surface-sunken">
+      <div className="flex items-center justify-between gap-4 border-b border-line bg-surface px-4 py-2">
+        <span className="font-display text-lg font-heading tracking-tight">Fernhill</span>
+        <NotificationsCenter {...common} />
+      </div>
+      <div className="grid px-4 pt-2 pb-6">
+        <div aria-hidden className="col-start-1 row-start-1 flex flex-col gap-3 pt-6">
+          <span className="h-4 w-40 rounded-full bg-line" />
+          <span className="h-24 w-full rounded-control bg-surface" />
+          <span className="h-24 w-full rounded-control bg-surface" />
+          <span className="h-24 w-full rounded-control bg-surface" />
+        </div>
+        <NotificationsCenter
+          {...common}
+          inline
+          className="col-start-1 row-start-1 w-full max-w-md self-start justify-self-end shadow-raised"
+        />
+      </div>
     </div>
   );
 }
