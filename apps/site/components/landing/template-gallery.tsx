@@ -90,7 +90,16 @@ function TemplateText({
       <div className="mt-auto flex max-w-full flex-col items-start gap-4">
         <div className="flex max-w-full flex-col gap-2">
           <CopyCommand command={template.command} className="max-w-full overflow-x-auto" />
-          <p className="text-sm text-fg-muted">Needs your rectio Pro license key.</p>
+          <p className="text-sm text-fg-muted">
+            Needs a{' '}
+            <Link
+              href="/#pricing"
+              className="text-fg underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            >
+              rectio Pro license
+            </Link>
+            .
+          </p>
         </div>
         <Link
           href={template.href}

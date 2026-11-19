@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { templateManifestSchema } from '@rectio/registry';
 
-import { CATEGORY_LABELS, type SiteTemplate } from './template-types.ts';
+import { CATEGORY_LABELS, TEMPLATE_CATEGORIES, type SiteTemplate } from './template-types.ts';
 
 /** The repo's templates folder, read at build time; the site runs from apps/site. */
 export const TEMPLATES_DIR = join(process.cwd(), '..', '..', 'templates');
@@ -15,7 +15,8 @@ const served = (name: string, path: string) =>
   `/templates/${name}/${path.slice('screenshots/'.length)}`;
 
 /**
- * Every template with a template.json, in folder order, as the site shows it. A new folder under
+ * Every template with a template.json, by category (apps first, the kit's home ground), then by
+ * name, as the site shows it. A new folder under
  * templates/ appears in the docs and on the landing with no change here.
  */
 export function readTemplates(): SiteTemplate[] {
@@ -46,7 +47,12 @@ export function readTemplates(): SiteTemplate[] {
             pick('phone') === undefined ? undefined : served(manifest.name, pick('phone') ?? ''),
         },
       };
-    });
+    })
+    .sort(
+      (a, b) =>
+        TEMPLATE_CATEGORIES.indexOf(a.category) - TEMPLATE_CATEGORIES.indexOf(b.category) ||
+        a.name.localeCompare(b.name),
+    );
 }
 
 export function readTemplate(name: string): SiteTemplate {

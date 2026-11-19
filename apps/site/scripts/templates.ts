@@ -37,7 +37,7 @@ for (const template of templates) {
     '',
     '## Start a project',
     '',
-    `A ${CATEGORY_LABELS[template.category].toLowerCase()} template: a complete Next.js app with the kit items it`,
+    `${/^[aeiou]/i.test(CATEGORY_LABELS[template.category]) ? 'An' : 'A'} ${CATEGORY_LABELS[template.category].toLowerCase()} template: a complete Next.js app with the kit items it`,
     'uses installed as your own source. Templates are Pro, so the CLI needs your license key.',
     '',
     '```sh',
