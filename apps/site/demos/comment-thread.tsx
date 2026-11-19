@@ -12,9 +12,9 @@ import { useState } from 'react';
 export const NOW = new Date(2026, 2, 19, 14, 20);
 const ago = (minutes: number) => new Date(NOW.getTime() - minutes * 60_000);
 
-const NIAMH: CommentAuthor = { id: 'niamh', name: 'Niamh Walsh' };
-const INES: CommentAuthor = { id: 'ines', name: 'Ines Duarte' };
-const TOMASZ: CommentAuthor = { id: 'tomasz', name: 'Tomasz Wierzbicki' };
+const NIAMH: CommentAuthor = { id: 'niamh', name: 'Niamh Walsh', role: 'Owner' };
+const INES: CommentAuthor = { id: 'ines', name: 'Ines Duarte', role: 'Finance' };
+const TOMASZ: CommentAuthor = { id: 'tomasz', name: 'Tomasz Wierzbicki', role: 'Engineering' };
 const AIYANA: CommentAuthor = { id: 'aiyana', name: 'Aiyana Brooks' };
 
 const COMMENTS: ThreadComment[] = [
@@ -76,6 +76,7 @@ export function useCommentThreadDemo() {
     onDelete: (id) => {
       setComments(comments.filter((c) => c.id !== id));
     },
+    onCopyLink: () => undefined,
     onResolve: () => {
       setResolved({ by: NIAMH.name, at: NOW });
     },

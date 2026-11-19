@@ -45,10 +45,17 @@ Reply buttons give way, and `onReopen` adds a Reopen button.
       type: 'readonly ThreadComment[]',
       description: 'id, author, body, createdAt, optional editedAt and parentId.',
     },
-    writer: { type: 'CommentAuthor', description: 'The person writing: id, name, avatarUrl.' },
+    writer: {
+      type: 'CommentAuthor',
+      description: 'The person writing: id, name, avatarUrl and an optional role chip.',
+    },
     onAdd: { type: '(body: string, parentId?: string) => void' },
     onEdit: { type: '(commentId: string, body: string) => void' },
     onDelete: { type: '(commentId: string) => void', description: 'Asked to confirm first.' },
+    onCopyLink: {
+      type: '(commentId: string) => void',
+      description: 'Gives every comment a menu with Copy link.',
+    },
     resolved: { type: '{ by: string; at: Date }' },
     onResolve: { type: '() => void' },
     onReopen: { type: '() => void' },

@@ -42,7 +42,10 @@ widths the columns scroll sideways and snap.
 
 <TypeTable
   type={{
-    columns: { type: 'readonly KanbanColumn[]', description: 'id, title and optional limit.' },
+    columns: {
+      type: 'readonly KanbanColumn[]',
+      description: 'id, title, optional limit, and done for a finished column.',
+    },
     cards: {
       type: 'readonly KanbanCard[]',
       description: 'id, columnId, title, optional reference, tags, assignee, due and priority.',
