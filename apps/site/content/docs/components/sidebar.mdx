@@ -1,0 +1,199 @@
+---
+title: Sidebar
+description: The app's main navigation, folding to an icon rail and an off-canvas sheet on phones.
+---
+
+import SidebarDemo from '@/demos/sidebar';
+
+<Preview name="sidebar" plain={<SidebarDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add sidebar
+```
+
+`kbd`, `menu`, `sheet`, `tooltip` and their dependencies install with it.
+
+## Usage
+
+```tsx
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarInset,
+  SidebarItem,
+  SidebarProvider,
+  SidebarSubItem,
+  SidebarSubmenu,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
+
+<SidebarProvider>
+  <Sidebar label="Main">
+    <SidebarHeader>Harbour &amp; Finch</SidebarHeader>
+    <SidebarContent>
+      <SidebarGroup label="Finance">
+        <SidebarItem href="/overview" icon={<HouseIcon />}>
+          Overview
+        </SidebarItem>
+        <SidebarSubmenu label="Receivables" icon={<ReceiptIcon />} active>
+          <SidebarSubItem href="/invoices" active>
+            Invoices
+          </SidebarSubItem>
+          <SidebarSubItem href="/customers">Customers</SidebarSubItem>
+        </SidebarSubmenu>
+        <SidebarItem href="/payables" icon={<BankIcon />} badge={4}>
+          Payables
+        </SidebarItem>
+      </SidebarGroup>
+    </SidebarContent>
+  </Sidebar>
+  <SidebarInset>
+    <SidebarTrigger />
+    {/* the page */}
+  </SidebarInset>
+</SidebarProvider>;
+```
+
+On desktop the sidebar is a full-height column that folds to an icon rail. In the rail the labels
+become tooltips and accessible names, group headings become hairlines, and a submenu opens as a
+flyout beside its icon, so nested pages stay one click away. Below the medium breakpoint the sidebar
+is an off-canvas sheet from the start edge, opened by `SidebarTrigger`, and always shows labels.
+Following a link in the sheet closes it.
+
+`mod+b` folds and unfolds the sidebar from anywhere (Command B on a Mac, Control B elsewhere); it is
+ignored while typing in a field, where it may mean bold. Pass `shortcut` to change it or `null` to
+bind nothing. The fold is not animated on purpose, because it would animate the width and push the
+page around. Save the choice with `onCollapsedChange` and start from it with `defaultCollapsed`.
+
+Mark the item of the current page with `active`. Pass `render` to use your router's link:
+`render={<Link to="/invoices" />}`. Without `href` or `render`, an item is a button, for an action.
+
+`useSidebar()` returns `collapsed`, `toggle()`, `mobile` and `mobileOpen` anywhere inside the
+provider. The sidebar needs a `TooltipProvider` above it for the delay group; `AppShell` adds one.
+
+## Props
+
+### SidebarProvider
+
+<TypeTable
+  type={{
+    collapsed: { type: 'boolean', description: 'Controlled collapsed state of the desktop rail.' },
+    defaultCollapsed: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Where the rail starts when uncontrolled; read it from the saved preference.',
+    },
+    onCollapsedChange: {
+      type: '(collapsed: boolean) => void',
+      description: 'Called on every fold and unfold, to save the preference.',
+    },
+    shortcut: {
+      type: 'string | null',
+      default: "'mod+b'",
+      description: 'Folds and unfolds the sidebar from anywhere. Null binds nothing.',
+    },
+  }}
+/>
+
+### Sidebar
+
+Every `aside` prop is accepted as well, except `children`.
+
+<TypeTable
+  type={{
+    label: {
+      type: 'string',
+      default: "'Main'",
+      description: 'Names the navigation landmark and the phone sheet.',
+    },
+  }}
+/>
+
+### SidebarHeader, SidebarContent, SidebarFooter, SidebarInset
+
+Plain `div` elements. The header holds the product mark, the content scrolls and holds the groups,
+the footer holds the account menu or settings, and the inset is the column beside the sidebar.
+
+### SidebarGroup
+
+<TypeTable
+  type={{
+    label: {
+      type: 'ReactNode',
+      description: 'Names the group. Hidden in the icon rail, where a hairline separates groups.',
+    },
+  }}
+/>
+
+### SidebarItem
+
+Every `a` prop is accepted as well.
+
+<TypeTable
+  type={{
+    children: {
+      type: 'ReactNode',
+      required: true,
+      description: 'The label, also the tooltip and accessible name in the icon rail.',
+    },
+    icon: { type: 'ReactNode', description: 'A 16px icon. It is all the icon rail shows.' },
+    active: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Marks the current page: tinted and announced as the current page.',
+    },
+    badge: {
+      type: 'ReactNode',
+      description: 'A count at the end, such as items waiting. Hidden in the icon rail.',
+    },
+    render: { type: 'ReactElement', description: "Replaces the anchor, for a router's link." },
+  }}
+/>
+
+### SidebarSubmenu, SidebarSubItem
+
+`SidebarSubmenu` expands in place in the full sidebar and opens a flyout in the rail.
+`SidebarSubItem` takes the same props as `SidebarItem` except `icon`.
+
+<TypeTable
+  type={{
+    label: { type: 'ReactNode', required: true, description: 'The section name, on the submenu.' },
+    icon: { type: 'ReactNode', description: 'On the submenu.' },
+    active: {
+      type: 'boolean',
+      default: 'false',
+      description: 'The current page is one of its items: tinted, and it starts open.',
+    },
+    defaultOpen: { type: 'boolean', description: 'Open at first. Default: open when `active`.' },
+    badge: { type: 'ReactNode' },
+  }}
+/>
+
+### SidebarTrigger
+
+Every `button` prop is accepted as well, except `children`.
+
+<TypeTable
+  type={{
+    labels: {
+      type: '{ collapse: string; expand: string; open: string }',
+      description: 'Names for each state, for translation.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- The sidebar is a `nav` landmark named by `label`; groups are named by their heading.
+- The current item carries `aria-current="page"`.
+- The trigger reports `aria-expanded` and names its action ("Collapse sidebar", "Expand sidebar",
+  "Open navigation"); its tooltip shows the shortcut.
+- In the icon rail every item keeps its name for screen readers and gets a tooltip on hover and
+  focus.
+- The phone sheet is a modal dialog with focus trapped, restored on close, and closed by Escape.
+
+<ComponentSource path="sidebar/sidebar.tsx" />

@@ -1,0 +1,108 @@
+---
+title: Tabs
+description: Line tabs for sections of a page, and segmented tabs for views of the same data.
+---
+
+import TabsDemo from '@/demos/tabs';
+import TabsMotionDemo from '@/demos/tabs.motion';
+
+<Preview
+  name="tabs"
+  plain={<TabsDemo />}
+  motion={<TabsMotionDemo />}
+  importLine="import { TabsList, TabsPanel } from '@rectio/motion/navigation';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add tabs
+```
+
+## Usage
+
+```tsx
+import { Tabs, TabsList, TabsPanel, TabsTab } from '@/components/ui/tabs';
+
+<Tabs defaultValue="open">
+  <TabsList aria-label="Invoices by state">
+    <TabsTab value="open" hint="12">
+      Open
+    </TabsTab>
+    <TabsTab value="overdue" hint="3">
+      Overdue
+    </TabsTab>
+  </TabsList>
+  <TabsPanel value="open">{/* open invoices */}</TabsPanel>
+  <TabsPanel value="overdue">{/* overdue invoices */}</TabsPanel>
+</Tabs>;
+```
+
+`line` (the default) draws an underline under the active tab and suits sections of a page.
+`segmented` draws a switch and suits a few views of the same thing, such as chart or table, or month
+or quarter. On a phone the line variant scrolls sideways instead of wrapping, so the underline stays
+on one line.
+
+The indicator is placed from Base UI's measurements. In the plain tabs it jumps to the active tab;
+the motion variant glides it on a spring, and falls back to the plain one under reduced motion. Use
+`TabsList` and `TabsPanel` from `@rectio/motion/navigation` together with the plain `Tabs` and
+`TabsTab`.
+
+`tabsIndicator` is exported, and `indicator={false}` hides the built-in one, for a motioned
+indicator of your own.
+
+## Props
+
+### Tabs, TabsPanel
+
+Base UI's `Tabs.Root` and `Tabs.Panel`. `Tabs` takes `value`, `defaultValue`, `onValueChange` and
+`orientation`; each `TabsPanel` takes the `value` of its tab. Panels are focusable.
+
+### TabsList
+
+Every prop of Base UI's `Tabs.List` is accepted as well.
+
+<TypeTable
+  type={{
+    variant: {
+      type: "'line' | 'segmented'",
+      default: "'line'",
+      description: 'An underline for page sections, a switch for views of the same thing.',
+    },
+    indicator: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Set false to render without the indicator.',
+    },
+    activateOnFocus: {
+      type: 'boolean',
+      default: 'true',
+      description:
+        'Arrow keys activate the tab they land on. Set false when a panel is slow to render, so Enter or Space activates instead.',
+    },
+  }}
+/>
+
+### TabsTab
+
+Every prop of Base UI's `Tabs.Tab` is accepted as well, including `value` and `disabled`.
+
+<TypeTable
+  type={{
+    hint: {
+      type: 'ReactNode',
+      description:
+        'A count after the label, such as the open items in that view. Set in tabular figures.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Name the list with `aria-label`; each tab is tied to its panel.
+- Arrow keys move between tabs, Home and End jump to the ends, and Tab moves from the list into the
+  active panel.
+- A disabled tab can take focus but does not open its panel.
+- The active tab differs by weight and text colour as well as the indicator.
+
+<ComponentSource path="tabs/tabs.tsx" />

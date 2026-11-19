@@ -1,0 +1,99 @@
+---
+title: Popover
+description: Content anchored to a button and opened on purpose, such as a filter form.
+---
+
+import PopoverDemo from '@/demos/popover';
+import PopoverMotionDemo from '@/demos/popover.motion';
+
+<Preview
+  name="popover"
+  plain={<PopoverDemo />}
+  motion={<PopoverMotionDemo />}
+  importLine="import { PopoverContent } from '@rectio/motion/navigation';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add popover
+```
+
+`select` and `theme-scope` install with it.
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+
+<Popover>
+  <PopoverTrigger render={<Button variant="secondary" />}>Filter payables</PopoverTrigger>
+  <PopoverContent showClose align="start">
+    <PopoverTitle>Filter payables</PopoverTitle>
+    <PopoverDescription>Show the bills of one supplier.</PopoverDescription>
+    {/* fields */}
+  </PopoverContent>
+</Popover>;
+```
+
+Use a popover for something the user asked for: a filter form, a detail, a short choice. For a list
+of actions use `Menu`; for a link preview use `HoverCard`. Focus moves into the popover when it
+opens and returns to the trigger when it closes. It portals into the nearest `ThemeScope`.
+
+`popoverSurface` is exported: the hairline, overlay surface and shadow every anchored panel shares.
+
+The motion variant grows from the trigger. Import `PopoverContent` from
+`@rectio/motion/navigation`; every other part is the plain one.
+
+## Props
+
+### Popover, PopoverTrigger, PopoverClose
+
+Base UI's `Popover.Root`, `Popover.Trigger` and `Popover.Close`. `Popover` takes `open`,
+`defaultOpen`, `onOpenChange` and `modal`; the trigger and close take `render`.
+
+### PopoverContent
+
+Every prop of Base UI's `Popover.Popup` is accepted as well.
+
+<TypeTable
+  type={{
+    children: { type: 'ReactNode', required: true },
+    showClose: {
+      type: 'boolean',
+      default: 'false',
+      description: 'A close button in the corner. Escape and an outside press close it too.',
+    },
+    closeLabel: {
+      type: 'string',
+      default: "'Close'",
+      description: 'Accessible name of the close button.',
+    },
+    side: {
+      type: "'top' | 'right' | 'bottom' | 'left' | 'inline-start' | 'inline-end'",
+      default: "'bottom'",
+    },
+    align: { type: "'start' | 'center' | 'end'", default: "'center'" },
+    sideOffset: { type: 'number', default: '8' },
+  }}
+/>
+
+### PopoverTitle, PopoverDescription
+
+Every prop of Base UI's `Popover.Title` and `Popover.Description`.
+
+## Accessibility
+
+- The popover is named by `PopoverTitle` and described by `PopoverDescription`.
+- Focus moves in on open and returns to the trigger on close.
+- Escape, an outside press and the close button close it.
+- The popup stays inside the viewport and flips to the other side when there is no room.
+
+<ComponentSource path="popover/popover.tsx" />

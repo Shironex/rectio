@@ -1,0 +1,155 @@
+---
+title: CommandMenu
+description: A command palette to jump anywhere or run any action, opened from the keyboard.
+---
+
+import CommandMenuDemo from '@/demos/command-menu';
+
+<Preview name="command-menu" plain={<CommandMenuDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add command-menu
+```
+
+`kbd` and `theme-scope` install with it.
+
+## Usage
+
+```tsx
+import { CommandMenu, CommandMenuTrigger, type CommandGroup } from '@/components/ui/command-menu';
+
+const groups: CommandGroup[] = [
+  {
+    label: 'Go to',
+    items: [
+      { id: 'payables', label: 'Payables', keywords: ['bills'], onSelect: () => go('/payables') },
+    ],
+  },
+  {
+    label: 'Actions',
+    items: [
+      { id: 'new-invoice', label: 'New invoice', shortcut: 'mod+shift+i', onSelect: newInvoice },
+    ],
+  },
+];
+
+<CommandMenu groups={groups}>
+  <CommandMenuTrigger>Search pages and actions</CommandMenuTrigger>
+</CommandMenu>;
+```
+
+The menu opens from anywhere on the page with `mod+k` (Command K on a Mac, Control K elsewhere);
+pass `shortcut` to change it or `null` to bind nothing. Typing filters the items by fuzzy match
+against the label and its `keywords`, so `nwinv` finds "New invoice", and the matched letters are
+marked. The first result is highlighted, Arrow Up and Arrow Down move, Enter runs it and Escape
+closes. The query is cleared on close.
+
+`onSelect` runs after the menu closes. An item's `shortcut` is shown as keycaps but not bound: the
+app binds it, as with `Menu`.
+
+`CommandMenuTrigger` is a field-shaped button with the shortcut, for the header of an app. It shrinks
+to the search icon on a phone. Give it the same `shortcut` as the menu. You can also control the menu
+with `open` and `onOpenChange` and open it from any button.
+
+Use `emptyState` to say something more useful than the default when nothing matches. `filterCommands` and
+`fuzzyScore` are exported if you want to reuse the matching.
+
+The command menu has no open animation, and no motion variant, on purpose. It is used dozens of times
+a day, and the field should be ready the moment the shortcut is pressed.
+
+## Props
+
+### CommandMenu
+
+<TypeTable
+  type={{
+    groups: {
+      type: 'CommandGroup[]',
+      required: true,
+      description:
+        'Each group has a `label` and its `items`. Groups keep their order when filtered.',
+    },
+    open: { type: 'boolean', description: 'Controlled open state.' },
+    defaultOpen: { type: 'boolean', default: 'false' },
+    onOpenChange: { type: '(open: boolean) => void' },
+    shortcut: {
+      type: 'string | null',
+      default: "'mod+k'",
+      description: 'Opens and closes the menu from anywhere. Null binds nothing.',
+    },
+    label: {
+      type: 'string',
+      default: "'Command menu'",
+      description: 'Accessible name of the dialog and the search field.',
+    },
+    placeholder: { type: 'string', default: "'Search pages and actions'" },
+    emptyState: {
+      type: '(query: string) => ReactNode',
+      description: 'What to show when nothing matches.',
+    },
+    showHints: {
+      type: 'boolean',
+      default: 'true',
+      description: 'The keyboard hints under the list. Hidden on touch screens.',
+    },
+    children: {
+      type: 'ReactNode',
+      description: 'A `CommandMenuTrigger`, or anything rendered inside the dialog root.',
+    },
+  }}
+/>
+
+### CommandItem
+
+<TypeTable
+  type={{
+    id: { type: 'string', required: true, description: 'Unique across the whole menu.' },
+    label: {
+      type: 'string',
+      required: true,
+      description: 'What it does or where it goes: "New invoice", "Go to Payables".',
+    },
+    onSelect: { type: '() => void', required: true, description: 'Runs after the menu closes.' },
+    keywords: {
+      type: 'readonly string[]',
+      description: 'Other words that find it: synonyms, codes, the old name. Not shown.',
+    },
+    icon: { type: 'ReactNode', description: 'A 16px icon before the label.' },
+    hint: {
+      type: 'ReactNode',
+      description: 'Secondary text at the end, such as the section a page lives in.',
+    },
+    shortcut: { type: 'string', description: "The command's own shortcut, shown as keycaps." },
+    disabled: { type: 'boolean' },
+  }}
+/>
+
+### CommandMenuTrigger
+
+Every prop of Base UI's `Dialog.Trigger` is accepted as well.
+
+<TypeTable
+  type={{
+    children: { type: 'ReactNode', default: "'Search'", description: 'The words in the field.' },
+    shortcut: {
+      type: 'string | null',
+      default: "'mod+k'",
+      description: "The shortcut to show, matching the menu's. Null hides it.",
+    },
+  }}
+/>
+
+## Accessibility
+
+- Opens as a modal dialog named by `label`, with the search field focused. Escape closes it and
+  returns focus to where it was.
+- The field and the list work as a combobox: focus stays in the field while Arrow Up and Arrow Down
+  move the highlighted item, and Enter runs it.
+- Groups are named, items with a shortcut carry `aria-keyshortcuts`, and the keyboard hints are
+  linked to the field as its description.
+- With no matches the empty message is announced.
+
+<ComponentSource path="command-menu/command-menu.tsx" />
+<ComponentSource path="command-menu/fuzzy.ts" />

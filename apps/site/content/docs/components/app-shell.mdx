@@ -1,0 +1,108 @@
+---
+title: AppShell
+description: The frame of an app, with a sidebar, a sticky header and the page, and a skip link.
+---
+
+import AppShellDemo from '@/demos/app-shell';
+
+<Preview name="app-shell" plain={<AppShellDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add app-shell
+```
+
+`sidebar`, `tooltip` and their dependencies install with it.
+
+## Usage
+
+```tsx
+import { AppShell, AppShellHeader } from '@/components/ui/app-shell';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { Sidebar } from '@/components/ui/sidebar';
+
+<AppShell
+  sidebar={<Sidebar>{/* header, content, footer */}</Sidebar>}
+  header={
+    <AppShellHeader
+      title={<Breadcrumb items={items} />}
+      actions={<Button size="sm">New invoice</Button>}
+    />
+  }
+>
+  {/* the page */}
+</AppShell>;
+```
+
+`AppShell` wires a `SidebarProvider`, a `TooltipProvider`, the sidebar, a sticky header and the page
+inside a `main` landmark. The page scrolls the window, not a box inside it, so browser find, scroll
+restoration and pull to refresh behave as on any page. The header sticks to the top.
+
+The first Tab stop of the page is a skip link that jumps past the navigation to `main`. It is hidden
+until focused.
+
+The shell accepts the props of `SidebarProvider` (`defaultCollapsed`, `onCollapsedChange`,
+`shortcut`), so the folded state can be saved and the shortcut changed here.
+
+`AppShellHeader` puts the `SidebarTrigger`, a divider, the title and the actions on one line. Set
+`showTrigger={false}` for a page without a sidebar toggle.
+
+This preview sits in a fixed height box so the page can scroll inside it; in an app the shell takes
+the whole window (`min-h-dvh`).
+
+## Props
+
+### AppShell
+
+Takes the props of `SidebarProvider` as well.
+
+<TypeTable
+  type={{
+    sidebar: { type: 'ReactNode', required: true, description: 'A `Sidebar`.' },
+    header: { type: 'ReactNode', description: 'An `AppShellHeader`, sticky above the page.' },
+    children: { type: 'ReactNode', required: true, description: 'The page.' },
+    skipLabel: {
+      type: 'string',
+      default: "'Skip to content'",
+      description: 'Text of the skip link.',
+    },
+    mainId: {
+      type: 'string',
+      default: "'main'",
+      description: "Id of the main landmark, the skip link's target.",
+    },
+    className: { type: 'string', description: 'Classes for the outer frame.' },
+    mainClassName: { type: 'string', description: 'Classes for the `main` element.' },
+  }}
+/>
+
+### AppShellHeader
+
+Every `header` prop is accepted as well, except `title`.
+
+<TypeTable
+  type={{
+    title: {
+      type: 'ReactNode',
+      description: 'The page title or a `Breadcrumb`, after the sidebar trigger.',
+    },
+    actions: {
+      type: 'ReactNode',
+      description: 'Search, notifications, the account menu, at the end.',
+    },
+    showTrigger: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Set false to leave out the sidebar trigger.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- The skip link is the first Tab stop and moves focus to `main`, which is a named landmark.
+- Landmarks: the sidebar `nav`, the header, and `main`.
+- Everything about the sidebar and its trigger applies, including the phone sheet.
+
+<ComponentSource path="app-shell/app-shell.tsx" />

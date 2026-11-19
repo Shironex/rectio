@@ -1,0 +1,94 @@
+---
+title: Pagination
+description: Page numbers for a long list, with a compact form for phones.
+---
+
+import PaginationDemo from '@/demos/pagination';
+
+<Preview name="pagination" plain={<PaginationDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add pagination
+```
+
+The component lives in `pagination-bar.tsx`, so it does not clash with the `DataTablePagination`
+that comes with the data table.
+
+## Usage
+
+```tsx
+import { Pagination } from '@/components/ui/pagination-bar';
+
+<Pagination page={page} pageCount={24} onPageChange={setPage} label="Invoices" />;
+```
+
+The bar always shows the first and last page, the current page with `siblings` on each side, and a
+gap where pages are skipped. Its length stays the same as the current page moves, so the buttons
+never jump under the pointer, and a gap never stands for a single page (that page is drawn instead).
+`paginationRange` is exported if you need the same list.
+
+Previous and next stay in place and are disabled at the ends instead of disappearing.
+
+By default the pages are buttons. Pass `getHref` to make each one a link, so the page lives in the
+URL; clicking still calls `onPageChange` when you give one, and a plain navigation happens when you
+do not.
+
+```tsx
+<Pagination page={page} pageCount={24} getHref={(p) => `/invoices?page=${String(p)}`} />
+```
+
+`variant="responsive"` (the default) shows the numbers from the small breakpoint up and a compact
+"Page 4 of 24" with previous and next below it. Use `full` or `compact` to fix one.
+
+## Props
+
+Every `nav` prop is accepted as well.
+
+<TypeTable
+  type={{
+    page: { type: 'number', required: true, description: 'The current page, from 1.' },
+    pageCount: { type: 'number', required: true },
+    onPageChange: { type: '(page: number) => void' },
+    siblings: {
+      type: 'number',
+      default: '1',
+      description: 'Pages shown on each side of the current one.',
+    },
+    variant: {
+      type: "'full' | 'compact' | 'responsive'",
+      default: "'responsive'",
+      description: 'Page numbers, a compact status, or one that follows the screen width.',
+    },
+    getHref: {
+      type: '(page: number) => string',
+      description: 'Make each page a link instead of a button.',
+    },
+    label: {
+      type: 'string',
+      default: "'Pagination'",
+      description: 'Name of the navigation landmark.',
+    },
+    previousLabel: { type: 'string', default: "'Previous'" },
+    nextLabel: { type: 'string', default: "'Next'" },
+    formatStatus: {
+      type: '(page: number, pageCount: number) => ReactNode',
+      description: 'Text of the compact status. Default "Page 3 of 12".',
+    },
+    formatPageLabel: {
+      type: '(page: number) => string',
+      description: 'Accessible name of a page control. Default "Page 3".',
+    },
+  }}
+/>
+
+## Accessibility
+
+- A `nav` landmark named by `label`, holding a list of controls.
+- The current page carries `aria-current="page"` and is also drawn with a ring, not only a colour.
+- Previous and next at the ends are announced as unavailable with `aria-disabled` instead of being
+  removed, so the layout and the reading order stay put.
+- Each page number has a full name ("Page 4") through `formatPageLabel`.
+
+<ComponentSource path="pagination/pagination-bar.tsx" />

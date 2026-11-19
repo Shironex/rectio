@@ -1,0 +1,136 @@
+---
+title: Menu
+description: A dropdown of actions with icons, shortcuts, checkboxes, radio items and submenus.
+---
+
+import MenuDemo from '@/demos/menu';
+import MenuMotionDemo from '@/demos/menu.motion';
+
+<Preview
+  name="menu"
+  plain={<MenuDemo />}
+  motion={<MenuMotionDemo />}
+  importLine="import { MenuContent, MenuSubContent } from '@rectio/motion/navigation';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add menu
+```
+
+`kbd`, `popover`, `select` and `theme-scope` install with it.
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import {
+  Menu,
+  MenuContent,
+  MenuGroup,
+  MenuItem,
+  MenuSeparator,
+  MenuTrigger,
+} from '@/components/ui/menu';
+
+<Menu>
+  <MenuTrigger render={<Button variant="secondary" />}>Invoice 2041</MenuTrigger>
+  <MenuContent>
+    <MenuGroup label="Invoice">
+      <MenuItem icon={<PencilIcon />} shortcut="mod+e" onClick={edit}>
+        Edit
+      </MenuItem>
+      <MenuItem icon={<CopyIcon />} shortcut="mod+d" onClick={duplicate}>
+        Duplicate
+      </MenuItem>
+    </MenuGroup>
+    <MenuSeparator />
+    <MenuItem tone="danger" onClick={remove}>
+      Delete draft
+    </MenuItem>
+  </MenuContent>
+</Menu>;
+```
+
+Parts: `MenuItem` for an action, `MenuLinkItem` for a row that navigates (an anchor; pass `render` for a
+router link), `MenuCheckboxItem` for an on or off setting, `MenuRadioGroup` with `MenuRadioItem` for
+one choice, `MenuSub` with `MenuSubTrigger` and `MenuSubContent` for a submenu, `MenuGroup` and
+`MenuLabel` for headings, and `MenuSeparator`. Checkbox and radio items stay open when chosen.
+
+The `shortcut` on an item is a hint only: the menu does not bind it, your app does (see `Kbd`).
+`menuItem` and `menuPopup` are exported so your own rows and the context menu can share the styling.
+
+The motion variant opens the list from the trigger and glides the highlight between rows. Use its
+`MenuContent` and `MenuSubContent` from `@rectio/motion/navigation`; the other parts are plain.
+
+## Props
+
+### Menu, MenuTrigger, MenuSub, MenuRadioGroup
+
+Base UI's `Menu.Root`, `Menu.Trigger`, `Menu.SubmenuRoot` and `Menu.RadioGroup`. `MenuRadioGroup`
+takes `value` and `onValueChange`.
+
+### MenuContent, MenuSubContent
+
+Every prop of Base UI's `Menu.Popup` is accepted as well. `MenuSubContent` opens beside its trigger
+(`side` defaults to `inline-end`).
+
+<TypeTable
+  type={{
+    side: {
+      type: "'top' | 'right' | 'bottom' | 'left' | 'inline-start' | 'inline-end'",
+      default: "'bottom'",
+    },
+    align: { type: "'start' | 'center' | 'end'", default: "'start'" },
+    sideOffset: { type: 'number', default: '6' },
+    alignOffset: { type: 'number', default: '0' },
+  }}
+/>
+
+### MenuItem
+
+Every prop of Base UI's `Menu.Item` is accepted as well, including `onClick` and `disabled`.
+
+<TypeTable
+  type={{
+    icon: { type: 'ReactNode', description: 'An icon before the label, 16px.' },
+    shortcut: {
+      type: 'string',
+      description:
+        'A hint at the end, such as `mod+d`, drawn for the platform. Not bound by the menu.',
+    },
+    tone: {
+      type: "'default' | 'danger'",
+      description: '`danger` for an action that destroys or cannot be undone.',
+    },
+  }}
+/>
+
+### MenuLinkItem, MenuSubTrigger
+
+Both take `icon`, like `MenuItem`. `MenuLinkItem` accepts every prop of Base UI's `Menu.LinkItem`,
+`MenuSubTrigger` every prop of `Menu.SubmenuTrigger`.
+
+### MenuCheckboxItem, MenuRadioItem
+
+Every prop of Base UI's `Menu.CheckboxItem` and `Menu.RadioItem`: `checked`, `onCheckedChange`,
+`value`. Both default `closeOnClick` to false. `MenuCheckboxItem` also takes `shortcut`.
+
+### MenuGroup, MenuLabel, MenuSeparator, MenuShortcut
+
+`MenuGroup` takes `label` to name the group for everyone, drawn above it and announced with it.
+`MenuLabel` is a heading inside a `MenuGroup` or `MenuRadioGroup`. `MenuShortcut` takes `shortcut`
+for a hint in a custom row.
+
+## Accessibility
+
+- The trigger opens with Enter, Space or Arrow Down; the arrows move through the rows.
+- Typing a letter jumps to the row that starts with it. Enter or Space runs a row; Escape closes the
+  menu and returns focus to the trigger.
+- A submenu opens with ArrowRight, Enter, Space or hover, and ArrowLeft comes back.
+- Rows with a shortcut carry `aria-keyshortcuts`. Checkbox and radio rows show a check or a dot, not
+  only a colour.
+- Rows grow to a comfortable height on touch screens.
+
+<ComponentSource path="menu/menu.tsx" />

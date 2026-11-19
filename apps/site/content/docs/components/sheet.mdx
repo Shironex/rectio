@@ -1,0 +1,117 @@
+---
+title: Sheet
+description: A panel that slides in from an edge for a side task, a bottom sheet on phones.
+---
+
+import SheetDemo from '@/demos/sheet';
+
+<Preview name="sheet" plain={<SheetDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add sheet
+```
+
+`theme-scope` installs with it.
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetBody,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+
+<Sheet side="right">
+  <SheetTrigger render={<Button variant="secondary" />}>View invoice 2041</SheetTrigger>
+  <SheetContent>
+    <SheetHeader>
+      <SheetTitle>Invoice 2041</SheetTitle>
+      <SheetDescription>Nordlicht GmbH, due 11 April.</SheetDescription>
+    </SheetHeader>
+    <SheetBody>{/* the details */}</SheetBody>
+    <SheetFooter>
+      <SheetClose render={<Button variant="ghost" />}>Close</SheetClose>
+      <Button>Record payment</Button>
+    </SheetFooter>
+  </SheetContent>
+</Sheet>;
+```
+
+Use a sheet for a side task that keeps the page in view: a record's details, filters, a phone menu.
+For a short task or a confirmation use `Dialog`. `side` is `right` by default; `left`, `top` and
+`bottom` are the other edges, and `bottom` draws a drag handle and clears the home indicator, which
+makes it the phone bottom sheet. On a touch screen the sheet can be swiped back toward its edge to
+close it.
+
+The sheet has no motion variant on purpose: it already moves with the finger, and its slide is the
+plain one.
+
+## Props
+
+### Sheet
+
+Base UI's `Drawer.Root`: `open`, `defaultOpen`, `onOpenChange` and the rest, except
+`swipeDirection`, which follows `side`.
+
+<TypeTable
+  type={{
+    side: {
+      type: "'left' | 'right' | 'top' | 'bottom'",
+      default: "'right'",
+      description: 'The edge the sheet slides from, and the direction it is swiped to close.',
+    },
+  }}
+/>
+
+### SheetTrigger, SheetClose
+
+Base UI's `Drawer.Trigger` and `Drawer.Close`; both take `render` to draw a `Button`.
+
+### SheetContent
+
+Backdrop, viewport and panel in one. Every prop of Base UI's `Drawer.Popup` is accepted as well.
+
+<TypeTable
+  type={{
+    children: { type: 'ReactNode', required: true },
+    closeLabel: {
+      type: 'string',
+      default: "'Close'",
+      description: 'Accessible name of the close button in the corner.',
+    },
+    showClose: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Hide the corner close button when the footer has its own.',
+    },
+  }}
+/>
+
+### SheetTitle, SheetDescription
+
+Every prop of Base UI's `Drawer.Title` and `Drawer.Description`.
+
+### SheetHeader, SheetBody, SheetFooter
+
+Plain `div` elements with the sheet's spacing. The body scrolls; the footer is pinned to the bottom
+and puts the primary action last.
+
+## Accessibility
+
+- Opens as a modal dialog named by `SheetTitle` and described by `SheetDescription`.
+- Focus moves in, stays inside while it is open, and returns to the trigger on close.
+- Escape and a press on the backdrop close it; the corner button is named by `closeLabel`.
+- The drag handle of a bottom sheet is decorative: the keyboard closes the sheet with Escape or the
+  button.
+
+<ComponentSource path="sheet/sheet.tsx" />

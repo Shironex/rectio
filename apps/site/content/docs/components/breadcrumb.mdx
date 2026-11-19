@@ -1,0 +1,98 @@
+---
+title: Breadcrumb
+description: Where the page sits in the app, with a long trail folded into a menu.
+---
+
+import BreadcrumbDemo from '@/demos/breadcrumb';
+
+<Preview name="breadcrumb" plain={<BreadcrumbDemo />} align="start" />
+
+## Install
+
+```sh
+pnpm dlx rectio add breadcrumb
+```
+
+`menu` and its dependencies install with it.
+
+## Usage
+
+```tsx
+import { Breadcrumb } from '@/components/ui/breadcrumb';
+
+<Breadcrumb
+  items={[
+    { label: 'Receivables', href: '/receivables' },
+    { label: 'Customers', href: '/customers' },
+    { label: 'Kowalski & Sons', href: '/customers/kowalski-sons' },
+    { label: 'Invoices', href: '/customers/kowalski-sons/invoices' },
+    { label: 'Invoice 2041' },
+  ]}
+  maxItems={4}
+/>;
+```
+
+List the items from the root to the current page. The last item is the current page: it has no link
+and is marked as such. When there are more than `maxItems`, the first item and the last
+`maxItems - 1` stay and the middle folds into a menu button, so the trail never wraps. Use 2 or 3 on
+a phone.
+
+Pass `renderLink` to draw links with your router. The levels folded into the menu are plain anchors.
+
+```tsx
+<Breadcrumb
+  items={items}
+  renderLink={({ href, className, children }) => (
+    <Link to={href} className={className}>
+      {children}
+    </Link>
+  )}
+/>
+```
+
+`collapseBreadcrumb` is exported if you need the same split elsewhere.
+
+## Props
+
+### Breadcrumb
+
+Every `nav` prop is accepted as well, except `children`.
+
+<TypeTable
+  type={{
+    items: {
+      type: 'BreadcrumbItem[]',
+      required: true,
+      description:
+        'From the root to the current page. Each item has a `label`, an optional `href` (omit on the last) and an optional `id`.',
+    },
+    maxItems: {
+      type: 'number',
+      default: '4',
+      description: 'Most items shown. Beyond it the middle collapses into a menu.',
+    },
+    renderLink: {
+      type: '(props: { href; className; children }) => ReactNode',
+      description: "Draws a visible link, for a router's link component. Defaults to an anchor.",
+    },
+    label: {
+      type: 'string',
+      default: "'Breadcrumb'",
+      description: 'Name of the navigation landmark.',
+    },
+    moreLabel: {
+      type: 'string',
+      default: "'Show hidden levels'",
+      description: 'Accessible name of the button that shows the folded levels.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- A `nav` landmark named by `label`, holding an ordered list of levels.
+- The last item carries `aria-current="page"` and is not a link.
+- The folded levels sit behind a menu button, with the menu's keyboard behaviour (arrows, Escape).
+- The separators are hidden from assistive technology.
+
+<ComponentSource path="breadcrumb/breadcrumb.tsx" />
