@@ -111,8 +111,8 @@ function LockedSource({ importLine }: { importLine: string | undefined }) {
         <ProBadge />
       </p>
       <p className="max-w-prose text-sm text-fg-muted">
-        The preview is the real component. Its source installs with a license key through the
-        registry; the usage is the same as the plain example, from another import path.
+        The preview is the real component. Its source comes with a Pro license and is not shown
+        here; the usage is the same as the plain example, from another import path.
       </p>
       {importLine !== undefined && (
         <code className="w-fit rounded-control border border-line bg-surface-sunken px-2 py-1 font-mono text-sm text-fg">
