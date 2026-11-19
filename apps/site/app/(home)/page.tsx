@@ -17,6 +17,7 @@ import { StatRow } from '@/components/landing/stat-row';
 import { Section, SectionIntro } from '@/components/landing/section';
 import { ThemeCurtain } from '@/components/landing/theme-curtain';
 import { ThemePacks } from '@/components/landing/theme-packs';
+import { Templates } from '@/components/landing/templates';
 import { readoutValues } from '@/components/landing/theme-tokens';
 
 const REGISTRY_POINTS = [
@@ -67,6 +68,8 @@ export default function Home() {
             <Bench />
           </div>
         </Section>
+
+        <Templates />
 
         <Section className="flex flex-col gap-10 py-16 md:py-24">
           <SectionIntro

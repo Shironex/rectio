@@ -21,11 +21,9 @@
   ],
   "uses": [
     "button",
-    "cn",
     "kbd",
     "menu",
     "docs-core",
-    "motion-docs-core",
     "docs-layout",
     "docs-sidebar",
     "docs-toc",
@@ -38,9 +36,7 @@
     "docs-search",
     "docs-page-nav",
     "docs-switchers",
-    "docs-feedback",
     "motion-docs-feedback",
-    "docs-home",
     "motion-docs-home",
     "docs-changelog",
     "motion-docs-changelog"

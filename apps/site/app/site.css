@@ -340,3 +340,41 @@ html[data-mode='dark'] .site-panel {
     --site-runway: 340vh;
   }
 }
+
+/*
+ * Template screenshots: the light and dark captures are both in the page, and the page's mode
+ * picks one. The hidden one is lazy and not displayed, so it is never fetched.
+ */
+.site-shot-dark {
+  display: none;
+}
+html[data-mode='dark'] .site-shot-light {
+  display: none;
+}
+html[data-mode='dark'] .site-shot-dark {
+  display: block;
+}
+
+/* The gallery: a short entrance on each filter choice, in an uneven stagger; a frame that lifts. */
+.site-gallery-item {
+  animation: site-rise var(--rx-motion-duration-base) var(--rx-motion-easing-enter) both;
+  animation-delay: calc(var(--rx-motion-duration-stagger) * var(--site-i, 0));
+}
+.site-gallery-item:nth-child(2) {
+  --site-i: 1;
+}
+.site-gallery-item:nth-child(3) {
+  --site-i: 1.8;
+}
+.site-gallery-item:nth-child(n + 4) {
+  --site-i: 2.4;
+}
+.site-gallery-frame {
+  display: block;
+  transition: translate var(--rx-motion-duration-base) var(--rx-motion-easing-enter);
+}
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .site-gallery-frame {
+    translate: 0 calc(var(--rx-motion-distance-reveal) * -0.5);
+  }
+}

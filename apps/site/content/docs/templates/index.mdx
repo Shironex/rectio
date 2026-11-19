@@ -1,0 +1,19 @@
+---
+title: Templates
+description: Complete starter apps built from the kit, installed as your own source with one command.
+pro: true
+---
+
+A template is a whole app, not a block: routes, navigation, realistic data and every state a real
+product has (empty, loading, error), composed only from rectio components, blocks and tokens. It
+switches between both themes, light and dark, like everything in the kit.
+
+```sh
+rectio init --template <name> my-app
+```
+
+The CLI writes the app into a new folder, installs the kit items it uses as source you own, and
+records them in `rectio.lock.json` so `rectio diff` keeps working. Each template is a Next.js app
+with a static export, so it runs from any static host until you wire your own backend.
+
+<TemplateGrid />

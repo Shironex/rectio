@@ -98,7 +98,7 @@ The template ships with both rectio themes, default and ledger, each in light an
 
 - **Default theme for new readers:** change `data-theme="default"` on `<html>` in `app/layout.tsx` to `ledger`.
 - **Only one theme:** remove the theme group from `components/theme-menu.tsx`.
-- **Your own colours, type and corners:** every colour, size and radius is a design token from `@rectio/tokens`. Edit or add a theme there, or override the variables in `app/globals.css`:
+- **Your own colours, type and corners:** every colour, size and radius is a design token in `styles/rectio/`. Edit or add a theme there, or override the variables in `app/globals.css`:
 
 ```css
 [data-theme='default'] {

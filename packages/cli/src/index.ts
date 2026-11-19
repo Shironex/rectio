@@ -3,6 +3,12 @@ export { main } from './main.ts';
 export { runAdd, type AddOptions } from './commands/add.ts';
 export { runDiff, type DiffOptions, type DiffResult, type FileDiff } from './commands/diff.ts';
 export { baseItems, runInit, type InitOptions } from './commands/init.ts';
+export {
+  packageNameFor,
+  runInitTemplate,
+  type InitTemplateOptions,
+  type InitTemplateResult,
+} from './commands/init-template.ts';
 export { rankMatches, runList, runSearch, type ListOptions } from './commands/list.ts';
 export { runMcp, type McpOptions } from './commands/mcp.ts';
 export { createMcpServer, serveStdio } from './mcp/server.ts';

@@ -8,7 +8,7 @@ const config = {
   // No generated AGENTS.md from next dev.
   agentRules: false,
   // The rectio packages ship their TypeScript source.
-  transpilePackages: ['@rectio/ui', '@rectio/motion', '@rectio/blocks'],
+  transpilePackages: ['@rectio/ui', '@rectio/motion', '@rectio/blocks'], // rectio:workspace
 };
 
 export default config;

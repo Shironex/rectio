@@ -32,6 +32,8 @@ const PAGES = [
   { name: 'docs-blocks', path: '/docs/blocks' },
   { name: 'docs-invoice-list', path: '/docs/blocks/invoice-list' },
   { name: 'docs-cash-flow', path: '/docs/blocks/cash-flow' },
+  { name: 'docs-templates', path: '/docs/templates' },
+  { name: 'docs-finance-app', path: '/docs/templates/finance-app' },
 ] as const;
 const VIEWPORTS = [
   { name: 'desktop', width: 1440, height: 900, mobile: false },

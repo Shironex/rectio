@@ -77,6 +77,12 @@ export interface RegistryConfig {
   /** Add-on trees built on top of `sourceDir`. */
   addons?: AddonSourceConfig[];
   /**
+   * Folder of starter apps: every subfolder with a template.json becomes a `template` item that
+   * `rectio init --template <name>` turns into a new project. Imports of `workspacePackages` in a
+   * template become registry dependencies, like an add-on's.
+   */
+  templates?: { dir: string };
+  /**
    * Workspace packages an add-on imports, each mapped to its barrel file (the package's index.ts).
    * The barrel's re-exports say which base item owns each imported name.
    */

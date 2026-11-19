@@ -286,6 +286,7 @@ describe('the rectio registry', () => {
       'data-table',
       'date-picker',
       'dialog',
+      'docs',
       'docs-api-reference',
       'docs-changelog',
       'docs-code-block',
@@ -308,6 +309,7 @@ describe('the rectio registry', () => {
       'fieldset',
       'file-manager',
       'file-upload',
+      'finance-app',
       'hero',
       'hover-card',
       'input-group',
@@ -413,6 +415,7 @@ describe('the rectio registry', () => {
       'payouts',
       'popover',
       'pricing-table',
+      'product-launch',
       'profile-settings',
       'profit-and-loss',
       'progress',
@@ -420,6 +423,7 @@ describe('the rectio registry', () => {
       'radio-group',
       'reset-password',
       'saas-core',
+      'saas-landing',
       'scroll-area',
       'search-input',
       'select',
@@ -678,8 +682,37 @@ describe('the rectio registry', () => {
     expect(existsSync(join(out, 'items/motion-dialog.json'))).toBe(false);
   });
 
-  it('keeps no relative import in published code', () => {
-    for (const item of result.items) {
+  it('publishes every template as a pro template item that names no workspace package', () => {
+    const templates = result.items.filter((i) => i.type === 'template');
+    expect(templates.map((t) => t.name).sort()).toEqual([
+      'docs',
+      'finance-app',
+      'product-launch',
+      'saas-landing',
+    ]);
+    for (const template of templates) {
+      expect(template.tier).toBe('pro');
+      expect(template.registryDependencies).toEqual(
+        expect.arrayContaining([
+          'tokens',
+          'theme-default',
+          'theme-ledger',
+          ...(template.template?.uses ?? []),
+        ]),
+      );
+      for (const file of template.files) {
+        expect(file.target, file.path).toMatch(/^@project\//);
+        expect(file.content, file.path).not.toContain('@rectio/');
+        expect(file.content, file.path).not.toContain('rectio:workspace');
+      }
+      const pkg = template.files.find((f) => f.path === 'template/package.json');
+      expect(pkg?.content).not.toContain('workspace:');
+    }
+  });
+
+  it('keeps no relative import in published kit code', () => {
+    // A template is a project of its own: its files may import each other relatively.
+    for (const item of result.items.filter((i) => i.type !== 'template')) {
       for (const file of item.files) {
         expect(file.content, file.path).not.toMatch(/from '\.\.?\//);
       }

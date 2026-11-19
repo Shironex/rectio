@@ -7,11 +7,20 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/packages/ui/src/**",
-        "$TURBO_ROOT$/packages/motion/src/**"
+        "$TURBO_ROOT$/packages/motion/src/**",
+        "$TURBO_ROOT$/templates/*/template.json",
+        "$TURBO_ROOT$/templates/*/screenshots/**"
       ]
     },
     "test": {
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/motion/src/**"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/motion/src/**",
+        "$TURBO_ROOT$/templates/*/{app,components,data}/**"
+      ]
+    },
+    "typecheck": {
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/templates/*/template.json"]
     }
   }
 }

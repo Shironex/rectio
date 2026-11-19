@@ -66,31 +66,83 @@ export function proItem(): RegistryItem {
   return { ...body, integrity: itemIntegrity(body) };
 }
 
-/** The real rectio registry plus one pro item, written to a temp folder. */
-export function buildTestRegistry(): { dir: string; url: string; cleanup: () => void } {
-  const temp = tempDir('rectio-cli-registry-');
-  const result = buildRegistry(config);
-  writeRegistry(temp.dir, result);
-  const pro = proItem();
-  for (const version of [undefined, pro.version]) {
-    const path = join(temp.dir, itemPath(pro.name, 'pro', version));
+/** A small pro template on the real kit items, added to the built registry by hand. */
+export function templateItem(): RegistryItem {
+  const file = (path: string, content: string) => ({
+    path: `template/${path}`,
+    type: 'template' as const,
+    target: `@project/${path}`,
+    content,
+    sha256: sha256Hex(content),
+  });
+  const body = {
+    schemaVersion: 1 as const,
+    name: 'books',
+    version: '0.3.0',
+    type: 'template' as const,
+    tier: 'pro' as const,
+    title: 'Books',
+    description: 'A small bookkeeping app.',
+    categories: ['template', 'app'],
+    dependencies: {},
+    devDependencies: {},
+    registryDependencies: ['button', 'money', 'theme-default', 'theme-ledger', 'tokens'],
+    requires: {},
+    files: [
+      file(
+        'package.json',
+        `${JSON.stringify({ name: 'books', version: '0.3.0', private: true, dependencies: { next: '16.4.6' } }, null, 2)}\n`,
+      ),
+      file('tsconfig.json', '{\n  "compilerOptions": { "paths": { "@/*": ["./*"] } }\n}\n'),
+      file('app/globals.css', "@import 'tailwindcss';\n\nbody {\n  margin: 0;\n}\n"),
+      file(
+        'app/page.tsx',
+        "import { Button } from '@registry/ui/button';\nimport { Money } from '@registry/ui/money';\n\nexport default function Page() {\n  return <Button><Money amount={1} currency=\"EUR\" /></Button>;\n}\n",
+      ),
+    ],
+    template: {
+      category: 'app' as const,
+      framework: 'next' as const,
+      pages: ['/'],
+      uses: ['button', 'money'],
+      screenshots: ['screenshots/desktop-light.webp'],
+    },
+  };
+  return { ...body, integrity: itemIntegrity(body) };
+}
+
+/** Writes a hand-made item into a built registry folder: its body and its index entry. */
+function publish(dir: string, item: RegistryItem): void {
+  for (const version of [undefined, item.version]) {
+    const path = join(dir, itemPath(item.name, item.tier, version));
     mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, JSON.stringify(pro));
+    writeFileSync(path, JSON.stringify(item));
   }
-  const indexFile = join(temp.dir, 'index.json');
+  const indexFile = join(dir, 'index.json');
   const index = JSON.parse(readFileSync(indexFile, 'utf8')) as RegistryIndex;
   index.items.push({
-    name: pro.name,
-    type: pro.type,
-    tier: pro.tier,
-    version: pro.version,
-    versions: [pro.version],
-    title: pro.title,
-    description: pro.description,
-    categories: pro.categories,
-    registryDependencies: pro.registryDependencies,
+    name: item.name,
+    type: item.type,
+    tier: item.tier,
+    version: item.version,
+    versions: [item.version],
+    title: item.title,
+    description: item.description,
+    categories: item.categories,
+    registryDependencies: item.registryDependencies,
   });
   writeFileSync(indexFile, JSON.stringify(index));
+}
+
+/** The real rectio registry plus one pro item and one small template, written to a temp folder. */
+export function buildTestRegistry(): { dir: string; url: string; cleanup: () => void } {
+  const temp = tempDir('rectio-cli-registry-');
+  // The real templates are covered by the end-to-end test; command tests use the small one.
+  const kit = { ...config };
+  delete kit.templates;
+  writeRegistry(temp.dir, buildRegistry(kit));
+  publish(temp.dir, proItem());
+  publish(temp.dir, templateItem());
   return { ...temp, url: pathToFileURL(temp.dir).href };
 }
 

@@ -34,6 +34,29 @@ rectio init [--theme ledger] [--css src/index.css] [--framework vite|next|tansta
 
 Running `init` again with another `--theme` installs that theme and records it in `rectio.json`.
 
+### init --template
+
+Starts a new project from a [template](/docs/templates): a complete Next.js app you own from the
+first commit. Templates are Pro, so the license key is needed as for any Pro item.
+
+```sh
+rectio init --template finance-app [folder] [--theme ledger] [--registry <url|folder>]
+            [--force] [--dry-run] [--no-install]
+```
+
+1. Resolves the template and every kit item it uses, checks the key, then fetches and verifies all
+   of them. A missing key or a failed download writes nothing.
+2. Writes the template into `folder` (default: the template name), which must be empty unless you
+   pass `--force`. The package name follows the folder name.
+3. Writes `rectio.json` with `@/` aliases (the template's `tsconfig.json` maps `@/*` to the project
+   root), then installs the kit items as `add` does: components under `components/ui`, blocks under
+   `components/blocks`, helpers under `lib`, tokens and both themes under `styles/rectio`. The
+   template's imports already point at those paths.
+4. Records the kit items in `rectio.lock.json`, so `diff` and later updates work on them. The
+   template's own files are yours and are not tracked.
+
+`rectio list --templates` shows the templates with their category.
+
 ### add
 
 Adds items and everything they depend on.
@@ -73,7 +96,7 @@ install, and prints a unified patch from your file to the registry's.
 Lists registry items with their type, tier, version and title.
 
 ```sh
-rectio list [--type component|block|theme|lib|hook|style] [--tier free|pro]
+rectio list [--type component|block|theme|lib|hook|style|template] [--tier free|pro] [--templates]
 ```
 
 In a project, `*` marks an installed item and `^` one with a newer version available.

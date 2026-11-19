@@ -18,6 +18,7 @@ An item is one installable unit. Its `type` is one of:
 | `style`     | Shared CSS: `tokens`, the Tailwind theme mapping, density and reduced motion. |
 | `lib`       | A helper, such as `cn`.                                                       |
 | `hook`      | A React hook.                                                                 |
+| `template`  | A whole app for [init --template](/docs/cli#init---template), always Pro.     |
 
 Every item has a `tier` (`free` or `pro`), a semver `version`, its npm `dependencies`, the
 `registryDependencies` it needs, and `requires`: the React range, the Tailwind range and the token
@@ -26,6 +27,11 @@ alias placeholder (`@ui/button.tsx`), the `content` and its `sha256`. Field name
 registry item where the two overlap.
 
 A free item never depends on a Pro one; the build fails if it would.
+
+A `template` item is different: its files target `@project/<path>`, the root of the new project,
+instead of an alias, and a `template` field carries its category, routes and the kit items it uses
+(each also a registry dependency, with `tokens` and every theme). `add` refuses it; only
+`init --template` writes it, once.
 
 ## Layout
 

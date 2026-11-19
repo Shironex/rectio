@@ -16,3 +16,7 @@ test-results/
 out/
 .source/
 next-env.d.ts
+# generated from templates/*/template.json by apps/site/scripts/templates.ts
+apps/site/content/docs/templates/*.mdx
+!apps/site/content/docs/templates/index.mdx
+apps/site/public/templates/

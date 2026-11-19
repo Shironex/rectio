@@ -3,8 +3,8 @@
 /**
  * The docs blocks the pages use, as client components. Server components (the pages and the MDX
  * map) import them from here, so the client boundary sits in one place. The motion variant is the
- * plain blocks plus entrances and gliding markers; import from `@rectio/blocks/docs` instead for
- * no motion at all.
+ * plain blocks plus entrances and gliding markers; import the plain docs blocks instead for no
+ * motion at all.
  */
 export {
   Callout,

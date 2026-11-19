@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { test } from 'node:test';
 
@@ -8,6 +8,7 @@ const OUT = join(SITE, 'out');
 const MOTION_SRC = join(SITE, '..', '..', 'packages', 'motion', 'src');
 const UI_SRC = join(SITE, '..', '..', 'packages', 'ui', 'src');
 const BLOCKS_SRC = join(SITE, '..', '..', 'packages', 'blocks', 'src');
+const TEMPLATES = join(SITE, '..', '..', 'templates');
 
 function files(dir: string, keep: (name: string) => boolean): string[] {
   return readdirSync(dir, { withFileTypes: true, recursive: true })
@@ -50,6 +51,54 @@ void test('no Pro block source is published', () => {
   for (const line of lines) {
     const leak = published.find((file) => file.text.includes(line));
     assert.equal(leak, undefined, `block source line found in out/${leak?.path ?? ''}: ${line}`);
+  }
+});
+
+void test('no Pro template source is published', () => {
+  // The site shows templates as screenshots and their template.json; their code stays in pro/.
+  const templateFiles = readdirSync(TEMPLATES, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .flatMap((entry) =>
+      ['app', 'components', 'data']
+        .map((folder) => join(TEMPLATES, entry.name, folder))
+        .filter((dir) => existsSync(dir))
+        .flatMap((dir) => files(dir, (name) => /\.tsx?$/.test(name))),
+    );
+  const lines = templateFiles.flatMap(commentLines);
+  assert.ok(lines.length > 5, 'expected comment lines in the template source to check against');
+  for (const line of lines) {
+    const leak = published.find((file) => file.text.includes(line));
+    assert.equal(leak, undefined, `template source line found in out/${leak?.path ?? ''}: ${line}`);
+  }
+});
+
+void test('every template has a published page marked Pro, with its screenshots', () => {
+  const names = readdirSync(TEMPLATES, { withFileTypes: true })
+    .filter(
+      (entry) => entry.isDirectory() && existsSync(join(TEMPLATES, entry.name, 'template.json')),
+    )
+    .map((entry) => entry.name);
+  for (const name of ['finance-app', 'saas-landing', 'product-launch', 'docs']) {
+    assert.ok(names.includes(name), `expected the ${name} template`);
+  }
+  for (const name of names) {
+    const page = published.find((file) => file.path === join('docs', 'templates', `${name}.html`));
+    assert.ok(page, `docs/templates/${name}.html is missing`);
+    assert.match(page.text, />Pro</, `docs/templates/${name}.html is not marked Pro`);
+    const manifest = JSON.parse(readFileSync(join(TEMPLATES, name, 'template.json'), 'utf8')) as {
+      screenshots: string[];
+    };
+    for (const shot of manifest.screenshots) {
+      const file = join(OUT, 'templates', name, shot.slice('screenshots/'.length));
+      assert.ok(existsSync(file), `out/templates/${name}/${shot} is missing`);
+    }
+  }
+  const landing = published.find((file) => file.path === 'index.html');
+  for (const name of names) {
+    assert.ok(
+      landing?.text.includes(`/docs/templates/${name}`),
+      `the landing does not show ${name}`,
+    );
   }
 });
 

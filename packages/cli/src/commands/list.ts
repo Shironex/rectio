@@ -9,6 +9,8 @@ export interface ListOptions {
   registry?: string;
   type?: string;
   tier?: string;
+  /** Templates only, with their category: `rectio list --templates`. */
+  templates?: boolean;
 }
 
 function printEntries(ctx: CliContext, entries: readonly IndexEntry[]) {
@@ -34,7 +36,30 @@ async function loadIndex(ctx: CliContext, flag: string | undefined) {
   return (await client.index()).items;
 }
 
+function printTemplates(ctx: CliContext, entries: readonly IndexEntry[]) {
+  if (entries.length === 0) {
+    ctx.log('No templates yet.');
+    return;
+  }
+  const width = Math.max(...entries.map((e) => e.name.length));
+  for (const entry of entries) {
+    const category = entry.categories.find((c) => c !== 'template') ?? '';
+    const tier = entry.tier === 'pro' ? 'pro ' : 'free';
+    ctx.log(
+      `  ${entry.name.padEnd(width)}  ${category.padEnd(9)} ${tier} ${entry.title}: ${entry.description}`,
+    );
+  }
+  ctx.log('\nStart a project: rectio init --template <name> [folder]');
+}
+
 export async function runList(ctx: CliContext, options: ListOptions = {}) {
+  if (options.templates === true) {
+    const templates = (await loadIndex(ctx, options.registry)).filter(
+      (e) => e.type === 'template' && (options.tier === undefined || e.tier === options.tier),
+    );
+    printTemplates(ctx, templates);
+    return templates;
+  }
   const entries = (await loadIndex(ctx, options.registry)).filter(
     (e) =>
       (options.type === undefined || e.type === options.type) &&
