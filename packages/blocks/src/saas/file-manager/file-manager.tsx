@@ -683,18 +683,24 @@ export function FileManager({
               note={
                 <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                   <span>{storageNote(storage, locale)}</span>
-                  {onUpgrade !== undefined && (
-                    <button
-                      type="button"
-                      onClick={onUpgrade}
-                      className={cn(
-                        'cursor-pointer rounded-badge font-medium text-accent-strong underline-offset-4 hover:underline',
-                        focusRing,
-                      )}
-                    >
-                      Upgrade
-                    </button>
-                  )}
+                  {onUpgrade !== undefined &&
+                    // A quiet link while there is room; a real button once space runs short.
+                    (storageLevel(storage) === 'ok' ? (
+                      <button
+                        type="button"
+                        onClick={onUpgrade}
+                        className={cn(
+                          'cursor-pointer rounded-badge font-medium text-accent-strong underline-offset-4 hover:underline',
+                          focusRing,
+                        )}
+                      >
+                        Upgrade
+                      </button>
+                    ) : (
+                      <Button variant="secondary" size="sm" onClick={onUpgrade}>
+                        Upgrade
+                      </Button>
+                    ))}
                 </span>
               }
             />
@@ -897,9 +903,10 @@ function FileSortHead({
           weight="bold"
           className={cn(
             'size-3 shrink-0',
-            // Only the active column shows its arrow; the others show it on hover or focus.
+            // Every sortable head shows that it sorts: a quiet double arrow at rest, stronger on
+            // hover or focus; the active column shows its direction.
             !active &&
-              'text-fg-subtle opacity-0 group-hover/sort:opacity-100 group-focus-visible/sort:opacity-100',
+              'text-fg-subtle group-hover/sort:text-fg-muted group-focus-visible/sort:text-fg-muted',
           )}
         />
       </button>
