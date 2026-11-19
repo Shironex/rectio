@@ -7,12 +7,41 @@ import type { DocsNavItem, DocsNavSection, DocsSearchDocument } from '@rectio/bl
 import type { Page } from './content';
 import { slugify, uniqueSlugs } from './slugs';
 
+/**
+ * Removes every JSX tag with its attributes, however many lines and nested braces they span, and
+ * keeps the text between an opening and a closing tag.
+ */
+function withoutJsxTags(text: string): string {
+  let out = '';
+  let i = 0;
+  while (i < text.length) {
+    const tag = /^<\/?[A-Z]/.test(text.slice(i, i + 3));
+    if (!tag) {
+      out += text.charAt(i);
+      i += 1;
+      continue;
+    }
+    let depth = 0;
+    let quote: string | null = null;
+    for (i += 1; i < text.length; i += 1) {
+      const char = text[i];
+      if (quote !== null) {
+        if (char === quote) quote = null;
+      } else if (char === '"' || char === "'" || char === '`') quote = char;
+      else if (char === '{') depth += 1;
+      else if (char === '}') depth -= 1;
+      else if (char === '>' && depth === 0) break;
+    }
+    i += 1;
+    out += ' ';
+  }
+  return out;
+}
+
 /** Markdown and MDX reduced to the words a reader would search for. */
 export function plainText(body: string): string {
-  return body
-    .replace(/^```[\s\S]*?^```/gm, ' ')
+  return withoutJsxTags(body.replace(/^```[\s\S]*?^```/gm, ' '))
     .replace(/^(import|export) .*$/gm, ' ')
-    .replace(/<\/?[A-Z][^>]*>/g, ' ')
     .replace(/\{[^{}]*\}/g, ' ')
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')

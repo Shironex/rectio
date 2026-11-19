@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { DocsLayout } from '@/components/blocks';
+import { DocsLayout, LinkCards } from '@/components/blocks';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { getNav } from '@/lib/content';
@@ -14,15 +14,42 @@ export default function NotFound() {
           This page is not in the docs
         </h1>
         <p className="max-w-prose text-pretty text-fg-muted">
-          It may have moved in a recent release. Search the docs with the box above, or start again
-          from the introduction.
+          It may have moved in a recent release. Search the docs, or pick up from one of these
+          pages.
         </p>
         <Link
           href="/docs"
-          className="rounded-control text-accent-strong underline underline-offset-4 outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus"
+          className="rounded-control font-medium text-accent-strong underline decoration-accent-strong/40 underline-offset-4 outline-offset-2 hover:decoration-accent-strong focus-visible:outline-2 focus-visible:outline-focus"
         >
           Go to the introduction
         </Link>
+        <LinkCards
+          className="mt-8 w-full"
+          variant="list"
+          title="Most read"
+          items={[
+            {
+              title: 'Installation',
+              href: '/docs/installation',
+              description: 'Add Halyard and run a first job.',
+            },
+            {
+              title: 'Retries and backoff',
+              href: '/docs/retries',
+              description: 'What happens when a job fails.',
+            },
+            {
+              title: 'JavaScript API',
+              href: '/docs/api',
+              description: 'Every function and option.',
+            },
+            {
+              title: 'Changelog',
+              href: '/changelog',
+              description: 'What changed in each release.',
+            },
+          ]}
+        />
       </div>
     </DocsLayout>
   );

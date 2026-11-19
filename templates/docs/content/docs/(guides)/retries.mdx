@@ -54,7 +54,7 @@ Some failures will fail the same way every time: a deleted customer, a payload t
  }
 ```
 
-<Callout type="danger" title="Make jobs safe to run twice">
+<Callout type="warning" title="Make jobs safe to run twice">
   A job can run more than once: a worker may finish the work and crash before it records the result.
   Use an idempotency key, or check before you charge a card or send an email.
 </Callout>

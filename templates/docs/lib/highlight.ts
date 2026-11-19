@@ -31,6 +31,7 @@ const LANGS: BundledLanguage[] = [
   'http',
   'diff',
   'dockerfile',
+  'dotenv',
 ];
 
 const ALIASES: Record<string, string> = {

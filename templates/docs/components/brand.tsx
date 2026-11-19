@@ -8,7 +8,7 @@ export function Brand() {
     <span className="inline-flex items-center gap-2">
       <span
         aria-hidden
-        className="inline-flex size-7 items-center justify-center rounded-control bg-accent text-fg-on-accent"
+        className="inline-flex size-7 items-center justify-center rounded-control bg-accent text-accent-contrast"
       >
         <AnchorSimpleIcon weight="bold" className="size-4" />
       </span>

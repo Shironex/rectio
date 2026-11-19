@@ -35,6 +35,15 @@ export async function HighlightedSignatureCard(props: SignatureCardProps) {
   return <SignatureCard {...props} {...(tokens === null ? {} : { tokens })} />;
 }
 
+/** JSON as written in a page, indented two spaces; MDX drops the indentation of JSX attributes. */
+function prettyJson(text: string): string {
+  try {
+    return JSON.stringify(JSON.parse(text), null, 2);
+  } catch {
+    return text;
+  }
+}
+
 /** An endpoint whose request and response examples are highlighted at build time. */
 export async function HighlightedEndpoint({ request, responses, ...props }: EndpointProps) {
   const requestTokens =
@@ -45,8 +54,10 @@ export async function HighlightedEndpoint({ request, responses, ...props }: Endp
       : await Promise.all(
           responses.map(async (response) => {
             if (response.example === undefined || response.tokens !== undefined) return response;
-            const tokens = await highlight(response.example, response.lang ?? 'json');
-            return tokens === null ? response : { ...response, tokens };
+            const lang = response.lang ?? 'json';
+            const example = lang === 'json' ? prettyJson(response.example) : response.example;
+            const tokens = await highlight(example, lang);
+            return tokens === null ? { ...response, example } : { ...response, example, tokens };
           }),
         );
   return (
