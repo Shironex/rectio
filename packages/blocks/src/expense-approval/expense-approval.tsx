@@ -369,7 +369,10 @@ export function ExpenseApproval({
   );
 }
 
-/** Reject and approve for one request: icon-only reject beside a worded approve. */
+/**
+ * Reject and approve for one request. Approve is the primary action, the one an approver takes
+ * most; reject is the secondary one beside it, worded and asking for a reason in its dialog.
+ */
 function Decide({
   request,
   onApprove,
@@ -384,11 +387,11 @@ function Decide({
   return (
     <span className="flex items-center justify-end gap-2 pointer-coarse:gap-3">
       {/* Named in words: a bare cross reads as dismiss, and rejecting asks for a reason. */}
-      <Button variant="ghost" size="sm" aria-label={`Reject ${name}`} onClick={onReject}>
+      <Button variant="secondary" size="sm" aria-label={`Reject ${name}`} onClick={onReject}>
         <XIcon aria-hidden weight="bold" className="size-3.5" />
         Reject
       </Button>
-      <Button variant="secondary" size="sm" aria-label={`Approve ${name}`} onClick={onApprove}>
+      <Button size="sm" aria-label={`Approve ${name}`} onClick={onApprove}>
         <CheckIcon aria-hidden weight="bold" className="size-3.5" />
         Approve
       </Button>
@@ -425,6 +428,13 @@ function RejectDialog({
     setTried(true);
     if (error !== null) return;
     onConfirm(reason.trim());
+  };
+  /**
+   * The form empties once the dialog has finished closing, never during its exit: clearing the
+   * reason or its error while the popup still fades away flashes a changed form.
+   */
+  const onOpenChangeComplete = (isOpen: boolean) => {
+    if (isOpen) return;
     setReason('');
     setTried(false);
   };
@@ -436,11 +446,9 @@ function RejectDialog({
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (!next) {
-          onCancel();
-          setTried(false);
-        }
+        if (!next) onCancel();
       }}
+      onOpenChangeComplete={onOpenChangeComplete}
     >
       <DialogContent>
         <form onSubmit={submit} onKeyDown={onKeyDown} noValidate>
