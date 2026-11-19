@@ -140,3 +140,8 @@ export function storageLevel(usage: StorageUsage): 'ok' | 'warning' | 'over' {
   if (share >= 0.8) return 'warning';
   return 'ok';
 }
+
+/** Whether storage is full enough to show up front: from 90 percent. Below that it is a footnote. */
+export function storageNeedsAttention(usage: StorageUsage): boolean {
+  return usage.total <= 0 || usage.used / usage.total >= 0.9;
+}

@@ -1,22 +1,26 @@
 import {
+  ArchiveIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ArrowsDownUpIcon,
   CaretRightIcon,
+  CodeIcon,
   DownloadSimpleIcon,
-  FileAudioIcon,
-  FileCodeIcon,
-  FileDocIcon,
   FileIcon,
-  FileImageIcon,
-  FilePdfIcon,
-  FilePptIcon,
-  FileVideoIcon,
-  FileXlsIcon,
-  FileZipIcon,
+  FileTextIcon,
+  FilmStripIcon,
   FolderOpenIcon,
   FolderPlusIcon,
   FolderSimpleIcon,
+  HardDrivesIcon,
+  ImageIcon,
   PencilSimpleIcon,
+  PresentationChartIcon,
+  TableIcon,
+  TextAlignLeftIcon,
   TrashIcon,
   UploadSimpleIcon,
+  WaveformIcon,
   XIcon,
   type Icon,
 } from '@phosphor-icons/react';
@@ -58,6 +62,7 @@ import {
   fileNameError,
   sortFileEntries,
   storageLevel,
+  storageNeedsAttention,
   type FileEntry,
   type FileKind,
   type FilePathSegment,
@@ -90,16 +95,17 @@ export interface FileManagerProps {
 }
 
 const KIND_ICONS: Record<FileKind, Icon> = {
+  // Distinct shapes rather than lettered page icons: a label inside a 16px glyph cannot be read.
   folder: FolderSimpleIcon,
-  document: FileDocIcon,
-  spreadsheet: FileXlsIcon,
-  presentation: FilePptIcon,
-  pdf: FilePdfIcon,
-  image: FileImageIcon,
-  video: FileVideoIcon,
-  audio: FileAudioIcon,
-  archive: FileZipIcon,
-  code: FileCodeIcon,
+  document: TextAlignLeftIcon,
+  spreadsheet: TableIcon,
+  presentation: PresentationChartIcon,
+  pdf: FileTextIcon,
+  image: ImageIcon,
+  video: FilmStripIcon,
+  audio: WaveformIcon,
+  archive: ArchiveIcon,
+  code: CodeIcon,
   other: FileIcon,
 };
 
@@ -149,19 +155,32 @@ export function FileManager({
 }: FileManagerProps) {
   const locale = resolveLocale(requestedLocale);
   const { Button, Rows, Row } = useBlockParts();
-  const [sort, setSort] = useState<FileSortKey>('name');
+  const [sort, setSort] = useState<{ key: FileSortKey; ascending: boolean }>({
+    key: 'name',
+    ascending: true,
+  });
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [renaming, setRenaming] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string[] | null>(null);
 
   const current = path.at(-1);
-  const sorted = sortFileEntries(entries, sort);
+  const sorted = sortFileEntries(entries, sort.key, sort.ascending);
   // Selection never outlives the entries it points at.
   const chosen = sorted.filter((entry) => selected.has(entry.id));
   const all = sorted.length > 0 && chosen.length === sorted.length;
   const folders = entries.filter((entry) => entry.type === 'folder').length;
   const byId = new Map(entries.map((entry) => [entry.id, entry]));
   const selectable = onDelete !== undefined || onDownload !== undefined;
+
+  // A new key starts in its natural order (names A to Z, newest and largest first); the same key flips.
+  const sortBy = (key: FileSortKey) => {
+    setSort((was) =>
+      was.key === key ? { key, ascending: !was.ascending } : { key, ascending: key === 'name' },
+    );
+  };
+  const selectAll = (checked: boolean) => {
+    setSelected(checked ? new Set(sorted.map((e) => e.id)) : new Set());
+  };
 
   const toggle = (id: string, on: boolean) => {
     setSelected((was) => {
@@ -237,7 +256,7 @@ export function FileManager({
       title={title ?? current?.name ?? 'Files'}
       description={summary}
       actions={
-        onUpload !== undefined || onCreateFolder !== undefined ? (
+        entries.length > 0 && (onUpload !== undefined || onCreateFolder !== undefined) ? (
           <>
             {onCreateFolder !== undefined && (
               <Button variant="secondary" onClick={onCreateFolder}>
@@ -257,98 +276,120 @@ export function FileManager({
       className={className}
       bodyClassName="gap-4"
     >
-      <div className="flex flex-col gap-4 @2xl:flex-row @2xl:items-center @2xl:justify-between">
-        {path.length > 0 && (
-          <nav aria-label="Folder path" className="min-w-0">
-            <ol className="flex flex-wrap items-center gap-1 text-sm">
-              {path.map((segment, index) => {
-                const last = index === path.length - 1;
-                return (
-                  <li key={segment.id} className="flex items-center gap-1">
-                    {last || onNavigate === undefined ? (
-                      <span
-                        aria-current={last ? 'page' : undefined}
-                        className={cn('px-1', last ? 'font-medium text-fg' : 'text-fg-muted')}
-                      >
-                        {segment.name}
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onNavigate(segment.id);
-                        }}
-                        className={cn(
-                          'cursor-pointer rounded-badge px-1 text-fg-muted hover:text-fg hover:underline hover:underline-offset-4',
-                          'pointer-coarse:py-2.5',
-                          focusRing,
-                        )}
-                      >
-                        {segment.name}
-                      </button>
-                    )}
-                    {!last && (
-                      <CaretRightIcon aria-hidden weight="bold" className="size-3 text-fg-subtle" />
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </nav>
-        )}
-        {storage !== undefined && (
-          <UsageMeter
-            className="@2xl:w-64"
-            label="Storage"
-            value={storage.used}
-            max={storage.total}
-            valueText={`${formatBytes(storage.used, locale)} of ${formatBytes(storage.total, locale)}`}
-            level={storageLevel(storage)}
-            {...(storageLevel(storage) === 'ok'
-              ? {}
-              : {
-                  note:
-                    storageLevel(storage) === 'over'
-                      ? 'Storage is full. Delete files or upgrade to upload more.'
-                      : 'Storage is nearly full.',
-                })}
-          />
-        )}
-      </div>
+      {path.length > 0 && (
+        <nav aria-label="Folder path" className="min-w-0">
+          <ol className="flex flex-wrap items-center gap-1 text-sm">
+            {path.map((segment, index) => {
+              const last = index === path.length - 1;
+              return (
+                <li key={segment.id} className="flex items-center gap-1">
+                  {last || onNavigate === undefined ? (
+                    <span
+                      aria-current={last ? 'page' : undefined}
+                      className={cn('px-1', last ? 'font-medium text-fg' : 'text-fg-muted')}
+                    >
+                      {segment.name}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onNavigate(segment.id);
+                      }}
+                      className={cn(
+                        'cursor-pointer rounded-badge px-1 text-fg-muted hover:text-fg hover:underline hover:underline-offset-4',
+                        'pointer-coarse:py-2.5',
+                        focusRing,
+                      )}
+                    >
+                      {segment.name}
+                    </button>
+                  )}
+                  {!last && (
+                    <CaretRightIcon aria-hidden weight="bold" className="size-3 text-fg-subtle" />
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+      )}
+      {storage !== undefined && storageNeedsAttention(storage) && (
+        <UsageMeter
+          label="Storage"
+          value={storage.used}
+          max={storage.total}
+          valueText={`${formatBytes(storage.used, locale)} of ${formatBytes(storage.total, locale)}`}
+          level={storageLevel(storage)}
+          note={
+            storageLevel(storage) === 'over'
+              ? 'Storage is full. Delete files or upgrade to upload more.'
+              : 'Storage is nearly full. Delete files you no longer need to keep uploading.'
+          }
+        />
+      )}
 
       {entries.length === 0 ? (
-        <EmptyNote title="This folder is empty">
-          {onUpload !== undefined
-            ? 'Upload files or create a folder to start filling it.'
-            : 'Files added here appear with their size, owner and last change.'}
+        <EmptyNote
+          title={
+            <span className="flex flex-col items-center gap-3">
+              <FolderOpenIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
+              Nothing in {current?.name ?? 'this folder'} yet
+            </span>
+          }
+        >
+          {onUpload !== undefined || onCreateFolder !== undefined
+            ? 'Upload files here, or make a folder to keep them in order.'
+            : 'Files added here show with their size and last change.'}
+          {(onUpload !== undefined || onCreateFolder !== undefined) && (
+            <span className="mt-4 flex flex-wrap justify-center gap-2">
+              {onCreateFolder !== undefined && (
+                <Button variant="secondary" onClick={onCreateFolder}>
+                  <FolderPlusIcon aria-hidden weight="bold" className="size-4" />
+                  New folder
+                </Button>
+              )}
+              {onUpload !== undefined && (
+                <Button onClick={onUpload}>
+                  <UploadSimpleIcon aria-hidden weight="bold" className="size-4" />
+                  Upload
+                </Button>
+              )}
+            </span>
+          )}
         </EmptyNote>
       ) : (
         <>
-          <div className="flex min-h-(--rx-control-height-md) flex-wrap items-center justify-between gap-3 rounded-control bg-surface-sunken px-3 py-1.5">
+          {/* One toolbar: on narrow widths it selects and sorts; on wide ones the header row
+              does both, so the toolbar only appears to act on a selection. */}
+          <div
+            className={cn(
+              'flex min-h-(--rx-control-height-md) flex-wrap items-center justify-between gap-3 rounded-control bg-surface-sunken px-3 py-1.5',
+              chosen.length === 0 && '@xl:hidden',
+            )}
+          >
             {selectable ? (
               <label className="flex cursor-pointer items-center gap-3 text-sm">
-                <Checkbox
-                  aria-label="Select everything in this folder"
-                  checked={all}
-                  indeterminate={chosen.length > 0 && !all}
-                  onCheckedChange={(checked) => {
-                    setSelected(checked ? new Set(sorted.map((e) => e.id)) : new Set());
-                  }}
-                />
-                <span aria-live="polite">
-                  {chosen.length === 0 ? (
-                    <span className="text-fg-muted">Select to act on several</span>
-                  ) : (
-                    <>
-                      <span className="font-medium numeric">{chosen.length}</span> selected
-                      {fileEntriesSize(chosen) > 0 && (
-                        <span className="text-fg-muted">
-                          , {formatBytes(fileEntriesSize(chosen), locale)}
-                        </span>
-                      )}
-                    </>
-                  )}
+                <span className="flex @xl:hidden">
+                  <Checkbox
+                    aria-label="Select everything in this folder"
+                    checked={all}
+                    indeterminate={chosen.length > 0 && !all}
+                    onCheckedChange={selectAll}
+                  />
                 </span>
+                {chosen.length === 0 ? (
+                  <span className="text-fg-muted">Select all</span>
+                ) : (
+                  <span>
+                    <span className="font-medium numeric">{chosen.length}</span> selected
+                    {fileEntriesSize(chosen) > 0 && (
+                      <span className="text-fg-muted">
+                        , {formatBytes(fileEntriesSize(chosen), locale)}
+                      </span>
+                    )}
+                  </span>
+                )}
               </label>
             ) : (
               <span />
@@ -381,33 +422,49 @@ export function FileManager({
               {chosen.length === 0 && (
                 <ChoiceSelect
                   label="Sort"
-                  value={sort}
-                  onValueChange={setSort}
+                  value={sort.key}
+                  onValueChange={(key) => {
+                    setSort({ key, ascending: key === 'name' });
+                  }}
                   choices={SORTS}
                   className="h-(--rx-control-height-sm) text-sm"
                 />
               )}
             </div>
           </div>
+          <p role="status" className="sr-only">
+            {chosen.length === 0 ? '' : `${String(chosen.length)} selected`}
+          </p>
 
           <Table>
             <TableCaption className="sr-only">
               {current?.name ?? 'Files'}, folders first, sorted by{' '}
-              {SORTS.find((s) => s.value === sort)?.label.toLowerCase()}
+              {SORTS.find((s) => s.value === sort.key)?.label.toLowerCase()}
             </TableCaption>
-            <TableHeader className="@max-xl:sr-only">
+            <TableHeader className="hidden @xl:table-header-group">
               <TableRow>
                 {selectable && (
                   <TableHead className="w-0 pe-0">
-                    <span className="sr-only">Select</span>
+                    <span className="flex items-center">
+                      <Checkbox
+                        aria-label="Select everything in this folder"
+                        checked={all}
+                        indeterminate={chosen.length > 0 && !all}
+                        onCheckedChange={selectAll}
+                      />
+                    </span>
                   </TableHead>
                 )}
-                <TableHead>Name</TableHead>
+                <FileSortHead column="name" sort={sort} onSort={sortBy}>
+                  Name
+                </FileSortHead>
                 <TableHead className={WIDE}>Owner</TableHead>
-                <TableHead className="hidden @xl:table-cell">Modified</TableHead>
-                <TableHead align="end" className="hidden @xl:table-cell">
+                <FileSortHead column="modified" sort={sort} onSort={sortBy}>
+                  Modified
+                </FileSortHead>
+                <FileSortHead column="size" sort={sort} onSort={sortBy} align="end">
                   Size
-                </TableHead>
+                </FileSortHead>
                 <TableHead className="w-0">
                   <span className="sr-only">Actions</span>
                 </TableHead>
@@ -466,7 +523,9 @@ export function FileManager({
                           ) : (
                             <span className="flex min-w-0 flex-col">
                               {onOpen === undefined ? (
-                                <span className="truncate font-medium">{entry.name}</span>
+                                <span className="font-medium break-words @xl:truncate">
+                                  {entry.name}
+                                </span>
                               ) : (
                                 <button
                                   type="button"
@@ -474,7 +533,7 @@ export function FileManager({
                                     onOpen(entry);
                                   }}
                                   className={cn(
-                                    'w-fit max-w-full cursor-pointer truncate rounded-badge text-start font-medium',
+                                    'w-fit max-w-full cursor-pointer rounded-badge text-start font-medium break-words @xl:truncate',
                                     'hover:underline hover:decoration-line-strong hover:underline-offset-4',
                                     focusRing,
                                   )}
@@ -483,7 +542,7 @@ export function FileManager({
                                 </button>
                               )}
                               {/* Narrow: what the hidden columns said, under the name. */}
-                              <span className="truncate text-sm text-fg-muted @xl:hidden">
+                              <span className="text-sm text-fg-muted @xl:hidden">
                                 {[
                                   entry.type === 'file'
                                     ? formatBytes(entry.size ?? 0, locale)
@@ -491,7 +550,6 @@ export function FileManager({
                                       ? null
                                       : plural(entry.itemCount, 'item'),
                                   relativeTime(entry.modified, now, locale),
-                                  entry.owner,
                                 ]
                                   .filter(Boolean)
                                   .join(', ')}
@@ -533,6 +591,15 @@ export function FileManager({
               </Rows>
             </TableBody>
           </Table>
+          {storage !== undefined && !storageNeedsAttention(storage) && (
+            <p className="flex items-center gap-2 text-sm text-fg-muted">
+              <HardDrivesIcon aria-hidden weight="bold" className="size-4 text-fg-subtle" />
+              <span>
+                <span className="numeric">{formatBytes(storage.used, locale)}</span> of{' '}
+                <span className="numeric">{formatBytes(storage.total, locale)}</span> storage used
+              </span>
+            </p>
+          )}
         </>
       )}
 
@@ -660,5 +727,57 @@ function DeleteEntriesDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+const SORT_WORDS = { true: 'ascending', false: 'descending' } as const;
+
+/** A sortable column header: the title is a button, `aria-sort` says the current order. */
+function FileSortHead({
+  column,
+  sort,
+  onSort,
+  align = 'start',
+  children,
+}: {
+  column: FileSortKey;
+  sort: { key: FileSortKey; ascending: boolean };
+  onSort: (key: FileSortKey) => void;
+  align?: 'start' | 'end';
+  children: string;
+}) {
+  const active = sort.key === column;
+  const SortIcon = !active ? ArrowsDownUpIcon : sort.ascending ? ArrowUpIcon : ArrowDownIcon;
+  return (
+    <TableHead
+      align={align}
+      aria-sort={active ? SORT_WORDS[String(sort.ascending) as 'true' | 'false'] : 'none'}
+      className="p-0"
+    >
+      <button
+        type="button"
+        data-sorted={active || undefined}
+        onClick={() => {
+          onSort(column);
+        }}
+        className={cn(
+          'group/sort inline-flex h-full w-full cursor-pointer items-center gap-1.5 px-(--rx-table-cell-padding-x)',
+          'font-medium whitespace-nowrap text-fg-muted hover:text-fg data-sorted:text-fg',
+          'transition-colors duration-fast ease-standard',
+          '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
+          align === 'end' && 'flex-row-reverse',
+        )}
+      >
+        <span>{children}</span>
+        <SortIcon
+          aria-hidden
+          weight="bold"
+          className={cn(
+            'size-3 shrink-0',
+            !active && 'text-fg-disabled group-hover/sort:text-fg-subtle',
+          )}
+        />
+      </button>
+    </TableHead>
   );
 }

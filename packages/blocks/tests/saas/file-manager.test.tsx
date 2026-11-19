@@ -9,6 +9,7 @@ import {
   fileNameError,
   sortFileEntries,
   storageLevel,
+  storageNeedsAttention,
   type FileEntry,
 } from '../../src/index';
 
@@ -44,6 +45,8 @@ describe('file manager logic', () => {
     expect(storageLevel({ used: 5, total: 10 })).toBe('ok');
     expect(storageLevel({ used: 8, total: 10 })).toBe('warning');
     expect(storageLevel({ used: 10, total: 10 })).toBe('over');
+    expect(storageNeedsAttention({ used: 8.9, total: 10 })).toBe(false);
+    expect(storageNeedsAttention({ used: 9, total: 10 })).toBe(true);
   });
 });
 
@@ -76,7 +79,7 @@ describe('FileManager', () => {
     render(<FileManager path={PATH} entries={ENTRIES} now={NOW} onDelete={onDelete} />);
     await userEvent.click(screen.getByRole('checkbox', { name: 'Select notes' }));
     await userEvent.click(screen.getByRole('checkbox', { name: 'Select Archive' }));
-    expect(screen.getByText('selected', { exact: false })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('2 selected');
     await userEvent.click(screen.getByRole('button', { name: 'Delete 2' }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText(/Folders are deleted with everything/)).toBeInTheDocument();
@@ -84,8 +87,42 @@ describe('FileManager', () => {
     expect(onDelete).toHaveBeenCalledWith(['c', 'd']);
   });
 
+  it('sorts from the column headers and flips on a second click', async () => {
+    render(<FileManager path={PATH} entries={ENTRIES} now={NOW} />);
+    const names = () =>
+      screen
+        .getAllByRole('row')
+        .slice(1)
+        .map((row) => row.textContent);
+    const size = screen.getByRole('button', { name: 'Size' });
+    await userEvent.click(size);
+    expect(size.closest('th')).toHaveAttribute('aria-sort', 'descending');
+    expect(names()[1]).toMatch(/Report Q2\.pdf/);
+    await userEvent.click(size);
+    expect(size.closest('th')).toHaveAttribute('aria-sort', 'ascending');
+    expect(names()[1]).toMatch(/notes/);
+  });
+
+  it('keeps storage quiet until it is nearly full', () => {
+    const { rerender } = render(
+      <FileManager path={PATH} entries={ENTRIES} now={NOW} storage={{ used: 5e9, total: 1e10 }} />,
+    );
+    expect(screen.getByText(/storage used/)).toBeInTheDocument();
+    expect(screen.queryByRole('meter')).not.toBeInTheDocument();
+    rerender(
+      <FileManager
+        path={PATH}
+        entries={ENTRIES}
+        now={NOW}
+        storage={{ used: 9.5e9, total: 1e10 }}
+      />,
+    );
+    expect(screen.getByText(/Storage is nearly full/)).toBeInTheDocument();
+  });
+
   it('shows an empty folder', () => {
     render(<FileManager path={PATH} entries={[]} now={NOW} onUpload={vi.fn()} />);
-    expect(screen.getByText('This folder is empty')).toBeInTheDocument();
+    expect(screen.getByText('Nothing in Q1 yet')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Upload' })).toBeInTheDocument();
   });
 });
