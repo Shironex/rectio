@@ -5,7 +5,9 @@ import { cn } from '../lib/cn';
 export type BadgeTone = 'neutral' | 'positive' | 'negative' | 'warning' | 'info';
 
 const TONES: Record<BadgeTone, string> = {
-  neutral: 'border-line bg-surface-sunken text-fg-muted',
+  // The strong border keeps a neutral badge visible on dark rows, where the sunken fill is close
+  // to the canvas.
+  neutral: 'border-line-strong bg-surface-sunken text-fg-muted',
   positive: 'border-positive-strong/25 bg-positive-subtle text-positive-strong',
   negative: 'border-negative-strong/25 bg-negative-subtle text-negative-strong',
   warning: 'border-warning-strong/25 bg-warning-subtle text-warning-strong',
