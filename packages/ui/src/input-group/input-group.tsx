@@ -93,9 +93,12 @@ export function InputGroupAddon({ className, align = 'start', ...props }: InputG
         'data-[align=start]:has-[button]:-ms-1.5 data-[align=end]:has-[button]:-me-1.5',
         '[&_svg]:size-4 [&_svg]:shrink-0',
         // A text addon ("https://", "EUR") is fenced off by a hairline, so it never reads as typed.
-        'not-has-[svg]:self-stretch not-has-[svg]:border-line',
-        'data-[align=start]:not-has-[svg]:border-e data-[align=start]:not-has-[svg]:pe-2.5',
-        'data-[align=end]:not-has-[svg]:border-s data-[align=end]:not-has-[svg]:ps-2.5',
+        // It sits on a sunken cell that runs to the field's edge.
+        'not-has-[svg]:self-stretch not-has-[svg]:border-line not-has-[svg]:bg-surface-sunken',
+        'data-[align=start]:not-has-[svg]:-ms-(--rx-field-padding-x) data-[align=start]:not-has-[svg]:rounded-s-(--rx-field-radius)',
+        'data-[align=start]:not-has-[svg]:border-e data-[align=start]:not-has-[svg]:ps-(--rx-field-padding-x) data-[align=start]:not-has-[svg]:pe-2.5',
+        'data-[align=end]:not-has-[svg]:-me-(--rx-field-padding-x) data-[align=end]:not-has-[svg]:rounded-e-(--rx-field-radius)',
+        'data-[align=end]:not-has-[svg]:border-s data-[align=end]:not-has-[svg]:pe-(--rx-field-padding-x) data-[align=end]:not-has-[svg]:ps-2.5',
         className,
       )}
       {...props}
