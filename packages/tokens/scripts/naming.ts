@@ -30,6 +30,7 @@ export const COLOR_GROUPS = new Set([
   'scrim',
   'chart',
   'identity',
+  'code',
 ]);
 
 /**

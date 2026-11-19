@@ -331,5 +331,70 @@
         "$value": "{palette.citron.200}"
       }
     }
+  },
+  "code": {
+    "$type": "color",
+    "$description": "Syntax highlighting, read by a build-time highlighter through CSS variables (--rx-code-token-*). Every token colour holds 4.5:1 against the code background.",
+    "background": {
+      "$value": "{palette.ink.950}",
+      "$description": "Code blocks and their tabs."
+    },
+    "foreground": {
+      "$value": "{palette.paper.75}",
+      "$description": "Code text without a token colour."
+    },
+    "highlight": {
+      "$value": "{palette.citron.950}",
+      "$description": "A highlighted line."
+    },
+    "inserted": {
+      "$value": "{palette.green.950}",
+      "$description": "A line a diff adds."
+    },
+    "deleted": {
+      "$value": "{palette.red.950}",
+      "$description": "A line a diff removes."
+    },
+    "inserted-mark": {
+      "$value": "{palette.green.300}",
+      "$description": "The + of an added line."
+    },
+    "deleted-mark": {
+      "$value": "{palette.red.300}",
+      "$description": "The - of a removed line."
+    },
+    "line-number": {
+      "$value": "{palette.ink.400}",
+      "$description": "Line numbers in the gutter."
+    },
+    "token": {
+      "keyword": {
+        "$value": "{palette.citron.300}"
+      },
+      "string": {
+        "$value": "{palette.orange.300}"
+      },
+      "function": {
+        "$value": "{palette.sky.300}"
+      },
+      "constant": {
+        "$value": "{palette.amber.300}"
+      },
+      "parameter": {
+        "$value": "{palette.red.300}"
+      },
+      "comment": {
+        "$value": "{palette.ink.400}"
+      },
+      "punctuation": {
+        "$value": "{palette.ink.300}"
+      },
+      "string-expression": {
+        "$value": "{palette.orange.300}"
+      },
+      "link": {
+        "$value": "{palette.citron.300}"
+      }
+    }
   }
 }
