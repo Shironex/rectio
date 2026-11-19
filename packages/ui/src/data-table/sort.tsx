@@ -23,6 +23,9 @@ export interface DataTableSortProps<TData extends RowData> {
  * fold columns under the first one. Lists every sortable column by its `meta.label` or string
  * header, and a pressed button reverses the order. It drives the same sorting state as the header,
  * so both always agree. Show it only where it is needed, for example with `className="sm:hidden"`.
+ *
+ * Give a sortable column with a non-string header a `meta.label`, or the list falls back to its id.
+ * The label, placeholder and order name are props, for translation.
  */
 export function DataTableSort<TData extends RowData>({
   table,
