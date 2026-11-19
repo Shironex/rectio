@@ -92,7 +92,7 @@ export function LaunchPage() {
                 Stop quoting the loudest person. <Em>Quote your customers.</Em>
               </>
             }
-            description="Every tile is a piece of the product. Pick a theme in the board above and the interview follows."
+            description="Every tile is a piece of the product: evidence with its source, search across calls, themes that rank themselves."
             items={[
               {
                 id: 'evidence',
@@ -157,10 +157,7 @@ export function LaunchPage() {
             ))}
           </ol>
         </Section>
-        <TestimonialQuote
-          testimonial={BETA_QUOTE}
-          metric={{ value: '3×', label: 'more customer quotes in roadmap reviews' }}
-        />
+        <TestimonialQuote testimonial={BETA_QUOTE} />
         <Section id="waitlist" tone="panel" width="wide" labelledBy="waitlist-title">
           <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
             <div className="flex flex-col gap-6 lg:col-span-6">
@@ -178,9 +175,13 @@ export function LaunchPage() {
                     </>
                   )
                 }
-                description="Early access opens in January in waves of about two hundred teams. The list goes in order."
+                description={
+                  joined
+                    ? 'We open in January and invite teams in the order they joined. Invites from your link move you up.'
+                    : 'Early access opens in January in waves of about two hundred teams. The list goes in order.'
+                }
               />
-              <ul className="flex flex-col gap-3">
+              <ul className={joined ? 'hidden' : 'flex flex-col gap-3'}>
                 {EARLY_ACCESS.map((item) => (
                   <li key={item} className="flex items-center gap-3 text-lg text-fg">
                     <CheckIcon aria-hidden weight="bold" className="size-5 shrink-0 text-accent" />
@@ -195,7 +196,7 @@ export function LaunchPage() {
           </div>
         </Section>
         <div id="faq">
-          <Faq title="Before you join" items={FAQ} defaultOpen={['q1']} />
+          <Faq title="Before you join" items={FAQ} defaultOpen={['q1', 'q2']} />
         </div>
       </main>
       <SiteFooter

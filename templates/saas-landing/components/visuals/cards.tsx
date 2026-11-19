@@ -132,9 +132,7 @@ export function OpenShiftBoard() {
   return (
     <div ref={ref} tabIndex={-1} role="group" aria-label="Open shifts" className={LANDING}>
       <p aria-live="polite" className="sr-only">
-        {taken === undefined
-          ? ''
-          : `You claimed ${taken.day}, ${taken.start} to ${taken.end}. One open shift a week each, so the others stay for the team.`}
+        {taken === undefined ? '' : `You claimed ${taken.day}, ${taken.start} to ${taken.end}.`}
       </p>
       <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-panel border border-line bg-surface">
         {OPEN_SHIFTS.map((shift) => {
@@ -173,6 +171,11 @@ export function OpenShiftBoard() {
           );
         })}
       </ul>
+      {taken !== undefined && (
+        <p className="mt-2 text-sm text-fg-muted">
+          One open shift a week each, so the rest stay for the team.
+        </p>
+      )}
     </div>
   );
 }

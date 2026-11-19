@@ -149,44 +149,52 @@ function Estimator({ billing }: { billing: Billing }) {
         {(() => {
           const team = PLANS.find((plan) => plan.id === 'team');
           const total = team === undefined ? null : monthlyTotal(team, billing, count);
-          return total === null
+          return total === null || people === null
             ? ''
             : `Team for ${String(count)} people: ${formatMoney(total / 100, CURRENCY, { locale: LOCALE })} a month.`;
         })()}
       </p>
-      <dl className="grid gap-3 sm:grid-cols-3 lg:col-span-7">
-        {PLANS.map((plan) => {
-          const total = monthlyTotal(plan, billing, count);
-          return (
-            <div
-              key={plan.id}
-              className="flex flex-col gap-1 rounded-panel border border-line bg-surface p-4"
-            >
-              <dt className="text-sm font-medium text-fg-muted">{plan.name}</dt>
-              <dd className="flex flex-col gap-0.5">
-                {total === null ? (
-                  <>
-                    <span className="text-base text-fg">Covers up to {plan.limit ?? 0} people</span>
-                    <span className="text-sm text-fg-muted">Try Team for a bigger rota</span>
-                  </>
-                ) : (
-                  <>
-                    <Money
-                      amount={total / 100}
-                      currency={CURRENCY}
-                      locale={LOCALE}
-                      className="font-display text-2xl font-strong text-fg"
-                    />
-                    <span className="text-sm text-fg-muted">
-                      {billing === 'yearly' ? 'a month, billed yearly' : 'a month'}
-                    </span>
-                  </>
-                )}
-              </dd>
-            </div>
-          );
-        })}
-      </dl>
+      {people === null ? (
+        <p className="rounded-panel border border-dashed border-line p-6 text-base text-fg-muted lg:col-span-7">
+          Enter how many people work shifts to see what each plan costs.
+        </p>
+      ) : (
+        <dl className="grid gap-3 sm:grid-cols-3 lg:col-span-7">
+          {PLANS.map((plan) => {
+            const total = monthlyTotal(plan, billing, count);
+            return (
+              <div
+                key={plan.id}
+                className="flex flex-col gap-1 rounded-panel border border-line bg-surface p-4"
+              >
+                <dt className="text-sm font-medium text-fg-muted">{plan.name}</dt>
+                <dd className="flex flex-col gap-0.5">
+                  {total === null ? (
+                    <>
+                      <span className="text-base text-fg">
+                        Covers up to {plan.limit ?? 0} people
+                      </span>
+                      <span className="text-sm text-fg-muted">Try Team for a bigger rota</span>
+                    </>
+                  ) : (
+                    <>
+                      <Money
+                        amount={total / 100}
+                        currency={CURRENCY}
+                        locale={LOCALE}
+                        className="font-display text-2xl font-strong text-fg"
+                      />
+                      <span className="text-sm text-fg-muted">
+                        {billing === 'yearly' ? 'a month, billed yearly' : 'a month'}
+                      </span>
+                    </>
+                  )}
+                </dd>
+              </div>
+            );
+          })}
+        </dl>
+      )}
     </div>
   );
 }

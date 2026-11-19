@@ -22,6 +22,6 @@ html[data-mode='dark'] {
 }
 
 /* Anchored sections clear the sticky header. */
-:target {
+:target:not(main) {
   scroll-margin-top: calc(var(--spacing) * 24);
 }

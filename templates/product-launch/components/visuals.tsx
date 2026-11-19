@@ -54,7 +54,7 @@ export function InterviewBoard({ className }: { className?: string }) {
             })}
           </ol>
         </div>
-        <div className="flex flex-col gap-3 border-t border-line bg-surface-sunken p-5 @2xl:col-span-2 @2xl:border-t-0">
+        <div className="order-first flex flex-col gap-3 border-b border-line bg-surface-sunken p-5 @2xl:order-none @2xl:col-span-2 @2xl:border-b-0">
           <span className="text-sm font-medium text-fg">Themes across 12 interviews</span>
           <span className="text-sm text-fg-muted">Pick one to see where it was said.</span>
           <span role="status" className="sr-only">
@@ -63,11 +63,10 @@ export function InterviewBoard({ className }: { className?: string }) {
               : `${String(INTERVIEW.lines.filter((line) => line.theme === active).length)} of ${String(INTERVIEW.lines.length)} lines match.`}
           </span>
           <ul className="flex flex-col gap-1">
-            {THEMES_FOUND.map((theme, index) => {
+            {THEMES_FOUND.map((theme) => {
               const on = active === theme.id;
               return (
-                // A narrow board lists the top three, so the hero fade never covers a live control.
-                <li key={theme.id} className={cn(index > 2 && '@max-2xl:hidden')}>
+                <li key={theme.id}>
                   <button
                     type="button"
                     aria-pressed={on}

@@ -20,7 +20,6 @@ import {
   ClockInCard,
   ConfirmedCard,
   CoverageCard,
-  HoursCard,
   OpenShiftBoard,
   PublishedCard,
   RequestCard,
@@ -46,7 +45,16 @@ export function HomePage() {
         secondary={DEMO}
         visual={<WeekSchedule className="rounded-none border-0" />}
         cards={[
-          { id: 'published', position: 'top-end', content: <PublishedCard /> },
+          {
+            id: 'published',
+            position: 'top-end',
+            // The same card is a bento tile below; this copy is a picture of it.
+            content: (
+              <div inert aria-hidden>
+                <PublishedCard />
+              </div>
+            ),
+          },
           { id: 'clock', position: 'bottom-start', content: <ClockInCard /> },
         ]}
       />
@@ -146,19 +154,6 @@ export function HomePage() {
                   <RequestCard />
                   <TimeOffCard />
                 </div>
-              </Panel>
-            ),
-          },
-          {
-            id: 'hours',
-            title: 'Know the hours before payroll does',
-            description:
-              'Hours, breaks and overtime add up as you plan, against the budget you set for each site.',
-            points: ['Labour budget per site', 'Rest rules checked as you plan'],
-            action: { label: 'See hours and budgets', href: '/features#hours' },
-            visual: (
-              <Panel>
-                <HoursCard />
               </Panel>
             ),
           },

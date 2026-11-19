@@ -61,7 +61,7 @@ export function AboutPage() {
         <SectionHeader
           id="jobs-title"
           title="Open roles"
-          description="Remote across Europe or from our Dublin office. Every role has a salary range on its page."
+          description="Remote across Europe or from our Dublin office. Write to us about any role: every reply includes the salary range."
         />
         <ul className="mt-10 flex flex-col divide-y divide-line border-y border-line">
           {OPENINGS.map((role) => (

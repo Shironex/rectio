@@ -42,8 +42,23 @@ function parseEntry(raw: string | null | undefined): WaitlistEntry | null {
  * the place again instead of the form.
  */
 /** The place in line, with the invite link that moves it up. */
-function Joined({ entry, focus }: { entry: WaitlistEntry; focus: boolean }) {
+function Joined({
+  entry,
+  focus,
+  onReset,
+}: {
+  entry: WaitlistEntry;
+  focus: boolean;
+  onReset: () => void;
+}) {
   const [copied, setCopied] = useState(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(
+    () => () => {
+      clearTimeout(resetTimer.current);
+    },
+    [],
+  );
   const heading = useRef<HTMLHeadingElement>(null);
   const link = `${SITE.url}/?ref=${String(entry.position)}`;
   // Focus the result once, right after joining, so a keyboard lands on the news.
@@ -64,8 +79,8 @@ function Joined({ entry, focus }: { entry: WaitlistEntry; focus: boolean }) {
         We will write to {entry.email} when your wave opens. Each teammate who joins with your link
         moves you up ten places.
       </p>
-      <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-        <code className="min-w-0 flex-1 truncate rounded-control border border-line bg-surface-sunken px-3 py-2 text-sm text-fg">
+      <div className="flex w-full flex-col items-start gap-2">
+        <code className="w-full truncate rounded-control border border-line bg-surface-sunken px-3 py-2 text-sm text-fg">
           {link}
         </code>
         <Button
@@ -74,7 +89,8 @@ function Joined({ entry, focus }: { entry: WaitlistEntry; focus: boolean }) {
             navigator.clipboard.writeText(link).then(
               () => {
                 setCopied(true);
-                setTimeout(() => {
+                clearTimeout(resetTimer.current);
+                resetTimer.current = setTimeout(() => {
                   setCopied(false);
                 }, 2000);
               },
@@ -93,9 +109,7 @@ function Joined({ entry, focus }: { entry: WaitlistEntry; focus: boolean }) {
       </div>
       <button
         type="button"
-        onClick={() => {
-          writeStored(STORAGE.waitlist, null);
-        }}
+        onClick={onReset}
         className="inline-flex min-h-(--rx-button-height-md) cursor-pointer items-center rounded-control text-sm text-fg-muted underline underline-offset-4 outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus pointer-coarse:min-h-(--rx-button-height-touch) pointer-fine:hover:text-fg"
       >
         Wrong address? Use a different email
@@ -115,6 +129,11 @@ export function WaitlistForm() {
   const [busy, setBusy] = useState(false);
   const [beta, setBeta] = useState(false);
   const emailInput = useRef<HTMLInputElement>(null);
+  const [refocus, setRefocus] = useState(false);
+  // After "use a different email" the form comes back; put the caret in the address field.
+  useEffect(() => {
+    if (refocus) emailInput.current?.focus();
+  }, [refocus, raw]);
   const statusId = useId();
 
   const submit = async (event: SyntheticEvent<HTMLFormElement>) => {
@@ -138,11 +157,26 @@ export function WaitlistForm() {
     }
   };
 
-  // One live region holds both states, so joining is announced and nothing jumps on a return visit.
+  // Height is held only until storage is read, so a return visit does not jump. Joining moves focus
+  // to the result heading, which announces it.
   return (
-    <div aria-live="polite" className={raw === undefined ? 'min-h-96' : undefined}>
+    <div className={raw === undefined ? 'min-h-96' : undefined}>
+      <noscript>
+        <p className="text-base text-fg">
+          Write to <a href={`mailto:${SITE.email}?subject=Waitlist`}>{SITE.email}</a> to join the
+          waitlist.
+        </p>
+      </noscript>
       {raw === undefined ? null : saved !== null ? (
-        <Joined entry={saved} focus={joinedNow} />
+        <Joined
+          entry={saved}
+          focus={joinedNow}
+          onReset={() => {
+            setJoinedNow(false);
+            setRefocus(true);
+            writeStored(STORAGE.waitlist, null);
+          }}
+        />
       ) : (
         <form
           noValidate
@@ -162,6 +196,7 @@ export function WaitlistForm() {
               value={email}
               onChange={(event) => {
                 setEmail(event.target.value);
+                if (error !== null && isEmail(event.target.value)) setError(null);
               }}
             />
             {error !== null && <FieldError>{error}</FieldError>}

@@ -10,7 +10,7 @@ export default function NotFound() {
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-6 px-4 py-24 text-center sm:px-8">
       <Link
         href="/"
-        className="rounded-control outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus"
+        className="inline-flex min-h-(--rx-button-height-md) items-center rounded-control outline-offset-4 pointer-coarse:min-h-(--rx-button-height-touch) focus-visible:outline-2 focus-visible:outline-focus"
       >
         <Brand />
       </Link>
