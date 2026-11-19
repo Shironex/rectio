@@ -4,9 +4,6 @@ description: Motion that confirms a change, from the same props and the same tok
 pro: true
 ---
 
-import DataTableDemo from '@/demos/data-table';
-import DataTableMotionDemo from '@/demos/data-table.motion';
-
 The motion add-on gives the components that move a motioned twin. Each twin has the same name and
 the same props as the plain component, so you choose motion per component by its import path.
 Motion here confirms what happened: a row arrived, a total changed, a step landed. It never
@@ -14,8 +11,8 @@ decorates.
 
 <Preview
   name="data-table"
-  plain={<DataTableDemo />}
-  motion={<DataTableMotionDemo />}
+  plain={<Demo name="data-table" />}
+  motion={<Demo name="data-table.motion" />}
   importLine="import { DataTableBody, Money } from '@rectio/motion';"
 />
 

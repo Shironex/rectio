@@ -4,13 +4,10 @@ description: 'One invoice: parties, lines, VAT per rate, payments received and t
 pro: true
 ---
 
-import InvoiceDetailDemo from '@/demos/invoice-detail';
-import InvoiceDetailMotionDemo from '@/demos/invoice-detail.motion';
-
 <Preview
   name="invoice-detail"
-  plain={<InvoiceDetailDemo />}
-  motion={<InvoiceDetailMotionDemo />}
+  plain={<Demo name="invoice-detail" />}
+  motion={<Demo name="invoice-detail.motion" />}
   importLine="import { InvoiceDetail } from '@rectio/blocks/motion';"
   align="start"
 />

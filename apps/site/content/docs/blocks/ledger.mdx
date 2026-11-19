@@ -4,13 +4,10 @@ description: 'Journal entries with their postings, or one account with a running
 pro: true
 ---
 
-import LedgerDemo from '@/demos/ledger';
-import LedgerMotionDemo from '@/demos/ledger.motion';
-
 <Preview
   name="ledger"
-  plain={<LedgerDemo />}
-  motion={<LedgerMotionDemo />}
+  plain={<Demo name="ledger" />}
+  motion={<Demo name="ledger.motion" />}
   importLine="import { Ledger } from '@rectio/blocks/motion';"
   align="start"
 />
