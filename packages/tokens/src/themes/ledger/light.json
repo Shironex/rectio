@@ -20,7 +20,7 @@
       "$value": "{palette.paper.75}"
     },
     "selected": {
-      "$value": "{palette.citron.50}"
+      "$value": "{palette.citron.100}"
     },
     "inset": {
       "$value": "{palette.paper.75}",
@@ -54,23 +54,24 @@
   "accent": {
     "$type": "color",
     "default": {
-      "$value": "{palette.citron.700}"
+      "$value": "{palette.ink.900}"
     },
     "hover": {
-      "$value": "{palette.citron.800}"
+      "$value": "{palette.ink.800}"
     },
     "active": {
-      "$value": "{palette.citron.850}"
+      "$value": "{palette.ink.950}"
     },
     "subtle": {
-      "$value": "{palette.citron.50}"
+      "$value": "{palette.citron.100}"
     },
     "strong": {
-      "$value": "{palette.citron.700}"
+      "$value": "{palette.ink.800}"
     },
     "contrast": {
-      "$value": "{palette.paper.0}"
-    }
+      "$value": "{palette.citron.100}"
+    },
+    "$description": "Light ledger: green-black ink for actions, citron as the tint and the label on ink. Dark ledger inverts it: citron actions with ink labels."
   },
   "positive": {
     "$type": "color",
@@ -138,7 +139,7 @@
   "focus": {
     "$type": "color",
     "default": {
-      "$value": "{palette.citron.700}"
+      "$value": "{palette.ink.900}"
     }
   },
   "scrim": {
