@@ -1,0 +1,386 @@
+import type { ComponentProps, CSSProperties, ReactNode } from 'react';
+
+import { cn } from '../lib/cn';
+
+export type SkeletonAnimation = 'shimmer' | 'pulse' | 'none';
+
+/**
+ * The delay of the n-th shape in a group, so the light runs down a preset like a wave instead of
+ * every shape flashing at once. A multiple of the stagger token, so themes keep their tempo.
+ */
+const wave = (index: number): CSSProperties => ({
+  animationDelay: `calc(var(--rx-motion-duration-stagger) * ${String(index)})`,
+});
+
+export interface SkeletonProps extends ComponentProps<'span'> {
+  /**
+   * `shimmer` sweeps a soft light across; `pulse` breathes in place; `none` is still. Under
+   * reduced motion every skeleton is still.
+   */
+  animation?: SkeletonAnimation | undefined;
+  /** Position in a group, for the wave. Presets set it for you. */
+  index?: number | undefined;
+}
+
+/**
+ * A block standing in for content that is on its way. Size it like the content it replaces, so
+ * nothing moves when the content lands. Hidden from assistive technology: announce the loading
+ * once on the region (presets do), not once per shape.
+ */
+export function Skeleton({
+  animation = 'shimmer',
+  index = 0,
+  className,
+  style,
+  ...props
+}: SkeletonProps) {
+  return (
+    <span
+      aria-hidden
+      data-slot="skeleton"
+      data-animation={animation}
+      className={cn(
+        'relative block overflow-hidden rounded-control bg-surface-sunken',
+        animation === 'pulse' && 'animate-breathe motion-reduce:animate-none',
+        className,
+      )}
+      style={animation === 'pulse' ? { ...wave(index), ...style } : style}
+      {...props}
+    >
+      {animation === 'shimmer' && (
+        <span
+          className={cn(
+            'absolute inset-0 -translate-x-full animate-shimmer motion-reduce:hidden',
+            'bg-linear-to-r from-transparent via-surface-raised to-transparent opacity-70',
+          )}
+          style={wave(index)}
+        />
+      )}
+    </span>
+  );
+}
+
+export interface SkeletonLineProps extends SkeletonProps {
+  /** Width of the line as a share of its container, such as `w-3/4`. */
+  width?: string | undefined;
+  /** Text size the line stands in for, so its height matches a real line. */
+  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | undefined;
+}
+
+const LINE: Record<NonNullable<SkeletonLineProps['size']>, string> = {
+  xs: 'h-2.5',
+  sm: 'h-3',
+  base: 'h-3.5',
+  lg: 'h-4',
+  xl: 'h-5',
+  '2xl': 'h-6',
+};
+
+/** One line of text: the height of the type's x-height, with a line's worth of space around it. */
+export function SkeletonLine({
+  width = 'w-full',
+  size = 'base',
+  className,
+  ...props
+}: SkeletonLineProps) {
+  return <Skeleton className={cn('rounded-badge', LINE[size], width, className)} {...props} />;
+}
+
+export interface SkeletonCircleProps extends SkeletonProps {
+  size?: 'sm' | 'md' | 'lg' | 'xl' | undefined;
+}
+
+const CIRCLE = { sm: 'size-6', md: 'size-8', lg: 'size-10', xl: 'size-14' } as const;
+
+/** An avatar or an icon tile on its way. */
+export function SkeletonCircle({ size = 'md', className, ...props }: SkeletonCircleProps) {
+  return <Skeleton className={cn('shrink-0 rounded-full', CIRCLE[size], className)} {...props} />;
+}
+
+interface PresetProps extends Omit<ComponentProps<'div'>, 'children'> {
+  /** Announced once when the placeholder appears. */
+  label?: string | undefined;
+  animation?: SkeletonAnimation | undefined;
+}
+
+/** The region a preset fills: one live announcement, then shapes that are not read. */
+function Preset({
+  label = 'Loading',
+  className,
+  children,
+  ...props
+}: Omit<PresetProps, 'animation'> & { children: ReactNode }) {
+  return (
+    <div
+      role="status"
+      aria-busy="true"
+      data-slot="skeleton-preset"
+      className={cn('flex flex-col', className)}
+      {...props}
+    >
+      <span className="sr-only">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+/** Widths that read as prose: long lines of slightly different length, a short last line. */
+const PROSE = ['w-full', 'w-11/12', 'w-full', 'w-10/12', 'w-full', 'w-9/12'];
+
+export interface SkeletonTextProps extends PresetProps {
+  lines?: number | undefined;
+  size?: SkeletonLineProps['size'] | undefined;
+  /** A heading line above the paragraph. */
+  heading?: boolean | undefined;
+}
+
+export function SkeletonText({
+  lines = 3,
+  size = 'base',
+  heading = false,
+  animation,
+  className,
+  ...props
+}: SkeletonTextProps) {
+  return (
+    <Preset className={cn('gap-2.5', className)} {...props}>
+      {heading && <SkeletonLine size="xl" width="w-2/5" animation={animation} className="mb-1.5" />}
+      {Array.from({ length: lines }, (_, i) => (
+        <SkeletonLine
+          key={i}
+          size={size}
+          index={i + (heading ? 1 : 0)}
+          animation={animation}
+          width={i === lines - 1 && lines > 1 ? 'w-7/12' : PROSE[i % PROSE.length]}
+        />
+      ))}
+    </Preset>
+  );
+}
+
+export interface SkeletonCardProps extends PresetProps {
+  /** A media block on top, such as a cover image or a chart. */
+  media?: boolean | undefined;
+}
+
+/** A card on its way: optional media, a title, two lines, and a footer with a person. */
+export function SkeletonCard({ media = true, animation, className, ...props }: SkeletonCardProps) {
+  return (
+    <Preset
+      className={cn('overflow-hidden rounded-panel border border-line bg-surface', className)}
+      {...props}
+    >
+      {media && <Skeleton animation={animation} className="aspect-video rounded-none" />}
+      <div className="flex flex-col gap-2.5 px-5 py-4">
+        <SkeletonLine size="lg" width="w-3/5" index={1} animation={animation} />
+        <SkeletonLine size="sm" index={2} animation={animation} />
+        <SkeletonLine size="sm" width="w-4/5" index={3} animation={animation} />
+      </div>
+      <div className="flex items-center gap-3 border-t border-line px-5 py-3">
+        <SkeletonCircle size="sm" index={4} animation={animation} />
+        <SkeletonLine size="sm" width="w-1/3" index={4} animation={animation} />
+        <SkeletonLine size="sm" width="w-12" index={5} animation={animation} className="ms-auto" />
+      </div>
+    </Preset>
+  );
+}
+
+export interface SkeletonTableProps extends PresetProps {
+  rows?: number | undefined;
+  columns?: number | undefined;
+  /** The last column is a figure: right-aligned and narrower, like an amount column. */
+  numeric?: boolean | undefined;
+}
+
+/** Column widths that vary like real data, never a grid of equal bars. */
+const CELL = ['w-4/5', 'w-3/5', 'w-2/3', 'w-1/2', 'w-3/4', 'w-2/5'];
+
+/** Rows of a table on their way, with a header band, under the real column count. */
+export function SkeletonTable({
+  rows = 5,
+  columns = 4,
+  numeric = true,
+  animation,
+  className,
+  ...props
+}: SkeletonTableProps) {
+  const grid = { gridTemplateColumns: `repeat(${String(columns)}, minmax(0, 1fr))` };
+  return (
+    <Preset
+      className={cn('overflow-hidden rounded-panel border border-line bg-surface', className)}
+      {...props}
+    >
+      <div
+        className="grid h-(--rx-table-header-height) items-center gap-4 border-b border-line bg-(--rx-table-header-background) px-(--rx-table-cell-padding-x)"
+        style={grid}
+      >
+        {Array.from({ length: columns }, (_, c) => (
+          <SkeletonLine
+            key={c}
+            size="xs"
+            animation="none"
+            width={c === columns - 1 && numeric ? 'w-1/3' : 'w-2/5'}
+            className={cn(c === columns - 1 && numeric && 'ms-auto', 'bg-line')}
+          />
+        ))}
+      </div>
+      {Array.from({ length: rows }, (_, r) => (
+        <div
+          key={r}
+          className="grid h-(--rx-table-row-height) items-center gap-4 border-b border-line px-(--rx-table-cell-padding-x) last:border-b-0"
+          style={grid}
+        >
+          {Array.from({ length: columns }, (_, c) => {
+            const figure = c === columns - 1 && numeric;
+            return (
+              <SkeletonLine
+                key={c}
+                size="sm"
+                index={r}
+                animation={animation}
+                width={figure ? 'w-1/2' : CELL[(r * 3 + c * 2) % CELL.length]}
+                className={cn(figure && 'ms-auto')}
+              />
+            );
+          })}
+        </div>
+      ))}
+    </Preset>
+  );
+}
+
+export interface SkeletonListItemProps extends PresetProps {
+  /** How many items. */
+  count?: number | undefined;
+  /** A trailing figure or date on each item. */
+  meta?: boolean | undefined;
+}
+
+/** Items of a list with an avatar, two lines and a trailing figure, divided by hairlines. */
+export function SkeletonListItem({
+  count = 1,
+  meta = true,
+  animation,
+  className,
+  ...props
+}: SkeletonListItemProps) {
+  return (
+    <Preset className={cn('divide-y divide-line', className)} {...props}>
+      {Array.from({ length: count }, (_, i) => (
+        <div key={i} className="flex items-center gap-3 py-3">
+          <SkeletonCircle index={i} animation={animation} />
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <SkeletonLine
+              size="sm"
+              index={i}
+              animation={animation}
+              width={i % 2 === 0 ? 'w-2/5' : 'w-1/2'}
+            />
+            <SkeletonLine
+              size="xs"
+              index={i}
+              animation={animation}
+              width={i % 2 === 0 ? 'w-3/5' : 'w-2/5'}
+            />
+          </div>
+          {meta && <SkeletonLine size="sm" width="w-14" index={i} animation={animation} />}
+        </div>
+      ))}
+    </Preset>
+  );
+}
+
+export interface SkeletonChartProps extends PresetProps {
+  kind?: 'bar' | 'line' | undefined;
+  /** Bars or points along the axis. */
+  points?: number | undefined;
+}
+
+/** Heights that rise and fall like a season of figures, never a staircase. */
+const SERIES = [46, 62, 38, 71, 55, 84, 66, 49, 77, 58, 90, 69];
+
+/** A chart on its way: gridlines, a baseline, and bars or a line, in the chart's own frame. */
+export function SkeletonChart({
+  kind = 'bar',
+  points = 9,
+  animation = 'shimmer',
+  className,
+  ...props
+}: SkeletonChartProps) {
+  const values = Array.from({ length: points }, (_, i) => SERIES[i % SERIES.length] ?? 50);
+  return (
+    <Preset className={cn('gap-3', className)} {...props}>
+      <div className="flex items-end justify-between">
+        <SkeletonLine size="lg" width="w-1/3" animation={animation} />
+        <SkeletonLine size="sm" width="w-20" animation={animation} index={1} />
+      </div>
+      <div className="relative h-48">
+        {/* Gridlines are drawn still: only the data placeholders move. */}
+        <div aria-hidden className="absolute inset-0 flex flex-col justify-between">
+          {[0, 1, 2, 3].map((g) => (
+            <span key={g} className="h-px w-full bg-line" />
+          ))}
+        </div>
+        {kind === 'bar' ? (
+          <div className="absolute inset-x-2 top-0 bottom-px flex items-end justify-between gap-2">
+            {values.map((v, i) => (
+              <Skeleton
+                key={i}
+                index={i}
+                animation={animation}
+                className="flex-1 rounded-b-none"
+                style={{ height: `${String(v)}%` }}
+              />
+            ))}
+          </div>
+        ) : (
+          <svg
+            aria-hidden
+            viewBox={`0 0 ${String((points - 1) * 10)} 100`}
+            preserveAspectRatio="none"
+            className={cn(
+              'absolute inset-0 size-full overflow-visible text-surface-sunken',
+              animation !== 'none' && 'animate-breathe motion-reduce:animate-none',
+            )}
+          >
+            <polyline
+              points={values.map((v, i) => `${String(i * 10)},${String(100 - v)}`).join(' ')}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+        )}
+      </div>
+      <div className="flex justify-between px-2">
+        {Array.from({ length: Math.min(points, 6) }, (_, i) => (
+          <SkeletonLine key={i} size="xs" width="w-8" animation="none" />
+        ))}
+      </div>
+    </Preset>
+  );
+}
+
+export interface SkeletonSwapProps {
+  /** While true, the fallback shows; then the content replaces it. */
+  loading: boolean;
+  /** The placeholder, usually a preset sized like the content. */
+  fallback: ReactNode;
+  children: ReactNode;
+  className?: string | undefined;
+}
+
+/**
+ * Shows the placeholder while loading, then the content in its place. The plain one swaps at once;
+ * the motion add-on's twin crossfades the two in the same box.
+ */
+export function SkeletonSwap({ loading, fallback, children, className }: SkeletonSwapProps) {
+  return (
+    <div data-slot="skeleton-swap" aria-busy={loading || undefined} className={className}>
+      {loading ? fallback : children}
+    </div>
+  );
+}
