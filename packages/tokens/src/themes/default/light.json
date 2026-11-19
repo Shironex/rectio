@@ -24,7 +24,7 @@
       "$value": "{palette.stone.100}"
     },
     "selected": {
-      "$value": "{palette.cobalt.50}"
+      "$value": "{palette.cobalt.100}"
     },
     "inset": {
       "$value": "{palette.stone.75}",
