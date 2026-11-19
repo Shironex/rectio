@@ -72,6 +72,7 @@ export function CommentThreadDemo({ motion, empty, locale }: DemoProps) {
         setComments(comments.map((c) => (c.id === id ? { ...c, body, editedAt: NOW } : c)));
       }}
       onCopyLink={() => undefined}
+      onAttach={() => undefined}
       onDelete={(id) => {
         setComments(comments.filter((c) => c.id !== id));
       }}

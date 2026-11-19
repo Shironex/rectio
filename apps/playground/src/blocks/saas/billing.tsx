@@ -68,6 +68,7 @@ export function BillingDemo({ motion, empty, locale }: DemoProps) {
       onCancelPlan={() => undefined}
       onUpdatePaymentMethod={() => undefined}
       onDownloadInvoice={() => undefined}
+      onAddSeats={() => undefined}
     />
   );
 }

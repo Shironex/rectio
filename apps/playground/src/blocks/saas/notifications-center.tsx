@@ -76,8 +76,9 @@ export function NotificationsCenterDemo({ motion, empty, locale }: DemoProps) {
         <span className="font-display text-lg font-heading tracking-tight">Fernhill</span>
         <NotificationsCenter {...common} />
       </div>
-      <div className="grid px-4 pt-2 pb-6">
-        <div aria-hidden className="col-start-1 row-start-1 flex flex-col gap-3 pt-6">
+      {/* The page sits beside the panel, never under it; the panel's end edge lines up with the bell. */}
+      <div className="flex items-start gap-6 px-4 pt-2 pb-6">
+        <div aria-hidden className="hidden min-w-0 flex-1 flex-col gap-3 pt-6 md:flex">
           <span className="h-4 w-40 rounded-full bg-line" />
           <span className="h-24 w-full rounded-control bg-surface" />
           <span className="h-24 w-full rounded-control bg-surface" />
@@ -86,7 +87,7 @@ export function NotificationsCenterDemo({ motion, empty, locale }: DemoProps) {
         <NotificationsCenter
           {...common}
           inline
-          className="col-start-1 row-start-1 w-full max-w-md self-start justify-self-end shadow-raised"
+          className="ms-auto w-full shrink-0 shadow-raised md:w-96"
         />
       </div>
     </div>

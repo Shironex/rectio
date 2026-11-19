@@ -20,7 +20,7 @@ const EVENTS: ActivityEvent[] = [
     kind: 'update',
     verb: 'moved',
     target: 'Vendor contract renewals',
-    detail: 'In review to Approved',
+    change: { from: 'In review', to: 'Approved' },
   },
   {
     id: 'e3',
@@ -80,6 +80,7 @@ export function ActivityFeedDemo({ motion, empty, locale }: DemoProps) {
       hasMore
       onLoadMore={() => undefined}
       onInvite={() => undefined}
+      lastSeen={ago(90)}
       now={NOW}
       locale={locale}
     />

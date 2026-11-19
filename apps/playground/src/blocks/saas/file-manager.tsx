@@ -119,6 +119,8 @@ export function FileManagerDemo({ motion, empty, locale }: DemoProps) {
         setEntries(entries.map((e) => (e.id === id ? { ...e, name, modified: NOW } : e)));
       }}
       onDownload={() => undefined}
+      onUpgrade={() => undefined}
+      defaultSelectedIds={['f3']}
       onDelete={(ids) => {
         setEntries(entries.filter((e) => !ids.includes(e.id)));
       }}

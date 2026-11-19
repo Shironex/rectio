@@ -33,6 +33,8 @@ const RELEASES: ChangelogRelease[] = [
     id: 'r3',
     version: '2.12',
     date: new Date(2026, 1, 20),
+    title: 'Cleaner exports',
+    summary: 'Two fixes for the reports finance teams send out at month end.',
     changes: [
       { kind: 'fixed', text: 'Exports to CSV keep the leading zeros of account codes.' },
       { kind: 'fixed', text: 'The aging report counts weekends correctly.' },
