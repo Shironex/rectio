@@ -2,6 +2,7 @@ import { LockSimpleIcon } from '@phosphor-icons/react';
 import { Checkbox, cn } from '@rectio/ui';
 import { Fragment, useId } from 'react';
 
+import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
 import { EmptyNote } from '../../lib/empty-note';
 import {
@@ -24,6 +25,11 @@ export interface NotificationPreferencesProps {
   value: NotificationMatrix;
   /** Called with the whole new matrix on every change; save it as it comes or behind a button. */
   onChange: (value: NotificationMatrix) => void;
+  /**
+   * Offered while nothing beyond the required events is on, as a "Use recommended" button: set
+   * your suggested matrix through `onChange` or your own state.
+   */
+  onUseRecommended?: () => void;
   /** Turns every control off while you save, so changes never race. */
   disabled?: boolean;
   title?: string;
@@ -41,6 +47,7 @@ export function NotificationPreferences({
   events,
   value,
   onChange,
+  onUseRecommended,
   disabled = false,
   title = 'Notifications',
   description,
@@ -49,7 +56,10 @@ export function NotificationPreferences({
   const groups = groupNotificationEvents(events);
   const on = notificationCount(value, events, channels);
   const lockNoteId = useId();
-  const anyLocked = events.some((event) => (event.required?.length ?? 0) > 0);
+  const { Button } = useBlockParts();
+  const lockedCount = events.reduce((sum, event) => sum + (event.required?.length ?? 0), 0);
+  const anyLocked = lockedCount > 0;
+  const untouched = on <= lockedCount;
 
   return (
     <BlockPanel
@@ -63,24 +73,58 @@ export function NotificationPreferences({
     >
       {events.length === 0 || channels.length === 0 ? (
         <EmptyNote title="Nothing to set up yet">
-          Notifications appear here once there is something to be told about.
+          Each kind of notification appears here, with a box per channel, as soon as the workspace
+          has something to tell you about.
         </EmptyNote>
       ) : (
         <>
+          {untouched && onUseRecommended !== undefined && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-control border border-line bg-surface-sunken px-4 py-3">
+              <p className="text-sm">
+                <span className="font-medium">Nothing chosen yet.</span>{' '}
+                <span className="text-fg-muted">
+                  {anyLocked ? 'Only the required alerts go out. ' : ''}Start from what most teams
+                  use and adjust from there.
+                </span>
+              </p>
+              <Button variant="secondary" size="sm" disabled={disabled} onClick={onUseRecommended}>
+                Use recommended
+              </Button>
+            </div>
+          )}
           {/* Wide: one matrix, events down, channels across. */}
           <table className="hidden w-full border-collapse text-sm @xl:table">
             <caption className="sr-only">Notifications by event and channel</caption>
             <thead>
-              <tr className="border-b border-line">
-                <th scope="col" className="py-2 pe-4 text-start font-medium text-fg-muted">
+              <tr>
+                <th
+                  scope="col"
+                  className="py-2 pe-4 text-start align-bottom font-medium text-fg-muted"
+                >
                   Event
+                </th>
+                {channels.map((channel) => (
+                  <th
+                    key={channel.id}
+                    scope="col"
+                    className="w-28 px-2 py-2 text-center align-bottom font-medium"
+                  >
+                    {channel.label}
+                  </th>
+                ))}
+              </tr>
+              <tr className="border-b border-line">
+                <th
+                  scope="row"
+                  className="pb-2.5 pe-4 text-start text-xs font-medium text-fg-subtle"
+                >
+                  All events
                 </th>
                 {channels.map((channel) => {
                   const state = notificationColumnState(value, events, channel.id);
                   return (
-                    <th key={channel.id} scope="col" className="w-28 px-2 py-2 font-medium">
-                      <label className="flex cursor-pointer flex-col items-center gap-2">
-                        <span>{channel.label}</span>
+                    <td key={channel.id} className="px-2 pb-2.5 text-center">
+                      <span className="inline-flex justify-center">
                         <Checkbox
                           aria-label={`Every event by ${channel.label}`}
                           checked={state === 'all'}
@@ -90,8 +134,8 @@ export function NotificationPreferences({
                             onChange(setNotificationColumn(value, events, channel.id, checked));
                           }}
                         />
-                      </label>
-                    </th>
+                      </span>
+                    </td>
                   );
                 })}
               </tr>
@@ -114,7 +158,7 @@ export function NotificationPreferences({
                       className="border-b border-line transition-colors duration-fast ease-standard last:border-b-0 hover:bg-surface-hover"
                     >
                       <th scope="row" className="py-3 pe-4 text-start font-regular">
-                        <span className="block font-medium text-fg">{event.label}</span>
+                        <EventLabel event={event} channels={channels} />
                         {event.description !== undefined && (
                           <span className="block text-fg-muted">{event.description}</span>
                         )}
@@ -139,20 +183,24 @@ export function NotificationPreferences({
           </table>
 
           {/* Narrow: each event, then its channels as labelled boxes. */}
-          <div className="flex flex-col gap-5 @xl:hidden">
+          <div className="flex flex-col @xl:hidden">
             {groups.map((group) => (
-              <section key={group.name} aria-label={group.name} className="flex flex-col">
-                <h3 className="pb-1.5 text-xs font-medium tracking-caps text-fg-subtle uppercase">
+              <section
+                key={group.name}
+                aria-label={group.name}
+                className="flex flex-col pt-6 first:pt-0"
+              >
+                <h3 className="pb-1 text-xs font-medium tracking-caps text-fg-subtle uppercase">
                   {group.name}
                 </h3>
                 <ul className="flex flex-col">
                   {group.events.map((event) => (
                     <li
                       key={event.id}
-                      className="flex flex-col gap-2 border-b border-line py-3 last:border-b-0"
+                      className="flex flex-col gap-1 border-b border-line py-2.5 last:border-b-0"
                     >
                       <span className="flex flex-col text-sm">
-                        <span className="font-medium">{event.label}</span>
+                        <EventLabel event={event} channels={channels} />
                         {event.description !== undefined && (
                           <span className="text-fg-muted">{event.description}</span>
                         )}
@@ -160,7 +208,7 @@ export function NotificationPreferences({
                       <span
                         role="group"
                         aria-label={`Channels for ${event.label}`}
-                        className="flex flex-wrap gap-x-6 gap-y-1"
+                        className="flex flex-wrap gap-x-6"
                       >
                         {channels.map((channel) => (
                           <label
@@ -220,7 +268,7 @@ function Cell({
 }) {
   const locked = notificationLocked(event, channel.id);
   return (
-    <span className={cn('relative inline-flex items-center', !labelled && 'justify-center')}>
+    <span className={cn('inline-flex items-center', !labelled && 'justify-center')}>
       <Checkbox
         aria-label={labelled ? undefined : `${event.label} by ${channel.label}`}
         aria-describedby={locked ? lockNoteId : undefined}
@@ -230,15 +278,27 @@ function Cell({
           onChange(setNotification(value, event, channel.id, checked));
         }}
       />
-      {locked && (
-        <LockSimpleIcon
-          aria-hidden
-          weight="bold"
-          className={cn(
-            'size-3 text-fg-subtle',
-            labelled ? 'ms-1.5' : 'absolute start-full ms-1.5',
-          )}
-        />
+    </span>
+  );
+}
+
+/** The event's name, with a lock and the channels it always goes to when some are required. */
+function EventLabel({
+  event,
+  channels,
+}: {
+  event: NotificationEvent;
+  channels: readonly NotificationChannel[];
+}) {
+  const required = channels.filter((channel) => notificationLocked(event, channel.id));
+  return (
+    <span className="flex flex-wrap items-center gap-x-2 font-medium text-fg">
+      {event.label}
+      {required.length > 0 && (
+        <span className="inline-flex items-center gap-1 text-xs font-regular text-fg-subtle">
+          <LockSimpleIcon aria-hidden weight="bold" className="size-3" />
+          {required.map((channel) => channel.label).join(' and ')} always on
+        </span>
       )}
     </span>
   );

@@ -87,6 +87,31 @@ describe('NotificationPreferences', () => {
     });
   });
 
+  it('offers the recommended set while nothing is chosen', async () => {
+    const onUseRecommended = vi.fn();
+    const { rerender } = render(
+      <NotificationPreferences
+        channels={CHANNELS}
+        events={EVENTS}
+        value={{}}
+        onChange={vi.fn()}
+        onUseRecommended={onUseRecommended}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Use recommended' }));
+    expect(onUseRecommended).toHaveBeenCalled();
+    rerender(
+      <NotificationPreferences
+        channels={CHANNELS}
+        events={EVENTS}
+        value={VALUE}
+        onChange={vi.fn()}
+        onUseRecommended={onUseRecommended}
+      />,
+    );
+    expect(screen.queryByRole('button', { name: 'Use recommended' })).not.toBeInTheDocument();
+  });
+
   it('locks required pairs and says why', () => {
     render(
       <NotificationPreferences
