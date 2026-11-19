@@ -84,6 +84,8 @@ export interface UsersTableProps {
 // Role is plain text, so the one chip in a row is the status: a quiet outlined badge with a
 // coloured dot. The words carry the meaning; the dot only marks it. Owners carry a lock, since
 // they sit outside bulk changes.
+// Suspended also says it in the negative text colour, since it is the status that needs action.
+const STATUS_TEXT: Partial<Record<UserStatus, string>> = { suspended: 'text-negative-strong' };
 const STATUS_DOT: Record<UserStatus, string> = {
   active: 'bg-positive',
   invited: 'bg-warning',
@@ -103,8 +105,8 @@ function RoleLabel({ role }: { role: UserRole }) {
 
 function StatusBadge({ status }: { status: UserStatus }) {
   return (
-    <Badge>
-      <span aria-hidden className={cn('size-1.5 shrink-0 rounded-full', STATUS_DOT[status])} />
+    <Badge className={cn('text-sm', STATUS_TEXT[status])}>
+      <span aria-hidden className={cn('size-2 shrink-0 rounded-full', STATUS_DOT[status])} />
       {USER_STATUS_LABELS[status]}
     </Badge>
   );
@@ -235,11 +237,12 @@ export function UsersTable({
                     />
                   </span>
                 ) : (
+                  // Drawn in the checkbox's own footprint, so the column keeps one clean edge.
                   <span
-                    className="flex size-4 items-center justify-center text-fg-subtle"
+                    className="flex size-4 items-center justify-center rounded-badge border border-line bg-surface-sunken text-fg-muted"
                     title="Owners are left out of bulk changes"
                   >
-                    <LockSimpleIcon aria-hidden weight="bold" className="size-3.5" />
+                    <LockSimpleIcon aria-hidden weight="bold" className="size-2.5" />
                     <span className="sr-only">
                       {row.original.name} is an owner and is left out of bulk changes
                     </span>
@@ -348,7 +351,13 @@ export function UsersTable({
         meta: { align: 'end', className: 'w-0' },
         cell: ({ row }) => {
           const actions = rowActions(row.original);
-          return actions.length === 0 ? null : (
+          // A row without actions keeps the menu's width, so the right edge stays even.
+          return actions.length === 0 ? (
+            <span
+              aria-hidden
+              className="inline-block h-(--rx-button-height-sm) w-(--rx-button-height-sm)"
+            />
+          ) : (
             <ActionMenu label={`Actions for ${row.original.name}`} actions={actions} />
           );
         },
