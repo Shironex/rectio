@@ -30,11 +30,11 @@ const INVOICES: BillingInvoice[] = [
 ];
 
 describe('billing logic', () => {
-  it('grades usage, calm at the allowance exactly', () => {
+  it('grades usage, warning from 80 per cent and over when full', () => {
     expect(billingUsageLevel(10, 100)).toBe('ok');
-    expect(billingUsageLevel(80, 100)).toBe('ok');
+    expect(billingUsageLevel(80, 100)).toBe('warning');
     expect(billingUsageLevel(90, 100)).toBe('warning');
-    expect(billingUsageLevel(100, 100)).toBe('ok');
+    expect(billingUsageLevel(100, 100)).toBe('over');
     expect(billingUsageLevel(101, 100)).toBe('over');
     expect(billingUsageLevel(0, 0)).toBe('ok');
   });
@@ -93,6 +93,20 @@ describe('Billing', () => {
     expect(screen.getByText('Renews on 1 April 2026, in 13 days')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Download FH-2' }));
     expect(onDownloadInvoice).toHaveBeenCalledWith(INVOICES[1]);
+  });
+
+  it('counts down a trial in place of empty usage', () => {
+    render(
+      <Billing
+        plan={{ ...PLAN, status: 'trialing' }}
+        paymentMethod={{ brand: 'Visa', last4: '4821', expMonth: 4, expYear: 2026 }}
+        currency="EUR"
+        locale="en-GB"
+        today={TODAY}
+      />,
+    );
+    expect(screen.getByText('13 days left in your trial')).toBeInTheDocument();
+    expect(screen.queryByText(/update it before the next charge/)).not.toBeInTheDocument();
   });
 
   it('shows the empty invoices note and a past due alert', () => {

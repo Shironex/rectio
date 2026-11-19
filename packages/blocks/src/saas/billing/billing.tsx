@@ -94,6 +94,8 @@ export function Billing({
   const renewal = formatLongDate(plan.renewsOn, locale);
   const totals = billingInvoiceTotals(invoices, currency);
   const card = paymentMethod === undefined ? null : billingCardState(paymentMethod, today);
+  // During a trial nothing is charged yet, so an expiring card is not yet a call to act.
+  const cardUrgent = plan.status !== 'trialing' && card !== 'ok';
 
   const renewalText =
     plan.status === 'canceled'
@@ -174,9 +176,24 @@ export function Billing({
 
         {/* Usage against the allowances. */}
         <div className="flex flex-col gap-4 @3xl:col-span-3">
-          <h3 className="text-sm font-medium text-fg-muted">Usage this period</h3>
+          <h3 className="text-sm font-medium text-fg-muted">
+            {usage.length === 0 && plan.status === 'trialing' ? 'Your trial' : 'Usage this period'}
+          </h3>
           {usage.length === 0 ? (
-            <p className="text-sm text-fg-muted">This plan has no metered allowances.</p>
+            plan.status === 'trialing' ? (
+              <div className="flex flex-col gap-1">
+                <p className="font-display text-xl font-heading tracking-tight">
+                  {days === 1 ? '1 day' : `${String(days)} days`} left in your trial
+                </p>
+                <p className="text-sm text-fg-muted">
+                  Everything in {plan.name} is open until then. The first charge,{' '}
+                  <Money amount={plan.price} currency={currency} locale={locale} />, is on {renewal}
+                  .
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-fg-muted">This plan has no metered allowances.</p>
+            )
           ) : (
             <div className="flex flex-col gap-5">
               {usage.map((item) => {
@@ -195,7 +212,7 @@ export function Billing({
                       locale,
                       item.resetsOn === undefined
                         ? null
-                        : `on ${formatShortDate(item.resetsOn, locale)}`,
+                        : `on ${formatLongDate(item.resetsOn, locale)}`,
                     )}
                   />
                 );
@@ -221,8 +238,8 @@ export function Billing({
               <span
                 className={cn(
                   'text-sm text-fg-muted',
-                  card === 'expiring' && 'text-warning-strong',
-                  card === 'expired' && 'text-negative-strong',
+                  cardUrgent && card === 'expiring' && 'text-warning-strong',
+                  cardUrgent && card === 'expired' && 'text-negative-strong',
                 )}
               >
                 {paymentMethod.expMonth !== undefined && paymentMethod.expYear !== undefined ? (
@@ -231,7 +248,7 @@ export function Billing({
                     <span className="numeric">
                       {String(paymentMethod.expMonth).padStart(2, '0')}/{paymentMethod.expYear}
                     </span>
-                    {card === 'expiring' && ', update it before the next charge'}
+                    {cardUrgent && card === 'expiring' && ', update it before the next charge'}
                   </>
                 ) : (
                   'Charged on each renewal'
@@ -266,13 +283,13 @@ export function Billing({
             Your first invoice appears here after the first charge, on {renewal}.
           </EmptyNote>
         ) : (
-          <ul aria-label="Invoices" className="-mx-2 flex flex-col">
+          <ul aria-label="Invoices" className="flex flex-col">
             {invoices.map((invoice) => {
               const state = INVOICE_STATE[invoice.status];
               return (
                 <li
                   key={invoice.id}
-                  className="flex items-center gap-3 rounded-control px-2 py-2 not-last:border-b not-last:border-line pointer-coarse:gap-4"
+                  className="flex items-center gap-3 py-2 not-last:border-b not-last:border-line pointer-coarse:gap-4"
                 >
                   <span className="flex min-w-0 flex-1 flex-col @md:flex-row @md:items-baseline @md:gap-4">
                     <span className="font-medium numeric">{invoice.number}</span>
