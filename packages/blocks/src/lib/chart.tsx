@@ -168,6 +168,9 @@ export interface ChartFigureProps {
   table: ReactNode;
   /** Height of the plot, a token utility such as `h-64`. */
   plotClassName?: string;
+  /** The toggle's words, from the block's messages. */
+  showTableLabel?: string;
+  hideTableLabel?: string;
   children: ReactNode;
   className?: string;
 }
@@ -181,6 +184,8 @@ export function ChartFigure({
   legend,
   table,
   plotClassName,
+  showTableLabel = 'Show table',
+  hideTableLabel = 'Hide table',
   children,
   className,
 }: ChartFigureProps) {
@@ -203,7 +208,7 @@ export function ChartFigure({
           className="-me-2"
         >
           <TableIcon aria-hidden weight="bold" className="size-3.5" />
-          {showTable ? 'Hide table' : 'Show table'}
+          {showTable ? hideTableLabel : showTableLabel}
         </Button>
       </div>
       <ChartStage className={cn('relative min-w-0', chartSurface, plotClassName)}>
