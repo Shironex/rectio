@@ -1,4 +1,14 @@
 {
   "title": "Blocks",
-  "pages": ["index"]
+  "pages": [
+    "index",
+    "kpi-row",
+    "cash-flow",
+    "invoice-list",
+    "invoice-detail",
+    "ledger",
+    "expense-approval",
+    "ar-aging",
+    "budget-vs-actual"
+  ]
 }

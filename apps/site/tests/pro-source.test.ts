@@ -7,6 +7,7 @@ const SITE = join(import.meta.dirname, '..');
 const OUT = join(SITE, 'out');
 const MOTION_SRC = join(SITE, '..', '..', 'packages', 'motion', 'src');
 const UI_SRC = join(SITE, '..', '..', 'packages', 'ui', 'src');
+const BLOCKS_SRC = join(SITE, '..', '..', 'packages', 'blocks', 'src');
 
 function files(dir: string, keep: (name: string) => boolean): string[] {
   return readdirSync(dir, { withFileTypes: true, recursive: true })
@@ -39,6 +40,28 @@ void test('no Pro motion source is published', () => {
   for (const line of lines) {
     const leak = published.find((file) => file.text.includes(line));
     assert.equal(leak, undefined, `motion source line found in out/${leak?.path ?? ''}: ${line}`);
+  }
+});
+
+void test('no Pro block source is published', () => {
+  const blockFiles = files(BLOCKS_SRC, (name) => /\.tsx?$/.test(name) && !name.includes('.test.'));
+  const lines = blockFiles.flatMap(commentLines);
+  assert.ok(lines.length > 5, 'expected comment lines in the blocks source to check against');
+  for (const line of lines) {
+    const leak = published.find((file) => file.text.includes(line));
+    assert.equal(leak, undefined, `block source line found in out/${leak?.path ?? ''}: ${line}`);
+  }
+});
+
+void test('every block has a published page marked Pro', () => {
+  const blocks = readdirSync(BLOCKS_SRC, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name !== 'lib')
+    .map((entry) => entry.name);
+  assert.ok(blocks.length >= 8, `expected the finance blocks, found ${String(blocks.length)}`);
+  for (const block of blocks) {
+    const page = published.find((file) => file.path === join('docs', 'blocks', `${block}.html`));
+    assert.ok(page, `docs/blocks/${block}.html is missing`);
+    assert.match(page.text, />Pro</, `docs/blocks/${block}.html is not marked Pro`);
   }
 });
 

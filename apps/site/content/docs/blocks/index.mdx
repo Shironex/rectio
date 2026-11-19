@@ -1,15 +1,32 @@
 ---
 title: Blocks
-description: Finance screens composed from rectio components, ready to adapt.
+description: "Finance screens composed from rectio components, ready to adapt."
 pro: true
 ---
 
 Blocks are whole pieces of a finance screen, built only from rectio components and tokens: the
 kind of composition every expense, ledger or approval tool ends up writing by hand.
 
-<Callout>
-  Blocks are in progress. This section lists each block with a live preview as it ships.
-</Callout>
+Each block is data-agnostic: typed props in, callbacks out, no fetching. Its money logic (totals,
+VAT, running balances, aging, variance, approval moves) is exported and tested on its own, and
+every sum runs in minor units. Each block has a motion variant with the same props, picked by
+import path:
 
-Until then, every block's parts are documented under Components, starting with
-[DataTable](/docs/components/data-table) and [Money](/docs/components/money).
+```tsx
+import { InvoiceList } from '@rectio/blocks'; // plain
+import { InvoiceList } from '@rectio/blocks/motion'; // enters once, on first view
+```
+
+| Block                                             | What it answers                   |
+| ------------------------------------------------- | --------------------------------- |
+| [KPI row](/docs/blocks/kpi-row)                   | How are the key figures moving?   |
+| [Cash flow chart](/docs/blocks/cash-flow)         | Is more coming in than going out? |
+| [Invoice list](/docs/blocks/invoice-list)         | Who owes what, and what is late?  |
+| [Invoice detail](/docs/blocks/invoice-detail)     | What does this invoice come to?   |
+| [General journal](/docs/blocks/ledger)            | Do the books balance?             |
+| [Expense approval](/docs/blocks/expense-approval) | What is waiting for my decision?  |
+| [Receivables aging](/docs/blocks/ar-aging)        | How old is what we are owed?      |
+| [Budget vs actual](/docs/blocks/budget-vs-actual) | Where are we over or under plan?  |
+
+Blocks are built only from rectio components and tokens, so they follow the theme, mode and
+density of their scope, and install the free components they render.

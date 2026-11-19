@@ -1,0 +1,76 @@
+---
+title: Budget vs actual
+description: "Budget against actual per category, with the variance in sign, arrow and words."
+pro: true
+---
+
+import BudgetVsActualDemo from '@/demos/budget-vs-actual';
+import BudgetVsActualMotionDemo from '@/demos/budget-vs-actual.motion';
+
+<Preview
+  name="budget-vs-actual"
+  plain={<BudgetVsActualDemo />}
+  motion={<BudgetVsActualMotionDemo />}
+  importLine="import { BudgetVsActual } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add budget-vs-actual
+```
+
+The motion variant is `motion-budget-vs-actual`. It installs the plain block too and changes only how the
+block enters.
+
+## Usage
+
+Each bar is drawn against its own budget: the outline is 100% of budget and spend past it runs
+on in the second series colour. The variance is signed as actual minus budget (plus is over),
+with an arrow and the word over or under; colour adds whether that is good news for `kind`. A line
+within half a percent reads as on budget.
+
+The block is data-agnostic: it takes plain records and calls you back; it never fetches. The Code
+tab shows the preview's usage. The block's own source comes with the license.
+
+## Props
+
+<TypeTable
+  type={{
+    lines: { type: 'readonly BudgetLine[]', description: 'category, budget and actual.' },
+    kind: {
+      type: "'expense' | 'revenue'",
+      default: "'expense'",
+      description: 'Which way is good news: under budget for spending, over target for revenue.',
+    },
+    currency: {
+      type: 'string',
+      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+    },
+    locale: {
+      type: 'string',
+      default: 'the runtime locale',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+    },
+    period: { type: 'string', description: 'Such as "Q1 2026, 11 of 13 weeks".' },
+    title: { type: 'string', default: "'Budget vs actual'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+The money logic is exported and tested on its own, so a server can compute the same figures:
+`variance(line, kind, currency)` and `budgetSummary(lines, kind, currency)`.
+
+## Accessibility
+
+- Variance never rests on colour: the sign, the arrow and the words all agree.
+- The bars are decorative; budget, actual and variance are all in the table.
+- Every figure is in tabular numerals with a true minus sign; negatives carry the sign as well as colour.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

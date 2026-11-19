@@ -1,0 +1,78 @@
+---
+title: Receivables aging
+description: "What customers owe by days past due, as a chart and per customer."
+pro: true
+---
+
+import ArAgingDemo from '@/demos/ar-aging';
+import ArAgingMotionDemo from '@/demos/ar-aging.motion';
+
+<Preview
+  name="ar-aging"
+  plain={<ArAgingDemo />}
+  motion={<ArAgingMotionDemo />}
+  importLine="import { ArAging } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add ar-aging
+```
+
+The motion variant is `motion-ar-aging`. It installs the plain block too and changes only how the
+block enters.
+
+## Usage
+
+Buckets are current, 1 to 30, 31 to 60, 61 to 90 and over 90 days past due; due today is still
+current. Each bar carries its amount as a label, so the deepening colour of older buckets only
+reinforces what the words say.
+
+The block is data-agnostic: it takes plain records and calls you back; it never fetches. The Code
+tab shows the preview's usage. The block's own source comes with the license.
+
+## Props
+
+<TypeTable
+  type={{
+    receivables: {
+      type: 'readonly Receivable[]',
+      description: 'customer, invoice, due and outstanding amount.',
+    },
+    currency: {
+      type: 'string',
+      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+    },
+    locale: {
+      type: 'string',
+      default: 'the runtime locale',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+    },
+    today: { type: 'Date', default: 'new Date()' },
+    customerLimit: {
+      type: 'number',
+      default: '6',
+      description: 'Customers listed before the rest are only counted in the total.',
+    },
+    title: { type: 'string', default: "'Receivables aging'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+The money logic is exported and tested on its own, so a server can compute the same figures:
+`agingBucket(due, today)` and `agingReport(receivables, today, currency)`.
+
+## Accessibility
+
+- The chart has a table of the same figures, with each bucket's share.
+- Bucket columns in the customer table name their range in full for screen readers.
+- Every figure is in tabular numerals with a true minus sign; negatives carry the sign as well as colour.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.
