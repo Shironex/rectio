@@ -285,6 +285,23 @@ function ItemIcon({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * In the icon rail a count cannot fit: a dot on the icon says something is waiting, and the count
+ * stays in the accessible name and the tooltip.
+ */
+function RailBadge({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <span
+        aria-hidden
+        data-slot="sidebar-rail-badge"
+        className="absolute end-1.5 top-1.5 size-1.5 rounded-full bg-accent ring-2 ring-(--rx-sidebar-background)"
+      />
+      <span className="sr-only">{children}</span>
+    </>
+  );
+}
+
 function Badge({ children }: { children: ReactNode }) {
   return (
     <span className="ms-auto shrink-0 rounded-badge px-1.5 text-xs text-fg-subtle numeric group-data-current/item:text-fg-muted">
@@ -343,7 +360,8 @@ export function SidebarItem({
             <span className={cn('min-w-0 flex-1 truncate text-start', collapsed && 'sr-only')}>
               {children}
             </span>
-            {badge !== undefined && !collapsed && <Badge>{badge}</Badge>}
+            {badge !== undefined &&
+              (collapsed ? <RailBadge>{badge}</RailBadge> : <Badge>{badge}</Badge>)}
           </>
         ),
       },
@@ -355,7 +373,10 @@ export function SidebarItem({
       {collapsed ? (
         <Tooltip>
           <TooltipTrigger render={element} />
-          <TooltipContent side="right">{children}</TooltipContent>
+          <TooltipContent side="right">
+            {children}
+            {badge !== undefined && <span className="ms-2 numeric opacity-70">{badge}</span>}
+          </TooltipContent>
         </Tooltip>
       ) : (
         element
@@ -409,8 +430,12 @@ export function SidebarSubmenu({
             >
               {icon !== undefined && <ItemIcon>{icon}</ItemIcon>}
               <span className="sr-only">{label}</span>
+              {badge !== undefined && <RailBadge>{badge}</RailBadge>}
             </TooltipTrigger>
-            <TooltipContent side="right">{label}</TooltipContent>
+            <TooltipContent side="right">
+              {label}
+              {badge !== undefined && <span className="ms-2 numeric opacity-70">{badge}</span>}
+            </TooltipContent>
           </Tooltip>
           <MenuContent side="right" align="start" sideOffset={8}>
             <MenuGroup label={label}>
@@ -534,7 +559,9 @@ export function SidebarTrigger({
           <button
             type="button"
             aria-label={label}
-            aria-expanded={mobile ? mobileOpen : !collapsed}
+            // On desktop the label names the action, which already says the state; the phone
+            // trigger keeps one name and reports whether the sheet is open.
+            aria-expanded={mobile ? mobileOpen : undefined}
             data-slot="sidebar-trigger"
             className={cn(
               'relative inline-flex size-(--rx-button-height-md) shrink-0 cursor-pointer items-center justify-center',

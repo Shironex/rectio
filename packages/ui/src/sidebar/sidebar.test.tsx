@@ -87,17 +87,15 @@ describe('Sidebar on desktop', () => {
     const onCollapsedChange = vi.fn();
     render(<App onCollapsedChange={onCollapsedChange} />);
     const trigger = screen.getByRole('button', { name: 'Collapse sidebar' });
-    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(trigger).not.toHaveAttribute('aria-expanded');
     await userEvent.click(trigger);
     expect(onCollapsedChange).toHaveBeenLastCalledWith(true);
-    expect(screen.getByRole('button', { name: 'Expand sidebar' })).toHaveAttribute(
-      'aria-expanded',
-      'false',
-    );
+    expect(screen.getByRole('button', { name: 'Expand sidebar' })).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Main' });
     expect(nav.closest('[data-slot="sidebar"]')).toHaveAttribute('data-collapsed');
-    // Labels stay in the accessible name; the count is dropped from the rail.
-    expect(within(nav).getByRole('link', { name: 'Payables' })).toBeInTheDocument();
+    // Labels and counts stay in the accessible name; the rail draws a dot for the count.
+    const payables = within(nav).getByRole('link', { name: /Payables\s*4/ });
+    expect(payables.querySelector('[data-slot="sidebar-rail-badge"]')).not.toBeNull();
   });
 
   it('opens a collapsed submenu as a flyout menu of its links', async () => {
@@ -140,6 +138,7 @@ describe('Sidebar on a phone', () => {
     render(<App />);
     expect(screen.queryByRole('navigation', { name: 'Main' })).not.toBeInTheDocument();
     const trigger = screen.getByRole('button', { name: 'Open navigation' });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(trigger);
     const sheet = await screen.findByRole('dialog', { name: 'Main' });
     const link = within(sheet).getByRole('link', { name: /Payables/ });
