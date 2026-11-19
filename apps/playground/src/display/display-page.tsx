@@ -328,10 +328,8 @@ function ProgressGroup({ ui }: { ui: Moving }) {
             >
               3/5
             </ui.ProgressCircle>
-            <div className="flex flex-col items-center gap-3">
-              <ui.ProgressCircle value={40} size="md" label="Sync" />
-              <ui.ProgressCircle value={null} size="sm" label="Waiting" showLabel />
-            </div>
+            <ui.ProgressCircle value={40} size="md" label="Sync" showLabel />
+            <ui.ProgressCircle value={null} size="md" label="Connecting" showLabel />
           </div>
         </Tile>
       </div>
