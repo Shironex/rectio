@@ -24,11 +24,20 @@ import { usePathname } from 'next/navigation';
 
 import { COMPANY, TODAY } from '@/data/company';
 import { INVOICES } from '@/data/invoices';
-import { useQueryParam } from '../use-page-state';
+import { usePageState, useQueryParam } from '../use-page-state';
 import { useAppData } from './app-data';
 import { icon } from './icon';
 
 const overdueCount = INVOICES.filter((i) => invoiceState(i, TODAY) === 'overdue').length;
+
+/** A count with its meaning in words, so the number never stands alone. */
+function CountBadge({ count, label, urgent }: { count: number; label: string; urgent: boolean }) {
+  return (
+    <span className={urgent ? 'font-medium text-negative-strong' : undefined}>
+      {count} {label}
+    </span>
+  );
+}
 
 /** The product mark: the company initial on the accent, and the name beside it. */
 export function CompanyMark({ hideNameWhenCollapsed = true }: { hideNameWhenCollapsed?: boolean }) {
@@ -54,7 +63,10 @@ export function AppSidebar() {
   const pathname = usePathname();
   const account = useQueryParam('account');
   const { expenses } = useAppData();
-  const pending = expenses.requests.filter((r) => r.status === 'pending').length;
+  // An empty account has nothing overdue or waiting, so the counts follow ?state=empty too.
+  const empty = usePageState() === 'empty';
+  const pending = empty ? 0 : expenses.requests.filter((r) => r.status === 'pending').length;
+  const overdue = empty ? 0 : overdueCount;
   const on = (path: string) => (path === '/' ? pathname === '/' : pathname.startsWith(path));
   const onJournal = on('/journal');
 
@@ -74,7 +86,9 @@ export function AppSidebar() {
             render={<Link href="/invoices" />}
             icon={icon(FileTextIcon)}
             active={on('/invoices')}
-            {...(overdueCount > 0 ? { badge: overdueCount } : {})}
+            {...(overdue > 0
+              ? { badge: <CountBadge count={overdue} label="overdue" urgent /> }
+              : {})}
           >
             Invoices
           </SidebarItem>
@@ -84,7 +98,9 @@ export function AppSidebar() {
             render={<Link href="/expenses" />}
             icon={icon(CreditCardIcon)}
             active={on('/expenses')}
-            {...(pending > 0 ? { badge: pending } : {})}
+            {...(pending > 0
+              ? { badge: <CountBadge count={pending} label="waiting" urgent={false} /> }
+              : {})}
           >
             Expenses
           </SidebarItem>
