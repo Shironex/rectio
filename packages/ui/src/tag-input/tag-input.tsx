@@ -349,7 +349,7 @@ export function TagInput({
           aria-label={ariaLabel}
           aria-errormessage={error === null ? undefined : errorId}
           {...(error === null ? {} : { 'aria-invalid': true })}
-          placeholder={tags.length === 0 ? placeholder : undefined}
+          placeholder={placeholder}
           autoComplete="off"
           enterKeyHint="enter"
           onValueChange={onTextChange}
