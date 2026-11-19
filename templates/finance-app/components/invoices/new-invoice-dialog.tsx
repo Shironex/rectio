@@ -180,7 +180,7 @@ export function NewInvoiceDialog({
                 onChange={(event) => {
                   setDescription(event.target.value);
                 }}
-                placeholder="Fleetplan licence, 40 seats"
+                placeholder="Route optimisation module, 25 seats"
               />
               <FieldError>{show('description')}</FieldError>
             </Field>
