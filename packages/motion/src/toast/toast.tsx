@@ -5,7 +5,7 @@ import {
   type ToastProviderProps,
   type ToastType,
 } from '@rectio/ui';
-import { useCallback } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 
 import { tweenTo, type Controls } from '../lib/animate';
 import { usePlainMotion } from '../lib/mode';
@@ -107,18 +107,23 @@ function useStackReflow(on: boolean) {
 export function ToastProvider({ toastClassName, viewportRef, ...props }: ToastProviderProps) {
   const plain = usePlainMotion();
   const reflow = useStackReflow(!plain);
+  // The consumer's ref is read through a ref, so an inline callback ref cannot change our identity.
+  const outer = useRef(viewportRef);
+  useLayoutEffect(() => {
+    outer.current = viewportRef;
+  }, [viewportRef]);
   // Stable across renders: a new ref each render would detach the observer, and with it the
   // mutation records of the very toast that caused the render.
   const ref = useCallback(
     (node: HTMLDivElement | null) => {
       const cleanup = reflow(node);
-      assignRef(viewportRef, node);
+      assignRef(outer.current, node);
       return () => {
         cleanup?.();
-        assignRef(viewportRef, null);
+        assignRef(outer.current, null);
       };
     },
-    [reflow, viewportRef],
+    [reflow],
   );
   if (plain)
     return (
