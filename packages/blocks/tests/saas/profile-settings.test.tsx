@@ -104,4 +104,22 @@ describe('ProfileSettings', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Resend the link' }));
     expect(onResendVerification).toHaveBeenCalled();
   });
+
+  it('says when the profile was last saved', () => {
+    render(
+      <ProfileSettings
+        profile={{
+          name: 'Ines Duarte',
+          email: 'ines@fernhill.io',
+          jobTitle: '',
+          timeZone: 'Europe/Lisbon',
+        }}
+        savedAt={new Date(2026, 10, 19, 14, 32)}
+        locale="en-GB"
+        onSave={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('Saved at 14:32')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Save changes' })).not.toBeInTheDocument();
+  });
 });

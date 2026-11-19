@@ -50,6 +50,8 @@ export interface ProfileSettingsProps {
   onDeleteAccount?: () => void;
   /** IANA time zones to offer. Defaults to a short list around the saved one. */
   timeZones?: readonly string[];
+  /** When the profile was last saved: the bar then says "Saved at 14:32". */
+  savedAt?: Date | undefined;
   /** Saving is in flight. */
   pending?: boolean;
   error?: ReactNode;
@@ -87,12 +89,13 @@ function Row({
   className?: string;
 }) {
   return (
-    <div className={cn('grid gap-3 py-5 first:pt-6 @2xl:grid-cols-5 @2xl:gap-8', className)}>
-      <div className="flex flex-col gap-0.5 @2xl:col-span-2">
+    <div className={cn('flex flex-col gap-3 py-5 first:pt-6 @2xl:flex-row @2xl:gap-10', className)}>
+      <div className="flex flex-col gap-0.5 @2xl:w-60 @2xl:shrink-0">
         <h3 className={cn('text-base font-medium', danger && 'text-negative-strong')}>{title}</h3>
         {hint !== undefined && <p className="text-sm text-pretty text-fg-muted">{hint}</p>}
       </div>
-      <div className="flex min-w-0 flex-col gap-4 @2xl:col-span-3">{children}</div>
+      {/* A field column about a form's width: no long empty inputs on a wide panel. */}
+      <div className="flex w-full max-w-sm min-w-0 flex-col gap-4 @2xl:flex-1">{children}</div>
     </div>
   );
 }
@@ -110,6 +113,7 @@ export function ProfileSettings({
   onResendVerification,
   onDeleteAccount,
   timeZones,
+  savedAt,
   pending = false,
   error,
   now = new Date(),
@@ -160,7 +164,12 @@ export function ProfileSettings({
       className={className}
       bodyClassName="gap-0"
     >
-      <form onSubmit={submit} noValidate className="flex flex-col">
+      {/* Fields scrolled into view stop above the sticky save bar, not under it. */}
+      <form
+        onSubmit={submit}
+        noValidate
+        className="flex flex-col [&_button]:scroll-mb-24 [&_input]:scroll-mb-24"
+      >
         {error !== undefined && error !== null && error !== false && (
           <div className="pb-5">
             <FormMessage tone="error" title={error} />
@@ -256,11 +265,11 @@ export function ProfileSettings({
                   We will send a link to the new address. The old one stays until it is confirmed.
                 </FieldDescription>
               ) : profile.emailVerified === false ? (
-                <FieldDescription className="flex flex-wrap items-center gap-x-1.5">
+                <FieldDescription className="flex flex-wrap items-center gap-x-1.5 text-sm">
                   <WarningCircleIcon
                     aria-hidden
                     weight="bold"
-                    className="size-3.5 shrink-0 text-warning-strong"
+                    className="size-4 shrink-0 text-warning"
                   />
                   <span className="font-medium text-warning-strong">Not verified.</span>
                   {onResendVerification === undefined ? (
@@ -311,38 +320,48 @@ export function ProfileSettings({
           </Row>
         </div>
 
-        {/* The save bar holds its place, so the danger zone below never jumps when it appears. */}
-        <div className="sticky bottom-0 z-10 -mx-5 mt-2 flex min-h-(--rx-control-height-lg) flex-wrap items-center justify-between gap-3 border-t border-line bg-surface px-5 py-3">
-          <p className="text-sm text-fg-muted" aria-live="polite">
+        {/* The save bar holds its height, so the danger zone below never jumps when it changes. */}
+        <div
+          className={cn(
+            'sticky bottom-0 z-10 -mx-5 mt-2 flex min-h-(--rx-control-height-lg) flex-wrap items-center gap-3 border-t border-line bg-surface px-5 py-3',
+            dirty || pending ? 'justify-between' : 'justify-end',
+          )}
+        >
+          <p className="flex items-center gap-1.5 text-sm text-fg-muted" aria-live="polite">
             {dirty ? (
               <span className="font-medium text-fg">
                 {plural(changed.length, 'unsaved change')}
               </span>
             ) : (
-              'All changes saved'
+              <>
+                <CheckCircleIcon
+                  aria-hidden
+                  weight="bold"
+                  className="size-4 shrink-0 text-positive-strong"
+                />
+                {savedAt === undefined
+                  ? 'All changes saved'
+                  : `Saved at ${new Intl.DateTimeFormat(locale, { timeStyle: 'short' }).format(savedAt)}`}
+              </>
             )}
           </p>
-          {/* Hidden, not removed, while nothing changed: the bar keeps its height. */}
-          <div
-            className={cn(
-              'flex items-center gap-2',
-              !dirty && !pending && 'invisible @max-xl:hidden',
-            )}
-          >
-            <Button
-              variant="ghost"
-              disabled={pending}
-              onClick={() => {
-                setDraft(profile);
-                setTried(false);
-              }}
-            >
-              Discard
-            </Button>
-            <Button type="submit" loading={pending}>
-              Save changes
-            </Button>
-          </div>
+          {(dirty || pending) && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                disabled={pending}
+                onClick={() => {
+                  setDraft(profile);
+                  setTried(false);
+                }}
+              >
+                Discard
+              </Button>
+              <Button type="submit" loading={pending}>
+                Save changes
+              </Button>
+            </div>
+          )}
         </div>
       </form>
 
@@ -351,7 +370,7 @@ export function ProfileSettings({
           danger
           title="Danger zone"
           hint="Removes your profile and signs you out everywhere. Work you shared stays with the team."
-          className="border-t border-line pt-6 pb-0"
+          className="mt-6 rounded-panel border border-line px-5"
         >
           <div>
             <Button
