@@ -22,9 +22,9 @@ export const cashRunwayPl: CashRunwayMessages = {
       {status === 'burning' && threshold !== undefined ? (
         <>
           Przy obecnym tempie od{' '}
-          <strong className="font-medium text-fg">{genitive(threshold.month)}</strong> saldo będzie
-          poniżej minimum {threshold.amount}, a gotówki wystarczy do{' '}
-          <strong className="font-medium text-fg">
+          <strong className="font-medium text-warning-strong">{genitive(threshold.month)}</strong>{' '}
+          saldo będzie poniżej minimum {threshold.amount}, a gotówki wystarczy do{' '}
+          <strong className="font-medium text-negative-strong">
             {zeroMonth === undefined ? '' : genitive(zeroMonth)}
           </strong>
         </>
@@ -33,7 +33,7 @@ export const cashRunwayPl: CashRunwayMessages = {
           {status === 'burning' ? (
             <>
               Przy obecnym tempie gotówki wystarczy do{' '}
-              <strong className="font-medium text-fg">
+              <strong className="font-medium text-negative-strong">
                 {zeroMonth === undefined ? '' : genitive(zeroMonth)}
               </strong>
             </>
@@ -44,7 +44,10 @@ export const cashRunwayPl: CashRunwayMessages = {
           )}
           {threshold !== undefined && (
             <>
-              , a od <strong className="font-medium text-fg">{genitive(threshold.month)}</strong>{' '}
+              , a od{' '}
+              <strong className="font-medium text-warning-strong">
+                {genitive(threshold.month)}
+              </strong>{' '}
               saldo będzie poniżej minimum {threshold.amount}
             </>
           )}

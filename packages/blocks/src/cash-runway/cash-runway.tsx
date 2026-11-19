@@ -145,14 +145,15 @@ export const CASH_RUNWAY_MESSAGES: CashRunwayMessages = {
         threshold === undefined ? (
           <>
             At this burn, cash runs out in{' '}
-            <strong className="font-medium text-fg">{zeroMonth?.text}</strong>
+            <strong className="font-medium text-negative-strong">{zeroMonth?.text}</strong>
           </>
         ) : (
           // In the order they happen: under the minimum first, then out.
           <>
             At this burn, cash drops below the {threshold.amount} minimum in{' '}
-            <strong className="font-medium text-fg">{threshold.month.text}</strong> and runs out in{' '}
-            <strong className="font-medium text-fg">{zeroMonth?.text}</strong>
+            <strong className="font-medium text-warning-strong">{threshold.month.text}</strong> and
+            runs out in{' '}
+            <strong className="font-medium text-negative-strong">{zeroMonth?.text}</strong>
           </>
         )
       ) : (
@@ -163,7 +164,7 @@ export const CASH_RUNWAY_MESSAGES: CashRunwayMessages = {
           {threshold !== undefined && (
             <>
               , and drops below the {threshold.amount} minimum in{' '}
-              <strong className="font-medium text-fg">{threshold.month.text}</strong>
+              <strong className="font-medium text-warning-strong">{threshold.month.text}</strong>
             </>
           )}
         </>
@@ -598,7 +599,7 @@ export function CashRunway({
                   y={Math.max(0, thresholdDatum.point.balance)}
                   r={4}
                   fill="var(--rx-chart-halo)"
-                  stroke={chartColor('reference')}
+                  stroke="var(--rx-warning)"
                   strokeWidth={2}
                 />
               )}
@@ -609,7 +610,7 @@ export function CashRunway({
                   y={0}
                   r={5}
                   fill="var(--rx-chart-halo)"
-                  stroke={chartColor('series-1')}
+                  stroke="var(--rx-negative)"
                   strokeWidth={2}
                   label={(props: LabelProps) => (
                     <ChartNote viewBox={props.viewBox} at="dot">
