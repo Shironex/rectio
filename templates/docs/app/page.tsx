@@ -1,4 +1,5 @@
 import {
+  ArrowRightIcon,
   ArrowsClockwiseIcon,
   BookOpenTextIcon,
   BracketsCurlyIcon,
@@ -45,9 +46,12 @@ export default function HomePage() {
             latest === undefined ? undefined : (
               <Link
                 href="/changelog"
-                className="rounded-control outline-offset-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
+                className="group/eyebrow inline-flex items-center gap-1.5 rounded-control text-accent-strong outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus"
               >
-                New in {latest.version}: {latest.title ?? 'see the changelog'}
+                <span className="underline decoration-accent-strong/40 underline-offset-4 group-hover/eyebrow:decoration-accent-strong">
+                  New in {latest.version}: {latest.title ?? 'see the changelog'}
+                </span>
+                <ArrowRightIcon aria-hidden weight="bold" className="size-3.5" />
               </Link>
             )
           }

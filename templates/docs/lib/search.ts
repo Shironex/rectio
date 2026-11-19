@@ -40,20 +40,25 @@ function withoutJsxTags(text: string): string {
 
 /** Markdown and MDX reduced to the words a reader would search for. */
 export function plainText(body: string): string {
-  return withoutJsxTags(body.replace(/^```[\s\S]*?^```/gm, ' '))
-    .replace(/^(import|export) .*$/gm, ' ')
-    .replace(/\{[^{}]*\}/g, ' ')
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/[`*_>#|~]/g, ' ')
-    .replace(/^[-:\s|]+$/gm, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (
+    withoutJsxTags(body.replace(/^\x60{3}[\s\S]*?^\x60{3}/gm, ' '))
+      .replace(/^(import|export) .*$/gm, ' ')
+      // Headings are indexed on their own, and an excerpt should not run one into the next.
+      .replace(/^#{1,6}\s.*$/gm, ' ')
+      .replace(/^\s*(?:[-*+]|\d+\.)\s+/gm, ' ')
+      .replace(/\{[^{}]*\}/g, ' ')
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/[\x60*_>#|~]/g, ' ')
+      .replace(/^[-:\s|]+$/gm, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 }
 
 /** The h2 and h3 headings of a page and its API entries, with the ids the page gives them. */
 export function headingsOf(body: string): { id: string; title: string }[] {
-  const withoutCode = body.replace(/^```[\s\S]*?^```/gm, '');
+  const withoutCode = body.replace(/^\x60{3}[\s\S]*?^\x60{3}/gm, '');
   const entries = [
     ...withoutCode.matchAll(/<(?:SignatureCard[^>]*?\sname|Endpoint[^>]*?\stitle)="([^"]+)"/g),
   ].map((match) => ({ id: slugify(match[1] ?? ''), title: match[1] ?? '' }));
@@ -61,7 +66,7 @@ export function headingsOf(body: string): { id: string; title: string }[] {
     level: match[1]?.length ?? 2,
     title: (match[2] ?? '')
       .replace(/<[^>]+>/g, '')
-      .replace(/[`*_]/g, '')
+      .replace(/[\x60*_]/g, '')
       .trim()
       .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1'),
   }));
