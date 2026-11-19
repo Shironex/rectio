@@ -124,7 +124,7 @@ describe('ApiKeys', () => {
     Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
     try {
       render(<ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} />);
-      await user.click(screen.getByRole('button', { name: 'Copy ID, Sync' }));
+      await user.click(screen.getByRole('button', { name: 'Copy prefix, Sync' }));
       expect(await screen.findByRole('button', { name: 'Copy failed, Sync' })).toBeInTheDocument();
     } finally {
       if (clipboard !== undefined) Object.defineProperty(navigator, 'clipboard', clipboard);
@@ -180,8 +180,8 @@ describe('ApiKeys', () => {
     const user = userEvent.setup();
     const writeText = vi.spyOn(navigator.clipboard, 'writeText');
     render(<ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} />);
-    expect(screen.queryByRole('button', { name: 'Copy ID, Old' })).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Copy ID, Sync' }));
+    expect(screen.queryByRole('button', { name: 'Copy prefix, Old' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Copy prefix, Sync' }));
     expect(writeText).toHaveBeenCalledWith('fh_live_b');
   });
 });

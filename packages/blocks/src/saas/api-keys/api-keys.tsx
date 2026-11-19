@@ -150,11 +150,15 @@ export function ApiKeys({
     refocusCreate.current = true;
     setCreating(false);
   };
-  // The button comes back only after the app clears the revealed key, so wait for it to render.
+  // The button comes back only after the app clears the revealed key, so wait for it to render;
+  // with no reveal pending, the request ends here either way and never steals focus later.
   useEffect(() => {
-    if (refocusCreate.current && createButtonRef.current !== null) {
+    if (!refocusCreate.current) return;
+    if (createButtonRef.current !== null) {
       refocusCreate.current = false;
       createButtonRef.current.focus();
+    } else if (createdKey === undefined) {
+      refocusCreate.current = false;
     }
   });
   const [creating, setCreating] = useState(false);
@@ -233,6 +237,7 @@ export function ApiKeys({
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
               {onCreate !== undefined && (
                 <Button
+                  ref={createButtonRef}
                   onClick={() => {
                     setCreating(true);
                   }}
@@ -255,7 +260,7 @@ export function ApiKeys({
             {sortApiKeys(keys).map((key) => (
               <Item
                 key={key.id}
-                className="flex items-center gap-3 py-3.5 not-last:border-b not-last:border-line"
+                className="flex flex-col gap-2 py-3.5 not-last:border-b not-last:border-line @lg:flex-row @lg:items-center @lg:gap-3"
               >
                 <KeyRow
                   apiKey={key}
@@ -311,13 +316,15 @@ function KeyRow({
   const dead = status === 'revoked' || status === 'expired';
   const elevated = scope?.elevated === true;
   const copyLabel =
-    copyState === 'copied' ? 'Copied' : copyState === 'failed' ? 'Copy failed' : 'Copy ID';
+    copyState === 'copied' ? 'Copied' : copyState === 'failed' ? 'Copy failed' : 'Copy prefix';
+  const expiringSoon = status === 'expiring';
+  const canRevoke = onRevoke !== undefined && status !== 'revoked';
   return (
     <>
       <span
         aria-hidden
         className={cn(
-          'hidden size-9 shrink-0 items-center justify-center rounded-full border border-line-strong bg-surface-sunken text-fg-muted @md:inline-flex',
+          'hidden size-9 shrink-0 items-center justify-center rounded-full border border-line-strong bg-surface-sunken text-fg-muted @lg:inline-flex',
           dead && 'border-dashed',
         )}
       >
@@ -325,8 +332,8 @@ function KeyRow({
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         {/* Line 1: what it is called, what it may do and whether it still works. */}
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="font-medium text-pretty">{key.name}</span>
+        <span className="flex flex-wrap items-center gap-1.5">
+          <span className="me-0.5 font-medium text-pretty">{key.name}</span>
           <span
             className={cn(
               'inline-flex items-center gap-1 rounded-badge border px-1.5 py-px text-xs',
@@ -338,18 +345,52 @@ function KeyRow({
           </span>
           {badge !== null && <StateBadge state={badge.state} label={badge.label} />}
         </span>
-        {/* Line 2: the visible part of the key, in a sunken chip, with a labelled copy. */}
-        <span className="flex min-h-(--rx-button-height-sm) flex-wrap items-center gap-2">
+        {/* Line 2: the visible part of the key, in a sunken chip. */}
+        <span>
           <code className="rounded-badge border border-line bg-surface-sunken px-1.5 py-0.5 font-mono text-sm text-fg">
             <span className="sr-only">Key starting </span>
             {maskApiKey(key.prefix)}
           </code>
+        </span>
+        {/* Line 3: its dates, each its own phrase. */}
+        <span className="flex flex-wrap items-center gap-x-1.5 text-sm text-fg-muted">
+          <span>
+            Created <span className="numeric">{formatShortDate(key.createdAt, locale)}</span>
+          </span>
+          <MetaDot />
+          <span>
+            {key.lastUsedAt === undefined
+              ? 'Never used'
+              : `Last used ${relativeTime(key.lastUsedAt, now, locale)}`}
+          </span>
+          {key.revokedAt === undefined && key.expiresAt !== undefined && (
+            <>
+              <MetaDot />
+              <span className={cn(expiringSoon && 'font-medium text-warning-strong')}>
+                {status === 'expired' ? 'Expired' : 'Expires'}{' '}
+                <span className="numeric">{formatShortDate(key.expiresAt, locale)}</span>
+              </span>
+            </>
+          )}
+          {key.revokedAt !== undefined && (
+            <>
+              <MetaDot />
+              <span>
+                Revoked <span className="numeric">{formatShortDate(key.revokedAt, locale)}</span>
+              </span>
+            </>
+          )}
+        </span>
+      </div>
+      {/* Narrow: a row of actions under the dates. Wide: centred on the right. */}
+      {(!dead || canRevoke) && (
+        <div className="-ms-2 flex items-center gap-1 @lg:ms-0 @lg:shrink-0">
           {!dead && (
             <Button
               variant="ghost"
               size="sm"
               className={cn(
-                'px-2 text-xs text-fg-muted hover:text-fg',
+                'text-fg-muted hover:text-fg',
                 copyState === 'failed' && 'text-negative-strong',
               )}
               aria-label={`${copyLabel}, ${key.name}`}
@@ -358,49 +399,43 @@ function KeyRow({
               }}
             >
               {copyState === 'copied' ? (
-                <CheckIcon aria-hidden weight="bold" className="size-3.5" />
+                <CheckIcon aria-hidden weight="bold" className="size-4" />
               ) : (
-                <CopyIcon aria-hidden weight="bold" className="size-3.5" />
+                <CopyIcon aria-hidden weight="bold" className="size-4" />
               )}
               {copyLabel}
             </Button>
           )}
-        </span>
-        {/* Line 3: its dates. */}
-        <span className="text-sm text-fg-muted">
-          Created <span className="numeric">{formatShortDate(key.createdAt, locale)}</span>
-          {', '}
-          {key.lastUsedAt === undefined
-            ? 'never used'
-            : `last used ${relativeTime(key.lastUsedAt, now, locale)}`}
-          {key.revokedAt === undefined && key.expiresAt !== undefined && (
-            <>
-              {', '}
-              {status === 'expired' ? 'expired' : 'expires'}{' '}
-              <span className="numeric">{formatShortDate(key.expiresAt, locale)}</span>
-            </>
+          {canRevoke && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-fg-muted hover:bg-negative-subtle hover:text-negative-strong"
+              aria-label={`Revoke, ${key.name}`}
+              onClick={onRevoke}
+            >
+              <XCircleIcon aria-hidden weight="bold" className="size-4" />
+              Revoke
+            </Button>
           )}
-          {key.revokedAt !== undefined && (
-            <>
-              {', revoked '}
-              <span className="numeric">{formatShortDate(key.revokedAt, locale)}</span>
-            </>
-          )}
-        </span>
-      </div>
-      {onRevoke !== undefined && status !== 'revoked' && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="shrink-0 text-fg-muted hover:bg-negative-subtle hover:text-negative-strong"
-          aria-label={`Revoke, ${key.name}`}
-          onClick={onRevoke}
-        >
-          <XCircleIcon aria-hidden weight="bold" className="size-4" />
-          Revoke
-        </Button>
+        </div>
       )}
+      <span aria-live="polite" className="sr-only">
+        {copyState === 'copied'
+          ? `Prefix of ${key.name} copied`
+          : copyState === 'failed'
+            ? `Copy failed. Select the prefix of ${key.name} and copy it.`
+            : ''}
+      </span>
     </>
+  );
+}
+
+function MetaDot() {
+  return (
+    <span aria-hidden className="text-fg-subtle">
+      ·
+    </span>
   );
 }
 
