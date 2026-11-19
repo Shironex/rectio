@@ -4,7 +4,7 @@ export default {
     'scope-enum': [
       2,
       'always',
-      ['repo', 'tokens', 'ui', 'playground', 'motion', 'registry', 'cli', 'ci', 'docs'],
+      ['repo', 'tokens', 'ui', 'playground', 'motion', 'registry', 'cli', 'mcp', 'ci', 'docs'],
     ],
     'scope-empty': [2, 'never'],
     'subject-case': [2, 'always', 'lower-case'],
