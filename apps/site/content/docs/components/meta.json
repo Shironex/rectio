@@ -49,6 +49,21 @@
     "collapsible",
     "scroll-area",
     "stepper",
+    "---Navigation and overlays---",
+    "shortcuts",
+    "tooltip",
+    "popover",
+    "hover-card",
+    "menu",
+    "context-menu",
+    "tabs",
+    "sheet",
+    "breadcrumb",
+    "pagination",
+    "navigation-menu",
+    "command-menu",
+    "sidebar",
+    "app-shell",
     "theme-scope"
   ]
 }

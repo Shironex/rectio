@@ -27,6 +27,16 @@ const ALLOWED_VAR_PREFIXES = [
   // How far a toast has been dragged, set by Base UI Toast while swiping.
   '--toast-swipe-movement-x',
   '--toast-swipe-movement-y',
+  // Where the active tab sits, set by Base UI Tabs for the indicator.
+  '--active-tab-',
+  // The measured size of a navigation menu panel and its positioner.
+  '--popup-width',
+  '--popup-height',
+  '--positioner-width',
+  '--positioner-height',
+  // How far a drawer has been swiped, set by Base UI Drawer while dragging.
+  '--drawer-swipe-movement-x',
+  '--drawer-swipe-movement-y',
 ];
 
 const PALETTE =

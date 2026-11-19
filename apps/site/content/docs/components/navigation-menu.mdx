@@ -1,0 +1,146 @@
+---
+title: NavigationMenu
+description: Top navigation with dropdown panels, and a bar that folds into a sheet on phones.
+---
+
+<Preview name="navigation-menu" plain={<Demo name="navigation-menu" />} align="start" />
+
+## Install
+
+```sh
+pnpm dlx rectio add navigation-menu
+```
+
+`popover`, `select`, `sheet` and `theme-scope` install with it.
+
+## Usage
+
+```tsx
+import {
+  NavigationBar,
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuPanelLink,
+  NavigationMenuTrigger,
+} from '@/components/ui/navigation-menu';
+
+<NavigationBar
+  brand={<a href="/">Harbour &amp; Finch</a>}
+  actions={<AccountMenu />}
+  mobileMenu={(close) => <MobileLinks onNavigate={close} />}
+>
+  <NavigationMenu>
+    <NavigationMenuList>
+      <NavigationMenuItem>
+        <NavigationMenuLink href="/overview" active>
+          Overview
+        </NavigationMenuLink>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <NavigationMenuTrigger>Receivables</NavigationMenuTrigger>
+        <NavigationMenuContent>
+          <NavigationMenuPanelLink
+            href="/invoices"
+            title="Invoices"
+            description="Issue, send and chase what customers owe."
+          />
+        </NavigationMenuContent>
+      </NavigationMenuItem>
+    </NavigationMenuList>
+  </NavigationMenu>
+</NavigationBar>;
+```
+
+Panels open on hover after a short delay, or on click, Enter, Space or Arrow Down. All panels share
+one popup: moving from one trigger to another swaps the content in place and resizes the popup,
+instead of closing and reopening it. A bridge over the gap lets the pointer travel from trigger to
+panel without closing it.
+
+`NavigationBar` is the top bar: brand, navigation and actions on one line. Below the medium
+breakpoint the navigation is hidden and a menu button opens a sheet from the left holding whatever
+`mobileMenu` returns. It receives a `close` function to call after a link is followed. Leave
+`mobileMenu` out and no button is drawn.
+
+Pass `render` to a link part to use your router's link component.
+
+## Props
+
+### NavigationMenu, NavigationMenuList, NavigationMenuItem
+
+Base UI's `NavigationMenu.Root`, `List` and `Item`. `NavigationMenu` takes `value`, `defaultValue`,
+`onValueChange` and `delay`; give an `Item` a `value` when you control the open panel.
+
+### NavigationMenuTrigger, NavigationMenuContent
+
+Every prop of Base UI's `NavigationMenu.Trigger` and `NavigationMenu.Content` is accepted. The
+trigger draws its own caret, which turns while the panel is open. The panel is 30rem wide by default
+(`--rx-navigation-menu-panel-width`).
+
+### NavigationMenuLink
+
+A top-level link with no panel. Every prop of Base UI's `NavigationMenu.Link` is accepted as well.
+
+<TypeTable
+  type={{
+    active: {
+      type: 'boolean',
+      description: 'Marks the link of the current page and sets `aria-current="page"`.',
+    },
+  }}
+/>
+
+### NavigationMenuPanelLink
+
+A link inside a panel. Every prop of Base UI's `NavigationMenu.Link` is accepted as well.
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode', required: true },
+    description: { type: 'ReactNode', description: 'One line under the title.' },
+    icon: { type: 'ReactNode', description: 'An icon in a small tile before the text.' },
+  }}
+/>
+
+### NavigationBar
+
+Every `header` prop is accepted as well, except `title`.
+
+<TypeTable
+  type={{
+    brand: {
+      type: 'ReactNode',
+      required: true,
+      description: 'The product mark or name, usually a link home.',
+    },
+    children: {
+      type: 'ReactNode',
+      description: 'The desktop navigation, usually a `NavigationMenu`. Hidden below `md`.',
+    },
+    actions: {
+      type: 'ReactNode',
+      description: 'Search, notifications, the account menu. Always visible.',
+    },
+    mobileMenu: {
+      type: '(close: () => void) => ReactNode',
+      description: 'What the phone menu button opens in a sheet.',
+    },
+    mobileMenuLabel: {
+      type: 'string',
+      default: "'Menu'",
+      description: 'Name of the phone menu button and the sheet title.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Triggers are buttons that report whether their panel is open. Escape closes a panel and returns
+  focus to its trigger.
+- The links of the current page carry `aria-current="page"`.
+- The phone sheet is a modal dialog named by `mobileMenuLabel`, with the focus handling of `Sheet`.
+- Links are real anchors, so they work with the keyboard, the context menu and middle click.
+
+<ComponentSource path="navigation-menu/navigation-menu.tsx" />

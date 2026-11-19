@@ -1,0 +1,95 @@
+---
+title: Shortcuts
+description: Platform-aware shortcuts as keycaps, such as Command K on a Mac and Ctrl K elsewhere, plus a hook to bind them.
+---
+
+<Preview name="kbd" plain={<Demo name="shortcuts" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add kbd
+```
+
+## Usage
+
+```tsx
+import { Kbd, KbdShortcut, useShortcut } from '@/components/ui/kbd';
+
+<KbdShortcut shortcut="mod+shift+i" />
+
+<Kbd>Esc</Kbd>;
+
+useShortcut('mod+shift+i', () => openNewInvoice());
+```
+
+A shortcut is a string of keys joined by `+`, such as `mod+k`, `shift+mod+p` or `g`. Case does not
+matter. `mod` is Command on Apple platforms and Control everywhere else, so one string serves every
+user. The first render on the server shows the Control form and is corrected on a Mac right after
+hydration, so the markup never mismatches.
+
+`useShortcut` listens on the whole page. A shortcut with no modifier (`g`, `?`) is ignored while the
+user types in a field, so it never eats a letter. A shortcut with Command, Control or Alt fires in
+fields too; set `allowInFields: false` for one that an editor also uses, such as `mod+b`.
+
+The same helpers are exported for your own use: `parseShortcut`, `shortcutKeys`, `shortcutLabel`,
+`ariaKeyShortcut`, `matchesShortcut` and `useIsMac`.
+
+## Props
+
+### Kbd
+
+A `kbd` element drawn as one keycap. Every `kbd` prop is accepted.
+
+### KbdShortcut
+
+Every `kbd` prop is accepted as well, except `children`.
+
+<TypeTable
+  type={{
+    shortcut: {
+      type: 'string',
+      required: true,
+      description: 'Such as `mod+k`. Drawn per platform: `⌘ K` on Apple, `Ctrl K` elsewhere.',
+    },
+    keyClassName: { type: 'string', description: 'Classes for each keycap.' },
+  }}
+/>
+
+### useShortcut
+
+<TypeTable
+  type={{
+    shortcut: {
+      type: 'string | null',
+      required: true,
+      description: 'The shortcut to listen for. Null registers nothing.',
+    },
+    handler: {
+      type: '(event: KeyboardEvent) => void',
+      required: true,
+      description: 'Runs on a match. The browser default is prevented.',
+    },
+    enabled: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Pass false to stop listening, for instance while a form has unsaved edits.',
+    },
+    allowInFields: {
+      type: 'boolean',
+      description:
+        'Whether it fires while focus is in a text field. Default: yes with Command, Control or Alt, no for a bare key.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- `KbdShortcut` hides the keycaps from screen readers and announces the shortcut in words instead
+  ("Command K"), so it is not read symbol by symbol.
+- A shortcut is only a hint: the app binds it. Where a control has a shortcut, `Menu`, `CommandMenu`
+  and `Sidebar` also set `aria-keyshortcuts` on it.
+- Never make a shortcut the only way to an action.
+
+<ComponentSource path="kbd/kbd.tsx" />
+<ComponentSource path="kbd/shortcut.ts" />

@@ -57,4 +57,17 @@ describe('bundle cost', () => {
     console.info(`motion display components: +${added.toFixed(1)} kB gzip over the plain ones`);
     expect(added).toBeLessThan(5);
   }, 120_000);
+
+  it('keeps the navigation entry separate and light', async () => {
+    const plain = await bundle('nav-plain-entry.ts');
+    const motion = await bundle('nav-motion-entry.ts');
+    expect(plain.modules.filter((id) => MOTION.test(id))).toEqual([]);
+    // The main entry's components stay out of an app that only animates its navigation.
+    expect(motion.modules.some((id) => /[\\/]src[\\/]dialog[\\/]/.test(id))).toBe(false);
+    const added = (motion.gzip - plain.gzip) / 1024;
+    console.info(`motion navigation entry: +${added.toFixed(1)} kB gzip over the plain components`);
+    // Measured at 9.0 kB: mini animate and spring (shared with the main entry when both are used),
+    // the anchored entrance, the gliding highlight and indicator.
+    expect(added).toBeLessThan(10);
+  }, 120_000);
 });

@@ -1,0 +1,61 @@
+---
+title: ContextMenu
+description: A right click and long press menu that reuses the menu parts.
+---
+
+<Preview name="context-menu" plain={<Demo name="context-menu" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add context-menu
+```
+
+`menu` and its dependencies install with it.
+
+## Usage
+
+```tsx
+import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { MenuItem, MenuSeparator } from '@/components/ui/menu';
+
+<ContextMenu>
+  <ContextMenuTrigger>{/* a ledger row, a card */}</ContextMenuTrigger>
+  <ContextMenuContent>
+    <MenuItem onClick={open}>Open bill</MenuItem>
+    <MenuSeparator />
+    <MenuItem onClick={flag}>Flag for review</MenuItem>
+  </ContextMenuContent>
+</ContextMenu>;
+```
+
+The menu opens at the pointer on right click, or on a long press on a touch screen. Fill it with
+the parts from `Menu`: `MenuItem`, `MenuCheckboxItem`, `MenuRadioGroup`, `MenuSub`, `MenuGroup` and
+`MenuSeparator` work in both.
+
+A context menu is a shortcut, never the only way to an action. Put the same actions in a visible
+menu button on the row too.
+
+## Props
+
+### ContextMenu
+
+Base UI's `ContextMenu.Root`.
+
+### ContextMenuTrigger
+
+Every prop of Base UI's `ContextMenu.Trigger` is accepted, a `div` that covers the area. Text inside
+is not selectable.
+
+### ContextMenuContent
+
+Every prop of Base UI's `ContextMenu.Popup` is accepted.
+
+## Accessibility
+
+- Keyboard users reach the same actions through the visible menu button, which is why the context
+  menu must never be the only way.
+- Inside it the keys are those of `Menu`: arrows, type to jump, Enter, Escape.
+- Escape closes it and returns focus to where it was.
+
+<ComponentSource path="context-menu/context-menu.tsx" />

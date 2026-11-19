@@ -201,7 +201,14 @@ export {
   type CollapsibleTriggerProps,
 } from './collapsible/collapsible';
 export { Separator, type SeparatorProps } from './separator/separator';
-export { Kbd, KbdCombo, type KbdComboProps, type KbdProps } from './kbd/kbd';
+export {
+  Kbd,
+  KbdCombo,
+  KbdShortcut,
+  type KbdComboProps,
+  type KbdProps,
+  type KbdShortcutProps,
+} from './kbd/kbd';
 export { EmptyState, type EmptyStateProps, type EmptyStateSize } from './empty-state/empty-state';
 export {
   Timeline,
@@ -319,3 +326,172 @@ export {
   type MultiSelectItemProps,
   type MultiSelectProps,
 } from './multi-select/multi-select';
+export {
+  ariaKeyShortcut,
+  matchesShortcut,
+  parseShortcut,
+  shortcutKeys,
+  shortcutLabel,
+  useIsMac,
+  useShortcut,
+  type Shortcut,
+  type UseShortcutOptions,
+} from './kbd/shortcut';
+export {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  type TooltipContentProps,
+  type TooltipProviderProps,
+} from './tooltip/tooltip';
+export {
+  Popover,
+  PopoverClose,
+  PopoverContent,
+  PopoverDescription,
+  PopoverTitle,
+  PopoverTrigger,
+  popoverSurface,
+  type PopoverContentProps,
+  type PopoverDescriptionProps,
+  type PopoverTitleProps,
+} from './popover/popover';
+export {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+  type HoverCardContentProps,
+  type HoverCardTriggerProps,
+} from './hover-card/hover-card';
+export {
+  Menu,
+  MenuCheckboxItem,
+  MenuContent,
+  MenuGroup,
+  MenuItem,
+  MenuLabel,
+  MenuLinkItem,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuSeparator,
+  MenuShortcut,
+  MenuSub,
+  MenuSubContent,
+  MenuSubTrigger,
+  MenuTrigger,
+  menuItem,
+  menuPopup,
+  type MenuCheckboxItemProps,
+  type MenuContentProps,
+  type MenuGroupProps,
+  type MenuItemProps,
+  type MenuLabelProps,
+  type MenuLinkItemProps,
+  type MenuRadioItemProps,
+  type MenuSeparatorProps,
+  type MenuShortcutProps,
+  type MenuSubTriggerProps,
+} from './menu/menu';
+export {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+  type ContextMenuContentProps,
+  type ContextMenuTriggerProps,
+} from './context-menu/context-menu';
+export {
+  Tabs,
+  TabsList,
+  TabsPanel,
+  TabsTab,
+  tabsIndicator,
+  type TabsListProps,
+  type TabsPanelProps,
+  type TabsTabProps,
+  type TabsVariant,
+} from './tabs/tabs';
+export {
+  Sheet,
+  SheetBody,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  type SheetContentProps,
+  type SheetDescriptionProps,
+  type SheetProps,
+  type SheetSide,
+  type SheetTitleProps,
+} from './sheet/sheet';
+export {
+  Breadcrumb,
+  collapseBreadcrumb,
+  type BreadcrumbItem,
+  type BreadcrumbLinkProps,
+  type BreadcrumbProps,
+} from './breadcrumb/breadcrumb';
+export {
+  Pagination,
+  paginationRange,
+  type PageRangeItem,
+  type PaginationProps,
+} from './pagination/pagination-bar';
+export {
+  NavigationBar,
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuPanelLink,
+  NavigationMenuTrigger,
+  type NavigationBarProps,
+  type NavigationMenuContentProps,
+  type NavigationMenuLinkProps,
+  type NavigationMenuListProps,
+  type NavigationMenuPanelLinkProps,
+  type NavigationMenuProps,
+  type NavigationMenuTriggerProps,
+} from './navigation-menu/navigation-menu';
+export {
+  CommandMenu,
+  CommandMenuTrigger,
+  filterCommands,
+  type CommandGroup,
+  type CommandItem,
+  type CommandMenuProps,
+  type CommandMenuTriggerProps,
+} from './command-menu/command-menu';
+export { fuzzyMatch, fuzzyScore, type FuzzyMatch } from './command-menu/fuzzy';
+export {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarInset,
+  SidebarItem,
+  SidebarProvider,
+  SidebarSubItem,
+  SidebarSubmenu,
+  SidebarTrigger,
+  useIsMobileLayout,
+  useSidebar,
+  type SidebarGroupProps,
+  type SidebarItemProps,
+  type SidebarProps,
+  type SidebarProviderProps,
+  type SidebarSubItemProps,
+  type SidebarSubmenuProps,
+  type SidebarTriggerProps,
+} from './sidebar/sidebar';
+export {
+  AppShell,
+  AppShellHeader,
+  type AppShellHeaderProps,
+  type AppShellProps,
+} from './app-shell/app-shell';

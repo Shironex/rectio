@@ -1,6 +1,7 @@
 import { Fragment, type ComponentProps, type ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
+import { shortcutKeys, shortcutLabel, useIsMac } from './shortcut';
 
 /** Symbols that a screen reader would read as nothing or as their Unicode name. */
 const SPOKEN: Record<string, string> = {
@@ -78,6 +79,42 @@ export function KbdCombo({ keys, size = 'md', separator, className, ...props }: 
           {i > 0 && separator !== undefined && <span aria-hidden>{separator}</span>}
           <Kbd size={size}>{key}</Kbd>
         </Fragment>
+      ))}
+    </kbd>
+  );
+}
+
+export interface KbdShortcutProps extends Omit<ComponentProps<'kbd'>, 'children'> {
+  /** Such as `mod+k`: Command on Apple platforms, Control elsewhere. */
+  shortcut: string;
+  size?: keyof typeof SIZES | undefined;
+  /** Classes for each keycap. */
+  keyClassName?: string | undefined;
+}
+
+/**
+ * A shortcut as keycaps for the user's platform (`⌘ K` or `Ctrl K`). Screen readers hear it in
+ * words ("Command K") instead of symbol by symbol.
+ */
+export function KbdShortcut({
+  shortcut,
+  size = 'sm',
+  className,
+  keyClassName,
+  ...props
+}: KbdShortcutProps) {
+  const mac = useIsMac();
+  return (
+    <kbd
+      data-slot="kbd-shortcut"
+      className={cn('inline-flex items-center gap-0.5 font-sans not-italic', className)}
+      {...props}
+    >
+      <span className="sr-only">{shortcutLabel(shortcut, mac)}</span>
+      {shortcutKeys(shortcut, mac).map((key, index) => (
+        <Kbd key={`${key}-${String(index)}`} size={size} aria-hidden className={keyClassName}>
+          {key}
+        </Kbd>
       ))}
     </kbd>
   );

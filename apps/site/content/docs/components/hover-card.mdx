@@ -1,0 +1,88 @@
+---
+title: HoverCard
+description: A link that previews where it goes, such as a customer or an account.
+---
+
+<Preview
+  name="hover-card"
+  plain={<Demo name="hover-card" />}
+  motion={<Demo name="hover-card.motion" />}
+  importLine="import { HoverCardContent } from '@rectio/motion/navigation';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add hover-card
+```
+
+`popover`, `select` and `theme-scope` install with it.
+
+## Usage
+
+```tsx
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+
+<HoverCard>
+  <HoverCardTrigger href="/customers/kowalski-sons">
+    Kowalski &amp; Sons sp. z o.o.
+  </HoverCardTrigger>
+  <HoverCardContent>{/* a short summary */}</HoverCardContent>
+</HoverCard>;
+```
+
+The trigger is an ordinary link, so touch and keyboard users still reach the page. The card only
+adds a glance, after a 500ms delay on hover. Keep it to a summary: anything to act on belongs on the
+page the link opens, because the card cannot be reached on a touch screen.
+
+The motion variant grows the card from the link. Import `HoverCardContent` from
+`@rectio/motion/navigation`.
+
+## Props
+
+### HoverCard
+
+Base UI's `PreviewCard.Root`.
+
+### HoverCardTrigger
+
+Every prop of Base UI's `PreviewCard.Trigger` is accepted, including `href`, as well.
+
+<TypeTable
+  type={{
+    delay: {
+      type: 'number',
+      default: '500',
+      description: 'Milliseconds of hover before the card opens.',
+    },
+    closeDelay: {
+      type: 'number',
+      default: '250',
+      description: 'Milliseconds after the pointer leaves before the card closes.',
+    },
+  }}
+/>
+
+### HoverCardContent
+
+Every prop of Base UI's `PreviewCard.Popup` is accepted as well.
+
+<TypeTable
+  type={{
+    children: { type: 'ReactNode', required: true },
+    side: {
+      type: "'top' | 'right' | 'bottom' | 'left' | 'inline-start' | 'inline-end'",
+      default: "'bottom'",
+    },
+    align: { type: "'start' | 'center' | 'end'", default: "'start'" },
+    sideOffset: { type: 'number', default: '8' },
+  }}
+/>
+
+## Accessibility
+
+- The trigger is a real link with a visible focus ring; the page it opens has all the information.
+- The card also opens when the link takes keyboard focus, and Escape closes it.
+- It is never the only place a fact appears: touch screens do not open it.
+
+<ComponentSource path="hover-card/hover-card.tsx" />

@@ -1,0 +1,94 @@
+---
+title: Tooltip
+description: A short label for an icon control, with an optional shortcut.
+---
+
+<Preview name="tooltip" plain={<Demo name="tooltip" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add tooltip
+```
+
+`kbd` and `theme-scope` install with it.
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+<TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger render={<Button variant="ghost" iconOnly aria-label="Download PDF" />}>
+      <DownloadIcon aria-hidden />
+    </TooltipTrigger>
+    <TooltipContent shortcut="mod+s">Download PDF</TooltipContent>
+  </Tooltip>
+</TooltipProvider>;
+```
+
+Put one `TooltipProvider` near the root of the app. The first tooltip waits 600ms, so a pointer that
+is only passing opens nothing. While the pointer moves along a toolbar, the next tooltip opens at
+once and without its entrance (within 400ms of the last one closing).
+
+A tooltip labels a control whose purpose is not written on it. Keep it to a few words. It never
+opens on a touch screen, so it must not be the only place an important fact lives.
+
+Tooltips have no motion variant on purpose: they open too often to animate. The plain tooltip
+already fades in and scales slightly, and skips even that inside a delay group.
+
+## Props
+
+### TooltipProvider
+
+Every prop of Base UI's `Tooltip.Provider` is accepted.
+
+<TypeTable
+  type={{
+    delay: {
+      type: 'number',
+      default: '600',
+      description: 'Milliseconds before the first tooltip opens.',
+    },
+    timeout: {
+      type: 'number',
+      default: '400',
+      description: 'Milliseconds within which a neighbour opens without a delay.',
+    },
+  }}
+/>
+
+### Tooltip, TooltipTrigger
+
+Base UI's `Tooltip.Root` and `Tooltip.Trigger`. The trigger takes `render` to draw a `Button`.
+
+### TooltipContent
+
+Every prop of Base UI's `Tooltip.Popup` is accepted as well.
+
+<TypeTable
+  type={{
+    children: { type: 'ReactNode', required: true, description: 'The label.' },
+    shortcut: {
+      type: 'string',
+      description: 'A shortcut for the action, such as `mod+b`, drawn as keycaps after the label.',
+    },
+    side: {
+      type: "'top' | 'right' | 'bottom' | 'left' | 'inline-start' | 'inline-end'",
+      default: "'top'",
+    },
+    align: { type: "'start' | 'center' | 'end'", default: "'center'" },
+    sideOffset: { type: 'number', default: '6' },
+  }}
+/>
+
+## Accessibility
+
+- Opens on hover and on keyboard focus, and closes on Escape or when focus leaves.
+- Give an icon-only control its own `aria-label`. The tooltip repeats it for sighted users; it is not
+  the control's name.
+- Touch screens do not open tooltips, so important information belongs in the page.
+
+<ComponentSource path="tooltip/tooltip.tsx" />
