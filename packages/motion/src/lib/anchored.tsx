@@ -17,7 +17,7 @@ import { readMotionTokens, type MotionTokens } from './tokens';
  */
 export const REPLACES_POPUP_CSS = cn(
   'transition-none',
-  'data-starting-style:translate-y-0 data-starting-style:scale-100 data-starting-style:opacity-100',
+  'data-starting-style:translate-none! data-starting-style:scale-100 data-starting-style:opacity-100',
 );
 
 /** Where the popup starts: pulled a short way back toward its trigger, slightly smaller. */

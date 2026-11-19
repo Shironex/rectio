@@ -84,7 +84,7 @@ export function MotionPopup({ state, itemSlot, ref, children, ...props }: Motion
 /** Turns off the plain popup's CSS entrance so only the spring runs. */
 export const REPLACES_CSS_MOTION = cn(
   'relative transition-none',
-  'data-starting-style:translate-y-0 data-starting-style:scale-100 data-starting-style:opacity-100',
+  'data-starting-style:translate-none! data-starting-style:scale-100 data-starting-style:opacity-100',
 );
 
 /** An option that lets the list's gliding highlight show through its own. */
