@@ -49,9 +49,13 @@ function useStackReflow(on: boolean) {
         [...viewport.querySelectorAll<HTMLElement>(':scope > [data-slot="toast"]')].filter(
           (toast) => toast.offsetParent !== null,
         );
+      // Layout position on the page, untouched by transforms in flight. The viewport is anchored to
+      // the bottom and grows upward, so a toast's offset inside it can stay the same while the toast
+      // moves: the viewport's own offset is added.
+      const place = (toast: HTMLElement) => viewport.offsetTop + toast.offsetTop;
       const record = () => {
         resting.clear();
-        for (const toast of toasts()) resting.set(toast, toast.offsetTop);
+        for (const toast of toasts()) resting.set(toast, place(toast));
       };
       record();
 
@@ -64,7 +68,7 @@ function useStackReflow(on: boolean) {
         }
         for (const toast of toasts()) {
           const before = resting.get(toast);
-          const now = toast.offsetTop;
+          const now = place(toast);
           if (before === undefined || before === now) continue;
           // Where it is drawn now: its old place plus what is left of a glide in flight.
           const from = before + transformY(toast) - now;
