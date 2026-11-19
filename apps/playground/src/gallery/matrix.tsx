@@ -14,22 +14,6 @@ export function Matrix() {
             Every component and state, in each theme and mode.
           </p>
         </div>
-        <nav
-          aria-label="Expense report composition"
-          className="flex flex-wrap gap-x-4 gap-y-1 text-sm"
-        >
-          {THEMES.flatMap((theme) =>
-            MODES.map((mode) => (
-              <a
-                key={`${theme.id}-${mode}`}
-                href={`?view=app&theme=${theme.id}&mode=${mode}`}
-                className="text-accent-strong underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-focus"
-              >
-                {theme.name} {mode}
-              </a>
-            )),
-          )}
-        </nav>
       </header>
       <div className="grid xl:grid-cols-2">
         {THEMES.flatMap((theme) =>
@@ -46,6 +30,13 @@ export function Matrix() {
                 <span className="text-sm text-fg-muted">
                   {theme.note}, {mode}
                 </span>
+                {/* Each panel links to the composition in its own theme, in that theme's accent. */}
+                <a
+                  href={`?view=app&theme=${theme.id}&mode=${mode}`}
+                  className="ms-auto text-sm text-accent-strong underline decoration-line-strong underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                >
+                  Expense report
+                </a>
               </div>
               <Gallery />
             </ThemeScope>
