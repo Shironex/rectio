@@ -12,8 +12,11 @@ export type { ButtonProps };
 /** Keys that press a native button. */
 const PRESS_KEYS = new Set([' ', 'Enter']);
 
-/** The arriving part waits for the leaving one, so label and spinner never cross. */
-const AFTER_EXIT = { transitionDelay: 'var(--rx-motion-duration-fast)' };
+/**
+ * The arriving part starts halfway through the leaving one: the slot is never empty, and the two
+ * barely overlap while the leaving one is already faint.
+ */
+const AFTER_EXIT = { transitionDelay: 'calc(var(--rx-motion-duration-fast) / 2)' };
 
 /**
  * The label leaves upward and the spinner arrives from below, then the reverse when the work is

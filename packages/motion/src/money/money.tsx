@@ -35,8 +35,10 @@ function frameNodes(value: number, options: FrameOptions): Node[] {
 
 /**
  * Counts from the shown figure to the new one when the amount changes, on the `count` duration
- * with the `settle` easing: fast at first, then the last digits slow down and land. This is the
- * add-on's one signature moment, meant for totals. It never runs on the first render.
+ * with the `settle` easing: even at first, then a soft landing on the exact figure. It waits the
+ * `fast` duration first, so the change that caused it (a row opening or leaving) is seen before
+ * the total answers it. This is the add-on's one signature moment, meant for totals. It never runs
+ * on the first render.
  *
  * Legibility and accessibility:
  * - The real amount stays rendered, transparent, in the same grid cell; screen readers read only
@@ -67,9 +69,11 @@ function MotionMoney(props: MoneyProps) {
     const clock = new Animation(
       new KeyframeEffect(null, null, {
         duration: tokens.duration.count * 1000,
+        delay: tokens.duration.fast * 1000,
         // The token as CSS text: WAAPI takes the easing as the stylesheet writes it.
         easing: getComputedStyle(face).getPropertyValue('--rx-motion-easing-settle'),
-        fill: 'forwards',
+        // Both: the old figure holds through the delay instead of reading as no progress.
+        fill: 'both',
       }),
       document.timeline,
     );

@@ -61,9 +61,10 @@ export function DialogTrigger({ ref, onPointerDown, ...props }: TriggerProps) {
 }
 
 /**
- * Where the popup starts and ends: centred on the trigger, scaled uniformly to the trigger's width
- * so text never squashes. Without a visible trigger (opened from code or a shortcut), the plain
- * entrance: a short rise from the token shift and scale.
+ * Where the popup starts and ends: leaning a short way out from the trigger's side, slightly
+ * smaller, never a flight across the page. The lean is the `origin` distance along the line to the
+ * trigger, so the eye connects the two while the dialog stays where it will be read. Without a
+ * visible trigger (opened from code or a shortcut), the plain entrance: a short rise.
  */
 function originTransform(popup: HTMLElement, trigger: HTMLElement | null, tokens: MotionTokens) {
   const box = trigger?.getBoundingClientRect();
@@ -73,8 +74,11 @@ function originTransform(popup: HTMLElement, trigger: HTMLElement | null, tokens
   const self = popup.getBoundingClientRect();
   const dx = box.left + box.width / 2 - (self.left + self.width / 2);
   const dy = box.top + box.height / 2 - (self.top + self.height / 2);
-  const scale = Math.min(1, box.width / self.width);
-  return `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${scale.toFixed(3)})`;
+  const length = Math.hypot(dx, dy);
+  // A unit vector toward the trigger, scaled by the token in CSS so rem and reduced motion apply.
+  const [ux, uy] = length < 1 ? [0, 0] : [dx / length, dy / length];
+  const lean = (unit: number) => `calc(${tokens.distance.origin} * ${unit.toFixed(3)})`;
+  return `translate(${lean(ux)}, ${lean(uy)}) scale(${String(tokens.scale.origin)})`;
 }
 
 type PopupState = Parameters<
@@ -103,12 +107,12 @@ function MotionPopup({ state, ref, ...props }: ComponentProps<'div'> & { state: 
     const away = originTransform(element, origin?.current ?? null, tokens);
     running.current = state.open
       ? [
-          // Opens: travels out of the trigger on the overlay spring, opaque early.
+          // Opens: leans out of the trigger's side on the overlay spring, opaque early.
           springTo(element, { transform: [away, 'none'] }, tokens.spring.overlay),
           tweenTo(element, { opacity: [0, 1] }, tokens.duration.base, tokens.easing.enter),
         ]
       : [
-          // Closes: returns toward the trigger on the same spring, gone within the fast duration.
+          // Closes: leans back toward the trigger on the same spring, gone within the fast duration.
           springTo(element, { transform: [from.transform, away] }, tokens.spring.overlay),
           tweenTo(
             element,
