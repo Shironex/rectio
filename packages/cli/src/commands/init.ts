@@ -128,9 +128,8 @@ export async function runInit(ctx: CliContext, options: InitOptions = {}) {
   );
   printReport(ctx, report);
   if (!report.dryRun && wrote) {
+    // A non-default theme's usage note (data-theme) is printed with the report, from its item.
     ctx.log(`\nConfig: ${CONFIG_FILE}. Add components with \`rectio add button\`.`);
-    if (theme !== 'default')
-      ctx.log(`Set data-theme="${theme}" on <html> to use the ${theme} theme.`);
   }
   return { config: final, report };
 }

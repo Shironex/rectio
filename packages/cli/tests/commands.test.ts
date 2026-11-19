@@ -93,13 +93,16 @@ describe('init', () => {
 
   it('installs a second theme after the default one', async () => {
     const cwd = app();
-    await runInit(capture(cwd).ctx, { registry: registry.url, theme: 'ledger', ...noInstall });
+    const { ctx, out } = capture(cwd);
+    await runInit(ctx, { registry: registry.url, theme: 'ledger', ...noInstall });
     const css = read(cwd, 'src/index.css');
     const order = ['themes/default.css', 'themes/ledger.css', 'tokens.css'].map((f) =>
       css.indexOf(f),
     );
     expect(order).toEqual([...order].sort((a, b) => a - b));
     expect(JSON.parse(read(cwd, 'rectio.json'))).toMatchObject({ theme: 'ledger' });
+    // The theme's own usage note says how to switch to it, once.
+    expect(out.join('\n').match(/data-theme="ledger"/g)).toHaveLength(1);
   });
 
   it('is idempotent', async () => {
