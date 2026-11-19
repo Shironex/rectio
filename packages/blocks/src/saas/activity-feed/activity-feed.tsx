@@ -10,7 +10,7 @@ import {
   type Icon,
 } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -19,7 +19,8 @@ import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { Segmented } from '../../lib/segmented';
 import { Avatar } from '../lib/avatar';
-import { formatDateTime, relativeTime, sameDay } from '../lib/saas';
+import { useNow } from '../lib/focus';
+import { dateFormat, formatDateTime, isoDateTime, relativeTime, sameDay } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import {
   ACTIVITY_FILTER_LABELS,
@@ -71,12 +72,14 @@ export function ActivityFeed({
   loadingMore = false,
   onLoadMore,
   onInvite,
-  now = new Date(),
+  now: requestedNow,
   locale: requestedLocale,
   title = 'Activity',
   className,
 }: ActivityFeedProps) {
   const locale = resolveLocale(requestedLocale);
+  const now = useNow(requestedNow);
+  const idPrefix = useId();
   const { Button } = useBlockParts();
   const { Items, Item } = useSaasParts();
   const [filter, setFilter] = useState<ActivityFilter>('all');
@@ -148,11 +151,15 @@ export function ActivityFeed({
           ) : (
             <div className="flex flex-col gap-6">
               {days.map((day) => (
-                <section key={day.key} aria-label={day.label} className="flex flex-col gap-1">
-                  <h3 className="text-sm font-medium text-fg-muted first-letter:uppercase">
+                <div key={day.key} className="flex flex-col gap-1">
+                  {/* A heading per day, not a landmark: the list is named by it. */}
+                  <h3
+                    id={`${idPrefix}-${day.key}`}
+                    className="text-sm font-medium text-fg-muted first-letter:uppercase"
+                  >
                     {day.label}
                   </h3>
-                  <ol className="flex flex-col">
+                  <ol aria-labelledby={`${idPrefix}-${day.key}`} className="flex flex-col">
                     <Items>
                       {day.events.map((event, index) => (
                         <Item key={event.id} className="relative flex gap-3 py-2.5">
@@ -168,7 +175,7 @@ export function ActivityFeed({
                       ))}
                     </Items>
                   </ol>
-                </section>
+                </div>
               ))}
             </div>
           )}
@@ -220,7 +227,7 @@ function EventMark({ event }: { event: ActivityEvent }) {
         aria-hidden
         className="relative inline-flex size-8 shrink-0 items-center justify-center"
       >
-        <span className="inline-flex size-6 items-center justify-center rounded-full bg-surface-sunken text-fg-muted ring-1 ring-line-strong">
+        <span className="inline-flex size-6 items-center justify-center rounded-full bg-surface text-fg-muted ring-1 ring-line-strong">
           <KindIcon weight="bold" className="size-3.5" />
         </span>
       </span>
@@ -231,16 +238,16 @@ function EventMark({ event }: { event: ActivityEvent }) {
       <Avatar name={event.actor.name} src={event.actor.avatarUrl} />
       <span
         aria-hidden
-        className="absolute -end-2 -bottom-2 inline-flex size-5 items-center justify-center rounded-full bg-surface-raised text-fg ring-2 ring-surface"
+        className="absolute -end-2.5 -bottom-2.5 inline-flex size-5 items-center justify-center rounded-full bg-surface-raised text-fg ring-2 ring-surface"
       >
-        <KindIcon weight="bold" className="size-3" />
+        <KindIcon weight="bold" className="size-3.5" />
       </span>
     </span>
   );
 }
 
 /**
- * The sentence, then the moment on its own meta line (beside the sentence on wide panels). Today
+ * The sentence, then the moment on its own muted meta line under it at every width. Today
  * reads in relative words; an earlier day shows the clock time under its date heading.
  */
 function EventText({
@@ -257,7 +264,7 @@ function EventText({
   const quoted = event.kind === 'comment' && event.detail !== undefined;
   const moment = today
     ? relativeTime(event.at, now, locale)
-    : new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(event.at);
+    : dateFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(event.at);
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-1">
       <p className="min-w-0 text-pretty">
@@ -273,9 +280,9 @@ function EventText({
           <span className="text-fg-muted">, {event.detail}</span>
         )}
         <time
-          dateTime={event.at.toISOString()}
+          dateTime={isoDateTime(event.at)}
           title={formatDateTime(event.at, locale)}
-          className="mt-0.5 block text-sm text-fg-muted numeric @lg:ms-2 @lg:mt-0 @lg:inline"
+          className="mt-0.5 block text-sm text-fg-muted numeric"
         >
           {moment}
           <span className="sr-only">, {formatDateTime(event.at, locale)}</span>

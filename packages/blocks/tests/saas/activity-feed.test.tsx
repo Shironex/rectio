@@ -62,7 +62,7 @@ describe('activity logic', () => {
 describe('ActivityFeed', () => {
   it('reads as who did what, with the moment in words and the exact time', () => {
     render(<ActivityFeed events={EVENTS} now={NOW} locale="en-GB" />);
-    const today = screen.getByRole('region', { name: 'Today' });
+    const today = screen.getByRole('list', { name: 'Today' });
     expect(within(today).getByText('Q1 board review')).toBeInTheDocument();
     const time = within(today).getByText('5 minutes ago').closest('time');
     expect(time).toHaveAttribute('dateTime', EVENTS[1]?.at.toISOString());
