@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, MinusIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
-import { usePlainMotion } from '@rectio/motion';
+import { MotionPreferenceProvider, usePlainMotion } from '@rectio/motion';
 import {
   DialogBody,
   DialogClose,
@@ -15,7 +15,7 @@ import {
   ThemeScope,
   formatMoney,
 } from '@rectio/ui';
-import { createContext, use, useState, type ReactNode } from 'react';
+import { createContext, use, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { CATEGORIES } from '../expenses/data';
 import { KitProvider, useKit } from '../expenses/kit';
@@ -24,6 +24,16 @@ import { MODES, THEMES, type Mode, type ThemeId } from '../themes';
 const CURRENCY = 'EUR';
 const LOCALE = 'en-IE';
 const SAVE_DELAY_MS = 1400;
+
+/**
+ * Waits on the animation clock rather than a timer, so a capture that slows animations down slows
+ * the demo's pretend work with them and shows the whole loading state.
+ */
+function afterAnimationTime(ms: number, then: () => void) {
+  const hold = new Animation(new KeyframeEffect(null, null, ms), document.timeline);
+  hold.onfinish = then;
+  hold.play();
+}
 const STEP = 10;
 const ITEMS = CATEGORIES.map((c) => ({ value: c.value, label: c.label }));
 const LINES = [
@@ -38,7 +48,7 @@ const EXTRA = [
 ];
 
 const LINK =
-  'text-sm text-accent-strong underline decoration-line-strong underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
+  'inline-flex min-h-6 items-center text-sm text-accent-strong underline decoration-line-strong underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
 
 /** Which column a specimen is in, so it can say what moves there. */
 const InMotionColumn = createContext(false);
@@ -62,10 +72,10 @@ function Specimen({
   return (
     <section className="flex flex-col gap-3 border-t border-line pt-5">
       <div className="flex flex-col gap-1">
-        <h3 className="text-sm font-medium text-fg">
+        <h2 className="text-sm font-medium text-fg">
           {title}
           <span className="text-fg-muted md:sr-only">, {inMotion ? 'motion' : 'plain'}</span>
-        </h3>
+        </h2>
         {/* Two lines kept for every note, so plain and motion specimens start level. */}
         <p className="min-h-[2lh] max-w-prose text-sm text-fg-muted">{note}</p>
       </div>
@@ -87,9 +97,9 @@ function ButtonSpecimen() {
         loading={saving}
         onClick={() => {
           setSaving(true);
-          window.setTimeout(() => {
+          afterAnimationTime(SAVE_DELAY_MS, () => {
             setSaving(false);
-          }, SAVE_DELAY_MS);
+          });
         }}
       >
         Save expense
@@ -114,7 +124,7 @@ function AmountSpecimen() {
       <Field className="w-44">
         <FieldLabel>Amount, EUR</FieldLabel>
         <AmountInput currency={CURRENCY} locale={LOCALE} value={amount} onValueChange={setAmount} />
-        <FieldDescription>Arrow keys step by 0.01.</FieldDescription>
+        <FieldDescription>Arrow keys step by 0.01, the buttons by 10.00.</FieldDescription>
       </Field>
       <div className="flex gap-1 self-center">
         <Button
@@ -148,6 +158,15 @@ function RowsSpecimen() {
   const { Button, Money, TableRows, TableRow, TableCell } = useKit();
   const [lines, setLines] = useState(LINES);
   const [added, setAdded] = useState(0);
+  /** After a removal, focus goes to the line that took its place, or to the add button. */
+  const focusNext = useRef<string | null>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const id = focusNext.current;
+    if (id === null) return;
+    focusNext.current = null;
+    tableRef.current?.querySelector<HTMLElement>(`[data-focus="${id}"]`)?.focus();
+  }, [lines]);
   const total = lines.reduce((sum, line) => sum + line.amount, 0);
   const next = EXTRA[added % EXTRA.length];
   return (
@@ -156,7 +175,7 @@ function RowsSpecimen() {
       plain="Lines appear and disappear at once; the total changes in one step."
       motion="A new line opens in place, a removed one fades and closes the gap. The total counts to its new figure and settles: the one signature moment."
     >
-      <div className="flex w-full flex-col gap-3">
+      <div ref={tableRef} className="flex w-full flex-col gap-3">
         <table className="w-full border-collapse text-base">
           <caption className="sr-only">Lines</caption>
           <tbody>
@@ -173,8 +192,11 @@ function RowsSpecimen() {
                       size="sm"
                       iconOnly
                       aria-label={`Remove ${line.merchant}`}
+                      data-focus={line.id}
                       className="text-fg-subtle hover:text-fg"
                       onClick={() => {
+                        const index = lines.findIndex((l) => l.id === line.id);
+                        focusNext.current = (lines[index + 1] ?? lines[index - 1])?.id ?? 'add';
                         setLines((list) => list.filter((l) => l.id !== line.id));
                       }}
                     >
@@ -202,6 +224,7 @@ function RowsSpecimen() {
             variant="secondary"
             size="sm"
             className="self-start"
+            data-focus="add"
             onClick={() => {
               setLines((list) => [...list, { id: `x${String(added)}`, ...next }]);
               setAdded((n) => n + 1);
@@ -290,19 +313,38 @@ function Pair({ specimen: Specimen }: { specimen: () => ReactNode }) {
 
 /** Plain beside motioned, every motioned component, in one theme and mode. */
 export function MotionPage({ theme, mode }: { theme: ThemeId; mode: Mode }) {
+  const [off, setOff] = useState(false);
+  return (
+    <MotionPreferenceProvider value={off ? 'off' : 'user'}>
+      <Page theme={theme} mode={mode} off={off} onOffChange={setOff} />
+    </MotionPreferenceProvider>
+  );
+}
+
+function Page({
+  theme,
+  mode,
+  off,
+  onOffChange,
+}: {
+  theme: ThemeId;
+  mode: Mode;
+  off: boolean;
+  onOffChange: (off: boolean) => void;
+}) {
   const still = usePlainMotion();
   return (
     <ThemeScope theme={theme} mode={mode} className="min-h-dvh">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8">
+      <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8">
         <a
           href="?"
-          className="inline-flex w-fit items-center gap-1.5 text-sm text-fg-muted underline decoration-line-strong underline-offset-4 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="inline-flex min-h-6 w-fit items-center gap-1.5 text-sm text-fg-muted underline decoration-line-strong underline-offset-4 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
           <ArrowLeftIcon aria-hidden weight="bold" className="size-3.5" />
           All components
         </a>
         <header className="flex flex-col gap-3">
-          <h1 className="font-display text-3xl font-heading tracking-tight">Motion</h1>
+          <h1 className="font-display text-3xl font-heading tracking-tight">Motion add-on</h1>
           <p className="max-w-prose text-base text-fg-muted">
             The add-on beside the plain base. Same names and props: an app picks motion per
             component by importing it from <code className="font-mono text-sm">@rectio/motion</code>{' '}
@@ -317,7 +359,11 @@ export function MotionPage({ theme, mode }: { theme: ThemeId; mode: Mode }) {
                     key={`${t.id}-${m}`}
                     href={`?view=motion&theme=${t.id}&mode=${m}`}
                     aria-current={current ? 'page' : undefined}
-                    className={current ? 'text-sm font-medium text-fg' : LINK}
+                    className={
+                      current
+                        ? 'inline-flex min-h-6 items-center text-sm font-medium text-fg'
+                        : LINK
+                    }
                   >
                     {t.name} {m}
                   </a>
@@ -331,9 +377,24 @@ export function MotionPage({ theme, mode }: { theme: ThemeId; mode: Mode }) {
               Expense report with motion
             </a>
           </nav>
+          <label className="inline-flex min-h-6 w-fit items-center gap-2 text-sm text-fg">
+            <input
+              type="checkbox"
+              checked={off}
+              onChange={(event) => {
+                onOffChange(event.target.checked);
+              }}
+              className="size-4 accent-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            />
+            Turn motion off, as{' '}
+            <code className="font-mono text-sm">{'<MotionPreferenceProvider value="off">'}</code>{' '}
+            does
+          </label>
           {still && (
             <p role="note" className="max-w-prose text-sm text-fg-muted">
-              Your system asks for reduced motion, so both columns show the plain behaviour.
+              {off
+                ? 'Motion is off, so both columns show the plain behaviour.'
+                : 'Your system asks for reduced motion, so both columns show the plain behaviour.'}
             </p>
           )}
         </header>
@@ -348,7 +409,7 @@ export function MotionPage({ theme, mode }: { theme: ThemeId; mode: Mode }) {
             ),
           )}
         </div>
-      </div>
+      </main>
     </ThemeScope>
   );
 }

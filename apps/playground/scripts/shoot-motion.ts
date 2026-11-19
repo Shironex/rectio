@@ -61,6 +61,7 @@ async function filmstrip(
   region: Locator | 'viewport',
   action: () => Promise<void>,
   below = 0,
+  gap = GAP_MS,
 ) {
   let clip: { x: number; y: number; width: number; height: number } | undefined;
   if (region !== 'viewport') {
@@ -80,10 +81,14 @@ async function filmstrip(
     const file = join(out, 'frames', `${name}-${String(i).padStart(2, '0')}.png`);
     await page.screenshot(clip === undefined ? { path: file } : { path: file, clip });
     files.push(file);
-    await page.waitForTimeout(GAP_MS);
+    await page.waitForTimeout(gap);
   }
+  gaps.set(files[0] ?? '', gap);
   return files;
 }
+
+/** The real-time gap each strip was taken with, keyed by its first frame. */
+const gaps = new Map<string, number>();
 
 /** One sheet per interaction: the plain strip above the motioned one, frames left to right. */
 async function contactSheet(page: Page, name: string, rows: { label: string; files: string[] }[]) {
@@ -94,7 +99,7 @@ async function contactSheet(page: Page, name: string, rows: { label: string; fil
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${row.files
         .map(
           (f, i) =>
-            `<figure style="margin:0"><img src="data:image/png;base64,${readFileSync(f).toString('base64')}" style="width:100%;display:block;border:1px solid #ddd"><figcaption>${String(Math.round(i * GAP_MS * RATE))} ms</figcaption></figure>`,
+            `<figure style="margin:0"><img src="data:image/png;base64,${readFileSync(f).toString('base64')}" style="width:100%;display:block;border:1px solid #ddd"><figcaption>${String(Math.round(i * (gaps.get(row.files[0] ?? '') ?? GAP_MS) * RATE))} ms</figcaption></figure>`,
         )
         .join('')}</div></div>`,
       )
@@ -146,8 +151,9 @@ try {
   });
 
   await record('amount-step', (which) => {
+    // Tight on the field: the nudge is a hair, so the strip shows the figures large.
     const s = section(which, 'Amount input');
-    return filmstrip(page, `amount-${which}`, s, () =>
+    return filmstrip(page, `amount-${which}`, s.getByRole('textbox'), () =>
       s.getByRole('button', { name: 'Add 10.00' }).click(),
     );
   });
@@ -205,14 +211,24 @@ try {
 
   await record('row-add', (which) => {
     const s = section(which, 'Rows and total');
-    return filmstrip(page, `row-add-${which}`, s, () =>
-      s.getByRole('button', { name: /^Add / }).click(),
+    return filmstrip(
+      page,
+      `row-add-${which}`,
+      s,
+      () => s.getByRole('button', { name: /^Add / }).click(),
+      0,
+      GAP_MS * 2,
     );
   });
   await record('row-remove', (which) => {
     const s = section(which, 'Rows and total');
-    return filmstrip(page, `row-remove-${which}`, s, () =>
-      s.getByRole('button', { name: 'Remove Deutsche Bahn' }).click(),
+    return filmstrip(
+      page,
+      `row-remove-${which}`,
+      s,
+      () => s.getByRole('button', { name: 'Remove Deutsche Bahn' }).click(),
+      0,
+      GAP_MS * 2,
     );
   });
 
@@ -231,9 +247,13 @@ try {
   await page.getByRole('option', { name: 'Rail' }).click();
   await settle(page);
   const slow = await slowDown(page, RATE);
-  const table = page.locator('table');
-  const reportFiles = await filmstrip(page, 'report-save', table, () =>
-    page.getByRole('button', { name: 'Save expense' }).click(),
+  const reportFiles = await filmstrip(
+    page,
+    'report-save',
+    'viewport',
+    () => page.getByRole('button', { name: 'Save expense' }).click(),
+    0,
+    GAP_MS * 3,
   );
   await slow.send('Animation.setPlaybackRate', { playbackRate: 1 });
   await page.getByRole('dialog').waitFor({ state: 'detached' });
