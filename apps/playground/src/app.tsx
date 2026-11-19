@@ -7,6 +7,9 @@ const ExpenseReport = lazy(() =>
   import('./expenses/expense-report').then((m) => ({ default: m.ExpenseReport })),
 );
 const Matrix = lazy(() => import('./gallery/matrix').then((m) => ({ default: m.Matrix })));
+const BlocksPage = lazy(() =>
+  import('./blocks/blocks-page').then((m) => ({ default: m.BlocksPage })),
+);
 const MotionPage = lazy(() =>
   import('./motion/motion-page').then((m) => ({ default: m.MotionPage })),
 );
@@ -17,6 +20,8 @@ export function App() {
     <Suspense>
       {view === 'app' ? (
         <ExpenseReport theme={theme} mode={mode} motion={motion} />
+      ) : view === 'blocks' ? (
+        <BlocksPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'motion' ? (
         <MotionPage theme={theme} mode={mode} />
       ) : (
