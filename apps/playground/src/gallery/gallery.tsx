@@ -15,6 +15,13 @@ import {
 } from '@rectio/ui';
 
 import { CATEGORIES } from '../expenses/data';
+import {
+  BadgeSection,
+  CheckboxSection,
+  DataTableSection,
+  DateSection,
+  ToastSection,
+} from './finance';
 import { Row, Section } from './specimen';
 
 const items = CATEGORIES.map((c) => ({ value: c.value, label: c.label }));
@@ -212,6 +219,12 @@ export function Gallery() {
           </dl>
         </Row>
       </Section>
+
+      <BadgeSection />
+      <CheckboxSection />
+      <DataTableSection />
+      <DateSection />
+      <ToastSection />
     </div>
   );
 }
