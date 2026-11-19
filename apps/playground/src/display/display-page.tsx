@@ -176,6 +176,22 @@ function Loaders({ ui }: { ui: Moving }) {
             <Button loading={save.loading} onClick={() => void save.run()}>
               Save draft
             </Button>
+            <Button
+              variant="secondary"
+              loading
+              renderContent={({ children, loading }) =>
+                loading ? (
+                  <>
+                    <Spinner size="sm" tone="current" decorative />
+                    Exporting
+                  </>
+                ) : (
+                  children
+                )
+              }
+            >
+              Export
+            </Button>
           </div>
           <p className="text-sm text-fg-muted">
             Fast saves never flash a spinner; slow ones hold it long enough to read.
@@ -316,7 +332,7 @@ function ProgressGroup({ ui }: { ui: Moving }) {
           />
         </Tile>
         <Tile label="Ring">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="grid grid-cols-2 items-end justify-items-center gap-4 sm:flex sm:flex-wrap sm:justify-between">
             <ui.ProgressCircle value={72} size="lg" label="Profile complete" showLabel />
             <ui.ProgressCircle
               value={3}
