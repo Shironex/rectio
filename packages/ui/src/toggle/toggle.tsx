@@ -53,6 +53,9 @@ const SEGMENT = cn(
   'data-pressed:text-fg',
   'data-pressed:not-in-data-glide:bg-surface-raised data-pressed:not-in-data-glide:shadow-raised',
   'relative focus-visible:z-10',
+  // The track's padding takes a few pixels off each segment; the hit area reaches the track's edge
+  // so a segment is still a 44px target on touch screens.
+  'pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1',
 );
 
 export type ToggleProps = WithClassName<ComponentProps<typeof BaseToggle>> & {
