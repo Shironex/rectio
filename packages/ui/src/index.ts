@@ -82,6 +82,7 @@ export {
   type UseDataTableOptions,
 } from './data-table/data-table';
 export { DataTablePagination, type DataTablePaginationProps } from './data-table/pagination';
+export { DataTableSort, type DataTableSortProps } from './data-table/sort';
 export { Calendar, type CalendarProps } from './calendar/calendar';
 export { resolveDateLocale } from './calendar/locales';
 export {

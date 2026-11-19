@@ -5,6 +5,7 @@ import {
   DataTable,
   DataTableFooter,
   DataTableHeader,
+  DataTableSort,
   DateRangePicker,
   Money,
   ThemeScope,
@@ -284,6 +285,8 @@ function Report({ back }: { back: string | null }) {
             onValueChange={setPeriod}
             presets={PRESETS}
           />
+          {/* Phones fold Date, Category and Status away from the header; this sorts by any of them. */}
+          <DataTableSort table={table} className="w-full sm:hidden" />
           {selected.length > 0 && (
             <div className="flex items-center gap-3">
               <p className="text-sm text-fg-muted">

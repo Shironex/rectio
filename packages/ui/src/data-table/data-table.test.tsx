@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
@@ -13,6 +13,7 @@ import {
   type DataTableColumnDef,
 } from './data-table';
 import { DataTablePagination } from './pagination';
+import { DataTableSort } from './sort';
 
 interface Line {
   id: string;
@@ -48,10 +49,12 @@ function Lines({
   data = LINES,
   loading = false,
   paginate = false,
+  sortControl = false,
 }: {
   data?: Line[];
   loading?: boolean;
   paginate?: boolean;
+  sortControl?: boolean;
 }) {
   const table = useDataTable({
     data,
@@ -62,6 +65,7 @@ function Lines({
   });
   return (
     <>
+      {sortControl && <DataTableSort table={table} />}
       <DataTable caption="Expenses">
         <DataTableHeader table={table} sticky />
         <DataTableBody table={table} loading={loading} empty="No expenses yet." />
@@ -106,6 +110,34 @@ describe('DataTable', () => {
     expect(amount).toHaveAttribute('aria-sort', 'none');
     expect(merchants()).toEqual(['Lufthansa', 'Figma', 'Hotel Bristol']);
     expect(screen.getByRole('status')).toHaveTextContent('Amount, sort removed');
+  });
+
+  it('sorts every sortable column from the Sort by control, in step with the header', async () => {
+    render(<Lines sortControl />);
+    const sortBy = screen.getByRole('combobox', { name: 'Sort by' });
+    const order = screen.getByRole('button', { name: 'Descending' });
+    expect(sortBy).toHaveTextContent('Original order');
+    expect(order).toHaveAttribute('aria-disabled', 'true');
+
+    await userEvent.click(sortBy);
+    // The selection column never sorts, so it is not offered.
+    const options = await screen.findAllByRole('option');
+    expect(options.map((option) => option.textContent)).toEqual(['Merchant', 'Amount']);
+    await userEvent.click(screen.getByRole('option', { name: 'Amount' }));
+    await waitFor(() => {
+      expect(sortBy).toHaveTextContent('Amount');
+    });
+    // Same natural first order as the header: amounts high to low.
+    expect(merchants()).toEqual(['Hotel Bristol', 'Lufthansa', 'Figma']);
+    expect(order).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('columnheader', { name: /Amount/ })).toHaveAttribute(
+      'aria-sort',
+      'descending',
+    );
+
+    await userEvent.click(order);
+    expect(order).toHaveAttribute('aria-pressed', 'false');
+    expect(merchants()).toEqual(['Figma', 'Lufthansa', 'Hotel Bristol']);
   });
 
   it('sorts text columns from the keyboard', async () => {

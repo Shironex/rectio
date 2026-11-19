@@ -151,9 +151,14 @@ export default defineRegistry({
       version: '0.1.0',
       title: 'DataTable',
       description:
-        'Composable table on TanStack Table: sorting, row selection, sticky header, totals footer, loading, empty and pagination.',
+        'Composable table on TanStack Table: sorting (with a Sort by control for phones), row selection, sticky header, totals footer, loading, empty and pagination.',
       categories: ['data', 'finance'],
-      files: ['data-table/table.tsx', 'data-table/data-table.tsx', 'data-table/pagination.tsx'],
+      files: [
+        'data-table/table.tsx',
+        'data-table/data-table.tsx',
+        'data-table/pagination.tsx',
+        'data-table/sort.tsx',
+      ],
     },
     {
       name: 'calendar',
