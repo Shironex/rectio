@@ -213,6 +213,21 @@
 .site-ticker-track {
   animation: site-ticker calc(var(--rx-motion-duration-loop) * 44) linear infinite;
 }
+/* Phones: no loop. The strip starts on a whole item and scrolls by swipe, fading on the right. */
+@media (width < 40rem) {
+  .site-ticker {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, var(--rx-text) 80%, transparent);
+  }
+  .site-ticker-track {
+    animation: none;
+  }
+  .site-ticker-toggle {
+    display: none;
+  }
+}
 .site-ticker:hover .site-ticker-track,
 .site-ticker[data-stopped] .site-ticker-track,
 .site-ticker[data-paused] .site-ticker-track {
