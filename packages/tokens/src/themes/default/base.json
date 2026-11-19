@@ -135,6 +135,10 @@
       },
       "lg": {
         "$value": "{size.44}"
+      },
+      "touch": {
+        "$value": "{size.44}",
+        "$description": "Minimum height of a control or its hit area on touch screens (pointer: coarse). Never follows density."
       }
     },
     "padding-x": {

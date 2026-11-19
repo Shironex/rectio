@@ -2,7 +2,7 @@ import { Dialog as BaseDialog } from '@base-ui/react/dialog';
 import { XIcon } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { cn } from '../lib/cn';
+import { cn, touchHitArea } from '../lib/cn';
 import { usePortalContainer } from '../theme-scope/theme-scope';
 
 type WithClassName<P> = Omit<P, 'className'> & { className?: string };
@@ -64,6 +64,7 @@ export function DialogContent({
                 'rounded-(--rx-button-radius) text-fg-subtle hover:bg-surface-hover hover:text-fg',
                 'transition-colors duration-fast ease-standard',
                 'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
+                touchHitArea,
               )}
             >
               <XIcon aria-hidden weight="bold" className="size-4" />

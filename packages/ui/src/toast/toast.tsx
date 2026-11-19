@@ -2,7 +2,7 @@ import { Toast } from '@base-ui/react/toast';
 import { CheckCircleIcon, InfoIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 
-import { cn } from '../lib/cn';
+import { cn, touchHitArea } from '../lib/cn';
 import { usePortalContainer } from '../theme-scope/theme-scope';
 
 /** The kinds a toast can be. Each carries an icon and a word in the title, never colour alone. */
@@ -113,20 +113,22 @@ function ToastItem({ toast, closeLabel }: { toast: Toast.Root.ToastObject; close
             className={cn(
               // A bordered small button in every theme: the action must read as a control, never as
               // more text in the message.
-              'inline-flex h-(--rx-button-height-sm) cursor-pointer items-center px-(--rx-button-padding-x-sm)',
+              'relative inline-flex h-(--rx-button-height-sm) cursor-pointer items-center px-(--rx-button-padding-x-sm)',
               'rounded-(--rx-button-radius) border border-line-strong text-sm font-medium text-fg hover:bg-surface-hover',
               'transition-colors duration-fast ease-standard',
               'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
+              touchHitArea,
             )}
           />
         )}
         <Toast.Close
           aria-label={closeLabel}
           className={cn(
-            'inline-flex size-(--rx-button-height-sm) cursor-pointer items-center justify-center',
+            'relative inline-flex size-(--rx-button-height-sm) cursor-pointer items-center justify-center',
             'rounded-(--rx-button-radius) text-fg-subtle hover:bg-surface-hover hover:text-fg',
             'transition-colors duration-fast ease-standard',
             'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
+            touchHitArea,
           )}
         >
           <XIcon aria-hidden weight="bold" className="size-3.5" />

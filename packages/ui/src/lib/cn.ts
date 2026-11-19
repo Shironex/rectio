@@ -21,6 +21,18 @@ const merge = extendTailwindMerge({
   },
 });
 
+/**
+ * Hit area for a small pressable (icon buttons, small buttons, a checkbox) on touch screens: a
+ * transparent box centred on the control, at least the touch height square, so a finger lands on it
+ * while the drawn control keeps its size. Mouse and pen layouts are unchanged. The control must be
+ * positioned (`relative` or `absolute`).
+ */
+export const touchHitArea = cn(
+  'pointer-coarse:after:absolute pointer-coarse:after:inset-auto pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2',
+  'pointer-coarse:after:size-full pointer-coarse:after:-translate-1/2',
+  'pointer-coarse:after:min-h-(--rx-button-height-touch) pointer-coarse:after:min-w-(--rx-button-height-touch)',
+);
+
 export function cn(...inputs: ClassValue[]): string {
   return merge(clsx(inputs));
 }

@@ -2,7 +2,7 @@ import { Button as BaseButton } from '@base-ui/react/button';
 import { CircleNotchIcon } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { cn } from '../lib/cn';
+import { cn, touchHitArea } from '../lib/cn';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -27,16 +27,20 @@ const DISABLED: Record<ButtonVariant, string> = {
   danger: 'border border-line bg-surface-sunken text-fg-disabled shadow-none',
 };
 
+/**
+ * On touch screens medium and large buttons grow to the touch height, level with the fields beside
+ * them; small buttons keep their drawn size and reach it through the hit area instead.
+ */
 const SIZES: Record<ButtonSize, string> = {
   sm: 'h-(--rx-button-height-sm) px-(--rx-button-padding-x-sm) text-sm gap-1.5',
-  md: 'h-(--rx-button-height-md) px-(--rx-button-padding-x-md) text-base gap-2',
-  lg: 'h-(--rx-button-height-lg) px-(--rx-button-padding-x-lg) text-base gap-2',
+  md: 'h-(--rx-button-height-md) pointer-coarse:h-(--rx-button-height-touch) px-(--rx-button-padding-x-md) text-base gap-2',
+  lg: 'h-(--rx-button-height-lg) pointer-coarse:h-(--rx-button-height-touch) px-(--rx-button-padding-x-lg) text-base gap-2',
 };
 
 const ICON_ONLY: Record<ButtonSize, string> = {
   sm: 'w-(--rx-button-height-sm) px-0',
-  md: 'w-(--rx-button-height-md) px-0',
-  lg: 'w-(--rx-button-height-lg) px-0',
+  md: 'w-(--rx-button-height-md) pointer-coarse:w-(--rx-button-height-touch) px-0',
+  lg: 'w-(--rx-button-height-lg) pointer-coarse:w-(--rx-button-height-touch) px-0',
 };
 
 export interface ButtonProps extends Omit<ComponentProps<typeof BaseButton>, 'className'> {
@@ -88,6 +92,7 @@ export function Button({
         'active:scale-(--rx-motion-scale-press)',
         'data-disabled:cursor-not-allowed data-disabled:shadow-none',
         '[&_svg]:pointer-events-none [&_svg]:shrink-0',
+        touchHitArea,
         VARIANTS[variant],
         SIZES[size],
         iconOnly && ICON_ONLY[size],

@@ -15,7 +15,7 @@ import {
 import { Calendar } from '../calendar/calendar';
 import { resolveDateLocale } from '../calendar/locales';
 import { controlFocus, controlSurface } from '../field/field';
-import { cn } from '../lib/cn';
+import { cn, touchHitArea } from '../lib/cn';
 import { popupMotion } from '../select/select';
 import { usePortalContainer } from '../theme-scope/theme-scope';
 
@@ -94,7 +94,10 @@ function CalendarPopup({
         >
           {/* The sheet's own way out: touch screens have no Escape key. */}
           <div className="flex w-full justify-end px-2 pt-2 sm:hidden">
-            <Popover.Close aria-label="Close calendar" className={cn(triggerButton, 'size-11')}>
+            <Popover.Close
+              aria-label="Close calendar"
+              className={cn(triggerButton, 'size-(--rx-button-height-touch)')}
+            >
               <XIcon aria-hidden weight="bold" className="size-4" />
             </Popover.Close>
           </div>
@@ -106,11 +109,12 @@ function CalendarPopup({
 }
 
 const triggerButton = cn(
-  'inline-flex size-(--rx-button-height-sm) shrink-0 cursor-pointer items-center justify-center',
+  'relative inline-flex size-(--rx-button-height-sm) shrink-0 cursor-pointer items-center justify-center',
   'rounded-(--rx-button-radius) text-fg-subtle hover:bg-surface-hover hover:text-fg',
   'transition-colors duration-fast ease-standard',
   'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
   'data-disabled:cursor-not-allowed data-disabled:text-fg-disabled data-disabled:hover:bg-transparent',
+  touchHitArea,
 );
 
 export interface DatePickerProps {
@@ -349,7 +353,7 @@ export function DateRangePicker({
                       onOpenChange(false);
                     }}
                     className={cn(
-                      'flex min-h-(--rx-button-height-sm) w-full cursor-pointer items-center rounded-(--rx-button-radius) px-(--rx-button-padding-x-sm) py-1',
+                      'flex min-h-(--rx-button-height-sm) pointer-coarse:min-h-(--rx-button-height-touch) w-full cursor-pointer items-center rounded-(--rx-button-radius) px-(--rx-button-padding-x-sm) py-1',
                       'text-start text-sm whitespace-nowrap text-fg-muted hover:bg-surface-hover hover:text-fg',
                       'aria-pressed:bg-surface-selected aria-pressed:font-medium aria-pressed:text-fg',
                       'transition-colors duration-fast ease-standard',

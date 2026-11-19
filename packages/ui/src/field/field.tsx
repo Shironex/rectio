@@ -8,7 +8,8 @@ type WithClassName<P> = Omit<P, 'className'> & { className?: string };
 
 /** The control surface shared by Input, AmountInput and the Select trigger. */
 export const controlSurface = cn(
-  'h-(--rx-field-height) w-full min-w-0 rounded-(--rx-field-radius)',
+  // Taller on touch screens, a 44px target, without touching desktop density.
+  'h-(--rx-field-height) pointer-coarse:h-(--rx-field-height-touch) w-full min-w-0 rounded-(--rx-field-radius)',
   'border border-(--rx-field-border) bg-(--rx-field-background) text-base text-fg',
   'transition-[border-color,outline-color] duration-fast ease-standard',
   'outline-0 -outline-offset-1 outline-transparent hover:border-fg-subtle',

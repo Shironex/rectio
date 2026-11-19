@@ -14,6 +14,11 @@
           "$value": "{control.height.lg}"
         }
       },
+      "height-touch": {
+        "$type": "dimension",
+        "$value": "{control.height.touch}",
+        "$description": "Button height and the hit area of small and icon buttons on touch screens."
+      },
       "padding-x": {
         "$type": "dimension",
         "sm": {
@@ -43,6 +48,11 @@
       "height": {
         "$type": "dimension",
         "$value": "{control.height.md}"
+      },
+      "height-touch": {
+        "$type": "dimension",
+        "$value": "{control.height.touch}",
+        "$description": "Input, AmountInput and Select trigger height on touch screens."
       },
       "padding-x": {
         "$type": "dimension",
@@ -127,7 +137,7 @@
       },
       "day-size-touch": {
         "$type": "dimension",
-        "$value": "{control.height.lg}",
+        "$value": "{control.height.touch}",
         "$description": "Day button size on touch screens, so each day is a 44px target."
       },
       "radius": {
