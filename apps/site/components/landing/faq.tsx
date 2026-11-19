@@ -2,8 +2,8 @@ import { CaretDownIcon } from '@phosphor-icons/react/dist/ssr';
 
 const QUESTIONS = [
   {
-    q: 'Is this shadcn/ui with a new coat?',
-    a: 'No. rectio is its own library on Base UI primitives, with its own registry and CLI. Like shadcn, it installs as source you own; unlike it, components are styled only through design tokens, so a theme restyles everything without a fork.',
+    q: 'Is this another restyled component kit?',
+    a: 'No. rectio is its own library on Base UI primitives, with its own registry and CLI. It installs as source you own, and components are styled only through design tokens, so a theme restyles everything without a fork.',
   },
   {
     q: 'What does the free tier include?',
@@ -33,15 +33,21 @@ export function Faq() {
     <div className="flex flex-col border-t border-line">
       {QUESTIONS.map(({ q, a }, i) => (
         <details key={q} open={i === 0} className="group site-reveal border-b border-line">
-          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-6 py-4 text-lg font-medium text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden">
-            {q}
+          <summary className="flex min-h-14 cursor-pointer list-none items-baseline gap-4 py-4 text-lg font-medium text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus md:gap-6 [&::-webkit-details-marker]:hidden">
+            <span
+              aria-hidden
+              className="w-6 shrink-0 font-mono text-sm text-fg-subtle tabular-nums"
+            >
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <span className="flex-1">{q}</span>
             <CaretDownIcon
               aria-hidden
               weight="bold"
               className="size-4 shrink-0 text-fg-muted transition-transform duration-base ease-enter group-open:rotate-180"
             />
           </summary>
-          <p className="max-w-3xl pb-6 text-base text-pretty text-fg-muted">{a}</p>
+          <p className="max-w-3xl ps-10 pb-6 text-base text-pretty text-fg-muted md:ps-12">{a}</p>
         </details>
       ))}
     </div>
