@@ -14,7 +14,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import { useShortcut } from '../kbd/shortcut';
+import { ariaKeyShortcut, useIsMac, useShortcut } from '../kbd/shortcut';
 import { cn, touchHitArea } from '../lib/cn';
 import { Menu, MenuContent, MenuGroup, MenuLinkItem, MenuTrigger } from '../menu/menu';
 import { Sheet, SheetContent, SheetTitle } from '../sheet/sheet';
@@ -113,7 +113,15 @@ export function SidebarProvider({
     };
   }, [collapsed, collapsedProp, mobile, mobileOpen, onCollapsedChange, shortcut]);
 
-  useShortcut(shortcut, value.toggle, { allowInFields: false });
+  useShortcut(
+    shortcut,
+    () => {
+      // Never fold the rail behind, or open the sheet over, a dialog the user is in.
+      if (document.querySelector('[role="dialog"][aria-modal="true"]') !== null) return;
+      value.toggle();
+    },
+    { allowInFields: false },
+  );
 
   return <SidebarContext value={value}>{children}</SidebarContext>;
 }
@@ -124,7 +132,7 @@ function useCollapsed() {
   return use(PlacementContext) === 'rail' && state.collapsed;
 }
 
-export interface SidebarProps extends Omit<ComponentProps<'aside'>, 'children'> {
+export interface SidebarProps extends Omit<ComponentProps<'div'>, 'children'> {
   /** Names the navigation landmark and the phone sheet. Default "Main". */
   label?: string;
   children: ReactNode;
@@ -156,7 +164,8 @@ export function Sidebar({ label = 'Main', className, children, ...props }: Sideb
   }
 
   return (
-    <aside
+    // A plain column: the nav inside is the landmark, with no unnamed complementary one around it.
+    <div
       data-slot="sidebar"
       data-collapsed={collapsed ? '' : undefined}
       className={cn(
@@ -170,7 +179,7 @@ export function Sidebar({ label = 'Main', className, children, ...props }: Sideb
       <nav aria-label={label} className="flex min-h-0 flex-1 flex-col">
         {children}
       </nav>
-    </aside>
+    </div>
   );
 }
 
@@ -557,6 +566,7 @@ export function SidebarTrigger({
   ...props
 }: SidebarTriggerProps) {
   const { collapsed, mobile, mobileOpen, toggle, shortcut } = useSidebar();
+  const mac = useIsMac();
   const label = mobile ? labels.open : collapsed ? labels.expand : labels.collapse;
   return (
     <Tooltip>
@@ -568,6 +578,9 @@ export function SidebarTrigger({
             // On desktop the label names the action, which already says the state; the phone
             // trigger keeps one name and reports whether the sheet is open.
             aria-expanded={mobile ? mobileOpen : undefined}
+            aria-keyshortcuts={
+              shortcut === null || mobile ? undefined : ariaKeyShortcut(shortcut, mac)
+            }
             data-slot="sidebar-trigger"
             className={cn(
               'relative inline-flex size-(--rx-button-height-md) shrink-0 cursor-pointer items-center justify-center',
