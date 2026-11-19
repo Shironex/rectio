@@ -14,6 +14,8 @@ import { fileURLToPath } from 'node:url';
 import { chromium, type Locator, type Page } from 'playwright';
 import { createServer } from 'vite';
 
+import { dialogFieldsVerdict, watchDialogFields } from './checks.ts';
+
 const here = dirname(fileURLToPath(import.meta.url));
 const round = process.argv[2] ?? '1';
 if (!/^\d+$/.test(round)) throw new Error(`round must be a number, got ${round}`);
@@ -246,6 +248,7 @@ try {
   await page.getByRole('combobox', { name: 'Category' }).click();
   await page.getByRole('option', { name: 'Rail' }).click();
   await settle(page);
+  await watchDialogFields(page);
   const slow = await slowDown(page, RATE);
   const reportFiles = await filmstrip(
     page,
@@ -257,6 +260,7 @@ try {
   );
   await slow.send('Animation.setPlaybackRate', { playbackRate: 1 });
   await page.getByRole('dialog').waitFor({ state: 'detached' });
+  console.log('motion dialog on save', await dialogFieldsVerdict(page));
   await settle(page);
   await page.screenshot({ path: join(out, 'report-saved-ledger-dark.png') });
   await page.close();

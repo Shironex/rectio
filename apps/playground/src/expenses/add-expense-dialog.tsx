@@ -91,6 +91,17 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
     setErrors({});
   };
 
+  /**
+   * A saved draft is cleared once the dialog has finished closing, never during its exit: emptying
+   * the fields while the popup still fades or springs away flashes a blank form.
+   */
+  const saved = useRef(false);
+  const onOpenChangeComplete = (isOpen: boolean) => {
+    if (isOpen || !saved.current) return;
+    saved.current = false;
+    reset();
+  };
+
   const onSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     const found = validate(draft);
@@ -113,9 +124,9 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
         amount: draft.amount ?? 0,
         status: 'draft',
       });
+      saved.current = true;
       setSaving(false);
       setOpen(false);
-      reset();
     }, SAVE_DELAY_MS);
   };
 
@@ -128,7 +139,7 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} onOpenChangeComplete={onOpenChangeComplete}>
       <DialogTrigger render={<Button />}>
         <PlusIcon aria-hidden weight="bold" className="size-4" />
         Add expense

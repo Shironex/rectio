@@ -11,6 +11,8 @@ import { fileURLToPath } from 'node:url';
 import { chromium, type Page } from 'playwright';
 import { createServer } from 'vite';
 
+import { dialogFieldsVerdict, smallestTouchTarget, watchDialogFields } from './checks.ts';
+
 const here = dirname(fileURLToPath(import.meta.url));
 const round = process.argv[2] ?? '1';
 if (!/^\d+$/.test(round)) throw new Error(`round must be a number, got ${round}`);
@@ -173,8 +175,11 @@ try {
       // Finish the form from the keyboard and save: the row and the status line appear.
       await app.getByRole('combobox', { name: 'Category' }).click();
       await app.getByRole('option', { name: 'Rail' }).click();
+      await watchDialogFields(app);
       await app.getByRole('textbox', { name: 'Merchant' }).press('ControlOrMeta+Enter');
       await app.getByRole('dialog', { name: 'Add expense' }).waitFor({ state: 'detached' });
+      if (theme === 'default' && mode === 'light')
+        console.log('dialog on save', await dialogFieldsVerdict(app));
       await app.getByText('Expense added').waitFor();
       await settle(app);
       await app.screenshot({ path: join(out, `saved-${name}.png`) });
@@ -213,7 +218,17 @@ try {
     () => document.documentElement.scrollWidth - window.innerWidth,
   );
   console.log('phone horizontal overflow px', overflow);
+  console.log('phone smallest touch target', await smallestTouchTarget(phone));
   await phone.screenshot({ path: join(out, 'phone-app.png'), fullPage: true });
+  // Sort by a column the phone header folds away.
+  await phone.getByRole('combobox', { name: 'Sort by' }).tap();
+  await phone.getByRole('listbox').waitFor();
+  await settle(phone);
+  await phone.screenshot({ path: join(out, 'phone-sort-open.png') });
+  await phone.getByRole('option', { name: 'Category' }).tap();
+  await phone.getByRole('listbox').waitFor({ state: 'detached' });
+  await settle(phone);
+  await phone.screenshot({ path: join(out, 'phone-sorted.png') });
   await phone.getByRole('checkbox', { name: /^Select Linear/ }).tap();
   await phone.getByRole('checkbox', { name: /^Select Figma/ }).tap();
   await settle(phone);
@@ -223,6 +238,7 @@ try {
   await phone.getByRole('button', { name: 'Add expense' }).click();
   await phone.getByRole('dialog', { name: 'Add expense' }).waitFor();
   await settle(phone);
+  console.log('phone dialog smallest touch target', await smallestTouchTarget(phone));
   await phone.screenshot({ path: join(out, 'phone-dialog.png') });
   await phone.getByRole('button', { name: /^Choose date/ }).click();
   await phone.getByRole('grid').waitFor();
