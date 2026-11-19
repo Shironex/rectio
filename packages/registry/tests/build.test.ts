@@ -201,8 +201,13 @@ describe('the rectio registry', () => {
   it('publishes every component, the tokens and one theme item per theme', () => {
     expect([...byName.keys()].sort()).toEqual([
       'amount-input',
+      'badge',
       'button',
+      'calendar',
+      'checkbox',
       'cn',
+      'data-table',
+      'date-picker',
       'dialog',
       'field',
       'money',
@@ -210,8 +215,21 @@ describe('the rectio registry', () => {
       'theme-default',
       'theme-ledger',
       'theme-scope',
+      'toast',
       'tokens',
     ]);
+  });
+
+  it('links the data table to the checkbox and button it renders', () => {
+    expect(byName.get('data-table')?.registryDependencies).toEqual([
+      'tokens',
+      'button',
+      'checkbox',
+      'cn',
+    ]);
+    expect(byName.get('data-table')?.dependencies).toMatchObject({
+      '@tanstack/react-table': '^9.3.1',
+    });
   });
 
   it('derives the component graph from the imports', () => {
