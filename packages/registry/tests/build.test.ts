@@ -390,12 +390,12 @@ describe('the rectio registry', () => {
 
   it('links the data table to the checkbox, button, field and select it renders', () => {
     expect(byName.get('data-table')?.registryDependencies).toEqual([
+      'tokens',
       'button',
       'checkbox',
       'cn',
       'field',
       'select',
-      'tokens',
     ]);
     expect(byName.get('data-table')?.dependencies).toMatchObject({
       '@tanstack/react-table': '^9.3.1',
@@ -405,10 +405,10 @@ describe('the rectio registry', () => {
   it('derives the component graph from the imports', () => {
     expect(byName.get('dialog')?.registryDependencies).toEqual(['tokens', 'cn', 'theme-scope']);
     expect(byName.get('select')?.registryDependencies).toEqual([
+      'tokens',
       'cn',
       'field',
       'theme-scope',
-      'tokens',
     ]);
     expect(byName.get('button')?.dependencies).toEqual({
       '@base-ui/react': '^1.9.0',
@@ -428,10 +428,10 @@ describe('the rectio registry', () => {
     );
     // Imports of @rectio/ui became registry dependencies on the items that export each name.
     expect(byName.get('motion-dialog')?.registryDependencies).toEqual([
+      'tokens',
       'cn',
       'dialog',
       'motion-core',
-      'tokens',
     ]);
     const dialog = byName.get('motion-dialog')?.files[0];
     expect(dialog?.target).toBe('@ui/motion/dialog.tsx');
