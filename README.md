@@ -7,14 +7,14 @@ Private and unlicensed. Nothing here is published.
 
 ## Packages
 
-| Package                | What it is                                                                                                            |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `@rectio/tokens`       | DTCG token sources, built with Style Dictionary into CSS variables, a Tailwind v4 theme, font faces and resolved JSON |
-| `@rectio/ui`           | Button, Field and Input, AmountInput, Select, Dialog, Money, ThemeScope                                               |
-| `@rectio/playground`   | Vite app: every component in every state, both themes, both modes, plus an expense report composition                 |
-| `@rectio/design-rules` | The check that keeps hardcoded design values out of `packages/ui/src` (in `tooling/`)                                 |
-| `@rectio/registry`     | Registry item schema, the build that turns ui and tokens into static registry JSON, a local dev server                |
-| `@rectio/cli`          | The `rectio` command: `init`, `add`, `diff`, `list`, `search`, `update` (report only for now)                         |
+| Package                | What it is                                                                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@rectio/tokens`       | DTCG token sources, built with Style Dictionary into CSS variables, a Tailwind v4 theme, font faces and resolved JSON                             |
+| `@rectio/ui`           | Button, Field and Input, AmountInput, Select, Dialog, Money, ThemeScope, Badge, Checkbox, DataTable, Calendar, DatePicker, DateRangePicker, Toast |
+| `@rectio/playground`   | Vite app: every component in every state, both themes, both modes, plus an expense report composition                                             |
+| `@rectio/design-rules` | The check that keeps hardcoded design values out of `packages/ui/src` (in `tooling/`)                                                             |
+| `@rectio/registry`     | Registry item schema, the build that turns ui and tokens into static registry JSON, a local dev server                                            |
+| `@rectio/cli`          | The `rectio` command: `init`, `add`, `diff`, `list`, `search`, `update` (report only for now)                                                     |
 
 ## Tokens
 
@@ -23,7 +23,8 @@ Three tiers, all in `packages/tokens/src`:
 1. **Primitives**: OKLCH colour ramps, sizes, font families, durations, easings. Never emitted.
 2. **Semantic**: surface, text, border, accent, status, focus, radius, type, density, shadow and
    motion. Defined per theme and mode; every theme must define the same set (the build fails otherwise).
-3. **Component**: button, field, popover, dialog and money values, mostly aliases of semantic tokens.
+3. **Component**: button, field, popover, dialog, money, table, calendar, badge and toast values,
+   mostly aliases of semantic tokens.
 
 Themes apply with attributes: `data-theme="default" | "ledger"`, `data-mode="light" | "dark"`
 (no `data-mode` follows the system), `data-density="compact"`. Reduced motion drops movement and
