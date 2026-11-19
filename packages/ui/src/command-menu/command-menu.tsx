@@ -2,6 +2,8 @@ import { Autocomplete } from '@base-ui/react/autocomplete';
 import { Dialog as BaseDialog } from '@base-ui/react/dialog';
 import { MagnifyingGlassIcon } from '@phosphor-icons/react';
 import {
+  createContext,
+  use,
   useId,
   useMemo,
   useState,
@@ -133,6 +135,9 @@ function Highlighted({ text, indices }: { text: string; indices: number[] }) {
  * without an entrance on purpose: it is used dozens of times a day, and the field is ready the
  * moment the shortcut is pressed.
  */
+type Handle = ReturnType<typeof BaseDialog.createHandle>;
+const HandleContext = createContext<Handle | null>(null);
+
 const defaultCount = (count: number) =>
   count === 0 ? 'No results' : count === 1 ? '1 result' : `${String(count)} results`;
 
@@ -156,6 +161,10 @@ export function CommandMenu({
   const [query, setQuery] = useState('');
   const container = usePortalContainer();
   const hintsId = useId();
+  // The trigger links to the dialog through a handle, so the app inside `children` is not inside
+  // the dialog's root: a root wrapped around the app would count every dialog and sheet in it as
+  // nested, and Base UI draws no backdrop for a nested one.
+  const [handle] = useState(() => BaseDialog.createHandle());
 
   const setOpen = (next: boolean) => {
     if (openProp === undefined) setOpenState(next);
@@ -164,6 +173,8 @@ export function CommandMenu({
   };
 
   useShortcut(shortcut, () => {
+    // Never stack the menu over another dialog or sheet the user is in.
+    if (!open && document.querySelector('[role="dialog"][aria-modal="true"]') !== null) return;
     setOpen(!open);
   });
 
@@ -185,132 +196,135 @@ export function CommandMenu({
   };
 
   return (
-    <BaseDialog.Root
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-      }}
-    >
+    <HandleContext value={handle}>
       {children}
-      <BaseDialog.Portal container={container}>
-        <BaseDialog.Backdrop className="fixed inset-0 z-50 bg-scrim" />
-        <BaseDialog.Viewport className="fixed inset-0 z-50 flex items-start justify-center p-2 pt-4 sm:p-4 sm:pt-24">
-          <BaseDialog.Popup
-            aria-label={label}
-            data-slot="command-menu"
-            className={cn(
-              'flex max-h-full w-(--rx-command-width) max-w-full flex-col overflow-hidden',
-              'rounded-(--rx-dialog-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-dialog-shadow)',
-              'outline-none',
-              className,
-            )}
-          >
-            <Autocomplete.Root
-              open
-              inline
-              items={groups as CommandGroup[]}
-              filteredItems={filteredItems}
-              filter={null}
-              itemToStringValue={(item: CommandItem) => item.label}
-              value={query}
-              onValueChange={setQuery}
-              autoHighlight="always"
-              keepHighlight
-            >
-              <div className="flex items-center gap-2 border-b border-line px-4">
-                <MagnifyingGlassIcon
-                  aria-hidden
-                  weight="bold"
-                  className="size-4 shrink-0 text-fg-subtle"
-                />
-                <Autocomplete.Input
-                  aria-label={label}
-                  aria-describedby={showHints ? hintsId : undefined}
-                  placeholder={placeholder}
-                  data-slot="command-menu-input"
-                  className={cn(
-                    'h-12 w-full min-w-0 bg-transparent text-base text-fg outline-none',
-                    'placeholder:text-fg-subtle pointer-coarse:text-lg',
-                  )}
-                />
-                {/* For screen readers browsing the dialog; Tab skips it, Escape and the backdrop close. */}
-                <BaseDialog.Close tabIndex={-1} className="sr-only">
-                  {closeLabel}
-                </BaseDialog.Close>
-              </div>
-
-              <div className="max-h-(--rx-command-list-height) min-h-0 overflow-y-auto overscroll-contain">
-                <Autocomplete.Status className="sr-only">
-                  {query.trim() === '' ? null : formatCount(resultCount)}
-                </Autocomplete.Status>
-                <Autocomplete.Empty>
-                  <div className="flex flex-col items-center gap-1 px-4 py-10 text-center">
-                    {emptyState === undefined ? (
-                      <>
-                        <p className="text-sm font-medium text-fg">
-                          No results for “{query.trim()}”
-                        </p>
-                        <p className="text-sm text-fg-muted">
-                          Try a shorter word, or the name of a page.
-                        </p>
-                      </>
-                    ) : (
-                      emptyState(query.trim())
-                    )}
-                  </div>
-                </Autocomplete.Empty>
-                <Autocomplete.List className="p-1 empty:p-0">
-                  {(group: CommandGroup) => (
-                    <Autocomplete.Group
-                      key={group.label}
-                      items={group.items as CommandItem[]}
-                      className="not-first:mt-1"
-                    >
-                      <Autocomplete.GroupLabel className="px-3 pt-2 pb-1 text-xs font-medium tracking-caps text-fg-subtle uppercase select-none">
-                        {group.label}
-                      </Autocomplete.GroupLabel>
-                      <Autocomplete.Collection>
-                        {(item: CommandItem) => (
-                          <CommandRow
-                            key={item.id}
-                            item={item}
-                            indices={indicesById.get(item.id) ?? []}
-                            onRun={run}
-                          />
-                        )}
-                      </Autocomplete.Collection>
-                    </Autocomplete.Group>
-                  )}
-                </Autocomplete.List>
-              </div>
-
-              {showHints && (
-                <div
-                  id={hintsId}
-                  className="flex items-center gap-4 border-t border-line bg-(--rx-dialog-footer-background) px-4 py-2 text-xs text-fg-muted pointer-coarse:hidden"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <span className="flex gap-0.5" aria-hidden>
-                      <Kbd>↑</Kbd>
-                      <Kbd>↓</Kbd>
-                    </span>
-                    <span>to move</span>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Kbd aria-hidden>↵</Kbd>
-                    <span>to run</span>
-                  </span>
-                  <span className="ms-auto flex items-center gap-1.5">
-                    <Kbd aria-hidden>esc</Kbd>
-                    <span>to close</span>
-                  </span>
-                </div>
+      <BaseDialog.Root
+        handle={handle}
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+        }}
+      >
+        <BaseDialog.Portal container={container}>
+          <BaseDialog.Backdrop className="fixed inset-0 z-50 bg-scrim" />
+          <BaseDialog.Viewport className="fixed inset-0 z-50 flex items-start justify-center p-2 pt-4 sm:p-4 sm:pt-24">
+            <BaseDialog.Popup
+              aria-label={label}
+              data-slot="command-menu"
+              className={cn(
+                'flex max-h-full w-(--rx-command-width) max-w-full flex-col overflow-hidden',
+                'rounded-(--rx-dialog-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-dialog-shadow)',
+                'outline-none',
+                className,
               )}
-            </Autocomplete.Root>
-          </BaseDialog.Popup>
-        </BaseDialog.Viewport>
-      </BaseDialog.Portal>
-    </BaseDialog.Root>
+            >
+              <Autocomplete.Root
+                open
+                inline
+                items={groups as CommandGroup[]}
+                filteredItems={filteredItems}
+                filter={null}
+                itemToStringValue={(item: CommandItem) => item.label}
+                value={query}
+                onValueChange={setQuery}
+                autoHighlight="always"
+                keepHighlight
+              >
+                <div className="flex items-center gap-2 border-b border-line px-4">
+                  <MagnifyingGlassIcon
+                    aria-hidden
+                    weight="bold"
+                    className="size-4 shrink-0 text-fg-subtle"
+                  />
+                  <Autocomplete.Input
+                    aria-label={label}
+                    aria-describedby={showHints ? hintsId : undefined}
+                    placeholder={placeholder}
+                    data-slot="command-menu-input"
+                    className={cn(
+                      'h-12 w-full min-w-0 bg-transparent text-base text-fg outline-none',
+                      'placeholder:text-fg-subtle pointer-coarse:text-lg',
+                    )}
+                  />
+                  {/* For screen readers browsing the dialog; Tab skips it, Escape and the backdrop close. */}
+                  <BaseDialog.Close tabIndex={-1} className="sr-only">
+                    {closeLabel}
+                  </BaseDialog.Close>
+                </div>
+
+                <div className="max-h-(--rx-command-list-height) min-h-0 overflow-y-auto overscroll-contain">
+                  <Autocomplete.Status className="sr-only">
+                    {query.trim() === '' ? null : formatCount(resultCount)}
+                  </Autocomplete.Status>
+                  <Autocomplete.Empty>
+                    <div className="flex flex-col items-center gap-1 px-4 py-10 text-center">
+                      {emptyState === undefined ? (
+                        <>
+                          <p className="text-sm font-medium text-fg">
+                            No results for “{query.trim()}”
+                          </p>
+                          <p className="text-sm text-fg-muted">
+                            Try a shorter word, or the name of a page.
+                          </p>
+                        </>
+                      ) : (
+                        emptyState(query.trim())
+                      )}
+                    </div>
+                  </Autocomplete.Empty>
+                  <Autocomplete.List className="p-1 empty:p-0">
+                    {(group: CommandGroup) => (
+                      <Autocomplete.Group
+                        key={group.label}
+                        items={group.items as CommandItem[]}
+                        className="not-first:mt-1"
+                      >
+                        <Autocomplete.GroupLabel className="px-3 pt-2 pb-1 text-xs font-medium tracking-caps text-fg-subtle uppercase select-none">
+                          {group.label}
+                        </Autocomplete.GroupLabel>
+                        <Autocomplete.Collection>
+                          {(item: CommandItem) => (
+                            <CommandRow
+                              key={item.id}
+                              item={item}
+                              indices={indicesById.get(item.id) ?? []}
+                              onRun={run}
+                            />
+                          )}
+                        </Autocomplete.Collection>
+                      </Autocomplete.Group>
+                    )}
+                  </Autocomplete.List>
+                </div>
+
+                {showHints && (
+                  <div
+                    id={hintsId}
+                    className="flex items-center gap-4 border-t border-line bg-(--rx-dialog-footer-background) px-4 py-2 text-xs text-fg-muted pointer-coarse:hidden"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <span className="flex gap-0.5" aria-hidden>
+                        <Kbd>↑</Kbd>
+                        <Kbd>↓</Kbd>
+                      </span>
+                      <span>to move</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Kbd aria-hidden>↵</Kbd>
+                      <span>to run</span>
+                    </span>
+                    <span className="ms-auto flex items-center gap-1.5">
+                      <Kbd aria-hidden>esc</Kbd>
+                      <span>to close</span>
+                    </span>
+                  </div>
+                )}
+              </Autocomplete.Root>
+            </BaseDialog.Popup>
+          </BaseDialog.Viewport>
+        </BaseDialog.Portal>
+      </BaseDialog.Root>
+    </HandleContext>
   );
 }
 
@@ -386,8 +400,10 @@ export function CommandMenuTrigger({
   ...props
 }: CommandMenuTriggerProps): ReactElement {
   const mac = useIsMac();
+  const handle = use(HandleContext);
   return (
     <BaseDialog.Trigger
+      {...(handle === null ? {} : { handle })}
       data-slot="command-menu-trigger"
       aria-keyshortcuts={shortcut === null ? undefined : ariaKeyShortcut(shortcut, mac)}
       className={cn(
