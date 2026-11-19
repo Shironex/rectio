@@ -30,6 +30,22 @@ export const LOCALES: Record<Locale['id'], Locale> = {
 
 const scale = (amount: number, rate: number) => Math.round(amount * rate * 100) / 100;
 
+/** The words of the sample data are user content, so they follow the locale like a real company's. */
+const pick = (pl: boolean, en: string, pol: string) => (pl ? pol : en);
+
+/** The page's own words around the blocks: periods, the comparison and the dashboard header. */
+export function copy(locale: Locale) {
+  const pl = locale.id === 'pl-PL';
+  return {
+    month: pick(pl, 'March 2026', 'marzec 2026'),
+    quarter: pick(pl, 'Q1 2026', 'I kwartał 2026'),
+    quarterProgress: pick(pl, 'Q1 2026, 11 of 13 weeks', 'I kwartał 2026, 11 z 13 tygodni'),
+    comparison: pick(pl, 'vs February', 'vs luty'),
+    kpiLabel: pick(pl, 'Key figures, March 2026', 'Kluczowe wskaźniki, marzec 2026'),
+    dashboardTitle: pick(pl, 'Finance, March 2026', 'Finanse, marzec 2026'),
+  };
+}
+
 const INVOICES: InvoiceSummary[] = [
   {
     id: 'i01',
@@ -150,7 +166,7 @@ export function invoices(rate: number): InvoiceSummary[] {
   }));
 }
 
-export function invoiceDocument(rate: number): InvoiceDocument {
+export function invoiceDocument(rate: number, pl = false): InvoiceDocument {
   return {
     number: 'INV-2026-0124',
     status: 'sent',
@@ -159,67 +175,92 @@ export function invoiceDocument(rate: number): InvoiceDocument {
     reference: 'PO 4471-BM',
     seller: {
       name: 'Fernhill Systems Ltd',
-      address: ['14 Harcourt Street', 'Dublin D02 YX88', 'Ireland'],
+      address: ['14 Harcourt Street', 'Dublin D02 YX88', pick(pl, 'Ireland', 'Irlandia')],
       taxId: 'IE 3412876LH',
     },
     buyer: {
       name: 'Borowik Meble sp. z o.o.',
-      address: ['ul. Garbary 48', '61-869 Poznań', 'Poland'],
+      address: ['ul. Garbary 48', '61-869 Poznań', pick(pl, 'Poland', 'Polska')],
       taxId: 'PL 7792471305',
     },
     lines: [
       {
         id: 'l1',
-        description: 'Warehouse scheduling licence',
-        detail: 'Annual, 40 seats, Feb 2026 to Jan 2027',
+        description: pick(
+          pl,
+          'Warehouse scheduling licence',
+          'Licencja na harmonogramowanie magazynu',
+        ),
+        detail: pick(
+          pl,
+          'Annual, 40 seats, Feb 2026 to Jan 2027',
+          'Roczna, 40 stanowisk, luty 2026 do styczeń 2027',
+        ),
         quantity: 40,
-        unit: 'seats',
+        unit: pick(pl, 'seats', 'stan.'),
         unitPrice: scale(186, rate),
         taxRate: 0.23,
       },
       {
         id: 'l2',
-        description: 'Integration with the ERP',
-        detail: 'Order and stock sync, fixed scope',
+        description: pick(pl, 'Integration with the ERP', 'Integracja z systemem ERP'),
+        detail: pick(
+          pl,
+          'Order and stock sync, fixed scope',
+          'Synchronizacja zamówień i stanów, stały zakres',
+        ),
         quantity: 1,
         unitPrice: scale(1_450, rate),
         taxRate: 0.23,
       },
       {
         id: 'l3',
-        description: 'On-site training',
-        detail: 'Poznań, two days',
+        description: pick(pl, 'On-site training', 'Szkolenie na miejscu'),
+        detail: pick(pl, 'Poznań, two days', 'Poznań, dwa dni'),
         quantity: 14,
-        unit: 'h',
+        unit: pick(pl, 'h', 'godz.'),
         unitPrice: scale(95, rate),
         taxRate: 0.23,
       },
       {
         id: 'l4',
-        description: 'Printed operator guides',
+        description: pick(pl, 'Printed operator guides', 'Drukowane instrukcje dla operatorów'),
         quantity: 25,
-        unit: 'pcs',
+        unit: pick(pl, 'pcs', 'szt.'),
         unitPrice: scale(12.9, rate),
         taxRate: 0.08,
       },
     ],
     payments: [
-      { id: 'p1', date: d(2, 20), amount: scale(5_000, rate), method: 'Bank transfer, SEPA' },
+      {
+        id: 'p1',
+        date: d(2, 20),
+        amount: scale(5_000, rate),
+        method: pick(pl, 'Bank transfer, SEPA', 'Przelew bankowy, SEPA'),
+      },
     ],
-    notes: 'Pay by bank transfer to IE29 AIBK 9311 5212 3456 78, quoting the invoice number.',
+    notes: pick(
+      pl,
+      'Pay by bank transfer to IE29 AIBK 9311 5212 3456 78, quoting the invoice number.',
+      'Płatność przelewem na rachunek IE29 AIBK 9311 5212 3456 78, z numerem faktury w tytule.',
+    ),
   };
 }
 
-export const ACCOUNTS: LedgerAccount[] = [
-  { code: '1000', name: 'Bank, current account', normal: 'debit' },
-  { code: '1100', name: 'Trade debtors', normal: 'debit' },
-  { code: '2100', name: 'Trade creditors', normal: 'credit' },
-  { code: '2200', name: 'VAT payable', normal: 'credit' },
-  { code: '4000', name: 'Licence revenue', normal: 'credit' },
-  { code: '4100', name: 'Services revenue', normal: 'credit' },
-  { code: '6100', name: 'Software subscriptions', normal: 'debit' },
-  { code: '6200', name: 'Travel', normal: 'debit' },
+const ACCOUNT_ROWS: [code: string, en: string, pl: string, normal: LedgerAccount['normal']][] = [
+  ['1000', 'Bank, current account', 'Bank, rachunek bieżący', 'debit'],
+  ['1100', 'Trade debtors', 'Należności z tytułu dostaw i usług', 'debit'],
+  ['2100', 'Trade creditors', 'Zobowiązania z tytułu dostaw i usług', 'credit'],
+  ['2200', 'VAT payable', 'VAT należny', 'credit'],
+  ['4000', 'Licence revenue', 'Przychody z licencji', 'credit'],
+  ['4100', 'Services revenue', 'Przychody z usług', 'credit'],
+  ['6100', 'Software subscriptions', 'Subskrypcje oprogramowania', 'debit'],
+  ['6200', 'Travel', 'Podróże służbowe', 'debit'],
 ];
+
+export function accounts(pl = false): LedgerAccount[] {
+  return ACCOUNT_ROWS.map(([code, en, pol, normal]) => ({ code, name: pick(pl, en, pol), normal }));
+}
 
 type Posting = [account: string, debit: number, credit: number];
 
@@ -228,6 +269,7 @@ const ENTRIES: {
   date: Date;
   reference: string;
   description: string;
+  descriptionPl: string;
   lines: Posting[];
 }[] = [
   {
@@ -235,6 +277,7 @@ const ENTRIES: {
     date: d(3, 2),
     reference: 'INV-0139',
     description: 'Invoice to Greywell Partners',
+    descriptionPl: 'Faktura dla Greywell Partners',
     lines: [
       ['1100', 15_600, 0],
       ['4100', 0, 12_682.93],
@@ -246,6 +289,7 @@ const ENTRIES: {
     date: d(3, 4),
     reference: 'BNK-0311',
     description: 'Payment from Vantaa Foods',
+    descriptionPl: 'Wpłata od Vantaa Foods',
     lines: [
       ['1000', 27_300, 0],
       ['1100', 0, 27_300],
@@ -256,6 +300,7 @@ const ENTRIES: {
     date: d(3, 6),
     reference: 'INV-0141',
     description: 'Invoice to Nordwind Logistik',
+    descriptionPl: 'Faktura dla Nordwind Logistik',
     lines: [
       ['1100', 21_034.8, 0],
       ['4000', 0, 17_101.46],
@@ -267,6 +312,7 @@ const ENTRIES: {
     date: d(3, 9),
     reference: 'BILL-2207',
     description: 'Figma, team plan',
+    descriptionPl: 'Figma, plan zespołowy',
     lines: [
       ['6100', 540, 0],
       ['2200', 124.2, 0],
@@ -278,6 +324,7 @@ const ENTRIES: {
     date: d(3, 11),
     reference: 'EXP-0412',
     description: 'Rail to Poznań, training',
+    descriptionPl: 'Przejazd koleją do Poznania, szkolenie',
     lines: [
       ['6200', 286.4, 0],
       ['1000', 0, 286.4],
@@ -288,6 +335,7 @@ const ENTRIES: {
     date: d(3, 16),
     reference: 'BNK-0318',
     description: 'Payment from Nordwind Logistik',
+    descriptionPl: 'Wpłata od Nordwind Logistik',
     lines: [
       ['1000', 21_034.8, 0],
       ['1100', 0, 21_034.8],
@@ -295,7 +343,7 @@ const ENTRIES: {
   },
 ];
 
-export function journal(rate: number): JournalLine[] {
+export function journal(rate: number, pl = false): JournalLine[] {
   return ENTRIES.flatMap((entry) => {
     const lines = entry.lines.map(([accountCode, debit, credit]) => ({
       accountCode,
@@ -316,7 +364,7 @@ export function journal(rate: number): JournalLine[] {
       entryId: entry.id,
       date: entry.date,
       reference: entry.reference,
-      description: entry.description,
+      description: pick(pl, entry.description, entry.descriptionPl),
       ...line,
     }));
   });
@@ -353,12 +401,12 @@ export function cashFlow(rate: number): CashFlowPoint[] {
   }));
 }
 
-export function kpis(rate: number): Kpi[] {
+export function kpis(rate: number, pl = false): Kpi[] {
   const money = (values: number[]) => values.map((v) => scale(v, rate));
   return [
     {
       id: 'revenue',
-      label: 'Revenue',
+      label: pick(pl, 'Revenue', 'Przychody'),
       format: 'money',
       better: 'up',
       value: scale(74_600, rate),
@@ -370,7 +418,7 @@ export function kpis(rate: number): Kpi[] {
     },
     {
       id: 'spend',
-      label: 'Operating spend',
+      label: pick(pl, 'Operating spend', 'Koszty operacyjne'),
       format: 'money',
       better: 'down',
       value: scale(61_500, rate),
@@ -382,7 +430,7 @@ export function kpis(rate: number): Kpi[] {
     },
     {
       id: 'margin',
-      label: 'Gross margin',
+      label: pick(pl, 'Gross margin', 'Marża brutto'),
       format: 'percent',
       better: 'up',
       value: 0.412,
@@ -391,7 +439,7 @@ export function kpis(rate: number): Kpi[] {
     },
     {
       id: 'dso',
-      label: 'Receivables',
+      label: pick(pl, 'Receivables', 'Należności'),
       format: 'money',
       better: 'down',
       value: scale(53_615.9, rate),
@@ -427,14 +475,14 @@ export function receivables(rate: number): Receivable[] {
   }));
 }
 
-export function budget(rate: number): BudgetLine[] {
+export function budget(rate: number, pl = false): BudgetLine[] {
   const rows: [string, number, number][] = [
-    ['Salaries', 128_000, 126_450],
-    ['Contractors', 18_000, 23_870],
-    ['Software', 9_600, 9_640],
-    ['Cloud hosting', 14_500, 12_115.3],
-    ['Travel', 6_000, 7_382.4],
-    ['Marketing', 22_000, 15_940],
+    [pick(pl, 'Salaries', 'Wynagrodzenia'), 128_000, 126_450],
+    [pick(pl, 'Contractors', 'Podwykonawcy'), 18_000, 23_870],
+    [pick(pl, 'Software', 'Oprogramowanie'), 9_600, 9_640],
+    [pick(pl, 'Cloud hosting', 'Hosting w chmurze'), 14_500, 12_115.3],
+    [pick(pl, 'Travel', 'Podróże służbowe'), 6_000, 7_382.4],
+    [pick(pl, 'Marketing', 'Marketing'), 22_000, 15_940],
   ];
   return rows.map(([category, planned, actual], index) => ({
     id: `b${String(index)}`,
@@ -444,22 +492,31 @@ export function budget(rate: number): BudgetLine[] {
   }));
 }
 
-export function expenses(rate: number): ApprovalState {
+export function expenses(rate: number, pl = false): ApprovalState {
+  const travel = pick(pl, 'Travel', 'Podróże');
+  const software = pick(pl, 'Software', 'Oprogramowanie');
   const at = (day: number, hour: number, minute: number) => new Date(2026, 2, day, hour, minute);
   const rows: [string, string, string, Date, number, string[]?][] = [
-    ['Marta Zielińska', 'Lufthansa', 'Travel', d(3, 16), 412.8],
+    ['Marta Zielińska', 'Lufthansa', travel, d(3, 16), 412.8],
     [
       'Tom Avery',
       'The Shelbourne',
-      'Accommodation',
+      pick(pl, 'Accommodation', 'Noclegi'),
       d(3, 14),
       689,
-      ['Over the nightly hotel limit'],
+      [pick(pl, 'Over the nightly hotel limit', 'Powyżej limitu za noc w hotelu')],
     ],
-    ['Marta Zielińska', 'Uber', 'Travel', d(3, 17), 23.4],
-    ['Jonas Berg', 'JetBrains', 'Software', d(3, 12), 289],
-    ['Aoife Byrne', 'Wagamama', 'Meals', d(3, 18), 64.5, ['No receipt']],
-    ['Tom Avery', 'Irish Rail', 'Travel', d(3, 15), 38.9],
+    ['Marta Zielińska', 'Uber', travel, d(3, 17), 23.4],
+    ['Jonas Berg', 'JetBrains', software, d(3, 12), 289],
+    [
+      'Aoife Byrne',
+      'Wagamama',
+      pick(pl, 'Meals', 'Posiłki'),
+      d(3, 18),
+      64.5,
+      [pick(pl, 'No receipt', 'Brak paragonu')],
+    ],
+    ['Tom Avery', 'Irish Rail', travel, d(3, 15), 38.9],
   ];
   return {
     requests: [
@@ -477,7 +534,7 @@ export function expenses(rate: number): ApprovalState {
         id: 'x8',
         employee: 'Jonas Berg',
         merchant: 'Figma',
-        category: 'Software',
+        category: software,
         date: d(3, 9),
         amount: scale(540, rate),
         status: 'approved',
@@ -486,7 +543,7 @@ export function expenses(rate: number): ApprovalState {
         id: 'x9',
         employee: 'Aoife Byrne',
         merchant: 'Ryanair',
-        category: 'Travel',
+        category: travel,
         date: d(3, 4),
         amount: scale(186.2, rate),
         status: 'rejected',
@@ -499,7 +556,11 @@ export function expenses(rate: number): ApprovalState {
         action: 'rejected',
         actor: 'Niamh Walsh',
         at: at(17, 9, 12),
-        reason: 'Booked outside the travel tool, rebook through it',
+        reason: pick(
+          pl,
+          'Booked outside the travel tool, rebook through it',
+          'Zarezerwowane poza systemem podróży, zarezerwuj ponownie przez system',
+        ),
       },
       { id: 'v2', requestId: 'x8', action: 'approved', actor: 'Niamh Walsh', at: at(18, 16, 40) },
     ],
