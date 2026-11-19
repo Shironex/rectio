@@ -1,4 +1,9 @@
-import { CopyIcon } from '@phosphor-icons/react';
+import {
+  CheckCircleIcon,
+  CopyIcon,
+  PencilSimpleIcon,
+  WarningCircleIcon,
+} from '@phosphor-icons/react';
 import * as moving from '@rectio/motion';
 import * as ui from '@rectio/ui';
 import {
@@ -432,9 +437,9 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
         >
           <Field invalid={invalid}>
             <FieldLabel>Verification code</FieldLabel>
-            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
               <OtpInput groups={[3, 3]} defaultValue={invalid ? '111111' : ''} />
-              <k.Button variant="secondary" type="button">
+              <k.Button variant="secondary" type="button" className="max-sm:w-full">
                 Verify
               </k.Button>
             </div>
@@ -462,7 +467,6 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
               step={5}
               locale="en-GB"
               format={{ style: 'unit', unit: 'minute', unitDisplay: 'long' }}
-              className="sm:max-w-56"
             />
           </Field>
         </FormSection>
@@ -473,11 +477,18 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
         >
           <p
             role="status"
-            className={`min-w-0 flex-1 text-sm ${invalid ? 'text-negative-strong' : 'text-fg-muted'}`}
+            className={`flex min-w-0 flex-1 items-center gap-1.5 text-sm max-sm:basis-full ${invalid ? 'text-negative-strong' : 'text-fg-muted'}`}
           >
+            {invalid ? (
+              <WarningCircleIcon aria-hidden weight="bold" className="size-4 shrink-0" />
+            ) : dirty ? (
+              <PencilSimpleIcon aria-hidden weight="bold" className="size-4 shrink-0" />
+            ) : (
+              <CheckCircleIcon aria-hidden weight="bold" className="size-4 shrink-0" />
+            )}
             {invalid ? '7 fields need attention' : dirty ? 'Unsaved changes' : 'All changes saved'}
           </p>
-          <div className="flex shrink-0 gap-2">
+          <div className="ms-auto flex shrink-0 gap-2">
             <k.Button variant="ghost" type="reset">
               Discard
             </k.Button>

@@ -110,6 +110,10 @@ try {
     if (wanted(`popups-${name}`)) {
       const page = await open(browser, base, `theme=${theme}&mode=${mode}`);
       const timezone = page.getByRole('combobox', { name: 'Time zone' });
+      // Centre the field first, so the list opens below it as it would mid-page.
+      await timezone.evaluate((node) => {
+        node.scrollIntoView({ block: 'center' });
+      });
       await timezone.click();
       await timezone.fill('lon');
       await page.getByRole('listbox').waitFor();
@@ -119,6 +123,9 @@ try {
       await page.getByRole('listbox').waitFor({ state: 'detached' });
 
       const notify = page.getByRole('combobox', { name: 'Notify on changes' });
+      await notify.evaluate((node) => {
+        node.scrollIntoView({ block: 'center' });
+      });
       await notify.click();
       await page.getByRole('listbox').waitFor();
       await settle(page);
