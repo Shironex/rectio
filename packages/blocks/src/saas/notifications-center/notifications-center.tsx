@@ -19,13 +19,13 @@ import { useState, type ReactNode } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
-import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { Segmented } from '../../lib/segmented';
 import type { LinkTarget } from '../lib/auth';
 import { Avatar } from '../lib/avatar';
 import { Popover } from '../lib/popover';
-import { formatDateTime, relativeTime } from '../lib/saas';
+import { useNow } from '../lib/focus';
+import { formatDateTime, isoDateTime, relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import { focusRing, touchTarget } from '../lib/styles';
 import {
@@ -157,11 +157,12 @@ function NotificationsBody({
   onOpen,
   onMarkRead,
   settings,
-  now = new Date(),
+  now: requestedNow,
   locale: requestedLocale,
   inline = false,
 }: Omit<NotificationsCenterProps, 'title' | 'className' | 'onMarkAllRead'>) {
   const locale = resolveLocale(requestedLocale);
+  const now = useNow(requestedNow);
   const { Button } = useBlockParts();
   const { Items, Item } = useSaasParts();
   const [filter, setFilter] = useState<NotificationsFilter>('all');
@@ -173,32 +174,28 @@ function NotificationsBody({
     const none = notifications.length === 0;
     const EmptyIcon = none ? BellSlashIcon : CheckCircleIcon;
     content = (
-      <div className="px-5 py-4">
-        <EmptyNote
-          title={
-            <span className="flex flex-col items-center gap-3">
-              <EmptyIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
-              {none ? 'No notifications yet' : 'You are all caught up'}
-            </span>
-          }
-        >
-          {none
-            ? 'You will hear here when someone mentions you, assigns you work or your plan changes.'
-            : 'Every notification is read. Earlier ones stay under All.'}
-          {!none && (
-            <span className="mt-4 flex justify-center">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setFilter('all');
-                }}
-              >
-                Show all
-              </Button>
-            </span>
-          )}
-        </EmptyNote>
+      // The panel is already a surface, so the empty state sits in it without a box of its own.
+      <div role="status" className="flex flex-col items-center gap-3 px-6 py-10 text-center">
+        <EmptyIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
+        <div className="flex flex-col gap-1">
+          <p className="font-medium">{none ? 'No notifications yet' : 'You are all caught up'}</p>
+          <p className="max-w-xs text-sm text-pretty text-fg-muted">
+            {none
+              ? 'You will hear here when someone mentions you, assigns you work or your plan changes.'
+              : 'Every notification is read. Earlier ones stay under All.'}
+          </p>
+        </div>
+        {!none && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setFilter('all');
+            }}
+          >
+            Show all
+          </Button>
+        )}
       </div>
     );
   } else {
@@ -299,7 +296,6 @@ function NotificationRow({
       className={cn(
         'flex w-full cursor-pointer gap-3 py-3 ps-1 pe-5 text-start',
         'transition-colors duration-fast ease-standard hover:bg-surface-hover',
-        !notification.read && 'bg-surface-sunken',
         '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
       )}
     >
@@ -323,7 +319,8 @@ function NotificationRow({
         )}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-sm text-pretty text-fg">
+        {/* Unread: the dot, a strong lead and full text colour. Read: regular weight, muted. */}
+        <span className={cn('text-sm', notification.read ? 'text-fg-muted' : 'text-fg')}>
           {!notification.read && <span className="sr-only">Unread, </span>}
           <NotificationTitle notification={notification} />
         </span>
@@ -331,9 +328,9 @@ function NotificationRow({
           <span className="line-clamp-2 text-sm text-fg-muted">{notification.body}</span>
         )}
         <time
-          dateTime={notification.at.toISOString()}
+          dateTime={isoDateTime(notification.at)}
           title={formatDateTime(notification.at, locale)}
-          className="text-xs text-fg-subtle"
+          className="text-xs text-fg-muted"
         >
           {relativeTime(notification.at, now, locale)}
         </time>
@@ -342,19 +339,19 @@ function NotificationRow({
   );
 }
 
-/** The lead carries the weight: the actor's name, or the whole title when no one sent it. */
+/**
+ * An unread title leads with weight: the actor's name, or the whole title when no one sent it. A
+ * read title stays at regular weight throughout.
+ */
 function NotificationTitle({ notification }: { notification: AppNotification }) {
+  if (notification.read) return notification.title;
   const name = notification.actor?.name;
   if (name === undefined || !notification.title.startsWith(name)) {
-    return notification.read ? (
-      notification.title
-    ) : (
-      <span className="font-semibold">{notification.title}</span>
-    );
+    return <span className="font-strong">{notification.title}</span>;
   }
   return (
     <>
-      <span className={notification.read ? 'font-medium' : 'font-semibold'}>{name}</span>
+      <span className="font-strong">{name}</span>
       {notification.title.slice(name.length)}
     </>
   );
