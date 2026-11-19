@@ -198,10 +198,11 @@ function ChangeCell({
   const { Money } = useBlockParts();
   const Icon = ARROW[change.direction];
   return (
-    // Stacked in a mid-width column, on one line once the block is wide enough to spare it.
+    // Stacked in a mid-width column; on one line once the block is wide enough, the amount ends
+    // the row under the Change heading and the words sit before it.
     <span
       className={cn(
-        'flex flex-col items-end @4xl:flex-row @4xl:items-baseline @4xl:justify-end @4xl:gap-3',
+        'flex flex-col items-end @4xl:flex-row-reverse @4xl:items-baseline @4xl:justify-start @4xl:gap-4',
         tone(change),
       )}
     >
