@@ -32,6 +32,13 @@ describe('Button', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it('keeps the label in the accessibility tree while loading (transparent, never visibility hidden)', () => {
+    render(<Button loading>Save</Button>);
+    const label = screen.getByText('Save');
+    expect(label.className).toContain('text-transparent');
+    expect(label.className).not.toContain('invisible');
+  });
+
   it('leaves the tab order when disabled', async () => {
     render(
       <>

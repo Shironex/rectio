@@ -13,8 +13,18 @@ const VARIANTS: Record<ButtonVariant, string> = {
   secondary:
     'border border-line bg-surface-raised text-fg shadow-raised hover:bg-surface-hover active:bg-surface-sunken',
   ghost: 'text-fg hover:bg-surface-hover active:bg-surface-sunken',
+  // Outlined, so a destructive action never outweighs the primary one beside it. It fills on
+  // hover and press, the moment the user commits.
   danger:
-    'bg-negative text-negative-contrast shadow-raised hover:bg-negative-hover active:bg-negative-hover',
+    'border border-negative bg-surface-raised text-negative-strong shadow-raised hover:bg-negative hover:text-negative-contrast active:bg-negative-hover active:text-negative-contrast',
+};
+
+/** Disabled recedes to the neutral surface in every variant, never a faded brand colour. */
+const DISABLED: Record<ButtonVariant, string> = {
+  primary: 'border border-line bg-surface-sunken text-fg-disabled shadow-none',
+  secondary: 'border border-line bg-surface-sunken text-fg-disabled shadow-none',
+  ghost: 'pointer-events-none text-fg-disabled',
+  danger: 'border border-line bg-surface-sunken text-fg-disabled shadow-none',
 };
 
 const SIZES: Record<ButtonSize, string> = {
@@ -75,14 +85,15 @@ export function Button({
         VARIANTS[variant],
         SIZES[size],
         iconOnly && ICON_ONLY[size],
-        disabled && !loading && 'opacity-50',
+        disabled && !loading && DISABLED[variant],
         className,
       )}
       {...props}
     >
       {loading ? (
         <>
-          <span className="invisible contents">{children}</span>
+          {/* Transparent, not hidden: the label keeps its width and stays the accessible name. */}
+          <span className="contents text-transparent">{children}</span>
           <span className="absolute inset-0 inline-flex items-center justify-center">
             <CircleNotchIcon aria-hidden className="size-4 animate-spin" weight="bold" />
           </span>
