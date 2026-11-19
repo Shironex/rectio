@@ -2,7 +2,9 @@ import {
   AtIcon,
   BellIcon,
   BellSlashIcon,
+  CaretRightIcon,
   ChatCircleTextIcon,
+  CheckCircleIcon,
   CheckIcon,
   CreditCardIcon,
   EnvelopeSimpleIcon,
@@ -19,7 +21,7 @@ import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
 import { resolveLocale } from '../../lib/finance';
 import { Segmented } from '../../lib/segmented';
-import { AuthLink, type LinkTarget } from '../lib/auth';
+import type { LinkTarget } from '../lib/auth';
 import { Avatar } from '../lib/avatar';
 import { Popover } from '../lib/popover';
 import { formatDateTime, relativeTime } from '../lib/saas';
@@ -77,7 +79,11 @@ export function NotificationsCenter({
     return (
       <BlockPanel
         title={title}
-        description={<span aria-live="polite">{unreadText(unread)}</span>}
+        description={
+          <span aria-live="polite">
+            {props.notifications.length === 0 ? 'Nothing yet' : unreadText(unread)}
+          </span>
+        }
         actions={<MarkAllButton unread={unread} onMarkAllRead={props.onMarkAllRead} />}
         className={cn('overflow-hidden', className)}
         bodyClassName="gap-3 px-0 pb-0"
@@ -155,6 +161,7 @@ function NotificationsBody({
   inline = false,
 }: Omit<NotificationsCenterProps, 'title' | 'className' | 'onMarkAllRead'>) {
   const locale = resolveLocale(requestedLocale);
+  const { Button } = useBlockParts();
   const { Items, Item } = useSaasParts();
   const [filter, setFilter] = useState<NotificationsFilter>('all');
   const unread = unreadNotificationCount(notifications);
@@ -162,22 +169,38 @@ function NotificationsBody({
 
   let content: ReactNode;
   if (shown.length === 0) {
+    const none = notifications.length === 0;
+    const EmptyIcon = none ? BellSlashIcon : CheckCircleIcon;
     content = (
-      <div role="status" className="flex flex-col items-center gap-2 px-6 py-10 text-center">
+      <div role="status" className="flex flex-col items-center gap-3 px-6 py-10 text-center">
         <span
           aria-hidden
-          className="inline-flex size-10 items-center justify-center rounded-full bg-surface-sunken text-fg-subtle"
+          className={cn(
+            'inline-flex size-10 items-center justify-center rounded-full ring-1 ring-line',
+            none ? 'bg-surface-sunken text-fg-muted' : 'bg-positive-subtle text-positive-strong',
+          )}
         >
-          <BellSlashIcon weight="bold" className="size-5" />
+          <EmptyIcon weight="bold" className="size-5" />
         </span>
-        <p className="font-medium">
-          {notifications.length === 0 ? 'No notifications yet' : 'You are all caught up'}
-        </p>
-        <p className="max-w-64 text-sm text-fg-muted">
-          {notifications.length === 0
-            ? 'Mentions, assignments and account notices will show up here.'
-            : 'Nothing unread. Switch to All to see earlier notifications.'}
-        </p>
+        <div className="flex flex-col gap-1">
+          <p className="font-medium">{none ? 'No notifications yet' : 'You are all caught up'}</p>
+          <p className="max-w-xs text-sm text-pretty text-fg-muted">
+            {none
+              ? 'You will hear here when someone mentions you, assigns you work or your plan changes.'
+              : 'Every notification is read. Earlier ones stay under All.'}
+          </p>
+        </div>
+        {!none && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setFilter('all');
+            }}
+          >
+            Show all
+          </Button>
+        )}
       </div>
     );
   } else {
@@ -221,15 +244,40 @@ function NotificationsBody({
         </div>
       )}
       <div className="border-t border-line">{content}</div>
-      {settings !== undefined && (
-        <div className="flex items-center justify-center gap-1.5 border-t border-line bg-surface-sunken px-5 py-2.5 text-sm text-fg-muted">
-          <GearSixIcon aria-hidden weight="bold" className="size-4" />
-          <AuthLink to={settings} className="font-regular text-fg-muted">
-            Notification settings
-          </AuthLink>
-        </div>
-      )}
+      {settings !== undefined && <SettingsFooter to={settings} />}
     </div>
+  );
+}
+
+/** The footer row to the notification settings: a full-width target, not a small link. */
+function SettingsFooter({ to }: { to: LinkTarget }) {
+  const classes = cn(
+    'flex w-full cursor-pointer items-center gap-2.5 border-t border-line bg-surface-sunken px-5 py-3 text-start text-sm font-medium text-fg',
+    'transition-colors duration-fast ease-standard hover:bg-surface-hover',
+    '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
+  );
+  const content = (
+    <>
+      <GearSixIcon aria-hidden weight="bold" className="size-4 text-fg-muted" />
+      <span className="flex-1">Notification settings</span>
+      <CaretRightIcon
+        aria-hidden
+        weight="bold"
+        className="size-3.5 text-fg-subtle rtl:rotate-180"
+      />
+    </>
+  );
+  if (typeof to === 'string') {
+    return (
+      <a href={to} className={classes}>
+        {content}
+      </a>
+    );
+  }
+  return (
+    <button type="button" onClick={to} className={classes}>
+      {content}
+    </button>
   );
 }
 
@@ -255,6 +303,10 @@ function NotificationRow({
         '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
       )}
     >
+      {/* The unread dot sits in the row's own start padding, so it takes no width from the text. */}
+      {!notification.read && (
+        <span aria-hidden className="absolute start-2 top-6 size-2 rounded-full bg-accent" />
+      )}
       <span className="relative inline-flex size-8 shrink-0">
         {notification.actor === undefined ? (
           <span
@@ -271,14 +323,9 @@ function NotificationRow({
         )}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span
-          className={cn(
-            'text-sm text-pretty',
-            notification.read ? 'text-fg-muted' : 'font-medium text-fg',
-          )}
-        >
+        <span className="text-sm text-pretty text-fg">
           {!notification.read && <span className="sr-only">Unread, </span>}
-          {notification.title}
+          <NotificationTitle notification={notification} />
         </span>
         {notification.body !== undefined && (
           <span className="line-clamp-2 text-sm text-fg-muted">{notification.body}</span>
@@ -291,9 +338,18 @@ function NotificationRow({
           {relativeTime(notification.at, now, locale)}
         </time>
       </span>
-      <span aria-hidden className="flex w-2 shrink-0 justify-center pt-1.5">
-        {!notification.read && <span className="size-2 rounded-full bg-accent" />}
-      </span>
     </button>
+  );
+}
+
+/** Only the actor's name carries weight; the rest of the title stays at body weight. */
+function NotificationTitle({ notification }: { notification: AppNotification }) {
+  const name = notification.actor?.name;
+  if (name === undefined || !notification.title.startsWith(name)) return notification.title;
+  return (
+    <>
+      <span className="font-medium">{name}</span>
+      {notification.title.slice(name.length)}
+    </>
   );
 }

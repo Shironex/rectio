@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -56,7 +56,7 @@ describe('NotificationsCenter', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: 'Notifications, 1 unread' }));
     const dialog = await screen.findByRole('dialog', { name: 'Notifications' });
-    expect(within(dialog).getByText('Ines Duarte mentioned you')).toBeInTheDocument();
+    expect(dialog).toHaveTextContent('Ines Duarte mentioned you');
   });
 
   it('marks a notification read when it is opened', async () => {
