@@ -75,7 +75,9 @@ export function NotificationPreferences({
       title={title}
       description={
         description ??
-        `${String(on)} of ${String(events.length * channels.length)} notifications on`
+        (untouched && anyLocked
+          ? 'Only required alerts on'
+          : `${String(on)} of ${String(events.length * channels.length)} notifications on`)
       }
       className={className}
       bodyClassName="gap-4"
@@ -109,7 +111,7 @@ export function NotificationPreferences({
             </div>
           )}
           {/* Wide: one matrix, events down, channels across. */}
-          <table className="hidden w-full max-w-3xl border-collapse text-sm @xl:table">
+          <table className="hidden w-full border-collapse text-sm @xl:table">
             <caption className="sr-only">Notifications by event and channel</caption>
             <thead>
               <tr>
@@ -125,7 +127,7 @@ export function NotificationPreferences({
                     <th
                       key={channel.id}
                       scope="col"
-                      className="w-24 border-b border-line px-2 py-2 font-medium"
+                      className="w-28 border-b border-line px-2 py-2 font-medium"
                     >
                       {/* The name heads the column; the box under it turns the whole column. */}
                       <span className="flex flex-col items-center gap-2">
