@@ -48,8 +48,18 @@ export const taxSummaryPl: TaxSummaryMessages = {
   inputTax: 'VAT naliczony',
   net: 'Saldo',
   total: 'Razem',
-  foldedOutput: (tax) => <>Należny {tax}</>,
-  foldedInput: (tax) => <>Naliczony {tax}</>,
+  foldedOutput: (tax, base) => (
+    <>
+      <span className="whitespace-nowrap">Należny {tax}</span>{' '}
+      <span className="whitespace-nowrap">od {base}</span>
+    </>
+  ),
+  foldedInput: (tax, base) => (
+    <>
+      <span className="whitespace-nowrap">Naliczony {tax}</span>{' '}
+      <span className="whitespace-nowrap">od {base}</span>
+    </>
+  ),
   prepare: 'Przygotuj deklarację',
   file: 'Złóż deklarację',
   export: 'Eksportuj',

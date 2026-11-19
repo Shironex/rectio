@@ -90,8 +90,10 @@ export interface TaxSummaryMessages {
   net: string;
   total: string;
   /** On a narrow block, under the rate: "Output €19,366.00". The bases show on wider blocks. */
-  foldedOutput: (tax: ReactNode) => ReactNode;
-  foldedInput: (tax: ReactNode) => ReactNode;
+  /** Narrow blocks: the output tax and its taxable base on one line under the rate. */
+  foldedOutput: (tax: ReactNode, base: ReactNode) => ReactNode;
+  /** Narrow blocks: the input tax and its taxable base on one line under the rate. */
+  foldedInput: (tax: ReactNode, base: ReactNode) => ReactNode;
   prepare: string;
   file: string;
   export: string;
@@ -145,8 +147,18 @@ export const TAX_SUMMARY_MESSAGES: TaxSummaryMessages = {
   inputTax: 'Input tax',
   net: 'Net',
   total: 'Total',
-  foldedOutput: (tax) => <>Output {tax}</>,
-  foldedInput: (tax) => <>Input {tax}</>,
+  foldedOutput: (tax, base) => (
+    <>
+      <span className="whitespace-nowrap">Output {tax}</span>{' '}
+      <span className="whitespace-nowrap">on {base}</span>
+    </>
+  ),
+  foldedInput: (tax, base) => (
+    <>
+      <span className="whitespace-nowrap">Input {tax}</span>{' '}
+      <span className="whitespace-nowrap">on {base}</span>
+    </>
+  ),
   prepare: 'Prepare return',
   file: 'File return',
   export: 'Export',
@@ -315,13 +327,13 @@ export function TaxSummary({
                 <TableHead align="end" className="hidden @3xl:table-cell">
                   {m.taxableSales}
                 </TableHead>
-                <TableHead align="end" className="hidden @xl:table-cell">
+                <TableHead align="end" className="hidden @3xl:table-cell">
                   {m.outputTax}
                 </TableHead>
                 <TableHead align="end" className="hidden @3xl:table-cell">
                   {m.taxablePurchases}
                 </TableHead>
-                <TableHead align="end" className="hidden @xl:table-cell">
+                <TableHead align="end" className="hidden @3xl:table-cell">
                   {m.inputTax}
                 </TableHead>
                 <TableHead align="end">{m.net}</TableHead>
@@ -332,23 +344,23 @@ export function TaxSummary({
                 <TableRow key={row.id}>
                   <TableCell className="align-top">
                     <span className="block font-medium numeric">{rateLabel(row.rate)}</span>
-                    <span className="flex justify-between gap-4 text-sm text-fg-muted @xl:hidden">
-                      {m.foldedOutput(money(row.outputTax))}
+                    <span className="block text-sm text-fg-muted @3xl:hidden">
+                      {m.foldedOutput(money(row.outputTax), money(row.outputBase))}
                     </span>
-                    <span className="flex justify-between gap-4 text-sm text-fg-muted @xl:hidden">
-                      {m.foldedInput(money(row.inputTax))}
+                    <span className="block text-sm text-fg-muted @3xl:hidden">
+                      {m.foldedInput(money(row.inputTax), money(row.inputBase))}
                     </span>
                   </TableCell>
                   <TableCell align="end" className="hidden align-top text-fg-muted @3xl:table-cell">
                     {money(row.outputBase)}
                   </TableCell>
-                  <TableCell align="end" className="hidden align-top @xl:table-cell">
+                  <TableCell align="end" className="hidden align-top @3xl:table-cell">
                     {money(row.outputTax)}
                   </TableCell>
                   <TableCell align="end" className="hidden align-top text-fg-muted @3xl:table-cell">
                     {money(row.inputBase)}
                   </TableCell>
-                  <TableCell align="end" className="hidden align-top @xl:table-cell">
+                  <TableCell align="end" className="hidden align-top @3xl:table-cell">
                     {money(row.inputTax)}
                   </TableCell>
                   <TableCell align="end" className="align-top">
@@ -361,23 +373,23 @@ export function TaxSummary({
               <TableRow>
                 <TableCell className="align-top font-medium">
                   {m.total}
-                  <span className="flex justify-between gap-4 text-sm font-regular text-fg-muted @xl:hidden">
-                    {m.foldedOutput(money(summary.outputTax))}
+                  <span className="block text-sm font-regular text-fg-muted @3xl:hidden">
+                    {m.foldedOutput(money(summary.outputTax), money(summary.outputBase))}
                   </span>
-                  <span className="flex justify-between gap-4 text-sm font-regular text-fg-muted @xl:hidden">
-                    {m.foldedInput(money(summary.inputTax))}
+                  <span className="block text-sm font-regular text-fg-muted @3xl:hidden">
+                    {m.foldedInput(money(summary.inputTax), money(summary.inputBase))}
                   </span>
                 </TableCell>
                 <TableCell align="end" className="hidden align-top @3xl:table-cell">
                   {money(summary.outputBase)}
                 </TableCell>
-                <TableCell align="end" className="hidden align-top @xl:table-cell">
+                <TableCell align="end" className="hidden align-top @3xl:table-cell">
                   {money(summary.outputTax)}
                 </TableCell>
                 <TableCell align="end" className="hidden align-top @3xl:table-cell">
                   {money(summary.inputBase)}
                 </TableCell>
-                <TableCell align="end" className="hidden align-top @xl:table-cell">
+                <TableCell align="end" className="hidden align-top @3xl:table-cell">
                   {money(summary.inputTax)}
                 </TableCell>
                 <TableCell align="end" className="align-top">
