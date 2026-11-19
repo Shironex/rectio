@@ -67,6 +67,9 @@ export function SignIn({
     remember: true,
   });
   const [tried, setTried] = useState(false);
+  // A refusal marks the password field until the password is edited.
+  const [answered, setAnswered] = useState<ReactNode>(undefined);
+  const refused = error !== undefined && error !== null && error !== false && error !== answered;
   const errors: SignInErrors = tried ? signInErrors(values, method) : {};
 
   const submit = (event: SyntheticEvent) => {
@@ -139,7 +142,7 @@ export function SignIn({
         </Field>
 
         {method === 'password' && (
-          <Field invalid={errors.password !== undefined}>
+          <Field invalid={errors.password !== undefined || refused}>
             <div className="flex items-baseline justify-between gap-3">
               <FieldLabel>Password</FieldLabel>
               {forgotPassword !== undefined && (
@@ -154,6 +157,7 @@ export function SignIn({
               value={values.password}
               onChange={(event) => {
                 setValues({ ...values, password: event.target.value });
+                setAnswered(error);
               }}
             />
             {errors.password !== undefined && <FieldError>{errors.password}</FieldError>}

@@ -29,6 +29,24 @@ describe('SignIn', () => {
     expect(screen.getByLabelText('Email')).toHaveAttribute('aria-invalid', 'true');
   });
 
+  it('marks the password field on a refusal until the password is edited', async () => {
+    render(<SignIn onSubmit={vi.fn()} error="That email and password do not match." />);
+    expect(screen.getByRole('alert')).toHaveTextContent('That email and password do not match.');
+    const password = screen.getByLabelText('Password');
+    expect(password).toHaveAttribute('aria-invalid', 'true');
+    await userEvent.type(password, 'x');
+    expect(password).not.toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('shows the password with a pressed toggle that keeps its name', async () => {
+    render(<SignIn onSubmit={vi.fn()} />);
+    const toggle = screen.getByRole('button', { name: 'Show password' });
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await userEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'text');
+  });
+
   it('sends trimmed values', async () => {
     const onSubmit = vi.fn();
     render(<SignIn onSubmit={onSubmit} />);
