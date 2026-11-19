@@ -22,7 +22,10 @@ function Items({ children }: { children: ReactNode }) {
   return plain ? children : <AnimatePresence initial={false}>{children}</AnimatePresence>;
 }
 
-/** Takes a leaver out of the layout and slides its later siblings from where they were. */
+/**
+ * Takes a leaver out of the layout and slides its later siblings from where they were. Every
+ * layout read happens before any animation starts, so the browser lays out once.
+ */
 function closeGap(item: HTMLElement, tokens: MotionTokens) {
   const parent = item.parentElement;
   if (parent === null) return;
@@ -31,18 +34,36 @@ function closeGap(item: HTMLElement, tokens: MotionTokens) {
   );
   const before = rest.map((child) => child.getBoundingClientRect());
   item.style.display = 'none';
+  const after = rest.map((child) => child.getBoundingClientRect());
+  const ease = easing(parent, 'standard');
   rest.forEach((child, index) => {
     const was = before[index];
-    if (was === undefined) return;
-    const now = child.getBoundingClientRect();
+    const now = after[index];
+    if (was === undefined || now === undefined) return;
     const dx = was.left - now.left;
     const dy = was.top - now.top;
     if (dx === 0 && dy === 0) return;
     child.animate(
       [{ transform: `translate(${String(dx)}px, ${String(dy)}px)` }, { transform: 'none' }],
-      { duration: tokens.duration.base * 1000, easing: easing(child, 'standard') },
+      { duration: tokens.duration.base * 1000, easing: ease },
     );
   });
+}
+
+/**
+ * Before a leaver goes inert, hands focus to the item after it (or before it, or the list), so
+ * a keyboard user who just removed a row is not dropped to the top of the page.
+ */
+function keepFocus(item: HTMLElement) {
+  if (!item.contains(document.activeElement)) return;
+  const next = item.nextElementSibling ?? item.previousElementSibling;
+  const target =
+    next?.querySelector<HTMLElement>(
+      'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ) ?? item.parentElement;
+  if (target === null) return;
+  if (target === item.parentElement && !target.hasAttribute('tabindex')) target.tabIndex = -1;
+  target.focus({ preventScroll: true });
 }
 
 function Item({ ref, ...props }: ComponentProps<'li'>) {
@@ -74,6 +95,7 @@ function Item({ ref, ...props }: ComponentProps<'li'>) {
       return;
     }
     // Leaving: out of the tab order at once, then a fade faster than the entrance.
+    keepFocus(item);
     item.inert = true;
     const exit = item.animate(
       [
@@ -82,10 +104,12 @@ function Item({ ref, ...props }: ComponentProps<'li'>) {
       ],
       { duration: tokens.duration.fast * 1000, easing: ease, fill: 'forwards' },
     );
-    void exit.finished.then(() => {
+    // A cancelled animation rejects: remove the item either way so it never sticks.
+    const done = () => {
       closeGap(item, tokens);
       safeToRemove();
-    });
+    };
+    exit.finished.then(done, done);
   }, [isPresent, plain, safeToRemove]);
 
   return (
