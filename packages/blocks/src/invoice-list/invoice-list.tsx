@@ -73,8 +73,12 @@ interface Row {
   due: string | null;
 }
 
-/** On phones Issued and Due fold under the customer, so the amount never leaves the screen. */
-const WIDE = 'hidden @2xl:table-cell';
+/**
+ * Narrower blocks fold Issued, then Due, under the customer, so the amount never leaves the panel:
+ * Due gets its own column from a 48rem block, Issued from 56rem.
+ */
+const DUE_COLUMN = 'hidden @3xl:table-cell';
+const ISSUED_COLUMN = 'hidden @4xl:table-cell';
 
 function InvoiceNumber({
   invoice,
@@ -158,10 +162,14 @@ export function InvoiceList({
                 <InvoiceNumber invoice={invoice} onOpen={onOpenInvoice} />
               </span>
               <span className="block">{invoice.customer}</span>
-              <span className="block text-sm text-fg-muted @2xl:hidden">
+              <span className="block text-sm text-fg-muted @4xl:hidden">
                 Issued <span className="numeric">{formatShortDate(invoice.issued, locale)}</span>
                 {due !== null && (
-                  <span className={cn(state === 'overdue' && 'text-negative-strong')}>, {due}</span>
+                  <span
+                    className={cn('@3xl:hidden', state === 'overdue' && 'text-negative-strong')}
+                  >
+                    , {due}
+                  </span>
                 )}
               </span>
             </>
@@ -187,7 +195,7 @@ export function InvoiceList({
         accessorFn: (row) => row.invoice.issued,
         header: 'Issued',
         sortFn: 'datetime',
-        meta: { className: `${WIDE} whitespace-nowrap` },
+        meta: { className: `${ISSUED_COLUMN} whitespace-nowrap` },
         cell: ({ row }) => (
           <span className="text-fg-muted numeric">
             {formatShortDate(row.original.invoice.issued, locale)}
@@ -199,7 +207,7 @@ export function InvoiceList({
         accessorFn: (row) => row.invoice.due,
         header: 'Due',
         sortFn: 'datetime',
-        meta: { className: `${WIDE} whitespace-nowrap` },
+        meta: { className: `${DUE_COLUMN} whitespace-nowrap` },
         cell: ({ row }) => {
           const { invoice, due, state } = row.original;
           return (
@@ -250,7 +258,7 @@ export function InvoiceList({
                 className={cn(state === 'void' && 'text-fg-muted line-through')}
               />
               {partial && (
-                <span className="text-end text-sm text-fg-muted @xl:whitespace-nowrap">
+                <span className="text-end text-sm text-fg-muted @3xl:whitespace-nowrap">
                   <Money amount={invoice.total - balance} currency={currency} locale={locale} />{' '}
                   paid of <Money amount={invoice.total} currency={currency} locale={locale} />
                 </span>
