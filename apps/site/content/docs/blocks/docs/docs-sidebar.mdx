@@ -1,0 +1,60 @@
+---
+title: Docs sidebar
+description: 'Sections and nested pages that open and close, with the current page marked.'
+pro: true
+---
+
+import DocsSidebarDemo from '@/demos/docs-sidebar';
+
+## Sidebar
+
+<Preview
+  name="docs-sidebar"
+  plain={<DocsSidebarDemo />}
+  importLine="import { DocsSidebar } from '@rectio/blocks/docs';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-sidebar
+```
+
+This block has no motion variant: nothing on it moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+The navigation tree: titled sections, pages that hold other pages, badges such as New and Beta, and the current page marked. The groups on the way to the current page start open.
+
+## Usage
+
+Describe the tree as data: sections of items, each with a `title`, an optional `href`, a `badge` and nested `items`. An item without an `href` is a group that only holds pages. Pass the current path as `currentHref`. Set `external` on a link that leaves the docs. In a sheet, `onNavigate` closes it after a link press; `DocsHeader` does this for you through `mobileNav`.
+
+## Props
+
+<TypeTable
+  type={{
+    sections: {
+      type: 'readonly DocsNavSection[]',
+      description: 'Titled runs of items, each item a page, a group or both.',
+    },
+    currentHref: {
+      type: 'string',
+      description: 'The current page. Its link gets aria-current and its groups start open.',
+    },
+    label: { type: 'string', description: 'Name of the navigation landmark.', default: "'Docs'" },
+    onNavigate: { type: '() => void', description: 'Called after any link press.' },
+    header: { type: 'ReactNode', description: 'Above the tree, such as a version switcher.' },
+    footer: { type: 'ReactNode', description: 'Below the tree.' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The tree is a navigation landmark.
+- The current page has `aria-current="page"`.

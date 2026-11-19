@@ -1,0 +1,65 @@
+---
+title: Feedback widget
+description: 'Was this page helpful: a vote, an optional comment, a sending state and an error.'
+pro: true
+---
+
+import DocsFeedbackDemo from '@/demos/docs-feedback';
+import DocsFeedbackMotionDemo from '@/demos/docs-feedback.motion';
+
+## Feedback
+
+<Preview
+  name="docs-feedback"
+  plain={<DocsFeedbackDemo />}
+  motion={<DocsFeedbackMotionDemo />}
+  importLine="import { DocsFeedback } from '@rectio/blocks/docs/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-feedback
+```
+
+The motion variant is `motion-docs-feedback`. It installs the plain block too and changes only how the block moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+A one-question widget for the foot of a page: a yes or no vote, an optional comment that counts down to its limit, a sending state, and an error that keeps what the reader wrote. It sends nothing itself. In the motion variant the thanks fades in.
+
+## Usage
+
+Pass `onSubmit`: it receives `{ helpful, comment }` and sends it wherever you collect feedback, such as an analytics event, a form endpoint or an issue tracker. Return a promise: while it is pending the form shows its sending state, and if it rejects the error shows and the comment stays. `onVote` fires on the vote itself, before any comment, if you count votes separately. The preview here sends nothing and always succeeds.
+
+## Props
+
+<TypeTable
+  type={{
+    onSubmit: {
+      type: '(value: DocsFeedbackValue) => Promise<void> | void',
+      description: 'Sends the vote and the comment. Reject to show the error.',
+    },
+    onVote: {
+      type: '(helpful: boolean) => void',
+      description: 'Called on the vote, before any comment.',
+    },
+    question: { type: 'string', default: "'Was this page helpful?'" },
+    prompts: {
+      type: '{ helpful?: string; unhelpful?: string }',
+      description: 'Prompts above the comment field.',
+    },
+    thanks: { type: 'string', description: 'Shown after sending.' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The vote buttons say whether they are pressed.
+- The thanks is announced as a status message.
+- Focus moves to the comment field after a vote.

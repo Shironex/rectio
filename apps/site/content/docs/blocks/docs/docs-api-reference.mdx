@@ -1,0 +1,98 @@
+---
+title: API reference
+description: 'A props table that stacks in narrow columns, signature cards and HTTP endpoints.'
+pro: true
+---
+
+import DocsApiReferenceDemo from '@/demos/docs-api-reference';
+
+## API reference
+
+<Preview
+  name="docs-api-reference"
+  plain={<DocsApiReferenceDemo />}
+  importLine="import { PropsTable, SignatureCard, Endpoint } from '@rectio/blocks/docs';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-api-reference
+```
+
+This block has no motion variant: nothing on it moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+Three ways to document an API: a props table, a signature card for a function, method, class or hook, and an HTTP endpoint with parameters, a request and example responses. The props table is a table in a wide column and a list of entries in a narrow one, so it never scrolls sideways.
+
+## Usage
+
+Rows, parameters and responses are data, so they can come from your own type extraction. Pass `tokens` from the same highlighter as your code blocks to colour a signature or an example. `MethodBadge` draws the HTTP verb on its own. All three are in `docsMdxComponents`, so an MDX page can write them directly.
+
+## Props
+
+### PropsTable
+
+<TypeTable
+  type={{
+    rows: {
+      type: 'readonly PropRow[]',
+      description: 'Each row: name, type, default, description, required and deprecated.',
+    },
+    label: { type: 'string', description: 'Names the table for assistive technology.' },
+    labels: {
+      type: 'Partial<Record<column, string>>',
+      description: 'Column headings, for translation.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+### SignatureCard
+
+<TypeTable
+  type={{
+    name: { type: 'string', description: 'The function or method name, also the anchor id.' },
+    signature: { type: 'string', description: 'The signature as code.' },
+    tokens: { type: 'readonly CodeLine[]' },
+    kind: { type: "'function' | 'method' | 'class' | 'hook' | 'type'", default: "'function'" },
+    description: { type: 'ReactNode' },
+    params: { type: 'readonly SignatureParam[]' },
+    returns: { type: '{ type: string; description?: ReactNode }' },
+    since: { type: 'string', description: 'The version that introduced it.' },
+    deprecated: { type: 'boolean', default: 'false' },
+    level: { type: '2 | 3 | 4', description: 'Heading level of the name.', default: '3' },
+    children: { type: 'ReactNode', description: 'Example code under the parameters.' },
+  }}
+/>
+
+### Endpoint
+
+<TypeTable
+  type={{
+    method: { type: "'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'" },
+    path: { type: 'string', description: 'The path with its parameters.' },
+    title: { type: 'string', description: 'A short name, the heading and the anchor.' },
+    description: { type: 'ReactNode' },
+    auth: { type: 'ReactNode', description: 'Who may call it.' },
+    pathParams: { type: 'readonly PropRow[]' },
+    queryParams: { type: 'readonly PropRow[]' },
+    body: { type: 'readonly PropRow[]' },
+    request: { type: '{ code: string; lang?: string; tokens?: readonly CodeLine[] }' },
+    responses: {
+      type: 'readonly EndpointResponse[]',
+      description: 'Each response: status, description, example, tokens and lang.',
+    },
+    level: { type: '2 | 3', default: '3' },
+  }}
+/>
+
+## Accessibility
+
+- The props table has column and row headers; the narrow layout is a description list with the same names.
+- Required and deprecated rows say so in text.

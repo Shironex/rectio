@@ -1,0 +1,80 @@
+---
+title: Page navigation
+description: 'Previous and next page, a breadcrumb, edit this page and last updated.'
+pro: true
+---
+
+import DocsPageNavDemo from '@/demos/docs-page-nav';
+
+## Page navigation
+
+<Preview
+  name="docs-page-nav"
+  plain={<DocsPageNavDemo />}
+  importLine="import { DocsBreadcrumb, DocsPageMeta, DocsPager } from '@rectio/blocks/docs';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-page-nav
+```
+
+This block has no motion variant: nothing on it moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+What sits around a page: a breadcrumb from the docs home to the current page, a row with an edit link and the date of the last change, and the previous and next page.
+
+## Usage
+
+Work out the previous and next page from your navigation with `pagerFor(sections, currentHref)`, and the trail for the breadcrumb with `trailTo`. `DocsPageMeta` takes the page's edit URL and an ISO date, and its children land at the end of the row, a fine place for `DocsFeedback`. Links go through the same `DocsLink` as every docs block, so your router's link component applies.
+
+## Props
+
+### DocsPager
+
+<TypeTable
+  type={{
+    prev: { type: 'DocsPageLink | null' },
+    next: { type: 'DocsPageLink | null' },
+    labels: { type: '{ prev?: string; next?: string }', description: 'Words above each title.' },
+    className: { type: 'string' },
+  }}
+/>
+
+### DocsBreadcrumb
+
+<TypeTable
+  type={{
+    items: {
+      type: 'readonly BreadcrumbItem[]',
+      description: 'From the docs home to the current page; the last is the current page.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+### DocsPageMeta
+
+<TypeTable
+  type={{
+    editHref: { type: 'string', description: 'Where the page source can be edited.' },
+    editLabel: { type: 'string', default: "'Edit this page'" },
+    lastUpdated: { type: 'string | Date' },
+    lastUpdatedLabel: { type: 'string', default: "'Last updated'" },
+    locale: { type: 'string' },
+    children: { type: 'ReactNode', description: 'Something else for the row.' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The pager and the breadcrumb are navigation landmarks with their own names.
+- The current breadcrumb item is marked with `aria-current="page"`.
+- The pager is a navigation landmark with its own name.

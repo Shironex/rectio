@@ -1,0 +1,65 @@
+---
+title: Table of contents
+description: 'On this page with scroll spy, smooth scrolling and focus moved to the section.'
+pro: true
+---
+
+import DocsTocDemo from '@/demos/docs-toc';
+import DocsTocMotionDemo from '@/demos/docs-toc.motion';
+
+## Table of contents
+
+<Preview
+  name="docs-toc"
+  plain={<DocsTocDemo />}
+  motion={<DocsTocMotionDemo />}
+  importLine="import { DocsToc } from '@rectio/blocks/docs/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-toc
+```
+
+The motion variant is `motion-docs-toc`. It installs the plain block too and changes only how the block moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+On this page: the headings of the page, with the one being read marked as you scroll. A link scrolls to its section and moves focus there. Smooth scrolling is turned off under reduced motion. In the motion variant the marker glides between headings.
+
+## Usage
+
+Pass the headings as `{ id, title, level }` records, from your MDX build or from the DOM. Set `offset` to the sticky header height plus a little air so the active heading matches what the reader sees. The logic is exported too: `useActiveHeading`, `scrollToHeading` and `pickActive`.
+
+## Props
+
+<TypeTable
+  type={{
+    headings: {
+      type: 'readonly TocHeading[]',
+      description: 'Each heading: id, title and level (2, 3 or 4).',
+    },
+    title: {
+      type: 'ReactNode',
+      description: 'The heading above the list.',
+      default: "'On this page'",
+    },
+    offset: {
+      type: 'number',
+      description: 'Pixels from the top of the viewport to the reading line.',
+      default: '96',
+    },
+    footer: { type: 'ReactNode', description: 'Under the list, such as an edit link.' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The current heading has `aria-current="location"`.
+- Focus moves to the section after a jump, so the next Tab continues from there.

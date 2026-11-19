@@ -1,0 +1,79 @@
+---
+title: Version and language switchers
+description: 'Menus that link to other versions and languages, each language in its own tongue.'
+pro: true
+---
+
+import DocsSwitchersDemo from '@/demos/docs-switchers';
+
+## Switchers
+
+<Preview
+  name="docs-switchers"
+  plain={<DocsSwitchersDemo />}
+  importLine="import { VersionSwitcher, LanguageSwitcher } from '@rectio/blocks/docs';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-switchers
+```
+
+This block has no motion variant: nothing on it moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+Two menus for the header: one links to other versions of the docs and one to other languages. Each is a list of links, so the choice is a normal page load. Each language is named in its own tongue, so a reader finds theirs without reading the current one.
+
+## Usage
+
+Give each version a `value`, a `label` and an `href`, plus a `note` such as Latest or Legacy. Give each language a BCP 47 tag, its own name and the `href` of that translation. `current` is the `value` of what the reader is on. Put them in the `actions` of `DocsHeader`. Set `compact` on the language switcher to show only the globe in a narrow header.
+
+## Props
+
+### VersionSwitcher
+
+<TypeTable
+  type={{
+    versions: {
+      type: 'readonly DocsVersion[]',
+      description: 'Each version: value, label, href and note.',
+    },
+    current: { type: 'string', description: 'The value of the version being read.' },
+    label: {
+      type: 'string',
+      description: 'Accessible name prefix of the button.',
+      default: "'Version'",
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+### LanguageSwitcher
+
+<TypeTable
+  type={{
+    languages: {
+      type: 'readonly DocsLanguage[]',
+      description: 'Each language: value, its own label and href.',
+    },
+    current: { type: 'string', description: 'The value of the language being read.' },
+    label: { type: 'string', default: "'Language'" },
+    compact: {
+      type: 'boolean',
+      description: 'Show only the globe on narrow headers.',
+      default: 'false',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The current version and language are marked with `aria-current`.
+- Each language label carries its own `lang`, so it is pronounced correctly.

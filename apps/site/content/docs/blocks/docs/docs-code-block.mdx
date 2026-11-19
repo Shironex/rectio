@@ -1,0 +1,88 @@
+---
+title: Code block
+description: 'Highlighted code from any build-time highlighter, with line marks, diff marks and copy.'
+pro: true
+---
+
+import DocsCodeBlockDemo from '@/demos/docs-code-block';
+
+## Code block
+
+<Preview
+  name="docs-code-block"
+  plain={<DocsCodeBlockDemo />}
+  importLine="import { CodeBlock } from '@rectio/blocks/docs';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-code-block
+```
+
+This block has no motion variant: nothing on it moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+A code block with a file name, line highlights, line numbers, diff marks and a copy button. The syntax colours are token driven: the block takes `tokens`, one array per line, from any build-time highlighter, and colours them through CSS variables such as `var(--rx-code-token-keyword)`. Without tokens it shows plain `code` in the foreground colour.
+
+## Usage
+
+Highlight on the server so no highlighter ships to the browser. With shiki, a CSS variables theme with the `--rx-code-` prefix reads the theme's colours:
+
+```ts
+import { createCssVariablesTheme, createHighlighter } from 'shiki';
+
+const theme = createCssVariablesTheme({ variablePrefix: '--rx-code-' });
+const highlighter = await createHighlighter({ themes: [theme], langs: ['ts', 'sh'] });
+const { tokens } = highlighter.codeToTokens(code, { lang: 'ts', theme });
+```
+
+Pass `tokens` (and `code` for copying). A Markdown fence's meta string works too: `meta='title="queue.ts" {2,5} showLineNumbers'` sets the title, the highlighted lines and the numbers, and explicit props win. Lines that start with `+` or `-` are drawn as added and removed in a `diff` block, or anywhere with `diff`.
+
+## Props
+
+<TypeTable
+  type={{
+    code: {
+      type: 'string',
+      description: 'The code as text. Needed for copying unless tokens are given.',
+    },
+    tokens: { type: 'readonly CodeLine[]', description: 'Highlighted tokens, one array per line.' },
+    lang: {
+      type: 'string',
+      description: 'The fence language, for the label and the accessible name.',
+    },
+    title: { type: 'ReactNode', description: 'A file name or a short caption.' },
+    highlight: {
+      type: 'readonly number[] | string',
+      description: 'Lines to highlight: [2, 4, 5] or "2,4-5".',
+    },
+    lineNumbers: { type: 'boolean' },
+    startLine: { type: 'number', description: 'The first line number.', default: '1' },
+    diff: {
+      type: 'boolean',
+      description: 'Reads + and - at the start of lines as added and removed. On for diff.',
+    },
+    meta: { type: 'string', description: "A Markdown fence's meta string." },
+    copy: { type: 'boolean', description: 'Show the copy button.', default: 'true' },
+    copyLabel: { type: 'string' },
+    wrap: { type: 'boolean', description: 'Wrap long lines instead of scrolling sideways.' },
+    framed: {
+      type: 'boolean',
+      description: 'Draw its own frame. Pass false inside code tabs.',
+      default: 'true',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- Added and removed lines carry a sign and a hidden word, never colour alone.
+- Every token colour holds 4.5:1 against the code background in both themes.
+- The copy button announces that it copied.

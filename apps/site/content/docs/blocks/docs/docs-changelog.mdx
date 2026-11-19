@@ -1,0 +1,75 @@
+---
+title: Changelog
+description: 'Release notes newest first, grouped from breaking to deprecated.'
+pro: true
+---
+
+import DocsChangelogDemo from '@/demos/docs-changelog';
+import DocsChangelogMotionDemo from '@/demos/docs-changelog.motion';
+
+## Changelog
+
+<Preview
+  name="docs-changelog"
+  plain={<DocsChangelogDemo />}
+  motion={<DocsChangelogMotionDemo />}
+  importLine="import { Changelog } from '@rectio/blocks/docs/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-changelog
+```
+
+The motion variant is `motion-docs-changelog`. It installs the plain block too and changes only how the block moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+Release notes, newest first. Each version stays in view beside its changes as you scroll, and the changes are grouped in the order that matters to a reader: breaking, security, features, improvements, fixes and deprecations. In the motion variant each release fades up once on first view.
+
+## Usage
+
+Pass releases as data: a `version`, an ISO `date`, an optional `title` and `summary`, and `changes` with a `type`, a `text` and an optional `ref` such as a pull request. Order does not matter, because releases are sorted by version. The newest is marked Latest unless `markLatest` is false. Use `level={2}` when the changelog is the page and `3` when it sits under a heading. `compareVersions`, `sortReleases`, `groupChanges` and `isBreaking` are exported for a release feed or a badge.
+
+## Props
+
+### Changelog
+
+<TypeTable
+  type={{
+    releases: {
+      type: 'readonly Release[]',
+      description: 'Each release: version, date, title, summary, changes and href.',
+    },
+    markLatest: {
+      type: 'boolean',
+      description: 'Marks the newest release as the latest.',
+      default: 'true',
+    },
+    locale: { type: 'string', description: 'Locale of the dates.' },
+    level: { type: '2 | 3', description: 'Heading level of each version.', default: '2' },
+    className: { type: 'string' },
+  }}
+/>
+
+### Change
+
+<TypeTable
+  type={{
+    type: { type: "'breaking' | 'security' | 'feature' | 'improvement' | 'fix' | 'deprecation'" },
+    text: { type: 'string', description: 'One line.' },
+    ref: {
+      type: '{ label: string; href: string }',
+      description: 'A pull request, issue or commit.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Each version is a heading, so the page has an outline.
