@@ -33,7 +33,7 @@ const SWATCH: Record<ChartColor, string> = {
 };
 
 /** How a legend key is drawn: a square for bars, a rule for lines, a broken rule for forecasts. */
-export type SwatchShape = 'bar' | 'line' | 'dashed';
+export type SwatchShape = 'bar' | 'hatched' | 'line' | 'dashed';
 
 /** A legend key: a square for bars, a short rule for lines. Always next to its name. */
 export function Swatch({
@@ -49,6 +49,19 @@ export function Swatch({
         <span className={cn('h-0.5 w-1.5 rounded-full', SWATCH[color])} />
         <span className={cn('h-0.5 w-1.5 rounded-full', SWATCH[color])} />
       </span>
+    );
+  }
+  if (shape === 'hatched') {
+    // The same stripes as the mark it keys, so the step reads without telling colours apart.
+    return (
+      <span
+        aria-hidden
+        className={cn('inline-block size-2.5 shrink-0 rounded-badge', SWATCH[color])}
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(135deg, transparent 0 2px, var(--rx-surface) 2px 3px)',
+        }}
+      />
     );
   }
   return (

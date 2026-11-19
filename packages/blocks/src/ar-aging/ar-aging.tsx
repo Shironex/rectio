@@ -10,7 +10,7 @@ import {
   TableRow,
   cn,
 } from '@rectio/ui';
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import {
   Bar,
   BarChart,
@@ -126,6 +126,9 @@ export const AR_AGING_MESSAGES: ArAgingMessages = {
       : `Total, including ${String(others)} other ${others === 1 ? 'customer' : 'customers'}`,
 };
 
+/** The most severe step also carries stripes: a second channel beside colour and its label. */
+const HATCHED: ReadonlySet<AgingBucket> = new Set(['90+']);
+
 const BUCKET_COLOR: Record<AgingBucket, ChartColor> = {
   current: 'sequence-1',
   '1-30': 'sequence-2',
@@ -162,6 +165,7 @@ export function ArAging({
   const BUCKET_LABEL = m.buckets;
   const BUCKET_SHORT = m.bucketsShort;
   const { Money } = useBlockParts();
+  const hatchId = `rx-aging-hatch-${useId().replace(/:/g, '')}`;
   const report = agingReport(receivables, today, currency);
   const data: Datum[] = AGING_BUCKETS.map((bucket) => ({
     bucket,
@@ -221,6 +225,7 @@ export function ArAging({
             legend={AGING_BUCKETS.map((bucket) => ({
               label: BUCKET_LABEL[bucket],
               color: BUCKET_COLOR[bucket],
+              shape: HATCHED.has(bucket) ? ('hatched' as const) : ('bar' as const),
             }))}
             plotClassName="h-48"
             showTableLabel={m.showTable}
@@ -257,6 +262,17 @@ export function ArAging({
               margin={{ top: 20, right: 4, bottom: 0, left: 4 }}
               style={{ width: '100%', height: '100%' }}
             >
+              <defs>
+                <pattern
+                  id={hatchId}
+                  width="6"
+                  height="6"
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(45)"
+                >
+                  <rect width="2" height="6" fill="var(--rx-surface)" opacity="0.55" />
+                </pattern>
+              </defs>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
               <YAxis
@@ -283,12 +299,17 @@ export function ArAging({
                 radius={[2, 2, 0, 0]}
                 maxBarSize={56}
                 isAnimationActive={false}
-                shape={(props: BarShapeProps) => (
-                  <Rectangle
-                    {...props}
-                    fill={chartColor(BUCKET_COLOR[data[props.index]?.bucket ?? 'current'])}
-                  />
-                )}
+                shape={(props: BarShapeProps) => {
+                  const bucket = data[props.index]?.bucket ?? 'current';
+                  const bar = <Rectangle {...props} fill={chartColor(BUCKET_COLOR[bucket])} />;
+                  if (!HATCHED.has(bucket)) return bar;
+                  return (
+                    <g>
+                      {bar}
+                      <Rectangle {...props} fill={`url(#${hatchId})`} />
+                    </g>
+                  );
+                }}
               >
                 <LabelList
                   dataKey="amount"
