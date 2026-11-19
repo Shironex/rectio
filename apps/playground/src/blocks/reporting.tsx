@@ -132,7 +132,7 @@ export function renderReporting(
   const alt = new URLSearchParams(window.location.search).get('state') === 'alt';
   const common = { currency: locale.currency, locale: locale.locale };
   const action = (
-    <Button size="sm" variant={name === 'tax-summary' ? 'secondary' : 'primary'}>
+    <Button variant={name === 'tax-summary' ? 'secondary' : 'primary'}>
       {EMPTY_ACTION[name][pl ? 1 : 0]}
     </Button>
   );

@@ -38,11 +38,7 @@ function emptyAction(name: BlockName, locale: data.Locale): ReactNode {
     'vendors-list': undefined,
   }[name];
   if (label === undefined) return undefined;
-  return (
-    <Button size="sm" variant={name === 'expense-approval' ? 'secondary' : 'primary'}>
-      {label}
-    </Button>
-  );
+  return <Button variant={name === 'expense-approval' ? 'secondary' : 'primary'}>{label}</Button>;
 }
 
 /** The playground shows each block plain and motioned; an app picks one by import path. */

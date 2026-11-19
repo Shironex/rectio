@@ -281,7 +281,7 @@ export function renderOperations(
   const pl = locale.id === 'pl-PL';
   const common = { currency: locale.currency, locale: locale.locale };
   const action = (
-    <Button size="sm" variant={name === 'vendors-list' ? 'secondary' : 'primary'}>
+    <Button variant={name === 'vendors-list' ? 'secondary' : 'primary'}>
       {EMPTY_ACTION[name][pl ? 1 : 0]}
     </Button>
   );
