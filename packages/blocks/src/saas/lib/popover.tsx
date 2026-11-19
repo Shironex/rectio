@@ -1,8 +1,11 @@
-import { Popover as BasePopover } from '@base-ui/react/popover';
-import { cn, usePortalContainer } from '@rectio/ui';
+import {
+  cn,
+  Popover as SharedPopover,
+  PopoverContent,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@rectio/ui';
 import type { ReactElement, ReactNode } from 'react';
-
-import { popupMotion, popupSurface } from './styles';
 
 export interface PopoverProps {
   /** The element that opens it, usually a button; it receives the trigger's props. */
@@ -19,9 +22,9 @@ export interface PopoverProps {
 }
 
 /**
- * A panel anchored to its trigger, such as a notifications list under a bell. It traps no focus
- * but moves it inside on open; Escape or a click outside closes it and focus returns to the
- * trigger. The block-local piece stands in for a shared Popover component.
+ * A panel anchored to its trigger, such as a notifications list under a bell, on the shared
+ * Popover. It traps no focus but moves it inside on open; Escape or a click outside closes it and
+ * focus returns to the trigger. The blocks lay out their own padding, so the panel has none.
  */
 export function Popover({
   trigger,
@@ -33,9 +36,8 @@ export function Popover({
   className,
   children,
 }: PopoverProps) {
-  const container = usePortalContainer();
   return (
-    <BasePopover.Root
+    <SharedPopover
       {...(open === undefined ? {} : { open })}
       {...(onOpenChange === undefined
         ? {}
@@ -45,27 +47,17 @@ export function Popover({
             },
           })}
     >
-      <BasePopover.Trigger render={trigger} />
-      <BasePopover.Portal container={container}>
-        <BasePopover.Positioner
-          sideOffset={8}
-          align={align}
-          collisionPadding={12}
-          className="z-50 outline-none"
-        >
-          <BasePopover.Popup
-            className={cn(
-              'flex max-h-(--available-height) max-w-(--available-width) flex-col overflow-hidden',
-              popupSurface,
-              popupMotion,
-              className,
-            )}
-          >
-            <BasePopover.Title className={cn(!showTitle && 'sr-only')}>{title}</BasePopover.Title>
-            {children}
-          </BasePopover.Popup>
-        </BasePopover.Positioner>
-      </BasePopover.Portal>
-    </BasePopover.Root>
+      <PopoverTrigger render={trigger} />
+      <PopoverContent
+        align={align}
+        className={cn(
+          'max-h-(--available-height) min-w-0 gap-0 overflow-hidden p-0 outline-none',
+          className,
+        )}
+      >
+        <PopoverTitle className={cn(!showTitle && 'sr-only')}>{title}</PopoverTitle>
+        {children}
+      </PopoverContent>
+    </SharedPopover>
   );
 }
