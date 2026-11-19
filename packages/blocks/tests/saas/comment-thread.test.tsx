@@ -145,6 +145,18 @@ describe('CommentThread', () => {
     expect(screen.getByRole('button', { name: /Actions for your comment/ })).toHaveFocus();
   });
 
+  it('replies to a reply in the same thread, one level deep', async () => {
+    const onAdd = vi.fn();
+    render(<CommentThread comments={COMMENTS} writer={ME} now={NOW} onAdd={onAdd} />);
+    const replies = screen.getByRole('list', { name: 'Replies to Ines Duarte' });
+    const [first] = within(replies).getAllByRole('button', { name: 'Reply, Niamh Walsh' });
+    if (first === undefined) throw new Error('no reply button');
+    await userEvent.click(first);
+    await userEvent.type(screen.getByLabelText('Reply to Niamh Walsh'), 'Thanks');
+    await userEvent.click(screen.getByRole('button', { name: 'Reply' }));
+    expect(onAdd).toHaveBeenCalledWith('Thanks', 'c1');
+  });
+
   it('returns focus to Reply after cancelling a reply', async () => {
     render(<CommentThread comments={COMMENTS} writer={ME} now={NOW} onAdd={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Reply, Ines Duarte' }));

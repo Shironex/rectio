@@ -105,7 +105,10 @@ export function CommentThread({
   const now = useNow(requestedNow);
   const { Button } = useBlockParts();
   const { Items, Item } = useSaasParts();
+  // Replies stay one level deep: a reply to a reply joins its thread. `replyingTo` is the thread's
+  // first comment, `replyFrom` the comment whose Reply button opened the composer.
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyFrom, setReplyFrom] = useState<ThreadComment | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const list = useRef<HTMLOListElement>(null);
   // When an in-place composer closes, focus goes back to what opened it: the comment's menu after
@@ -118,10 +121,12 @@ export function CommentThread({
     setEditing(null);
   };
   const stopReplying = () => {
-    if (replyingTo !== null) {
-      returnFocus.current = `[data-reply-for="${CSS.escape(replyingTo)}"]`;
+    const opener = replyFrom?.id ?? replyingTo;
+    if (opener !== null) {
+      returnFocus.current = `[data-reply-for="${CSS.escape(opener)}"]`;
     }
     setReplyingTo(null);
+    setReplyFrom(null);
   };
 
   useEffect(() => {
@@ -137,7 +142,7 @@ export function CommentThread({
   const tree = commentTree(comments);
   const people = commentParticipants(comments);
 
-  const renderComment = (comment: ThreadComment, isReply: boolean) => {
+  const renderComment = (comment: ThreadComment, threadId: string) => {
     const own = comment.author.id === writer.id;
     const actions = [
       ...(own && onEdit !== undefined
@@ -262,26 +267,24 @@ export function CommentThread({
               )}
             </p>
           )}
-          {!isReply &&
-            resolved === undefined &&
-            editing !== comment.id &&
-            replyingTo !== comment.id && (
-              <span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="-ms-2 text-fg-muted"
-                  aria-label={`Reply, ${comment.author.name}`}
-                  data-reply-for={comment.id}
-                  onClick={() => {
-                    setReplyingTo(comment.id);
-                  }}
-                >
-                  <ArrowBendUpLeftIcon aria-hidden weight="bold" className="size-3.5" />
-                  Reply
-                </Button>
-              </span>
-            )}
+          {resolved === undefined && editing !== comment.id && replyFrom?.id !== comment.id && (
+            <span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="-ms-2 text-fg-muted"
+                aria-label={`Reply, ${comment.author.name}`}
+                data-reply-for={comment.id}
+                onClick={() => {
+                  setReplyingTo(threadId);
+                  setReplyFrom(comment);
+                }}
+              >
+                <ArrowBendUpLeftIcon aria-hidden weight="bold" className="size-3.5" />
+                Reply
+              </Button>
+            </span>
+          )}
         </div>
       </article>
     );
@@ -377,7 +380,7 @@ export function CommentThread({
           <Items>
             {tree.map(({ comment, replies }) => (
               <Item key={comment.id} className="flex flex-col gap-4">
-                {renderComment(comment, false)}
+                {renderComment(comment, comment.id)}
                 {(replies.length > 0 || replyingTo === comment.id) && (
                   <ol
                     aria-label={`Replies to ${comment.author.name}`}
@@ -385,7 +388,7 @@ export function CommentThread({
                   >
                     <Items>
                       {replies.map((reply) => (
-                        <Item key={reply.id}>{renderComment(reply, true)}</Item>
+                        <Item key={reply.id}>{renderComment(reply, comment.id)}</Item>
                       ))}
                     </Items>
                     {replyingTo === comment.id && (
@@ -394,7 +397,7 @@ export function CommentThread({
                         <div className="min-w-0 flex-1">
                           <Composer
                             onAttach={onAttach}
-                            label={`Reply to ${comment.author.name}`}
+                            label={`Reply to ${(replyFrom ?? comment).author.name}`}
                             submitLabel="Reply"
                             autoFocus
                             onCancel={stopReplying}
