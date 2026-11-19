@@ -252,15 +252,15 @@
       "$description": "Spring physics for the motion add-on (stiffness, damping, mass). Damping ratio at or near 1: settles without overshoot, never bounces.",
       "press": {
         "stiffness": {
-          "$value": 600
+          "$value": 900
         },
         "damping": {
-          "$value": 49
+          "$value": 59
         },
         "mass": {
           "$value": 1
         },
-        "$description": "A pressed button returning to rest."
+        "$description": "A pressed button returning to rest, and the select highlight gliding. Settles in under 200ms."
       },
       "overlay": {
         "stiffness": {
