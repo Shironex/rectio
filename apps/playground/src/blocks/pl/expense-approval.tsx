@@ -5,11 +5,12 @@ import { commonPl } from './common';
 const expenses = (count: number) =>
   plural(count, { one: 'wydatek', few: 'wydatki', many: 'wydatków', other: 'wydatku' }, 'pl-PL');
 
+// Impersonal past forms, so the line reads right whoever acted.
 const PAST = {
-  submitted: 'przesłał(a)',
-  approved: 'zatwierdził(a)',
-  rejected: 'odrzucił(a)',
-  reopened: 'wznowił(a)',
+  submitted: 'przesłano',
+  approved: 'zatwierdzono',
+  rejected: 'odrzucono',
+  reopened: 'wznowiono',
 } as const;
 
 export const expenseApprovalPl: ExpenseApprovalMessages = {
@@ -52,7 +53,7 @@ export const expenseApprovalPl: ExpenseApprovalMessages = {
   },
   trailLine: (actor, action, merchant, amount) => (
     <>
-      <span className="font-medium">{actor}</span> {PAST[action]} {merchant ?? 'wydatek'}
+      <span className="font-medium">{actor}</span>: {PAST[action]} {merchant ?? 'wydatek'}
       {amount !== undefined && <>, {amount}</>}
     </>
   ),
