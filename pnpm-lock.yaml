@@ -80,6 +80,9 @@ importers:
       '@phosphor-icons/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@rectio/blocks':
+        specifier: workspace:*
+        version: link:../../packages/blocks
       '@rectio/motion':
         specifier: workspace:*
         version: link:../../packages/motion
