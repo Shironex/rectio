@@ -7,6 +7,7 @@ const packages = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ui = join(packages, 'ui');
 const tokens = join(packages, 'tokens');
 const motion = join(packages, 'motion');
+const blocks = join(packages, 'blocks');
 
 /** A motion add-on item: pro, installed under `@ui/motion/` beside the plain components. */
 const motionItem = (
@@ -26,6 +27,36 @@ const motionItem = (
   files,
 });
 
+/** A finance block: pro, installed under `@blocks/finance/`, with its motioned twin beside it. */
+const blockItems = (
+  name: string,
+  title: string,
+  description: string,
+  folder: string,
+  file: string,
+) => [
+  {
+    name,
+    type: 'block' as const,
+    tier: 'pro' as const,
+    version: '0.1.0',
+    title,
+    description,
+    categories: ['finance', 'blocks'],
+    files: [`${folder}/${file}.tsx`, `${folder}/${folder}.logic.ts`],
+  },
+  {
+    name: `motion-${name}`,
+    type: 'block' as const,
+    tier: 'pro' as const,
+    version: '0.1.0',
+    title: `Motion ${title}`,
+    description: `${title} with entrances that play once, on first view.`,
+    categories: ['finance', 'blocks', 'motion'],
+    files: [`${folder}/${file}.motion.tsx`],
+  },
+];
+
 /**
  * What the registry publishes. Every folder in packages/ui/src must belong to an item, so a new
  * component fails the build until it is listed here with its tier and version. Bump an item's
@@ -39,6 +70,7 @@ export default defineRegistry({
     join(ui, 'package.json'),
     join(tokens, 'package.json'),
     join(motion, 'package.json'),
+    join(blocks, 'package.json'),
   ],
   requireEveryFolder: true,
   tokens: {
@@ -215,8 +247,11 @@ export default defineRegistry({
       files: ['toast/toast.tsx'],
     },
   ],
-  // The motion add-on: imports of @rectio/ui become registry dependencies on the plain items.
-  workspacePackages: { '@rectio/ui': join(ui, 'src', 'index.ts') },
+  // Add-ons: imports of @rectio/ui and @rectio/motion become registry dependencies on their items.
+  workspacePackages: {
+    '@rectio/ui': join(ui, 'src', 'index.ts'),
+    '@rectio/motion': join(motion, 'src', 'index.ts'),
+  },
   addons: [
     {
       sourceDir: join(motion, 'src'),
@@ -262,6 +297,100 @@ export default defineRegistry({
           'Motion Toast',
           'Toasts with a calm entrance and a stack that glides.',
           ['toast/toast.tsx'],
+        ),
+      ],
+    },
+    {
+      sourceDir: join(blocks, 'src'),
+      targetFolder: 'finance',
+      requireEveryFolder: true,
+      items: [
+        {
+          name: 'blocks-core',
+          type: 'lib',
+          tier: 'pro',
+          version: '0.1.0',
+          title: 'Blocks core',
+          description:
+            'Money maths in minor units, the panel, chart theming with a table fallback, and the parts every finance block shares.',
+          categories: ['finance', 'blocks'],
+          files: [
+            'lib/finance.ts',
+            'lib/block-parts.tsx',
+            'lib/block-panel.tsx',
+            'lib/chart.tsx',
+            'lib/choice-select.tsx',
+            'lib/figures.tsx',
+            'lib/segmented.tsx',
+            'lib/state-badge.tsx',
+          ],
+        },
+        {
+          name: 'motion-blocks-core',
+          type: 'lib',
+          tier: 'pro',
+          version: '0.1.0',
+          title: 'Motion blocks core',
+          description:
+            'First-view entrances, chart bars that grow from the baseline and rows that leave without a jump.',
+          categories: ['finance', 'blocks', 'motion'],
+          files: ['lib/motion-parts.tsx'],
+        },
+        ...blockItems(
+          'kpi-row',
+          'KPI row',
+          'Key figures with their change in words and a sparkline.',
+          'kpi-row',
+          'kpi-row',
+        ),
+        ...blockItems(
+          'cash-flow',
+          'Cash flow chart',
+          'Inflow, outflow and net by month or quarter, with a table fallback.',
+          'cash-flow',
+          'cash-flow-chart',
+        ),
+        ...blockItems(
+          'invoice-list',
+          'Invoice list',
+          'Invoices with totals, status filters, period switch and a totals footer.',
+          'invoice-list',
+          'invoice-list',
+        ),
+        ...blockItems(
+          'invoice-detail',
+          'Invoice detail',
+          'One invoice: parties, lines, VAT per rate, payments and balance due.',
+          'invoice-detail',
+          'invoice-detail',
+        ),
+        ...blockItems(
+          'ledger',
+          'General journal',
+          'Journal entries or one account with a running balance, checked for balance.',
+          'ledger',
+          'ledger',
+        ),
+        ...blockItems(
+          'expense-approval',
+          'Expense approval',
+          'Pending expenses, approve or reject with a reason, bulk actions and an audit trail.',
+          'expense-approval',
+          'expense-approval',
+        ),
+        ...blockItems(
+          'ar-aging',
+          'Receivables aging',
+          'Receivables by days past due, as a chart and per customer.',
+          'ar-aging',
+          'ar-aging',
+        ),
+        ...blockItems(
+          'budget-vs-actual',
+          'Budget vs actual',
+          'Budget against actual per category, variance in sign, arrow and words.',
+          'budget-vs-actual',
+          'budget-vs-actual',
         ),
       ],
     },
