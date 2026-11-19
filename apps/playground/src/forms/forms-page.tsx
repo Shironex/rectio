@@ -141,6 +141,7 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
   const k = kit;
   const [timeZones, setTimeZones] = useState<TimeZone[]>(TIME_ZONES);
   const [timeZone, setTimeZone] = useState<TimeZone | null>(TIME_ZONES[2] ?? null);
+  const [dirty, setDirty] = useState(false);
   const [notify, setNotify] = useState<Member[]>(invalid ? [] : MEMBERS.slice(0, 2));
   const receipts = useFileUpload({
     upload: fakeUpload,
@@ -162,8 +163,15 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
 
       <form
         className="flex flex-col divide-y divide-line rounded-(--rx-popover-radius) border border-line bg-surface"
+        onChange={() => {
+          setDirty(true);
+        }}
+        onReset={() => {
+          setDirty(false);
+        }}
         onSubmit={(event) => {
           event.preventDefault();
+          setDirty(false);
         }}
       >
         <FormSection
@@ -332,8 +340,8 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
             <FieldDescription>Expenses over this need two approvals.</FieldDescription>
           </Field>
           <Field>
-            <FieldLabel>Card spend reviewed</FieldLabel>
             <Slider
+              label="Card spend reviewed"
               showValue
               marks={[0, 2500, 5000, 7500, 10000]}
               defaultValue={[250, 5000]}
@@ -424,7 +432,7 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
         >
           <Field invalid={invalid}>
             <FieldLabel>Verification code</FieldLabel>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
               <OtpInput groups={[3, 3]} defaultValue={invalid ? '111111' : ''} />
               <k.Button variant="secondary" type="button">
                 Verify
@@ -459,7 +467,13 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
           </Field>
         </FormSection>
 
-        <FormActions className="sticky bottom-0 rounded-b-(--rx-popover-radius) bg-surface p-4 sm:px-8">
+        <FormActions
+          align="between"
+          className="sticky bottom-0 rounded-b-(--rx-popover-radius) bg-surface p-4 sm:px-8"
+        >
+          <p role="status" className="text-sm text-fg-muted">
+            {dirty ? 'Unsaved changes' : 'All changes saved'}
+          </p>
           <k.Button variant="ghost" type="reset">
             Discard
           </k.Button>

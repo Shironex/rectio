@@ -42,7 +42,7 @@ export async function dialogFieldsVerdict(page: Page) {
 export async function smallestTouchTarget(page: Page) {
   return page.evaluate(() => {
     const selector =
-      '[data-slot="button"], [data-slot="input"], [data-slot="select-trigger"], [data-slot="checkbox"], [data-slot="amount-input"] input, [data-slot="date-picker"], [data-slot="date-range-picker"], [data-slot="dialog"] button, [data-slot="data-table-sort"] button';
+      '[data-slot="button"], [data-slot="input"], [data-slot="select-trigger"], [data-slot="checkbox"], [data-slot="amount-input"] input, [data-slot="date-picker"], [data-slot="date-range-picker"], [data-slot="dialog"] button, [data-slot="data-table-sort"] button, [data-slot="switch"], [data-slot="radio"], [data-slot="radio-card"], [data-slot="toggle"], [data-slot="slider-thumb"], [data-slot="input-group"], [data-slot="input-group-button"], [data-slot="search-input"], [data-slot="number-field"] button, [data-slot="otp-input-slot"], [data-slot="combobox-input"], [data-slot="multi-select-chips"], [data-slot="tag"] button, [data-slot="tag-input"], [data-slot="file-dropzone"], [data-slot="file-upload-trigger"], [data-slot="file-item"] button, [data-slot="textarea"]';
     let smallest = { size: Infinity, name: '' };
     for (const element of document.querySelectorAll<HTMLElement>(selector)) {
       const box = element.getBoundingClientRect();
@@ -52,7 +52,9 @@ export async function smallestTouchTarget(page: Page) {
         after.position === 'absolute'
           ? Math.min(Number.parseFloat(after.width), Number.parseFloat(after.height))
           : 0;
-      const field = element.closest('[data-slot="amount-input"], [data-slot="date-picker"]');
+      const field = element.closest(
+        '[data-slot="amount-input"], [data-slot="date-picker"], [data-slot="number-field"]',
+      );
       const height = field === null ? box.height : field.getBoundingClientRect().height;
       const size = Math.max(Math.min(box.width, height), hit);
       if (size < smallest.size)
