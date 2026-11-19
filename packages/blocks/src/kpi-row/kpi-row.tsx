@@ -106,7 +106,7 @@ export function KpiRow({
               >
                 <dt className="text-sm text-fg-muted">{kpi.label}</dt>
                 <dd className="flex items-end justify-between gap-3">
-                  <span className="flex min-w-0 flex-col gap-1">
+                  <span className="flex min-w-0 flex-col items-start gap-1">
                     {kpi.format === 'money' ? (
                       <Money
                         amount={kpi.value}

@@ -91,7 +91,8 @@ function Reveal({ children, className }: { children: ReactNode; className?: stri
 }
 
 const BAR = '.recharts-bar-rectangle path, .recharts-bar-rectangle rect';
-const LINE = '.recharts-line, .recharts-area';
+// Recharts 3 draws a line's dots in their own layer, outside `.recharts-line`.
+const LINE = '.recharts-line, .recharts-line-dots, .recharts-area';
 /** Bars arrive one after another, but the whole set lands within this many steps of the first. */
 const STAGGER_STEPS = 8;
 
@@ -171,6 +172,7 @@ function ChartStage({ children, className }: { children: ReactNode; className?: 
       className={cn(
         'data-[enter=waiting]:[&_.recharts-bar-rectangle]:opacity-0',
         'data-[enter=waiting]:[&_.recharts-line]:opacity-0',
+        'data-[enter=waiting]:[&_.recharts-line-dots]:opacity-0',
         className,
       )}
     >
