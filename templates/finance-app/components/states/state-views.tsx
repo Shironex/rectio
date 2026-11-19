@@ -1,31 +1,106 @@
 'use client';
 
 import { ArrowClockwiseIcon, WarningCircleIcon } from '@phosphor-icons/react';
-import { Button, EmptyState, SkeletonChart, SkeletonLine, SkeletonTable } from '@rectio/ui';
+import { Button, EmptyState, SkeletonChart, SkeletonLine, SkeletonTable, cn } from '@rectio/ui';
 import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-/** The frame of a panel while it loads, matching the block it stands in for. */
+/** A row of figure cells, like the KPI strip and the summary at the top of a list. */
+const STRIP_COLUMNS: Record<number, string> = {
+  2: 'sm:grid-cols-2',
+  3: 'sm:grid-cols-3',
+  4: 'sm:grid-cols-4',
+};
+
+function SkeletonFigures({ count, className }: { count: number; className: string }) {
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-2 divide-line sm:divide-x',
+        STRIP_COLUMNS[count] ?? 'sm:grid-cols-4',
+        className,
+      )}
+    >
+      {Array.from({ length: count }, (_, i) => (
+        <div key={i} className="flex flex-col gap-2 p-4">
+          <SkeletonLine size="sm" width="50%" index={i} />
+          <SkeletonLine size="2xl" width="75%" index={i} />
+          <SkeletonLine size="xs" width="40%" index={i} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** A row of tabs while the page loads: short labels over a rule. */
+export function LoadingTabs({ count }: { count: number }) {
+  return (
+    <div aria-hidden className="flex gap-6 border-b border-line pb-3">
+      {Array.from({ length: count }, (_, i) => (
+        <SkeletonLine key={i} size="sm" width="4.5rem" index={i} />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * The frame of a panel while it loads, laid out like the block it stands in for: the title, then
+ * optionally a figure strip, a toolbar control and a row of filter tabs, then the body.
+ */
 export function LoadingPanel({
   kind = 'table',
   rows = 6,
+  columns = 4,
+  strip = 0,
+  tabs = 0,
+  toolbar = false,
   className,
 }: {
   kind?: 'table' | 'chart' | 'figures' | 'list';
   rows?: number;
+  columns?: number;
+  /** Figure cells above the body, as in the summary of a list. */
+  strip?: number;
+  /** Filter tabs above the body. */
+  tabs?: number;
+  /** One control, such as an account or period select, beside the title. */
+  toolbar?: boolean;
   className?: string;
 }) {
+  if (kind === 'figures') {
+    return (
+      <div aria-hidden className={className}>
+        <SkeletonFigures count={4} className="rounded-panel border border-line bg-surface" />
+      </div>
+    );
+  }
   return (
     <div
       aria-hidden
-      className={`flex min-w-0 flex-col gap-5 rounded-panel border border-line bg-surface px-5 pt-4 pb-5 ${className ?? ''}`}
+      className={cn(
+        'flex min-w-0 flex-col gap-5 rounded-panel border border-line bg-surface px-5 pt-4 pb-5',
+        className,
+      )}
     >
-      <div className="flex flex-col gap-2">
-        <SkeletonLine size="lg" width="40%" />
-        <SkeletonLine size="sm" width="25%" />
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-1 flex-col gap-2">
+          <SkeletonLine size="lg" width="40%" />
+          <SkeletonLine size="sm" width="25%" />
+        </div>
+        {toolbar && <SkeletonLine size="2xl" width="10rem" />}
       </div>
+      {strip > 0 && (
+        <SkeletonFigures count={strip} className="rounded-control border border-line" />
+      )}
+      {tabs > 0 && (
+        <div className="flex gap-2">
+          {Array.from({ length: tabs }, (_, i) => (
+            <SkeletonLine key={i} size="xl" width="5.5rem" index={i} />
+          ))}
+        </div>
+      )}
       {kind === 'chart' && <SkeletonChart className="h-56" />}
-      {kind === 'table' && <SkeletonTable rows={rows} columns={4} numeric />}
+      {kind === 'table' && <SkeletonTable rows={rows} columns={columns} numeric />}
       {kind === 'list' && (
         <div className="flex flex-col gap-4">
           {Array.from({ length: rows }, (_, i) => (
@@ -35,17 +110,6 @@ export function LoadingPanel({
                 <SkeletonLine size="base" width="60%" index={i} />
                 <SkeletonLine size="sm" width="35%" index={i} />
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-      {kind === 'figures' && (
-        <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="flex flex-col gap-2">
-              <SkeletonLine size="sm" width="50%" index={i} />
-              <SkeletonLine size="2xl" width="80%" index={i} />
-              <SkeletonLine size="xs" width="40%" index={i} />
             </div>
           ))}
         </div>

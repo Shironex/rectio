@@ -42,7 +42,7 @@ export function JournalPage() {
           <Menu>
             <MenuTrigger
               render={
-                <Button variant="secondary">
+                <Button variant="secondary" disabled={state !== 'ready'}>
                   <DownloadSimpleIcon aria-hidden weight="bold" className="size-4" />
                   Export
                 </Button>
@@ -69,7 +69,7 @@ export function JournalPage() {
       />
       {state === 'loading' ? (
         <LoadingRegion label="Loading the journal">
-          <LoadingPanel kind="table" rows={12} />
+          <LoadingPanel kind="table" rows={12} columns={3} toolbar />
         </LoadingRegion>
       ) : state === 'error' ? (
         <ErrorPanel title="The journal did not load" />

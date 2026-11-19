@@ -44,6 +44,7 @@ export function InvoicesPage() {
           <>
             <Button
               variant="secondary"
+              disabled={state !== 'ready'}
               onClick={() => {
                 toast.add({
                   type: 'success',
@@ -55,16 +56,18 @@ export function InvoicesPage() {
               <DownloadSimpleIcon aria-hidden weight="bold" className="size-4" />
               Export
             </Button>
-            <Button onClick={openNewInvoice}>
-              <FilePlusIcon aria-hidden weight="bold" className="size-4" />
-              New invoice
-            </Button>
+            {state !== 'empty' && (
+              <Button onClick={openNewInvoice}>
+                <FilePlusIcon aria-hidden weight="bold" className="size-4" />
+                New invoice
+              </Button>
+            )}
           </>
         }
       />
       {state === 'loading' ? (
         <LoadingRegion label="Loading invoices">
-          <LoadingPanel kind="table" rows={10} />
+          <LoadingPanel kind="table" rows={10} columns={6} strip={3} tabs={5} toolbar />
         </LoadingRegion>
       ) : state === 'error' ? (
         <ErrorPanel title="Invoices did not load" />

@@ -32,7 +32,13 @@ import { useState } from 'react';
 import { CURRENCY, LOCALE, formatShortDate, isoDay } from '@/data/company';
 import { PageHeader } from '../page-header';
 import { useAppData } from '../shell/app-data';
-import { EmptyPanel, ErrorPanel, LoadingPanel, LoadingRegion } from '../states/state-views';
+import {
+  EmptyPanel,
+  ErrorPanel,
+  LoadingPanel,
+  LoadingRegion,
+  LoadingTabs,
+} from '../states/state-views';
 import { usePageState } from '../use-page-state';
 
 type Tab = 'pending' | 'approved' | 'rejected';
@@ -208,11 +214,12 @@ export function ExpensesPage() {
             'Claims from the team'
           )
         }
-        actions={submit}
+        actions={empty ? undefined : submit}
       />
       {state === 'loading' ? (
         <LoadingRegion label="Loading expenses">
-          <LoadingPanel kind="table" rows={8} />
+          <LoadingTabs count={3} />
+          <LoadingPanel kind="table" rows={8} columns={4} />
         </LoadingRegion>
       ) : state === 'error' ? (
         <ErrorPanel title="Expenses did not load" />

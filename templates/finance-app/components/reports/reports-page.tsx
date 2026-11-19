@@ -237,8 +237,8 @@ function BalanceSheet() {
 function ReportsLoading() {
   return (
     <LoadingRegion label="Loading reports">
-      <LoadingPanel kind="table" rows={12} />
-      <div className="grid gap-6 lg:grid-cols-2">
+      <LoadingPanel kind="table" rows={12} columns={4} />
+      <div className="grid items-start gap-6 lg:grid-cols-2">
         <LoadingPanel kind="table" rows={6} />
         <LoadingPanel kind="table" rows={6} />
       </div>
@@ -274,7 +274,11 @@ export function ReportsPage() {
                 if (value !== null) setPeriod(value);
               }}
             >
-              <SelectTrigger aria-label="Report period" className="sm:w-56" />
+              <SelectTrigger
+                aria-label="Report period"
+                className="sm:w-56"
+                disabled={state === 'empty'}
+              />
               <SelectContent>
                 {REPORT_PERIODS.map((p) => (
                   <SelectItem key={p.value} value={p.value}>
@@ -286,7 +290,7 @@ export function ReportsPage() {
             <Menu>
               <MenuTrigger
                 render={
-                  <Button variant="secondary">
+                  <Button variant="secondary" disabled={state !== 'ready'}>
                     <DownloadSimpleIcon aria-hidden weight="bold" className="size-4" />
                     Export
                   </Button>
