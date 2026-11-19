@@ -42,6 +42,19 @@ export function pricingMonthlyPrice(
   return plan.monthly;
 }
 
+/**
+ * A price as it reads on a pricing page: whole amounts without the cents ("€20"), others to the
+ * currency's minor unit ("€39.17").
+ */
+export function pricingPriceText(amount: number, currency: string, locale: string): string {
+  const whole = Number.isInteger(amount);
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    ...(whole ? { minimumFractionDigits: 0, maximumFractionDigits: 0 } : {}),
+  }).format(amount);
+}
+
 /** The share saved by paying yearly, such as 0.17 for 17 per cent; 0 when there is no saving. */
 export function pricingYearlySaving(plan: PricingPlan): number {
   if (plan.monthly === null || plan.monthly <= 0 || plan.yearly === undefined) return 0;

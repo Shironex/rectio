@@ -1,4 +1,4 @@
-import { CaretDownIcon, CheckIcon, MinusIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, CheckIcon, MinusIcon, PlusIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 import { Fragment, useId, useState } from 'react';
 
@@ -11,6 +11,7 @@ import {
   groupPricingFeatures,
   pricingBestSaving,
   pricingMonthlyPrice,
+  pricingPriceText,
   pricingYearlySaving,
   type PricingCycle,
   type PricingFeature,
@@ -31,6 +32,8 @@ export interface PricingTableProps {
   onSelectPlan: (plan: PricingPlan, cycle: PricingCycle) => void;
   title?: string;
   description?: string;
+  /** Offered from the empty state as "Add a plan", for an admin setting the table up. */
+  onAddPlan?: () => void;
   /** Drop the panel frame, for a landing page section. */
   bare?: boolean;
   className?: string;
@@ -57,10 +60,11 @@ export function PricingTable({
   defaultCycle = 'yearly',
   currentPlanId,
   onSelectPlan,
+  onAddPlan,
   ...panel
 }: PricingTableProps) {
   const locale = resolveLocale(requestedLocale);
-  const { Button, Money } = useBlockParts();
+  const { Button } = useBlockParts();
   const [cycle, setCycle] = useState<PricingCycle>(defaultCycle);
   const saving = pricingBestSaving(plans);
   const hasYearly = plans.some((plan) => plan.yearly !== undefined);
@@ -70,6 +74,14 @@ export function PricingTable({
       {plans.length === 0 ? (
         <EmptyNote title="No plans to show">
           Add a plan to show its price and features here.
+          {onAddPlan !== undefined && (
+            <span className="mt-3 flex justify-center">
+              <Button variant="secondary" size="sm" onClick={onAddPlan}>
+                <PlusIcon aria-hidden weight="bold" className="size-4" />
+                Add a plan
+              </Button>
+            </span>
+          )}
         </EmptyNote>
       ) : (
         <>
@@ -112,9 +124,9 @@ export function PricingTable({
                   key={plan.id}
                   aria-label={recommended ? `${plan.name}, recommended` : plan.name}
                   className={cn(
-                    // Three shared rows (name, price and button, highlights), so prices and buttons
-                    // line up across the cards in a row whatever the descriptions say.
-                    'row-span-3 grid grid-rows-subgrid gap-5 rounded-panel border p-5',
+                    // Four shared rows (name, price, highlights, button), so prices and buttons line
+                    // up across the cards in a row whatever the descriptions and lists say.
+                    'row-span-4 grid grid-rows-subgrid gap-5 rounded-panel border p-5',
                     recommended
                       ? 'border-accent bg-surface-raised shadow-raised ring-1 ring-accent'
                       : 'border-line bg-surface',
@@ -141,67 +153,42 @@ export function PricingTable({
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      {price === null || price === 0 ? (
-                        <span className="text-4xl leading-none font-strong tracking-tight">
-                          {price === null ? 'Custom' : 'Free'}
-                        </span>
-                      ) : (
-                        <span className="flex flex-wrap items-baseline gap-x-1.5">
-                          <Money
-                            amount={price}
-                            currency={currency}
-                            locale={locale}
-                            className="text-4xl leading-none font-strong tracking-tight"
-                          />
-                          <span className="text-sm text-fg-muted">
-                            per month{plan.unit !== undefined && `, ${plan.unit}`}
-                          </span>
-                        </span>
-                      )}
-                      <span className="text-sm text-fg-muted">
-                        {price === null ? (
-                          'Priced for your volume, billed yearly'
-                        ) : price === 0 ? (
-                          'Free for as long as you like'
-                        ) : cycle === 'yearly' && plan.yearly !== undefined ? (
-                          <>
-                            <Money amount={plan.yearly} currency={currency} locale={locale} />{' '}
-                            billed yearly
-                            {planSaving > 0 && (
-                              <span className="text-positive-strong">
-                                , you save {formatPercent(planSaving, locale, { digits: 0 })}
-                              </span>
-                            )}
-                          </>
-                        ) : (
-                          'Billed monthly, cancel any time'
-                        )}
+                  <div className="flex flex-col gap-1.5">
+                    {price === null || price === 0 ? (
+                      <span className="font-display text-4xl leading-none font-heading tracking-tight">
+                        {price === null ? 'Custom' : 'Free'}
                       </span>
-                    </div>
-
-                    {current ? (
-                      <p className="flex min-h-(--rx-control-height-md) items-center justify-center gap-2 rounded-control bg-surface-sunken text-sm font-medium text-fg-muted pointer-coarse:min-h-(--rx-control-height-touch)">
-                        <CheckIcon
-                          aria-hidden
-                          weight="bold"
-                          className="size-4 text-positive-strong"
-                        />
-                        You are on this plan
-                      </p>
                     ) : (
-                      <Button
-                        variant={recommended ? 'primary' : 'secondary'}
-                        className="w-full"
-                        aria-label={`${plan.cta ?? `Choose ${plan.name}`}, ${plan.name} plan`}
-                        onClick={() => {
-                          onSelectPlan(plan, cycle);
-                        }}
-                      >
-                        {plan.cta ?? `Choose ${plan.name}`}
-                      </Button>
+                      <span className="flex flex-wrap items-baseline gap-x-1.5">
+                        <span className="font-display text-4xl leading-none font-heading tracking-tight numeric">
+                          {pricingPriceText(price, currency, locale)}
+                        </span>
+                        <span className="text-sm text-fg-muted">
+                          per month{plan.unit !== undefined && `, ${plan.unit}`}
+                        </span>
+                      </span>
                     )}
+                    <span className="text-sm text-fg-muted">
+                      {price === null ? (
+                        'Priced for your volume, billed yearly'
+                      ) : price === 0 ? (
+                        'Free for as long as you like'
+                      ) : cycle === 'yearly' && plan.yearly !== undefined ? (
+                        <>
+                          <span className="numeric">
+                            {pricingPriceText(plan.yearly, currency, locale)}
+                          </span>{' '}
+                          billed yearly
+                          {planSaving > 0 && (
+                            <span className="text-positive-strong">
+                              , you save {formatPercent(planSaving, locale, { digits: 0 })}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        'Billed monthly, cancel any time'
+                      )}
+                    </span>
                   </div>
 
                   {plan.highlights !== undefined && plan.highlights.length > 0 ? (
@@ -220,6 +207,31 @@ export function PricingTable({
                   ) : (
                     <span aria-hidden />
                   )}
+
+                  {/* The last shared row, so every button sits on the cards' bottom edge. */}
+                  <div className="flex flex-col justify-end">
+                    {current ? (
+                      <p className="flex min-h-(--rx-control-height-md) items-center justify-center gap-2 text-sm font-medium text-fg-muted pointer-coarse:min-h-(--rx-control-height-touch)">
+                        <CheckIcon
+                          aria-hidden
+                          weight="bold"
+                          className="size-4 text-positive-strong"
+                        />
+                        Your current plan
+                      </p>
+                    ) : (
+                      <Button
+                        variant={recommended ? 'primary' : 'secondary'}
+                        className="w-full"
+                        aria-label={`${plan.cta ?? `Choose ${plan.name}`}, ${plan.name} plan`}
+                        onClick={() => {
+                          onSelectPlan(plan, cycle);
+                        }}
+                      >
+                        {plan.cta ?? `Choose ${plan.name}`}
+                      </Button>
+                    )}
+                  </div>
                 </li>
               );
             })}
@@ -277,7 +289,7 @@ function Comparison({
           >
             <summary className="flex min-h-(--rx-control-height-touch) cursor-pointer list-none items-center justify-between gap-3 rounded-control px-4 font-medium outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus">
               <span className={cn(plan.recommended === true && 'text-accent-strong')}>
-                Everything in {plan.name}
+                {plan.name} features
               </span>
               <CaretDownIcon
                 aria-hidden

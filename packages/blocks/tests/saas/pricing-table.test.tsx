@@ -7,6 +7,7 @@ import {
   groupPricingFeatures,
   pricingBestSaving,
   pricingMonthlyPrice,
+  pricingPriceText,
   pricingYearlySaving,
   type PricingPlan,
 } from '../../src/index';
@@ -28,6 +29,11 @@ describe('pricing logic', () => {
     expect(pricingYearlySaving(GROWTH)).toBeCloseTo(1 / 6);
     expect(pricingYearlySaving(ENT)).toBe(0);
     expect(pricingBestSaving(PLANS)).toBeCloseTo(1 / 6);
+  });
+
+  it('drops the cents on whole prices only', () => {
+    expect(pricingPriceText(20, 'EUR', 'en-GB')).toBe('€20');
+    expect(pricingPriceText(39.17, 'EUR', 'en-GB')).toBe('€39.17');
   });
 
   it('groups features in order', () => {
@@ -73,11 +79,18 @@ describe('PricingTable', () => {
         onSelectPlan={vi.fn()}
       />,
     );
-    expect(screen.getByText('You are on this plan')).toBeInTheDocument();
+    expect(screen.getByText('Your current plan')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Starter plan/ })).not.toBeInTheDocument();
     expect(screen.getByRole('listitem', { name: 'Growth, recommended' })).toBeInTheDocument();
     expect(screen.getByText('Free')).toBeInTheDocument();
     expect(screen.getByText('Custom')).toBeInTheDocument();
+  });
+
+  it('offers to add a plan when there are none', async () => {
+    const onAddPlan = vi.fn();
+    render(<PricingTable plans={[]} currency="EUR" onSelectPlan={vi.fn()} onAddPlan={onAddPlan} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Add a plan' }));
+    expect(onAddPlan).toHaveBeenCalled();
   });
 
   it('names included and missing features in words', () => {
