@@ -79,9 +79,16 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
     setErrors((e) => ({ ...e, [key]: undefined }));
   };
 
+  const saved = useRef(false);
+
   /** Closing keeps the draft, so Escape or a stray click outside never throws typing away. */
   const onOpenChange = (next: boolean) => {
     if (saving) return;
+    // Reopened before the last save finished closing: start from an empty form, not the saved one.
+    if (next && saved.current) {
+      saved.current = false;
+      reset();
+    }
     setOpen(next);
   };
 
@@ -95,7 +102,6 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
    * A saved draft is cleared once the dialog has finished closing, never during its exit: emptying
    * the fields while the popup still fades or springs away flashes a blank form.
    */
-  const saved = useRef(false);
   const onOpenChangeComplete = (isOpen: boolean) => {
     if (isOpen || !saved.current) return;
     saved.current = false;
