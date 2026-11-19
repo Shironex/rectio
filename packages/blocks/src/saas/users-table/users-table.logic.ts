@@ -47,18 +47,36 @@ function fold(text: string): string {
     .toLowerCase();
 }
 
+/** What a search looks through for one user: name, email and team, folded. */
+export function userHaystack(user: UserRecord): string {
+  return fold(`${user.name} ${user.email} ${user.team ?? ''}`);
+}
+
+/** Every user's folded search text, worked out once per list instead of once per keystroke. */
+export function userHaystacks(users: readonly UserRecord[]): Map<string, string> {
+  return new Map(users.map((user) => [user.id, userHaystack(user)]));
+}
+
 /** True when the user matches every filter; words of the query may match different fields. */
-export function matchesUserFilters(user: UserRecord, filters: UserFilters): boolean {
+export function matchesUserFilters(
+  user: UserRecord,
+  filters: UserFilters,
+  haystack: string = userHaystack(user),
+): boolean {
   if (filters.role !== 'all' && user.role !== filters.role) return false;
   if (filters.status !== 'all' && user.status !== filters.status) return false;
   const words = fold(filters.query).split(/\s+/).filter(Boolean);
   if (words.length === 0) return true;
-  const haystack = fold(`${user.name} ${user.email} ${user.team ?? ''}`);
   return words.every((word) => haystack.includes(word));
 }
 
-export function filterUsers(users: readonly UserRecord[], filters: UserFilters): UserRecord[] {
-  return users.filter((user) => matchesUserFilters(user, filters));
+/** The users that match; pass `haystacks` from `userHaystacks` to skip folding on every call. */
+export function filterUsers(
+  users: readonly UserRecord[],
+  filters: UserFilters,
+  haystacks?: ReadonlyMap<string, string>,
+): UserRecord[] {
+  return users.filter((user) => matchesUserFilters(user, filters, haystacks?.get(user.id)));
 }
 
 /** True when any filter narrows the list, so the empty table can offer to clear them. */

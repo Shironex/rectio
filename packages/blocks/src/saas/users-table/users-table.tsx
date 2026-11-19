@@ -32,7 +32,7 @@ import {
   useDataTable,
   type DataTableColumnDef,
 } from '@rectio/ui';
-import { useId, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useId, useMemo, useRef, useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -52,6 +52,7 @@ import {
   bulkUserTargets,
   filterUsers,
   userCounts,
+  userHaystacks,
   userFiltersActive,
   type UserFilters,
   type UserRecord,
@@ -80,17 +81,24 @@ export interface UsersTableProps {
   className?: string;
 }
 
-// Member is the normal case and stays plain text; the roles that change what someone can do get a badge.
-// One chip system: every role is the same quiet outlined badge, every status a badge with a
-// coloured dot. The words carry the meaning; the dot only marks it.
+// Role is plain text, so the one chip in a row is the status: a quiet outlined badge with a
+// coloured dot. The words carry the meaning; the dot only marks it. Owners carry a lock, since
+// they sit outside bulk changes.
 const STATUS_DOT: Record<UserStatus, string> = {
   active: 'bg-positive',
   invited: 'bg-warning',
   suspended: 'bg-negative',
 };
 
-function RoleBadge({ role }: { role: UserRole }) {
-  return <Badge>{USER_ROLE_LABELS[role]}</Badge>;
+function RoleLabel({ role }: { role: UserRole }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-sm text-fg">
+      {role === 'owner' && (
+        <LockSimpleIcon aria-hidden weight="bold" className="size-3.5 text-fg-subtle" />
+      )}
+      {USER_ROLE_LABELS[role]}
+    </span>
+  );
 }
 
 function StatusBadge({ status }: { status: UserStatus }) {
@@ -134,16 +142,26 @@ export function UsersTable({
     ids: string[];
   } | null>(null);
 
-  const counts = userCounts(users);
-  const rows = filterUsers(users, filters);
+  // Typing stays quick on long lists: the filter runs on a deferred copy of the query, and each
+  // user's search text is folded once per list.
+  const query = useDeferredValue(filters.query);
+  const haystacks = useMemo(() => userHaystacks(users), [users]);
+  const counts = useMemo(() => userCounts(users), [users]);
+  const rows = useMemo(
+    () => filterUsers(users, { ...filters, query }, haystacks),
+    [users, filters, query, haystacks],
+  );
   const filtering = userFiltersActive(filters);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersId = useId();
   const bulk = onChangeRole !== undefined || onSuspend !== undefined || onRemove !== undefined;
   // Only rows still on hand count as selected, so a selection never outlives its users.
-  const selectedIds = users.filter((user) => rowSelection[user.id]).map((user) => user.id);
-  const targets = bulkUserTargets(users, selectedIds);
-  const byId = new Map(users.map((user) => [user.id, user]));
+  const selectedIds = useMemo(
+    () => users.filter((user) => rowSelection[user.id]).map((user) => user.id),
+    [users, rowSelection],
+  );
+  const targets = useMemo(() => bulkUserTargets(users, selectedIds), [users, selectedIds]);
+  const byId = useMemo(() => new Map(users.map((user) => [user.id, user])), [users]);
 
   const rowActions = (user: UserRecord): MenuAction[] => {
     if (user.role === 'owner') return [];
@@ -263,9 +281,15 @@ export function UsersTable({
                 <span className="truncate text-sm text-fg-muted" title={user.email}>
                   {user.email}
                 </span>
+                {/* Narrow: last seen as a quiet line, since its column is hidden. */}
+                <span className="text-sm text-fg-subtle @2xl:hidden">
+                  {user.lastSeen === undefined
+                    ? 'Never signed in'
+                    : `Seen ${relativeTime(user.lastSeen, now, locale)}`}
+                </span>
                 {/* Narrow: role and status fold under the person. */}
                 <span className="mt-1 flex min-w-0 items-center gap-x-2 overflow-hidden whitespace-nowrap @xl:hidden">
-                  <RoleBadge role={user.role} />
+                  <RoleLabel role={user.role} />
                   <StatusBadge status={user.status} />
                 </span>
               </span>
@@ -287,7 +311,7 @@ export function UsersTable({
         header: 'Role',
         sortFn: 'basic',
         meta: { className: 'hidden @xl:table-cell' },
-        cell: ({ row }) => <RoleBadge role={row.original.role} />,
+        cell: ({ row }) => <RoleLabel role={row.original.role} />,
       },
       {
         id: 'status',
@@ -396,7 +420,10 @@ export function UsersTable({
         onInvite === undefined || users.length === 0 ? undefined : (
           <Button onClick={onInvite}>
             <UserPlusIcon aria-hidden weight="bold" className="size-4" />
-            Invite<span className="@max-md:hidden"> users</span>
+            {/* One text node for the label, so the button's gap sits only after the icon. */}
+            <span>
+              Invite<span className="@max-md:hidden"> users</span>
+            </span>
           </Button>
         )
       }
@@ -425,7 +452,7 @@ export function UsersTable({
       ) : (
         <>
           <div className="flex flex-col gap-2 @2xl:flex-row @2xl:items-center">
-            <div className="relative flex-1">
+            <div className="relative w-full @2xl:w-72 @2xl:flex-none">
               <MagnifyingGlassIcon
                 aria-hidden
                 weight="bold"
@@ -575,7 +602,9 @@ export function UsersTable({
             className="rounded-control focus-visible:outline-2 focus-visible:outline-focus"
           >
             <DataTable caption={`${title}, ${plural(rows.length, 'result')}`} hideCaption>
-              <DataTableHeader table={table} className="@max-xl:sr-only" />
+              {/* Narrow rows describe themselves and DataTableSort sorts, so the header row goes
+                  away instead of leaving sort buttons focusable but unseen. */}
+              <DataTableHeader table={table} className="@max-xl:hidden" />
               <DataTableBody
                 table={table}
                 rowProps={(row) => ({
