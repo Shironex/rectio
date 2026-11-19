@@ -280,7 +280,7 @@ export function ArAging({
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableHead scope="row" className="text-fg">
+                <TableHead scope="row" className="whitespace-normal text-fg">
                   Total
                   {others > 0 &&
                     `, including ${String(others)} other ${others === 1 ? 'customer' : 'customers'}`}

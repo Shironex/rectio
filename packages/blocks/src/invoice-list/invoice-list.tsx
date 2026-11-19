@@ -159,7 +159,7 @@ export function InvoiceList({
               </span>
               <span className="block">{invoice.customer}</span>
               <span className="block text-sm text-fg-muted @2xl:hidden">
-                <span className="numeric">{formatShortDate(invoice.issued, locale)}</span>
+                Issued <span className="numeric">{formatShortDate(invoice.issued, locale)}</span>
                 {due !== null && (
                   <span className={cn(state === 'overdue' && 'text-negative-strong')}>, {due}</span>
                 )}
@@ -251,7 +251,8 @@ export function InvoiceList({
               />
               {partial && (
                 <span className="text-sm whitespace-nowrap text-fg-muted">
-                  left of <Money amount={invoice.total} currency={currency} locale={locale} />
+                  <Money amount={invoice.total - balance} currency={currency} locale={locale} />{' '}
+                  paid of <Money amount={invoice.total} currency={currency} locale={locale} />
                 </span>
               )}
               <span className="mt-1 @xl:hidden">

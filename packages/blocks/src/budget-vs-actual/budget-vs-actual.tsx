@@ -170,10 +170,7 @@ export function BudgetVsActual({
             <TableHeader>
               <TableRow>
                 <TableHead>Category</TableHead>
-                <TableHead className="hidden w-2/5 @2xl:table-cell">
-                  <span className="sr-only">Actual against budget</span>
-                  <span aria-hidden>Share of budget</span>
-                </TableHead>
+                <TableHead className="hidden w-2/5 @2xl:table-cell">Spent of each budget</TableHead>
                 <TableHead align="end" className="hidden @xl:table-cell">
                   Budget
                 </TableHead>
