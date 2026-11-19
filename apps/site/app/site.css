@@ -108,3 +108,8 @@
     animation: none;
   }
 }
+
+/* Inline code in the docs names one token or flag: keep it on one line instead of breaking at a dash. */
+.prose :not(pre) > code {
+  white-space: nowrap;
+}
