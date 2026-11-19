@@ -32,7 +32,7 @@ export default function Home() {
   const money = currencies();
   return (
     <>
-      <div className="flex flex-col">
+      <div id="content" className="flex flex-col">
         <Hero kit={kit} />
 
         <CloseBooks />
@@ -161,7 +161,14 @@ export default function Home() {
 
         <Section className="grid gap-10 py-16 md:py-24 lg:grid-cols-12">
           <div className="flex flex-col gap-6 lg:col-span-4">
-            <SectionIntro eyebrow="FAQ" title="Questions" />
+            <SectionIntro
+              eyebrow="FAQ"
+              title={
+                <>
+                  <span className="font-regular">Questions,</span> answered.
+                </>
+              }
+            />
             <p className="site-reveal text-base text-fg-muted">
               Still unsure?{' '}
               <Link

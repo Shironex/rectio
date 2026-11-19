@@ -125,7 +125,7 @@ export function Bench() {
               <span className="text-lg font-strong text-fg-muted transition-colors duration-fast ease-standard group-data-active:text-fg pointer-fine:group-hover:text-fg">
                 {t.label}
               </span>
-              <span className="hidden text-sm text-fg-subtle md:block">{t.note}</span>
+              <span className="hidden text-sm text-fg-muted md:block">{t.note}</span>
               <span aria-hidden className="absolute inset-x-0 -bottom-px h-0.5 bg-line" />
               <span
                 aria-hidden

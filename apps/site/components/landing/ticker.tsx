@@ -39,7 +39,7 @@ export function Ticker({ items, label }: { items: readonly ReactNode[]; label: s
   const list = (copy: number) => (
     <ul
       aria-hidden={copy === 1 ? true : undefined}
-      className="flex shrink-0 items-center gap-10 pe-10"
+      className="flex shrink-0 items-center gap-10 ps-10 pe-10"
     >
       {items.map((item, i) => (
         <li key={i} className="flex shrink-0 items-center gap-10 whitespace-nowrap">
@@ -71,7 +71,7 @@ export function Ticker({ items, label }: { items: readonly ReactNode[]; label: s
         onClick={() => {
           setStopped((value) => !value);
         }}
-        className="site-ticker-toggle flex size-8 shrink-0 items-center justify-center rounded-control text-fg-muted transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        className="site-ticker-toggle flex size-8 shrink-0 pointer-coarse:size-11 items-center justify-center rounded-control text-fg-muted transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
         {stopped ? (
           <PlayIcon aria-hidden weight="fill" className="size-3.5" />

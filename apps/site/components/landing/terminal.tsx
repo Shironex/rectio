@@ -124,7 +124,7 @@ export function Terminal({ onDone }: { onDone?: () => void }) {
     >
       <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
         <span className="font-mono text-xs text-fg-muted">~/acme-expenses</span>
-        <span className="font-mono text-xs text-fg-subtle">zsh</span>
+        <span className="font-mono text-xs text-fg-muted">zsh</span>
       </div>
       {/* The full session is always in the DOM for screen readers; the animation only hides parts. */}
       <pre className="sr-only">

@@ -59,7 +59,7 @@ export function Pricing({ blocks }: { blocks: number }) {
             <article
               key={tier.name}
               aria-labelledby={`tier-${tier.name}`}
-              className={`site-reveal ${i === 0 ? '' : i === 1 ? 'site-step-1' : 'site-step-2'} flex flex-col gap-6 rounded-panel border p-6 sm:p-7 ${recommended ? 'border-accent bg-surface-raised shadow-overlay max-md:order-first' : 'border-line bg-surface'}`}
+              className={`site-reveal ${i === 0 ? '' : i === 1 ? 'site-step-1' : 'site-step-2'} flex flex-col gap-6 rounded-panel border p-6 sm:p-7 ${recommended ? 'border-accent bg-surface-raised shadow-overlay max-md:order-first md:-translate-y-3' : 'border-line bg-surface'}`}
             >
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between gap-3">

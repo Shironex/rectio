@@ -34,10 +34,7 @@ export function Faq() {
       {QUESTIONS.map(({ q, a }, i) => (
         <details key={q} open={i === 0} className="group site-reveal border-b border-line">
           <summary className="flex min-h-14 cursor-pointer list-none items-baseline gap-4 py-4 text-lg font-medium text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus md:gap-6 [&::-webkit-details-marker]:hidden">
-            <span
-              aria-hidden
-              className="w-6 shrink-0 font-mono text-sm text-fg-subtle tabular-nums"
-            >
+            <span aria-hidden className="w-6 shrink-0 font-mono text-sm text-fg-muted tabular-nums">
               {String(i + 1).padStart(2, '0')}
             </span>
             <span className="flex-1">{q}</span>

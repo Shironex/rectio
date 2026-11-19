@@ -8,7 +8,6 @@ import { Eyebrow } from './section';
 export function ClosingBand() {
   return (
     <div className="site-panel relative isolate overflow-hidden rounded-panel px-6 py-14 sm:px-10 md:px-14 md:py-20">
-      <div aria-hidden className="site-dots absolute inset-0 -z-10" />
       <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex max-w-2xl flex-col gap-4">
           <Eyebrow>Start</Eyebrow>

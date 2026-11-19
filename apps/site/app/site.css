@@ -147,7 +147,7 @@
 /* The backdrop: a dot grid in the border colour, fading out downwards. */
 /* The hero's dots stay clear of the copy: they show to the right of it and below. */
 .site-dots.site-dots-hero {
-  mask-image: radial-gradient(ellipse at 20% 30%, transparent 30%, var(--rx-text) 70%);
+  mask-image: linear-gradient(to bottom, transparent 40%, var(--rx-text) 55%, transparent 95%);
 }
 .site-dots {
   background-image: radial-gradient(

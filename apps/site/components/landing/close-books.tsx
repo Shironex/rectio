@@ -238,10 +238,7 @@ export function CloseBooks() {
                       {s.title}
                     </span>
                     <span
-                      className={cn(
-                        'text-base',
-                        i === caption ? 'text-fg-muted' : 'text-fg-subtle',
-                      )}
+                      className={cn('text-base', i === caption ? 'text-fg-muted' : 'text-fg-muted')}
                     >
                       {s.text}
                     </span>
@@ -250,7 +247,7 @@ export function CloseBooks() {
               ))}
             </ol>
             <p className="text-sm text-fg-muted sm:text-base lg:hidden" aria-live="polite">
-              <span className="font-mono text-xs text-fg-subtle tabular-nums">
+              <span className="font-mono text-xs text-fg-muted tabular-nums">
                 {caption + 1}/{STEPS.length}
               </span>{' '}
               <span className="font-strong text-fg">{STEPS[caption].title}.</span>{' '}
@@ -333,7 +330,7 @@ export function CloseBooks() {
                           />
                           <span className="flex min-w-0 flex-col">
                             <span className="text-fg">{line.merchant}</span>
-                            <span className="hidden text-fg-subtle sm:block">{line.note}</span>
+                            <span className="hidden text-fg-muted sm:block">{line.note}</span>
                           </span>
                         </span>
                         <Money

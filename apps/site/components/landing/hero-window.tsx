@@ -85,7 +85,7 @@ export function HeroWindow() {
       </div>
       <div
         aria-hidden
-        className="absolute top-96 end-0 hidden w-64 items-start gap-3 rounded-panel border border-line-strong bg-surface-raised p-3 shadow-overlay xl:flex xl:-end-4"
+        className="absolute top-36 end-0 hidden w-64 items-start gap-3 rounded-panel border border-line-strong bg-surface-raised p-3 shadow-overlay xl:flex xl:-end-12"
       >
         <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-positive-subtle text-positive-strong">
           <CheckIcon weight="bold" className="size-4" />

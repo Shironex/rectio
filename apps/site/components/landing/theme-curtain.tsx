@@ -25,7 +25,7 @@ function Statement({ look, values }: { look: Look; values: Readout }) {
       <div className="flex flex-col gap-3 border-b border-line px-6 pt-7 pb-6 sm:px-8">
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-fg-muted">Quarter close, Q1 2026</p>
-          <code className="font-mono text-xs text-fg-subtle">
+          <code className="font-mono text-xs text-fg-muted">
             {theme}, {mode}
           </code>
         </div>
@@ -53,10 +53,13 @@ function Statement({ look, values }: { look: Look; values: Readout }) {
               {'swatch' in item && (
                 <span
                   aria-hidden
-                  className={`hidden size-4 shrink-0 rounded-badge border border-line-strong sm:block ${item.swatch}`}
+                  className={`size-4 shrink-0 rounded-badge border border-line-strong ${item.swatch}`}
                 />
               )}
-              <span className="truncate">{shown?.[item.token] ?? ''}</span>
+              {/* On a phone a colour shows as its swatch alone; the value would cross the split. */}
+              <span className={`truncate ${'swatch' in item ? 'hidden sm:inline' : ''}`}>
+                {shown?.[item.token] ?? ''}
+              </span>
             </dd>
           </div>
         ))}

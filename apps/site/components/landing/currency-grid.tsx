@@ -48,7 +48,7 @@ export function CurrencyGrid({ codes, names }: { codes: string[]; names: Record<
           <span className="sr-only">Search currencies</span>
           <MagnifyingGlassIcon
             aria-hidden
-            className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-fg-subtle"
+            className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-fg-muted"
           />
           <input
             id={inputId}
@@ -59,7 +59,7 @@ export function CurrencyGrid({ codes, names }: { codes: string[]; names: Record<
             onChange={(event) => {
               setQuery(event.target.value);
             }}
-            className="h-11 w-full rounded-control border border-line-strong bg-surface ps-9 pe-3 text-base text-fg placeholder:text-fg-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            className="h-11 w-full rounded-control border border-line-strong bg-surface ps-9 pe-3 text-base text-fg placeholder:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           />
         </label>
         <p aria-live="polite" className="text-sm text-fg-muted tabular-nums">

@@ -47,7 +47,7 @@ export function RegistryDemo({ notes }: { notes?: ReactNode }) {
                 <span className="h-4 w-24 rounded-badge bg-surface-inset" />
                 <span className="h-3 w-32 rounded-badge bg-surface-inset" />
               </div>
-              <code className="font-mono text-sm text-fg-subtle">invoice-list.tsx</code>
+              <code className="font-mono text-sm text-fg-muted">invoice-list.tsx</code>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[0, 1, 2].map((i) => (
