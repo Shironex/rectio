@@ -89,6 +89,22 @@ The playground's `/?view=forms` shows a workspace settings form built from the f
 `pnpm --filter @rectio/playground shoot:forms 3` writes desktop and phone shots in every theme and
 mode, open popups and the invalid state to `.rounds/round-3/forms/`.
 
+## Templates
+
+`templates/*` holds complete starter apps, the showcase of the kit: each is a standalone Next.js
+16 app (`@rectio/template-<name>`, App Router, static export) that imports the workspace packages
+while in the repo and becomes the buyer's own project with `rectio init --template <name>`.
+
+| Template      | Category | What it is                                                                                    |
+| ------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `finance-app` | app      | A finance back office: overview, invoices, expenses and approvals, journal, reports, settings |
+
+Each has a `template.json` (name, title, description, category, tier, pages, `uses`, screenshots)
+that the registry build, the docs pages and the landing gallery all read, so a new folder appears
+everywhere without other changes. Its code lives in `app/`, `components/` and `data/`; kit imports
+are named imports from package roots; repo-only lines end in `rectio:workspace`. `pnpm --filter
+@rectio/template-<name> shoot` writes the gallery screenshots, `shoot <n>` a design round.
+
 ## The token rule
 
 Components never hardcode colour, radius, font, shadow, duration or easing. In `packages/ui/src`
@@ -144,7 +160,7 @@ Layout of `dist/registry`:
 | `pro/items/<name>.json` (and `@ver`) | Pro items: served only with a valid license key                      |
 | `schema/{item,index,config}.json`    | JSON Schemas of the item, the index and `rectio.json`                |
 
-**Items.** Types are `component`, `block`, `theme`, `lib`, `hook` and `style`. An item has a
+**Items.** Types are `component`, `block`, `theme`, `lib`, `hook`, `style` and `template`. An item has a
 `tier` (`free` or `pro`), a semver `version`, npm `dependencies`, `registryDependencies`,
 `requires` (React range, Tailwind range, token contract), optional `cssVars` token additions, and
 `files`, each with `path`, `type`, a `target` through an alias placeholder (`@ui/button.tsx`), the
@@ -171,6 +187,18 @@ names match shadcn's registry item where they overlap.
 Adding a component to `packages/ui/src` fails the registry build until it is listed in
 `registry.config.ts`. Bump an item's version whenever its content changes.
 
+**Templates** are a third source, `templates/*` (see [Templates](#templates)). Each folder with a
+`template.json` becomes a `template` item: its text files with `@project/<path>` targets, under
+`pro/` like every pro item. Imports of `@rectio/ui`, `@rectio/motion`, `@rectio/blocks` (and their
+documented subpaths) become registry imports and registry dependencies, as for an add-on; the item
+also depends on `tokens` and every theme. Lines ending in `// rectio:workspace` or
+`/* rectio:workspace */` are dropped, workspace packages leave `package.json` with the repo-only
+`shoot` and `lint` scripts, and `screenshots/`, `scripts/`, `turbo.json` and `template.json` stay
+in the repo. The build fails on a file where kit items install (`components/ui/`,
+`components/blocks/`, `lib/`, `hooks/`, `styles/rectio/`), an npm import the template's
+`package.json` does not declare, a shipped file that still names a workspace package, a missing
+screenshot, or a `uses` list in `template.json` that differs from what the template imports.
+
 **The motion add-on** is an add-on tree in the same config: every `packages/motion/src` folder is
 a pro item named `motion-<name>` (`motion-core` holds the shared token reader and animator), and
 its files install under their own folder (`@ui/motion/dialog.tsx`, `@lib/motion/animate.ts`) so
@@ -195,9 +223,10 @@ key also installs the free DataTable, Badge and Money it renders.
 ```sh
 rectio init [--theme ledger] [--css src/index.css] [--framework vite|next|tanstack-start]
             [--force] [--dry-run] [--no-install] [--registry <url|folder>]
+rectio init --template finance-app [folder] [--theme ledger] [--force] [--dry-run] [--no-install]
 rectio add button dialog money [--overwrite] [--dry-run] [--no-install]
 rectio diff dialog
-rectio list [--type theme] [--tier pro]
+rectio list [--type theme] [--tier pro] [--templates]
 rectio search money
 rectio update
 rectio mcp [--registry <url|folder>]
@@ -210,6 +239,12 @@ rectio mcp [--registry <url|folder>]
   `--framework` names the framework when detection fails, `--force` rewrites an existing
   `rectio.json`, `--dry-run` prints the plan and writes nothing, and `--no-install` leaves the
   package manager alone. A non-default theme prints one note: set `data-theme` on `<html>`.
+- **init --template** creates a new Next.js project from a template in `[folder]` (default: the
+  template name; it must be empty unless `--force`). It resolves the template and every kit item
+  it uses, checks the license key (templates are pro) and fetches and verifies everything before
+  the first write, then writes the template, a `rectio.json` with `@/` aliases and installs the kit
+  items through the same path as `add` (lockfile, CSS entry block, package.json, install). The
+  template's own files are the buyer's and are not in the lockfile. `add` refuses a template.
 - **add** resolves the dependency graph from the index (cycles and unknown items are named),
   fetches every item, checks its schema and integrity, plans every write, and only then writes.
   A file the user edited since rectio wrote it stops the whole add (nothing written) unless
