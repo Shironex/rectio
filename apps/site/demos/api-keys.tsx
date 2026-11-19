@@ -9,7 +9,12 @@ const ago = (minutes: number) => new Date(NOW.getTime() - minutes * 60_000);
 export const SCOPES: ApiKeyScopeOption[] = [
   { value: 'read', label: 'Read only', description: 'Reads data, changes nothing' },
   { value: 'write', label: 'Read and write', description: 'Creates and edits records' },
-  { value: 'admin', label: 'Full access', description: 'Also manages members and billing' },
+  {
+    value: 'admin',
+    label: 'Full access',
+    description: 'Also manages members and billing',
+    elevated: true,
+  },
 ];
 
 export const KEYS: ApiKey[] = [
@@ -77,7 +82,7 @@ export default function ApiKeysDemo() {
   const store = useDemoKeys(KEYS);
   return (
     <div className="w-full">
-      <ApiKeys {...store} scopes={SCOPES} now={NOW} locale="en-GB" />
+      <ApiKeys {...store} scopes={SCOPES} docsHref="/docs" now={NOW} locale="en-GB" />
     </div>
   );
 }

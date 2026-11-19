@@ -1,5 +1,6 @@
 'use client';
 
+import { HexagonIcon } from '@phosphor-icons/react';
 import { TwoFactor } from '@rectio/blocks/motion';
 import { useState } from 'react';
 
@@ -10,6 +11,12 @@ export default function TwoFactorMotionDemo() {
   const [error, setError] = useState<string | undefined>();
   return (
     <TwoFactor
+      brand={
+        <span className="flex items-center gap-2 font-display text-lg font-heading">
+          <HexagonIcon aria-hidden weight="duotone" className="size-6 text-accent" />
+          Fernhill
+        </span>
+      }
       method="sms"
       destination="+44 7700 900829"
       sentAt={sentAt}

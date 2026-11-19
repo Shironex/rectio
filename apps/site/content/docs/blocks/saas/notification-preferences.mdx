@@ -30,7 +30,7 @@ The motion variant is `motion-notification-preferences`. It installs the plain b
 
 Pass the channels, the events (each with a group) and the current matrix: for each event id, the
 channel ids it goes to. The block is controlled; `onChange` gets the whole new matrix, so save it as
-it comes or behind your own button. A channel box in the header turns a whole column on or off and
+it comes or behind your own button. An All events row under the channel names turns a whole column on or off and
 shows a mixed state when only some are on. Channels listed in an event's `required` stay checked,
 carry a lock and say why. On a narrow block each event becomes its own row of labelled boxes.
 
@@ -48,6 +48,10 @@ carry a lock and say why. On a narrow block each event becomes its own row of la
       description: 'Event id to the channel ids it is sent on.',
     },
     onChange: { type: '(value: NotificationMatrix) => void' },
+    onUseRecommended: {
+      type: '() => void',
+      description: 'Offered as a button while nothing beyond the required events is on.',
+    },
     disabled: {
       type: 'boolean',
       default: 'false',

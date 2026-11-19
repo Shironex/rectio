@@ -1,5 +1,6 @@
 'use client';
 
+import { HexagonIcon } from '@phosphor-icons/react';
 import { ResetPassword, type ResetPasswordStep } from '@rectio/blocks';
 import { useState } from 'react';
 
@@ -9,6 +10,12 @@ export default function ResetPasswordDemo() {
   const [sentTo, setSentTo] = useState<string | undefined>();
   return (
     <ResetPassword
+      brand={
+        <span className="flex items-center gap-2 font-display text-lg font-heading">
+          <HexagonIcon aria-hidden weight="duotone" className="size-6 text-accent" />
+          Fernhill
+        </span>
+      }
       step={step}
       sentTo={sentTo}
       signIn={() => {

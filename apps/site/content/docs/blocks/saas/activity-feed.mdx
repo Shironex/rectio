@@ -30,11 +30,12 @@ The motion variant is `motion-activity-feed`. It installs the plain block too; n
 
 Pass the events in any order; the block sorts them newest first and groups them under Today,
 Yesterday or their date. Each event is a sentence: the actor, a past tense `verb` and an optional
-`target`, with a `detail` underneath (comments show it as a quote). The `kind` picks the small icon
-on the avatar and the filter it belongs to.
+`target`, then a muted `detail` on the same line (a status move such as "In review to Approved"),
+or under it as a quote for comments. The `kind` picks the small icon beside the time and the
+filter it belongs to.
 
 `filterable` adds a filter row of comments, changes, people and account, leaving out filters with
-nothing in them. For older pages, pass `hasMore`, `onLoadMore` and `loadingMore`.
+nothing in them; on narrow widths it becomes one select. For older pages, pass `hasMore`, `onLoadMore` and `loadingMore`.
 
 ## Props
 

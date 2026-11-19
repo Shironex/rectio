@@ -73,6 +73,9 @@ export default function NotificationPreferencesDemo() {
         events={EVENTS}
         value={value}
         onChange={setValue}
+        onUseRecommended={() => {
+          setValue(START);
+        }}
       />
     </div>
   );

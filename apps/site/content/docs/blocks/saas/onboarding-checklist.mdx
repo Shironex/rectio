@@ -29,9 +29,10 @@ The motion variant is `motion-onboarding-checklist`. It installs the plain block
 ## Usage
 
 Pass the steps in the order they should be done, each with whether it is done. The first step not
-done becomes the current one: it is highlighted and its action is the primary button. Give a
+done becomes the current one: it is raised, labelled Next, and its action is the primary button. Give a
 step an `action` with `onSelect` or `href` to do it from the list; pass `onToggleStep` to offer
-"Mark as done" for steps your app cannot detect by itself.
+"Mark as done" and its undo, in a small menu on each row, for steps your app cannot detect by
+itself.
 
 Once every step is done the list gives way to a finished note, with Hide when you pass
 `onDismiss`. The block holds only whether it is folded; `defaultCollapsed` starts it folded to the
@@ -61,7 +62,7 @@ complete; `onboardingSummary` says it in words.
 ## Accessibility
 
 - The current step carries `aria-current="step"`; every step says whether it is done in words, not only with a tick.
-- Progress is a labelled meter with its value in words, and the count is announced politely as it changes.
+- The count is said once, in the description, and announced politely as it changes; the bar under it is a labelled meter with the same words.
 - The fold button reports `aria-expanded` and names what it shows or hides.
 - Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
 - The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

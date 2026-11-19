@@ -8,7 +8,7 @@ export default function ApiKeysMotionDemo() {
   const store = useDemoKeys(KEYS);
   return (
     <div className="w-full">
-      <ApiKeys {...store} scopes={SCOPES} now={NOW} locale="en-GB" />
+      <ApiKeys {...store} scopes={SCOPES} docsHref="/docs" now={NOW} locale="en-GB" />
     </div>
   );
 }

@@ -30,7 +30,7 @@ block enters.
 
 The block holds only what is typed. The password rules tick off as the password is typed, under a
 four-step strength bar; on submit every field is checked and `onSubmit` gets valid, trimmed values.
-Your app creates the account, sets `pending` while it waits and passes a refusal back as `error`.
+Your app creates the account, sets `pending` while it waits and passes a refusal back as `error`. When the address is already registered, set `emailTaken` instead: the block says so under the email field, with a link to `signIn`.
 
 Pass `terms` (and `privacy`) as URLs or handlers to show the agreement checkbox; it is required
 once shown. Provider buttons go in the `social` slot, as on [Sign in](/docs/blocks/saas/sign-in).
@@ -46,6 +46,10 @@ once shown. Provider buttons go in the `social` slot, as on [Sign in](/docs/bloc
     social: { type: 'ReactNode' },
     pending: { type: 'boolean', default: 'false' },
     error: { type: 'ReactNode', description: 'Why the server refused, above the form.' },
+    emailTaken: {
+      type: 'boolean',
+      description: 'The email is already registered: said under the field with a sign-in link.',
+    },
     minPasswordLength: { type: 'number', default: '12' },
     terms: { type: 'string | (() => void)', description: 'Shows the agreement checkbox.' },
     privacy: { type: 'string | (() => void)' },

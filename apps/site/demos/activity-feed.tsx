@@ -22,7 +22,7 @@ export const EVENTS: ActivityEvent[] = [
     kind: 'update',
     verb: 'moved',
     target: 'Vendor contract renewals',
-    detail: 'From In review to Approved',
+    detail: 'In review to Approved',
   },
   {
     id: 'e3',

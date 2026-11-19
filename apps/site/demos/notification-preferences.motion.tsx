@@ -14,6 +14,9 @@ export default function NotificationPreferencesMotionDemo() {
         events={EVENTS}
         value={value}
         onChange={setValue}
+        onUseRecommended={() => {
+          setValue(START);
+        }}
       />
     </div>
   );

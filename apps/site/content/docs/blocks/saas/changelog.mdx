@@ -29,10 +29,11 @@ The motion variant is `motion-changelog`. It installs the plain block too; the b
 ## Usage
 
 Pass the releases, each with its version, date and changes tagged `new`, `improved` or `fixed`.
-The block lists them newest first; a release without a title is headed by its version. The filter
-row keeps only one kind of change and drops releases left empty.
+The block lists them newest first, each headed by its version and date, with its changes grouped
+under New, Improved and Fixed. `title` and `summary` are optional. The filter row keeps only one
+kind of change and drops releases left empty.
 
-Pass the reader's `lastSeen` to mark releases since their last visit, and `onMarkSeen` to offer
+Pass the reader's `lastSeen` to set apart the releases since their last visit under one marker, and `onMarkSeen` to offer
 Mark as read while something is unseen. For older pages, pass `hasMore` and `onLoadMore`.
 
 ## Props
@@ -61,8 +62,8 @@ tested on their own.
 
 ## Accessibility
 
-- Every change is tagged in words with an icon beside it; colour only reinforces the tag.
-- The new since your last visit marker is text, and the count in the description is announced as it changes.
+- Each group of changes has a subhead in words with an icon; colour only reinforces it.
+- The new since your last visit marker is a labelled separator, each new release says so in its heading, and the count in the description is announced as it changes.
 - Release dates are `<time>` elements in the reader's locale.
 - Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
 - The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

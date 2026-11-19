@@ -8,7 +8,7 @@ import { useState } from 'react';
 /** Your app creates the account; the block checks the fields and the password rules first. */
 export default function SignUpMotionDemo() {
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | undefined>();
+  const [taken, setTaken] = useState(false);
   return (
     <SignUp
       brand={
@@ -18,7 +18,7 @@ export default function SignUpMotionDemo() {
         </span>
       }
       pending={pending}
-      error={error}
+      emailTaken={taken}
       social={
         <SocialButton icon={<GoogleLogoIcon aria-hidden weight="bold" />}>
           Continue with Google
@@ -29,10 +29,10 @@ export default function SignUpMotionDemo() {
       signIn="#sign-in"
       onSubmit={() => {
         setPending(true);
-        setError(undefined);
+        setTaken(false);
         setTimeout(() => {
           setPending(false);
-          setError('An account with this email already exists. Sign in instead.');
+          setTaken(true);
         }, 900);
       }}
     />
