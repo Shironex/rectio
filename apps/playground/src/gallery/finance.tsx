@@ -296,16 +296,22 @@ export function DateSection() {
         />
       </Row>
       <Row label="Range, weekends closed">
-        <div className="rounded-(--rx-popover-radius) border border-line bg-surface-overlay">
-          <Calendar
-            mode="range"
-            locale="en-GB"
-            defaultMonth={FIXED_MONTH}
-            selected={period}
-            onSelect={setPeriod}
-            disabled={{ dayOfWeek: [0, 6] }}
-            required={false}
-          />
+        <div className="flex flex-col gap-2">
+          <div className="w-fit rounded-(--rx-popover-radius) border border-line bg-surface-overlay">
+            <Calendar
+              mode="range"
+              locale="en-GB"
+              defaultMonth={FIXED_MONTH}
+              selected={period}
+              onSelect={setPeriod}
+              disabled={{ dayOfWeek: [0, 6] }}
+              showOutsideDays={false}
+              required={false}
+            />
+          </div>
+          <p className="text-sm text-fg-muted">
+            Struck days are closed: settlement runs on weekdays only.
+          </p>
         </div>
       </Row>
     </Section>

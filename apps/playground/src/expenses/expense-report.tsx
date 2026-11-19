@@ -135,6 +135,8 @@ const columns: DataTableColumnDef<Expense>[] = [
           currency={CURRENCY}
           locale={LOCALE}
           tone={row.original.amount < 0 ? 'auto' : 'neutral'}
+          // Rejected lines stay for the record, struck and muted because the total leaves them out.
+          className={row.original.status === 'rejected' ? 'text-fg-muted line-through' : undefined}
         />
         {/* On phones the state sits under its amount, so a row stays three lines at most. */}
         <span className="mt-1 block sm:hidden">
@@ -210,10 +212,14 @@ function Report() {
     setExpenses(before.filter((e) => !removed.has(e.id)));
     table.resetRowSelection();
     const count = removed.size;
+    // Speak in the total's terms: rejected lines were never counted, so they do not move it.
+    const totalNow = sum(
+      claimed(before.filter((e) => !removed.has(e.id) && inPeriod(e.date, period))),
+    );
     const id = toast.add({
       type: 'success',
       title: count === 1 ? 'Expense removed' : `${String(count)} expenses removed`,
-      description: `${money(sum(selected))} taken off the report.`,
+      description: `Total claimed is now ${money(totalNow)}.`,
       actionProps: {
         children: 'Undo',
         onClick: () => {
@@ -258,7 +264,8 @@ function Report() {
             <div className="flex items-center gap-3">
               <p className="text-sm text-fg-muted">
                 {selected.length} selected,{' '}
-                <Money amount={sum(selected)} currency={CURRENCY} locale={LOCALE} />
+                <Money amount={sum(claimed(selected))} currency={CURRENCY} locale={LOCALE} /> of the
+                total
               </p>
               <Button variant="danger" size="sm" onClick={remove}>
                 <TrashIcon aria-hidden weight="bold" className="size-3.5" />
