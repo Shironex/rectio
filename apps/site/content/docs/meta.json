@@ -1,0 +1,16 @@
+{
+  "title": "rectio",
+  "pages": [
+    "---Get started---",
+    "index",
+    "installation",
+    "theming",
+    "motion",
+    "---Distribution---",
+    "cli",
+    "registry",
+    "mcp",
+    "---Components---",
+    "...components"
+  ]
+}

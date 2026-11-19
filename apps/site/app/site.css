@@ -1,1 +1,37 @@
 /* Site-only styles, all on rectio tokens. */
+
+/*
+ * The theme morph. The new theme opens as a circle from the switch that was pressed; with reduced
+ * motion it crossfades instead, gentler but still a transition.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+
+:root[data-morph='circle']::view-transition-old(root) {
+  animation: none;
+}
+
+:root[data-morph='circle']::view-transition-new(root) {
+  animation: site-morph var(--rx-motion-duration-reveal) var(--rx-motion-easing-enter);
+}
+
+:root[data-morph='fade']::view-transition-old(root),
+:root[data-morph='fade']::view-transition-new(root) {
+  animation-duration: var(--rx-motion-duration-slow);
+  animation-timing-function: var(--rx-motion-easing-standard);
+}
+
+@keyframes site-morph {
+  from {
+    clip-path: circle(
+      var(--rx-motion-distance-reveal) at var(--site-morph-x, 50%) var(--site-morph-y, 0)
+    );
+  }
+  to {
+    clip-path: circle(
+      var(--site-morph-r, 150vmax) at var(--site-morph-x, 50%) var(--site-morph-y, 0)
+    );
+  }
+}

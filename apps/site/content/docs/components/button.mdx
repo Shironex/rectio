@@ -1,0 +1,69 @@
+---
+title: Button
+description: Actions, from the one that approves a report to the one that rejects it.
+---
+
+import ButtonDemo from '@/demos/button';
+import ButtonMotionDemo from '@/demos/button.motion';
+
+<Preview
+  name="button"
+  plain={<ButtonDemo />}
+  motion={<ButtonMotionDemo />}
+  importLine="import { Button } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add button
+```
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+
+<Button onClick={approve}>Approve report</Button>;
+```
+
+One primary action per view. `danger` is outlined until hovered or pressed, so a destructive action
+never outweighs the primary beside it. `loading` keeps the label's width and the focus, blocks
+presses and sets `aria-busy`.
+
+## Props
+
+Every prop of Base UI's `Button` is accepted as well.
+
+<TypeTable
+  type={{
+    variant: {
+      type: "'primary' | 'secondary' | 'ghost' | 'danger'",
+      default: "'primary'",
+      description: 'The weight of the action.',
+    },
+    size: { type: "'sm' | 'md' | 'lg'", default: "'md'" },
+    loading: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Shows a spinner and blocks presses, keeping the width and the focus.',
+    },
+    iconOnly: {
+      type: 'boolean',
+      default: 'false',
+      description: 'A square button holding only an icon. Give it an aria-label.',
+    },
+    renderContent: {
+      type: '(content: { children: ReactNode; loading: boolean }) => ReactNode',
+      description: 'Draws the label and loading indicator, as the motion add-on does.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- A native `<button>`: Enter and Space press it, and it is in the tab order.
+- On touch screens every size grows to a 44px target.
+- An `iconOnly` button needs an `aria-label`; the icon is hidden from assistive technology.
+
+<ComponentSource path="button/button.tsx" />

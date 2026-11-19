@@ -17,23 +17,24 @@
   --shadow-2xl: var(--rx-shadow-overlay);
   --font-weight-semibold: var(--rx-font-weight-strong);
   --font-weight-bold: var(--rx-font-weight-heading);
-  --ease-in: var(--rx-motion-easing-exit);
+  --ease-in: var(--rx-motion-easing-enter);
   --ease-out: var(--rx-motion-easing-enter);
   --ease-in-out: var(--rx-motion-easing-standard);
-  /* Fumadocs' popups, dialogs and drawer, timed by the theme's motion tokens. */
+  /* Fumadocs' popups, dialogs and drawer on the theme's motion tokens: ease-out both ways, exits faster. */
   --animate-fd-fade-in: fd-fade-in var(--rx-motion-duration-slow) var(--rx-motion-easing-enter);
-  --animate-fd-fade-out: fd-fade-out var(--rx-motion-duration-base) var(--rx-motion-easing-exit);
+  --animate-fd-fade-out: fd-fade-out var(--rx-motion-duration-base) var(--rx-motion-easing-enter);
   --animate-fd-roll-in: fd-roll-in var(--rx-motion-duration-slow) var(--rx-motion-easing-enter);
   --animate-fd-dialog-in: fd-dialog-in var(--rx-motion-duration-slow) var(--rx-motion-easing-enter);
-  --animate-fd-dialog-out: fd-dialog-out var(--rx-motion-duration-base) var(--rx-motion-easing-exit);
+  --animate-fd-dialog-out: fd-dialog-out var(--rx-motion-duration-base)
+    var(--rx-motion-easing-enter);
   --animate-fd-popover-in: fd-popover-in var(--rx-motion-duration-fast)
     var(--rx-motion-easing-enter);
   --animate-fd-popover-out: fd-popover-out var(--rx-motion-duration-fast)
-    var(--rx-motion-easing-exit);
+    var(--rx-motion-easing-enter);
   --animate-fd-sidebar-in: fd-sidebar-in var(--rx-motion-duration-slow)
     var(--rx-motion-easing-enter);
   --animate-fd-sidebar-out: fd-sidebar-out var(--rx-motion-duration-base)
-    var(--rx-motion-easing-exit);
+    var(--rx-motion-easing-enter);
   /* The palette as utilities (bg-fd-card, text-fd-primary). */
   --color-fd-background: var(--rx-surface-canvas);
   --color-fd-foreground: var(--rx-text);
