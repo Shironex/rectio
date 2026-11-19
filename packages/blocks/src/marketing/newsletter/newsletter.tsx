@@ -104,7 +104,8 @@ export function Newsletter({
                 setEmail(event.target.value);
                 if (status.state === 'error') setStatus({ state: 'idle' });
               }}
-              className="flex-1"
+              // Grow only in the row layout: a column basis of zero would collapse the field.
+              className={compact ? '@xs:flex-1' : '@md:flex-1'}
             />
             <Button type="submit" size="md" loading={status.state === 'sending'}>
               {submitLabel}

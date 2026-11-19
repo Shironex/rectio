@@ -71,7 +71,10 @@ export function SiteHeader({
         <Anchor
           href={brandHref}
           aria-label={brandLabel}
-          className={cn('inline-flex shrink-0 items-center', linkFocus)}
+          className={cn(
+            'inline-flex min-h-(--rx-button-height-touch) shrink-0 items-center',
+            linkFocus,
+          )}
         >
           {brand}
         </Anchor>

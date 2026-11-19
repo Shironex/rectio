@@ -53,7 +53,7 @@ export function StatRow({
           as="dl"
           stagger
           className={cn(
-            'grid grid-cols-2 gap-y-10 @4xl:grid-flow-col @4xl:auto-cols-fr @4xl:grid-cols-none',
+            'grid gap-y-8 @xl:grid-flow-col @xl:auto-cols-fr @xl:gap-y-10',
             lead !== undefined && 'lg:col-span-8',
           )}
         >

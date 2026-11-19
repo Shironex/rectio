@@ -95,7 +95,7 @@ export function CtaBand({
                   variant={accent ? 'ghost' : 'secondary'}
                   className={cn(
                     accent &&
-                      'text-accent-contrast pointer-fine:hover:bg-accent-hover active:bg-accent-active',
+                      'border border-accent-contrast text-accent-contrast pointer-fine:hover:bg-accent-hover active:bg-accent-active',
                   )}
                 />
               )}

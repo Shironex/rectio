@@ -42,7 +42,7 @@ export interface FloatingCard {
 export interface HeroFloatingProps extends HeroCopy {
   /** The main visual, framed. */
   visual: ReactNode;
-  /** Up to four cards that float over the visual's corners on wide screens and line up under it on narrow ones. */
+  /** Up to four cards that float over the visual's corners on wide screens and line up under it on narrow ones (two on a phone). */
   cards: readonly FloatingCard[];
   className?: string;
 }
@@ -192,10 +192,10 @@ export function HeroSplit({ visual, reverse = false, className, ...copy }: HeroS
 }
 
 const CORNER: Record<FloatingCardPosition, string> = {
-  'top-start': 'md:-top-8 md:-start-10',
-  'top-end': 'md:-top-10 md:-end-8',
-  'bottom-start': 'md:-bottom-10 md:-start-12',
-  'bottom-end': 'md:-end-10 md:-bottom-8',
+  'top-start': 'md:top-0 md:-start-6',
+  'top-end': 'md:top-3 md:-end-6',
+  'bottom-start': 'md:bottom-0 md:-start-8',
+  'bottom-end': 'md:-end-6 md:bottom-2',
 };
 
 /**
@@ -211,7 +211,7 @@ export function HeroFloating({ visual, cards, className, ...copy }: HeroFloating
       aria-labelledby={titleId}
       data-slot="hero"
       className={cn(
-        'overflow-hidden bg-linear-to-b from-surface-canvas via-accent-subtle to-surface-canvas py-16 text-fg sm:py-24',
+        'overflow-hidden bg-linear-to-b from-accent-subtle to-surface-canvas to-60% py-16 text-fg sm:py-24',
         className,
       )}
     >
@@ -219,7 +219,8 @@ export function HeroFloating({ visual, cards, className, ...copy }: HeroFloating
         <div className="lg:col-span-5">
           <Copy {...copy} align="start" titleId={titleId} />
         </div>
-        <div className="relative md:px-12 md:py-10 lg:col-span-7 lg:px-0">
+        {/* The padding leaves room for the cards to hang off the frame without covering its header. */}
+        <div className="relative md:px-12 md:pt-28 md:pb-20 lg:col-span-7 lg:px-0">
           <Reveal>
             <HeroFrame>{visual}</HeroFrame>
           </Reveal>
@@ -227,10 +228,18 @@ export function HeroFloating({ visual, cards, className, ...copy }: HeroFloating
             stagger
             as="ul"
             aria-label="Highlights"
-            className="mt-4 grid gap-3 sm:grid-cols-2 md:contents"
+            className="mt-4 grid gap-3 sm:grid-cols-2 md:pointer-events-none md:absolute md:inset-0 md:mt-0 md:block"
           >
-            {cards.slice(0, 4).map((card) => (
-              <li key={card.id} className={cn('md:absolute md:w-64', CORNER[card.position])}>
+            {cards.slice(0, 4).map((card, index) => (
+              <li
+                key={card.id}
+                // A phone shows two: the rest repeat the story and push the next section away.
+                className={cn(
+                  'md:pointer-events-auto md:absolute md:w-64',
+                  index >= 2 && 'max-sm:hidden',
+                  CORNER[card.position],
+                )}
+              >
                 <FloatingCardFrame>{card.content}</FloatingCardFrame>
               </li>
             ))}
@@ -327,7 +336,7 @@ export function HeroWordCycle({
       <span className="sr-only">{spoken}</span>
       <span aria-hidden>
         {before}{' '}
-        <span className="inline-grid overflow-hidden pb-1 align-bottom">
+        <span className="inline-grid justify-items-start overflow-hidden pb-1 text-start align-bottom">
           {/* Every word, invisible, in the same cell: the widest one sets the width. */}
           {words.map((each) => (
             <span key={each} className="invisible col-start-1 row-start-1 font-heading">

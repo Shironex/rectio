@@ -38,13 +38,14 @@ export function templateSections(template: LegalTemplate): LegalSection[] {
     title: section.title,
     content: (
       <>
-        {section.paragraphs.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
+        {section.paragraphs.map((paragraph, index) => (
+          // Templates repeat placeholder sentences, so the position keeps keys unique.
+          <p key={`${String(index)}-${paragraph}`}>{paragraph}</p>
         ))}
         {section.items !== undefined && (
           <ul>
-            {section.items.map((item) => (
-              <li key={item}>{item}</li>
+            {section.items.map((item, index) => (
+              <li key={`${String(index)}-${item}`}>{item}</li>
             ))}
           </ul>
         )}

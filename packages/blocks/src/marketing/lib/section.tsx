@@ -175,7 +175,7 @@ export function SectionHeader({
 
 /** The stressed words of a mixed-weight heading: the same family, heavier. */
 export function Em({ children, className }: { children: ReactNode; className?: string }) {
-  return <strong className={cn('font-heading text-fg', className)}>{children}</strong>;
+  return <strong className={cn('emphasis text-fg', className)}>{children}</strong>;
 }
 
 /** An id for a section heading, so the section can name itself with `aria-labelledby`. */

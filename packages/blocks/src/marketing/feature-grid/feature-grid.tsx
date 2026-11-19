@@ -187,7 +187,7 @@ export function FeatureRows({
                 )}
               </Reveal>
               <Reveal className="lg:col-span-7">
-                <div className="rounded-panel border border-line bg-linear-to-br from-accent-subtle to-surface-sunken p-4 sm:p-8">
+                <div className="rounded-panel border border-line bg-linear-to-br from-accent-subtle to-surface-sunken p-2 sm:p-8">
                   {row.visual}
                 </div>
               </Reveal>
@@ -251,7 +251,15 @@ export function FeatureBento({
               )}
             </div>
             {item.visual !== undefined && (
-              <div className="mt-auto min-w-0 px-6 pb-6 sm:px-7 sm:pb-7">{item.visual}</div>
+              <div
+                className={cn(
+                  'min-w-0 px-6 pb-6 sm:px-7 sm:pb-7',
+                  // A tall tile centres its visual in the spare height instead of leaving a hole under the copy.
+                  item.size === 'tall' ? 'my-auto' : 'mt-auto',
+                )}
+              >
+                {item.visual}
+              </div>
             )}
           </li>
         ))}

@@ -88,7 +88,10 @@ export function CookiePreferences({
                 {' '}
                 <Anchor
                   href={policyHref}
-                  className={cn('text-fg underline underline-offset-4', linkFocus)}
+                  className={cn(
+                    'whitespace-nowrap text-fg underline underline-offset-4',
+                    linkFocus,
+                  )}
                 >
                   {policyLabel}
                 </Anchor>
@@ -187,12 +190,14 @@ export function CookieConsent({
           className={cn(
             'fixed inset-x-3 bottom-3 z-40 flex flex-col gap-4 rounded-panel border border-line bg-surface-overlay p-5 text-fg shadow-overlay',
             'sm:inset-x-auto sm:start-6 sm:bottom-6 sm:max-w-md',
+            // Wide screens: one slim bar along the bottom, clear of the content above the fold.
+            'lg:end-6 lg:max-w-none lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:py-4',
             'transition-[opacity,translate] duration-slow ease-enter',
             'starting:translate-y-(--rx-motion-distance-reveal) starting:opacity-0',
             className,
           )}
         >
-          <div className="flex flex-col gap-1.5">
+          <div className="flex max-w-prose flex-col gap-1.5">
             <h2 id={titleId} className="text-base font-strong text-fg">
               {title}
             </h2>
@@ -203,7 +208,10 @@ export function CookieConsent({
                   {' '}
                   <Anchor
                     href={copy.policyHref}
-                    className={cn('text-fg underline underline-offset-4', linkFocus)}
+                    className={cn(
+                      'whitespace-nowrap text-fg underline underline-offset-4',
+                      linkFocus,
+                    )}
                   >
                     {copy.policyLabel ?? 'Cookie policy'}
                   </Anchor>
@@ -211,7 +219,7 @@ export function CookieConsent({
               )}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 lg:flex lg:shrink-0">
             <Button
               variant="secondary"
               onClick={() => {
@@ -230,7 +238,7 @@ export function CookieConsent({
             </Button>
             <Button
               variant="ghost"
-              className="col-span-2"
+              className="col-span-2 lg:order-first"
               onClick={() => {
                 setCustomising(true);
               }}

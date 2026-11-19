@@ -36,7 +36,7 @@ export interface SiteFooterProps {
 }
 
 const LINK = cn(
-  'inline-flex min-h-8 items-center text-base text-fg-muted transition-colors duration-fast ease-standard pointer-fine:hover:text-fg pointer-coarse:min-h-(--rx-button-height-touch)',
+  'inline-flex min-h-8 items-center text-base text-fg-muted transition-colors duration-fast ease-standard pointer-fine:hover:text-fg pointer-coarse:min-h-(--rx-button-height-touch) pointer-coarse:min-w-(--rx-button-height-touch)',
   linkFocus,
 );
 
@@ -98,7 +98,7 @@ export function SiteFooter({
     <Anchor
       href={brandHref}
       aria-label={brandLabel}
-      className={cn('inline-flex w-fit items-center', linkFocus)}
+      className={cn('inline-flex min-h-(--rx-button-height-touch) w-fit items-center', linkFocus)}
     >
       {brand}
     </Anchor>
