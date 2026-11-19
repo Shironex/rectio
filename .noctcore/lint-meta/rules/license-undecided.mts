@@ -18,7 +18,10 @@ export const licenseUndecided: IMetaRule = {
         violations.push({ file, rule: RULE, message: 'the license is not decided: remove it' });
       }
     }
-    const manifests = ['package.json', ...ctx.glob('{packages,apps,tooling}/*/package.json')];
+    const manifests = [
+      'package.json',
+      ...ctx.glob('{packages,apps,tooling,templates}/*/package.json'),
+    ];
     for (const file of manifests) {
       const text = ctx.read(file);
       if (text === null) continue;
