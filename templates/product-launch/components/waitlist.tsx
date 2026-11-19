@@ -62,7 +62,7 @@ function Joined({ entry, focus }: { entry: WaitlistEntry; focus: boolean }) {
         moves you up ten places.
       </p>
       <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-        <code className="min-w-0 flex-1 truncate rounded-control border border-line bg-surface-sunken px-3 py-2 text-sm text-fg">
+        <code className="min-w-0 flex-1 rounded-control break-all border border-line bg-surface-sunken px-3 py-2 text-sm text-fg">
           {link}
         </code>
         <Button
@@ -82,6 +82,15 @@ function Joined({ entry, focus }: { entry: WaitlistEntry; focus: boolean }) {
           {copied ? 'Link copied' : 'Copy invite link'}
         </Button>
       </div>
+      <button
+        type="button"
+        onClick={() => {
+          writeStored(STORAGE.waitlist, null);
+        }}
+        className="inline-flex min-h-(--rx-button-height-md) cursor-pointer items-center rounded-control text-sm text-fg-muted underline underline-offset-4 outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus pointer-coarse:min-h-(--rx-button-height-touch) pointer-fine:hover:text-fg"
+      >
+        Wrong address? Use a different email
+      </button>
     </div>
   );
 }
@@ -119,7 +128,7 @@ export function WaitlistForm() {
 
   // One live region holds both states, so joining is announced and nothing jumps on a return visit.
   return (
-    <div aria-live="polite" className="min-h-96">
+    <div aria-live="polite" className={raw === undefined ? 'min-h-96' : undefined}>
       {raw === undefined ? null : saved !== null ? (
         <Joined entry={saved} focus={joinedNow} />
       ) : (

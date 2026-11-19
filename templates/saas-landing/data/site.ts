@@ -28,6 +28,7 @@ export const NAV: readonly MarketingLink[] = [
   { label: 'Customers', href: '/customers' },
   { label: 'Blog', href: '/blog' },
   { label: 'Changelog', href: '/changelog' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 /** One label per intent, used everywhere on the site. */

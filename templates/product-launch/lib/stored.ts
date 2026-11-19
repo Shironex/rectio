@@ -27,9 +27,11 @@ export function readStored(key: string): string | null {
   }
 }
 
-export function writeStored(key: string, value: string) {
+/** Writes a value, or removes the key when given null, and tells every reader. */
+export function writeStored(key: string, value: string | null) {
   try {
-    localStorage.setItem(key, value);
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, value);
   } catch {
     // Storage blocked: readers keep the old value for this page view.
   }

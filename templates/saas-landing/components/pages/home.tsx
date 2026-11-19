@@ -52,8 +52,7 @@ export function HomePage() {
       />
       <LogoStrip
         title="Cafés, clinics, shops and warehouses plan their week on Rostra"
-        logos={CUSTOMERS}
-        variant="marquee"
+        logos={CUSTOMERS.slice(0, 5)}
       />
       <FeatureBento
         eyebrow="Product"
@@ -168,7 +167,7 @@ export function HomePage() {
       <TestimonialGrid
         eyebrow="Customers"
         title={<>Teams that stopped texting about shifts</>}
-        testimonials={TESTIMONIALS.slice(0, 5)}
+        testimonials={TESTIMONIALS.filter((t) => t.id !== 't4')}
       />
       <Faq
         title="Questions, answered"

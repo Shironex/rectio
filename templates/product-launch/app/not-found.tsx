@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: 'Page not found' };
 
 export default function NotFound() {
   return (
-    <main className="flex flex-1 flex-col items-start justify-center gap-6 px-4 py-24 sm:px-8 lg:mx-auto lg:w-full lg:max-w-3xl">
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-6 px-4 py-24 text-center sm:px-8">
       <a
         href="/"
         className="rounded-control outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus"

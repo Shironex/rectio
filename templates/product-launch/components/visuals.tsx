@@ -56,10 +56,11 @@ export function InterviewBoard({ className }: { className?: string }) {
           <span className="text-sm font-medium text-fg">Themes across 12 interviews</span>
           <span className="text-sm text-fg-muted">Pick one to see where it was said.</span>
           <ul className="flex flex-col gap-1">
-            {THEMES_FOUND.map((theme) => {
+            {THEMES_FOUND.map((theme, index) => {
               const on = active === theme.id;
               return (
-                <li key={theme.id}>
+                // A narrow board lists the top three, so the hero fade never covers a live control.
+                <li key={theme.id} className={cn(index > 2 && '@max-2xl:hidden')}>
                   <button
                     type="button"
                     aria-pressed={on}

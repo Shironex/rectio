@@ -69,7 +69,8 @@ function PlanCard({ plan, billing }: { plan: Plan; billing: Billing }) {
   return (
     <li
       className={cn(
-        'relative flex flex-col gap-6 rounded-panel border p-6 sm:p-8',
+        // A subgrid on wide screens, so prices, buttons and lists line up across the plans.
+        'relative flex flex-col gap-6 rounded-panel border p-6 sm:p-8 lg:row-span-4 lg:grid lg:grid-rows-subgrid',
         plan.featured === true
           ? 'border-accent bg-surface-raised shadow-overlay'
           : 'border-line bg-surface',
@@ -250,7 +251,7 @@ function PhoneComparison() {
 
 function Comparison() {
   return (
-    <Section width="wide" labelledBy="compare-title" className="pt-8 sm:pt-12">
+    <Section width="wide" labelledBy="compare-title" className="pt-8 pb-8 sm:pt-12 sm:pb-12">
       <SectionHeader id="compare-title" title="Compare every plan" size="md" />
       <PhoneComparison />
       {/* Focusable so a keyboard can scroll the plans into view if the screen is narrow. */}
@@ -267,7 +268,12 @@ function Comparison() {
                 <span className="sr-only">Feature</span>
               </TableHead>
               {PLANS.map((plan) => (
-                <TableHead key={plan.id}>{plan.name}</TableHead>
+                <TableHead
+                  key={plan.id}
+                  className={cn(plan.featured === true && 'bg-accent-subtle text-fg')}
+                >
+                  {plan.name}
+                </TableHead>
               ))}
             </TableRow>
           </TableHeader>
@@ -292,7 +298,10 @@ function Comparison() {
                       {row.feature}
                     </TableHead>
                     {PLANS.map((plan) => (
-                      <TableCell key={plan.id}>
+                      <TableCell
+                        key={plan.id}
+                        className={cn(plan.featured === true && 'bg-accent-subtle/40')}
+                      >
                         <CellValue value={row.cells[plan.id]} />
                       </TableCell>
                     ))}
@@ -327,7 +336,7 @@ export function PricingPage() {
           Plans
         </h2>
         <Container width="wide" className="flex flex-col gap-10">
-          <ul className="grid gap-4 lg:grid-cols-3">
+          <ul className="grid gap-4 lg:grid-cols-3 lg:gap-y-6">
             {PLANS.map((plan) => (
               <PlanCard key={plan.id} plan={plan} billing={billing} />
             ))}
@@ -337,6 +346,7 @@ export function PricingPage() {
       </section>
       <Comparison />
       <Faq
+        className="pt-8 sm:pt-12"
         variant="numbered"
         title="Billing questions"
         description="The four things teams ask before they pay."

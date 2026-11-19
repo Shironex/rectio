@@ -81,7 +81,7 @@ export function LaunchPage() {
         />
         <LogoStrip
           title="Product teams testing Quarry in private beta"
-          logos={BETA_TEAMS.map((name) => ({ name }))}
+          logos={BETA_TEAMS.slice(0, 4).map((name) => ({ name }))}
         />
         <div id="product">
           <FeatureBento

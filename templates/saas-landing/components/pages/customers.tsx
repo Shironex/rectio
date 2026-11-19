@@ -7,19 +7,15 @@ import {
   LogoStrip,
   Section,
   SectionHeader,
-  StatRow,
   TestimonialGrid,
-  TestimonialQuote,
 } from '@rectio/blocks/marketing/motion';
 import { cn } from '@rectio/ui';
 
 import { CUSTOMERS } from '@/components/brand';
 import { PageIntro } from '@/components/page-intro';
 import { CASE_STUDIES, type CaseStudy } from '@/data/company';
-import { STATS, TESTIMONIALS } from '@/data/marketing';
+import { TESTIMONIALS } from '@/data/marketing';
 import { DEMO, START } from '@/data/site';
-
-const LEAD = TESTIMONIALS.find((t) => t.id === 't3') ?? TESTIMONIALS[0];
 
 function CaseStudyCard({ study }: { study: CaseStudy }) {
   const logo = CUSTOMERS.find((customer) => study.company.startsWith(customer.name))?.logo;
@@ -72,7 +68,7 @@ export function CustomersPage() {
         }
         description="Cafés, clinics, shops and warehouses, from one site to forty. Here is what changed for them."
       />
-      <LogoStrip logos={CUSTOMERS.slice(0, 4)} className="pt-0 sm:pt-0" />
+      <LogoStrip logos={CUSTOMERS.slice(4, 8)} className="pt-0 sm:pt-0" />
       <Section width="wide" labelledBy="stories-title">
         <SectionHeader id="stories-title" title="Customer stories" />
         <ul className="mt-10 grid gap-4 md:grid-cols-3">
@@ -81,16 +77,9 @@ export function CustomersPage() {
           ))}
         </ul>
       </Section>
-      {LEAD !== undefined && (
-        <TestimonialQuote
-          testimonial={LEAD}
-          metric={{ value: '31%', label: 'fewer calls to the ward phone in six months' }}
-        />
-      )}
-      <StatRow stats={STATS} locale="en-GB" label="Rostra in numbers" />
       <TestimonialGrid
         title="In their words"
-        testimonials={TESTIMONIALS.filter((t) => t.id !== 't3').slice(0, 5)}
+        testimonials={TESTIMONIALS.filter((t) => t.id !== 't4')}
       />
       <CtaBand
         layout="split"
