@@ -12,6 +12,7 @@ describe('findDesignValueViolations', () => {
     ['duration-base ease-enter data-starting-style:opacity-0'],
     ['data-[side=top]:translate-y-1 aria-[invalid=true]:border-negative'],
     ['origin-(--transform-origin) h-control-md translate-y-(--rx-motion-shift)'],
+    ['translate-x-(--toast-swipe-movement-x) translate-y-(--toast-swipe-movement-y)'],
     ['font-sans font-numeric tabular-nums text-sm'],
     ['Interest is charged monthly'],
     ['transition-[opacity,scale,translate] duration-fast'],

@@ -24,6 +24,9 @@ const ALLOWED_VAR_PREFIXES = [
   '--available-width',
   '--available-height',
   '--nested-dialogs',
+  // How far a toast has been dragged, set by Base UI Toast while swiping.
+  '--toast-swipe-movement-x',
+  '--toast-swipe-movement-y',
 ];
 
 const PALETTE =
