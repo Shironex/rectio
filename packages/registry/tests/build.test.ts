@@ -253,6 +253,7 @@ describe('the rectio registry', () => {
       'alert',
       'amount-input',
       'announcement-bar',
+      'app-shell',
       'ar-aging',
       'avatar',
       'avatar-group',
@@ -260,6 +261,7 @@ describe('the rectio registry', () => {
       'banner',
       'blocks-core',
       'blog',
+      'breadcrumb',
       'budget-vs-actual',
       'button',
       'calendar',
@@ -269,7 +271,9 @@ describe('the rectio registry', () => {
       'cn',
       'collapsible',
       'combobox',
+      'command-menu',
       'contact',
+      'context-menu',
       'cookie-consent',
       'cta-band',
       'data-table',
@@ -283,6 +287,7 @@ describe('the rectio registry', () => {
       'fieldset',
       'file-upload',
       'hero',
+      'hover-card',
       'input-group',
       'invoice-detail',
       'invoice-list',
@@ -292,6 +297,7 @@ describe('the rectio registry', () => {
       'legal',
       'logo-strip',
       'marketing-core',
+      'menu',
       'meter',
       'money',
       'motion-alert',
@@ -315,6 +321,7 @@ describe('the rectio registry', () => {
       'motion-feature-grid',
       'motion-file-upload',
       'motion-hero',
+      'motion-hover-card',
       'motion-invoice-detail',
       'motion-invoice-list',
       'motion-kpi-row',
@@ -322,25 +329,31 @@ describe('the rectio registry', () => {
       'motion-loading-overlay',
       'motion-logo-strip',
       'motion-marketing-core',
+      'motion-menu',
       'motion-meter',
       'motion-money',
       'motion-multi-select',
       'motion-newsletter',
       'motion-number-field',
+      'motion-popover',
       'motion-progress',
       'motion-select',
       'motion-skeleton',
       'motion-stat-row',
       'motion-switch',
+      'motion-tabs',
       'motion-team',
       'motion-testimonials',
       'motion-timeline',
       'motion-toast',
       'motion-toggle',
       'multi-select',
+      'navigation-menu',
       'newsletter',
       'number-field',
       'otp-input',
+      'pagination',
+      'popover',
       'progress',
       'progress-circle',
       'radio-group',
@@ -348,6 +361,8 @@ describe('the rectio registry', () => {
       'search-input',
       'select',
       'separator',
+      'sheet',
+      'sidebar',
       'site-footer',
       'site-header',
       'skeleton',
@@ -357,6 +372,7 @@ describe('the rectio registry', () => {
       'stat-row',
       'stepper',
       'switch',
+      'tabs',
       'tag-input',
       'team',
       'testimonials',
@@ -368,17 +384,18 @@ describe('the rectio registry', () => {
       'toast',
       'toggle',
       'tokens',
+      'tooltip',
     ]);
   });
 
   it('links the data table to the checkbox, button, field and select it renders', () => {
     expect(byName.get('data-table')?.registryDependencies).toEqual([
-      'tokens',
       'button',
       'checkbox',
       'cn',
       'field',
       'select',
+      'tokens',
     ]);
     expect(byName.get('data-table')?.dependencies).toMatchObject({
       '@tanstack/react-table': '^9.3.1',
@@ -388,10 +405,10 @@ describe('the rectio registry', () => {
   it('derives the component graph from the imports', () => {
     expect(byName.get('dialog')?.registryDependencies).toEqual(['tokens', 'cn', 'theme-scope']);
     expect(byName.get('select')?.registryDependencies).toEqual([
-      'tokens',
       'cn',
       'field',
       'theme-scope',
+      'tokens',
     ]);
     expect(byName.get('button')?.dependencies).toEqual({
       '@base-ui/react': '^1.9.0',
@@ -411,10 +428,10 @@ describe('the rectio registry', () => {
     );
     // Imports of @rectio/ui became registry dependencies on the items that export each name.
     expect(byName.get('motion-dialog')?.registryDependencies).toEqual([
-      'tokens',
       'cn',
       'dialog',
       'motion-core',
+      'tokens',
     ]);
     const dialog = byName.get('motion-dialog')?.files[0];
     expect(dialog?.target).toBe('@ui/motion/dialog.tsx');
