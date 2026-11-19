@@ -63,7 +63,7 @@ export const payoutsPl: PayoutsMessages = {
   noneInFilter: (filter) => `Brak wypłat w widoku „${filter}”`,
   noneInFilterNote: 'Pojawią się tu wszystkie wypłaty z tym statusem.',
   showAll: 'Pokaż wszystkie wypłaty',
-  totalRow: (count) => `Wypłacone i w drodze, ${payouts(count)}`,
+  totalRow: (count) => `Razem, ${payouts(count)}`,
   totalNote: (excluded) =>
     excluded === 0
       ? 'Suma pokazanych kwot'

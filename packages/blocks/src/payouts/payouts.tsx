@@ -165,7 +165,7 @@ export const PAYOUTS_MESSAGES: PayoutsMessages = {
   noneInFilter: (filter) => `No ${filter.toLowerCase()} payouts`,
   noneInFilterNote: 'Every payout with this status will show here.',
   showAll: 'Show all payouts',
-  totalRow: (count) => `Paid and on the way, ${payouts(count)}`,
+  totalRow: (count) => `Total, ${payouts(count)}`,
   totalNote: (excluded) =>
     excluded === 0
       ? 'Sum of the amounts shown'
