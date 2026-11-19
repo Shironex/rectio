@@ -41,6 +41,7 @@ import { Button, Money, SelectContent } from '@rectio/motion';
 | [Dialog, DialogTrigger, DialogContent](/docs/components/dialog)              | The popup grows from the trigger that opened it, and returns there on close.     |
 | [SelectContent, SelectItem](/docs/components/select)                         | The list opens with a spring; the highlight glides between items.                |
 | [DataTableBody, TableRow, TableCell, TableRows](/docs/components/data-table) | New rows open in place; removed rows fade, then close the gap.                   |
+| [ToastProvider, useToast](/docs/components/toast)                            | Toasts rise into the stack and leave faster, dropping toward the corner.         |
 
 `TableRows`, `TableRow` and `TableCell` are for tables you build from the Table parts: wrap the rows
 in `TableRows` and use the motion `TableRow` and `TableCell` inside it.
@@ -83,7 +84,7 @@ same test checks that.
 ## Install
 
 <Callout>
-  The motion add-on is part of rectio Pro. Its registry items are not published yet. Once they are,
-  they install with `rectio add` and a license key, as described in
-  [Installation](/docs/installation#pro-license-key).
+  The motion add-on is part of rectio Pro. Each twin is a registry item named `motion-` and the
+  component, such as `motion-button`, and installs with `rectio add` and a license key, as described
+  in [Installation](/docs/installation#pro-license-key).
 </Callout>

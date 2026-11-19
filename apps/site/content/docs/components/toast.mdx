@@ -4,8 +4,14 @@ description: A short message after an action, with an Undo when the action can b
 ---
 
 import ToastDemo from '@/demos/toast';
+import ToastMotionDemo from '@/demos/toast.motion';
 
-<Preview name="toast" plain={<ToastDemo />} />
+<Preview
+  name="toast"
+  plain={<ToastDemo />}
+  motion={<ToastMotionDemo />}
+  importLine="import { ToastProvider, useToast } from '@rectio/motion';"
+/>
 
 ## Install
 

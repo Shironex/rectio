@@ -4,7 +4,7 @@ import { Button, ToastProvider, useToast } from '@rectio/ui';
 import { useState } from 'react';
 
 /** A toast with an Undo stays long enough to reach the button from the keyboard. */
-const UNDO_MS = 8000;
+export const UNDO_MS = 8000;
 
 export default function ToastDemo() {
   return (
@@ -14,7 +14,8 @@ export default function ToastDemo() {
   );
 }
 
-function ReportActions() {
+/** The actions, shared with the motion demo: the motion add-on uses the same `useToast`. */
+export function ReportActions() {
   const toast = useToast();
   const [lines, setLines] = useState(7);
 
