@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -103,12 +103,12 @@ describe('FileManager', () => {
     expect(names()[1]).toMatch(/notes/);
   });
 
-  it('keeps storage quiet until it is nearly full', () => {
+  it('shows a thin storage meter that warns near the limit', () => {
     const { rerender } = render(
       <FileManager path={PATH} entries={ENTRIES} now={NOW} storage={{ used: 5e9, total: 1e10 }} />,
     );
-    expect(screen.getByText(/storage used/)).toBeInTheDocument();
-    expect(screen.queryByRole('meter')).not.toBeInTheDocument();
+    expect(screen.getByRole('meter')).toBeInTheDocument();
+    expect(screen.queryByText(/Nearly full/)).not.toBeInTheDocument();
     rerender(
       <FileManager
         path={PATH}
@@ -117,7 +117,16 @@ describe('FileManager', () => {
         storage={{ used: 9.5e9, total: 1e10 }}
       />,
     );
-    expect(screen.getByText(/Storage is nearly full/)).toBeInTheDocument();
+    expect(screen.getByText(/Nearly full/)).toBeInTheDocument();
+  });
+
+  it('takes files dropped on an empty folder', () => {
+    const onDropFiles = vi.fn();
+    render(<FileManager path={PATH} entries={[]} now={NOW} onDropFiles={onDropFiles} />);
+    const file = new File(['x'], 'a.txt');
+    const title = screen.getByText('Drag files here or upload');
+    fireEvent.drop(title, { dataTransfer: { files: [file], types: ['Files'] } });
+    expect(onDropFiles).toHaveBeenCalledWith([file]);
   });
 
   it('shows an empty folder', () => {

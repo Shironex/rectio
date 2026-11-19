@@ -45,7 +45,7 @@ import {
   TableRow,
   cn,
 } from '@rectio/ui';
-import { useState, type KeyboardEvent } from 'react';
+import { useState, type DragEvent, type KeyboardEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -81,6 +81,8 @@ export interface FileManagerProps {
   /** Goes to a folder on the path; the breadcrumb becomes buttons when given. */
   onNavigate?: (folderId: string) => void;
   onUpload?: () => void;
+  /** Files dropped on the empty folder; the drop area appears when given. */
+  onDropFiles?: (files: File[]) => void;
   onCreateFolder?: () => void;
   /** Called with a valid, new name; the row renames in place. */
   onRename?: (entryId: string, name: string) => void;
@@ -144,6 +146,7 @@ export function FileManager({
   onOpen,
   onNavigate,
   onUpload,
+  onDropFiles,
   onCreateFolder,
   onRename,
   onDownload,
@@ -162,6 +165,7 @@ export function FileManager({
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [renaming, setRenaming] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string[] | null>(null);
+  const [dropping, setDropping] = useState(false);
 
   const current = path.at(-1);
   const sorted = sortFileEntries(entries, sort.key, sort.ascending);
@@ -314,50 +318,72 @@ export function FileManager({
           </ol>
         </nav>
       )}
-      {storage !== undefined && storageNeedsAttention(storage) && (
-        <UsageMeter
-          label="Storage"
-          value={storage.used}
-          max={storage.total}
-          valueText={`${formatBytes(storage.used, locale)} of ${formatBytes(storage.total, locale)}`}
-          level={storageLevel(storage)}
-          note={
-            storageLevel(storage) === 'over'
-              ? 'Storage is full. Delete files or upgrade to upload more.'
-              : 'Storage is nearly full. Delete files you no longer need to keep uploading.'
-          }
-        />
-      )}
-
       {entries.length === 0 ? (
-        <EmptyNote
-          title={
-            <span className="flex flex-col items-center gap-3">
-              <FolderOpenIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
-              Nothing in {current?.name ?? 'this folder'} yet
-            </span>
-          }
+        <div
+          data-drop={dropping || undefined}
+          {...(onDropFiles === undefined
+            ? {}
+            : {
+                onDragOver: (event: DragEvent) => {
+                  if (!event.dataTransfer.types.includes('Files')) return;
+                  event.preventDefault();
+                  setDropping(true);
+                },
+                onDragLeave: (event: DragEvent) => {
+                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                    setDropping(false);
+                  }
+                },
+                onDrop: (event: DragEvent) => {
+                  event.preventDefault();
+                  setDropping(false);
+                  const files = [...event.dataTransfer.files];
+                  if (files.length > 0) onDropFiles(files);
+                },
+              })}
+          className="rounded-control transition-colors duration-fast ease-standard data-drop:bg-accent-subtle data-drop:ring-2 data-drop:ring-accent"
         >
-          {onUpload !== undefined || onCreateFolder !== undefined
-            ? 'Upload files here, or make a folder to keep them in order.'
-            : 'Files added here show with their size and last change.'}
-          {(onUpload !== undefined || onCreateFolder !== undefined) && (
-            <span className="mt-4 flex flex-wrap justify-center gap-2">
-              {onCreateFolder !== undefined && (
-                <Button variant="secondary" onClick={onCreateFolder}>
-                  <FolderPlusIcon aria-hidden weight="bold" className="size-4" />
-                  New folder
-                </Button>
-              )}
-              {onUpload !== undefined && (
-                <Button onClick={onUpload}>
-                  <UploadSimpleIcon aria-hidden weight="bold" className="size-4" />
-                  Upload
-                </Button>
-              )}
-            </span>
-          )}
-        </EmptyNote>
+          <EmptyNote
+            title={
+              <span className="flex flex-col items-center gap-3">
+                {onDropFiles === undefined ? (
+                  <FolderOpenIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
+                ) : (
+                  <UploadSimpleIcon
+                    aria-hidden
+                    weight="duotone"
+                    className="size-8 text-fg-subtle"
+                  />
+                )}
+                {onDropFiles !== undefined
+                  ? dropping
+                    ? `Drop to upload to ${current?.name ?? 'this folder'}`
+                    : 'Drag files here or upload'
+                  : `Nothing in ${current?.name ?? 'this folder'} yet`}
+              </span>
+            }
+          >
+            {onUpload !== undefined || onCreateFolder !== undefined || onDropFiles !== undefined
+              ? `Files land in ${current?.name ?? 'this folder'}; make a folder to keep them in order.`
+              : 'Files added here show with their size and last change.'}
+            {(onUpload !== undefined || onCreateFolder !== undefined) && (
+              <span className="mt-4 flex flex-wrap justify-center gap-2">
+                {onCreateFolder !== undefined && (
+                  <Button variant="secondary" onClick={onCreateFolder}>
+                    <FolderPlusIcon aria-hidden weight="bold" className="size-4" />
+                    New folder
+                  </Button>
+                )}
+                {onUpload !== undefined && (
+                  <Button onClick={onUpload}>
+                    <UploadSimpleIcon aria-hidden weight="bold" className="size-4" />
+                    Upload
+                  </Button>
+                )}
+              </span>
+            )}
+          </EmptyNote>
+        </div>
       ) : (
         <>
           {/* One toolbar: on narrow widths it selects and sorts; on wide ones the header row
@@ -496,14 +522,15 @@ export function FileManager({
                           <span
                             className={cn(
                               'inline-flex size-8 shrink-0 items-center justify-center rounded-control border',
+                              // A low tint for folders: an outline glyph in the accent, not a solid block.
                               kind === 'folder'
-                                ? 'border-accent/30 bg-accent-subtle text-accent-strong'
+                                ? 'border-line bg-surface text-accent-strong'
                                 : 'border-line bg-surface-sunken text-fg-muted',
                             )}
                           >
                             <KindIcon
                               aria-hidden
-                              weight={kind === 'folder' ? 'fill' : 'regular'}
+                              weight={kind === 'folder' ? 'duotone' : 'regular'}
                               className="size-4"
                             />
                             <span className="sr-only">{KIND_WORDS[kind]}</span>
@@ -574,11 +601,15 @@ export function FileManager({
                         align="end"
                         className="hidden whitespace-nowrap text-fg-muted numeric @xl:table-cell"
                       >
-                        {entry.type === 'folder'
-                          ? entry.itemCount === undefined
-                            ? ''
-                            : plural(entry.itemCount, 'item')
-                          : formatBytes(entry.size ?? 0, locale)}
+                        {entry.type === 'folder' ? (
+                          entry.itemCount === undefined ? null : (
+                            <span className="text-fg-subtle">
+                              {plural(entry.itemCount, 'item')}
+                            </span>
+                          )
+                        ) : (
+                          formatBytes(entry.size ?? 0, locale)
+                        )}
                       </TableCell>
                       <TableCell className="w-0">
                         {actions.length > 0 && (
@@ -591,14 +622,28 @@ export function FileManager({
               </Rows>
             </TableBody>
           </Table>
-          {storage !== undefined && !storageNeedsAttention(storage) && (
-            <p className="flex items-center gap-2 text-sm text-fg-muted">
-              <HardDrivesIcon aria-hidden weight="bold" className="size-4 text-fg-subtle" />
-              <span>
-                <span className="numeric">{formatBytes(storage.used, locale)}</span> of{' '}
-                <span className="numeric">{formatBytes(storage.total, locale)}</span> storage used
-              </span>
-            </p>
+          {storage !== undefined && (
+            <UsageMeter
+              className="@xl:max-w-xs"
+              label={
+                <span className="inline-flex items-center gap-1.5 font-normal text-fg-muted">
+                  <HardDrivesIcon aria-hidden weight="bold" className="size-4 text-fg-subtle" />
+                  Storage
+                </span>
+              }
+              value={storage.used}
+              max={storage.total}
+              valueText={`${formatBytes(storage.used, locale)} of ${formatBytes(storage.total, locale)}`}
+              level={storageLevel(storage)}
+              {...(storageNeedsAttention(storage)
+                ? {
+                    note:
+                      storageLevel(storage) === 'over'
+                        ? 'Storage is full. Delete files or upgrade to upload more.'
+                        : 'Nearly full. Delete files you no longer need to keep uploading.',
+                  }
+                : {})}
+            />
           )}
         </>
       )}
@@ -765,7 +810,7 @@ function FileSortHead({
           'font-medium whitespace-nowrap text-fg-muted hover:text-fg data-sorted:text-fg',
           'transition-colors duration-fast ease-standard',
           '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
-          align === 'end' && 'flex-row-reverse',
+          align === 'end' && 'justify-end',
         )}
       >
         <span>{children}</span>
@@ -774,7 +819,9 @@ function FileSortHead({
           weight="bold"
           className={cn(
             'size-3 shrink-0',
-            !active && 'text-fg-disabled group-hover/sort:text-fg-subtle',
+            // Only the active column shows its arrow; the others show it on hover or focus.
+            !active &&
+              'text-fg-subtle opacity-0 group-hover/sort:opacity-100 group-focus-visible/sort:opacity-100',
           )}
         />
       </button>
