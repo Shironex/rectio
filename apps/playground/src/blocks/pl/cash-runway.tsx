@@ -93,6 +93,7 @@ export const cashRunwayPl: CashRunwayMessages = {
   ),
   chartSummary: (summary) =>
     `Saldo gotówki na koniec miesiąca, rzeczywiste, a potem prognozowane przy średnim spalaniu. ${summary}. Strzałkami na wykresie przejdziesz po miesiącach, albo pokaż tabelę.`,
+  emptySummary: 'Nic jeszcze nie zaksięgowano',
   emptyTitle: 'Brak historii gotówki',
   emptyNote: 'Zapas gotówki pojawi się, gdy zaksięgujesz co najmniej miesiąc wpływów i wydatków.',
   tableCaption: (currency) => `Saldo gotówki na koniec miesiąca, w ${currency}`,

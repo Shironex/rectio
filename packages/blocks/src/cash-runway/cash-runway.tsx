@@ -133,6 +133,8 @@ export interface CashRunwayMessages extends CommonMessages {
   chartSummary: (summary: string) => string;
   emptyTitle: string;
   emptyNote: string;
+  /** The line under the title while there is no history. */
+  emptySummary: string;
   tableCaption: (currency: string) => string;
 }
 
@@ -205,6 +207,7 @@ export const CASH_RUNWAY_MESSAGES: CashRunwayMessages = {
   ),
   chartSummary: (summary) =>
     `Month-end cash balance, actual then projected at the average burn. ${summary}. Use the arrow keys on the chart to read each month, or show the table.`,
+  emptySummary: 'Nothing booked yet',
   emptyTitle: 'No cash history yet',
   emptyNote: 'Runway appears once a month of cash in and out is booked.',
   tableCaption: (currency) => `Month-end cash balance, in ${currency}`,
@@ -411,25 +414,7 @@ export function CashRunway({
     <BlockPanel
       title={title ?? m.title}
       description={
-        history.length === 0 ? undefined : m.summary(runway.status, zeroMonth, thresholdWords)
-      }
-      actions={
-        windows.length > 1 && (
-          <div className="flex items-center gap-2">
-            {/* The switch's name in sight as well as on the group: "3 mo" alone says too little. */}
-            <span aria-hidden className="text-sm text-fg-muted">
-              {m.window}
-            </span>
-            <Segmented
-              label={m.window}
-              value={String(averageOver)}
-              onValueChange={(value) => {
-                setAverageOver(Number(value) as RunwayWindow);
-              }}
-              options={windows.map((w) => ({ value: String(w), label: m.windowOption(w) }))}
-            />
-          </div>
-        )
+        history.length === 0 ? m.emptySummary : m.summary(runway.status, zeroMonth, thresholdWords)
       }
       className={className}
       bodyClassName="gap-4"
@@ -440,6 +425,23 @@ export function CashRunway({
         </EmptyNote>
       ) : (
         <>
+          {/* Its own row in every theme and width, right above the figures it changes. */}
+          {windows.length > 1 && (
+            <div className="flex items-center gap-2">
+              {/* The switch's name in sight as well as on the group: "3 mo" alone says too little. */}
+              <span aria-hidden className="text-sm text-fg-muted">
+                {m.window}
+              </span>
+              <Segmented
+                label={m.window}
+                value={String(averageOver)}
+                onValueChange={(value) => {
+                  setAverageOver(Number(value) as RunwayWindow);
+                }}
+                options={windows.map((w) => ({ value: String(w), label: m.windowOption(w) }))}
+              />
+            </div>
+          )}
           <Figures
             currency={currency}
             locale={locale}

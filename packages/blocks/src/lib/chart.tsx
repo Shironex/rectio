@@ -206,8 +206,11 @@ export function ChartFigure({
   return (
     <figure className={cn('m-0 flex min-w-0 flex-col gap-3', className)}>
       <figcaption className="sr-only">{summary}</figcaption>
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        {legend !== undefined ? <ChartLegend items={legend} /> : <span />}
+      {/* The legend wraps inside its own column, so the table switch keeps its place at the end. */}
+      <div className="flex items-start justify-between gap-x-4">
+        <div className="min-w-0 flex-1 pt-1.5">
+          {legend !== undefined && <ChartLegend items={legend} />}
+        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -216,7 +219,7 @@ export function ChartFigure({
           onClick={() => {
             setShowTable((shown) => !shown);
           }}
-          className="-me-2"
+          className="-me-2 shrink-0"
         >
           <TableIcon aria-hidden weight="bold" className="size-3.5" />
           {showTable ? hideTableLabel : showTableLabel}
