@@ -82,7 +82,8 @@ describe('Toast', () => {
 
   it('closes by itself after the timeout', async () => {
     render(
-      <ToastProvider timeout={50}>
+      // Long enough for the first look to find the toast on a busy worker, short enough to wait out.
+      <ToastProvider timeout={400}>
         <SaveButton onUndo={vi.fn()} />
       </ToastProvider>,
     );

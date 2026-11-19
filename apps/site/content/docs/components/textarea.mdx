@@ -1,0 +1,79 @@
+---
+title: Textarea
+description: Longer text, such as a note or a reason, that grows with what is typed.
+---
+
+<Preview name="textarea" plain={<Demo name="textarea" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add textarea
+```
+
+`field` installs with it.
+
+## Usage
+
+```tsx
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Textarea } from '@/components/ui/textarea';
+
+<Field>
+  <FieldLabel>Note for the approver</FieldLabel>
+  <Textarea value={note} onValueChange={setNote} maxLength={240} showCount />
+</Field>;
+```
+
+The field starts `minRows` lines tall and grows with its text up to `maxRows`, then scrolls. It
+measures and sets its height in one pass before the browser paints, so the page below never jumps,
+whether the text is typed or set by the app. Set `minRows` and `maxRows` to the same number for a
+fixed height.
+
+With `maxLength` and `showCount`, the count under the field reads `120 / 500`. Near the limit it
+turns to the warning colour and adds the characters left in words; at the limit it says so in the
+negative colour. `warnAt` sets how close counts as near; the default is a tenth of the limit, at
+least 10 characters.
+
+There is no motion variant: a text field that animates as you type only slows typing down.
+
+## Props
+
+Every prop of a native `textarea` is accepted as well, except `rows`, which `minRows` sets.
+
+<TypeTable
+  type={{
+    value: { type: 'string', description: 'The text, when controlled.' },
+    defaultValue: { type: 'string', description: 'The starting text, when uncontrolled.' },
+    onValueChange: {
+      type: '(value: string, details) => void',
+      description: 'Called with the new text on every change.',
+    },
+    minRows: { type: 'number', default: '3', description: 'Height at rest, in lines.' },
+    maxRows: {
+      type: 'number',
+      default: '10',
+      description: 'The field grows up to this many lines, then scrolls.',
+    },
+    maxLength: { type: 'number', description: 'The character limit. Typing stops there.' },
+    showCount: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Shows the count against maxLength under the field.',
+    },
+    warnAt: {
+      type: 'number',
+      description: 'Characters before the limit at which the count warns and starts to announce.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Named by its `FieldLabel`; the description and the error are linked to it.
+- The count is announced politely only near the limit, as "12 characters left" or "Limit
+  reached", after a short pause in typing so a fast typist hears one number, not every keystroke.
+- Near and at the limit the count carries a warning icon and words, not colour alone.
+- Uses the same invalid, disabled and focus styles as `Input`.
+
+<ComponentSource path="textarea/textarea.tsx" />

@@ -1,0 +1,105 @@
+---
+title: Switch
+description: An on or off setting that applies at once, alone or as a settings row.
+---
+
+<Preview
+  name="switch"
+  plain={<Demo name="switch" />}
+  motion={<Demo name="switch.motion" />}
+  importLine="import { Switch, SwitchField } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add switch
+```
+
+`field` installs with it.
+
+## Usage
+
+```tsx
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Switch, SwitchField } from '@/components/ui/switch';
+
+<Field>
+  <FieldLabel>Email receipts</FieldLabel>
+  <Switch checked={receipts} onCheckedChange={setReceipts} />
+</Field>;
+
+<SwitchField
+  label="Require two approvers"
+  description="For expenses above €5,000."
+  checked={twoApprovers}
+  onCheckedChange={setTwoApprovers}
+/>;
+```
+
+Use a switch for a setting that takes effect the moment it changes. In a form that applies on
+submit, a `Checkbox` says better that nothing has happened yet.
+
+`SwitchField` is the row of a settings list: the label and description on the left, the switch on
+the right. It is a `Field`, so the label names the switch and pressing the label toggles it, the
+description is linked, and `disabled` greys the whole row. Pass a `FieldError` as children and set
+`invalid` to show why a setting cannot be turned on.
+
+The motion variant moves the thumb to its new end on a spring, and turns it around mid way when a
+second press comes quickly.
+
+## Props
+
+### Switch
+
+Every prop of Base UI's `Switch.Root` is accepted as well: `checked`, `defaultChecked`,
+`onCheckedChange`, `disabled`, `readOnly`, `required`, `name` and the rest.
+
+<TypeTable
+  type={{
+    thumbClassName: {
+      type: 'string',
+      description: 'Class for the thumb.',
+    },
+  }}
+/>
+
+### SwitchField
+
+Takes every `Switch` prop, which goes to the switch, plus:
+
+<TypeTable
+  type={{
+    label: {
+      type: 'ReactNode',
+      required: true,
+      description: 'Names the switch. Pressing it toggles the switch.',
+    },
+    description: {
+      type: 'ReactNode',
+      description: 'What the setting does. Linked to the switch as its description.',
+    },
+    invalid: {
+      type: 'boolean',
+      description: 'Marks the row invalid and shows the FieldError passed as children.',
+    },
+    fieldClassName: {
+      type: 'string',
+      description: 'Class for the row. `className` styles the switch.',
+    },
+    children: {
+      type: 'ReactNode',
+      description: 'A FieldError, shown under the description.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Renders `role="switch"` with `aria-checked`. Space and Enter toggle it.
+- Named by its `FieldLabel`, the `SwitchField` label, a wrapping label or `aria-label`.
+- On is the filled track with the thumb at the far end, so the state reads from position as well
+  as colour.
+- The drawn track is small; its hit area is larger, and reaches 44px on touch screens.
+
+<ComponentSource path="switch/switch.tsx" />

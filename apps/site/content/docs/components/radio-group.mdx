@@ -1,0 +1,117 @@
+---
+title: Radio group
+description: One choice from a few options that stay in view, as a list or as cards.
+---
+
+<Preview name="radio-group" plain={<Demo name="radio-group" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add radio-group
+```
+
+`field` installs with it.
+
+## Usage
+
+```tsx
+import { Field, FieldDescription } from '@/components/ui/field';
+import { Radio, RadioCard, RadioGroup } from '@/components/ui/radio-group';
+
+<Field>
+  <RadioGroup legend="Billing period" value={period} onValueChange={setPeriod}>
+    <Radio value="monthly">Monthly</Radio>
+    <Radio value="yearly" description="Two months free.">
+      Yearly
+    </Radio>
+  </RadioGroup>
+</Field>;
+
+<Field>
+  <RadioGroup
+    legend="Plan"
+    value={plan}
+    onValueChange={setPlan}
+    className="grid gap-3 sm:grid-cols-3"
+  >
+    <RadioCard value="starter" title="Starter" description="Up to 3 members." meta="€0/mo" />
+    <RadioCard
+      value="team"
+      title="Team"
+      description="Approval flows and audit log."
+      meta="€12/mo"
+    />
+  </RadioGroup>
+  <FieldDescription>Per member. Change plans at any time.</FieldDescription>
+</Field>;
+```
+
+Reach for a radio group when there are two to five options and seeing them all helps the choice.
+For a longer list, use a `Select`.
+
+Name the group with `legend`. It works like a fieldset legend: it names the group without being
+pressable, so a click on the question never picks an option, which a `FieldLabel` would. Inside a
+`Field`, the group takes the field's description, error and disabled state.
+
+`RadioCard` draws an option as a card for plan and method pickers. The whole card is the radio; its
+title names it and its description and `meta` (a price, a fee) describe it. Lay cards out with
+`className` on the group, such as a grid. The group stacks its options in a column by default; pass
+`flex-row` for a short inline set.
+
+## Props
+
+### RadioGroup
+
+Every prop of Base UI's `RadioGroup` is accepted as well: `value`, `defaultValue`,
+`onValueChange`, `disabled`, `readOnly`, `required`, `name` and the rest.
+
+<TypeTable
+  type={{
+    legend: {
+      type: 'ReactNode',
+      description: 'The question the options answer. Names the group; without it, pass aria-label.',
+    },
+  }}
+/>
+
+### Radio
+
+Every prop of Base UI's `Radio.Root` is accepted as well, including `value` and `disabled`.
+
+<TypeTable
+  type={{
+    children: { type: 'ReactNode', description: 'The label. Pressing it picks the option.' },
+    description: {
+      type: 'ReactNode',
+      description: 'A second line under the label, linked as the description.',
+    },
+  }}
+/>
+
+### RadioCard
+
+Every prop of Base UI's `Radio.Root` is accepted as well, including `value` and `disabled`.
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode', required: true, description: 'The option name. Names the radio.' },
+    description: { type: 'ReactNode', description: 'What the option includes.' },
+    meta: {
+      type: 'ReactNode',
+      description:
+        'Trailing detail such as a price, in tabular figures. Read after the description.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Renders `role="radiogroup"` named by its legend, with a `role="radio"` per option.
+- Tab enters the group at the chosen option; the arrow keys move the choice; Tab leaves.
+- The chosen option shows a dot in a filled circle, and a chosen card also gets an accent border,
+  so the choice never rests on colour alone.
+- The dot grows from half size when an option is picked; under reduced motion it simply appears.
+- Each circle has a hit area larger than its drawing, 44px on touch screens.
+
+<ComponentSource path="radio-group/radio-group.tsx" />

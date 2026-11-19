@@ -1,0 +1,95 @@
+---
+title: InputGroup
+description: An input with text, an icon or a button inside its border.
+---
+
+<Preview name="input-group" plain={<Demo name="input-group" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add input-group
+```
+
+`field` and `button` install with it.
+
+## Usage
+
+```tsx
+import { Field, FieldLabel } from '@/components/ui/field';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group';
+
+<Field>
+  <FieldLabel>Company website</FieldLabel>
+  <InputGroup>
+    <InputGroupAddon>https://</InputGroupAddon>
+    <InputGroupInput placeholder="northwind.io" />
+  </InputGroup>
+</Field>;
+
+<Field>
+  <FieldLabel>Webhook URL</FieldLabel>
+  <InputGroup>
+    <InputGroupInput value={url} readOnly />
+    <InputGroupAddon align="end">
+      <InputGroupButton iconOnly aria-label="Copy webhook URL" onClick={copy}>
+        <CopyIcon aria-hidden />
+      </InputGroupButton>
+    </InputGroupAddon>
+  </InputGroup>
+</Field>;
+```
+
+The group draws the field's border, so the input and its addons read as one control. Place addons
+in the markup in the order they appear, and set `align="end"` on an addon after the input. Pressing
+a text or icon addon focuses the input, as if the press landed inside it.
+
+Invalid and disabled come from the `Field` around it: the whole group turns red or recedes.
+A disabled button inside an addon (a Copy with nothing to copy) leaves the field as it is.
+
+`SearchInput` is built on this component.
+
+## Props
+
+### InputGroup
+
+Every prop of a `div` is accepted.
+
+### InputGroupInput
+
+Every prop of Base UI's `Field.Control` is accepted: `value`, `defaultValue`, `onValueChange`,
+`placeholder`, `type` and the rest.
+
+### InputGroupAddon
+
+Every prop of a `div` is accepted as well.
+
+<TypeTable
+  type={{
+    align: {
+      type: "'start' | 'end'",
+      default: "'start'",
+      description: 'Which side of the input the addon sits on. Mirrors in right-to-left text.',
+    },
+  }}
+/>
+
+### InputGroupButton
+
+Every prop of `Button` is accepted, with `variant` defaulting to `ghost` and `size` to `sm`.
+
+## Accessibility
+
+- The `FieldLabel` names the input. Addon text such as "EUR" is not part of the input's name or
+  value: name the unit in the label too ("Hourly rate, EUR").
+- Icon addons are decorative; give them `aria-hidden`. An icon-only button needs an `aria-label`.
+- One focus ring wraps the group while the input has focus; an addon button shows its own ring
+  when it has focus, so focus never shows twice.
+- Buttons stay reachable with Tab after the input.
+
+<ComponentSource path="input-group/input-group.tsx" />

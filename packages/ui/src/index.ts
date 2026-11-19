@@ -213,3 +213,109 @@ export {
 export { Stat, StatGroup, type StatChange, type StatProps } from './stat/stat';
 export { ScrollArea, type ScrollAreaProps } from './scroll-area/scroll-area';
 export { Stepper, type StepStatus, type StepperProps, type StepperStep } from './stepper/stepper';
+export { Textarea, type TextareaProps } from './textarea/textarea';
+export {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  type InputGroupAddonProps,
+  type InputGroupButtonProps,
+  type InputGroupInputProps,
+  type InputGroupProps,
+} from './input-group/input-group';
+export { SearchInput, type SearchInputProps } from './search-input/search-input';
+export { NumberField, type NumberFieldProps } from './number-field/number-field';
+export { OtpInput, type OtpInputProps } from './otp-input/otp-input';
+export {
+  Fieldset,
+  FieldsetDescription,
+  FieldsetLegend,
+  FormActions,
+  FormSection,
+  type FieldsetDescriptionProps,
+  type FieldsetLegendProps,
+  type FieldsetProps,
+  type FormActionsProps,
+  type FormSectionProps,
+} from './fieldset/fieldset';
+export { Switch, SwitchField, type SwitchFieldProps, type SwitchProps } from './switch/switch';
+export {
+  Radio,
+  RadioCard,
+  RadioGroup,
+  type RadioCardProps,
+  type RadioGroupProps,
+  type RadioProps,
+} from './radio-group/radio-group';
+export {
+  Toggle,
+  ToggleGroup,
+  type ToggleGroupProps,
+  type ToggleProps,
+  type ToggleSize,
+} from './toggle/toggle';
+export { Slider, type SliderProps } from './slider/slider';
+export {
+  FileDropzone,
+  FileItem,
+  FileList,
+  FileProgress,
+  FileUpload,
+  FileUploadTrigger,
+  defaultFileUploadMessages,
+  describeAccept,
+  formatFileSize,
+  matchesAccept,
+  useFileUpload,
+  validateFiles,
+  type FileDropzoneProps,
+  type FileItemProps,
+  type FileListProps,
+  type FileProgressProps,
+  type FileRejection,
+  type FileRejectionCode,
+  type FileRules,
+  type FileUploadEntry,
+  type FileUploadMessages,
+  type FileUploadProps,
+  type FileUploadStatus,
+  type FileUploadTask,
+  type FileUploadTriggerProps,
+  type UseFileUploadOptions,
+} from './file-upload/file-upload';
+export { popupGroupLabel, popupItem, popupMotion, popupSurface } from './select/select';
+export {
+  Tag,
+  TagInput,
+  tagRemoveButton,
+  type TagInputProps,
+  type TagProps,
+  type TagRejection,
+} from './tag-input/tag-input';
+export {
+  Combobox,
+  ComboboxContent,
+  ComboboxGroup,
+  ComboboxInput,
+  ComboboxItem,
+  comboboxIconButton,
+  comboboxSurface,
+  type ComboboxContentProps,
+  type ComboboxGroupProps,
+  type ComboboxInputProps,
+  type ComboboxItemProps,
+  type ComboboxProps,
+} from './combobox/combobox';
+export {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectGroup,
+  MultiSelectInput,
+  MultiSelectItem,
+  type MultiSelectContentProps,
+  type MultiSelectGroupProps,
+  type MultiSelectInputProps,
+  type MultiSelectItemProps,
+  type MultiSelectProps,
+} from './multi-select/multi-select';

@@ -22,6 +22,17 @@ import {
   DateSection,
   ToastSection,
 } from './finance';
+import { RadioGroupSection, SliderSection, SwitchSection, ToggleSection } from './forms-choice';
+import { ComboboxSection, MultiSelectSection, TagInputSection } from './forms-pickers';
+import {
+  FieldsetSection,
+  InputGroupSection,
+  NumberFieldSection,
+  OtpInputSection,
+  SearchInputSection,
+  TextareaSection,
+} from './forms-text';
+import { FileUploadSection } from './forms-upload';
 import { Row, Section } from './specimen';
 
 const items = CATEGORIES.map((c) => ({ value: c.value, label: c.label }));
@@ -222,6 +233,20 @@ export function Gallery() {
 
       <BadgeSection />
       <CheckboxSection />
+      <SwitchSection />
+      <RadioGroupSection />
+      <ToggleSection />
+      <SliderSection />
+      <TextareaSection />
+      <InputGroupSection />
+      <SearchInputSection />
+      <NumberFieldSection />
+      <OtpInputSection />
+      <ComboboxSection />
+      <MultiSelectSection />
+      <TagInputSection />
+      <FileUploadSection />
+      <FieldsetSection />
       <DataTableSection />
       <DateSection />
       <ToastSection />

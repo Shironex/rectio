@@ -1,0 +1,77 @@
+---
+title: OtpInput
+description: A one-time code or PIN, one slot per character.
+---
+
+<Preview name="otp-input" plain={<Demo name="otp-input" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add otp-input
+```
+
+`field` installs with it.
+
+## Usage
+
+```tsx
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { OtpInput } from '@/components/ui/otp-input';
+
+<Field invalid={wrong}>
+  <FieldLabel>Verification code</FieldLabel>
+  <OtpInput groups={[3, 3]} value={code} onValueChange={setCode} onComplete={verify} />
+  <FieldError>That code is not right.</FieldError>
+</Field>;
+```
+
+`length` sets the number of slots, from 4 to 8 (6 by default). `groups` splits them into chunks
+with a separator between, such as `[3, 3]` for `123 456`; groups that do not add up to the length
+are ignored. `type="alphanumeric"` takes letters as well as digits, for recovery and invite codes.
+`mask` hides the characters, for a PIN.
+
+Focus moves to the next slot as each character lands, and Backspace moves back. Pasting a whole
+code fills every slot, and the browser can offer a code from a text message, since the first slot
+carries `autocomplete="one-time-code"`. `onComplete` runs once every slot is filled.
+
+There is no motion variant: characters arrive in quick succession, and animating them would only
+slow entry down.
+
+## Props
+
+Every prop of Base UI's `OTPField.Root` is accepted as well: `value`, `defaultValue`,
+`onValueChange`, `mask`, `autoSubmit`, `name`, `disabled` and more.
+
+<TypeTable
+  type={{
+    length: { type: '4 | 5 | 6 | 7 | 8', default: '6', description: 'Number of characters.' },
+    groups: {
+      type: 'number[]',
+      description: 'Chunk sizes, such as [3, 3]. Must add up to length.',
+    },
+    type: {
+      type: "'numeric' | 'alphanumeric'",
+      default: "'numeric'",
+      description: 'Digits only, or letters and digits.',
+    },
+    mask: { type: 'boolean', default: 'false', description: 'Hide the characters, for a PIN.' },
+    onComplete: {
+      type: '(value: string) => void',
+      description: 'Called once every slot is filled, with the whole code.',
+    },
+    slotLabel: {
+      type: '(position: number, length: number) => string',
+      description: 'Accessible name of each slot after the first. Defaults to "Character 2 of 6".',
+    },
+  }}
+/>
+
+## Accessibility
+
+- The slots form a group named by the `FieldLabel` and described by the description and error.
+  The first slot takes the label too; the others are named by position.
+- Numeric codes open the numeric keyboard on phones.
+- An invalid code shows the error with an icon and text, and every slot turns red.
+
+<ComponentSource path="otp-input/otp-input.tsx" />

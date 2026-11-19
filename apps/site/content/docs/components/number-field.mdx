@@ -1,0 +1,93 @@
+---
+title: NumberField
+description: A number with a stepper, such as seats, a percentage or a number of days.
+---
+
+<Preview
+  name="number-field"
+  plain={<Demo name="number-field" />}
+  motion={<Demo name="number-field.motion" />}
+  importLine="import { NumberField } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add number-field
+```
+
+`field` installs with it.
+
+## Usage
+
+```tsx
+import { Field, FieldLabel } from '@/components/ui/field';
+import { NumberField } from '@/components/ui/number-field';
+
+<Field>
+  <FieldLabel>Seats</FieldLabel>
+  <NumberField value={seats} onValueChange={setSeats} min={1} max={250} unit="seats" />
+</Field>;
+
+<Field>
+  <FieldLabel>Volume discount</FieldLabel>
+  <NumberField
+    value={discount}
+    onValueChange={setDiscount}
+    step={0.01}
+    format={{ style: 'percent' }}
+  />
+</Field>;
+```
+
+`format` takes Intl number format options: `{ style: 'percent' }` shows `0.15` as `15%`, and
+`{ style: 'unit', unit: 'day', unitDisplay: 'long' }` shows `14 days`. Typed text is parsed with the
+same rules in the given `locale`. For a unit that is only a label, such as "seats", pass `unit`
+instead: it sits after the figure and is not part of the value.
+
+Figures are right-aligned and tabular, like `AmountInput`. The stepper buttons are as tall as the
+field, so they are 44px targets on touch screens, and they repeat while held. Use `AmountInput` for
+money; it sets the currency's symbol and decimals for you.
+
+The motion variant nudges the figure in the direction of a stepped change (the buttons, arrow
+keys, the wheel, or a value set by the app) and settles, the same tick as the motion
+`AmountInput`. Typed changes never move.
+
+## Props
+
+Every prop of Base UI's `NumberField.Root` is accepted as well: `value`, `defaultValue`,
+`onValueChange`, `min`, `max`, `step`, `largeStep`, `disabled`, `name` and more.
+
+<TypeTable
+  type={{
+    format: {
+      type: 'Intl.NumberFormatOptions',
+      description: 'Percent, unit, decimals and grouping, applied in the locale.',
+    },
+    locale: { type: 'string', description: 'BCP 47 locale for grouping, decimals and units.' },
+    unit: {
+      type: 'ReactNode',
+      description: 'A fixed unit after the figure. Decorative: name it in the label too.',
+    },
+    placeholder: { type: 'string' },
+    hideStepper: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Hide the buttons; the keyboard still steps.',
+    },
+    decrementLabel: { type: 'string', default: "'Decrease'" },
+    incrementLabel: { type: 'string', default: "'Increase'" },
+    'aria-label': { type: 'string', description: 'Only when no FieldLabel names the input.' },
+  }}
+/>
+
+## Accessibility
+
+- Named by its `FieldLabel`. Arrow Up and Arrow Down step by `step`, Page Up and Page Down by
+  `largeStep`, Home and End jump to `min` and `max`.
+- The stepper buttons are named "Decrease" and "Increase" and sit out of the tab order, since the
+  arrow keys do the same from the input. They disable at `min` and `max`.
+- A `unit` is hidden from screen readers; name it in the label ("Seats", "Retention, days").
+- Uses the same invalid, disabled and focus styles as `Input`.
+
+<ComponentSource path="number-field/number-field.tsx" />

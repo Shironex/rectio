@@ -16,6 +16,28 @@ export const popupMotion = cn(
   'data-ending-style:opacity-0 data-ending-style:ease-exit data-ending-style:duration-fast',
 );
 
+/**
+ * The surface of a list popup: Select, Combobox and Multi select share it, so every list in a
+ * theme scope reads as the same object.
+ */
+export const popupSurface = cn(
+  'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow)',
+  'outline-none',
+);
+
+/** One option row in a list popup, highlighted by keyboard or pointer, check mark on the left. */
+export const popupItem = cn(
+  'flex cursor-default scroll-my-1 items-center gap-2',
+  'rounded-(--rx-field-radius) py-1.5 ps-2 pe-3 text-base outline-none select-none',
+  'pointer-coarse:min-h-(--rx-field-height-touch)',
+  'data-highlighted:bg-accent-subtle data-highlighted:text-fg data-selected:font-medium',
+  'data-disabled:text-fg-disabled',
+);
+
+/** The small caps heading of a group of options. */
+export const popupGroupLabel =
+  'px-2 pt-2 pb-1 text-xs font-medium tracking-caps text-fg-subtle uppercase';
+
 export const Select = BaseSelect.Root;
 
 export type SelectTriggerProps = WithClassName<ComponentProps<typeof BaseSelect.Trigger>> & {
@@ -74,8 +96,7 @@ export function SelectContent({
           data-slot="select-content"
           className={cn(
             'max-h-(--available-height) min-w-(--anchor-width) overflow-y-auto p-1',
-            'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow)',
-            'outline-none',
+            popupSurface,
             popupMotion,
             className,
           )}
@@ -95,18 +116,7 @@ export type SelectItemProps = WithClassName<ComponentProps<typeof BaseSelect.Ite
 
 export function SelectItem({ className, children, hint, ...props }: SelectItemProps) {
   return (
-    <BaseSelect.Item
-      data-slot="select-item"
-      className={cn(
-        'flex cursor-default scroll-my-1 items-center gap-2',
-        'rounded-(--rx-field-radius) py-1.5 ps-2 pe-3 text-base outline-none select-none',
-        'pointer-coarse:min-h-(--rx-field-height-touch)',
-        'data-highlighted:bg-accent-subtle data-highlighted:text-fg data-selected:font-medium',
-        'data-disabled:text-fg-disabled',
-        className,
-      )}
-      {...props}
-    >
+    <BaseSelect.Item data-slot="select-item" className={cn(popupItem, className)} {...props}>
       <span className="flex size-4 shrink-0 items-center justify-center">
         <BaseSelect.ItemIndicator className="flex text-accent-strong">
           <CheckIcon aria-hidden weight="bold" className="size-3.5" />
@@ -125,9 +135,7 @@ export type SelectGroupProps = WithClassName<ComponentProps<typeof BaseSelect.Gr
 export function SelectGroup({ className, label, children, ...props }: SelectGroupProps) {
   return (
     <BaseSelect.Group className={cn('not-first:mt-1', className)} {...props}>
-      <BaseSelect.GroupLabel className="px-2 pt-2 pb-1 text-xs font-medium tracking-caps text-fg-subtle uppercase">
-        {label}
-      </BaseSelect.GroupLabel>
+      <BaseSelect.GroupLabel className={popupGroupLabel}>{label}</BaseSelect.GroupLabel>
       {children}
     </BaseSelect.Group>
   );
