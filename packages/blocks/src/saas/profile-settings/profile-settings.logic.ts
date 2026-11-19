@@ -57,3 +57,12 @@ export function timeZoneLabel(timeZone: string, at: Date, locale: string): strin
     return city;
   }
 }
+
+/** The time it is in a time zone, short and in the locale; empty when the zone is unknown. */
+export function profileLocalTime(timeZone: string, at: Date, locale: string): string {
+  try {
+    return dateFormat(locale, { timeZone, timeStyle: 'short' }).format(at);
+  } catch {
+    return '';
+  }
+}

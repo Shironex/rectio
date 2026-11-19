@@ -8,6 +8,7 @@ import {
   profileDeleteConfirmed,
   profileEmailChanged,
   profileErrors,
+  profileLocalTime,
   timeZoneLabel,
 } from '../../src/index';
 
@@ -160,5 +161,24 @@ describe('ProfileSettings', () => {
     await userEvent.type(screen.getByLabelText(/Job title/), 'x');
     await userEvent.click(screen.getByRole('button', { name: 'Discard' }));
     expect(screen.getByText('All changes saved').closest('p')).toHaveFocus();
+  });
+
+  it('previews how teammates see the edits as they are typed', async () => {
+    render(<ProfileSettings profile={PROFILE} onSave={vi.fn()} now={NOW} locale="en-GB" />);
+    const preview = screen.getByRole('complementary', { name: 'How teammates see you' });
+    const title = screen.getByLabelText(/Job title/);
+    await userEvent.clear(title);
+    await userEvent.type(title, 'Finance lead');
+    expect(within(preview).getByText('Finance lead')).toBeInTheDocument();
+    expect(
+      within(preview).getByText(profileLocalTime(PROFILE.timeZone, NOW, 'en-GB')),
+    ).toBeInTheDocument();
+  });
+
+  it('reads the local time in a zone, and nothing for an unknown one', () => {
+    expect(profileLocalTime('Europe/Lisbon', new Date(Date.UTC(2026, 0, 5, 9, 30)), 'en-GB')).toBe(
+      '09:30',
+    );
+    expect(profileLocalTime('Nowhere/City', NOW, 'en-GB')).toBe('');
   });
 });

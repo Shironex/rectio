@@ -1,4 +1,10 @@
-import { CheckCircleIcon, ImageIcon, TrashIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  ImageIcon,
+  TrashIcon,
+  WarningCircleIcon,
+} from '@phosphor-icons/react';
 import {
   Dialog,
   DialogBody,
@@ -40,6 +46,7 @@ import {
   profileDeleteConfirmed,
   profileEmailChanged,
   profileErrors,
+  profileLocalTime,
   timeZoneLabel,
   type ProfileErrors,
   type ProfileValues,
@@ -209,151 +216,160 @@ export function ProfileSettings({
             <FormMessage tone="error" title={error} />
           </div>
         )}
-        <div className="flex flex-col divide-y divide-line">
-          <Row title="Picture" hint="Square images work best, at least 256 pixels wide.">
-            <div className="flex flex-wrap items-center gap-4">
-              <Avatar
-                name={profile.name}
-                src={profile.avatarUrl}
-                size="lg"
-                className="size-20 text-2xl"
-              />
-              <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-5">
-                {onAvatarChange !== undefined && (
-                  <>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        fileRef.current?.click();
-                      }}
-                    >
-                      <ImageIcon aria-hidden weight="bold" className="size-3.5" />
-                      {profile.avatarUrl === undefined ? 'Upload picture' : 'Change picture'}
-                    </Button>
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      accept="image/png, image/jpeg, image/webp"
-                      aria-label="Choose a profile picture"
-                      className="sr-only"
-                      tabIndex={-1}
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        if (file !== undefined) onAvatarChange(file);
-                        event.target.value = '';
-                      }}
-                    />
-                  </>
-                )}
-                {onAvatarRemove !== undefined && profile.avatarUrl !== undefined && (
-                  <Button variant="ghost" size="sm" onClick={onAvatarRemove}>
-                    Remove
-                  </Button>
-                )}
-              </div>
-            </div>
-          </Row>
-
-          <Row title="Name and role" hint="Shown on comments, mentions and approvals.">
-            <Field invalid={errors.name !== undefined}>
-              <FieldLabel>Full name</FieldLabel>
-              <Input
-                name="name"
-                autoComplete="name"
-                value={draft.name}
-                onChange={(event) => {
-                  set('name', event.target.value);
-                }}
-              />
-              {errors.name !== undefined && <FieldError>{errors.name}</FieldError>}
-            </Field>
-            <Field>
-              <FieldLabel optional>Job title</FieldLabel>
-              <Input
-                name="job-title"
-                autoComplete="organization-title"
-                value={draft.jobTitle}
-                placeholder="For example: Finance lead"
-                onChange={(event) => {
-                  set('jobTitle', event.target.value);
-                }}
-              />
-            </Field>
-          </Row>
-
-          <Row title="Email" hint="Where sign-in links, invites and notifications go.">
-            <Field invalid={errors.email !== undefined}>
-              {/* The row names the field; the label stays for screen readers. */}
-              <FieldLabel className="sr-only">Email address</FieldLabel>
-              <Input
-                type="email"
-                name="email"
-                autoComplete="email"
-                inputMode="email"
-                spellCheck={false}
-                value={draft.email}
-                onChange={(event) => {
-                  set('email', event.target.value);
-                }}
-              />
-              {errors.email !== undefined ? (
-                <FieldError>{errors.email}</FieldError>
-              ) : emailChanged ? (
-                <FieldDescription>
-                  We will send a link to the new address. The old one stays until it is confirmed.
-                </FieldDescription>
-              ) : profile.emailVerified === false ? (
-                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                  <FieldDescription className="flex items-center gap-1.5 text-sm">
-                    <WarningCircleIcon
-                      aria-hidden
-                      weight="bold"
-                      className="size-4 shrink-0 text-warning-strong"
-                    />
-                    <span className="font-medium text-warning-strong">Not verified.</span>
-                    Confirm it from the link we sent.
-                  </FieldDescription>
-                  {onResendVerification !== undefined && (
-                    <Button variant="secondary" size="sm" onClick={onResendVerification}>
-                      Resend the link
+        {/* From @4xl the right side holds a live preview, so the form is not left-heavy. */}
+        <div className="flex flex-col @4xl:flex-row @4xl:items-start @4xl:gap-8">
+          <div className="flex min-w-0 flex-1 flex-col divide-y divide-line">
+            <Row title="Picture" hint="Square images work best, at least 256 pixels wide.">
+              <div className="flex flex-wrap items-center gap-4">
+                <Avatar
+                  name={profile.name}
+                  src={profile.avatarUrl}
+                  size="lg"
+                  className="size-20 text-2xl"
+                />
+                <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-5">
+                  {onAvatarChange !== undefined && (
+                    <>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          fileRef.current?.click();
+                        }}
+                      >
+                        <ImageIcon aria-hidden weight="bold" className="size-3.5" />
+                        {profile.avatarUrl === undefined ? 'Upload picture' : 'Change picture'}
+                      </Button>
+                      <input
+                        ref={fileRef}
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        aria-label="Choose a profile picture"
+                        className="sr-only"
+                        tabIndex={-1}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file !== undefined) onAvatarChange(file);
+                          event.target.value = '';
+                        }}
+                      />
+                    </>
+                  )}
+                  {onAvatarRemove !== undefined && profile.avatarUrl !== undefined && (
+                    <Button variant="ghost" size="sm" onClick={onAvatarRemove}>
+                      Remove
                     </Button>
                   )}
                 </div>
-              ) : (
-                <FieldDescription className="flex items-center gap-1.5">
-                  <CheckCircleIcon
-                    aria-hidden
-                    weight="bold"
-                    className="size-3.5 shrink-0 text-positive-strong"
-                  />
-                  Verified
-                </FieldDescription>
-              )}
-            </Field>
-          </Row>
+              </div>
+            </Row>
 
-          <Row title="Time zone" hint="Due dates, digests and quiet hours follow it.">
-            <Field>
-              <FieldLabel className="sr-only">Time zone</FieldLabel>
-              <Select
-                items={zoneItems}
-                value={draft.timeZone}
-                onValueChange={(next) => {
-                  if (typeof next === 'string') set('timeZone', next);
-                }}
-              >
-                <SelectTrigger />
-                <SelectContent>
-                  {zoneItems.map((zone) => (
-                    <SelectItem key={zone.value} value={zone.value}>
-                      {zone.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </Row>
+            <Row title="Name and role" hint="Shown on comments, mentions and approvals.">
+              <Field invalid={errors.name !== undefined}>
+                <FieldLabel>Full name</FieldLabel>
+                <Input
+                  name="name"
+                  autoComplete="name"
+                  value={draft.name}
+                  onChange={(event) => {
+                    set('name', event.target.value);
+                  }}
+                />
+                {errors.name !== undefined && <FieldError>{errors.name}</FieldError>}
+              </Field>
+              <Field>
+                <FieldLabel optional>Job title</FieldLabel>
+                <Input
+                  name="job-title"
+                  autoComplete="organization-title"
+                  value={draft.jobTitle}
+                  placeholder="For example: Finance lead"
+                  onChange={(event) => {
+                    set('jobTitle', event.target.value);
+                  }}
+                />
+              </Field>
+            </Row>
+
+            <Row title="Email" hint="Where sign-in links, invites and notifications go.">
+              <Field invalid={errors.email !== undefined}>
+                {/* The row names the field; the label stays for screen readers. */}
+                <FieldLabel className="sr-only">Email address</FieldLabel>
+                <Input
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  inputMode="email"
+                  spellCheck={false}
+                  value={draft.email}
+                  onChange={(event) => {
+                    set('email', event.target.value);
+                  }}
+                />
+                {errors.email !== undefined ? (
+                  <FieldError>{errors.email}</FieldError>
+                ) : emailChanged ? (
+                  <FieldDescription>
+                    We will send a link to the new address. The old one stays until it is confirmed.
+                  </FieldDescription>
+                ) : profile.emailVerified === false ? (
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                    <FieldDescription className="flex items-center gap-1.5 text-sm">
+                      <WarningCircleIcon
+                        aria-hidden
+                        weight="bold"
+                        className="size-4 shrink-0 text-warning-strong"
+                      />
+                      <span className="font-medium text-warning-strong">Not verified.</span>
+                      Confirm it from the link we sent.
+                    </FieldDescription>
+                    {onResendVerification !== undefined && (
+                      <Button variant="secondary" size="sm" onClick={onResendVerification}>
+                        Resend the link
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <FieldDescription className="flex items-center gap-1.5">
+                    <CheckCircleIcon
+                      aria-hidden
+                      weight="bold"
+                      className="size-3.5 shrink-0 text-positive-strong"
+                    />
+                    Verified
+                  </FieldDescription>
+                )}
+              </Field>
+            </Row>
+
+            <Row title="Time zone" hint="Due dates, digests and quiet hours follow it.">
+              <Field>
+                <FieldLabel className="sr-only">Time zone</FieldLabel>
+                <Select
+                  items={zoneItems}
+                  value={draft.timeZone}
+                  onValueChange={(next) => {
+                    if (typeof next === 'string') set('timeZone', next);
+                  }}
+                >
+                  <SelectTrigger />
+                  <SelectContent>
+                    {zoneItems.map((zone) => (
+                      <SelectItem key={zone.value} value={zone.value}>
+                        {zone.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            </Row>
+          </div>
+          <ProfilePreview
+            name={draft.name}
+            jobTitle={draft.jobTitle}
+            avatarUrl={profile.avatarUrl}
+            time={profileLocalTime(draft.timeZone, now, locale)}
+          />
         </div>
 
         {/* -mx-5 and px-5 match BlockPanel's body padding, so the bar runs edge to edge. */}
@@ -440,6 +456,48 @@ export function ProfileSettings({
         }}
       />
     </BlockPanel>
+  );
+}
+
+/** How teammates see you, updated as you type: picture, name, role and local time. */
+function ProfilePreview({
+  name,
+  jobTitle,
+  avatarUrl,
+  time,
+}: {
+  name: string;
+  jobTitle: string;
+  avatarUrl: string | undefined;
+  time: string;
+}) {
+  return (
+    <aside
+      aria-label="How teammates see you"
+      className="sticky top-4 hidden w-64 shrink-0 flex-col gap-4 rounded-panel border border-line bg-surface-sunken p-5 @4xl:mt-6 @4xl:flex"
+    >
+      <p className="text-sm font-medium text-fg-muted">How teammates see you</p>
+      <div className="flex items-center gap-3">
+        <Avatar
+          name={name.trim() === '' ? '?' : name}
+          src={avatarUrl}
+          size="md"
+          className="size-10"
+        />
+        <div className="flex min-w-0 flex-col">
+          <p className="truncate font-medium text-fg">{name.trim() === '' ? 'Your name' : name}</p>
+          <p className="truncate text-sm text-fg-muted">
+            {jobTitle.trim() === '' ? 'No job title' : jobTitle}
+          </p>
+        </div>
+      </div>
+      <p className="flex items-center gap-1.5 border-t border-line pt-3 text-sm text-fg-muted">
+        <ClockIcon aria-hidden weight="bold" className="size-4 shrink-0" />
+        <span>
+          Local time <span className="numeric text-fg">{time}</span>
+        </span>
+      </p>
+    </aside>
   );
 }
 
