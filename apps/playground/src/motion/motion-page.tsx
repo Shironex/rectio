@@ -342,7 +342,7 @@ function SelectSpecimen() {
         `List: ${springSpec(t.spring.overlay)}. Highlight: ${springSpec(t.spring.press)}.`
       }
       plain="The list fades in from its trigger; each option highlights itself."
-      motion="The list grows from its trigger. On arrow keys, one highlight glides to the next option."
+      motion="The list grows from its trigger. Under the pointer, one highlight glides to the next option; arrow keys move it at once."
     >
       <Field className="w-56">
         <FieldLabel>Category</FieldLabel>

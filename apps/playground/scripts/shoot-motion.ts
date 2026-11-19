@@ -186,8 +186,10 @@ try {
       `select-glide-${which}`,
       s,
       async () => {
-        await page.keyboard.press('ArrowDown');
-        await page.keyboard.press('ArrowDown');
+        // The glide follows the pointer; arrow keys move the highlight at once.
+        const options = page.getByRole('option');
+        await options.nth(1).hover();
+        await options.nth(3).hover();
       },
       260,
     );
