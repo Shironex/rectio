@@ -97,7 +97,7 @@ describe('ResetPassword', () => {
     expect(screen.getByText('Passwords do not match yet')).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText('Confirm new password'), '-Lines-42');
     expect(screen.getByText('Passwords match')).toBeInTheDocument();
-    expect(screen.getByText('You will be signed out elsewhere')).toBeInTheDocument();
+    expect(screen.getByText('Signed out elsewhere.')).toBeInTheDocument();
   });
 
   it('points the new password at both its rules and its error', async () => {
@@ -125,5 +125,13 @@ describe('ResetPassword', () => {
   it('moves focus to the heading of a step that replaces another', () => {
     render(<ResetPassword step="sent" sentTo="a@b.io" onRequest={noop} onReset={noop} />);
     expect(screen.getByRole('heading', { name: 'Check your email' })).toHaveFocus();
+  });
+
+  it('moves focus to the request heading when coming back from the sent step', () => {
+    const { rerender } = render(
+      <ResetPassword step="sent" sentTo="a@b.io" onRequest={noop} onReset={noop} />,
+    );
+    rerender(<ResetPassword step="request" onRequest={noop} onReset={noop} />);
+    expect(screen.getByRole('heading', { name: 'Reset your password' })).toHaveFocus();
   });
 });

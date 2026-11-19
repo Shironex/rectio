@@ -58,9 +58,18 @@ export function ResetPassword({
   signIn,
   defaultEmail = '',
   brand,
+  aside,
   className,
 }: ResetPasswordProps) {
   const { Button } = useBlockParts();
+  // Set once the step has changed since mount: the request step then replaces another (after
+  // "Use a different email" or an expired link), so it takes focus like the others.
+  const [shownStep, setShownStep] = useState(step);
+  const [arrived, setArrived] = useState(false);
+  if (step !== shownStep) {
+    setShownStep(step);
+    setArrived(true);
+  }
   const hasError = error !== undefined && error !== null && error !== false;
   // Every step carries the same way out, so the four read as one flow.
   const back =
@@ -70,7 +79,7 @@ export function ResetPassword({
         <AuthLink to={signIn}>Back to sign in</AuthLink>
       </>
     );
-  const frame: StepFrame = { brand, className, footer: back };
+  const frame: StepFrame = { brand, aside, className, footer: back };
 
   if (step === 'sent') {
     return (
@@ -147,6 +156,7 @@ export function ResetPassword({
   return (
     <RequestLink
       frame={frame}
+      focusHeading={arrived}
       pending={pending}
       error={hasError ? error : undefined}
       defaultEmail={defaultEmail}
@@ -158,18 +168,21 @@ export function ResetPassword({
 /** What every step's frame shares: your brand, your class and the way back to sign in. */
 interface StepFrame {
   brand: ReactNode;
+  aside: ReactNode;
   className: string | undefined;
   footer: ReactNode;
 }
 
 function RequestLink({
   frame,
+  focusHeading,
   pending,
   error,
   defaultEmail,
   onRequest,
 }: {
   frame: StepFrame;
+  focusHeading: boolean;
   pending: boolean;
   error: ReactNode;
   defaultEmail: string;
@@ -194,6 +207,7 @@ function RequestLink({
   return (
     <AuthFrame
       {...frame}
+      focusHeading={focusHeading}
       title="Reset your password"
       description="Enter the email you sign in with and we will send you a link to choose a new password."
     >
@@ -292,7 +306,10 @@ function NewPassword({
           />
           {errors.password !== undefined && <FieldError>{errors.password}</FieldError>}
           {/* Choosing the password is the whole step, so its rules stay in view from the start. */}
-          <PasswordRules id={rulesId} password={password} minLength={minLength} />
+          <div id={rulesId} className="flex flex-col gap-1.5">
+            {password === '' && <p className="text-sm font-medium text-fg">Your password needs:</p>}
+            <PasswordRules password={password} minLength={minLength} />
+          </div>
         </Field>
         <Field invalid={errors.confirm !== undefined}>
           <FieldLabel>Confirm new password</FieldLabel>
@@ -309,7 +326,7 @@ function NewPassword({
           <p
             aria-live="polite"
             className={cn(
-              'flex items-center gap-1.5 text-sm empty:hidden',
+              'flex items-center gap-1.5 text-sm empty:sr-only',
               matches ? 'text-positive-strong' : 'text-fg-muted',
             )}
           >
@@ -325,15 +342,13 @@ function NewPassword({
             )}
           </p>
         </Field>
-        <div className="flex items-start gap-3 rounded-control border border-line bg-surface-sunken px-3.5 py-3">
-          <SignOutIcon aria-hidden weight="fill" className="mt-0.5 size-5 shrink-0 text-fg" />
-          <div className="flex flex-col gap-0.5 text-sm">
-            <p className="font-medium text-fg">You will be signed out elsewhere</p>
-            <p className="text-fg-muted">
-              Saving ends every other session, so anyone using your old password loses access.
-            </p>
-          </div>
-        </div>
+        <p className="flex items-start gap-2 text-sm text-fg-muted">
+          <SignOutIcon aria-hidden weight="bold" className="mt-0.5 size-4 shrink-0 text-fg" />
+          <span>
+            <strong className="font-medium text-fg">Signed out elsewhere.</strong> Saving ends your
+            sessions on other devices.
+          </span>
+        </p>
         <Button type="submit" loading={pending} className="w-full">
           Save new password
         </Button>
