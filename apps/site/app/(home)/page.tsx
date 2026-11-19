@@ -110,22 +110,8 @@ export default function Home() {
           </div>
         </Section>
 
-        <Section className="flex flex-col gap-10 py-16 md:py-24">
-          <SectionIntro
-            eyebrow="Theme packs"
-            title={
-              <>
-                <span className="font-regular">Themes are</span> token files.
-              </>
-            }
-          >
-            Two ship free with every component. Packs for charts and printed statements are next.
-          </SectionIntro>
-          <ThemePacks />
-        </Section>
-
-        <Section className="py-8 md:py-12">
-          <div className="flex flex-col gap-10 rounded-panel bg-accent-subtle px-4 py-12 sm:px-8 md:px-12 md:py-16">
+        <Section className="py-16 md:py-24">
+          <div className="flex flex-col gap-10">
             <SectionIntro
               eyebrow="Currencies"
               title={
@@ -139,6 +125,22 @@ export default function Home() {
               minus sign and tabular figures. Search the list.
             </SectionIntro>
             <CurrencyGrid codes={money.codes} names={money.names} />
+          </div>
+        </Section>
+
+        <Section className="py-8 md:py-12">
+          <div className="site-panel flex flex-col gap-10 rounded-panel px-4 py-12 sm:px-8 md:px-12 md:py-16">
+            <SectionIntro
+              eyebrow="Theme packs"
+              title={
+                <>
+                  <span className="font-regular">Themes are</span> token files.
+                </>
+              }
+            >
+              Two ship free with every component. Packs for charts and printed statements are next.
+            </SectionIntro>
+            <ThemePacks />
           </div>
         </Section>
 

@@ -29,15 +29,18 @@ function Statement({ look, values }: { look: Look; values: Readout }) {
             {theme}, {mode}
           </code>
         </div>
-        <p className="font-display text-xl font-heading tracking-tight text-fg sm:text-3xl">
-          Net position
-        </p>
-        <Money
-          amount={182406.35}
-          currency="EUR"
-          locale="en-IE"
-          className="text-xl font-strong text-fg tabular-nums sm:text-4xl"
-        />
+        {/* Title on the left, figure on the right: at the default split each theme shows one. */}
+        <div className="flex items-end justify-between gap-4">
+          <p className="font-display text-xl font-heading tracking-tight text-fg sm:text-3xl">
+            Net position
+          </p>
+          <Money
+            amount={182406.35}
+            currency="EUR"
+            locale="en-IE"
+            className="font-display text-xl font-heading text-fg tabular-nums sm:text-4xl"
+          />
+        </div>
       </div>
       <dl className="flex flex-1 flex-col px-6 py-2 sm:px-8">
         {READOUT.map((item) => (
@@ -46,11 +49,11 @@ function Statement({ look, values }: { look: Look; values: Readout }) {
             className="flex items-center justify-between gap-4 border-b border-line py-3 last:border-b-0"
           >
             <dt className="truncate text-sm text-fg">{item.label}</dt>
-            <dd className="flex min-w-0 items-center gap-2 font-mono text-sm text-fg">
+            <dd className="flex max-w-1/2 min-w-0 items-center justify-end gap-2 font-mono text-xs text-fg sm:text-sm">
               {'swatch' in item && (
                 <span
                   aria-hidden
-                  className={`size-4 shrink-0 rounded-badge border border-line-strong ${item.swatch}`}
+                  className={`hidden size-4 shrink-0 rounded-badge border border-line-strong sm:block ${item.swatch}`}
                 />
               )}
               <span className="truncate">{shown?.[item.token] ?? ''}</span>
