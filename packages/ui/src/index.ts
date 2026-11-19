@@ -284,3 +284,38 @@ export {
   type FileUploadTriggerProps,
   type UseFileUploadOptions,
 } from './file-upload/file-upload';
+export { popupGroupLabel, popupItem, popupMotion, popupSurface } from './select/select';
+export {
+  Tag,
+  TagInput,
+  tagRemoveButton,
+  type TagInputProps,
+  type TagProps,
+  type TagRejection,
+} from './tag-input/tag-input';
+export {
+  Combobox,
+  ComboboxContent,
+  ComboboxGroup,
+  ComboboxInput,
+  ComboboxItem,
+  comboboxIconButton,
+  comboboxSurface,
+  type ComboboxContentProps,
+  type ComboboxGroupProps,
+  type ComboboxInputProps,
+  type ComboboxItemProps,
+  type ComboboxProps,
+} from './combobox/combobox';
+export {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectGroup,
+  MultiSelectInput,
+  MultiSelectItem,
+  type MultiSelectContentProps,
+  type MultiSelectGroupProps,
+  type MultiSelectInputProps,
+  type MultiSelectItemProps,
+  type MultiSelectProps,
+} from './multi-select/multi-select';
