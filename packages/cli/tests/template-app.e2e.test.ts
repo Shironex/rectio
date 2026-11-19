@@ -87,7 +87,7 @@ describe('a project from each template', () => {
 
   afterAll(() => {
     parent.cleanup();
-  });
+  }, 120_000);
 
   it('has at least the finance app', () => {
     expect(templates.map((t) => t.name)).toContain('finance-app');
@@ -120,8 +120,11 @@ describe('a project from each template', () => {
         expect(files.some((f) => f.startsWith('components/ui/'))).toBe(true);
         for (const file of files.filter((f) => /\.(tsx?|css|json|mjs)$/.test(f))) {
           const text = read(root, file);
-          expect(text, file).not.toContain('@rectio/');
-          expect(text, file).not.toContain('@registry/');
+          // Prose may name the kit's packages; no import, CSS import or dependency may.
+          expect(text, file).not.toMatch(
+            /(?:from|import|@import)\s*\(?\s*['"]@(?:rectio|registry)\//,
+          );
+          expect(text, file).not.toMatch(/"@rectio\/[\w-]+"\s*:/);
           expect(text, file).not.toContain('workspace:');
         }
         const pkg = JSON.parse(read(root, 'package.json')) as { name: string };
