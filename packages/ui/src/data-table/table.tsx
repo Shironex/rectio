@@ -83,7 +83,7 @@ export function TableHead({ className, align = 'start', scope = 'col', ...props 
       scope={scope}
       className={cn(
         'h-(--rx-table-header-height) px-(--rx-table-cell-padding-x) align-middle',
-        'pointer-coarse:h-(--rx-table-row-height-touch)',
+        'pointer-coarse:has-data-[slot=checkbox]:h-(--rx-table-row-height-touch)',
         'text-sm font-medium whitespace-nowrap text-fg-muted',
         'border-b border-line-strong bg-(--rx-table-header-background)',
         // In the footer, the label of a totals row sits on the strong rule above it.
@@ -105,8 +105,9 @@ export function TableCell({ className, align = 'start', ...props }: TableCellPro
     <td
       className={cn(
         'h-(--rx-table-row-height) px-(--rx-table-cell-padding-x) py-2 align-middle',
-        // Touch rows are never shorter than a hit area, so checkbox targets of two rows never overlap.
-        'pointer-coarse:h-(--rx-table-row-height-touch)',
+        // A touch row with a checkbox is never shorter than its hit area, so the checkbox targets of
+        // two rows never overlap. Rows without one keep their density.
+        'pointer-coarse:has-data-[slot=checkbox]:h-(--rx-table-row-height-touch)',
         'border-b border-line',
         // A totals row draws its own strong rule, so the last body row drops its hairline.
         'in-[table:has(tfoot)>tbody>tr:last-child]:border-b-0',
