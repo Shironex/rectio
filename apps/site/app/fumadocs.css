@@ -99,3 +99,39 @@
   --color-fd-secondary: var(--rx-surface-hover);
   --color-fd-muted-foreground: var(--rx-text-muted);
 }
+
+/*
+ * Code colours. Highlighting uses the GitHub themes, whose keyword red and dark comment grey fall
+ * under 4.5:1 on rectio surfaces and sit outside its palette. Each GitHub colour is mapped to a
+ * rectio token instead; the tokens already change with the theme and the mode.
+ */
+:root .shiki code span,
+:root code.shiki span {
+  &[style*='--shiki-light:#24292E'] {
+    color: var(--rx-fg);
+  }
+  &[style*='--shiki-light:#032F62'] {
+    color: var(--rx-positive-strong);
+  }
+  &[style*='--shiki-light:#005CC5'] {
+    color: var(--rx-info-strong);
+  }
+  &[style*='--shiki-light:#D73A49'] {
+    color: var(--rx-accent-strong);
+  }
+  &[style*='--shiki-light:#6F42C1'] {
+    color: var(--rx-warning-strong);
+  }
+  &[style*='--shiki-light:#E36209'] {
+    color: var(--rx-warning-strong);
+  }
+  &[style*='--shiki-light:#22863A'] {
+    color: var(--rx-positive-strong);
+  }
+  &[style*='--shiki-light:#B31D28'] {
+    color: var(--rx-negative-strong);
+  }
+  &[style*='--shiki-light:#6A737D'] {
+    color: var(--rx-fg-muted);
+  }
+}

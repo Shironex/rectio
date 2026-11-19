@@ -85,6 +85,7 @@ export const columns: DataTableColumnDef<Expense>[] = [
     accessorKey: 'date',
     header: 'Date',
     sortFn: 'datetime',
+    meta: { className: 'hidden sm:table-cell' },
     cell: ({ row }) => (
       <span className="text-fg-muted numeric">{shortDate.format(row.original.date)}</span>
     ),
@@ -101,7 +102,6 @@ export const columns: DataTableColumnDef<Expense>[] = [
     accessorKey: 'status',
     header: 'Status',
     sortFn: 'text',
-    meta: { className: 'hidden sm:table-cell' },
     cell: ({ row }) => <Badge tone={TONES[row.original.status]}>{row.original.status}</Badge>,
   },
   {
@@ -110,7 +110,12 @@ export const columns: DataTableColumnDef<Expense>[] = [
     header: 'Amount, EUR',
     meta: { align: 'end', label: 'Amount' },
     cell: ({ row }) => (
-      <Money amount={row.original.amount} currency="EUR" locale="en-IE" tone="auto" />
+      <Money
+        amount={row.original.amount}
+        currency="EUR"
+        locale="en-IE"
+        tone={row.original.amount < 0 ? 'auto' : 'neutral'}
+      />
     ),
     footer: ({ table }) => (
       <Money

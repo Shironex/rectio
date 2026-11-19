@@ -57,7 +57,7 @@ export function PreviewShell({
             Code
           </Tabs.Tab>
         </Tabs.List>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="-mx-3 flex max-w-full items-center gap-2 overflow-x-auto px-3 sm:mx-0 sm:px-0">
           {motion !== undefined && (
             <Segmented
               label="Variant"
