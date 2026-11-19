@@ -321,18 +321,11 @@ function NotificationRow({
       className={cn(
         'flex w-full cursor-pointer gap-3 px-5 py-3 text-start',
         'transition-colors duration-fast ease-standard hover:bg-surface-hover',
-        !notification.read && 'bg-surface-sunken',
+        !notification.read && 'bg-accent-subtle/40',
         '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
       )}
     >
       <span className="relative inline-flex size-8 shrink-0">
-        {/* The unread dot rides the avatar's top corner, ringed in the row's tint. */}
-        {!notification.read && (
-          <span
-            aria-hidden
-            className="absolute -start-0.5 -top-0.5 z-10 size-2.5 rounded-full bg-accent ring-2 ring-surface-sunken"
-          />
-        )}
         {notification.actor === undefined ? (
           <span
             aria-hidden
@@ -356,13 +349,16 @@ function NotificationRow({
         {notification.body !== undefined && (
           <span className="line-clamp-2 text-sm text-fg-muted">{notification.body}</span>
         )}
-        <time
-          dateTime={isoDateTime(notification.at)}
-          title={formatDateTime(notification.at, locale)}
-          className="text-xs text-fg-muted"
-        >
-          {relativeTime(notification.at, now, locale)}
-        </time>
+        {/* The meta line: the unread dot beside the moment, said once by the title's prefix. */}
+        <span className="flex items-center gap-1.5 text-xs text-fg-muted">
+          {!notification.read && <span aria-hidden className="size-2 rounded-full bg-accent" />}
+          <time
+            dateTime={isoDateTime(notification.at)}
+            title={formatDateTime(notification.at, locale)}
+          >
+            {relativeTime(notification.at, now, locale)}
+          </time>
+        </span>
       </span>
     </button>
   );

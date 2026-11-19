@@ -133,4 +133,20 @@ describe('NotificationsCenter', () => {
     expect(button).toHaveFocus();
     expect(button).toHaveAttribute('aria-disabled', 'true');
   });
+
+  it('says all is caught up when the Unread filter is empty, and offers the way back', async () => {
+    render(
+      <NotificationsCenter
+        inline
+        notifications={markAllNotificationsRead(LIST)}
+        now={NOW}
+        onMarkRead={() => undefined}
+        onMarkAllRead={() => undefined}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /^Unread/ }));
+    expect(screen.getByRole('status')).toHaveTextContent('You are all caught up');
+    await userEvent.click(screen.getByRole('button', { name: 'Show all' }));
+    expect(screen.getByRole('button', { name: /^All/ })).toHaveAttribute('aria-pressed', 'true');
+  });
 });
