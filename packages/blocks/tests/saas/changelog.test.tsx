@@ -60,8 +60,11 @@ describe('Changelog', () => {
       />,
     );
     expect(screen.getByText('1 release since your last visit')).toBeInTheDocument();
-    expect(screen.getAllByRole('separator', { name: 'New since your last visit' })).toHaveLength(1);
-    expect(screen.getByRole('separator', { name: 'Earlier' })).toBeInTheDocument();
+    expect(
+      screen.getAllByRole('heading', { level: 3, name: 'New since your last visit' }),
+    ).toHaveLength(1);
+    expect(screen.getByRole('heading', { level: 3, name: 'Earlier' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 4, name: '2.12' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Mark as read' }));
     expect(onMarkSeen).toHaveBeenCalled();
   });
@@ -74,8 +77,11 @@ describe('Changelog', () => {
     expect(screen.queryByText('Bulk approvals keep the last row.')).not.toBeInTheDocument();
   });
 
-  it('says what will appear when there are no releases', () => {
-    render(<Changelog releases={[]} />);
+  it('says what will appear when there are no releases, and offers to subscribe', async () => {
+    const onSubscribe = vi.fn();
+    render(<Changelog releases={[]} onSubscribe={onSubscribe} />);
     expect(screen.getByRole('status')).toHaveTextContent('Nothing released yet');
+    await userEvent.click(screen.getByRole('button', { name: 'Subscribe to updates' }));
+    expect(onSubscribe).toHaveBeenCalled();
   });
 });

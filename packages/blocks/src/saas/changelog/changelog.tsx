@@ -1,15 +1,17 @@
 import {
   ArrowUpRightIcon,
+  BellRingingIcon,
   MegaphoneIcon,
   SparkleIcon,
   WrenchIcon,
   type Icon,
 } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
+import { EmptyNote } from '../../lib/empty-note';
 import { formatLongDate, resolveLocale } from '../../lib/finance';
 import { Segmented } from '../../lib/segmented';
 import {
@@ -33,6 +35,8 @@ export interface ChangelogProps {
   hasMore?: boolean | undefined;
   loadingMore?: boolean | undefined;
   onLoadMore?: (() => void) | undefined;
+  /** Offers "Subscribe to updates" on the empty changelog. */
+  onSubscribe?: (() => void) | undefined;
   locale?: string;
   title?: string;
   className?: string;
@@ -58,6 +62,7 @@ export function Changelog({
   hasMore = false,
   loadingMore = false,
   onLoadMore,
+  onSubscribe,
   locale: requestedLocale,
   title = 'Changelog',
   className,
@@ -92,24 +97,24 @@ export function Changelog({
       bodyClassName="gap-5"
     >
       {releases.length === 0 ? (
-        <div
-          role="status"
-          className="flex flex-col items-center gap-3 rounded-control bg-surface-sunken px-6 py-10 text-center"
+        <EmptyNote
+          title={
+            <span className="flex flex-col items-center gap-3">
+              <MegaphoneIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
+              Nothing released yet
+            </span>
+          }
         >
-          <span
-            aria-hidden
-            className="inline-flex size-10 items-center justify-center rounded-full bg-surface text-fg-muted ring-1 ring-line"
-          >
-            <MegaphoneIcon weight="bold" className="size-5" />
-          </span>
-          <div className="flex flex-col gap-1">
-            <p className="font-medium">Nothing released yet</p>
-            <p className="max-w-sm text-sm text-pretty text-fg-muted">
-              The first release note lands here with its version and date. Check back after the next
-              update.
-            </p>
-          </div>
-        </div>
+          The first release note lands here with its version, date and changes.
+          {onSubscribe !== undefined && (
+            <span className="mt-4 flex justify-center">
+              <Button variant="secondary" onClick={onSubscribe}>
+                <BellRingingIcon aria-hidden weight="bold" className="size-4" />
+                Subscribe to updates
+              </Button>
+            </span>
+          )}
+        </EmptyNote>
       ) : (
         <>
           <Segmented
@@ -128,29 +133,7 @@ export function Changelog({
               these releases.
             </p>
           ) : (
-            <ol className="flex flex-col">
-              {shown.map((release, index) => {
-                const unseen = isReleaseUnseen(release, lastSeen);
-                const previous = shown[index - 1];
-                const previousUnseen =
-                  previous !== undefined && isReleaseUnseen(previous, lastSeen);
-                return (
-                  <Fragment key={release.id}>
-                    {/* One marker for the run of unseen releases, one where the seen ones begin. */}
-                    {unseen && index === 0 && (
-                      <ReleaseDivider label="New since your last visit" accent />
-                    )}
-                    {!unseen && previousUnseen && <ReleaseDivider label="Earlier" />}
-                    <Release
-                      release={release}
-                      unseen={unseen}
-                      divided={index > 0 && unseen === previousUnseen}
-                      locale={locale}
-                    />
-                  </Fragment>
-                );
-              })}
-            </ol>
+            <ReleaseList releases={shown} lastSeen={lastSeen} locale={locale} />
           )}
           {hasMore && onLoadMore !== undefined && (
             <Button
@@ -168,33 +151,88 @@ export function Changelog({
   );
 }
 
-function ReleaseDivider({ label, accent = false }: { label: string; accent?: boolean }) {
+/**
+ * With a last visit to compare against, the releases split under two real headings, new since
+ * then and earlier, each drawn as a labelled rule; otherwise they are one plain list.
+ */
+function ReleaseList({
+  releases,
+  lastSeen,
+  locale,
+}: {
+  releases: readonly ChangelogRelease[];
+  lastSeen: Date | undefined;
+  locale: string;
+}) {
+  const unseen = releases.filter((release) => isReleaseUnseen(release, lastSeen));
+  const seen = releases.filter((release) => !isReleaseUnseen(release, lastSeen));
+  if (unseen.length === 0) {
+    return <Releases releases={releases} heading="h3" locale={locale} />;
+  }
   return (
-    <li
-      role="separator"
-      aria-label={label}
+    <div className="flex flex-col gap-2">
+      <section className="flex flex-col">
+        <GroupHeading label="New since your last visit" accent />
+        <Releases releases={unseen} heading="h4" locale={locale} />
+      </section>
+      {seen.length > 0 && (
+        <section className="flex flex-col">
+          <GroupHeading label="Earlier" />
+          <Releases releases={seen} heading="h4" locale={locale} />
+        </section>
+      )}
+    </div>
+  );
+}
+
+function GroupHeading({ label, accent = false }: { label: string; accent?: boolean }) {
+  return (
+    <h3
       className={cn(
-        'flex items-center gap-3 pb-1 text-xs font-medium',
-        accent ? 'text-accent-strong' : 'text-fg-subtle',
-        !accent && 'pt-5',
+        'flex items-center gap-3 text-sm font-medium',
+        accent ? 'text-accent-strong' : 'text-fg-muted',
       )}
     >
       {accent && <span aria-hidden className="size-1.5 rounded-full bg-accent" />}
-      <span aria-hidden>{label}</span>
+      {label}
       <span aria-hidden className={cn('h-px flex-1', accent ? 'bg-accent' : 'bg-line')} />
-    </li>
+    </h3>
+  );
+}
+
+function Releases({
+  releases,
+  heading,
+  locale,
+}: {
+  releases: readonly ChangelogRelease[];
+  heading: 'h3' | 'h4';
+  locale: string;
+}) {
+  return (
+    <ol className="flex flex-col">
+      {releases.map((release, index) => (
+        <Release
+          key={release.id}
+          release={release}
+          heading={heading}
+          divided={index > 0}
+          locale={locale}
+        />
+      ))}
+    </ol>
   );
 }
 
 function Release({
   release,
-  unseen,
+  heading: Heading,
   divided,
   locale,
 }: {
   release: ChangelogRelease;
-  unseen: boolean;
-  /** Draws a rule above, between two releases of the same run. */
+  heading: 'h3' | 'h4';
+  /** Draws a rule above, between two releases of the same group. */
   divided: boolean;
   locale: string;
 }) {
@@ -205,27 +243,26 @@ function Release({
   return (
     <li
       className={cn(
-        'grid gap-x-8 gap-y-3 py-5 @2xl:grid-cols-4',
+        'grid gap-x-8 gap-y-3 py-5 @2xl:grid-cols-5',
         divided && 'border-t border-line',
       )}
     >
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 @2xl:flex-col @2xl:gap-1">
-        <h3 className="font-display text-lg font-heading tracking-tight numeric">
+        <Heading className="font-display text-2xl font-heading tracking-tight numeric">
           {release.version}
-          {unseen && <span className="sr-only">, new to you</span>}
-        </h3>
+        </Heading>
         <time dateTime={release.date.toISOString()} className="text-sm text-fg-muted numeric">
           {formatLongDate(release.date, locale)}
         </time>
       </div>
-      <article className="flex min-w-0 flex-col gap-4 @2xl:col-span-3">
+      <article className="flex min-w-0 flex-col gap-4 @2xl:col-span-4">
         {(release.title !== undefined || release.summary !== undefined) && (
           <div className="flex flex-col gap-1">
             {release.title !== undefined && (
               <p className="font-medium text-balance">{release.title}</p>
             )}
             {release.summary !== undefined && (
-              <p className="max-w-prose text-sm text-pretty text-fg-muted">{release.summary}</p>
+              <p className="text-sm text-pretty text-fg-muted">{release.summary}</p>
             )}
           </div>
         )}
@@ -246,20 +283,20 @@ function Release({
   );
 }
 
-/** A kind's subhead: neutral with its icon, and only New in the accent. */
+/** A kind's subhead: a small capitals label with its icon, and only New on a filled tint. */
 function KindTag({ kind }: { kind: ChangeKind }) {
   const KindIcon = KIND_ICONS[kind];
   return (
-    <h4
+    <p
       className={cn(
-        'inline-flex items-center gap-1.5 self-start rounded-full px-2 py-0.5 text-xs font-medium',
+        'inline-flex items-center gap-1.5 self-start text-xs font-semibold tracking-wide uppercase',
         kind === 'new'
-          ? 'bg-accent-subtle text-accent-strong'
-          : 'bg-surface-sunken text-fg-muted ring-1 ring-line ring-inset',
+          ? 'rounded-full bg-accent-subtle px-2 py-0.5 text-accent-strong'
+          : 'text-fg-muted',
       )}
     >
       <KindIcon aria-hidden weight="bold" className="size-3.5" />
       {CHANGE_KIND_LABELS[kind]}
-    </h4>
+    </p>
   );
 }
