@@ -250,9 +250,11 @@ describe('the rectio registry', () => {
   it('publishes every component, the tokens and one theme item per theme', () => {
     expect([...byName.keys()].sort()).toEqual([
       'accordion',
+      'activity-feed',
       'alert',
       'amount-input',
       'announcement-bar',
+      'api-keys',
       'app-shell',
       'ar-aging',
       'avatar',
@@ -260,6 +262,7 @@ describe('the rectio registry', () => {
       'badge',
       'bank-reconciliation',
       'banner',
+      'billing',
       'blocks-core',
       'blog',
       'breadcrumb',
@@ -269,11 +272,13 @@ describe('the rectio registry', () => {
       'card',
       'cash-flow',
       'cash-runway',
+      'changelog',
       'checkbox',
       'cn',
       'collapsible',
       'combobox',
       'command-menu',
+      'comment-thread',
       'contact',
       'context-menu',
       'cookie-consent',
@@ -287,12 +292,14 @@ describe('the rectio registry', () => {
       'feature-grid',
       'field',
       'fieldset',
+      'file-manager',
       'file-upload',
       'hero',
       'hover-card',
       'input-group',
       'invoice-detail',
       'invoice-list',
+      'kanban-board',
       'kbd',
       'kpi-row',
       'ledger',
@@ -302,18 +309,23 @@ describe('the rectio registry', () => {
       'menu',
       'meter',
       'money',
+      'motion-activity-feed',
       'motion-alert',
       'motion-amount-input',
+      'motion-api-keys',
       'motion-ar-aging',
       'motion-bank-reconciliation',
       'motion-banner',
+      'motion-billing',
       'motion-blocks-core',
       'motion-blog',
       'motion-budget-vs-actual',
       'motion-button',
       'motion-cash-flow',
       'motion-cash-runway',
+      'motion-changelog',
       'motion-combobox',
+      'motion-comment-thread',
       'motion-contact',
       'motion-cookie-consent',
       'motion-core',
@@ -323,11 +335,13 @@ describe('the rectio registry', () => {
       'motion-expense-approval',
       'motion-faq',
       'motion-feature-grid',
+      'motion-file-manager',
       'motion-file-upload',
       'motion-hero',
       'motion-hover-card',
       'motion-invoice-detail',
       'motion-invoice-list',
+      'motion-kanban-board',
       'motion-kpi-row',
       'motion-ledger',
       'motion-loading-overlay',
@@ -338,41 +352,62 @@ describe('the rectio registry', () => {
       'motion-money',
       'motion-multi-select',
       'motion-newsletter',
+      'motion-notification-preferences',
+      'motion-notifications-center',
       'motion-number-field',
+      'motion-onboarding-checklist',
       'motion-payouts',
       'motion-popover',
+      'motion-pricing-table',
+      'motion-profile-settings',
       'motion-profit-and-loss',
       'motion-progress',
+      'motion-reset-password',
+      'motion-saas-core',
       'motion-select',
+      'motion-sign-in',
+      'motion-sign-up',
       'motion-skeleton',
       'motion-stat-row',
       'motion-switch',
       'motion-tabs',
       'motion-tax-summary',
       'motion-team',
+      'motion-team-members',
       'motion-testimonials',
       'motion-timeline',
       'motion-toast',
       'motion-toggle',
+      'motion-two-factor',
+      'motion-users-table',
       'motion-vendors-list',
       'multi-select',
       'navigation-menu',
       'newsletter',
+      'notification-preferences',
+      'notifications-center',
       'number-field',
+      'onboarding-checklist',
       'otp-input',
       'pagination',
       'payouts',
       'popover',
+      'pricing-table',
+      'profile-settings',
       'profit-and-loss',
       'progress',
       'progress-circle',
       'radio-group',
+      'reset-password',
+      'saas-core',
       'scroll-area',
       'search-input',
       'select',
       'separator',
       'sheet',
       'sidebar',
+      'sign-in',
+      'sign-up',
       'site-footer',
       'site-header',
       'skeleton',
@@ -386,6 +421,7 @@ describe('the rectio registry', () => {
       'tag-input',
       'tax-summary',
       'team',
+      'team-members',
       'testimonials',
       'textarea',
       'theme-default',
@@ -396,6 +432,8 @@ describe('the rectio registry', () => {
       'toggle',
       'tokens',
       'tooltip',
+      'two-factor',
+      'users-table',
       'vendors-list',
     ]);
   });
@@ -530,6 +568,48 @@ describe('the rectio registry', () => {
     expect(byName.get('motion-marketing-core')?.registryDependencies).toContain('motion-button');
     const legal = byName.get('legal')?.files.find((f) => f.path.endsWith('legal.logic.ts'));
     expect(legal?.content).toContain('This is not legal advice.');
+  });
+
+  it('publishes every saas block under blocks/saas with its motion twin', () => {
+    const blocks = [
+      'sign-in',
+      'sign-up',
+      'two-factor',
+      'reset-password',
+      'profile-settings',
+      'team-members',
+      'billing',
+      'api-keys',
+      'notification-preferences',
+      'pricing-table',
+      'onboarding-checklist',
+      'activity-feed',
+      'notifications-center',
+      'changelog',
+      'users-table',
+      'kanban-board',
+      'comment-thread',
+      'file-manager',
+    ];
+    for (const name of blocks) {
+      for (const item of [byName.get(name), byName.get(`motion-${name}`)]) {
+        expect(item, name).toBeDefined();
+        expect(item?.tier, item?.name).toBe('pro');
+        expect(item?.type, item?.name).toBe('block');
+      }
+      expect(byName.get(name)?.categories).toContain('saas');
+      // Every block rests on a core: the shared panel and parts, and most on the saas core too.
+      expect(byName.get(name)?.registryDependencies).toContain('blocks-core');
+      expect(byName.get(`motion-${name}`)?.registryDependencies).toEqual(
+        expect.arrayContaining([name, 'motion-saas-core']),
+      );
+    }
+    expect(byName.get('motion-saas-core')?.registryDependencies).toContain('motion-blocks-core');
+    expect(byName.get('sign-in')?.registryDependencies).toContain('saas-core');
+    const signIn = byName.get('sign-in')?.files.find((f) => f.path.endsWith('sign-in.tsx'));
+    expect(signIn?.target).toBe('@blocks/saas/sign-in.tsx');
+    expect(signIn?.content).toContain("from '@registry/lib/saas/auth'");
+    expect(signIn?.content).not.toMatch(/@rectio\/(ui|motion)/);
   });
 
   it('writes the pro motion items under pro/ only', () => {
