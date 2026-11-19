@@ -308,6 +308,18 @@ export function SkeletonChart({
   ...props
 }: SkeletonChartProps) {
   const values = Array.from({ length: points }, (_, i) => SERIES[i % SERIES.length] ?? 50);
+  const last = (points - 1) * 10;
+  // Each segment bends through the midpoint between its ends, so the line reads as a trend.
+  const curve = values
+    .map((v, i) => {
+      const x = i * 10;
+      const y = 100 - v;
+      if (i === 0) return `M 0,${String(y)}`;
+      const px = x - 10;
+      const py = 100 - (values[i - 1] ?? v);
+      return `C ${String(px + 5)},${String(py)} ${String(x - 5)},${String(y)} ${String(x)},${String(y)}`;
+    })
+    .join(' ');
   return (
     <Preset className={cn('gap-3', className)} {...props}>
       <div className="flex items-end justify-between">
@@ -343,20 +355,19 @@ export function SkeletonChart({
               animation !== 'none' && 'animate-breathe motion-reduce:animate-none',
             )}
           >
-            {/* A faint area under the line gives the placeholder the weight of a filled chart. */}
-            <polygon
-              points={`0,100 ${values.map((v, i) => `${String(i * 10)},${String(100 - v)}`).join(' ')} ${String((points - 1) * 10)},100`}
+            {/* A faint area under a smooth line: the weight of a filled trend chart. */}
+            <path
+              d={`${curve} L ${String(last)},100 L 0,100 Z`}
               fill="currentColor"
               fillOpacity={0.6}
             />
-            <polyline
-              points={values.map((v, i) => `${String(i * 10)},${String(100 - v)}`).join(' ')}
+            <path
+              d={curve}
               fill="none"
-              stroke="currentColor"
-              strokeWidth={6}
+              strokeWidth={3}
               strokeLinecap="round"
-              strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
+              className="stroke-line-strong"
             />
           </svg>
         )}

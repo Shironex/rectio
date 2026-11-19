@@ -234,19 +234,23 @@ export function LoadingOverlay({
     <div
       data-slot="loading-overlay"
       className={cn(
-        'inset-0 z-40 flex items-center justify-center bg-surface/90',
+        'inset-0 z-40 flex items-center justify-center bg-surface/70',
         fullPage ? 'fixed bg-surface-canvas/80' : 'absolute',
         'transition-opacity duration-slow ease-enter delay-(--rx-motion-duration-slow) starting:opacity-0',
         className,
       )}
       {...props}
     >
-      {/* A section keeps its own frame under a scrim; only the page gets a panel to hold the eye. */}
+      {/*
+        A section gets a small pill over a dimmed copy of itself, so the content keeps its shape;
+        the page gets a panel to hold the eye.
+      */}
       <div
         className={cn(
-          'flex flex-col items-center gap-3',
-          fullPage &&
-            'rounded-panel border border-line bg-surface-overlay px-6 py-5 shadow-overlay',
+          'flex items-center border border-line bg-surface-overlay shadow-overlay',
+          fullPage
+            ? 'flex-col gap-3 rounded-panel px-6 py-5'
+            : 'gap-2.5 rounded-full py-2 ps-3 pe-4',
         )}
       >
         <Spinner variant={variant} size={fullPage ? 'lg' : 'md'} label={label} />

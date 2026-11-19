@@ -43,7 +43,7 @@ describe('Skeleton presets', () => {
     const { container: chart } = render(<SkeletonChart points={7} />);
     expect(chart.querySelectorAll('.rounded-b-none')).toHaveLength(7);
     const { container: line } = render(<SkeletonChart kind="line" />);
-    expect(line.querySelector('polyline')).not.toBeNull();
+    expect(line.querySelector('path[d^="M 0,"]')).not.toBeNull();
     render(<SkeletonCard label="Loading plan" />);
     expect(screen.getByText('Loading plan')).toHaveClass('sr-only');
   });
