@@ -39,7 +39,9 @@ export function DialogContent({
           'data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-fast',
         )}
       />
-      <BaseDialog.Viewport className="fixed inset-0 z-50 grid place-items-center overflow-y-auto p-4">
+      {/* Anchored near the top, so the dialog grows downward when errors appear instead of re-centring
+          under the pointer. */}
+      <BaseDialog.Viewport className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 sm:pt-24">
         <BaseDialog.Popup
           data-slot="dialog"
           className={cn(

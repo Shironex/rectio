@@ -22,7 +22,7 @@ export const controlSurface = cn(
  */
 export const controlFocus = cn(
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-  'data-invalid:focus-visible:outline-negative',
+  'data-invalid:focus-visible:outline-negative data-invalid:focus-visible:ring-0',
 );
 
 export type FieldProps = WithClassName<ComponentProps<typeof BaseField.Root>>;

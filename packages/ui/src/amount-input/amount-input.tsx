@@ -45,6 +45,11 @@ export function AmountInput({
     new Intl.NumberFormat(locale, { style: 'currency', currency }).resolvedOptions()
       .maximumFractionDigits ?? 2;
   const { symbol, before } = currencyAffix(currency, locale);
+  // Empty and filled look the same: a format hint such as "0.00" or "0,00" in the field's locale.
+  const formatHint = new Intl.NumberFormat(locale, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(0);
   // Decorative: the symbol is outside the input, so screen readers would not tie it to the value.
   // Name the currency in the label or description instead ("Amount, PLN").
   const affix = (
@@ -67,17 +72,16 @@ export function AmountInput({
           controlSurface,
           'flex items-center gap-2 px-(--rx-field-padding-x) numeric',
           'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus',
-          'data-invalid:has-focus-visible:outline-negative',
+          'data-invalid:has-focus-visible:outline-negative data-invalid:has-focus-visible:ring-0',
         )}
       >
         {before && affix}
         <NumberField.Input
-          placeholder={placeholder}
+          placeholder={placeholder ?? formatHint}
           aria-label={ariaLabel}
           className={cn(
-            'h-full min-w-0 flex-1 bg-transparent outline-none placeholder:text-fg-subtle',
-            // The figures sit against the symbol, so "€ 129.40" and "129,40 €" each read as one.
-            before ? 'text-start' : 'text-end',
+            // Always right-aligned, like the column it feeds; the symbol keeps its locale side.
+            'h-full min-w-0 flex-1 bg-transparent text-end outline-none placeholder:text-fg-subtle',
             'data-disabled:cursor-not-allowed',
           )}
         />
