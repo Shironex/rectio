@@ -305,6 +305,18 @@
         "unit": "ms"
       }
     },
+    "50": {
+      "$value": {
+        "value": 50,
+        "unit": "ms"
+      }
+    },
+    "60": {
+      "$value": {
+        "value": 60,
+        "unit": "ms"
+      }
+    },
     "100": {
       "$value": {
         "value": 100,
