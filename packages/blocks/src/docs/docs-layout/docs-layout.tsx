@@ -191,16 +191,19 @@ export function DocsLayout({
       {header}
       <div className="flex flex-1">
         {sidebar !== undefined && (
-          <aside
-            data-slot="docs-layout-sidebar"
-            // Starts behind the sticky header and pads under it, so the column fills the viewport
-            // at every scroll position without a computed height.
-            className="sticky top-0 -mt-(--rx-app-shell-header-height) hidden h-dvh w-72 shrink-0 flex-col border-e border-line pt-(--rx-app-shell-header-height) lg:flex"
-          >
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-8">
-              {sidebar}
-            </div>
-          </aside>
+          // The rule runs the full height of the page; the column inside it stays in view.
+          <div className="hidden w-72 shrink-0 border-e border-line lg:block">
+            <aside
+              data-slot="docs-layout-sidebar"
+              // Starts behind the sticky header and pads under it, so the column fills the
+              // viewport at every scroll position without a computed height.
+              className="sticky top-0 -mt-(--rx-app-shell-header-height) flex h-dvh flex-col pt-(--rx-app-shell-header-height)"
+            >
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-8">
+                {sidebar}
+              </div>
+            </aside>
+          </div>
         )}
         <div className="flex min-w-0 flex-1 justify-center gap-12 px-4 sm:px-8 xl:px-12">
           <main

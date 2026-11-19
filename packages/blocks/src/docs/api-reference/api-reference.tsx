@@ -208,7 +208,7 @@ export function SignatureCard({
         {since !== undefined && <DocsBadge tone="neutral">Since {since}</DocsBadge>}
         {deprecated && <DocsBadge tone="deprecated">Deprecated</DocsBadge>}
       </header>
-      <CodeBlock code={signature} tokens={tokens} lang="ts" copy={false} />
+      <CodeBlock code={signature} tokens={tokens} lang="ts" copy={false} wrap />
       {description !== undefined && (
         <div className="text-base text-pretty text-fg-muted">{description}</div>
       )}
