@@ -111,6 +111,11 @@
         "$value": "{control.height.lg}",
         "$description": "Minimum height of a body row. Follows density."
       },
+      "row-height-touch": {
+        "$type": "dimension",
+        "$value": "{control.height.touch}",
+        "$description": "Minimum height of header and body rows on touch screens, so the 44px hit areas of checkboxes in adjacent rows never overlap. Never follows density."
+      },
       "header-height": {
         "$type": "dimension",
         "$value": "{control.height.md}"
