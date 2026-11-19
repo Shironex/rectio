@@ -160,11 +160,3 @@ export const registryIndexSchema = z.object({
   items: z.array(indexEntrySchema),
 });
 export type RegistryIndex = z.infer<typeof registryIndexSchema>;
-
-/** JSON Schemas published next to the registry JSON, for editors and third-party tooling. */
-export function jsonSchemas(): { item: unknown; index: unknown } {
-  return {
-    item: z.toJSONSchema(registryItemSchema, { io: 'input' }),
-    index: z.toJSONSchema(registryIndexSchema, { io: 'input' }),
-  };
-}

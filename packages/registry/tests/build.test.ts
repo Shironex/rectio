@@ -165,6 +165,7 @@ describe('buildRegistry on a fixture', () => {
       'pro/items/ledger-card@2.1.0.json',
       'schema/item.json',
       'schema/index.json',
+      'schema/config.json',
     ]) {
       expect(existsSync(join(out, path)), path).toBe(true);
     }

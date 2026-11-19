@@ -112,9 +112,10 @@ describe('integrity', () => {
 
 describe('published JSON Schema', () => {
   it('describes the item and the index', () => {
-    const { item, index } = jsonSchemas() as {
+    const { item, index, config } = jsonSchemas() as {
       item: { properties: Record<string, unknown>; required: string[] };
       index: { properties: Record<string, unknown> };
+      config: { properties: Record<string, unknown> };
     };
     expect(Object.keys(item.properties)).toEqual(
       expect.arrayContaining(['tier', 'version', 'files', 'registryDependencies', 'integrity']),
@@ -122,6 +123,7 @@ describe('published JSON Schema', () => {
     expect(item.required).toContain('integrity');
     expect(item.required).not.toContain('categories');
     expect(index.properties).toHaveProperty('items');
+    expect(config.properties).toHaveProperty('aliases');
   });
 
   it('parses an index', () => {

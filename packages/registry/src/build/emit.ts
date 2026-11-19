@@ -2,7 +2,7 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import { INDEX_PATH, SCHEMA_PATHS, itemPath } from '../layout.ts';
-import { jsonSchemas } from '../schema.ts';
+import { jsonSchemas } from '../json-schemas.ts';
 import type { BuildResult } from './registry.ts';
 
 const json = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`;
@@ -25,5 +25,6 @@ export function writeRegistry(outDir: string, result: BuildResult): string[] {
   const schemas = jsonSchemas();
   write(SCHEMA_PATHS.item, json(schemas.item));
   write(SCHEMA_PATHS.index, json(schemas.index));
+  write(SCHEMA_PATHS.config, json(schemas.config));
   return written;
 }

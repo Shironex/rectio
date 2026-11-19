@@ -18,6 +18,10 @@
     "./serve": {
       "types": "./src/serve.ts",
       "default": "./dist/serve.js"
+    },
+    "./config": {
+      "types": "./registry.config.ts",
+      "default": "./registry.config.ts"
     }
   },
   "files": [

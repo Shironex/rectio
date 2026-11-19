@@ -21,4 +21,5 @@ export function itemPath(name: string, tier: Tier, version?: string): string {
 export const SCHEMA_PATHS = {
   item: 'schema/item.json',
   index: 'schema/index.json',
+  config: 'schema/config.json',
 } as const;
