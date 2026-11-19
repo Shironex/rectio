@@ -98,8 +98,8 @@ function Chevron({ orientation }: { orientation?: 'up' | 'down' | 'left' | 'righ
 }
 
 /**
- * A month grid on react-day-picker, styled only with tokens. Single dates, several dates or a
- * range (`mode`). Arrow keys move by day, Page Up and Down by month, Home and End to the week's
+ * A month grid on DayPicker (@daypicker/react), styled only with tokens. Single dates, several
+ * dates or a range (`mode`). Arrow keys move by day, Page Up and Down by month, Home and End to the week's
  * ends; the first day of the week follows the locale.
  */
 export function Calendar({
