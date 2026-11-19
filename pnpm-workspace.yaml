@@ -7,3 +7,8 @@ packages:
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@noctcore/*'
+
+# esbuild (through fumadocs-mdx) runs a postinstall that only checks for, or downloads, its binary.
+# The platform binary arrives as an optional dependency, so the script is not needed.
+ignoredBuiltDependencies:
+  - esbuild
