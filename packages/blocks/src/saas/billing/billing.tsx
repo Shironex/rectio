@@ -2,6 +2,7 @@ import {
   ArrowsClockwiseIcon,
   CreditCardIcon,
   DownloadSimpleIcon,
+  PlusIcon,
   WarningCircleIcon,
 } from '@phosphor-icons/react';
 import { Badge, cn } from '@rectio/ui';
@@ -41,6 +42,8 @@ export interface BillingProps {
   onCancelPlan?: () => void;
   onUpdatePaymentMethod?: () => void;
   onDownloadInvoice?: (invoice: BillingInvoice) => void;
+  /** Offered as "Add seats" under the seats meter (id or unit `seats`) once every seat is taken. */
+  onAddSeats?: () => void;
   title?: string;
   className?: string;
 }
@@ -78,6 +81,7 @@ export function Billing({
   onCancelPlan,
   onUpdatePaymentMethod,
   onDownloadInvoice,
+  onAddSeats,
   title = 'Billing',
   className,
 }: BillingProps) {
@@ -129,7 +133,7 @@ export function Billing({
 
       <div className="grid gap-6 @3xl:grid-cols-5">
         {/* The plan: the one figure that matters, then when it moves. */}
-        <div className="flex flex-col gap-3 self-start rounded-control border border-line bg-surface-sunken p-4 @3xl:col-span-2">
+        <div className="flex flex-col gap-3 self-start @3xl:col-span-2 @3xl:border-e @3xl:border-line @3xl:pe-6">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-col">
               <span className="text-sm text-fg-muted">Current plan</span>
@@ -143,7 +147,7 @@ export function Billing({
                 amount={plan.price}
                 currency={currency}
                 locale={locale}
-                className="text-2xl font-strong tracking-tight"
+                className="text-2xl font-heading tracking-tight"
               />
               <span className="text-sm text-fg-muted">
                 per {INTERVAL_WORDS[plan.interval]}
@@ -194,22 +198,40 @@ export function Billing({
               {usage.map((item) => {
                 const level = billingUsageLevel(item.used, item.limit);
                 const format = numberFormat(locale);
+                const seatsFull =
+                  onAddSeats !== undefined &&
+                  (item.id === 'seats' || item.unit === 'seats') &&
+                  item.limit > 0 &&
+                  item.used >= item.limit;
                 return (
-                  <UsageMeter
-                    key={item.id}
-                    label={item.label}
-                    value={item.used}
-                    max={item.limit}
-                    level={level}
-                    valueText={`${format.format(item.used)} of ${format.format(item.limit)} ${item.unit}`}
-                    note={billingUsageNote(
-                      item,
-                      locale,
-                      item.resetsOn === undefined
-                        ? null
-                        : `on ${formatLongDate(item.resetsOn, locale)}`,
+                  <div key={item.id} className="flex flex-col items-start gap-1">
+                    <UsageMeter
+                      className="w-full"
+                      label={item.label}
+                      value={item.used}
+                      max={item.limit}
+                      level={level}
+                      valueText={`${format.format(item.used)} of ${format.format(item.limit)} ${item.unit}`}
+                      note={billingUsageNote(
+                        item,
+                        locale,
+                        item.resetsOn === undefined
+                          ? null
+                          : `on ${formatLongDate(item.resetsOn, locale)}`,
+                      )}
+                    />
+                    {seatsFull && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="-ms-2 text-accent-strong"
+                        onClick={onAddSeats}
+                      >
+                        <PlusIcon aria-hidden weight="bold" className="size-4" />
+                        Add seats
+                      </Button>
                     )}
-                  />
+                  </div>
                 );
               })}
             </div>
