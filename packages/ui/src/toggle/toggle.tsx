@@ -52,6 +52,8 @@ const SEGMENT = cn(
   'h-full rounded-(--rx-button-radius) text-fg-muted hover:text-fg',
   'data-pressed:text-fg',
   'data-pressed:not-in-data-glide:bg-surface-raised data-pressed:not-in-data-glide:shadow-raised',
+  // An edge as well as the lift, so the chosen segment reads on any surface.
+  'data-pressed:not-in-data-glide:ring-1 data-pressed:not-in-data-glide:ring-line-strong',
   'relative focus-visible:z-10',
   // The track's padding takes a few pixels off each segment; the hit area reaches the track's edge
   // so a segment is still a 44px target on touch screens.
