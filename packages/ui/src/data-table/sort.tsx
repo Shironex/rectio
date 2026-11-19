@@ -11,7 +11,7 @@ export interface DataTableSortProps<TData extends RowData> {
   table: DataTableInstance<TData>;
   /** Visible label of the column list. */
   label?: string;
-  /** Shown while no column sorts the rows. */
+  /** Shown while no column sorts the rows, and the first option, which clears the sort. */
   placeholder?: string;
   /** Name of the order button; it is pressed while the order is descending. */
   descendingLabel?: string;
@@ -46,7 +46,7 @@ export function DataTableSort<TData extends RowData>({
       <Field className="min-w-0 flex-1">
         <FieldLabel>{label}</FieldLabel>
         <Select
-          items={items}
+          items={[{ value: null, label: placeholder }, ...items]}
           value={current?.id ?? null}
           onValueChange={(value) => {
             const column = columns.find((c) => c.id === value);
@@ -60,6 +60,8 @@ export function DataTableSort<TData extends RowData>({
         >
           <SelectTrigger placeholder={placeholder} />
           <SelectContent>
+            {/* The way back on a phone, where the header cannot cycle the order off. */}
+            <SelectItem value={null}>{placeholder}</SelectItem>
             {items.map((item) => (
               <SelectItem key={item.value} value={item.value}>
                 {item.label}

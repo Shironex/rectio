@@ -122,7 +122,11 @@ describe('DataTable', () => {
     await userEvent.click(sortBy);
     // The selection column never sorts, so it is not offered.
     const options = await screen.findAllByRole('option');
-    expect(options.map((option) => option.textContent)).toEqual(['Merchant', 'Amount']);
+    expect(options.map((option) => option.textContent)).toEqual([
+      'Original order',
+      'Merchant',
+      'Amount',
+    ]);
     await userEvent.click(screen.getByRole('option', { name: 'Amount' }));
     await waitFor(() => {
       expect(sortBy).toHaveTextContent('Amount');
@@ -138,6 +142,15 @@ describe('DataTable', () => {
     await userEvent.click(order);
     expect(order).toHaveAttribute('aria-pressed', 'false');
     expect(merchants()).toEqual(['Figma', 'Lufthansa', 'Hotel Bristol']);
+
+    // The first option clears the sort again, the way back where the header cannot cycle it off.
+    await userEvent.click(sortBy);
+    await userEvent.click(await screen.findByRole('option', { name: 'Original order' }));
+    await waitFor(() => {
+      expect(sortBy).toHaveTextContent('Original order');
+    });
+    expect(order).toHaveAttribute('aria-disabled', 'true');
+    expect(merchants()).toEqual(['Lufthansa', 'Figma', 'Hotel Bristol']);
   });
 
   it('sorts text columns from the keyboard', async () => {
