@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -135,6 +135,14 @@ describe('KanbanBoard', () => {
     expect(screen.getByText('The board is clear')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Add a card' }));
     expect(onAddCard).toHaveBeenCalledWith('todo');
+  });
+
+  it('says what each ghost column is for and marks the column in view', () => {
+    render(<KanbanBoard columns={COLUMNS} cards={[]} />);
+    expect(screen.getByText('Cards land here when work starts')).toBeInTheDocument();
+    const tabs = within(screen.getByRole('group', { name: 'Columns' })).getAllByRole('button');
+    expect(tabs[0]).toHaveAttribute('aria-current', 'true');
+    expect(tabs[1]).not.toHaveAttribute('aria-current');
   });
 
   it('shows an empty state without columns', () => {

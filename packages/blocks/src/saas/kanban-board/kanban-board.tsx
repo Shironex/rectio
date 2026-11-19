@@ -12,8 +12,10 @@ import {
 } from '@phosphor-icons/react';
 import { Badge, cn } from '@rectio/ui';
 import {
+  memo,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -65,6 +67,22 @@ export interface KanbanBoardProps {
   className?: string;
 }
 
+/** What a card can ask of the board; the board hands every card the same stable object. */
+interface CardHandlers {
+  dragStart: (card: KanbanCard, event: DragEvent) => void;
+  dragEnd: () => void;
+  keyDown: (event: KeyboardEvent, card: KanbanCard) => void;
+  moveTo: (card: KanbanCard, columnId: string) => void;
+  step: (card: KanbanCard, direction: KanbanDirection) => void;
+}
+
+// A one-line note for each ghost column of an empty board, by the part it plays.
+function ghostHint(column: KanbanColumn, index: number): string {
+  if (column.done === true) return 'Finished work collects here';
+  if (index === 1) return 'Cards land here when work starts';
+  return 'Cards arrive here as work moves along';
+}
+
 const KEYS: Record<string, KanbanDirection> = {
   ArrowLeft: 'left',
   ArrowRight: 'right',
@@ -103,6 +121,14 @@ export function KanbanBoard({
   const [dropColumn, setDropColumn] = useState<string | null>(null);
   // Narrow widths show one column at a time; this is the one in view.
   const [shown, setShown] = useState(0);
+  const tabs = useRef<HTMLDivElement>(null);
+  const scrollFrame = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (scrollFrame.current !== null) cancelAnimationFrame(scrollFrame.current);
+    },
+    [],
+  );
 
   const showColumn = (index: number) => {
     setShown(index);
@@ -150,56 +176,72 @@ export function KanbanBoard({
     move(card, to, true);
   };
 
-  // Each card's place and each column's size, counted once per render. The menus read these, and
-  // a move's target is worked out only when it is chosen, so menus stay linear in the card count.
+  // One pass over the cards per change: each column's cards in order, and each card's place in
+  // its column. Columns, counts and menus all read from here.
   const layout = useMemo(() => {
-    const sizes = new Map<string, number>();
+    const byColumn = new Map<string, KanbanCard[]>();
     const places = new Map<string, number>();
     for (const card of cards) {
-      const place = sizes.get(card.columnId) ?? 0;
-      places.set(card.id, place);
-      sizes.set(card.columnId, place + 1);
+      const list = byColumn.get(card.columnId) ?? [];
+      places.set(card.id, list.length);
+      list.push(card);
+      byColumn.set(card.columnId, list);
     }
-    return { sizes, places };
+    return { byColumn, places };
   }, [cards]);
+  const cardsIn = (columnId: string): readonly KanbanCard[] => layout.byColumn.get(columnId) ?? [];
 
-  const moveActions = (card: KanbanCard): MenuAction[] => {
-    const place = layout.places.get(card.id) ?? 0;
-    const size = layout.sizes.get(card.columnId) ?? 0;
-    const step = (direction: KanbanDirection) => {
-      const to = kanbanStep(cards, columns, card.id, direction);
-      if (to !== null) move(card, to, true);
+  // Cards are memoised, so they get one handler object that never changes; it calls through to
+  // this render's functions, which a layout effect keeps current.
+  const latest = useRef<CardHandlers | null>(null);
+  useLayoutEffect(() => {
+    latest.current = {
+      dragStart: (card, event) => {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', card.id);
+        setDragging(card.id);
+      },
+      dragEnd: () => {
+        setDragging(null);
+        setDropColumn(null);
+      },
+      keyDown: onCardKeyDown,
+      moveTo: (card, columnId) => {
+        move(card, { columnId, index: cardsIn(columnId).length }, true);
+      },
+      step: (card, direction) => {
+        const to = kanbanStep(cards, columns, card.id, direction);
+        if (to !== null) move(card, to, true);
+      },
     };
-    return [
-      ...columns
-        .filter((column) => column.id !== card.columnId)
-        .map((column) => ({
-          id: `to-${column.id}`,
-          label: `Move to ${column.title}`,
-          icon: ArrowRightIcon,
-          onSelect: () => {
-            move(card, { columnId: column.id, index: layout.sizes.get(column.id) ?? 0 }, true);
-          },
-        })),
-      {
-        id: 'up',
-        label: 'Move up',
-        icon: ArrowUpIcon,
-        disabled: place === 0,
-        onSelect: () => {
-          step('up');
-        },
-      },
-      {
-        id: 'down',
-        label: 'Move down',
-        icon: ArrowDownIcon,
-        disabled: place >= size - 1,
-        onSelect: () => {
-          step('down');
-        },
-      },
-    ];
+  });
+  const handlers = useMemo<CardHandlers>(
+    () => ({
+      dragStart: (card, event) => latest.current?.dragStart(card, event),
+      dragEnd: () => latest.current?.dragEnd(),
+      keyDown: (event, card) => latest.current?.keyDown(event, card),
+      moveTo: (card, columnId) => latest.current?.moveTo(card, columnId),
+      step: (card, direction) => latest.current?.step(card, direction),
+    }),
+    [],
+  );
+
+  // Which column is in view is read at most once a frame while the board scrolls.
+  const onBoardScroll = () => {
+    if (scrollFrame.current !== null) return;
+    scrollFrame.current = requestAnimationFrame(() => {
+      scrollFrame.current = null;
+      const el = board.current;
+      if (el === null) return;
+      const first = el.children[0] as HTMLElement | undefined;
+      const gap = Number.parseFloat(getComputedStyle(el).columnGap) || 0;
+      const step = (first?.offsetWidth ?? el.clientWidth) + gap;
+      const index = Math.min(columns.length - 1, Math.round(el.scrollLeft / step));
+      if (index === shown) return;
+      setShown(index);
+      // Keep the matching tab in view, so the strip follows a swipe.
+      tabs.current?.children[index]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    });
   };
 
   const onDrop = (event: DragEvent, columnId: string) => {
@@ -236,29 +278,30 @@ export function KanbanBoard({
         </EmptyNote>
       ) : (
         <>
+          {/* The end padding outruns the fade, so the last tab scrolls fully into view. */}
           <div
+            ref={tabs}
             role="group"
             aria-label="Columns"
-            className="-mx-5 flex gap-1 overflow-x-auto mask-r-from-85% px-5 pe-12 @xl:hidden"
+            className="-mx-5 flex snap-x snap-mandatory scroll-px-5 gap-1 overflow-x-auto mask-r-from-85% px-5 pe-20 @xl:hidden"
           >
             {columns.map((column, index) => (
               <button
                 key={column.id}
                 type="button"
-                aria-pressed={shown === index}
+                aria-current={shown === index ? 'true' : undefined}
+                data-current={shown === index || undefined}
                 onClick={() => {
                   showColumn(index);
                 }}
                 className={cn(
-                  'flex h-(--rx-control-height-sm) shrink-0 cursor-pointer items-center gap-1.5 rounded-control px-3 text-sm whitespace-nowrap text-fg-muted pointer-coarse:h-(--rx-control-height-touch)',
-                  'aria-pressed:bg-surface-sunken aria-pressed:font-medium aria-pressed:text-fg',
+                  'flex h-(--rx-control-height-sm) shrink-0 cursor-pointer snap-start items-center gap-1.5 rounded-control px-3 text-sm whitespace-nowrap text-fg-muted pointer-coarse:h-(--rx-control-height-touch)',
+                  'data-current:bg-surface-sunken data-current:font-medium data-current:text-fg',
                   focusRing,
                 )}
               >
                 <span>{column.title}</span>
-                <span className="shrink-0 text-fg-subtle numeric">
-                  {kanbanColumnCards(cards, column.id).length}
-                </span>
+                <span className="shrink-0 text-fg-subtle numeric">{cardsIn(column.id).length}</span>
               </button>
             ))}
           </div>
@@ -273,18 +316,11 @@ export function KanbanBoard({
           )}
           <div
             ref={board}
-            onScroll={(event) => {
-              const el = event.currentTarget;
-              const first = el.children[0] as HTMLElement | undefined;
-              const gap = Number.parseFloat(getComputedStyle(el).columnGap) || 0;
-              const step = (first?.offsetWidth ?? el.clientWidth) + gap;
-              const index = Math.min(columns.length - 1, Math.round(el.scrollLeft / step));
-              if (index !== shown) setShown(index);
-            }}
-            className="-mx-5 flex snap-x snap-mandatory scroll-px-5 items-start gap-5 overflow-x-auto px-5 pb-2 @4xl:items-stretch @xl:gap-3"
+            onScroll={onBoardScroll}
+            className="-mx-5 flex scroll-px-5 @max-xl:snap-x @max-xl:snap-mandatory items-start gap-5 overflow-x-auto px-5 pb-2 @4xl:items-stretch @xl:gap-3"
           >
-            {columns.map((column) => {
-              const columnCards = kanbanColumnCards(cards, column.id);
+            {columns.map((column, columnIndex) => {
+              const columnCards = cardsIn(column.id);
               const over = kanbanOverLimit(column, columnCards.length);
               const headingId = `${hintId}-${column.id}`;
               return (
@@ -306,7 +342,7 @@ export function KanbanBoard({
                     onDrop(event, column.id);
                   }}
                   className={cn(
-                    'flex w-full shrink-0 snap-start flex-col gap-2 rounded-control border border-line bg-surface-sunken p-2 @xl:w-72 @4xl:w-auto @4xl:min-w-52 @4xl:flex-1',
+                    'flex w-full shrink-0 snap-start flex-col gap-2 @max-xl:min-h-96 rounded-control border border-line bg-surface-sunken p-2 @xl:w-72 @4xl:w-auto @4xl:min-w-52 @4xl:flex-1',
                     'transition-[border-color,background-color] duration-fast ease-standard',
                     'data-drop:border-accent data-drop:bg-accent-subtle',
                     over && 'border-warning-strong/40',
@@ -349,28 +385,12 @@ export function KanbanBoard({
                             today={today}
                             locale={locale}
                             hintId={onMoveCard === undefined ? undefined : hintId}
-                            draggable={onMoveCard !== undefined}
-                            onDragStart={(event) => {
-                              event.dataTransfer.effectAllowed = 'move';
-                              event.dataTransfer.setData('text/plain', card.id);
-                              setDragging(card.id);
-                            }}
-                            onDragEnd={() => {
-                              setDragging(null);
-                              setDropColumn(null);
-                            }}
-                            onKeyDown={(event) => {
-                              onCardKeyDown(event, card);
-                            }}
+                            movable={onMoveCard !== undefined}
+                            columns={columns}
+                            place={layout.places.get(card.id) ?? 0}
+                            size={columnCards.length}
+                            handlers={handlers}
                             onOpen={onOpenCard}
-                            moveMenu={
-                              onMoveCard === undefined ? null : (
-                                <ActionMenu
-                                  label={`Move ${card.title}`}
-                                  actions={moveActions(card)}
-                                />
-                              )
-                            }
                           />
                         </Item>
                       ))}
@@ -380,7 +400,13 @@ export function KanbanBoard({
                         No cards
                       </li>
                     )}
-                    {/* An empty board: ghost columns, with the one way in placed in the first. */}
+                    {/* An empty board: ghost columns, each saying what it is for, with the one
+                        way in placed in the first. */}
+                    {cards.length === 0 && columnIndex > 0 && (
+                      <li className="px-1.5 text-sm text-fg-subtle">
+                        {ghostHint(column, columnIndex)}
+                      </li>
+                    )}
                     {cards.length === 0 && column.id === columns[0]?.id && (
                       <li className="flex flex-col items-center gap-2 rounded-control border border-dashed border-line-strong bg-surface px-3 py-6 text-center text-sm">
                         <KanbanIcon
@@ -437,31 +463,80 @@ export function KanbanBoard({
 
 const DUE_WORDS = { overdue: 'Overdue', today: 'Today' } as const;
 
-function CardView({
+// Memoised: a drag, a drop target or an announcement re-renders the board, not every card.
+const CardView = memo(function CardView({
   card,
   done,
   today,
   locale,
   hintId,
-  draggable,
-  onDragStart,
-  onDragEnd,
-  onKeyDown,
+  movable,
+  columns,
+  place,
+  size,
+  handlers,
   onOpen,
-  moveMenu,
 }: {
   card: KanbanCard;
   done: boolean;
   today: Date;
   locale: string;
   hintId: string | undefined;
-  draggable: boolean;
-  onDragStart: (event: DragEvent) => void;
-  onDragEnd: () => void;
-  onKeyDown: (event: KeyboardEvent) => void;
+  movable: boolean;
+  columns: readonly KanbanColumn[];
+  /** The card's place in its column, and how many cards the column holds. */
+  place: number;
+  size: number;
+  handlers: CardHandlers;
   onOpen: ((card: KanbanCard) => void) | undefined;
-  moveMenu: ReactNode;
 }) {
+  const draggable = movable;
+  const onKeyDown = (event: KeyboardEvent) => {
+    handlers.keyDown(event, card);
+  };
+  const actions: MenuAction[] = movable
+    ? [
+        ...columns
+          .filter((column) => column.id !== card.columnId)
+          .map((column) => ({
+            id: `to-${column.id}`,
+            label: `Move to ${column.title}`,
+            icon: ArrowRightIcon,
+            onSelect: () => {
+              handlers.moveTo(card, column.id);
+            },
+          })),
+        {
+          id: 'up',
+          label: 'Move up',
+          icon: ArrowUpIcon,
+          disabled: place === 0,
+          onSelect: () => {
+            handlers.step(card, 'up');
+          },
+        },
+        {
+          id: 'down',
+          label: 'Move down',
+          icon: ArrowDownIcon,
+          disabled: place >= size - 1,
+          onSelect: () => {
+            handlers.step(card, 'down');
+          },
+        },
+      ]
+    : [];
+  // Fine pointers reveal the menu on hover or focus; touch keeps it in view.
+  const moveMenu: ReactNode = movable ? (
+    <span
+      className={cn(
+        'flex transition-opacity duration-fast ease-standard',
+        'pointer-fine:opacity-0 pointer-fine:group-focus-within/card:opacity-100 pointer-fine:group-hover/card:opacity-100 pointer-fine:has-data-popup-open:opacity-100',
+      )}
+    >
+      <ActionMenu label={`Move ${card.title}`} actions={actions} />
+    </span>
+  ) : null;
   const due = card.due === undefined ? null : kanbanDueState(card.due, today);
   const urgent = card.priority === 'urgent' || card.priority === 'high';
   const hasMeta = due !== null || urgent || card.assignee !== undefined;
@@ -476,8 +551,10 @@ function CardView({
   return (
     <article
       draggable={draggable}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
+      onDragStart={(event) => {
+        handlers.dragStart(card, event);
+      }}
+      onDragEnd={handlers.dragEnd}
       {...(onOpen === undefined ? { ...target, tabIndex: 0, 'aria-label': card.title } : {})}
       className={cn(
         'group/card relative flex flex-col gap-2 rounded-control border border-line bg-surface-raised p-3 shadow-raised',
@@ -599,4 +676,4 @@ function CardView({
       )}
     </article>
   );
-}
+});
