@@ -54,7 +54,14 @@ export function AuthFrame({
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
   const form = (
     <>
-      <Reveal className={cn('flex flex-col gap-6', !bare && 'px-6 pt-7 pb-6 @sm:px-8 @sm:pt-9')}>
+      <Reveal
+        className={cn(
+          'flex flex-col gap-6',
+          !bare && 'px-6 pt-7 pb-6 @sm:px-8 @sm:pt-9',
+          // Beside a brand panel the form keeps its own measure, centred in its half.
+          aside !== undefined && 'mx-auto w-full max-w-md',
+        )}
+      >
         <header className="flex flex-col gap-1.5">
           {brand !== undefined && <div className="mb-5 flex items-center text-fg">{brand}</div>}
           <Heading
@@ -105,7 +112,7 @@ export function AuthFrame({
           <div className="hidden flex-col border-e border-line bg-surface-sunken p-10 @3xl:flex">
             {aside}
           </div>
-          <div className="mx-auto flex w-full max-w-md flex-col">{form}</div>
+          <div className="flex w-full flex-col">{form}</div>
         </div>
       )}
     </section>
