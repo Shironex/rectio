@@ -66,6 +66,8 @@ describe('ActivityFeed', () => {
     expect(within(today).getByText('Q1 board review')).toBeInTheDocument();
     const time = within(today).getByText('5 minutes ago').closest('time');
     expect(time).toHaveAttribute('dateTime', EVENTS[1]?.at.toISOString());
+    // An earlier day is already named by its heading, so its events show the clock time.
+    expect(screen.getByText('09:00')).toBeInTheDocument();
   });
 
   it('filters to one kind and leaves out empty filters', async () => {
@@ -83,8 +85,11 @@ describe('ActivityFeed', () => {
     expect(onLoadMore).toHaveBeenCalled();
   });
 
-  it('says what will appear when there is nothing', () => {
-    render(<ActivityFeed events={[]} now={NOW} />);
+  it('says what will appear when there is nothing, and offers the next step', async () => {
+    const onInvite = vi.fn();
+    render(<ActivityFeed events={[]} now={NOW} onInvite={onInvite} />);
     expect(screen.getByRole('status')).toHaveTextContent('No activity yet');
+    await userEvent.click(screen.getByRole('button', { name: 'Invite your team' }));
+    expect(onInvite).toHaveBeenCalled();
   });
 });

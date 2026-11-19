@@ -7,6 +7,8 @@ export type ActivityKind =
 export interface ActivityActor {
   name: string;
   avatarUrl?: string;
+  /** The app itself, not a person: drawn as a small node on the rail instead of an avatar. */
+  system?: boolean;
 }
 
 export interface ActivityEvent {
