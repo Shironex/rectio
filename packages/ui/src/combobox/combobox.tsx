@@ -298,7 +298,12 @@ function ComboboxCreateItem({ option }: { option: CreateOption }) {
       data-slot="combobox-item"
       data-create=""
       value={option}
-      className={cn(popupItem, 'text-accent-strong data-highlighted:text-accent-strong')}
+      className={cn(
+        popupItem,
+        'text-accent-strong data-highlighted:text-accent-strong',
+        // Set apart from the matches by a rule, so it reads as an action, not a result.
+        'relative not-first:mt-1.5 not-first:before:absolute not-first:before:inset-x-0 not-first:before:-top-1 not-first:before:h-px not-first:before:bg-line',
+      )}
     >
       <span className="flex size-4 shrink-0 items-center justify-center">
         <PlusIcon aria-hidden weight="bold" className="size-3.5" />
