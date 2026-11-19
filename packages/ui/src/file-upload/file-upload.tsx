@@ -353,7 +353,7 @@ export function FileDropzone({ className, children, onClick, ref, ...props }: Fi
       }}
       render={<button type="button" />}
       className={cn(
-        'group relative flex w-full cursor-pointer flex-col items-center justify-center gap-2 px-6 py-8 text-center',
+        'group relative flex w-full cursor-pointer flex-col items-center justify-center gap-2 px-6 py-6 text-center',
         'rounded-panel border border-dashed border-line-strong bg-(--rx-field-background) text-fg',
         'transition-[background-color,border-color] duration-fast ease-standard',
         'hover:not-data-disabled:border-fg-subtle hover:not-data-disabled:bg-surface-hover',
@@ -607,7 +607,7 @@ export function FileItem({
       data-slot="file-item"
       data-status={file.status}
       className={cn(
-        'flex items-center gap-3 rounded-(--rx-field-radius) border border-line bg-surface px-3 py-2.5',
+        'flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-(--rx-field-radius) border border-line bg-surface px-3 py-2.5',
         'data-[status=error]:border-negative',
         className,
       )}
@@ -625,10 +625,14 @@ export function FileItem({
         </span>
         <div className="flex items-start gap-1.5 text-sm text-fg-subtle numeric">
           <span className="shrink-0">{formatFileSize(file.size, locale)}</span>
-          <span aria-hidden className="shrink-0">
-            ·
-          </span>
-          {status}
+          {file.status !== 'error' && (
+            <>
+              <span aria-hidden className="shrink-0">
+                ·
+              </span>
+              {status}
+            </>
+          )}
         </div>
       </div>
       {(onRetry !== undefined && file.status === 'error') || onRemove !== undefined ? (
@@ -668,6 +672,8 @@ export function FileItem({
           )}
         </div>
       ) : null}
+      {/* A failure gets its own line under the row, so the message never squeezes beside Retry. */}
+      {file.status === 'error' && <div className="basis-full ps-11 text-sm">{status}</div>}
     </li>
   );
 }
