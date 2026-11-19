@@ -194,6 +194,14 @@
       "stagger": {
         "$value": "{duration.60}",
         "$description": "The base step between items revealed together. Callers vary it per item (never a uniform beat) and keep it between 30 and 80ms."
+      },
+      "shimmer": {
+        "$value": "{duration.1800}",
+        "$description": "One sweep of the light across a skeleton placeholder. Slow and even: it says waiting, not urgency."
+      },
+      "breathe": {
+        "$value": "{duration.2200}",
+        "$description": "One breath of a pulsing indicator. Also what a looping indicator falls back to under reduced motion, as a fade in place."
       }
     },
     "easing": {

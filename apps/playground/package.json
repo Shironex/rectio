@@ -30,6 +30,7 @@
     "typecheck": "tsc -p tsconfig.json",
     "shoot": "node scripts/shoot.ts",
     "shoot:motion": "node scripts/shoot-motion.ts",
-    "shoot:blocks": "node scripts/shoot-blocks.ts"
+    "shoot:blocks": "node scripts/shoot-blocks.ts",
+    "shoot:display": "node scripts/shoot-display.ts"
   }
 }

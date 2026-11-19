@@ -29,6 +29,14 @@
     "inset": {
       "$value": "{palette.stone.75}",
       "$description": "A band inside an overlay, such as a dialog footer. Sits above the overlay in dark mode, below it in light."
+    },
+    "placeholder": {
+      "$value": "{palette.stone.200}",
+      "$description": "A skeleton shape or the empty track of a bar, ring or gauge: one step off the surface it sits on, lighter in dark mode, darker in light."
+    },
+    "placeholder-shine": {
+      "$value": "{palette.stone.25}",
+      "$description": "The light that sweeps across a skeleton shape."
     }
   },
   "text": {
@@ -323,6 +331,58 @@
     "halo": {
       "$value": "{palette.stone.25}",
       "$description": "Outline under a line or label so it stays readable over marks; the surface colour."
+    }
+  },
+  "identity": {
+    "$type": "color",
+    "$description": "Identity tints for avatars and initials: decorative, never a state. A name always picks the same tint. Each pair keeps strong text readable on its subtle fill.",
+    "1": {
+      "subtle": {
+        "$value": "{palette.cobalt.100}"
+      },
+      "strong": {
+        "$value": "{palette.cobalt.800}"
+      }
+    },
+    "2": {
+      "subtle": {
+        "$value": "{palette.green.100}"
+      },
+      "strong": {
+        "$value": "{palette.green.800}"
+      }
+    },
+    "3": {
+      "subtle": {
+        "$value": "{palette.amber.100}"
+      },
+      "strong": {
+        "$value": "{palette.amber.800}"
+      }
+    },
+    "4": {
+      "subtle": {
+        "$value": "{palette.sky.100}"
+      },
+      "strong": {
+        "$value": "{palette.sky.800}"
+      }
+    },
+    "5": {
+      "subtle": {
+        "$value": "{palette.orange.100}"
+      },
+      "strong": {
+        "$value": "{palette.orange.800}"
+      }
+    },
+    "6": {
+      "subtle": {
+        "$value": "{palette.citron.100}"
+      },
+      "strong": {
+        "$value": "{palette.citron.800}"
+      }
     }
   }
 }

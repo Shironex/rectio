@@ -1,0 +1,72 @@
+---
+title: Stat
+description: A figure with its label and how it moved.
+---
+
+<Preview name="stat" plain={<Demo name="stat" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add stat
+```
+
+## Usage
+
+```tsx
+import { Stat, StatGroup } from '@/components/ui/stat';
+
+<StatGroup>
+  <Stat
+    label="Active users"
+    value="4,182"
+    change={{ value: '12%', direction: 'up', favourable: true, comparison: 'vs last week' }}
+  />
+  <Stat label="Median response" value="182" unit="ms" />
+</StatGroup>;
+```
+
+The figure is set in tabular figures. A change carries an arrow and the direction in words; its
+colour comes from `favourable`, because a rise is good news for signups and bad news for churn.
+Leave `favourable` out for a change that is neither.
+
+`StatGroup` sets stats in one frame divided by hairlines, four across, two, or one, by its own width.
+
+## Props
+
+### Stat
+
+Every prop of a `div` is accepted as well.
+
+<TypeTable
+  type={{
+    label: { type: 'ReactNode', description: 'What the figure is. Required.' },
+    value: { type: 'ReactNode', description: 'The figure, formatted. Required.' },
+    unit: { type: 'ReactNode', description: 'A unit after the figure.' },
+    change: {
+      type: "{ value: ReactNode; direction: 'up' | 'down' | 'flat'; favourable?: boolean; comparison?: ReactNode }",
+      description: 'How it moved.',
+    },
+    description: { type: 'ReactNode', description: 'A line of context.' },
+    icon: { type: 'ReactNode', description: 'An icon beside the label.' },
+    trend: { type: 'ReactNode', description: 'A small chart at the end. Decorative.' },
+    size: { type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Figure size.' },
+    variant: {
+      type: "'plain' | 'card'",
+      default: "'plain'",
+      description: 'Frame the stat on its own.',
+    },
+  }}
+/>
+
+### StatGroup
+
+A `div`; its children are framed and divided.
+
+## Accessibility
+
+- A description list: the label and the figure are read as a pair.
+- The direction is said in words ("up 12%"), never colour alone.
+- A trend chart is hidden; say the trend in the change or description.
+
+<ComponentSource path="stat/stat.tsx" />

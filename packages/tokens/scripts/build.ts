@@ -196,7 +196,23 @@ function tailwindCss(contract: string[], types: TokenMap): string {
     add(`--ease-${ease}`, `--rx-motion-easing-${ease}`);
   add('--spacing', '--rx-space-unit');
 
-  map.push('--animate-spin: rx-spin var(--rx-motion-duration-loop) linear infinite;');
+  // Looping indicators. Each cycle is a multiple of a token, so a theme with slower motion slows
+  // every loader together. Components switch to `animate-breathe` (a fade in place) under reduced
+  // motion, so nothing travels or turns for people who asked for stillness.
+  const loop = 'var(--rx-motion-duration-loop)';
+  const standard = 'var(--rx-motion-easing-standard)';
+  for (const [name, value] of [
+    ['spin', `rx-spin ${loop} linear infinite`],
+    ['orbit', `rx-spin calc(${loop} * 1.6) linear infinite`],
+    ['arc', `rx-arc calc(${loop} * 1.6) ${standard} infinite`],
+    ['dot', `rx-dot calc(${loop} * 1.4) ${standard} infinite`],
+    ['bar', `rx-bar calc(${loop} * 1.2) ${standard} infinite`],
+    ['ripple', `rx-ripple calc(${loop} * 2) var(--rx-motion-easing-enter) infinite`],
+    ['breathe', `rx-breathe var(--rx-motion-duration-breathe) ${standard} infinite`],
+    ['shimmer', `rx-shimmer var(--rx-motion-duration-shimmer) ${standard} infinite`],
+    ['indeterminate', `rx-indeterminate calc(${loop} * 1.8) ${standard} infinite`],
+  ])
+    map.push(`--animate-${name}: ${value};`);
 
   const durations = ['fast', 'base', 'slow', 'reveal'].map(
     (d) => `@utility duration-${d} {\n  transition-duration: var(--rx-motion-duration-${d});\n}`,
@@ -228,6 +244,92 @@ ${resets.map((r) => `  ${r}`).join('\n')}
   @keyframes rx-spin {
     to {
       transform: rotate(360deg);
+    }
+  }
+
+  /* The ring spinner's arc grows and shrinks as it turns (path length 100). */
+  @keyframes rx-arc {
+    0% {
+      stroke-dasharray: 8 100;
+      stroke-dashoffset: 0;
+    }
+    50% {
+      stroke-dasharray: 62 100;
+      stroke-dashoffset: -18;
+    }
+    100% {
+      stroke-dasharray: 8 100;
+      stroke-dashoffset: -100;
+    }
+  }
+
+  @keyframes rx-dot {
+    0%,
+    70%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.35;
+    }
+    35% {
+      transform: translateY(-60%);
+      opacity: 1;
+    }
+  }
+
+  @keyframes rx-bar {
+    0%,
+    80%,
+    100% {
+      transform: scaleY(0.35);
+      opacity: 0.45;
+    }
+    40% {
+      transform: scaleY(1);
+      opacity: 1;
+    }
+  }
+
+  /* Never from scale 0: a ring starts as a small visible ring and widens as it fades. */
+  @keyframes rx-ripple {
+    0% {
+      transform: scale(0.4);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes rx-breathe {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  @keyframes rx-shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    60%,
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes rx-indeterminate {
+    0% {
+      transform: translateX(-100%) scaleX(0.4);
+    }
+    50% {
+      transform: translateX(60%) scaleX(0.6);
+    }
+    100% {
+      transform: translateX(250%) scaleX(0.4);
     }
   }
 }

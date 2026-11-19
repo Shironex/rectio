@@ -1,0 +1,77 @@
+---
+title: Meter
+description: A reading inside a known range, such as storage used or a budget spent.
+---
+
+<Preview
+  name="meter"
+  plain={<Demo name="meter" />}
+  motion={<Demo name="meter.motion" />}
+  importLine="import { Meter } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add meter
+```
+
+## Usage
+
+```tsx
+import { Meter } from '@/components/ui/meter';
+
+<Meter
+  value={93}
+  label="Storage used"
+  thresholds={{ warning: 75, critical: 90 }}
+  levelLabels={{ warning: 'Filling up', critical: 'Nearly full' }}
+/>;
+<Meter
+  variant="bar"
+  value={34}
+  label="Health score"
+  thresholds={{ warning: 50, critical: 30, worse: 'low' }}
+/>;
+```
+
+A meter is a measurement, not work that finishes: for that, use Progress. `gauge` draws a half ring
+with the figure inside; `bar` a line with the figure beside the label.
+
+Thresholds turn the meter to warning and critical and are marked on the scale. With `worse: 'low'`
+they count downward, for a score where less is worse. `levelLabels` puts the level in words under the
+figure and into the value text, so the state never rests on colour.
+
+The motion variant sweeps the gauge or the bar up to the reading the first time it is seen.
+
+## Props
+
+Every prop of Base UI's `Meter.Root` is accepted as well.
+
+<TypeTable
+  type={{
+    value: { type: 'number', description: 'The reading. Required.' },
+    label: { type: 'ReactNode', description: 'What is measured. Names the meter. Required.' },
+    variant: { type: "'gauge' | 'bar'", default: "'gauge'", description: 'The drawing.' },
+    thresholds: {
+      type: "{ warning?: number; critical?: number; worse?: 'high' | 'low' }",
+      description: 'Where the level changes.',
+    },
+    tone: {
+      type: "'accent' | 'positive' | 'warning' | 'negative'",
+      description: 'Overrides the tone the thresholds pick.',
+    },
+    levelLabels: {
+      type: "Partial<Record<'normal' | 'warning' | 'critical', string>>",
+      description: 'Words for each level.',
+    },
+    description: { type: 'ReactNode', description: 'Small print under the meter.' },
+  }}
+/>
+
+## Accessibility
+
+- A meter named by its label, with the level's words added to `aria-valuetext`.
+- Threshold marks are drawn, not read; the level is said in words.
+
+<ComponentSource path="meter/meter.tsx" />

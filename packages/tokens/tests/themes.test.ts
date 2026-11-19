@@ -72,6 +72,12 @@ const PAIRS: [string, string, number][] = [
   ['focus', 'surface', 3],
   ['focus', 'surface-canvas', 3],
   ['focus', 'surface-overlay', 3],
+  // Initials on an avatar's identity tint.
+  ...[1, 2, 3, 4, 5, 6].map((n): [string, string, number] => [
+    `identity-${n}-strong`,
+    `identity-${n}-subtle`,
+    4.5,
+  ]),
 ];
 
 describe('token contract', () => {

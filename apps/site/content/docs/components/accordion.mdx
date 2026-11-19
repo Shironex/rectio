@@ -1,0 +1,74 @@
+---
+title: Accordion
+description: Sections that open in place, such as FAQs or the settings of a rule.
+---
+
+<Preview name="accordion" plain={<Demo name="accordion" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add accordion
+```
+
+## Usage
+
+```tsx
+import {
+  Accordion,
+  AccordionItem,
+  AccordionPanel,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+
+<Accordion defaultValue={['vat']}>
+  <AccordionItem value="vat">
+    <AccordionTrigger>How is VAT worked out?</AccordionTrigger>
+    <AccordionPanel>Per line, at the line's rate.</AccordionPanel>
+  </AccordionItem>
+</Accordion>;
+```
+
+One section is open at a time; `multiple` lets several stay open. `variant="separated"` sets each
+item in its own frame. A trigger can carry a `hint`, such as a count, at its end.
+
+Opening shows the content at once and fades it in. The panel never animates its height, so the page
+below moves once instead of for a quarter of a second.
+
+## Props
+
+### Accordion
+
+Every prop of Base UI's `Accordion.Root` is accepted: `value`, `defaultValue`, `onValueChange`, `multiple`, `disabled`.
+
+<TypeTable
+  type={{
+    variant: {
+      type: "'plain' | 'separated'",
+      default: "'plain'",
+      description: 'Hairline dividers, or a frame per item.',
+    },
+  }}
+/>
+
+### AccordionTrigger
+
+Every prop of Base UI's `Accordion.Trigger`.
+
+<TypeTable
+  type={{
+    hint: { type: 'ReactNode', description: 'Secondary text at the end of the header.' },
+  }}
+/>
+
+### AccordionItem, AccordionPanel
+
+Base UI's `Accordion.Item` (with its `value`) and `Accordion.Panel`.
+
+## Accessibility
+
+- Each header is a heading holding a button, with `aria-expanded` and `aria-controls`.
+- Arrow keys move between headers; Home and End jump to the first and last.
+- Touch screens get a 44 pixel header.
+
+<ComponentSource path="accordion/accordion.tsx" />

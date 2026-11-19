@@ -1,0 +1,59 @@
+---
+title: Kbd
+description: Keycaps and key combinations for shortcut hints.
+---
+
+<Preview name="kbd" plain={<Demo name="kbd" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add kbd
+```
+
+## Usage
+
+```tsx
+import { Kbd, KbdCombo } from '@/components/ui/kbd';
+
+<KbdCombo keys={['⌘', 'K']} />;
+<Kbd>Esc</Kbd>;
+```
+
+Symbols such as ⌘, ⇧, ⌥ and ↵ are shown as the symbol and read as their name, so a hint makes sense
+heard as well as seen. `KbdCombo` nests one `kbd` per key, the HTML way to mark up keys pressed
+together; `separator` draws a `+` or `then` between keys.
+
+## Props
+
+### Kbd
+
+Every prop of a `kbd` is accepted as well.
+
+<TypeTable
+  type={{
+    size: { type: "'sm' | 'md'", default: "'md'", description: 'Keycap height.' },
+  }}
+/>
+
+### KbdCombo
+
+Every prop of a `kbd` except children.
+
+<TypeTable
+  type={{
+    keys: { type: 'string[]', description: 'The keys, in order. Required.' },
+    size: { type: "'sm' | 'md'", default: "'md'", description: 'Keycap height.' },
+    separator: {
+      type: 'ReactNode',
+      description: 'Drawn between keys and hidden from assistive technology.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Symbols are read by name: ⌘ K is read as "Command K".
+- Combinations are nested `kbd` elements.
+
+<ComponentSource path="kbd/kbd.tsx" />

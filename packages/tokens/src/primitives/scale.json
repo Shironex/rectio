@@ -407,7 +407,25 @@
         "unit": "ms"
       }
     },
-    "$type": "duration"
+    "$type": "duration",
+    "1400": {
+      "$value": {
+        "value": 1400,
+        "unit": "ms"
+      }
+    },
+    "1800": {
+      "$value": {
+        "value": 1800,
+        "unit": "ms"
+      }
+    },
+    "2200": {
+      "$value": {
+        "value": 2200,
+        "unit": "ms"
+      }
+    }
   },
   "easing": {
     "$type": "cubicBezier",

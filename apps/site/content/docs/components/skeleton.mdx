@@ -1,0 +1,122 @@
+---
+title: Skeleton
+description: Placeholders in the shape of content on its way.
+---
+
+<Preview
+  name="skeleton"
+  plain={<Demo name="skeleton" />}
+  motion={<Demo name="skeleton.motion" />}
+  importLine="import { SkeletonSwap } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add skeleton
+```
+
+## Usage
+
+```tsx
+import { SkeletonCard, SkeletonLine, SkeletonText } from '@/components/ui/skeleton';
+
+<SkeletonText heading lines={3} label="Loading the note" />;
+<SkeletonLine width="w-1/2" size="sm" />;
+```
+
+Reach for a skeleton when the shape of the result is known: it keeps the layout still when the
+content lands. Size each shape like the content it stands in for.
+
+The primitives are `Skeleton` (a block), `SkeletonLine` (a line of text at a type size) and
+`SkeletonCircle`. The presets compose them: `SkeletonText`, `SkeletonCard`, `SkeletonTable` (with a
+right-aligned figure column), `SkeletonListItem` and `SkeletonChart` (bars or a line, over still
+gridlines). In a preset the light runs down the shapes as a wave, one stagger step apart.
+
+`animation` picks `shimmer` (a soft light sweeping across), `pulse` (breathing in place) or `none`.
+Under reduced motion every skeleton is still.
+
+`SkeletonSwap` shows a fallback while `loading` and the content after.
+
+The motion variant of `SkeletonSwap` resolves the placeholder into the content: the content sharpens from a slight blur as it fades in while the placeholder fades out over it, in the same box.
+
+## Props
+
+### Skeleton, SkeletonLine, SkeletonCircle
+
+Every prop of a `span` is accepted as well.
+
+<TypeTable
+  type={{
+    animation: {
+      type: "'shimmer' | 'pulse' | 'none'",
+      default: "'shimmer'",
+      description: 'How the shape shows it is waiting.',
+    },
+    index: {
+      type: 'number',
+      default: '0',
+      description: 'Position in a group, for the wave. Presets set it.',
+    },
+    width: {
+      type: 'string',
+      default: "'w-full'",
+      description: 'SkeletonLine: a width utility such as `w-3/4`.',
+    },
+    size: {
+      type: "SkeletonLine: 'xs' to '2xl'; SkeletonCircle: 'sm' to 'xl'",
+      default: "'base' / 'md'",
+      description: 'The type size or avatar size it stands in for.',
+    },
+  }}
+/>
+
+### Presets
+
+Every preset takes `label` (announced once, default `Loading`), `animation` and the props of a `div`.
+
+<TypeTable
+  type={{
+    lines: { type: 'number', default: '3', description: 'SkeletonText: lines in the paragraph.' },
+    heading: {
+      type: 'boolean',
+      default: 'false',
+      description: 'SkeletonText: a heading line above.',
+    },
+    media: { type: 'boolean', default: 'true', description: 'SkeletonCard: a media block on top.' },
+    'rows, columns': {
+      type: 'number',
+      default: '5, 4',
+      description: 'SkeletonTable: the real row and column counts.',
+    },
+    numeric: {
+      type: 'boolean',
+      default: 'true',
+      description: 'SkeletonTable: the last column is a right-aligned figure.',
+    },
+    count: { type: 'number', default: '1', description: 'SkeletonListItem: items in the list.' },
+    kind: {
+      type: "'bar' | 'line'",
+      default: "'bar'",
+      description: 'SkeletonChart: the chart it stands in for.',
+    },
+  }}
+/>
+
+### SkeletonSwap
+
+<TypeTable
+  type={{
+    loading: { type: 'boolean', description: 'While true the fallback shows. Required.' },
+    fallback: { type: 'ReactNode', description: 'The placeholder, usually a preset. Required.' },
+  }}
+/>
+
+## Accessibility
+
+- Each shape is hidden from assistive technology.
+- A preset is one busy status that announces its label once, not once per shape.
+- `SkeletonSwap` sets `aria-busy` while loading.
+- Under reduced motion nothing shimmers or pulses.
+
+<ComponentSource path="skeleton/skeleton.tsx" />

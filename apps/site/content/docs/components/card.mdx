@@ -1,0 +1,79 @@
+---
+title: Card
+description: A frame for one self-contained thing, such as a record, a plan or a document.
+---
+
+<Preview name="card" plain={<Demo name="card" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add card
+```
+
+## Usage
+
+```tsx
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardLink,
+  CardTitle,
+} from '@/components/ui/card';
+
+<Card interactive>
+  <CardHeader>
+    <CardTitle>
+      <CardLink href="/reports/q1">Q1 report</CardLink>
+    </CardTitle>
+    <CardDescription>Closed 5 April</CardDescription>
+    <CardAction>{/* a badge or a menu */}</CardAction>
+  </CardHeader>
+  <CardContent>{/* content */}</CardContent>
+  <CardFooter>{/* actions or meta */}</CardFooter>
+</Card>;
+```
+
+Reach for a card when the frame says something: this is one unit, it can be picked. Group plain
+content with space or a Separator instead, and never nest cards.
+
+`outline` is a hairline frame on the surface, `raised` adds the raised shadow, `sunken` is a well one
+step below the surface. An `interactive` card is one target: put a `CardLink` in the title and its hit
+area stretches over the card, so the card has one accessible name. `CardAction` stays clickable above
+it.
+
+## Props
+
+### Card
+
+Every prop of a `div` is accepted as well.
+
+<TypeTable
+  type={{
+    variant: {
+      type: "'outline' | 'raised' | 'sunken'",
+      default: "'outline'",
+      description: 'The frame.',
+    },
+    interactive: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Hover lifts the edge and keyboard focus on the CardLink rings the card.',
+    },
+  }}
+/>
+
+### CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter, CardLink
+
+Plain elements with the card's spacing: `CardTitle` is an `h3`, `CardLink` an `a`.
+
+## Accessibility
+
+- `CardTitle` is a heading, so cards show in the page outline. Change the level with your own heading element if needed.
+- An interactive card is a real link named by its text, not a clickable div; focus rings the whole card.
+
+<ComponentSource path="card/card.tsx" />

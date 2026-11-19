@@ -1,0 +1,69 @@
+---
+title: Banner
+description: A page-level announcement across the top of the app.
+---
+
+<Preview
+  name="banner"
+  plain={<Demo name="banner" />}
+  motion={<Demo name="banner.motion" />}
+  importLine="import { Banner } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add banner
+```
+
+## Usage
+
+```tsx
+import { Banner } from '@/components/ui/banner';
+
+<Banner dismissible action={<a href="/changelog">See what changed</a>}>
+  Bulk approvals are here: approve up to 50 expenses in one go.
+</Banner>;
+```
+
+A banner speaks for the whole app: scheduled maintenance, a new feature, an account that needs
+attention. Show one at a time, at the top of the app. For a message about one part of the page, use
+an Alert there.
+
+`accent` is the one loud banner, in the brand's own fill; `danger` fills too. `neutral`, `info` and
+`warning` are tinted bands.
+
+The motion variant lifts away when dismissed.
+
+## Props
+
+Every prop of a `section` is accepted as well.
+
+<TypeTable
+  type={{
+    tone: {
+      type: "'accent' | 'neutral' | 'info' | 'warning' | 'danger'",
+      default: "'accent'",
+      description: 'The weight and meaning.',
+    },
+    icon: { type: 'ReactNode | null', description: "Replaces the tone's icon; `null` drops it." },
+    action: { type: 'ReactNode', description: 'A link or button after the message.' },
+    dismissible: { type: 'boolean', default: 'false', description: 'Adds a dismiss button.' },
+    open: { type: 'boolean', description: 'Controls whether it shows.' },
+    onDismiss: { type: '() => void', description: 'Called by the dismiss button.' },
+    dismissLabel: {
+      type: 'string',
+      default: "'Dismiss announcement'",
+      description: 'Name of the dismiss button.',
+    },
+    label: { type: 'string', default: "'Announcement'", description: 'Names the region.' },
+  }}
+/>
+
+## Accessibility
+
+- A region named by `label`, so it can be found and skipped.
+- Not a live region: it is part of the page when it loads.
+- The dismiss button is named and keyboard reachable.
+
+<ComponentSource path="banner/banner.tsx" />

@@ -1,0 +1,79 @@
+---
+title: AvatarGroup
+description: A few people at a glance, such as the approvers of an invoice.
+---
+
+<Preview name="avatar-group" plain={<Demo name="avatar-group" />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add avatar-group
+```
+
+## Usage
+
+```tsx
+import { AvatarGroup } from '@/components/ui/avatar-group';
+
+<AvatarGroup
+  label="Approvers"
+  items={[{ name: 'Ana Ruiz' }, { name: 'Tomasz Nowak' }, { name: 'Lena Fischer' }]}
+  max={4}
+/>;
+```
+
+Past `max`, the rest fold into a `+N` chip whose accessible name lists who it hides. A single extra
+person is never folded into `+1`, which would take the same room as their avatar.
+
+The names show under the group on hover and on keyboard focus, without a tooltip: the stack fans out
+a little (transform only, so nothing around it moves) and the list of names fades in. Set
+`names="always"` to keep the names visible, or `"none"` to leave them to assistive technology.
+`spacing="spaced"` sets avatars side by side instead of overlapping.
+
+## Props
+
+Every prop of a `div` is accepted as well.
+
+<TypeTable
+  type={{
+    items: {
+      type: '{ name: string; src?: string; status?: AvatarStatus }[]',
+      description: 'The people, in order. Required.',
+    },
+    label: {
+      type: 'string',
+      description: 'What the people are, such as `Approvers`. Names the group. Required.',
+    },
+    max: {
+      type: 'number',
+      default: '4',
+      description: 'Avatars shown before the rest fold into `+N`.',
+    },
+    size: {
+      type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'",
+      default: "'md'",
+      description: 'Size of every avatar.',
+    },
+    square: { type: 'boolean', default: 'false', description: 'Square avatars, for teams.' },
+    spacing: {
+      type: "'stacked' | 'spaced'",
+      default: "'stacked'",
+      description: 'Overlapping, or side by side.',
+    },
+    names: {
+      type: "'hover' | 'always' | 'none'",
+      default: "'hover'",
+      description: 'When the list of names shows.',
+    },
+    locale: { type: 'string', description: 'For the list of names and its conjunction.' },
+  }}
+/>
+
+## Accessibility
+
+- A group named by `label`, holding one named image per person and the `+N` chip.
+- With `names="hover"` the group takes keyboard focus, so the names are reachable without a pointer.
+- The fan-out is a transform and stops under reduced motion.
+
+<ComponentSource path="avatar-group/avatar-group.tsx" />
