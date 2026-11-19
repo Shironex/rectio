@@ -302,19 +302,13 @@ function EventText({
         {fresh && <span className="sr-only">New: </span>}
         <span className="font-medium">{event.actor.name}</span>{' '}
         <span className="text-fg-muted">{event.verb}</span>{' '}
-        {event.target !== undefined ? (
+        {event.target !== undefined && (
           <span className={chip}>
             {event.actor.system !== true && (
               <KindIcon aria-hidden weight="bold" className="size-3.5 shrink-0 text-fg-muted" />
             )}
             <span className="truncate">{event.target}</span>
           </span>
-        ) : (
-          event.actor.system !== true && (
-            <span className={cn(chip, 'px-1.5 text-fg-muted')}>
-              <KindIcon aria-hidden weight="bold" className="size-3.5" />
-            </span>
-          )
         )}
         {event.change !== undefined && (
           <>
