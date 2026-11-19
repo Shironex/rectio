@@ -14,6 +14,7 @@ import * as moving from '@rectio/motion/navigation';
 import {
   Breadcrumb,
   Button,
+  Checkbox,
   CommandMenu,
   CommandMenuTrigger,
   ContextMenu,
@@ -47,6 +48,7 @@ import {
   NavigationMenuTrigger,
   Pagination,
   Popover,
+  PopoverClose,
   PopoverContent as PlainPopoverContent,
   PopoverDescription,
   PopoverTitle,
@@ -274,7 +276,7 @@ function ActionsMenu({ defaultOpen = false }: { defaultOpen?: boolean }) {
           </MenuGroup>
         </MenuRadioGroup>
         <MenuSeparator />
-        <MenuItem icon={icon(TrashIcon)} tone="danger" shortcut="mod+backspace">
+        <MenuItem icon={icon(TrashIcon)} tone="danger">
           Void invoice
         </MenuItem>
       </MenuContent>
@@ -338,9 +340,26 @@ export function OverlaySection() {
           <PopoverTrigger render={<Button variant="secondary">{icon(FunnelIcon)}Filters</Button>} />
           <PopoverContent className="w-72" showClose>
             <PopoverTitle>Filter invoices</PopoverTitle>
-            <PopoverDescription>
-              Show invoices issued in March 2026 to customers in Poland.
-            </PopoverDescription>
+            <PopoverDescription>Issued in March 2026.</PopoverDescription>
+            <fieldset className="mt-3 flex flex-col gap-2.5">
+              <legend className="mb-2 text-xs font-medium tracking-caps text-fg-subtle uppercase">
+                Status
+              </legend>
+              {[
+                ['Outstanding', true],
+                ['Overdue', true],
+                ['Paid', false],
+              ].map(([label, checked]) => (
+                <label key={String(label)} className="flex items-center gap-2 text-sm">
+                  <Checkbox defaultChecked={Boolean(checked)} />
+                  {label}
+                </label>
+              ))}
+            </fieldset>
+            <div className="mt-4 flex justify-end gap-2">
+              <PopoverClose render={<Button variant="ghost" size="sm" />}>Reset</PopoverClose>
+              <PopoverClose render={<Button size="sm" />}>Apply</PopoverClose>
+            </div>
           </PopoverContent>
         </Popover>
       </Row>

@@ -32,7 +32,6 @@ import {
   MenuTrigger,
   Popover,
   PopoverContent as PlainPopoverContent,
-  PopoverDescription,
   PopoverTitle,
   PopoverTrigger,
   Sidebar,
@@ -80,21 +79,6 @@ function buildCommands(run: (message: string) => void): CommandGroup[] {
   });
   return [
     {
-      label: 'Go to',
-      items: [
-        go('overview', 'Overview', HouseIcon, ['dashboard', 'home']),
-        go('invoices', 'Invoices', ReceiptIcon, ['receivables', 'sales', 'AR']),
-        go('customers', 'Customers', UsersThreeIcon, ['clients', 'debtors']),
-        go('credit-notes', 'Credit notes', ReceiptIcon, ['refund', 'corrections']),
-        go('banking', 'Banking', BankIcon, ['transactions', 'reconcile']),
-        go('payables', 'Payables', WalletIcon, ['bills', 'suppliers', 'AP']),
-        go('expenses', 'Expenses', ArrowsLeftRightIcon, ['receipts', 'claims']),
-        go('journal', 'Journal', BookOpenTextIcon, ['ledger', 'entries']),
-        go('accounts', 'Chart of accounts', BookOpenTextIcon, ['ledger', 'accounts']),
-        go('reports', 'Reports', ChartLineUpIcon, ['profit', 'loss', 'balance sheet']),
-      ],
-    },
-    {
       label: 'Actions',
       items: [
         {
@@ -107,6 +91,21 @@ function buildCommands(run: (message: string) => void): CommandGroup[] {
         },
         go('upload-receipt', 'Upload a receipt', ReceiptIcon, ['expense', 'scan']),
         go('settings', 'Settings', GearSixIcon, ['preferences']),
+      ],
+    },
+    {
+      label: 'Go to',
+      items: [
+        go('overview', 'Overview', HouseIcon, ['dashboard', 'home']),
+        go('invoices', 'Invoices', ReceiptIcon, ['receivables', 'sales', 'AR']),
+        go('customers', 'Customers', UsersThreeIcon, ['clients', 'debtors']),
+        go('credit-notes', 'Credit notes', ReceiptIcon, ['refund', 'corrections']),
+        go('banking', 'Banking', BankIcon, ['transactions', 'reconcile']),
+        go('payables', 'Payables', WalletIcon, ['bills', 'suppliers', 'AP']),
+        go('expenses', 'Expenses', ArrowsLeftRightIcon, ['receipts', 'claims']),
+        go('journal', 'Journal', BookOpenTextIcon, ['ledger', 'entries']),
+        go('accounts', 'Chart of accounts', BookOpenTextIcon, ['ledger', 'accounts']),
+        go('reports', 'Reports', ChartLineUpIcon, ['profit', 'loss', 'balance sheet']),
       ],
     },
   ];
@@ -213,22 +212,7 @@ export function ShellPage({
       actions={
         <>
           <CommandMenuTrigger />
-          <Popover>
-            <PopoverTrigger
-              render={
-                <Button variant="ghost" iconOnly aria-label="Notifications, 2 new">
-                  {icon(BellIcon)}
-                </Button>
-              }
-            />
-            <PopoverContent align="end" className="w-80">
-              <PopoverTitle>Notifications</PopoverTitle>
-              <PopoverDescription>
-                Kestrel Analytics paid INV-2026-0121. Two bills from Nordwind Logistik are due on
-                Friday.
-              </PopoverDescription>
-            </PopoverContent>
-          </Popover>
+          <Notifications PopoverContent={PopoverContent} />
           <Menu>
             <MenuTrigger
               render={
@@ -314,5 +298,106 @@ export function ShellPage({
         </AppShell>
       </CommandMenu>
     </ThemeScope>
+  );
+}
+
+const NOTIFICATIONS = [
+  {
+    id: 'n1',
+    unread: true,
+    title: 'Kestrel Analytics paid INV-2026-0121',
+    detail: '€6,240.00 matched to the bank feed',
+    time: '9 min ago',
+    href: '#invoices',
+  },
+  {
+    id: 'n2',
+    unread: true,
+    title: 'Two bills from Nordwind Logistik are due Friday',
+    detail: '€4,180.00 in total, waiting for approval',
+    time: '1 h ago',
+    href: '#payables',
+  },
+  {
+    id: 'n3',
+    unread: false,
+    title: 'February closed by Piotr Nowak',
+    detail: 'Journal locked, reports ready',
+    time: 'Yesterday',
+    href: '#reports',
+  },
+];
+
+/** The bell: a count on the trigger, a short list of what changed, and a way to the full list. */
+function Notifications({ PopoverContent }: { PopoverContent: typeof PlainPopoverContent }) {
+  const [read, setRead] = useState(false);
+  const unread = read ? 0 : NOTIFICATIONS.filter((n) => n.unread).length;
+  return (
+    <Popover>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="ghost"
+            iconOnly
+            aria-label={unread === 0 ? 'Notifications' : `Notifications, ${String(unread)} new`}
+            className="relative"
+          >
+            {icon(BellIcon)}
+            {unread > 0 && (
+              <span
+                aria-hidden
+                className="absolute end-2 top-2 size-2 rounded-full bg-accent ring-2 ring-surface-canvas"
+              />
+            )}
+          </Button>
+        }
+      />
+      <PopoverContent align="end" className="w-88 max-w-(--available-width) p-0">
+        <div className="flex items-baseline justify-between gap-4 px-4 pt-3 pb-2">
+          <PopoverTitle>Notifications</PopoverTitle>
+          <button
+            type="button"
+            disabled={unread === 0}
+            onClick={() => {
+              setRead(true);
+            }}
+            className="cursor-pointer rounded-control text-sm text-accent-strong hover:underline focus-visible:outline-2 focus-visible:outline-focus disabled:cursor-default disabled:text-fg-disabled disabled:no-underline"
+          >
+            Mark all read
+          </button>
+        </div>
+        <ul className="flex flex-col border-t border-line">
+          {NOTIFICATIONS.map((n) => (
+            <li key={n.id} className="not-last:border-b not-last:border-line">
+              <a
+                href={n.href}
+                className="flex gap-3 px-4 py-3 hover:bg-surface-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+              >
+                <span
+                  aria-hidden
+                  className={`mt-1.5 size-2 shrink-0 rounded-full ${n.unread && !read ? 'bg-accent' : 'bg-transparent'}`}
+                />
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="text-sm font-medium text-fg">
+                    {n.unread && !read && <span className="sr-only">New: </span>}
+                    {n.title}
+                  </span>
+                  <span className="text-sm text-fg-muted">{n.detail}</span>
+                  <span className="text-xs text-fg-subtle">{n.time}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div className="border-t border-line px-4 py-2.5">
+          <a
+            href="#notifications"
+            className="text-sm font-medium text-accent-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          >
+            View all notifications
+          </a>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
