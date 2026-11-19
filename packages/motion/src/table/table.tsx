@@ -18,11 +18,12 @@ import { readMotionTokens, type MotionTokens } from '../lib/tokens';
 export { TableCell };
 
 /**
- * Table rows that arrive and leave in place, moving only transform and opacity: the layout changes
- * once, in a single frame, and every row that it moved slides from where it was drawn to where it
- * now is (FLIP). A new row fades in as the rows below it slide down out of its way; a deleted row
- * fades out to the side, faster than an entry, and then the rows below slide up into the gap.
- * Rows present on the first render never animate.
+ * Table rows that arrive and leave in place, moving only transform and opacity. A new row takes its
+ * place at once and fades in as the rows below it (the footer too) slide down out of its way from
+ * where they were drawn (FLIP). A deleted row fades out to the side, faster than an entry, keeping
+ * its space; the rows below then slide up over the gap, and the row leaves the layout in the frame
+ * that slide ends, so nothing is ever drawn on top of the total. Rows present on the first render
+ * never animate.
  */
 export function TableRows({ children }: { children?: ReactNode }) {
   return <AnimatePresence initial={false}>{children}</AnimatePresence>;
@@ -35,13 +36,24 @@ function cssEasing(element: Element, name: keyof MotionTokens['easing']): string
   );
 }
 
-/** Slides a row from `delta` pixels away (drawn where it was) to its place. */
-function slide(row: HTMLTableRowElement, delta: number, tokens: MotionTokens) {
-  if (delta === 0) return;
-  row.animate([{ transform: `translateY(${String(delta)}px)` }, { transform: 'none' }], {
-    duration: tokens.duration.base * 1000,
-    easing: cssEasing(row, 'standard'),
-  });
+/** Moves a row vertically between two offsets, in pixels, on the standard easing. */
+function slide(
+  row: HTMLTableRowElement,
+  from: number,
+  to: number,
+  tokens: MotionTokens,
+): Animation {
+  return row.animate(
+    [{ transform: `translateY(${String(from)}px)` }, { transform: `translateY(${String(to)}px)` }],
+    { duration: tokens.duration.base * 1000, easing: cssEasing(row, 'standard'), fill: 'both' },
+  );
+}
+
+/** The rows a change in the body moves: the body's own, then the footer's. */
+function followers(body: HTMLTableSectionElement): HTMLTableRowElement[] {
+  const table = body.parentElement;
+  const footer = table instanceof HTMLTableElement ? table.tFoot : null;
+  return [...body.rows, ...(footer?.rows ?? [])];
 }
 
 interface Leaving {
@@ -61,25 +73,40 @@ function openGaps(body: HTMLTableSectionElement, tokens: MotionTokens) {
   const added = new Set(arriving.get(body));
   arriving.delete(body);
   let above = 0;
-  for (const row of body.rows) {
+  for (const row of followers(body)) {
     if (added.has(row)) above += row.offsetHeight;
-    else slide(row, -above, tokens);
+    else if (above > 0) slide(row, -above, 0, tokens).finished.then(cancel, ignore);
   }
 }
 
-/** Measures the others, takes the leavers out of the layout, measures again, slides the moved. */
+/**
+ * The rows after the faded ones slide up by the faded rows' heights while the layout stays; when
+ * the slide ends, the faded rows leave the layout and the slides are dropped in the same frame, so
+ * every row is already drawn where the new layout puts it.
+ */
 function closeGaps(body: HTMLTableSectionElement, tokens: MotionTokens) {
   const queue = leaving.get(body) ?? [];
   leaving.delete(body);
   const gone = new Set(queue.map((entry) => entry.row));
-  const rest = [...body.rows].filter((row) => !gone.has(row));
-  const before = rest.map((row) => row.offsetTop);
-  for (const row of gone) row.style.display = 'none';
-  rest.forEach((row, index) => {
-    slide(row, (before[index] ?? 0) - row.offsetTop, tokens);
-  });
-  for (const entry of queue) entry.done();
+  const slides: Animation[] = [];
+  let above = 0;
+  for (const row of followers(body)) {
+    if (gone.has(row)) above += row.offsetHeight;
+    else if (above > 0) slides.push(slide(row, 0, -above, tokens));
+  }
+  const finish = () => {
+    for (const row of gone) row.style.display = 'none';
+    for (const animation of slides) animation.cancel();
+    for (const entry of queue) entry.done();
+  };
+  void Promise.all(slides.map((animation) => animation.finished)).then(finish, finish);
 }
+
+/** A finished slide is dropped: its end is where the layout already draws the row. */
+const cancel = (animation: Animation) => {
+  animation.cancel();
+};
+const ignore = () => undefined;
 
 function enqueue<T>(
   queues: Map<HTMLTableSectionElement, T[]>,
