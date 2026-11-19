@@ -15,6 +15,17 @@ export function readNormalized(file: string): string | undefined {
   return text === undefined ? undefined : normalizeLineEndings(text);
 }
 
+/** The line ending a file already uses, so an edit to a CRLF file on Windows stays CRLF. */
+export function lineEndingOf(text: string): '\n' | '\r\n' {
+  return text.includes('\r\n') ? '\r\n' : '\n';
+}
+
+/** `text` with every line ending set to `eol`. */
+export function withLineEnding(text: string, eol: '\n' | '\r\n'): string {
+  const lf = normalizeLineEndings(text);
+  return eol === '\n' ? lf : lf.replace(/\n/g, '\r\n');
+}
+
 export function writeText(file: string, content: string): void {
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, content);

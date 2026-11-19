@@ -1,7 +1,10 @@
 import { dirname, relative, sep } from 'node:path';
 
+import { normalizeLineEndings } from '@rectio/registry';
+
 import type { Lockfile } from './lockfile.ts';
 import { CliError } from './context.ts';
+import { lineEndingOf, withLineEnding } from './fs.ts';
 import { importsTailwind } from './project.ts';
 
 const START = '/* rectio:start (managed by the rectio CLI, do not edit between the markers) */';
@@ -41,9 +44,11 @@ export function updateCssEntry(css: string, entryPath: string, files: readonly s
     return `@import '${rel.startsWith('.') ? rel : `./${rel}`}';`;
   });
   const block = files.length === 0 ? '' : `${START}\n${lines.join('\n')}\n${END}\n`;
-  const without = css.replace(BLOCK, '');
-  return without.replace(
+  // Edited with LF, written back with the file's own endings: a CRLF entry stays CRLF throughout.
+  const without = normalizeLineEndings(css).replace(BLOCK, '');
+  const next = without.replace(
     TAILWIND_LINE,
     (line) => `${line.endsWith('\n') ? line : `${line}\n`}${block}`,
   );
+  return withLineEnding(next, lineEndingOf(css));
 }

@@ -3,7 +3,8 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { cssImports, updateCssEntry } from '../src/core/css-entry.ts';
-import { parseJsonc } from '../src/core/fs.ts';
+import { parseJsonc, readText } from '../src/core/fs.ts';
+import { mergeDependencies } from '../src/core/install.ts';
 import { authFile, findLicenseKey, userConfigDir } from '../src/core/license.ts';
 import type { Lockfile } from '../src/core/lockfile.ts';
 import {
@@ -237,6 +238,16 @@ describe('the CSS entry block', () => {
   it('refuses an entry without Tailwind', () => {
     expect(() => updateCssEntry('body{}', 'src/index.css', [])).toThrow('does not import Tailwind');
   });
+
+  it('keeps the CRLF endings of a Windows checkout, block included', () => {
+    const css = '@import "tailwindcss";\r\n\r\nbody {\r\n  margin: 0;\r\n}\r\n';
+    const once = updateCssEntry(css, 'src/index.css', ['src/styles/rectio/tokens.css']);
+    expect(once).toContain("@import './styles/rectio/tokens.css';\r\n");
+    expect(once.replace(/\r\n/g, '')).not.toContain('\n');
+    // A second run finds the CRLF block and replaces it instead of adding another.
+    const twice = updateCssEntry(once, 'src/index.css', ['src/styles/rectio/tokens.css']);
+    expect(twice).toBe(once);
+  });
 });
 
 describe('license key lookup', () => {
@@ -261,5 +272,23 @@ describe('license key lookup', () => {
     expect(authFile({ XDG_CONFIG_HOME: '/cfg' }, 'darwin')).toBe(
       join('/cfg', 'rectio', 'auth.json'),
     );
+  });
+});
+
+describe('package.json edits', () => {
+  it('keep the CRLF endings and the indentation of a Windows checkout', () => {
+    const temp = tempDir('rectio-crlf-');
+    try {
+      writeTree(temp.dir, {
+        'package.json':
+          '{\r\n\t"name": "app",\r\n\t"dependencies": {\r\n\t\t"react": "^19.0.0"\r\n\t}\r\n}\r\n',
+      });
+      mergeDependencies(temp.dir, { dependencies: { motion: '^14.12.0' }, devDependencies: {} });
+      const text = readText(join(temp.dir, 'package.json')) ?? '';
+      expect(text).toContain('\t\t"motion": "^14.12.0",\r\n');
+      expect(text.replace(/\r\n/g, '')).not.toContain('\n');
+    } finally {
+      temp.cleanup();
+    }
   });
 });

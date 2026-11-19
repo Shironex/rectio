@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 
 import { CliError } from './context.ts';
-import { readText, writeText } from './fs.ts';
+import { lineEndingOf, readText, withLineEnding, writeText } from './fs.ts';
 import type { PackageJson, PackageManager } from './project.ts';
 
 export interface DependencyChanges {
@@ -40,19 +40,21 @@ export function mergeDependencies(cwd: string, wanted: DependencyChanges): Depen
     pkg[field] = Object.fromEntries(Object.entries(merged).sort(([a], [b]) => (a < b ? -1 : 1)));
   }
   const indent = /^[ \t]+(?=")/m.exec(text)?.[0] ?? '  ';
-  writeText(file, `${JSON.stringify(pkg, null, indent)}\n`);
+  writeText(file, withLineEnding(`${JSON.stringify(pkg, null, indent)}\n`, lineEndingOf(text)));
   return added;
 }
 
 /**
- * Runs `<manager> install` in the project. The arguments are fixed strings: on Windows the
- * managers are .cmd shims, which Node only spawns through a shell.
+ * Runs `<manager> install` in the project. On Windows the managers are .cmd shims, which Node only
+ * spawns through a shell; the command is then one fixed string (`pnpm install`), never arguments
+ * passed beside `shell`, which Node deprecates because a shell would re-split them.
  */
 export function runInstall(cwd: string, manager: PackageManager): Promise<void> {
+  const windows = process.platform === 'win32';
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(manager, ['install'], {
+    const child = spawn(windows ? `${manager} install` : manager, windows ? [] : ['install'], {
       cwd,
-      shell: process.platform === 'win32',
+      shell: windows,
       stdio: ['ignore', 'pipe', 'pipe'],
       env: process.env,
     });
