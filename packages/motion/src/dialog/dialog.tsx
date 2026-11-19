@@ -61,24 +61,34 @@ export function DialogTrigger({ ref, onPointerDown, ...props }: TriggerProps) {
 }
 
 /**
- * Where the popup starts and ends: leaning a short way out from the trigger's side, slightly
- * smaller, never a flight across the page. The lean is the `origin` distance along the line to the
- * trigger, so the eye connects the two while the dialog stays where it will be read. Without a
- * visible trigger (opened from code or a shortcut), the plain entrance: a short rise.
+ * Where the popup starts and ends: grown from its edge nearest the trigger (the transform origin is
+ * the trigger's centre, clamped into the popup), leaning a short way toward it and slightly
+ * smaller. Never a flight across the page: the dialog stays where it will be read, and the eye
+ * still connects it to the button. Without a visible trigger (opened from code or a shortcut), the
+ * plain entrance: a short rise from the centre.
  */
-function originTransform(popup: HTMLElement, trigger: HTMLElement | null, tokens: MotionTokens) {
+function origin(popup: HTMLElement, trigger: HTMLElement | null, tokens: MotionTokens) {
   const box = trigger?.getBoundingClientRect();
   if (box === undefined || box.width === 0) {
-    return `translateY(${tokens.distance.shift}) scale(${String(tokens.scale.from)})`;
+    return {
+      transformOrigin: '50% 50%',
+      away: `translateY(${tokens.distance.shift}) scale(${String(tokens.scale.from)})`,
+    };
   }
   const self = popup.getBoundingClientRect();
+  const clamp = (value: number, size: number) => Math.min(Math.max(value, 0), size);
+  const ox = clamp(box.left + box.width / 2 - self.left, self.width);
+  const oy = clamp(box.top + box.height / 2 - self.top, self.height);
   const dx = box.left + box.width / 2 - (self.left + self.width / 2);
   const dy = box.top + box.height / 2 - (self.top + self.height / 2);
   const length = Math.hypot(dx, dy);
   // A unit vector toward the trigger, scaled by the token in CSS so rem and reduced motion apply.
   const [ux, uy] = length < 1 ? [0, 0] : [dx / length, dy / length];
   const lean = (unit: number) => `calc(${tokens.distance.origin} * ${unit.toFixed(3)})`;
-  return `translate(${lean(ux)}, ${lean(uy)}) scale(${String(tokens.scale.origin)})`;
+  return {
+    transformOrigin: `${ox.toFixed(1)}px ${oy.toFixed(1)}px`,
+    away: `translate(${lean(ux)}, ${lean(uy)}) scale(${String(tokens.scale.origin)})`,
+  };
 }
 
 type PopupState = Parameters<
@@ -87,7 +97,7 @@ type PopupState = Parameters<
 
 function MotionPopup({ state, ref, ...props }: ComponentProps<'div'> & { state: PopupState }) {
   const node = useRef<HTMLDivElement | null>(null);
-  const origin = use(OriginContext);
+  const originRef = use(OriginContext);
   const running = useRef<Controls[]>([]);
 
   useLayoutEffect(() => {
@@ -104,7 +114,8 @@ function MotionPopup({ state, ref, ...props }: ComponentProps<'div'> & { state: 
     for (const animation of element.getAnimations()) animation.cancel();
     element.style.removeProperty('transform');
     element.style.removeProperty('opacity');
-    const away = originTransform(element, origin?.current ?? null, tokens);
+    const { transformOrigin, away } = origin(element, originRef?.current ?? null, tokens);
+    element.style.transformOrigin = transformOrigin;
     running.current = state.open
       ? [
           // Opens: leans out of the trigger's side on the overlay spring, opaque early.
@@ -121,7 +132,7 @@ function MotionPopup({ state, ref, ...props }: ComponentProps<'div'> & { state: 
             tokens.easing.exit,
           ),
         ];
-  }, [state.open, origin]);
+  }, [state.open, originRef]);
 
   return (
     <div
