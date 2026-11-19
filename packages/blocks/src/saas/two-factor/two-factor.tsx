@@ -1,9 +1,10 @@
 import { OTPField } from '@base-ui/react/otp-field';
 import { Checkbox, Field, FieldDescription, FieldError, FieldLabel, Input, cn } from '@rectio/ui';
-import { Fragment, useEffect, useState, type ReactNode, type SyntheticEvent } from 'react';
+import { Fragment, useEffect, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { AuthFrame, AuthLink, type LinkTarget } from '../lib/auth';
+import { inlineLink } from '../lib/styles';
 import {
   backupCodeError,
   formatTwoFactorWait,
@@ -87,6 +88,11 @@ export function TwoFactor({
   const now = useNow(canResend && sentAt !== undefined);
   const wait = canResend ? twoFactorResendWait(sentAt, now, resendCooldown) : 0;
   const hasError = error !== undefined && error !== null && error !== false;
+  const firstSlot = useRef<HTMLInputElement>(null);
+  // A refused code sends focus back to the start, ready for the next attempt.
+  useEffect(() => {
+    if (hasError) firstSlot.current?.focus();
+  }, [hasError, error]);
 
   const verify = (value: string) => {
     if (pending || !twoFactorCodeComplete(value, length)) return;
@@ -129,7 +135,7 @@ export function TwoFactor({
     <AuthFrame
       {...frame}
       title={title ?? 'Enter your verification code'}
-      description={twoFactorInstruction(method, length, destination)}
+      description={`${twoFactorInstruction(method, length, destination)} We check it as soon as you enter the last digit.`}
     >
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
         <Field invalid={hasError || incomplete}>
@@ -142,7 +148,9 @@ export function TwoFactor({
               setTried(false);
             }}
             onValueComplete={verify}
-            disabled={pending}
+            // Read only, not disabled, while checking: disabling drops focus to the page.
+            readOnly={pending}
+            aria-busy={pending}
             className="group/otp flex items-center gap-1.5 @sm:gap-2"
           >
             {Array.from({ length }, (_, index) => (
@@ -153,15 +161,17 @@ export function TwoFactor({
                 <OTPField.Input
                   // The code is the only thing to do on this step, so the first slot takes focus.
                   autoFocus={index === 0}
+                  ref={index === 0 ? firstSlot : undefined}
                   aria-label={
                     index === 0 ? undefined : `Digit ${String(index + 1)} of ${String(length)}`
                   }
                   className={cn(
-                    'h-14 w-full min-w-0 flex-1 rounded-(--rx-field-radius) border border-(--rx-field-border) bg-(--rx-field-background)',
+                    'aspect-7/8 max-h-14 w-full min-w-0 flex-1 rounded-(--rx-field-radius) border border-(--rx-field-border) bg-(--rx-field-background)',
                     'text-center font-numeric text-2xl font-medium text-fg tabular-nums caret-accent',
                     'transition-[border-color,outline-color] duration-fast ease-standard hover:border-fg-subtle',
-                    'outline-0 -outline-offset-1 outline-transparent focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-                    'group-data-invalid/otp:border-negative group-data-disabled/otp:bg-surface-sunken group-data-disabled/otp:text-fg-disabled',
+                    // The focus ring stands off the slot, so it reads apart from the error border.
+                    'outline-0 outline-transparent focus:border-accent focus:outline-2 focus:outline-offset-3 focus:outline-focus',
+                    'group-data-invalid/otp:not-focus:border-negative group-data-readonly/otp:text-fg-muted',
                   )}
                 />
               </Fragment>
@@ -189,21 +199,34 @@ export function TwoFactor({
         </Button>
 
         {(canResend || onUseBackupCode !== undefined) && (
-          <div className="flex flex-col items-center gap-2 border-t border-line pt-4 text-sm @sm:flex-row @sm:justify-between">
-            {canResend &&
-              (wait > 0 ? (
-                <p className="text-fg-muted">
-                  New code in <span className="numeric">{formatTwoFactorWait(wait)}</span>
-                </p>
-              ) : (
-                <AuthLink to={onResend}>Send a new code</AuthLink>
-              ))}
+          <div className="flex items-center justify-between gap-3 border-t border-line pt-4 text-sm">
+            {canResend && (
+              <span className="flex items-baseline gap-1.5">
+                <button
+                  type="button"
+                  disabled={wait > 0}
+                  onClick={onResend}
+                  className={cn(
+                    inlineLink,
+                    'pointer-coarse:py-2',
+                    'disabled:cursor-not-allowed disabled:text-fg-muted disabled:no-underline',
+                  )}
+                >
+                  Send a new code
+                </button>
+                {wait > 0 && (
+                  <span className="text-fg-muted">
+                    in <span className="numeric">{formatTwoFactorWait(wait)}</span>
+                  </span>
+                )}
+              </span>
+            )}
             {onUseBackupCode !== undefined && (
               <AuthLink
                 to={() => {
                   setMode('backup');
                 }}
-                className="@sm:ms-auto"
+                className="ms-auto"
               >
                 Use a backup code
               </AuthLink>
