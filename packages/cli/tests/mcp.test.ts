@@ -49,8 +49,11 @@ describe('list_items', () => {
     expect(themes.text).toContain('theme-ledger');
     expect(themes.text).not.toContain('button |');
     const pro = await listItems(deps(), { tier: 'pro' });
-    expect(pro.text).toContain('1 item(s)');
     expect(pro.text).toContain('ledger-summary');
+    // The motion add-on is pro too, every item of it.
+    expect(pro.text).toContain('motion-toast | component | pro |');
+    expect(pro.text).toContain('motion-core | lib | pro |');
+    expect(pro.text).not.toContain('| free |');
   });
 
   it('truncates with a hint', async () => {
@@ -167,6 +170,15 @@ describe('get_item_source', () => {
     expect(isError).toBeUndefined();
     expect(text).toContain('export function LedgerSummary');
     expect(text).not.toContain(KEY);
+  });
+
+  it('gates the motion add-on source like any pro item', async () => {
+    const without = await getItemSource(deps(), { name: 'motion-dialog' });
+    expect(without.isError).toBe(true);
+    expect(without.text).not.toContain('export function');
+    const withIt = await getItemSource(withKey(), { name: 'motion-dialog' });
+    expect(withIt.isError).toBeUndefined();
+    expect(withIt.text).toContain('export function DialogContent');
   });
 
   it('reads the key from auth.json in the config folder too', async () => {
