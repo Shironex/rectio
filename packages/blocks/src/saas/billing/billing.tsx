@@ -11,7 +11,9 @@ import { BlockPanel } from '../../lib/block-panel';
 import { EmptyNote } from '../../lib/empty-note';
 import { formatLongDate, formatShortDate, resolveLocale } from '../../lib/finance';
 import { StateBadge } from '../../lib/state-badge';
+import { useNow } from '../lib/focus';
 import { UsageMeter } from '../lib/meter';
+import { numberFormat, plural } from '../lib/saas';
 import {
   billingCardState,
   billingDaysLeft,
@@ -59,14 +61,6 @@ const INVOICE_STATE = {
   void: { state: 'void', label: 'Void' },
 } as const;
 
-/** The narrow row's status word: quiet unless it needs paying. */
-const INVOICE_WORD_TONE = {
-  paid: '',
-  open: 'text-warning-strong',
-  failed: 'text-negative-strong',
-  void: '',
-} as const;
-
 /**
  * The account's money in one place: the plan and when it renews, how much of each allowance is
  * used, the card on file and every invoice. The block reads only; changing the plan, the card or
@@ -79,7 +73,7 @@ export function Billing({
   invoices = [],
   currency,
   locale: requestedLocale,
-  today = new Date(),
+  today: requestedToday,
   onChangePlan,
   onCancelPlan,
   onUpdatePaymentMethod,
@@ -88,6 +82,7 @@ export function Billing({
   className,
 }: BillingProps) {
   const locale = resolveLocale(requestedLocale);
+  const today = useNow(requestedToday);
   const { Button, Money } = useBlockParts();
   const status = PLAN_STATUS[plan.status];
   const days = billingDaysLeft(plan, today);
@@ -101,8 +96,8 @@ export function Billing({
     plan.status === 'canceled'
       ? `Access ends on ${renewal}`
       : plan.status === 'trialing'
-        ? `Trial ends on ${renewal}, ${days === 1 ? 'in 1 day' : `in ${String(days)} days`}`
-        : `Renews on ${renewal}, ${days === 1 ? 'in 1 day' : `in ${String(days)} days`}`;
+        ? `Trial ends on ${renewal}, in ${plural(days, 'day')}`
+        : `Renews on ${renewal}, in ${plural(days, 'day')}`;
 
   return (
     <BlockPanel
@@ -152,7 +147,7 @@ export function Billing({
               />
               <span className="text-sm text-fg-muted">
                 per {INTERVAL_WORDS[plan.interval]}
-                {plan.seats !== undefined && `, ${String(plan.seats)} seats included`}
+                {plan.seats !== undefined && `, ${plural(plan.seats, 'seat')} included`}
               </span>
             </p>
             <p className="text-sm text-fg-muted">{renewalText}</p>
@@ -183,7 +178,7 @@ export function Billing({
             plan.status === 'trialing' ? (
               <div className="flex flex-col gap-1">
                 <p className="font-display text-xl font-heading tracking-tight">
-                  {days === 1 ? '1 day' : `${String(days)} days`} left in your trial
+                  {plural(days, 'day')} left in your trial
                 </p>
                 <p className="text-sm text-fg-muted">
                   Everything in {plan.name} is open until then. The first charge,{' '}
@@ -198,7 +193,7 @@ export function Billing({
             <div className="flex flex-col gap-5">
               {usage.map((item) => {
                 const level = billingUsageLevel(item.used, item.limit);
-                const format = new Intl.NumberFormat(locale);
+                const format = numberFormat(locale);
                 return (
                   <UsageMeter
                     key={item.id}
@@ -293,11 +288,11 @@ export function Billing({
                 >
                   <span className="flex min-w-0 flex-1 flex-col @md:flex-row @md:items-baseline @md:gap-4">
                     <span className="font-medium numeric">{invoice.number}</span>
-                    <span className="text-sm text-fg-muted">
+                    <span className="flex items-center gap-2 text-sm text-fg-muted">
                       <span className="numeric">{formatShortDate(invoice.date, locale)}</span>
-                      {/* Narrow: the status as a plain word beside the date. */}
-                      <span className={cn('@md:hidden', INVOICE_WORD_TONE[invoice.status])}>
-                        , {state.label.toLowerCase()}
+                      {/* Narrow: a compact badge beside the date, icon and word, never colour alone. */}
+                      <span className="inline-flex @md:hidden">
+                        <StateBadge state={state.state} label={state.label} />
                       </span>
                     </span>
                   </span>

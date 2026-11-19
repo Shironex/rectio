@@ -1,4 +1,5 @@
 import { daysBetween, sumMoney } from '../../lib/finance';
+import { numberFormat } from '../lib/saas';
 
 export type BillingInterval = 'month' | 'year';
 export type BillingPlanStatus = 'active' | 'trialing' | 'past-due' | 'canceled';
@@ -63,7 +64,7 @@ export function billingUsageNote(
   locale: string,
   resetText: string | null,
 ): string {
-  const format = new Intl.NumberFormat(locale);
+  const format = numberFormat(locale);
   const reset = resetText === null ? '' : `, resets ${resetText}`;
   if (usage.used > usage.limit) {
     return `Over the allowance by ${format.format(usage.used - usage.limit)} ${usage.unit}${reset}`;
