@@ -78,7 +78,7 @@ void test('every template has a published page marked Pro, with its screenshots'
       (entry) => entry.isDirectory() && existsSync(join(TEMPLATES, entry.name, 'template.json')),
     )
     .map((entry) => entry.name);
-  for (const name of ['finance-app', 'saas-landing', 'product-launch']) {
+  for (const name of ['finance-app', 'saas-landing', 'product-launch', 'docs']) {
     assert.ok(names.includes(name), `expected the ${name} template`);
   }
   for (const name of names) {

@@ -286,6 +286,7 @@ describe('the rectio registry', () => {
       'data-table',
       'date-picker',
       'dialog',
+      'docs',
       'docs-api-reference',
       'docs-changelog',
       'docs-code-block',
@@ -684,6 +685,7 @@ describe('the rectio registry', () => {
   it('publishes every template as a pro template item that names no workspace package', () => {
     const templates = result.items.filter((i) => i.type === 'template');
     expect(templates.map((t) => t.name).sort()).toEqual([
+      'docs',
       'finance-app',
       'product-launch',
       'saas-landing',

@@ -95,11 +95,12 @@ mode, open popups and the invalid state to `.rounds/round-3/forms/`.
 16 app (`@rectio/template-<name>`, App Router, static export) that imports the workspace packages
 while in the repo and becomes the buyer's own project with `rectio init --template <name>`.
 
-| Template         | Category  | What it is                                                                                    |
-| ---------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `finance-app`    | app       | A finance back office: overview, invoices, expenses and approvals, journal, reports, settings |
-| `saas-landing`   | marketing | A multi-page marketing site: home, features, pricing, customers, blog, about, contact, legal  |
-| `product-launch` | marketing | A single long launch page with a live product board, feature bento, waitlist and FAQ          |
+| Template         | Category  | What it is                                                                                      |
+| ---------------- | --------- | ----------------------------------------------------------------------------------------------- |
+| `finance-app`    | app       | A finance back office: overview, invoices, expenses and approvals, journal, reports, settings   |
+| `saas-landing`   | marketing | A multi-page marketing site: home, features, pricing, customers, blog, about, contact, legal    |
+| `product-launch` | marketing | A single long launch page with a live product board, feature bento, waitlist and FAQ            |
+| `docs`           | marketing | A static documentation site from MDX: folder navigation, local search, API reference, changelog |
 
 Each has a `template.json` (name, title, description, category, tier, pages, `uses`, screenshots)
 that the registry build, the docs pages and the landing gallery all read, so a new folder appears
