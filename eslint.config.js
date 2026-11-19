@@ -113,7 +113,11 @@ export default tseslint.config(
   {
     files: ['apps/**/*.{ts,tsx}'],
     rules: {
-      'noctcore-monorepo/no-deep-package-imports': ['error', { scopes: ['@rectio'] }],
+      // `@rectio/blocks/motion` is a declared entry: each block's motioned twin, picked by import path.
+      'noctcore-monorepo/no-deep-package-imports': [
+        'error',
+        { scopes: ['@rectio'], allowedSubpaths: ['motion'] },
+      ],
     },
   },
 
@@ -122,6 +126,7 @@ export default tseslint.config(
     files: [
       'packages/ui/src/**/*.{ts,tsx}',
       'packages/motion/src/**/*.{ts,tsx}',
+      'packages/blocks/src/**/*.{ts,tsx}',
       'apps/site/{app,components,demos,lib}/**/*.{ts,tsx}',
     ],
     ignores: ['**/*.test.{ts,tsx}'],
