@@ -12,7 +12,13 @@ type WithClassName<P> = Omit<P, 'className'> & { className?: string };
 export const popupMotion = cn(
   'origin-(--transform-origin) transition-[opacity,scale,translate] ease-enter duration-base',
   'data-starting-style:scale-(--rx-motion-scale-from) data-starting-style:opacity-0',
+  // Out of the trigger's side: down from below it, up from above, sideways beside it.
   'data-starting-style:-translate-y-(--rx-motion-distance-shift)',
+  'data-[side=top]:data-starting-style:translate-y-(--rx-motion-distance-shift)',
+  'data-[side=right]:data-starting-style:translate-y-0 data-[side=right]:data-starting-style:-translate-x-(--rx-motion-distance-shift)',
+  'data-[side=left]:data-starting-style:translate-y-0 data-[side=left]:data-starting-style:translate-x-(--rx-motion-distance-shift)',
+  'data-[side=inline-end]:data-starting-style:translate-y-0 data-[side=inline-end]:data-starting-style:-translate-x-(--rx-motion-distance-shift)',
+  'data-[side=inline-start]:data-starting-style:translate-y-0 data-[side=inline-start]:data-starting-style:translate-x-(--rx-motion-distance-shift)',
   'data-ending-style:opacity-0 data-ending-style:ease-exit data-ending-style:duration-fast',
 );
 
