@@ -21,12 +21,14 @@ function placeFor(email: string): number {
   return 2400 + hash;
 }
 
-export async function joinWaitlist({
-  email,
-}: {
+/** What the form sends: the address, the role if given, and whether they want a beta session. */
+export interface WaitlistSignup {
   email: string;
   role: string;
-}): Promise<WaitlistEntry> {
+  beta: boolean;
+}
+
+export async function joinWaitlist({ email }: WaitlistSignup): Promise<WaitlistEntry> {
   await pause(900);
   // A sample failure, so the error state can be tried: any address at example.invalid bounces.
   if (email.endsWith('@example.invalid')) throw new Error('That address bounced. Try another.');

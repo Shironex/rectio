@@ -32,7 +32,7 @@ export function ChangelogPage() {
                 title={<span className="numeric text-fg-muted">Version {release.version}</span>}
               >
                 <div className="flex flex-col gap-4 pt-2 pb-6">
-                  <h2 className="font-display text-2xl font-strong tracking-tight text-fg">
+                  <h2 className="font-display text-2xl font-strong tracking-tight text-balance text-fg">
                     {release.title}
                   </h2>
                   <p className="max-w-prose text-lg text-pretty text-fg-muted">{release.summary}</p>
@@ -53,7 +53,7 @@ export function ChangelogPage() {
               </TimelineItem>
             ))}
           </Timeline>
-          <aside className="lg:col-span-4">
+          <div className="lg:col-span-4">
             <div className="flex flex-col gap-4 rounded-panel border border-line bg-surface-sunken p-6 lg:sticky lg:top-24">
               <Newsletter
                 layout="compact"
@@ -62,7 +62,7 @@ export function ChangelogPage() {
                 onSubscribe={subscribe}
               />
             </div>
-          </aside>
+          </div>
         </div>
       </Section>
     </>

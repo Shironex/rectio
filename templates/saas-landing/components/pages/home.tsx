@@ -52,7 +52,7 @@ export function HomePage() {
       />
       <LogoStrip
         title="Cafés, clinics, shops and warehouses plan their week on Rostra"
-        logos={CUSTOMERS.slice(0, 5)}
+        logos={CUSTOMERS.slice(0, 4)}
       />
       <FeatureBento
         eyebrow="Product"

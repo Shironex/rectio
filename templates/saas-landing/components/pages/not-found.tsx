@@ -30,7 +30,7 @@ export function NotFoundPage() {
             <li key={link.href}>
               <a
                 href={link.href}
-                className="inline-flex min-h-(--rx-button-height-touch) items-center rounded-control text-base text-fg-muted underline-offset-4 outline-offset-2 pointer-fine:hover:text-fg pointer-fine:hover:underline focus-visible:outline-2 focus-visible:outline-focus"
+                className="inline-flex min-h-(--rx-button-height-touch) min-w-11 items-center justify-center rounded-control text-base text-fg-muted underline-offset-4 outline-offset-2 pointer-fine:hover:text-fg pointer-fine:hover:underline focus-visible:outline-2 focus-visible:outline-focus"
               >
                 {link.label}
               </a>

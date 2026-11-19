@@ -17,7 +17,8 @@ import {
 import { AvatarGroup } from '@rectio/ui';
 
 import { BETA_QUOTE, BETA_TEAMS, FAQ, HERO_WORDS, STEPS } from '@/data/launch';
-import { JOIN, NAV, SITE } from '@/data/site';
+import { JOIN, NAV, SITE, STORAGE } from '@/data/site';
+import { useStored } from '@/lib/stored';
 
 import { Brand } from './brand';
 import { Panel } from './panel';
@@ -59,6 +60,7 @@ function ReadersCard() {
 
 /** The whole launch page: one long scroll from the promise to the waitlist. */
 export function LaunchPage() {
+  const joined = typeof useStored(STORAGE.waitlist) === 'string';
   return (
     <>
       <a
@@ -137,7 +139,7 @@ export function LaunchPage() {
             ]}
           />
         </div>
-        <Section id="how" labelledBy="how-title">
+        <Section id="how" width="wide" labelledBy="how-title">
           <h2 id="how-title" className="sr-only">
             How it works
           </h2>
@@ -166,9 +168,15 @@ export function LaunchPage() {
                 id="waitlist-title"
                 size="xl"
                 title={
-                  <>
-                    Get in <Em>before the doors open</Em>
-                  </>
+                  joined ? (
+                    <>
+                      You are <Em>on the list</Em>
+                    </>
+                  ) : (
+                    <>
+                      Get in <Em>before the doors open</Em>
+                    </>
+                  )
                 }
                 description="Early access opens in January in waves of about two hundred teams. The list goes in order."
               />

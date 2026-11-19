@@ -12,7 +12,8 @@ import { INTERVIEW, THEMES_FOUND } from '@/data/launch';
  */
 
 export function InterviewBoard({ className }: { className?: string }) {
-  const [active, setActive] = useState<string | null>(null);
+  // Opens on the strongest theme, so the board shows what filtering does before anyone clicks.
+  const [active, setActive] = useState<string | null>('invites');
   return (
     <div className={cn('@container', className)}>
       <div className="grid overflow-hidden rounded-panel border border-line bg-surface text-fg @2xl:grid-cols-5">
@@ -32,9 +33,10 @@ export function InterviewBoard({ className }: { className?: string }) {
               return (
                 <li
                   key={line.id}
+                  aria-hidden={dim}
                   className={cn(
                     'flex gap-3 transition-opacity duration-fast ease-standard motion-reduce:transition-none',
-                    dim && 'opacity-55',
+                    dim && 'opacity-70',
                   )}
                 >
                   <span className="numeric w-10 shrink-0 pt-0.5 text-xs text-fg-muted">
@@ -55,6 +57,11 @@ export function InterviewBoard({ className }: { className?: string }) {
         <div className="flex flex-col gap-3 border-t border-line bg-surface-sunken p-5 @2xl:col-span-2 @2xl:border-t-0">
           <span className="text-sm font-medium text-fg">Themes across 12 interviews</span>
           <span className="text-sm text-fg-muted">Pick one to see where it was said.</span>
+          <span role="status" className="sr-only">
+            {active === null
+              ? 'Showing every line.'
+              : `${String(INTERVIEW.lines.filter((line) => line.theme === active).length)} of ${String(INTERVIEW.lines.length)} lines match.`}
+          </span>
           <ul className="flex flex-col gap-1">
             {THEMES_FOUND.map((theme, index) => {
               const on = active === theme.id;
@@ -142,7 +149,7 @@ export function SearchCard() {
 
 export function TagCloud() {
   return (
-    <ul aria-label="Tags" className="flex flex-wrap gap-2">
+    <ul aria-label="Tags" className="flex flex-wrap content-start gap-2">
       {THEMES_FOUND.map((theme) => (
         <li key={theme.id}>
           <Badge tone="info">{theme.label}</Badge>

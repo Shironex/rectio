@@ -127,7 +127,7 @@ function Estimator({ billing }: { billing: Billing }) {
   return (
     <div className="grid gap-8 rounded-panel border border-line bg-surface-sunken p-6 sm:p-8 lg:grid-cols-12 lg:items-center">
       <div className="flex flex-col gap-4 lg:col-span-5">
-        <h2 className="font-display text-2xl font-regular tracking-tight text-fg sm:text-3xl">
+        <h2 className="font-display text-2xl font-regular tracking-tight text-balance text-fg sm:text-3xl">
           What would <Em>your team</Em> pay?
         </h2>
         <Field>
@@ -231,7 +231,12 @@ function PhoneComparison() {
         ))}
       </ToggleGroup>
       {COMPARISON.map((group) => (
-        <div key={group.id} className="flex flex-col gap-2">
+        <div
+          key={group.id}
+          role="group"
+          aria-label={`${group.title}, ${PLANS.find((plan) => plan.id === planId)?.name ?? ''} plan`}
+          className="flex flex-col gap-2"
+        >
           <h3 className="text-sm font-strong text-fg">{group.title}</h3>
           <dl className="flex flex-col divide-y divide-line border-y border-line">
             {group.rows.map((row) => (

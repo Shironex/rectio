@@ -39,7 +39,13 @@ export function SwapCard() {
   const [state, setState] = useState<'pending' | 'approved' | 'declined'>('pending');
   const { ref, land } = useLanding<HTMLDivElement>();
   return (
-    <div ref={ref} tabIndex={-1} className={cn('flex flex-col gap-3', LANDING)}>
+    <div
+      ref={ref}
+      tabIndex={-1}
+      role="group"
+      aria-label="Shift swap request"
+      className={cn('flex flex-col gap-3', LANDING)}
+    >
       <div className={ROW}>
         <span className="inline-flex items-center gap-1.5 text-sm text-fg-muted">
           <ArrowsLeftRightIcon aria-hidden weight="bold" className="size-4" />
@@ -56,7 +62,9 @@ export function SwapCard() {
         </span>
       </div>
       <div className="flex items-center gap-3">
-        <Avatar name="Ana Ribeiro" size="md" />
+        <span aria-hidden className="contents">
+          <Avatar name="Ana Ribeiro" size="md" />
+        </span>
         <div className="flex min-w-0 flex-col">
           <span className="font-medium text-pretty text-fg">Ana swaps Thu 07:00 with Marco</span>
           <span className="text-sm text-fg-muted">Both qualified for Front desk</span>
@@ -122,9 +130,11 @@ export function OpenShiftBoard() {
   const { ref, land } = useLanding<HTMLDivElement>();
   const taken = OPEN_SHIFTS.find((item) => item.id === claimed);
   return (
-    <div ref={ref} tabIndex={-1} className={LANDING}>
+    <div ref={ref} tabIndex={-1} role="group" aria-label="Open shifts" className={LANDING}>
       <p aria-live="polite" className="sr-only">
-        {taken === undefined ? '' : `You claimed ${taken.day}, ${taken.start} to ${taken.end}.`}
+        {taken === undefined
+          ? ''
+          : `You claimed ${taken.day}, ${taken.start} to ${taken.end}. One open shift a week each, so the others stay for the team.`}
       </p>
       <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-panel border border-line bg-surface">
         {OPEN_SHIFTS.map((shift) => {
@@ -200,7 +210,7 @@ export function TimeOffCard() {
   const [last, setLast] = useState<string | null>(null);
   const { ref, land } = useLanding<HTMLDivElement>();
   return (
-    <div ref={ref} tabIndex={-1} className={LANDING}>
+    <div ref={ref} tabIndex={-1} role="group" aria-label="Time off requests" className={LANDING}>
       <p aria-live="polite" className="sr-only">
         {last === null ? '' : `Time off approved for ${last}.`}
       </p>
@@ -209,7 +219,9 @@ export function TimeOffCard() {
           const done = approved.has(request.id);
           return (
             <li key={request.id} className="flex items-center gap-3">
-              <Avatar name={request.name} size="md" />
+              <span aria-hidden className="contents">
+                <Avatar name={request.name} size="md" />
+              </span>
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate font-medium text-fg">{request.name}</span>
                 <span className="text-sm text-fg-muted">
@@ -304,7 +316,9 @@ export function MyWeekCard() {
   return (
     <div className="flex flex-col gap-4 bg-surface p-5 text-fg">
       <div className="flex items-center gap-3">
-        <Avatar name={person.name} size="lg" />
+        <span aria-hidden className="contents">
+          <Avatar name={person.name} size="lg" />
+        </span>
         <div className="flex min-w-0 flex-col">
           <span className="font-medium">Your week, {person.name.split(' ')[0]}</span>
           <span className="text-sm text-fg-muted">40 hours across 5 shifts</span>

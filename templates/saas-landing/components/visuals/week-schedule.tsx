@@ -121,7 +121,9 @@ export function WeekSchedule({ className }: { className?: string }) {
             <tr key={person.id} className="border-b border-line">
               <th scope="row" className="px-3 py-2 text-start font-regular">
                 <span className="flex min-w-0 items-center gap-2">
-                  <Avatar name={person.name} size="sm" />
+                  <span aria-hidden className="contents">
+                    <Avatar name={person.name} size="sm" />
+                  </span>
                   <span className="truncate text-fg">
                     <span className="@md:hidden">{person.name.split(' ')[0]}</span>
                     <span className="hidden @md:inline">{shortName(person.name)}</span>

@@ -25,7 +25,7 @@ function CaseStudyCard({ study }: { study: CaseStudy }) {
         href={study.href}
         className={cn(
           'group flex h-full flex-col gap-6 rounded-panel border border-line bg-surface p-6 text-fg',
-          'transition-[border-color,box-shadow] duration-fast ease-standard',
+          'transition-[border-color,box-shadow] duration-fast ease-standard motion-reduce:transition-none',
           'pointer-fine:hover:border-line-strong pointer-fine:hover:shadow-raised',
           'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         )}
@@ -48,7 +48,7 @@ function CaseStudyCard({ study }: { study: CaseStudy }) {
             <ArrowRightIcon
               aria-hidden
               weight="bold"
-              className="size-4 transition-transform duration-fast ease-standard pointer-fine:group-hover:translate-x-0.5"
+              className="size-4 transition-transform duration-fast ease-standard motion-reduce:transition-none pointer-fine:group-hover:translate-x-0.5"
             />
           </span>
         </span>

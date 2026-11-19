@@ -82,7 +82,7 @@ export function AboutPage() {
                   <ArrowRightIcon
                     aria-hidden
                     weight="bold"
-                    className="size-4 text-fg transition-transform duration-fast ease-standard pointer-fine:group-hover:translate-x-0.5"
+                    className="size-4 text-fg transition-transform duration-fast ease-standard motion-reduce:transition-none pointer-fine:group-hover:translate-x-0.5"
                   />
                 </span>
               </a>

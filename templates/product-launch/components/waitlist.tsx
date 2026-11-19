@@ -15,7 +15,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from '@rectio/ui';
-import { useId, useState, type SyntheticEvent } from 'react';
+import { useEffect, useId, useRef, useState, type SyntheticEvent } from 'react';
 
 import { ROLES } from '@/data/launch';
 import { SITE, STORAGE } from '@/data/site';
@@ -44,16 +44,19 @@ function parseEntry(raw: string | null | undefined): WaitlistEntry | null {
 /** The place in line, with the invite link that moves it up. */
 function Joined({ entry, focus }: { entry: WaitlistEntry; focus: boolean }) {
   const [copied, setCopied] = useState(false);
+  const heading = useRef<HTMLHeadingElement>(null);
   const link = `${SITE.url}/?ref=${String(entry.position)}`;
+  // Focus the result once, right after joining, so a keyboard lands on the news.
+  useEffect(() => {
+    if (focus) heading.current?.focus();
+  }, [focus]);
   return (
     <div className="flex flex-col items-start gap-4">
       <CheckCircleIcon aria-hidden weight="fill" className="size-10 text-positive" />
       <h3
         tabIndex={-1}
-        ref={(node) => {
-          if (focus) node?.focus();
-        }}
-        className="font-display text-3xl font-strong tracking-tight text-fg outline-none"
+        ref={heading}
+        className="font-display text-3xl font-strong tracking-tight text-balance text-fg outline-none"
       >
         You are number <span className="numeric">{entry.position.toLocaleString('en-GB')}</span>
       </h3>
@@ -62,7 +65,7 @@ function Joined({ entry, focus }: { entry: WaitlistEntry; focus: boolean }) {
         moves you up ten places.
       </p>
       <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-        <code className="min-w-0 flex-1 rounded-control break-all border border-line bg-surface-sunken px-3 py-2 text-sm text-fg">
+        <code className="min-w-0 flex-1 truncate rounded-control border border-line bg-surface-sunken px-3 py-2 text-sm text-fg">
           {link}
         </code>
         <Button
@@ -71,6 +74,9 @@ function Joined({ entry, focus }: { entry: WaitlistEntry; focus: boolean }) {
             navigator.clipboard.writeText(link).then(
               () => {
                 setCopied(true);
+                setTimeout(() => {
+                  setCopied(false);
+                }, 2000);
               },
               () => {
                 // Clipboard blocked: the link stays on screen to copy by hand.
@@ -81,6 +87,9 @@ function Joined({ entry, focus }: { entry: WaitlistEntry; focus: boolean }) {
           <CopyIcon aria-hidden weight="bold" />
           {copied ? 'Link copied' : 'Copy invite link'}
         </Button>
+        <span role="status" className="sr-only">
+          {copied ? 'Invite link copied' : ''}
+        </span>
       </div>
       <button
         type="button"
@@ -104,6 +113,8 @@ export function WaitlistForm() {
   const [error, setError] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [beta, setBeta] = useState(false);
+  const emailInput = useRef<HTMLInputElement>(null);
   const statusId = useId();
 
   const submit = async (event: SyntheticEvent<HTMLFormElement>) => {
@@ -111,12 +122,13 @@ export function WaitlistForm() {
     setFailure(null);
     if (!isEmail(email)) {
       setError('Enter a work email, such as you@company.com.');
+      emailInput.current?.focus();
       return;
     }
     setError(null);
     setBusy(true);
     try {
-      const entry = await joinWaitlist({ email, role: role ?? '' });
+      const entry = await joinWaitlist({ email, role: role ?? '', beta });
       setJoinedNow(true);
       writeStored(STORAGE.waitlist, JSON.stringify(entry));
     } catch (caught) {
@@ -143,6 +155,7 @@ export function WaitlistForm() {
           <Field invalid={error !== null}>
             <FieldLabel>Work email</FieldLabel>
             <Input
+              ref={emailInput}
               type="email"
               autoComplete="email"
               placeholder="you@company.com"
@@ -168,11 +181,16 @@ export function WaitlistForm() {
             <FieldDescription>Optional. It helps us pick who joins each wave.</FieldDescription>
           </Field>
           <label className="flex min-h-(--rx-button-height-md) cursor-pointer items-center gap-3 text-base text-fg pointer-coarse:min-h-(--rx-button-height-touch)">
-            <Checkbox />
+            <Checkbox
+              checked={beta}
+              onCheckedChange={(checked) => {
+                setBeta(checked);
+              }}
+            />
             Invite me to a beta session with the team
           </label>
           {failure !== null && (
-            <p id={statusId} role="alert" className="text-sm text-negative-strong">
+            <p id={statusId} className="text-sm text-negative-strong">
               {failure}
             </p>
           )}

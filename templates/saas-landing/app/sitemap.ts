@@ -21,9 +21,9 @@ const PAGES = [
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
-    ...PAGES.map((path) => ({ url: `${SITE.url}${path}` })),
+    ...PAGES.map((path) => ({ url: `${SITE.url}${path}/` })),
     ...ARTICLES.map((article) => ({
-      url: `${SITE.url}/blog/${article.slug}`,
+      url: `${SITE.url}/blog/${article.slug}/`,
       lastModified: article.date,
     })),
   ];

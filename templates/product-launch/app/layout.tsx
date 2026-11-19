@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: `${SITE.name}: ${SITE.tagline}`,
   description: SITE.description,
+  alternates: { canonical: '/' },
   openGraph: { type: 'website', siteName: SITE.name, locale: 'en_GB' },
   twitter: { card: 'summary' },
 };
