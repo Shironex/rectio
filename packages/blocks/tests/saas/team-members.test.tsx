@@ -87,6 +87,24 @@ describe('TeamMembers', () => {
     expect(onInvite).toHaveBeenCalledWith(['sam@x.io', 'lee@x.io'], 'member');
   });
 
+  it('puts the one invite button inside the empty state when you are alone', async () => {
+    render(
+      <TeamMembers
+        members={MEMBERS.filter((member) => member.you === true)}
+        invites={[]}
+        currentRole="owner"
+        now={NOW}
+        locale="en-GB"
+        onInvite={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('It is just you so far')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Invite people' })).toHaveLength(1);
+    await userEvent.click(screen.getByRole('button', { name: 'Invite people' }));
+    expect(screen.getByLabelText('Email addresses')).toBeInTheDocument();
+    expect(screen.queryByText('It is just you so far')).not.toBeInTheDocument();
+  });
+
   it('refuses an invite with a bad address and says which', async () => {
     const onInvite = vi.fn();
     render(<TeamMembers members={MEMBERS} currentRole="owner" now={NOW} onInvite={onInvite} />);

@@ -4,6 +4,7 @@ import {
   PaperPlaneTiltIcon,
   UserMinusIcon,
   UserPlusIcon,
+  UsersThreeIcon,
   XIcon,
 } from '@phosphor-icons/react';
 import {
@@ -112,7 +113,7 @@ export function TeamMembers({
       title={title}
       description={description}
       actions={
-        canInvite && !inviting ? (
+        canInvite && !inviting && !alone ? (
           <Button
             onClick={() => {
               setInviting(true);
@@ -142,14 +143,14 @@ export function TeamMembers({
         />
       )}
 
-      <ul aria-label="Members" className="-mx-2 flex flex-col">
+      <ul aria-label="Members" className="flex flex-col">
         <Items>
           {sorted.map((member) => {
             const manageable = canManage(currentRole, member, members);
             return (
               <Item
                 key={member.id}
-                className="flex items-center gap-3 rounded-control px-2 py-2.5 not-last:border-b not-last:border-line"
+                className="flex items-center gap-3 py-2.5 not-last:border-b not-last:border-line"
               >
                 <Avatar name={member.name} src={member.avatarUrl} />
                 <div className="flex min-w-0 flex-1 flex-col">
@@ -226,12 +227,12 @@ export function TeamMembers({
           <h3 className="text-sm font-medium text-fg-muted">
             Pending invites <span className="numeric text-fg-subtle">{invites.length}</span>
           </h3>
-          <ul aria-label="Pending invites" className="-mx-2 flex flex-col">
+          <ul aria-label="Pending invites" className="flex flex-col">
             <Items>
               {invites.map((invite) => (
                 <Item
                   key={invite.id}
-                  className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-control px-2 py-2.5 not-last:border-b not-last:border-line"
+                  className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2.5 not-last:border-b not-last:border-line"
                 >
                   <span
                     aria-hidden
@@ -241,7 +242,8 @@ export function TeamMembers({
                   </span>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate font-medium">{invite.email}</span>
-                    <span className="truncate text-sm text-fg-muted">
+                    {/* The who and when wrap rather than cut the inviter's name. */}
+                    <span className="text-sm text-pretty text-fg-muted">
                       {ROLE_LABELS[invite.role]}, invited{' '}
                       {relativeTime(invite.invitedAt, now, locale)}
                       {invite.invitedBy !== undefined && ` by ${invite.invitedBy}`}
@@ -315,13 +317,33 @@ export function TeamMembers({
         </div>
       )}
 
-      {alone && (
-        <p className="rounded-control border border-dashed border-line px-4 py-6 text-center text-sm text-fg-muted">
-          <span className="block font-medium text-fg">It is just you so far</span>
-          {canInvite
-            ? 'Invite the people you work with. They get an email and join with the role you pick.'
-            : 'An owner or admin can invite the people you work with.'}
-        </p>
+      {alone && !inviting && (
+        <div className="flex flex-col items-center gap-3 rounded-control border border-dashed border-line px-4 py-10 text-center text-sm text-fg-muted">
+          <span
+            aria-hidden
+            className="inline-flex size-10 items-center justify-center rounded-full bg-surface-sunken text-fg-muted"
+          >
+            <UsersThreeIcon weight="bold" className="size-5" />
+          </span>
+          <div className="flex max-w-sm flex-col gap-1">
+            <p className="font-medium text-fg">It is just you so far</p>
+            <p className="text-pretty">
+              {canInvite
+                ? 'Invite the people you work with. They get an email and join with the role you pick.'
+                : 'An owner or admin can invite the people you work with.'}
+            </p>
+          </div>
+          {canInvite && (
+            <Button
+              onClick={() => {
+                setInviting(true);
+              }}
+            >
+              <UserPlusIcon aria-hidden weight="bold" className="size-4" />
+              Invite people
+            </Button>
+          )}
+        </div>
       )}
 
       <RemoveDialog
