@@ -56,12 +56,17 @@ function Panel({ kind }: { kind: keyof typeof KITS }) {
   return (
     <div className="flex flex-col overflow-hidden rounded-panel border border-line bg-surface">
       <div className="flex items-center justify-between gap-3 border-b border-line bg-surface-sunken px-5 py-3">
-        <code className="truncate font-mono text-sm text-fg">
-          {'import '}
-          <span className="hidden sm:inline">{'{ Button, Money } '}</span>
-          <span className="sm:hidden">{'{ … } '}</span>
-          {'from '}
-          <span className="text-accent-strong">{`'${source}'`}</span>
+        {/* Wraps between its two halves on a phone, so the import path is never cut short. */}
+        <code className="flex min-w-0 flex-wrap gap-x-2 font-mono text-sm text-fg">
+          <span className="whitespace-nowrap">
+            {'import '}
+            <span className="hidden sm:inline">{'{ Button, Money }'}</span>
+            <span className="sm:hidden">{'{ Button }'}</span>
+          </span>
+          <span className="whitespace-nowrap">
+            {'from '}
+            <span className="text-accent-strong">{`'${source}'`}</span>
+          </span>
         </code>
         {kind === 'motion' && <ProBadge />}
       </div>
