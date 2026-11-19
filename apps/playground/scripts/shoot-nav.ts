@@ -254,6 +254,12 @@ try {
       await phone.getByRole('button', { name: 'Bottom sheet' }).click();
       await phone.getByRole('dialog').waitFor();
       await snap(phone, `open-bottom-sheet-phone-${tag}`);
+      // The layout viewport widens on a phone when anything overflows, and a sheet sized to it is
+      // then cut off at the edge: compare it with the screen once the sheet is open.
+      const widened = await phone.evaluate(
+        () => window.innerWidth - document.documentElement.clientWidth,
+      );
+      console.info(`bottom sheet ${tag} viewport widened by px ${String(widened)}`);
       await phone.close();
     }
   }

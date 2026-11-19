@@ -480,7 +480,7 @@ export function WayfindingSection() {
         />
       </Row>
       <Row label="Pagination">
-        <Pagination page={page} pageCount={24} onPageChange={setPage} variant="full" />
+        <Pagination page={page} pageCount={24} onPageChange={setPage} />
       </Row>
       <Row label="Compact">
         <Pagination page={page} pageCount={24} onPageChange={setPage} variant="compact" />

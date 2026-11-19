@@ -354,11 +354,12 @@ function Notifications({ PopoverContent }: { PopoverContent: typeof PlainPopover
           <PopoverTitle>Notifications</PopoverTitle>
           <button
             type="button"
-            disabled={unread === 0}
+            // aria-disabled, not disabled: the button keeps focus once everything is read.
+            aria-disabled={unread === 0}
             onClick={() => {
               setRead(true);
             }}
-            className="cursor-pointer rounded-control text-sm text-accent-strong pointer-coarse:py-3 hover:underline focus-visible:outline-2 focus-visible:outline-focus disabled:cursor-default disabled:text-fg-disabled disabled:no-underline"
+            className="cursor-pointer rounded-control text-sm text-accent-strong pointer-coarse:py-3 hover:underline focus-visible:outline-2 focus-visible:outline-focus aria-disabled:cursor-default aria-disabled:text-fg-disabled aria-disabled:no-underline"
           >
             Mark all read
           </button>
