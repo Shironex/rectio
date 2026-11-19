@@ -1,4 +1,7 @@
+import type { BudgetLine } from '@rectio/blocks';
+
 import { RECEIVABLES_TOTAL } from './invoices';
+import { PERIOD_FIGURES } from './overview';
 
 export type ReportPeriod = 'month' | 'quarter' | 'year';
 
@@ -171,3 +174,18 @@ export function equityOf(groups: readonly BalanceGroup[]): number {
       ?.lines.reduce((sum, l) => sum + Math.round(l.amount * 100), 0) ?? 0;
   return (total('assets') - total('liabilities')) / 100;
 }
+
+/** Spend against plan for each report period, from the same plan as the overview. */
+export const REPORT_BUDGET: Record<ReportPeriod, BudgetLine[]> = {
+  month: PERIOD_FIGURES['last-month'].budget,
+  quarter: PERIOD_FIGURES['last-month'].budget.map((line, index) => ({
+    ...line,
+    budget: line.budget * 3,
+    actual: Math.round(line.actual * (2.86 + (index % 3) * 0.07) * 100) / 100,
+  })),
+  year: PERIOD_FIGURES['last-month'].budget.map((line, index) => ({
+    ...line,
+    budget: line.budget * 10,
+    actual: Math.round(line.actual * (9.42 + (index % 4) * 0.21) * 100) / 100,
+  })),
+};
