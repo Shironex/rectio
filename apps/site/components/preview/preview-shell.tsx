@@ -48,8 +48,9 @@ export function PreviewShell({
       defaultValue="preview"
       className="not-prose my-6 overflow-hidden rounded-panel border border-line bg-surface"
     >
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-3 py-2">
-        <Tabs.List aria-label="Preview or code" className="flex gap-4">
+      {/* One wrapping row: on phones the switches fall to a second line instead of scrolling away. */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-line px-3 py-2">
+        <Tabs.List aria-label="Preview or code" className="me-auto flex gap-4">
           <Tabs.Tab value="preview" className={TAB}>
             Preview
           </Tabs.Tab>
@@ -57,38 +58,36 @@ export function PreviewShell({
             Code
           </Tabs.Tab>
         </Tabs.List>
-        <div className="-mx-3 flex max-w-full items-center gap-2 overflow-x-auto px-3 sm:mx-0 sm:px-0">
-          {motion !== undefined && (
-            <Segmented
-              label="Variant"
-              value={variant}
-              onChange={setVariant}
-              options={[
-                { value: 'plain', label: 'Plain' },
-                { value: 'motion', label: 'Motion' },
-              ]}
-            />
-          )}
+        {motion !== undefined && (
           <Segmented
-            label="Preview theme"
-            value={shownTheme}
-            onChange={setTheme}
-            options={THEMES.map((t) => ({ value: t.id, label: t.name }))}
+            label="Variant"
+            value={variant}
+            onChange={setVariant}
+            options={[
+              { value: 'plain', label: 'Plain' },
+              { value: 'motion', label: 'Motion' },
+            ]}
           />
-          <Segmented
-            label="Preview mode"
-            value={shownMode}
-            onChange={setMode}
-            options={MODES.map((m) => ({ value: m, label: m === 'light' ? 'Light' : 'Dark' }))}
-          />
-        </div>
+        )}
+        <Segmented
+          label="Preview theme"
+          value={shownTheme}
+          onChange={setTheme}
+          options={THEMES.map((t) => ({ value: t.id, label: t.name }))}
+        />
+        <Segmented
+          label="Preview mode"
+          value={shownMode}
+          onChange={setMode}
+          options={MODES.map((m) => ({ value: m, label: m === 'light' ? 'Light' : 'Dark' }))}
+        />
       </div>
       <Tabs.Panel value="preview" keepMounted>
         <ThemeScope
           theme={shownTheme}
           mode={shownMode}
           className={cn(
-            'flex min-h-56 flex-wrap gap-4 bg-surface-canvas p-6 text-fg sm:p-10',
+            'flex min-h-56 flex-wrap gap-4 bg-surface-canvas p-4 text-fg *:max-w-full *:min-w-0 sm:p-10',
             align === 'center' ? 'items-center justify-center' : 'items-start',
           )}
         >
