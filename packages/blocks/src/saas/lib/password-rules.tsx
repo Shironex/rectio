@@ -1,4 +1,4 @@
-import { CheckIcon, CircleIcon } from '@phosphor-icons/react';
+import { CheckIcon, MinusIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 
 import { passwordChecks, passwordStrength, type PasswordStrength } from './saas';
@@ -13,7 +13,7 @@ const GRADES: Record<PasswordStrength, { label: string; filled: number; tone: st
 
 /**
  * The rules a new password must meet, ticked off as they are typed, under a four-step strength
- * bar. The grade is written in words beside the bar and every rule says met or not met to screen
+ * bar that appears with the first character. The grade is written in words beside the bar and every rule says met or not met to screen
  * readers, so neither rests on colour.
  */
 export function PasswordRules({
@@ -30,28 +30,33 @@ export function PasswordRules({
   const grade = GRADES[strength];
   return (
     <div id={id} className="flex flex-col gap-2">
-      <div className="flex items-center gap-3">
-        <div aria-hidden className="grid flex-1 grid-cols-4 gap-1">
-          {[1, 2, 3, 4].map((step) => (
-            <span
-              key={step}
-              className={cn(
-                'h-1 rounded-full transition-colors duration-base ease-standard',
-                step <= grade.filled ? grade.tone : 'bg-surface-sunken ring-1 ring-line ring-inset',
-              )}
-            />
-          ))}
+      {/* The bar waits for the first character: four dead slivers say nothing. */}
+      {password !== '' && (
+        <div className="flex items-center gap-3">
+          <div aria-hidden className="grid flex-1 grid-cols-4 gap-1">
+            {[1, 2, 3, 4].map((step) => (
+              <span
+                key={step}
+                className={cn(
+                  'h-1 rounded-full transition-colors duration-base ease-standard',
+                  step <= grade.filled
+                    ? grade.tone
+                    : 'bg-surface-sunken ring-1 ring-line ring-inset',
+                )}
+              />
+            ))}
+          </div>
+          <span
+            className={cn(
+              'w-12 text-end text-xs font-medium text-fg-muted',
+              strength === 'empty' && 'hidden',
+            )}
+          >
+            <span className="sr-only">Password strength: </span>
+            {grade.label}
+          </span>
         </div>
-        <span
-          className={cn(
-            'w-12 text-end text-xs font-medium text-fg-muted',
-            strength === 'empty' && 'hidden',
-          )}
-        >
-          <span className="sr-only">Password strength: </span>
-          {grade.label}
-        </span>
-      </div>
+      )}
       <ul className="grid gap-0.5 text-sm">
         {passwordChecks(password, minLength).map((check) => (
           <li
@@ -68,7 +73,7 @@ export function PasswordRules({
                 className="size-3.5 shrink-0 text-positive-strong"
               />
             ) : (
-              <CircleIcon aria-hidden weight="bold" className="size-3.5 shrink-0 text-fg-subtle" />
+              <MinusIcon aria-hidden weight="bold" className="size-3.5 shrink-0 text-fg-muted" />
             )}
             <span>
               {check.label}
