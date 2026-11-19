@@ -6,6 +6,7 @@ import { Badge, cn } from '@rectio/ui';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { useReducedMotion } from './motion-tokens';
+import { Eyebrow } from './section';
 
 const CURRENCY = 'EUR';
 const LOCALE = 'en-IE';
@@ -195,6 +196,7 @@ export function CloseBooks() {
       >
         <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 sm:px-8 lg:grid-cols-12 lg:gap-12">
           <div className="flex flex-col gap-5 lg:col-span-4 lg:justify-center">
+            <Eyebrow>Month end</Eyebrow>
             <h2 id="close-books-title" className="site-headline text-fg">
               Close the books while you scroll.
             </h2>

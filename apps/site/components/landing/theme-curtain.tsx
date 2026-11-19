@@ -8,6 +8,7 @@ import { Segmented } from '@/components/segmented';
 import { setSiteLook, useSiteTheme } from '@/lib/use-site-theme';
 
 import { READOUT, type Readout } from './readout';
+import { Eyebrow } from './section';
 
 const LOOKS = {
   calm: { theme: 'default', mode: 'light' },
@@ -71,7 +72,7 @@ const STEP = 5;
 function CompareSlider({ values }: { values: Readout }) {
   const frame = useRef<HTMLDivElement>(null);
   const handle = useRef<HTMLDivElement>(null);
-  const split = useRef(50);
+  const split = useRef(35);
 
   const set = (percent: number) => {
     const next = Math.min(100, Math.max(0, percent));
@@ -131,11 +132,11 @@ function CompareSlider({ values }: { values: Readout }) {
         aria-label="Split between the calm and ledger themes"
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={50}
-        aria-valuetext="50% ledger, 50% calm"
+        aria-valuenow={35}
+        aria-valuetext="65% ledger, 35% calm"
         onKeyDown={onKey}
         // Physical left, like the clip it follows.
-        style={{ left: 'var(--site-split, 50%)' }}
+        style={{ left: 'var(--site-split, 35%)' }}
         className="group absolute inset-y-0 z-10 flex w-11 -translate-x-1/2 cursor-ew-resize items-center justify-center focus-visible:outline-none"
       >
         <span aria-hidden className="absolute inset-y-0 w-px bg-accent" />
@@ -164,6 +165,7 @@ export function ThemeCurtain({ values }: { values: Readout }) {
     <div className="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-16">
       <div className="flex flex-col gap-8 lg:col-span-5">
         <div className="flex flex-col gap-4">
+          <Eyebrow>Themes</Eyebrow>
           <h2 className="site-reveal site-headline text-fg">Calm by day. Ledger at close.</h2>
           <p className="site-reveal site-step-1 max-w-md text-lg text-pretty text-fg-muted">
             A theme is a token file. Switch this page between the two that ship: type, corners,

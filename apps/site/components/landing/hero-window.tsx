@@ -4,7 +4,9 @@ import {
   FileTextIcon,
   ReceiptIcon,
   BookOpenIcon,
+  CheckIcon,
 } from '@phosphor-icons/react/dist/ssr';
+import { Badge, Money } from '@rectio/ui';
 
 import ExpenseApprovalDemo from '@/demos/expense-approval';
 import InvoiceListDemo from '@/demos/invoice-list';
@@ -37,7 +39,7 @@ export function HeroWindow() {
           <span className="text-sm text-fg-subtle">/</span>
           <span className="text-sm text-fg-muted">Finance, March 2026</span>
         </div>
-        <div className="flex max-h-176 overflow-hidden sm:max-h-208">
+        <div className="relative flex max-h-176 overflow-hidden sm:max-h-208">
           <nav className="hidden w-48 shrink-0 flex-col gap-0.5 border-e border-line bg-surface p-3 lg:flex">
             {NAV.map(({ label, icon: Icon, ...item }) => (
               <span
@@ -57,7 +59,41 @@ export function HeroWindow() {
               <ExpenseApprovalDemo />
             </div>
           </div>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-surface-canvas"
+          />
         </div>
+      </div>
+
+      {/* Two cards from the same books float over the window's edges, as if lifted out of it. */}
+      <div
+        aria-hidden
+        className="absolute -bottom-8 start-0 hidden w-72 flex-col gap-2 rounded-panel border border-line-strong bg-surface-raised p-4 shadow-overlay md:flex xl:-start-6"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm text-fg-muted">Reconciled, March</span>
+          <Badge tone="positive">Matched 4 of 4</Badge>
+        </div>
+        <Money
+          amount={-1104.3}
+          currency="EUR"
+          locale="en-IE"
+          className="font-display text-3xl font-heading text-fg"
+        />
+        <span className="text-sm text-fg-muted">Difference €0.00</span>
+      </div>
+      <div
+        aria-hidden
+        className="absolute top-96 end-0 hidden w-64 items-start gap-3 rounded-panel border border-line-strong bg-surface-raised p-3 shadow-overlay xl:flex xl:-end-4"
+      >
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-positive-subtle text-positive-strong">
+          <CheckIcon weight="bold" className="size-4" />
+        </span>
+        <span className="flex flex-col">
+          <span className="text-sm font-strong text-fg">Hotel Bristol approved</span>
+          <span className="text-sm text-fg-muted">Marta Zielińska, 16 Mar</span>
+        </span>
       </div>
     </figure>
   );

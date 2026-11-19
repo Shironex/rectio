@@ -1,5 +1,7 @@
 import { Bench } from '@/components/landing/bench';
 import { CloseBooks } from '@/components/landing/close-books';
+import { CurrencyGrid } from '@/components/landing/currency-grid';
+import { currencies } from '@/components/landing/currencies';
 import { Faq } from '@/components/landing/faq';
 import { Footer } from '@/components/landing/footer';
 import { Hero } from '@/components/landing/hero';
@@ -7,6 +9,7 @@ import { kitFacts } from '@/components/landing/kit-facts';
 import { PlainVsMotion } from '@/components/landing/plain-vs-motion';
 import { Pricing } from '@/components/landing/pricing';
 import { RegistryDemo } from '@/components/landing/registry-demo';
+import { StatRow } from '@/components/landing/stat-row';
 import { Section, SectionIntro } from '@/components/landing/section';
 import { ThemeCurtain } from '@/components/landing/theme-curtain';
 import { ThemePacks } from '@/components/landing/theme-packs';
@@ -23,6 +26,7 @@ const REGISTRY_POINTS = [
 
 export default function Home() {
   const kit = kitFacts();
+  const money = currencies();
   return (
     <>
       <div className="flex flex-col">
@@ -30,21 +34,30 @@ export default function Home() {
 
         <CloseBooks />
 
+        <Section className="flex flex-col gap-8 py-20 md:py-28" label="The kit in numbers">
+          <StatRow kit={kit} />
+        </Section>
+
         <Section className="py-20 md:py-28">
           <ThemeCurtain values={readoutValues()} />
         </Section>
 
-        <Section className="flex flex-col gap-10 py-20 md:py-28">
-          <SectionIntro title="Live blocks, not screenshots.">
-            Four of the {kit.blocks} pro finance blocks, running. Sort, filter, approve, add a line:
-            what you try here is what you install.
-          </SectionIntro>
-          <Bench />
+        <Section className="py-12 md:py-16">
+          <div className="flex flex-col gap-10 rounded-panel bg-surface-sunken px-4 py-12 sm:px-8 md:px-12 md:py-16">
+            <SectionIntro eyebrow="Live blocks" title="Live blocks, not screenshots.">
+              Four of the {kit.blocks} pro finance blocks, running. Sort, filter, approve, add a
+              line: what you try here is what you install.
+            </SectionIntro>
+            <Bench />
+          </div>
         </Section>
 
         <Section className="flex flex-col gap-10 py-20 md:py-28">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
-            <SectionIntro title="One command, and the block is yours.">
+            <SectionIntro
+              eyebrow="CLI, registry and MCP"
+              title="One command, and the block is yours."
+            >
               rectio installs source into your project, records what it wrote, and shows the diff
               when a new version lands.
             </SectionIntro>
@@ -64,22 +77,38 @@ export default function Home() {
         </Section>
 
         <Section className="flex flex-col gap-10 py-20 md:py-28">
-          <SectionIntro title="Plain where it should be still. Motion where it helps.">
+          <SectionIntro
+            eyebrow="Motion add-on"
+            title="Plain where it should be still. Motion where it helps."
+          >
             The motion add-on has the same names and props as the plain components and costs{' '}
             {kit.motionKb} kB gzip. Choose per component by import path, and mix both on one screen.
           </SectionIntro>
           <PlainVsMotion />
         </Section>
 
+        <Section className="py-12 md:py-16">
+          <div className="flex flex-col gap-10 rounded-panel bg-surface-sunken px-4 py-12 sm:px-8 md:px-12 md:py-16">
+            <SectionIntro
+              eyebrow="Currencies"
+              title={`${String(money.codes.length)} currencies, one Money component.`}
+            >
+              Money formats any currency the runtime knows, with the locale's grouping, a true minus
+              sign and tabular figures. Search the list.
+            </SectionIntro>
+            <CurrencyGrid codes={money.codes} names={money.names} />
+          </div>
+        </Section>
+
         <Section className="flex flex-col gap-10 py-20 md:py-28">
-          <SectionIntro title="Themes are token files.">
+          <SectionIntro eyebrow="Theme packs" title="Themes are token files.">
             Two ship free with every component. Packs for charts and printed statements are next.
           </SectionIntro>
           <ThemePacks />
         </Section>
 
         <Section id="pricing" className="flex flex-col gap-10 py-20 md:py-28">
-          <SectionIntro title="Pay once.">
+          <SectionIntro eyebrow="Pricing" title="Pay once.">
             The free tier is the whole component library. Pro adds motion, the finance blocks and
             theme packs.
           </SectionIntro>
@@ -88,7 +117,7 @@ export default function Home() {
 
         <Section className="grid gap-10 py-20 md:py-28 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <SectionIntro title="Questions" />
+            <SectionIntro eyebrow="FAQ" title="Questions" />
           </div>
           <div className="lg:col-span-8">
             <Faq />

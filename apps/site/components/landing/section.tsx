@@ -25,18 +25,31 @@ export function Section({
   );
 }
 
+/** A small rule and label above a headline: where on the page you are. */
+export function Eyebrow({ children }: { children: ReactNode }) {
+  return (
+    <p className="site-reveal flex items-center gap-3 font-mono text-xs tracking-caps text-fg-muted uppercase">
+      <span aria-hidden className="h-px w-8 bg-line-strong" />
+      {children}
+    </p>
+  );
+}
+
 /** Headline and one short paragraph, stacked: a section has one message. */
 export function SectionIntro({
   title,
+  eyebrow,
   children,
   className,
 }: {
   title: ReactNode;
+  eyebrow?: ReactNode;
   children?: ReactNode;
   className?: string;
 }) {
   return (
     <div className={cn('flex max-w-2xl flex-col gap-4', className)}>
+      {eyebrow !== undefined && <Eyebrow>{eyebrow}</Eyebrow>}
       <h2 className="site-reveal font-display text-3xl font-heading tracking-tight text-balance text-fg md:text-4xl">
         {title}
       </h2>

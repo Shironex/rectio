@@ -35,9 +35,9 @@ export function Hero({ kit }: { kit: KitFacts }) {
           aria-label="Interfaces for money, set right."
           className="site-enter site-display text-fg lg:col-span-8"
         >
-          Interfaces for
+          <span className="font-regular">Interfaces for</span>
           <br />
-          <span className="text-accent-strong">
+          <span className="font-strong text-accent-strong">
             <WordCycle words={NOUNS} />
           </span>
           <br />

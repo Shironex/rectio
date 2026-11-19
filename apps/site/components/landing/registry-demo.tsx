@@ -19,11 +19,11 @@ export function RegistryDemo() {
   }, []);
 
   return (
-    <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
-      <div className="min-w-0 lg:col-span-5">
+    <div className="grid gap-4 xl:grid-cols-12 xl:items-start">
+      <div className="min-w-0 xl:col-span-4">
         <Terminal onDone={onDone} />
       </div>
-      <div className="relative min-h-112 min-w-0 lg:col-span-7">
+      <div className="relative min-h-112 min-w-0 xl:col-span-8">
         {added ? (
           <InvoiceList
             invoices={INVOICES}
