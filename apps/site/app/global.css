@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/preset.css';
+/* After Fumadocs: the token reset clears every default scale, then the bridge maps Fumadocs onto tokens. */
+@import '@rectio/tokens/tailwind.css';
+@import '@rectio/tokens/fonts.css';
+@import './fumadocs.css';
+@import './site.css';
+
+/* Components live in other packages: tell Tailwind to read their class names too. */
+@source '../../../packages/ui/src';
+@source '../../../packages/motion/src';
+
+html {
+  scrollbar-gutter: stable;
+  -webkit-font-smoothing: antialiased;
+}

@@ -23,7 +23,17 @@ const onTs = (/** @type {Record<string, unknown>} */ preset) => ({
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/.turbo/**', '.rounds/**', '**/coverage/**'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.turbo/**',
+      '.rounds/**',
+      '**/coverage/**',
+      '**/.next/**',
+      '**/out/**',
+      '**/.source/**',
+      '**/next-env.d.ts',
+    ],
   },
 
   js.configs.recommended,

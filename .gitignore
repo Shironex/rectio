@@ -11,3 +11,8 @@ coverage/
 .rounds/
 playwright-report/
 test-results/
+# next.js and fumadocs output
+.next/
+out/
+.source/
+next-env.d.ts

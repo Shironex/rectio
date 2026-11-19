@@ -1,0 +1,100 @@
+/*
+ * The bridge between Fumadocs UI and rectio. Fumadocs is written against Tailwind's default scale
+ * names and its own --color-fd-* palette; rectio's token theme removes that scale. Everything here
+ * maps a name Fumadocs uses back onto a rectio token, so the docs chrome themes with the site.
+ * This is the one site file outside the token rule's check: it has to name Tailwind's variables.
+ */
+@theme inline {
+  --radius-sm: var(--rx-radius-control);
+  --radius-md: var(--rx-radius-control);
+  --radius-lg: var(--rx-radius-panel);
+  --radius-xl: var(--rx-radius-panel);
+  --radius-2xl: var(--rx-radius-panel);
+  --shadow-sm: var(--rx-shadow-raised);
+  --shadow-md: var(--rx-shadow-raised);
+  --shadow-lg: var(--rx-shadow-overlay);
+  --shadow-xl: var(--rx-shadow-overlay);
+  --shadow-2xl: var(--rx-shadow-overlay);
+  --font-weight-semibold: var(--rx-font-weight-strong);
+  --font-weight-bold: var(--rx-font-weight-heading);
+  --ease-in: var(--rx-motion-easing-exit);
+  --ease-out: var(--rx-motion-easing-enter);
+  --ease-in-out: var(--rx-motion-easing-standard);
+  /* Fumadocs' popups, dialogs and drawer, timed by the theme's motion tokens. */
+  --animate-fd-fade-in: fd-fade-in var(--rx-motion-duration-slow) var(--rx-motion-easing-enter);
+  --animate-fd-fade-out: fd-fade-out var(--rx-motion-duration-base) var(--rx-motion-easing-exit);
+  --animate-fd-roll-in: fd-roll-in var(--rx-motion-duration-slow) var(--rx-motion-easing-enter);
+  --animate-fd-dialog-in: fd-dialog-in var(--rx-motion-duration-slow) var(--rx-motion-easing-enter);
+  --animate-fd-dialog-out: fd-dialog-out var(--rx-motion-duration-base) var(--rx-motion-easing-exit);
+  --animate-fd-popover-in: fd-popover-in var(--rx-motion-duration-fast)
+    var(--rx-motion-easing-enter);
+  --animate-fd-popover-out: fd-popover-out var(--rx-motion-duration-fast)
+    var(--rx-motion-easing-exit);
+  --animate-fd-sidebar-in: fd-sidebar-in var(--rx-motion-duration-slow)
+    var(--rx-motion-easing-enter);
+  --animate-fd-sidebar-out: fd-sidebar-out var(--rx-motion-duration-base)
+    var(--rx-motion-easing-exit);
+  /* The palette as utilities (bg-fd-card, text-fd-primary). */
+  --color-fd-background: var(--rx-surface-canvas);
+  --color-fd-foreground: var(--rx-text);
+  --color-fd-muted: var(--rx-surface-sunken);
+  --color-fd-muted-foreground: var(--rx-text-muted);
+  --color-fd-popover: var(--rx-surface-overlay);
+  --color-fd-popover-foreground: var(--rx-text);
+  --color-fd-card: var(--rx-surface);
+  --color-fd-card-foreground: var(--rx-text);
+  --color-fd-border: var(--rx-border);
+  --color-fd-primary: var(--rx-accent-strong);
+  --color-fd-primary-foreground: var(--rx-accent-contrast);
+  --color-fd-secondary: var(--rx-surface-sunken);
+  --color-fd-secondary-foreground: var(--rx-text);
+  --color-fd-accent: var(--rx-surface-hover);
+  --color-fd-accent-foreground: var(--rx-text);
+  --color-fd-ring: var(--rx-focus);
+  --color-fd-overlay: var(--rx-scrim);
+  --color-fd-info: var(--rx-info);
+  --color-fd-warning: var(--rx-warning);
+  --color-fd-error: var(--rx-negative);
+  --color-fd-success: var(--rx-positive);
+  --color-fd-idea: var(--rx-accent);
+  --color-fd-diff-remove: var(--rx-negative-subtle);
+  --color-fd-diff-remove-symbol: var(--rx-negative);
+  --color-fd-diff-add: var(--rx-positive-subtle);
+  --color-fd-diff-add-symbol: var(--rx-positive);
+}
+
+/*
+ * The same palette as variables, for the places Fumadocs reads var(--color-fd-*) directly.
+ * :root.dark outranks Fumadocs' own .dark palette; the rectio tokens already follow data-mode.
+ */
+:root,
+:root.dark {
+  --color-fd-background: var(--rx-surface-canvas);
+  --color-fd-foreground: var(--rx-text);
+  --color-fd-muted: var(--rx-surface-sunken);
+  --color-fd-muted-foreground: var(--rx-text-muted);
+  --color-fd-popover: var(--rx-surface-overlay);
+  --color-fd-popover-foreground: var(--rx-text);
+  --color-fd-card: var(--rx-surface);
+  --color-fd-card-foreground: var(--rx-text);
+  --color-fd-border: var(--rx-border);
+  --color-fd-primary: var(--rx-accent-strong);
+  --color-fd-primary-foreground: var(--rx-accent-contrast);
+  --color-fd-secondary: var(--rx-surface-sunken);
+  --color-fd-secondary-foreground: var(--rx-text);
+  --color-fd-accent: var(--rx-surface-hover);
+  --color-fd-accent-foreground: var(--rx-text);
+  --color-fd-ring: var(--rx-focus);
+  --color-fd-overlay: var(--rx-scrim);
+  --color-fd-info: var(--rx-info);
+  --color-fd-warning: var(--rx-warning);
+  --color-fd-error: var(--rx-negative);
+  --color-fd-success: var(--rx-positive);
+  --color-fd-idea: var(--rx-accent);
+}
+
+.dark #nd-sidebar {
+  --color-fd-muted: var(--rx-surface-hover);
+  --color-fd-secondary: var(--rx-surface-hover);
+  --color-fd-muted-foreground: var(--rx-text-muted);
+}
