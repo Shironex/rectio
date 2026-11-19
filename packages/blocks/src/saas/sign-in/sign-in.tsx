@@ -113,16 +113,15 @@ export function SignIn({
     >
       {social !== undefined && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">{social}</div>
+          {/* Two providers sit side by side on a roomy form; one or three take the full width. */}
+          <div className="grid gap-2 @sm:grid-cols-2 @sm:[&>*:last-child:nth-child(odd)]:col-span-2">
+            {social}
+          </div>
           <OrDivider>or with email</OrDivider>
         </div>
       )}
 
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
-        {error !== undefined && error !== null && error !== false && (
-          <FormMessage tone="error" title={error} />
-        )}
-
         <Field invalid={errors.email !== undefined}>
           <FieldLabel>Email</FieldLabel>
           <Input
@@ -171,6 +170,11 @@ export function SignIn({
             />
             Keep me signed in on this device
           </label>
+        )}
+
+        {/* The refusal sits by the button that will retry it, after the fields it is about. */}
+        {error !== undefined && error !== null && error !== false && (
+          <FormMessage tone="error" title={error} />
         )}
 
         <div className="flex flex-col gap-2 pt-1">
