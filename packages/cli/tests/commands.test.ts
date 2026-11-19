@@ -142,7 +142,7 @@ describe('add', () => {
     expect(existsSync(join(cwd, 'src/components/ui/theme-scope.tsx'))).toBe(true);
 
     const lock = readLock(cwd);
-    expect(lock.items.dialog).toMatchObject({ version: '0.1.0', tier: 'free', type: 'component' });
+    expect(lock.items.dialog).toMatchObject({ version: '0.2.0', tier: 'free', type: 'component' });
     expect(lock.items.dialog?.files[0]).toMatchObject({
       path: 'src/components/ui/dialog.tsx',
       source: 'ui/dialog.tsx',
@@ -327,11 +327,11 @@ describe('diff, list, search and update', () => {
     const lockFile = join(cwd, 'rectio.lock.json');
     writeFileSync(
       lockFile,
-      read(cwd, 'rectio.lock.json').replace('"version": "0.1.0"', '"version": "0.0.9"'),
+      read(cwd, 'rectio.lock.json').replace('"version": "0.2.0"', '"version": "0.0.9"'),
     );
     const { ctx, out } = capture(cwd);
     expect(await runUpdate(ctx)).toHaveLength(1);
-    expect(out.join('\n')).toContain('-> 0.1.0');
+    expect(out.join('\n')).toContain('-> 0.2.0');
   });
 });
 
