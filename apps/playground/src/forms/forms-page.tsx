@@ -355,12 +355,12 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
           <Field invalid={invalid}>
             <FieldLabel>Expense tags</FieldLabel>
             <TagInput
-              defaultValue={invalid ? ['travel', 'travel '] : ['travel', 'client', 'software']}
+              defaultValue={invalid ? ['travel', 'client meals'] : ['travel', 'client', 'software']}
               placeholder="Add a tag"
               max={12}
             />
             <FieldDescription>Members pick from these on every expense.</FieldDescription>
-            <FieldError>travel is already a tag.</FieldError>
+            <FieldError>Tags cannot contain spaces: use client-meals.</FieldError>
           </Field>
           <Field>
             <FieldLabel optional>Policy documents</FieldLabel>
@@ -471,13 +471,18 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
           align="between"
           className="sticky bottom-0 rounded-b-(--rx-popover-radius) bg-surface p-4 sm:px-8"
         >
-          <p role="status" className="text-sm text-fg-muted">
-            {dirty ? 'Unsaved changes' : 'All changes saved'}
+          <p
+            role="status"
+            className={`min-w-0 flex-1 text-sm ${invalid ? 'text-negative-strong' : 'text-fg-muted'}`}
+          >
+            {invalid ? '7 fields need attention' : dirty ? 'Unsaved changes' : 'All changes saved'}
           </p>
-          <k.Button variant="ghost" type="reset">
-            Discard
-          </k.Button>
-          <k.Button type="submit">Save changes</k.Button>
+          <div className="flex shrink-0 gap-2">
+            <k.Button variant="ghost" type="reset">
+              Discard
+            </k.Button>
+            <k.Button type="submit">Save changes</k.Button>
+          </div>
         </FormActions>
       </form>
     </div>
