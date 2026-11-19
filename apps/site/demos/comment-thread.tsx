@@ -42,7 +42,7 @@ const COMMENTS: ThreadComment[] = [
   {
     id: 'k4',
     author: AIYANA,
-    body: 'Design side: the approver list now shows who already decided, so a second approver sees it before opening the request.\nScreens are in the March file.',
+    body: 'Design side: the approver list now shows who already decided, so a second approver sees it before opening the request. Screens are in the March file.',
     createdAt: ago(45),
   },
 ];
