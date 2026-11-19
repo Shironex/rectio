@@ -30,8 +30,13 @@ const SCRIPT = /\.(?:tsx?|mts|mjs|cjs|jsx?)$/;
 const RESERVED = ['components/ui/', 'components/blocks/', 'styles/rectio/'];
 /** A line that only works inside the rectio repo ends with this marker; the build drops it. */
 const WORKSPACE_LINE = /^.*(?:\/\/\s*rectio:workspace|\/\*\s*rectio:workspace\s*\*\/)\s*$\n?/gm;
-/** package.json fields that only serve the repo: its screenshot script and the root lint. */
-const REPO_SCRIPTS = ['shoot', 'lint'];
+/**
+ * package.json scripts that only serve the repo: the root lint, and any script that runs a file
+ * from `scripts/` (screenshots, previews), which does not ship.
+ */
+const REPO_SCRIPTS = ['lint'];
+const isRepoScript = (name: string, command: string): boolean =>
+  REPO_SCRIPTS.includes(name) || /(?:^|[\s/])scripts\//.test(command);
 const REPO_DEV_DEPENDENCIES = ['playwright'];
 
 interface TemplatePackageJson {
@@ -89,7 +94,7 @@ function projectPackageJson(text: string, manifest: TemplateManifest): string {
         );
   if (pkg.scripts !== undefined) {
     out.scripts = Object.fromEntries(
-      Object.entries(pkg.scripts).filter(([name]) => !REPO_SCRIPTS.includes(name)),
+      Object.entries(pkg.scripts).filter(([name, command]) => !isRepoScript(name, command)),
     );
   }
   const dependencies = strip(pkg.dependencies);
