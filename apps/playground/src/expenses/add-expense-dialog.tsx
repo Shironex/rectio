@@ -29,6 +29,8 @@ import { CATEGORIES, type Expense } from './data';
 const GROUPS = ['Travel', 'Meals', 'Tools'] as const;
 const ITEMS = CATEGORIES.map((c) => ({ value: c.value, label: c.label }));
 const SAVE_DELAY_MS = 700;
+/** The demo has no date field; the date is fixed and shown in the dialog so nothing is hidden. */
+const EXPENSE_DATE = '19 Mar';
 const IS_APPLE = /Mac|iPhone|iPad/.test(navigator.userAgent);
 const KBD =
   'rounded-badge border border-line bg-surface px-1.5 py-0.5 font-sans text-xs text-fg-muted';
@@ -77,14 +79,16 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
     setErrors((e) => ({ ...e, [key]: undefined }));
   };
 
+  /** Closing keeps the draft, so Escape or a stray click outside never throws typing away. */
   const onOpenChange = (next: boolean) => {
     if (saving) return;
     setOpen(next);
-    if (!next) {
-      setDirty(new Set());
-      setDraft(EMPTY);
-      setErrors({});
-    }
+  };
+
+  const reset = () => {
+    setDirty(new Set());
+    setDraft(EMPTY);
+    setErrors({});
   };
 
   const onSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
@@ -102,14 +106,15 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
     window.setTimeout(() => {
       onAdd({
         id: crypto.randomUUID(),
-        date: '19 Mar',
+        date: EXPENSE_DATE,
         merchant: draft.merchant.trim(),
         category: draft.category ?? 'office',
         note: draft.note.trim() === '' ? undefined : draft.note.trim(),
         amount: draft.amount ?? 0,
       });
       setSaving(false);
-      onOpenChange(false);
+      setOpen(false);
+      reset();
     }, SAVE_DELAY_MS);
   };
 
@@ -131,7 +136,9 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
         <form ref={formRef} noValidate onSubmit={onSubmit} onKeyDown={onKeyDown}>
           <DialogHeader>
             <DialogTitle>Add expense</DialogTitle>
-            <DialogDescription>Goes into the March report for review.</DialogDescription>
+            <DialogDescription>
+              Dated {EXPENSE_DATE}, goes into the March report for review.
+            </DialogDescription>
           </DialogHeader>
           <DialogBody>
             <Field invalid={errors.merchant !== undefined}>
@@ -143,8 +150,8 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
                 onValueChange={(value) => {
                   update('merchant', value);
                 }}
-                placeholder="As on the receipt"
               />
+              <FieldDescription>As printed on the receipt.</FieldDescription>
               {errors.merchant !== undefined && <FieldError>{errors.merchant}</FieldError>}
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -202,6 +209,11 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
               <kbd className={KBD}>{IS_APPLE ? '⌘ Enter' : 'Ctrl Enter'}</kbd>
               <span className="ms-1">to save</span>
             </p>
+            {dirty.size > 0 && (
+              <Button variant="ghost" disabled={saving} onClick={reset}>
+                Clear
+              </Button>
+            )}
             <DialogClose render={<Button variant="ghost" disabled={saving} />}>Cancel</DialogClose>
             <Button type="submit" loading={saving}>
               Save expense
