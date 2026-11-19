@@ -49,6 +49,10 @@ progress bar.
     onToggleStep: { type: '(stepId: string, done: boolean) => void' },
     onDismiss: { type: '() => void', description: 'Offers Hide once every step is done.' },
     defaultCollapsed: { type: 'boolean', default: 'false' },
+    estimate: {
+      type: 'string',
+      description: "How long the whole list takes, such as 'about 10 minutes'.",
+    },
     title: { type: 'string', default: "'Get set up'" },
     className: { type: 'string' },
   }}

@@ -56,6 +56,10 @@ under the name.
     onRename: { type: '(entryId: string, name: string) => void' },
     onDownload: { type: '(entryIds: string[]) => void' },
     onDelete: { type: '(entryIds: string[]) => void', description: 'Asked to confirm first.' },
+    onDropFiles: {
+      type: '(files: File[]) => void',
+      description: 'Makes the empty folder a drop target for files.',
+    },
     now: { type: 'Date', description: 'The moment "modified" is measured from.' },
     locale: { type: 'string', default: 'the runtime locale' },
     title: { type: 'string', default: 'the current folder' },

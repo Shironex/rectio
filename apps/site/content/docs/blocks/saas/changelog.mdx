@@ -49,6 +49,7 @@ Mark as read while something is unseen. For older pages, pass `hasMore` and `onL
     hasMore: { type: 'boolean', default: 'false' },
     loadingMore: { type: 'boolean', default: 'false' },
     onLoadMore: { type: '() => void' },
+    onSubscribe: { type: '() => void', description: 'Offered in the empty state when set.' },
     locale: { type: 'string', default: 'the runtime locale' },
     title: { type: 'string', default: "'Changelog'" },
     className: { type: 'string' },

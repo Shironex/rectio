@@ -52,6 +52,10 @@ you.
     onResendVerification: { type: '() => void' },
     onDeleteAccount: { type: '() => void', description: 'Called after the email is typed back.' },
     timeZones: { type: 'readonly string[]', description: 'IANA zones to offer.' },
+    savedAt: {
+      type: 'Date',
+      description: 'When the profile was last saved, shown in the bar while nothing is changed.',
+    },
     pending: { type: 'boolean', default: 'false' },
     error: { type: 'ReactNode' },
     now: { type: 'Date', description: 'When time zone offsets are read.' },

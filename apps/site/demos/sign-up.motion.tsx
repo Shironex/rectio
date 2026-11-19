@@ -1,6 +1,6 @@
 'use client';
 
-import { GoogleLogoIcon, HexagonIcon } from '@phosphor-icons/react';
+import { GithubLogoIcon, GoogleLogoIcon, HexagonIcon } from '@phosphor-icons/react';
 import { SocialButton } from '@rectio/blocks';
 import { SignUp } from '@rectio/blocks/motion';
 import { useState } from 'react';
@@ -20,9 +20,20 @@ export default function SignUpMotionDemo() {
       pending={pending}
       emailTaken={taken}
       social={
-        <SocialButton icon={<GoogleLogoIcon aria-hidden weight="bold" />}>
-          Continue with Google
-        </SocialButton>
+        <>
+          <SocialButton
+            aria-label="Continue with Google"
+            icon={<GoogleLogoIcon aria-hidden weight="bold" />}
+          >
+            Google
+          </SocialButton>
+          <SocialButton
+            aria-label="Continue with GitHub"
+            icon={<GithubLogoIcon aria-hidden weight="bold" />}
+          >
+            GitHub
+          </SocialButton>
+        </>
       }
       terms="#terms"
       privacy="#privacy"

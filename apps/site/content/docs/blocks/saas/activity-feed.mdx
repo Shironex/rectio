@@ -49,6 +49,7 @@ nothing in them; on narrow widths it becomes one select. For older pages, pass `
     hasMore: { type: 'boolean', default: 'false' },
     loadingMore: { type: 'boolean', default: 'false' },
     onLoadMore: { type: '() => void' },
+    onInvite: { type: '() => void', description: 'Offered in the empty state when set.' },
     now: { type: 'Date', description: 'The moment relative times and Today are measured from.' },
     locale: { type: 'string', default: 'the runtime locale' },
     title: { type: 'string', default: "'Activity'" },

@@ -54,6 +54,7 @@ dash and the words for each; on a narrow block the comparison becomes one sectio
     defaultCycle: { type: "'monthly' | 'yearly'", default: "'yearly'" },
     currentPlanId: { type: 'string' },
     onSelectPlan: { type: '(plan: PricingPlan, cycle: PricingCycle) => void' },
+    onAddPlan: { type: '() => void', description: 'Offered in the empty state when set.' },
     bare: { type: 'boolean', default: 'false' },
     title: { type: 'string', default: "'Plans and pricing'" },
     description: { type: 'string' },
