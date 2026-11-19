@@ -11,27 +11,36 @@ export type { AmountInputProps };
 type ChangeDetails = Parameters<NonNullable<AmountInputProps['onValueChange']>>[1];
 
 /**
- * Changes the user types are never animated: the figure under the caret must stay put. Only a
- * change that arrives whole (arrow keys, wheel, stepper buttons, a value set by the app) ticks.
+ * Changes made from the keyboard or in a rapid stream are never animated: the figure under the
+ * caret must stay put, and arrow keys, the wheel and scrubbing repeat too often to wait for
+ * motion. Only a discrete step ticks: a stepper button press or a value set by the app.
  */
-const TYPED = new Set(['input-change', 'input-clear', 'input-paste', 'input-blur']);
+const STILL = new Set([
+  'input-change',
+  'input-clear',
+  'input-paste',
+  'input-blur',
+  'keyboard',
+  'wheel',
+  'scrub',
+]);
 
 /**
  * The figures nudge a hair in the direction of the change (up for more, down for less) and settle.
  * Short and small, so the amount is legible at every frame; it confirms that a step landed and
- * which way it went. Ticks only when the value is controlled.
+ * which way it went. Ticks only when the value is controlled, and only for a discrete step.
  */
 function MotionAmountInput({ ref, value, onValueChange, ...props }: AmountInputProps) {
   const root = useRef<HTMLDivElement | null>(null);
-  const typed = useRef(false);
+  const still = useRef(false);
   const previous = useRef(value);
 
   useLayoutEffect(() => {
     const before = previous.current;
     previous.current = value;
-    const wasTyped = typed.current;
-    typed.current = false;
-    if (wasTyped || before === value || before == null || value == null) return;
+    const wasStill = still.current;
+    still.current = false;
+    if (wasStill || before === value || before == null || value == null) return;
     const input = root.current?.querySelector('input');
     if (input == null) return;
     const tokens = readMotionTokens(input);
@@ -54,7 +63,7 @@ function MotionAmountInput({ ref, value, onValueChange, ...props }: AmountInputP
       data-motion=""
       value={value}
       onValueChange={(next: number | null, details: ChangeDetails) => {
-        typed.current = TYPED.has(details.reason);
+        still.current = STILL.has(details.reason);
         onValueChange?.(next, details);
       }}
       {...props}
@@ -62,7 +71,7 @@ function MotionAmountInput({ ref, value, onValueChange, ...props }: AmountInputP
   );
 }
 
-/** AmountInput whose figures tick on a stepped change. Same props as the plain one. */
+/** AmountInput whose figures tick on a stepper press. Same props as the plain one. */
 export function AmountInput(props: AmountInputProps) {
   const plain = usePlainMotion();
   return plain ? <PlainAmountInput {...props} /> : <MotionAmountInput {...props} />;

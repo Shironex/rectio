@@ -171,7 +171,7 @@ function AmountSpecimen() {
       plainSpec={() => 'Figures change in place, no movement.'}
       spec={(t) => `Nudge: ${t.distance.tick} over ${ms(t.duration.base)}, ease out. Steps only.`}
       plain="A stepped change replaces the figures in place."
-      motion="A stepped change nudges the figures a hair toward its direction. Typing never moves them."
+      motion="A button step nudges the figures a hair toward its direction. Typing, arrow keys and the wheel never move them."
     >
       <Field className="w-44">
         <FieldLabel>Amount, EUR</FieldLabel>
@@ -305,10 +305,10 @@ function DialogSpecimen() {
         `Open: CSS rise and fade, ${ms(t.duration.slow)}. Close: ${ms(t.duration.fast)}.`
       }
       spec={(t) =>
-        `Open: ${springSpec(t.spring.overlay)}, from ${String(t.scale.origin)} and ${t.distance.origin} toward the trigger. Close: ${ms(t.duration.fast)} fade.`
+        `Open: ${springSpec(t.spring.overlay)}, centred, from ${String(t.scale.dialog)}. Close: ${ms(t.duration.fast)} exit tween.`
       }
       plain="Rises a few pixels and fades in, in CSS."
-      motion="Grows from the side of the button that opened it and leans back toward it on close."
+      motion="Grows in the centre from just under full size on a short spring; closes faster on a tween."
     >
       <Dialog>
         <DialogTrigger render={<Button variant="secondary" />}>Submit for approval</DialogTrigger>
@@ -342,7 +342,7 @@ function SelectSpecimen() {
         `List: ${springSpec(t.spring.overlay)}. Highlight: ${springSpec(t.spring.press)}.`
       }
       plain="The list fades in from its trigger; each option highlights itself."
-      motion="The list grows from its trigger. On arrow keys, one highlight glides to the next option."
+      motion="The list grows from its trigger. Under the pointer, one highlight glides to the next option; arrow keys move it at once."
     >
       <Field className="w-56">
         <FieldLabel>Category</FieldLabel>

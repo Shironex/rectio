@@ -158,6 +158,41 @@ try {
     console.log('phone smallest touch target', await smallestTouchTarget(phone));
     await phone.close();
   }
+  // The filter tabs of every segmented control must stay on one row at phone width.
+  for (const block of ['invoice-list', 'expense-approval']) {
+    const page = await shoot(browser, base, `phone-${block}`, `block=${block}&locale=pl-PL`, {
+      width: 390,
+      phone: true,
+    });
+    if (page === null) continue;
+    console.log(
+      `phone ${block} segmented rows`,
+      await page.evaluate(() =>
+        [...document.querySelectorAll('[data-slot="segmented"]')]
+          .map(
+            (group) => new Set([...group.children].map((c) => c.getBoundingClientRect().top)).size,
+          )
+          .join(', '),
+      ),
+    );
+    console.log(
+      `phone ${block} table past its block px`,
+      await page.evaluate(() =>
+        Math.max(
+          0,
+          ...[...document.querySelectorAll('[data-slot="block"] table')].map((table) => {
+            const block = table.closest('[data-slot="block"]')?.getBoundingClientRect();
+            return block === undefined ? 0 : table.getBoundingClientRect().right - block.right;
+          }),
+        ),
+      ),
+    );
+    const filters = page.locator('[data-slot="segmented"]').first();
+    if ((await filters.count()) > 0) {
+      await filters.locator('..').screenshot({ path: join(out, `phone-${block}-filters.png`) });
+    }
+    await page.close();
+  }
   const phoneLight = await shoot(browser, base, 'phone-dashboard-default', 'locale=pl-PL', {
     width: 390,
     phone: true,

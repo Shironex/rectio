@@ -1,14 +1,14 @@
-import { Button, Money, readMotionTokens, usePlainMotion, type MotionTokens } from '@rectio/motion';
-import { TableRow, cn } from '@rectio/ui';
-import { AnimatePresence, PresenceContext, usePresence } from 'motion/react';
 import {
-  use,
-  useLayoutEffect,
-  useRef,
-  type ComponentProps,
-  type ReactNode,
-  type RefObject,
-} from 'react';
+  Button,
+  Money,
+  TableRow,
+  TableRows,
+  readMotionTokens,
+  usePlainMotion,
+  type MotionTokens,
+} from '@rectio/motion';
+import { cn } from '@rectio/ui';
+import { useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
 
 import { BlockPartsProvider, type BlockParts } from './block-parts';
 
@@ -181,114 +181,14 @@ function ChartStage({ children, className }: { children: ReactNode; className?: 
   );
 }
 
-/** Rows that can leave. Rows present on the first render never animate in. */
-function Rows({ children }: { children: ReactNode }) {
-  const plain = usePlainMotion();
-  return plain ? children : <AnimatePresence initial={false}>{children}</AnimatePresence>;
-}
-
-interface Leaving {
-  row: HTMLTableRowElement;
-  done: () => void;
-}
-
-/**
- * Rows that finish leaving in the same frame close their gap together: the rest of the rows are
- * measured, the leavers taken out of the layout, the rows measured again, and each one slides from
- * where it was to where it is now (FLIP). Only transforms move; the layout changes once.
- */
-const leaving = new Map<HTMLTableSectionElement, Leaving[]>();
-
-function closeGaps(body: HTMLTableSectionElement, tokens: MotionTokens) {
-  const queue = leaving.get(body) ?? [];
-  leaving.delete(body);
-  const gone = new Set(queue.map((entry) => entry.row));
-  const rest = [...body.rows].filter((row) => !gone.has(row));
-  const before = rest.map((row) => row.offsetTop);
-  for (const row of gone) row.style.display = 'none';
-  rest.forEach((row, index) => {
-    const delta = (before[index] ?? 0) - row.offsetTop;
-    if (delta === 0) return;
-    row.animate([{ transform: `translateY(${String(delta)}px)` }, { transform: 'none' }], {
-      duration: tokens.duration.base * 1000,
-      easing: easing(row, 'standard'),
-    });
-  });
-  for (const entry of queue) entry.done();
-}
-
-function Row({ ref, ...props }: ComponentProps<'tr'>) {
-  const plain = usePlainMotion();
-  const [isPresent, safeToRemove] = usePresence();
-  const presence = use(PresenceContext);
-  const node = useRef<HTMLTableRowElement | null>(null);
-  const settled = useRef(presence === null || presence.initial === false);
-
-  useLayoutEffect(() => {
-    const row = node.current;
-    const tokens = row === null || plain ? null : readMotionTokens(row);
-    if (row === null || tokens === null) {
-      settled.current = true;
-      if (!isPresent) safeToRemove();
-      return;
-    }
-    const ease = easing(row, 'enter');
-    if (isPresent) {
-      if (settled.current) return;
-      settled.current = true;
-      row.animate(
-        [
-          { opacity: 0, transform: `translateY(calc(-1 * ${tokens.distance.shift}))` },
-          { opacity: 1, transform: 'none' },
-        ],
-        { duration: tokens.duration.base * 1000, easing: ease },
-      );
-      return;
-    }
-    // Leaving: out of the tab order at once, then a quick fade to the side, faster than an entry.
-    row.inert = true;
-    const exit = row.animate(
-      [
-        { opacity: 1, transform: 'none' },
-        { opacity: 0, transform: `translateX(${tokens.distance.shift})` },
-      ],
-      { duration: tokens.duration.fast * 1000, easing: ease, fill: 'forwards' },
-    );
-    const body = row.parentElement;
-    void exit.finished.then(() => {
-      if (!(body instanceof HTMLTableSectionElement)) {
-        safeToRemove();
-        return;
-      }
-      const queue = leaving.get(body) ?? [];
-      if (queue.length === 0) {
-        queueMicrotask(() => {
-          closeGaps(body, tokens);
-        });
-      }
-      leaving.set(body, [...queue, { row, done: safeToRemove }]);
-    });
-  }, [isPresent, plain, safeToRemove]);
-
-  return (
-    <TableRow
-      ref={(value: HTMLTableRowElement | null) => {
-        node.current = value;
-        if (typeof ref === 'function') ref(value);
-        else if (ref !== null && ref !== undefined) ref.current = value;
-      }}
-      {...props}
-    />
-  );
-}
-
 export const MOTION_PARTS: BlockParts = {
   Button,
   Money,
   Reveal,
   ChartStage,
-  Rows,
-  Row,
+  // Rows arrive and leave by transform and opacity only, the same as the motion table's rows.
+  Rows: TableRows,
+  Row: TableRow,
 };
 
 /** Renders its blocks with the motion parts. Each motion block wraps itself in it. */

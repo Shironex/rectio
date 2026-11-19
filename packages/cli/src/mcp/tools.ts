@@ -33,7 +33,12 @@ export interface ToolResult {
 export const ITEM_TYPES = itemTypeSchema.options;
 export const TIERS = tierSchema.options;
 
-const DEFAULT_LIMIT = 40;
+/**
+ * The most rows a list or search returns. A list row is one short line, so listing defaults to the
+ * maximum: the whole registry fits, and an agent never has to guess that items were cut off.
+ */
+export const MAX_LIMIT = 200;
+const DEFAULT_LIMIT = MAX_LIMIT;
 const TOKENS_ITEM = 'tokens';
 const THEME_PREFIX = 'theme-';
 

@@ -205,7 +205,8 @@
         "$value": "{easing.out-quart}"
       },
       "exit": {
-        "$value": "{easing.in-cubic}"
+        "$value": "{easing.out-quint}",
+        "$description": "Leaves on a strong ease-out at the fast duration: most of the way gone at once, so the interface answers immediately. Never an ease-in."
       },
       "settle": {
         "$value": "{easing.out-quart}",
@@ -222,9 +223,9 @@
         "$value": "{size.4}",
         "$description": "How far an amount nudges in the direction of a change. Zero under reduced motion."
       },
-      "origin": {
+      "arrive": {
         "$value": "{size.32}",
-        "$description": "How far a dialog leans in from its trigger as it opens. Zero under reduced motion."
+        "$description": "How far a toast rises as it arrives. Zero under reduced motion."
       },
       "reveal": {
         "$value": "{size.24}",
@@ -241,9 +242,9 @@
         "$value": 0.98,
         "$description": "Scale of a pressed button. One under reduced motion."
       },
-      "origin": {
-        "$value": 0.92,
-        "$description": "Scale a dialog grows from as it leaves its trigger. One under reduced motion."
+      "dialog": {
+        "$value": 0.96,
+        "$description": "Scale a dialog grows from, centred, as it opens. One under reduced motion."
       }
     },
     "spring": {
@@ -251,15 +252,15 @@
       "$description": "Spring physics for the motion add-on (stiffness, damping, mass). Damping ratio at or near 1: settles without overshoot, never bounces.",
       "press": {
         "stiffness": {
-          "$value": 720
+          "$value": 1100
         },
         "damping": {
-          "$value": 52
+          "$value": 66
         },
         "mass": {
           "$value": 1
         },
-        "$description": "A pressed button returning to rest."
+        "$description": "A pressed button returning to rest, and the select highlight gliding. Settles in under 200ms."
       },
       "overlay": {
         "stiffness": {
@@ -271,7 +272,7 @@
         "mass": {
           "$value": 1
         },
-        "$description": "A dialog leaning out of its trigger, and back on close."
+        "$description": "A dialog or a list opening. Closing never springs: it is a fast tween on the exit easing."
       }
     }
   }

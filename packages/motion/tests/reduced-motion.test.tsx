@@ -155,7 +155,7 @@ describe('motioned components', () => {
       const toast = await showToast();
       expect(toast).toHaveClass('duration-slow');
       expect(toast.className).toContain(
-        'data-starting-style:translate-y-(--rx-motion-distance-origin)',
+        'data-starting-style:translate-y-(--rx-motion-distance-arrive)',
       );
     });
 

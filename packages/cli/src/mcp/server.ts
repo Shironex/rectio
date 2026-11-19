@@ -5,6 +5,7 @@ import * as z from 'zod';
 
 import {
   ITEM_TYPES,
+  MAX_LIMIT,
   TIERS,
   getAddCommand,
   getDocs,
@@ -24,7 +25,7 @@ const itemName = z
   .string()
   .min(1)
   .describe('Registry item name, kebab-case, for example "data-table"');
-const limit = z.number().int().min(1).max(200).optional().describe('Maximum rows to return');
+const limit = z.number().int().min(1).max(MAX_LIMIT).optional().describe('Maximum rows to return');
 
 const asContent = (result: ToolResult): CallToolResult => ({
   content: [{ type: 'text', text: result.text }],

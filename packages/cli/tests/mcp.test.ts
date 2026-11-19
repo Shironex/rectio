@@ -57,6 +57,15 @@ describe('list_items', () => {
     expect(pro.text).not.toContain('| free |');
   });
 
+  it('lists the whole registry by default, with nothing cut off', async () => {
+    const { text } = await listItems(deps(), {});
+    const [header = '', , ...rows] = text.split('\n');
+    const count = Number(/^(\d+) item/.exec(header)?.[1]);
+    expect(count).toBeGreaterThan(40);
+    expect(rows).toHaveLength(count);
+    expect(text).not.toMatch(/more; narrow/);
+  });
+
   it('truncates with a hint', async () => {
     const { text } = await listItems(deps(), { limit: 2 });
     expect(text).toMatch(/\.\.\. \d+ more/);

@@ -17,14 +17,13 @@ export { useToast, type ToastProviderProps, type ToastType };
 /**
  * Enter and exit stay CSS transitions, so a toast added while another is still arriving retargets
  * from where it is instead of restarting. Arrives from further below on the slow duration with an
- * ease-out; leaves faster, dropping a little toward the corner. The exit takes the enter easing on
- * purpose: the exit token is an ease-in curve, which reads as sluggish for something that leaves.
- * Swipes keep the plain toast's own exit along the swipe.
+ * ease-out; leaves faster on the exit easing (the plain toast's fast duration), dropping a little
+ * toward the corner. Swipes keep the plain toast's own exit along the swipe.
  */
 const MOTION_TOAST = cn(
   'duration-slow',
-  'data-starting-style:translate-y-(--rx-motion-distance-origin)',
-  'data-ending-style:translate-y-(--rx-motion-distance-shift) data-ending-style:ease-enter',
+  'data-starting-style:translate-y-(--rx-motion-distance-arrive)',
+  'data-ending-style:translate-y-(--rx-motion-distance-shift)',
 );
 
 /** The vertical offset an element is drawn at by its transform (not `translate`), in pixels. */

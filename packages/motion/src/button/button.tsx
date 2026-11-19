@@ -13,11 +13,11 @@ export type { ButtonProps };
 const PRESS_KEYS = new Set([' ', 'Enter']);
 
 /**
- * The arriving part starts 60 percent into the leaving one, which fades on a fast-out curve: by
- * then the leaving part is nearly gone, so the two never read on top of each other, and the slot
- * is empty for less than a frame.
+ * The arriving part starts a third of the way into the leaving one, which fades on a fast-out
+ * curve: the leaving part is already faint and moving away, so the two cross instead of stacking,
+ * and the slot is never drawn empty.
  */
-const AFTER_EXIT = { transitionDelay: 'calc(var(--rx-motion-duration-fast) * 0.6)' };
+const AFTER_EXIT = { transitionDelay: 'calc(var(--rx-motion-duration-fast) * 0.33)' };
 
 /**
  * The label leaves upward and the spinner arrives from below, then the reverse when the work is
@@ -38,8 +38,8 @@ function MorphContent({ children, loading }: { children: ReactNode; loading: boo
           'inline-flex items-center',
           'transition-[opacity,translate] duration-base ease-enter',
           'in-data-loading:-translate-y-(--rx-motion-distance-shift) in-data-loading:opacity-0',
-          // Fast out, not ease-in: the label is mostly gone early instead of holding then vanishing.
-          'in-data-loading:duration-fast in-data-loading:ease-standard',
+          // Leaves on the exit easing: mostly gone early instead of holding, then vanishing.
+          'in-data-loading:duration-fast in-data-loading:ease-exit',
         )}
       >
         {children}
