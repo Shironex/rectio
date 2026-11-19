@@ -36,7 +36,7 @@
       "$value": "{palette.ink.700}"
     },
     "subtle": {
-      "$value": "{palette.ink.600}"
+      "$value": "{palette.ink.650}"
     },
     "disabled": {
       "$value": "{palette.ink.500}"
