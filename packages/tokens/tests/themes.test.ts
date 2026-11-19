@@ -42,6 +42,10 @@ const PAIRS: [string, string, number][] = [
   ['accent-strong', 'surface-overlay', 4.5],
   ['positive-strong', 'surface-overlay', 3],
   ['negative-strong', 'surface-overlay', 3],
+  // The docs sidebar's current page and a highlighted search result sit on the hover fill.
+  ['accent-strong', 'surface-hover', 4.5],
+  ['text', 'surface-hover', 4.5],
+  ['text-muted', 'surface-hover', 4.5],
   // A selected table row keeps its secondary text readable.
   ['text-muted', 'surface-selected', 4.5],
   ['accent-contrast', 'accent', 4.5],
