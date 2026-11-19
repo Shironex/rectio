@@ -305,6 +305,11 @@ export function CommandMenu({
                       </Autocomplete.Group>
                     )}
                   </Autocomplete.List>
+                  {/* Fades rows into the edge while more are below; at the end it is only space. */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none sticky bottom-0 h-4 bg-linear-to-t from-surface-overlay to-transparent"
+                  />
                 </div>
 
                 {showHints && (
