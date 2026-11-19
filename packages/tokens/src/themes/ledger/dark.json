@@ -221,8 +221,8 @@
     "$description": "Data visualisation. Series and sequence marks hold 3:1 against the surface and stay apart under protan, deutan and tritan vision; a legend, label or table always names them too.",
     "series": {
       "1": {
-        "$value": "{palette.citron.300}",
-        "$description": "First series, such as inflow or actual."
+        "$value": "{palette.sky.300}",
+        "$description": "First series, such as inflow or actual. A quiet blue, lighter than the orange second series, so the two differ in hue and lightness."
       },
       "2": {
         "$value": "{palette.orange.400}",
