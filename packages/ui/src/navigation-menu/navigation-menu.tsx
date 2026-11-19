@@ -18,11 +18,18 @@ export type NavigationMenuProps = WithClassName<ComponentProps<typeof BaseNaviga
  * Enter, Space or ArrowDown; Escape closes and returns focus to the trigger. One popup is shared
  * by every panel, so moving between triggers swaps the content in place.
  */
-export function NavigationMenu({ className, children, ...props }: NavigationMenuProps) {
+export function NavigationMenu({
+  className,
+  children,
+  'aria-label': label = 'Site',
+  ...props
+}: NavigationMenuProps) {
   const container = usePortalContainer();
   return (
     <BaseNavigationMenu.Root
       data-slot="navigation-menu"
+      // Named, so it is told apart from the app's main navigation and the breadcrumb.
+      aria-label={label}
       className={cn('relative min-w-0', className)}
       {...props}
     >
@@ -75,6 +82,9 @@ const topLevel = cn(
   'transition-colors duration-fast ease-standard hover:bg-surface-hover hover:text-fg',
   'data-popup-open:bg-surface-hover data-popup-open:text-fg',
   'aria-[current=page]:text-fg',
+  // The current page carries a mark under its label, as a line tab does: weight alone is too quiet.
+  'aria-[current=page]:after:absolute aria-[current=page]:after:inset-x-3 aria-[current=page]:after:bottom-0.5',
+  'aria-[current=page]:after:h-0.5 aria-[current=page]:after:rounded-full aria-[current=page]:after:bg-accent',
   '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
   'pointer-coarse:h-(--rx-button-height-touch)',
 );
@@ -92,7 +102,7 @@ export function NavigationMenuTrigger({
   return (
     <BaseNavigationMenu.Trigger className={cn(topLevel, className)} {...props}>
       {children}
-      <BaseNavigationMenu.Icon className="flex text-fg-subtle transition-transform duration-fast ease-standard data-popup-open:rotate-180">
+      <BaseNavigationMenu.Icon className="flex text-fg-subtle transition-transform duration-fast ease-standard data-popup-open:rotate-180 motion-reduce:transition-none">
         <CaretDownIcon aria-hidden weight="bold" className="size-3" />
       </BaseNavigationMenu.Icon>
     </BaseNavigationMenu.Trigger>
