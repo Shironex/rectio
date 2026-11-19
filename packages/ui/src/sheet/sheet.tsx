@@ -98,7 +98,10 @@ export function SheetContent({
           data-side={side}
           className={cn(
             'fixed flex flex-col overflow-hidden border-line bg-surface-overlay text-fg shadow-(--rx-sheet-shadow) outline-none',
-            'transition-transform duration-slow ease-enter will-change-transform',
+            'transition-[translate,opacity] duration-slow ease-enter will-change-transform',
+            // Under reduced motion the sheet fades in place instead of travelling across the screen.
+            'motion-reduce:data-starting-style:translate-0 motion-reduce:data-ending-style:translate-0',
+            'motion-reduce:data-starting-style:opacity-0 motion-reduce:data-ending-style:opacity-0',
             'data-swiping:transition-none data-swiping:select-none',
             'data-ending-style:duration-base data-ending-style:ease-exit',
             popupBySide[side],
