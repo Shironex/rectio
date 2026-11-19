@@ -133,7 +133,7 @@ export function Billing({
 
       <div className="grid gap-6 @3xl:grid-cols-5">
         {/* The plan: the one figure that matters, then when it moves. */}
-        <div className="flex flex-col gap-3 self-start @3xl:col-span-2 @3xl:border-e @3xl:border-line @3xl:pe-6">
+        <div className="flex flex-col gap-3 @3xl:col-span-2 @3xl:border-e @3xl:border-line @3xl:pe-6">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-col">
               <span className="text-sm text-fg-muted">Current plan</span>
@@ -157,7 +157,8 @@ export function Billing({
             <p className="text-sm text-fg-muted">{renewalText}</p>
           </div>
           {(onChangePlan !== undefined || onCancelPlan !== undefined) && (
-            <div className="flex flex-wrap gap-2 pt-1 pointer-coarse:gap-3">
+            // On a wide block the actions sit at the column foot, level with the last meter.
+            <div className="flex flex-wrap gap-2 pt-1 pointer-coarse:gap-3 @3xl:mt-auto">
               {onChangePlan !== undefined && (
                 <Button variant="secondary" onClick={onChangePlan}>
                   <ArrowsClockwiseIcon aria-hidden weight="bold" className="size-4" />
@@ -221,12 +222,7 @@ export function Billing({
                       )}
                     />
                     {seatsFull && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="-ms-2 text-accent-strong"
-                        onClick={onAddSeats}
-                      >
+                      <Button variant="secondary" size="sm" className="mt-1" onClick={onAddSeats}>
                         <PlusIcon aria-hidden weight="bold" className="size-4" />
                         Add seats
                       </Button>
@@ -261,6 +257,13 @@ export function Billing({
               >
                 {paymentMethod.expMonth !== undefined && paymentMethod.expYear !== undefined ? (
                   <>
+                    {cardUrgent && (
+                      <WarningCircleIcon
+                        aria-hidden
+                        weight="bold"
+                        className="me-1 inline size-3.5 align-text-bottom"
+                      />
+                    )}
                     {card === 'expired' ? 'Expired' : 'Expires'}{' '}
                     <span className="numeric">
                       {String(paymentMethod.expMonth).padStart(2, '0')}/{paymentMethod.expYear}
