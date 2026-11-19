@@ -220,7 +220,7 @@ function StepRow({
         {step.done ? <CheckIcon weight="bold" className="size-3.5" /> : number}
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        {/* The row menu sits on the title line, so the text under it runs the full width. */}
+        {/* Only the undo of a finished step sits on the title line; the rest go in the action row. */}
         <div className="flex items-center gap-2">
           <p className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-0.5">
             <span className={cn('font-medium', step.done && 'text-fg-muted')}>
@@ -233,7 +233,9 @@ function StepRow({
               </span>
             )}
           </p>
-          {onToggleStep !== undefined && <ToggleButton step={step} onToggleStep={onToggleStep} />}
+          {step.done && onToggleStep !== undefined && (
+            <ToggleButton step={step} onToggleStep={onToggleStep} />
+          )}
         </div>
         {step.done ? (
           <p aria-hidden className="text-sm text-fg-muted">
@@ -249,9 +251,17 @@ function StepRow({
                 {step.description}
               </p>
             )}
-            {step.action !== undefined && (
-              <div className="mt-2">
-                <StepAction action={step.action} primary={current} />
+            {(step.action !== undefined || onToggleStep !== undefined) && (
+              // The next step always ends in one primary button: its own action, or Mark done.
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {step.action !== undefined && <StepAction action={step.action} primary={current} />}
+                {onToggleStep !== undefined && (
+                  <ToggleButton
+                    step={step}
+                    onToggleStep={onToggleStep}
+                    primary={current && step.action === undefined}
+                  />
+                )}
               </div>
             )}
           </>
@@ -262,15 +272,18 @@ function StepRow({
 }
 
 /**
- * The one hand-made action of a row, as a direct quiet button: "Mark done" in words on a step
- * still to do, and a small undo icon on a finished one.
+ * The one hand-made action of a row, as a direct button: "Mark done" in words beside a step's
+ * action (or as its primary button when it has none), and a small undo icon on a finished one.
  */
 function ToggleButton({
   step,
   onToggleStep,
+  primary = false,
 }: {
   step: OnboardingStep;
   onToggleStep: (stepId: string, done: boolean) => void;
+  /** The next step with no action of its own: Mark done becomes its primary button. */
+  primary?: boolean;
 }) {
   const { Button } = useBlockParts();
   const toggle = () => {
@@ -279,12 +292,12 @@ function ToggleButton({
   if (!step.done) {
     return (
       <Button
-        variant="ghost"
+        variant={primary ? 'primary' : 'secondary'}
         size="sm"
         aria-label={`Mark ${step.title} as done`}
         onClick={toggle}
-        className="-my-1 shrink-0 text-fg-muted"
       >
+        {primary && <CheckIcon aria-hidden weight="bold" className="size-3.5" />}
         Mark done
       </Button>
     );

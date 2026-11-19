@@ -100,6 +100,21 @@ describe('OnboardingChecklist', () => {
     expect(screen.getByText('Name your workspace').closest('li')).toHaveTextContent('Done');
   });
 
+  it('always gives the next step a primary button, even with no action of its own', () => {
+    const fresh = STEPS.map((step) => ({ ...step, done: false }));
+    const onToggleStep = vi.fn();
+    render(<OnboardingChecklist steps={fresh} onToggleStep={onToggleStep} />);
+    const next = screen.getByText('Name your workspace').closest('li');
+    expect(next).toHaveAttribute('aria-current', 'step');
+    const cta = screen.getByRole('button', { name: 'Mark Name your workspace as done' });
+    expect(cta).toHaveAttribute('data-variant', 'primary');
+    // A later step with its own action keeps it, and Mark done stays secondary beside it.
+    expect(screen.getByRole('button', { name: 'Mark Connect your bank as done' })).toHaveAttribute(
+      'data-variant',
+      'secondary',
+    );
+  });
+
   it('folds the steps away and back', async () => {
     render(<OnboardingChecklist steps={STEPS} />);
     const toggle = screen.getByRole('button', { name: 'Hide steps' });
