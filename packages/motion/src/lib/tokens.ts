@@ -22,8 +22,8 @@ export interface MotionTokens {
   duration: { fast: number; base: number; slow: number; count: number };
   easing: { standard: Bezier; enter: Bezier; exit: Bezier; settle: Bezier };
   /** CSS lengths, used as they are in transforms. */
-  distance: { shift: string; tick: string; origin: string };
-  scale: { from: number; press: number; origin: number };
+  distance: { shift: string; tick: string };
+  scale: { from: number; press: number; dialog: number };
   spring: { press: SpringToken; overlay: SpringToken };
 }
 
@@ -82,8 +82,8 @@ export function motionTokensFrom(read: Read): MotionTokens | null {
     exit: e('exit'),
     settle: e('settle'),
   };
-  const distance = { shift: l('shift'), tick: l('tick'), origin: l('origin') };
-  const scale = { from: n('scale-from'), press: n('scale-press'), origin: n('scale-origin') };
+  const distance = { shift: l('shift'), tick: l('tick') };
+  const scale = { from: n('scale-from'), press: n('scale-press'), dialog: n('scale-dialog') };
   const springs = { press: spring('press'), overlay: spring('overlay') };
 
   const groups = [duration, easing, distance, scale, springs];

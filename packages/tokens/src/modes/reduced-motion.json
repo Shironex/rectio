@@ -15,7 +15,7 @@
           "unit": "px"
         }
       },
-      "origin": {
+      "arrive": {
         "$value": {
           "value": 0,
           "unit": "px"
@@ -36,7 +36,7 @@
       "press": {
         "$value": 1
       },
-      "origin": {
+      "dialog": {
         "$value": 1
       }
     }
