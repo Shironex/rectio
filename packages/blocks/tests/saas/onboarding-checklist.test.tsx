@@ -67,6 +67,21 @@ describe('OnboardingChecklist', () => {
     expect(onToggleStep).toHaveBeenCalledWith('a', false);
   });
 
+  it('gives a reason to start before anything is done, and keeps the next step primary', () => {
+    const fresh = STEPS.map((step) => ({ ...step, done: false }));
+    render(<OnboardingChecklist steps={fresh} estimate="About 10 minutes" />);
+    expect(screen.getByText('0 of 3 done, about 10 minutes in all')).toBeInTheDocument();
+    expect(screen.getByText('Name your workspace').closest('li')).toHaveAttribute(
+      'aria-current',
+      'step',
+    );
+  });
+
+  it('marks finished steps as done in words', () => {
+    render(<OnboardingChecklist steps={STEPS} />);
+    expect(screen.getByText('Name your workspace').closest('li')).toHaveTextContent('Done');
+  });
+
   it('folds the steps away and back', async () => {
     render(<OnboardingChecklist steps={STEPS} />);
     const toggle = screen.getByRole('button', { name: 'Hide steps' });

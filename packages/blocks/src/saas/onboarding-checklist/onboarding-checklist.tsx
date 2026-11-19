@@ -12,8 +12,9 @@ import { useId, useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
+import { EmptyNote } from '../../lib/empty-note';
 import { ActionMenu } from '../lib/action-menu';
-import { focusRing, touchTarget } from '../lib/styles';
+import { focusRing, inlineLink, touchTarget } from '../lib/styles';
 import {
   onboardingProgress,
   onboardingSummary,
@@ -27,6 +28,8 @@ export interface OnboardingChecklistProps {
   onToggleStep?: ((stepId: string, done: boolean) => void) | undefined;
   /** Offers Hide once every step is done, and on the finished state. */
   onDismiss?: (() => void) | undefined;
+  /** How long the whole list takes, such as "About 10 minutes": said before the first step is done. */
+  estimate?: string | undefined;
   /** Start folded to the progress bar, for a returning user. */
   defaultCollapsed?: boolean;
   title?: string;
@@ -43,6 +46,7 @@ export function OnboardingChecklist({
   onToggleStep,
   onDismiss,
   defaultCollapsed = false,
+  estimate,
   title = 'Get set up',
   className,
 }: OnboardingChecklistProps) {
@@ -55,7 +59,11 @@ export function OnboardingChecklist({
   return (
     <BlockPanel
       title={title}
-      description={<span aria-live="polite">{summary}</span>}
+      description={
+        <span aria-live="polite">
+          {progress.done === 0 && steps.length > 0 ? startLine(summary, estimate) : summary}
+        </span>
+      }
       actions={
         steps.length > 0 && !progress.complete ? (
           <button
@@ -88,24 +96,24 @@ export function OnboardingChecklist({
       bodyClassName="gap-4"
     >
       {steps.length === 0 ? (
-        <div
-          role="status"
-          className="flex flex-col items-center gap-3 rounded-control bg-surface-sunken px-6 py-10 text-center"
+        <EmptyNote
+          title={
+            <span className="flex flex-col items-center gap-3">
+              <ListChecksIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
+              No setup steps
+            </span>
+          }
         >
-          <span
-            aria-hidden
-            className="inline-flex size-10 items-center justify-center rounded-full bg-surface text-fg-muted ring-1 ring-line"
-          >
-            <ListChecksIcon weight="bold" className="size-5" />
-          </span>
-          <div className="flex flex-col gap-1">
-            <p className="font-medium">No setup steps</p>
-            <p className="max-w-sm text-sm text-pretty text-fg-muted">
-              This workspace is ready to use as it is. Steps appear here when a feature needs
-              setting up.
-            </p>
-          </div>
-        </div>
+          This workspace is ready to use as it is. Steps appear here when a feature needs setting
+          up.
+          {onDismiss !== undefined && (
+            <span className="mt-4 flex justify-center">
+              <Button variant="secondary" onClick={onDismiss}>
+                Hide checklist
+              </Button>
+            </span>
+          )}
+        </EmptyNote>
       ) : progress.complete ? (
         <div
           role="status"
@@ -159,6 +167,12 @@ export function OnboardingChecklist({
   );
 }
 
+/** Before anything is done, the count gets a reason to start: the time it takes, or the first step. */
+function startLine(summary: string, estimate: string | undefined): string {
+  if (estimate === undefined) return `${summary}. Start with the first step.`;
+  return `${summary}, ${estimate.charAt(0).toLowerCase()}${estimate.slice(1)} in all`;
+}
+
 function StepRow({
   step,
   number,
@@ -189,9 +203,10 @@ function StepRow({
       >
         {step.done ? <CheckIcon weight="bold" className="size-3.5" /> : number}
       </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-2.5 @lg:flex-row @lg:items-center @lg:gap-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        {/* The row menu sits on the title line, so the text under it runs the full width. */}
+        <div className="flex items-center gap-2">
+          <p className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-0.5">
             <span className={cn('font-medium', step.done && 'text-fg-muted')}>
               {step.title}
               <span className="sr-only">{step.done ? ', done' : ', to do'}</span>
@@ -201,75 +216,99 @@ function StepRow({
                 Next
               </span>
             )}
-            {step.optional === true && <span className="text-sm text-fg-subtle">Optional</span>}
           </p>
-          {step.description !== undefined && !step.done && (
-            <p className="text-sm text-pretty text-fg-muted">{step.description}</p>
+          {onToggleStep !== undefined && (
+            <ActionMenu
+              label={`More for ${step.title}`}
+              className="-my-2"
+              actions={[
+                step.done
+                  ? {
+                      id: 'undo',
+                      label: 'Mark as not done',
+                      icon: ArrowCounterClockwiseIcon,
+                      onSelect: () => {
+                        onToggleStep(step.id, false);
+                      },
+                    }
+                  : {
+                      id: 'done',
+                      label: 'Mark as done',
+                      icon: CheckIcon,
+                      onSelect: () => {
+                        onToggleStep(step.id, true);
+                      },
+                    },
+              ]}
+            />
           )}
         </div>
-        {!step.done && step.action !== undefined && (
-          <StepAction action={step.action} primary={current} />
+        {step.done ? (
+          <p aria-hidden className="text-sm text-fg-muted">
+            Done
+          </p>
+        ) : (
+          <>
+            {(step.description !== undefined || step.optional === true) && (
+              <p className="text-sm text-pretty text-fg-muted">
+                {step.optional === true && (
+                  <span className="font-medium text-fg-muted">Optional. </span>
+                )}
+                {step.description}
+              </p>
+            )}
+            {step.action !== undefined && (
+              <div className="mt-2">
+                <StepAction action={step.action} primary={current} />
+              </div>
+            )}
+          </>
         )}
       </div>
-      {/* Every row ends in the same slot, so the right edge lines up down the list. */}
-      {onToggleStep !== undefined && (
-        <ActionMenu
-          label={`More for ${step.title}`}
-          actions={[
-            step.done
-              ? {
-                  id: 'undo',
-                  label: 'Mark as not done',
-                  icon: ArrowCounterClockwiseIcon,
-                  onSelect: () => {
-                    onToggleStep(step.id, false);
-                  },
-                }
-              : {
-                  id: 'done',
-                  label: 'Mark as done',
-                  icon: CheckIcon,
-                  onSelect: () => {
-                    onToggleStep(step.id, true);
-                  },
-                },
-          ]}
-        />
-      )}
     </li>
   );
 }
 
+/** The next step's action is the one primary button; every other step offers a text link. */
 function StepAction({ action, primary }: { action: OnboardingAction; primary: boolean }) {
   const { Button } = useBlockParts();
-  const variant = primary ? 'primary' : 'ghost';
-  // A quiet action lines its label up with the text above it while it sits under the text.
-  const placement = cn(
-    'self-start @lg:self-center',
-    !primary && '-ms-(--rx-button-padding-x-sm) @lg:ms-0',
-  );
   const content = (
     <>
       {action.label}
-      <ArrowRightIcon aria-hidden weight="bold" className="size-3.5" />
+      <ArrowRightIcon aria-hidden weight="bold" className="size-3.5 rtl:rotate-180" />
     </>
   );
+  if (!primary) {
+    const link = cn(
+      inlineLink,
+      'relative inline-flex items-center gap-1.5 text-sm font-medium',
+      touchTarget,
+    );
+    return action.href !== undefined ? (
+      <a href={action.href} onClick={action.onSelect} className={link}>
+        {content}
+      </a>
+    ) : (
+      <button type="button" onClick={action.onSelect} className={link}>
+        {content}
+      </button>
+    );
+  }
   if (action.href !== undefined) {
     return (
       <Button
-        variant={variant}
+        variant="primary"
         size="sm"
         nativeButton={false}
         render={<a href={action.href} />}
         onClick={action.onSelect}
-        className={placement}
       >
         {content}
       </Button>
     );
   }
   return (
-    <Button variant={variant} size="sm" onClick={action.onSelect} className={placement}>
+    <Button variant="primary" size="sm" onClick={action.onSelect}>
       {content}
     </Button>
   );
