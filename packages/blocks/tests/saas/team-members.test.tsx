@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -103,6 +103,11 @@ describe('TeamMembers', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Invite people' }));
     expect(screen.getByLabelText('Email addresses')).toBeInTheDocument();
     expect(screen.queryByText('It is just you so far')).not.toBeInTheDocument();
+    // Cancelling brings the empty state back and hands focus to its invite button.
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Invite people' })).toHaveFocus();
+    });
   });
 
   it('refuses an invite with a bad address and says which', async () => {

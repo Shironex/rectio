@@ -93,12 +93,19 @@ export function TeamMembers({
 }: TeamMembersProps) {
   const now = useNow(requestedNow);
   const invitePanel = useReturnFocus();
+  const panel = useRef<HTMLElement | null>(null);
+  // The opener may be gone once the form closes (the empty state's button): find the header one.
+  const inviteTrigger = () => panel.current?.querySelector<HTMLElement>('[data-invite-trigger]');
   const locale = resolveLocale(requestedLocale);
   const { Button } = useBlockParts();
   const { Items, Item } = useSaasParts();
   const [inviting, setInviting] = useState(false);
   const [removing, setRemoving] = useState<TeamMember | null>(null);
   const usage = seatUsage(members, invites, seats);
+  const activity = (member: TeamMember) =>
+    member.lastActive === undefined
+      ? 'Never signed in'
+      : `Active ${relativeTime(member.lastActive, now, locale)}`;
   const canInvite = onInvite !== undefined && assignableRoles(currentRole).length > 0;
   const sorted = sortMembers(members);
   const alone = members.length <= 1 && invites.length === 0;
@@ -113,11 +120,13 @@ export function TeamMembers({
 
   return (
     <BlockPanel
+      ref={panel}
       title={title}
       description={description}
       actions={
         canInvite && !inviting && !alone ? (
           <Button
+            data-invite-trigger
             onClick={() => {
               invitePanel.remember();
               setInviting(true);
@@ -139,12 +148,12 @@ export function TeamMembers({
           seatsLeft={usage.left}
           onCancel={() => {
             setInviting(false);
-            invitePanel.restore();
+            invitePanel.restore(inviteTrigger);
           }}
           onInvite={(emails, role) => {
             onInvite(emails, role);
             setInviting(false);
-            invitePanel.restore();
+            invitePanel.restore(inviteTrigger);
           }}
         />
       )}
@@ -180,12 +189,14 @@ export function TeamMembers({
                     {/* Narrow: the role column folds into a tag beside the name. */}
                     <Badge className="@xl:hidden">{ROLE_LABELS[member.role]}</Badge>
                   </span>
-                  <span className="truncate text-sm text-fg-muted">{member.email}</span>
+                  <span className="truncate text-sm text-fg-muted">
+                    {member.email}
+                    {/* Narrow: the activity column folds into the email line. */}
+                    <span className="@2xl:hidden"> · {activity(member)}</span>
+                  </span>
                 </div>
                 <span className="hidden w-36 text-sm whitespace-nowrap text-fg-muted @2xl:block">
-                  {member.lastActive === undefined
-                    ? 'Never signed in'
-                    : `Active ${relativeTime(member.lastActive, now, locale)}`}
+                  {activity(member)}
                 </span>
                 <span className="hidden @xl:block">
                   {manageable && onChangeRole !== undefined ? (
@@ -272,38 +283,40 @@ export function TeamMembers({
                     </span>
                   </div>
                   {/* Narrow: the two actions fold into a menu, so the address keeps the width. */}
-                  <span className="@xl:hidden">
-                    <ActionMenu
-                      label={`Actions for the invite to ${invite.email}`}
-                      actions={[
-                        ...(onResendInvite === undefined
-                          ? []
-                          : [
-                              {
-                                id: 'resend',
-                                label: 'Resend invite',
-                                icon: ArrowClockwiseIcon,
-                                onSelect: () => {
-                                  onResendInvite(invite.id);
+                  {(onResendInvite !== undefined || onRevokeInvite !== undefined) && (
+                    <span className="@xl:hidden">
+                      <ActionMenu
+                        label={`Actions for the invite to ${invite.email}`}
+                        actions={[
+                          ...(onResendInvite === undefined
+                            ? []
+                            : [
+                                {
+                                  id: 'resend',
+                                  label: 'Resend invite',
+                                  icon: ArrowClockwiseIcon,
+                                  onSelect: () => {
+                                    onResendInvite(invite.id);
+                                  },
                                 },
-                              },
-                            ]),
-                        ...(onRevokeInvite === undefined
-                          ? []
-                          : [
-                              {
-                                id: 'revoke',
-                                label: 'Revoke invite',
-                                icon: XIcon,
-                                danger: true,
-                                onSelect: () => {
-                                  onRevokeInvite(invite.id);
+                              ]),
+                          ...(onRevokeInvite === undefined
+                            ? []
+                            : [
+                                {
+                                  id: 'revoke',
+                                  label: 'Revoke invite',
+                                  icon: XIcon,
+                                  danger: true,
+                                  onSelect: () => {
+                                    onRevokeInvite(invite.id);
+                                  },
                                 },
-                              },
-                            ]),
-                      ]}
-                    />
-                  </span>
+                              ]),
+                        ]}
+                      />
+                    </span>
+                  )}
                   <span className="hidden items-center gap-2 @xl:flex pointer-coarse:gap-5">
                     {onResendInvite !== undefined && (
                       <Button
@@ -357,6 +370,7 @@ export function TeamMembers({
           </div>
           {canInvite && (
             <Button
+              data-invite-trigger
               onClick={() => {
                 invitePanel.remember();
                 setInviting(true);
