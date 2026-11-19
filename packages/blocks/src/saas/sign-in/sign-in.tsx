@@ -11,6 +11,7 @@ import {
   PasswordInput,
   type LinkTarget,
 } from '../lib/auth';
+import { focusFirstInvalid } from '../lib/focus';
 import { hasErrors } from '../lib/saas';
 import {
   signInErrors,
@@ -37,6 +38,8 @@ export interface SignInProps {
   defaultEmail?: string;
   /** Your mark or product name, above the heading. */
   brand?: ReactNode;
+  /** A brand panel beside the form on wide containers; it folds away on narrow ones. */
+  aside?: ReactNode;
   title?: ReactNode;
   description?: ReactNode;
   className?: string;
@@ -75,7 +78,11 @@ export function SignIn({
   const submit = (event: SyntheticEvent) => {
     event.preventDefault();
     setTried(true);
-    if (pending || hasErrors(signInErrors(values, method))) return;
+    if (hasErrors(signInErrors(values, method))) {
+      focusFirstInvalid(event.currentTarget instanceof HTMLElement ? event.currentTarget : null);
+      return;
+    }
+    if (pending) return;
     if (method === 'magic-link') onMagicLink?.(values.email.trim());
     else onSubmit({ ...values, email: values.email.trim() });
   };
@@ -89,7 +96,13 @@ export function SignIn({
 
   if (magicLinkSentTo !== undefined) {
     return (
-      <AuthFrame {...frame} title="Check your inbox" description={undefined} footer={footer}>
+      <AuthFrame
+        {...frame}
+        title="Check your inbox"
+        description={undefined}
+        footer={footer}
+        focusHeading
+      >
         <FormMessage tone="success" title={`We sent a sign-in link to ${magicLinkSentTo}`}>
           It works once and expires in 15 minutes. Open it on this device to continue.
         </FormMessage>
@@ -187,8 +200,8 @@ export function SignIn({
           </Button>
           {onMagicLink !== undefined && (
             <Button
-              variant="ghost"
-              className="w-full text-fg-muted"
+              variant="secondary"
+              className="w-full"
               onClick={() => {
                 setMethod(method === 'password' ? 'magic-link' : 'password');
                 setTried(false);

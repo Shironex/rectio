@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -45,6 +45,19 @@ describe('SignIn', () => {
     await userEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'text');
+  });
+
+  it('moves focus to the first field to fix after a refused submit', async () => {
+    render(<SignIn onSubmit={vi.fn()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    await waitFor(() => {
+      expect(screen.getByLabelText('Email')).toHaveFocus();
+    });
+  });
+
+  it('focuses the check-your-inbox heading once a link is sent', () => {
+    render(<SignIn onSubmit={vi.fn()} magicLinkSentTo="ines@fernhill.io" />);
+    expect(screen.getByRole('heading', { name: 'Check your inbox' })).toHaveFocus();
   });
 
   it('sends trimmed values', async () => {
