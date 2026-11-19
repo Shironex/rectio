@@ -47,8 +47,7 @@ const EMPTY: Draft = { merchant: '', amount: null, category: null, note: '' };
 function validate(draft: Draft): Errors {
   const errors: Errors = {};
   if (draft.merchant.trim() === '') errors.merchant = 'Enter the merchant name.';
-  if (draft.amount === null || draft.amount <= 0)
-    errors.amount = 'Enter an amount above zero, such as 129.40.';
+  if (draft.amount === null || draft.amount <= 0) errors.amount = 'Enter an amount above 0.00.';
   if (draft.category === null) errors.category = 'Choose a category.';
   return errors;
 }
@@ -188,20 +187,19 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
               </Field>
             </div>
             <Field>
-              <FieldLabel>Note</FieldLabel>
+              <FieldLabel optional>Note</FieldLabel>
               <Input
                 value={draft.note}
                 onValueChange={(value) => {
                   update('note', value);
                 }}
               />
-              <FieldDescription>Optional. Who attended, or what it was for.</FieldDescription>
+              <FieldDescription>Who attended, or what it was for.</FieldDescription>
             </Field>
           </DialogBody>
           <DialogFooter>
             <p className="me-auto hidden items-center gap-1 text-sm text-fg-subtle sm:flex">
-              <kbd className={KBD}>{IS_APPLE ? '⌘' : 'Ctrl'}</kbd>
-              <kbd className={KBD}>Enter</kbd>
+              <kbd className={KBD}>{IS_APPLE ? '⌘ Enter' : 'Ctrl Enter'}</kbd>
               <span className="ms-1">to save</span>
             </p>
             <DialogClose render={<Button variant="ghost" disabled={saving} />}>Cancel</DialogClose>

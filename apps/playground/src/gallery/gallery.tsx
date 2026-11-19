@@ -85,7 +85,7 @@ export function Gallery() {
 
       <Section
         title="Field and input"
-        note="Errors carry an icon and text. Setting invalid on the field shows its error, for server checks too."
+        note="Errors carry an icon and text, and setting invalid on the field shows its error. Label the minority: mark optional fields."
       >
         <Row label="Rest">
           <Field className="w-56">
@@ -93,7 +93,7 @@ export function Gallery() {
             <Input placeholder="As on the receipt" />
           </Field>
           <Field className="w-56">
-            <FieldLabel>Reference</FieldLabel>
+            <FieldLabel optional>Reference</FieldLabel>
             <Input defaultValue="INV-2041" />
             <FieldDescription>Printed on the statement.</FieldDescription>
           </Field>
