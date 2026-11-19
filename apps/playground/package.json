@@ -32,6 +32,7 @@
     "shoot:motion": "node scripts/shoot-motion.ts",
     "shoot:blocks": "node scripts/shoot-blocks.ts",
     "shoot:display": "node scripts/shoot-display.ts",
-    "shoot:marketing": "node scripts/shoot-marketing.ts"
+    "shoot:marketing": "node scripts/shoot-marketing.ts",
+    "shoot:forms": "node scripts/shoot-forms.ts"
   }
 }
