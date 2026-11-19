@@ -65,6 +65,45 @@ export function passwordAccepted(password: string, minLength = 12): boolean {
   return passwordChecks(password, minLength).every((check) => check.met);
 }
 
+// Formatters are costly to build and rows ask for the same few again and again: keep one per
+// locale and options for the life of the page.
+const formatters = new Map<string, unknown>();
+
+function cached<T>(kind: string, locale: string, options: object, make: () => T): T {
+  const key = `${kind}|${locale}|${JSON.stringify(options)}`;
+  let formatter = formatters.get(key) as T | undefined;
+  if (formatter === undefined) {
+    formatter = make();
+    formatters.set(key, formatter);
+  }
+  return formatter;
+}
+
+/** A shared `Intl.NumberFormat` for the locale and options. */
+export function numberFormat(locale: string, options: Intl.NumberFormatOptions = {}) {
+  return cached('number', locale, options, () => new Intl.NumberFormat(locale, options));
+}
+
+/** A shared `Intl.DateTimeFormat` for the locale and options. */
+export function dateFormat(locale: string, options: Intl.DateTimeFormatOptions = {}) {
+  return cached('date', locale, options, () => new Intl.DateTimeFormat(locale, options));
+}
+
+/** A shared `Intl.RelativeTimeFormat` for the locale and options. */
+export function relativeFormat(locale: string, options: Intl.RelativeTimeFormatOptions = {}) {
+  return cached('relative', locale, options, () => new Intl.RelativeTimeFormat(locale, options));
+}
+
+/** A shared `Intl.Collator` for the locale and options. */
+export function collator(locale: string, options: Intl.CollatorOptions = {}) {
+  return cached('collator', locale, options, () => new Intl.Collator(locale, options));
+}
+
+/** The machine-readable form for `<time dateTime>`, or nothing for an invalid date. */
+export function isoDateTime(date: Date): string | undefined {
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+}
+
 const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
   ['year', 365 * 24 * 3600],
   ['month', 30 * 24 * 3600],
@@ -77,7 +116,7 @@ const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
 /** "now", "5 minutes ago", "yesterday", "in 3 days": a moment as the reader thinks of it. */
 export function relativeTime(date: Date, now: Date, locale: string): string {
   const seconds = Math.round((date.getTime() - now.getTime()) / 1000);
-  const format = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  const format = relativeFormat(locale, { numeric: 'auto' });
   // Under a minute either way reads as "now".
   if (Math.abs(seconds) < 45) return format.format(0, 'second');
   for (const [unit, size] of UNITS) {
@@ -88,7 +127,7 @@ export function relativeTime(date: Date, now: Date, locale: string): string {
 
 /** "19 Mar, 14:05": a timestamp short enough for a row. */
 export function formatDateTime(date: Date, locale: string): string {
-  return new Intl.DateTimeFormat(locale, {
+  return dateFormat(locale, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -105,12 +144,15 @@ export function sameDay(a: Date, b: Date): boolean {
   );
 }
 
-/** "Today", "Yesterday" or the date itself: the heading over a day of events. */
+/** "Today", "Yesterday" or the date itself, in the locale: the heading over a day of events. */
 export function dayLabel(date: Date, today: Date, locale: string): string {
-  if (sameDay(date, today)) return 'Today';
   const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
-  if (sameDay(date, yesterday)) return 'Yesterday';
-  return new Intl.DateTimeFormat(locale, {
+  const offset = sameDay(date, today) ? 0 : sameDay(date, yesterday) ? -1 : null;
+  if (offset !== null) {
+    const word = relativeFormat(locale, { numeric: 'auto' }).format(offset, 'day');
+    return word.charAt(0).toLocaleUpperCase(locale) + word.slice(1);
+  }
+  return dateFormat(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -128,7 +170,7 @@ export function formatBytes(bytes: number, locale: string): string {
     value /= 1000;
     unit += 1;
   }
-  return new Intl.NumberFormat(locale, {
+  return numberFormat(locale, {
     style: 'unit',
     unit: BYTE_UNITS[unit],
     unitDisplay: unit === 0 ? 'long' : 'short',
@@ -138,7 +180,7 @@ export function formatBytes(bytes: number, locale: string): string {
 
 /** "1,204" or "1 204": a count in the reader's locale. */
 export function formatCount(count: number, locale: string): string {
-  return new Intl.NumberFormat(locale).format(count);
+  return numberFormat(locale).format(count);
 }
 
 /** "1 member", "3 members". */

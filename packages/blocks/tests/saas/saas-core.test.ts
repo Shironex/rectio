@@ -5,6 +5,8 @@ import {
   formatBytes,
   hasErrors,
   initials,
+  isoDateTime,
+  numberFormat,
   isEmail,
   passwordAccepted,
   passwordChecks,
@@ -60,5 +62,20 @@ describe('saas core', () => {
     expect(hasErrors({})).toBe(false);
     expect(hasErrors({ email: undefined })).toBe(false);
     expect(hasErrors({ email: 'Enter your email address.' })).toBe(true);
+  });
+
+  it('names today and yesterday in the locale', () => {
+    expect(dayLabel(NOW, NOW, 'pl-PL')).toBe('Dzisiaj');
+    expect(dayLabel(new Date(2026, 2, 18, 9), NOW, 'pl-PL')).toBe('Wczoraj');
+  });
+
+  it('shares one formatter per locale and options', () => {
+    expect(numberFormat('en-GB')).toBe(numberFormat('en-GB'));
+    expect(numberFormat('en-GB')).not.toBe(numberFormat('pl-PL'));
+  });
+
+  it('gives no machine date for an invalid date instead of throwing', () => {
+    expect(isoDateTime(new Date('nope'))).toBeUndefined();
+    expect(isoDateTime(new Date(Date.UTC(2026, 2, 19)))).toBe('2026-03-19T00:00:00.000Z');
   });
 });
