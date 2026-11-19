@@ -3,18 +3,21 @@ import {
   CrownSimpleIcon,
   EnvelopeSimpleIcon,
   EyeIcon,
+  LockSimpleIcon,
+  MinusIcon,
   MagnifyingGlassIcon,
   ProhibitIcon,
   ShieldCheckIcon,
-  UserIcon,
   UserMinusIcon,
   UserPlusIcon,
+  UsersThreeIcon,
   XIcon,
   type Icon,
 } from '@phosphor-icons/react';
 import type { RowSelectionState } from '@tanstack/react-table';
 import {
   Badge,
+  Checkbox,
   DataTable,
   DataTableBody,
   DataTableHeader,
@@ -80,20 +83,22 @@ export interface UsersTableProps {
   className?: string;
 }
 
-const ROLE_STYLE: Record<UserRole, { icon: Icon; tone: BadgeTone }> = {
+// Member is the normal case and stays plain text; the roles that change what someone can do get a badge.
+const ROLE_STYLE: Record<Exclude<UserRole, 'member'>, { icon: Icon; tone: BadgeTone }> = {
   owner: { icon: CrownSimpleIcon, tone: 'info' },
   admin: { icon: ShieldCheckIcon, tone: 'neutral' },
-  member: { icon: UserIcon, tone: 'neutral' },
   guest: { icon: EyeIcon, tone: 'neutral' },
 };
 
-const STATUS_STYLE: Record<UserStatus, { icon: Icon; tone: BadgeTone }> = {
-  active: { icon: CheckCircleIcon, tone: 'positive' },
+const STATUS_STYLE: Record<Exclude<UserStatus, 'active'>, { icon: Icon; tone: BadgeTone }> = {
   invited: { icon: EnvelopeSimpleIcon, tone: 'warning' },
   suspended: { icon: ProhibitIcon, tone: 'negative' },
 };
 
 function RoleBadge({ role }: { role: UserRole }) {
+  if (role === 'member') {
+    return <span className="text-sm text-fg-muted">{USER_ROLE_LABELS[role]}</span>;
+  }
   const { icon: RoleIcon, tone } = ROLE_STYLE[role];
   return (
     <Badge tone={tone}>
@@ -105,15 +110,10 @@ function RoleBadge({ role }: { role: UserRole }) {
 
 /** Active is the normal case and stays quiet; only states that need attention get a badge. */
 function StatusBadge({ status }: { status: UserStatus }) {
-  const { icon: StatusIcon, tone } = STATUS_STYLE[status];
   if (status === 'active') {
-    return (
-      <span className="inline-flex items-center gap-1 text-sm text-fg-muted">
-        <StatusIcon aria-hidden weight="bold" className="size-3.5 text-positive-strong" />
-        {USER_STATUS_LABELS[status]}
-      </span>
-    );
+    return <span className="text-sm text-fg-muted">{USER_STATUS_LABELS[status]}</span>;
   }
+  const { icon: StatusIcon, tone } = STATUS_STYLE[status];
   return (
     <Badge tone={tone}>
       <StatusIcon aria-hidden weight="bold" />
@@ -214,7 +214,34 @@ export function UsersTable({
   const columns = useMemo<DataTableColumnDef<UserRecord>[]>(
     () => [
       ...(bulk
-        ? [selectionColumn<UserRecord>({ rowLabel: (row) => `Select ${row.original.name}` })]
+        ? [
+            {
+              ...selectionColumn<UserRecord>({ rowLabel: (row) => `Select ${row.original.name}` }),
+              // Owners never join a bulk change: a lock says why, where a dead checkbox would not.
+              cell: ({ row }) =>
+                row.getCanSelect() ? (
+                  <span className="flex items-center">
+                    <Checkbox
+                      aria-label={`Select ${row.original.name}`}
+                      checked={row.getIsSelected()}
+                      onCheckedChange={(_checked, details) => {
+                        row.getToggleSelectedHandler()(details.event);
+                      }}
+                    />
+                  </span>
+                ) : (
+                  <span
+                    className="flex size-4 items-center justify-center text-fg-subtle"
+                    title="Owners are left out of bulk changes"
+                  >
+                    <LockSimpleIcon aria-hidden weight="bold" className="size-3.5" />
+                    <span className="sr-only">
+                      {row.original.name} is an owner and is left out of bulk changes
+                    </span>
+                  </span>
+                ),
+            } satisfies DataTableColumnDef<UserRecord>,
+          ]
         : []),
       {
         id: 'name',
@@ -245,9 +272,12 @@ export function UsersTable({
                 )}
                 <span className="truncate text-sm text-fg-muted">{user.email}</span>
                 {/* Narrow: role and status fold under the person. */}
-                <span className="mt-1 flex flex-wrap gap-1 @xl:hidden">
+                <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 @xl:hidden">
                   <RoleBadge role={user.role} />
-                  {user.status !== 'active' && <StatusBadge status={user.status} />}
+                  <span aria-hidden className="text-fg-subtle">
+                    ·
+                  </span>
+                  <StatusBadge status={user.status} />
                 </span>
               </span>
             </span>
@@ -287,7 +317,10 @@ export function UsersTable({
         cell: ({ row }) => {
           const seen = row.original.lastSeen;
           return seen === undefined ? (
-            <span className="text-fg-subtle">Never</span>
+            <span className="inline-flex text-fg-subtle">
+              <MinusIcon aria-hidden weight="bold" className="size-3.5" />
+              <span className="sr-only">Never signed in</span>
+            </span>
           ) : (
             <time dateTime={seen.toISOString()} className="text-fg-muted">
               {relativeTime(seen, now, locale)}
@@ -355,10 +388,11 @@ export function UsersTable({
       title={title}
       description={description}
       actions={
-        onInvite === undefined ? undefined : (
-          <Button onClick={onInvite}>
+        onInvite === undefined || users.length === 0 ? undefined : (
+          <Button onClick={onInvite} aria-label="Invite users">
             <UserPlusIcon aria-hidden weight="bold" className="size-4" />
-            Invite users
+            {/* Narrow: the icon alone, so the button stays on the title's row. */}
+            <span className="@max-md:sr-only">Invite users</span>
           </Button>
         )
       }
@@ -366,8 +400,23 @@ export function UsersTable({
       bodyClassName="gap-4"
     >
       {users.length === 0 ? (
-        <EmptyNote title="No users yet">
-          People you invite appear here with their role, status and when they were last seen.
+        <EmptyNote
+          title={
+            <span className="flex flex-col items-center gap-3">
+              <UsersThreeIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
+              Bring your team in
+            </span>
+          }
+        >
+          Invite people by email; each one shows here with their role and status.
+          {onInvite !== undefined && (
+            <span className="mt-4 flex justify-center">
+              <Button variant="secondary" onClick={onInvite}>
+                <UserPlusIcon aria-hidden weight="bold" className="size-4" />
+                Invite users
+              </Button>
+            </span>
+          )}
         </EmptyNote>
       ) : (
         <>

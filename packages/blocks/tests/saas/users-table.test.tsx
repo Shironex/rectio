@@ -108,14 +108,14 @@ describe('UsersTable', () => {
     expect(
       screen.queryByRole('button', { name: 'Actions for Niamh Walsh' }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: 'Select Niamh Walsh' })).toHaveAttribute(
-      'aria-disabled',
-      'true',
-    );
+    expect(screen.queryByRole('checkbox', { name: 'Select Niamh Walsh' })).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Niamh Walsh is an owner and is left out of bulk changes'),
+    ).toBeInTheDocument();
   });
 
   it('shows an empty state with no users', () => {
     render(<UsersTable users={[]} now={NOW} />);
-    expect(screen.getByRole('status')).toHaveTextContent('No users yet');
+    expect(screen.getByRole('status')).toHaveTextContent('Bring your team in');
   });
 });
