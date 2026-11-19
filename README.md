@@ -272,6 +272,37 @@ Do not commit a real key: keep the `env` block out of shared config, or use `aut
 runs in the project folder the editor opens, which is where it finds `rectio.json`. Point it at a
 local registry with `"args": ["mcp", "--registry", "../rectio/packages/registry/dist/registry"]`.
 
+### Windows checklist
+
+The CLI is written for Windows (path separators, `%APPDATA%`, `.cmd` shims, CRLF checkouts) but
+its tests run on macOS and Linux. Before a release, on a Windows machine with Node 22.18+ and
+pnpm 10, in PowerShell:
+
+```powershell
+git config --global core.autocrlf true      # the setting most Windows checkouts use
+pnpm install
+pnpm --filter @rectio/registry build
+pnpm --filter @rectio/cli build
+pnpm --filter @rectio/cli test              # unit, command, HTTP and MCP tests
+pnpm --filter @rectio/cli exec vitest run tests/vite-app.e2e.test.ts
+```
+
+Then by hand, in a fresh Vite app (`pnpm create vite@latest demo -- --template react-ts`, add
+Tailwind v4 and an `@/*` path alias), with the built bin
+(`node <repo>\packages\cli\dist\bin.js`):
+
+1. `init` writes `rectio.json` with forward slashes, and the CSS entry block uses `./` imports.
+2. `add button dialog money` runs `pnpm install` through the `.cmd` shim, then `pnpm exec tsc -b`
+   and `pnpm exec vite build` pass.
+3. Run `git add -A; git commit -m x`, let autocrlf turn the files into CRLF, then
+   `rectio add button`: it says the item is up to date (no false "edited" stop), and `rectio diff
+button` prints no patch.
+4. After `add`, `src\index.css` and `package.json` keep their CRLF endings (`git diff` shows only
+   the added lines).
+5. `$env:RECTIO_LICENSE_KEY = $null; rectio add motion-dialog` names the pro items and writes
+   nothing; with `%APPDATA%\rectio\auth.json` holding `{"licenseKey": "..."}` it installs.
+6. `rectio mcp` starts over stdio from an editor's MCP config (`"command": "rectio"`).
+
 ### update: the plan
 
 `rectio update` reports items with a newer version and stops. The merge it will do:
