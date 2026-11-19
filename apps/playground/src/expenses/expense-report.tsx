@@ -16,6 +16,7 @@ import {
   useToast,
   type DataTableColumnDef,
   type DateRange,
+  type DateRangePreset,
 } from '@rectio/ui';
 import { useEffect, useState } from 'react';
 
@@ -27,7 +28,17 @@ const CURRENCY = 'EUR';
 const LOCALE = 'en-IE';
 /** A toast with an Undo stays long enough to reach the button from the keyboard. */
 const UNDO_MS = 8000;
-const MARCH: DateRange = { from: new Date(2026, 2, 1), to: new Date(2026, 2, 31) };
+const MARCH = { from: new Date(2026, 2, 1), to: new Date(2026, 2, 31) };
+/** The report covers March 2026; the presets are fixed so the demo never drifts with the clock. */
+const PRESETS: DateRangePreset[] = [
+  { label: 'March', range: MARCH },
+  {
+    label: 'First half of March',
+    range: { from: new Date(2026, 2, 1), to: new Date(2026, 2, 15) },
+  },
+  { label: 'February', range: { from: new Date(2026, 1, 1), to: new Date(2026, 1, 28) } },
+  { label: 'Quarter to date', range: { from: new Date(2026, 0, 1), to: new Date(2026, 2, 31) } },
+];
 
 const shortDate = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short' });
 const money = (amount: number) => formatMoney(amount, CURRENCY, { locale: LOCALE });
@@ -74,9 +85,6 @@ const columns: DataTableColumnDef<Expense>[] = [
             <span className="numeric">{shortDate.format(e.date)}</span>, {categoryLabel(e.category)}
           </span>
           {e.note !== undefined && <span className="block text-sm text-fg-subtle">{e.note}</span>}
-          <span className="mt-1 block sm:hidden">
-            <StatusBadge status={e.status} />
-          </span>
         </>
       );
     },
@@ -86,7 +94,9 @@ const columns: DataTableColumnDef<Expense>[] = [
       const rejected = all.length - counted.length;
       return (
         <span className="flex flex-col text-sm">
-          <span className="font-medium text-fg">Total claimed, {counted.length} expenses</span>
+          <span className="font-medium whitespace-nowrap text-fg">
+            Total claimed, {counted.length} expenses
+          </span>
           {rejected > 0 && (
             <span className="text-fg-muted">
               {rejected} rejected,{' '}
@@ -119,12 +129,18 @@ const columns: DataTableColumnDef<Expense>[] = [
     header: `Amount, ${CURRENCY}`,
     meta: { align: 'end', label: 'Amount' },
     cell: ({ row }) => (
-      <Money
-        amount={row.original.amount}
-        currency={CURRENCY}
-        locale={LOCALE}
-        tone={row.original.amount < 0 ? 'auto' : 'neutral'}
-      />
+      <>
+        <Money
+          amount={row.original.amount}
+          currency={CURRENCY}
+          locale={LOCALE}
+          tone={row.original.amount < 0 ? 'auto' : 'neutral'}
+        />
+        {/* On phones the state sits under its amount, so a row stays three lines at most. */}
+        <span className="mt-1 block sm:hidden">
+          <StatusBadge status={row.original.status} />
+        </span>
+      </>
     ),
     footer: ({ table }) => (
       <Money
@@ -236,6 +252,7 @@ function Report() {
             locale={LOCALE}
             value={period}
             onValueChange={setPeriod}
+            presets={PRESETS}
           />
           {selected.length > 0 && (
             <div className="flex items-center gap-3">
@@ -256,9 +273,20 @@ function Report() {
           <DataTableBody
             table={table}
             empty={
-              <span className="flex flex-col items-center gap-1">
-                <span className="font-medium text-fg">No expenses in this period</span>
-                <span>Choose another period, or add an expense.</span>
+              <span className="flex flex-col items-center gap-3">
+                <span className="flex flex-col items-center gap-1">
+                  <span className="font-medium text-fg">No expenses in this period</span>
+                  <span>Every line in this report is dated in March.</span>
+                </span>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setPeriod(MARCH);
+                  }}
+                >
+                  Show all of March
+                </Button>
               </span>
             }
             rowProps={(row) => ({

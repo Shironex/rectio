@@ -214,9 +214,14 @@ function Invoices({
           loading={loading}
           loadingRows={3}
           empty={
-            <span className="flex flex-col items-center gap-1">
-              <span className="font-medium text-fg">No invoices match</span>
-              <span>Clear the filters to see every invoice.</span>
+            <span className="flex flex-col items-center gap-3">
+              <span className="flex flex-col items-center gap-1">
+                <span className="font-medium text-fg">No invoices match these filters</span>
+                <span>Overdue, sent to Nordhaven Freight, due this week.</span>
+              </span>
+              <Button variant="secondary" size="sm">
+                Clear filters
+              </Button>
             </span>
           }
         />
@@ -290,7 +295,7 @@ export function DateSection() {
           onValueChange={setPeriod}
         />
       </Row>
-      <Row label="Calendar, range">
+      <Row label="Range, weekends closed">
         <div className="rounded-(--rx-popover-radius) border border-line bg-surface-overlay">
           <Calendar
             mode="range"

@@ -107,6 +107,15 @@ try {
       await app.getByRole('checkbox', { name: /^Select Hotel Bristol, 4 Mar/ }).click();
       await settle(app);
       await app.screenshot({ path: join(out, `table-selected-${name}.png`) });
+      // Remove the two, then take them back with the toast's Undo.
+      await app.getByRole('button', { name: 'Remove' }).click();
+      await app.getByText('2 expenses removed').waitFor();
+      await settle(app);
+      await app.screenshot({ path: join(out, `removed-${name}.png`) });
+      await app.getByRole('button', { name: 'Undo' }).click();
+      await app.getByText('2 expenses removed').waitFor({ state: 'detached' });
+      await app.getByRole('checkbox', { name: /^Select Linear/ }).click();
+      await app.getByRole('checkbox', { name: /^Select Hotel Bristol, 4 Mar/ }).click();
       await app.getByRole('checkbox', { name: 'Select all expenses' }).click();
       await app.getByRole('checkbox', { name: 'Select all expenses' }).click();
       await app.getByRole('button', { name: /^Period/ }).click();
