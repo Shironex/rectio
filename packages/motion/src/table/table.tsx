@@ -133,6 +133,8 @@ export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
   const node = useRef<HTMLTableRowElement | null>(null);
   // Only rows added after the first render (or outside TableRows) skip the entrance.
   const settled = useRef(presence === null || presence.initial === false);
+  // The exit runs once: a re-render while the row leaves must not restart its fade.
+  const exiting = useRef(false);
 
   useLayoutEffect(() => {
     const row = node.current;
@@ -146,6 +148,7 @@ export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
     const { duration } = tokens;
 
     if (isPresent) {
+      exiting.current = false;
       if (settled.current) return;
       settled.current = true;
       // Fades in once the rows below have mostly cleared its place, from a short drop above it.
@@ -169,6 +172,8 @@ export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
 
     // Leaving: out of the tab order at once, then a quick fade to the side, faster than an entry.
     // From the frame on screen: a row removed while it still arrives fades on from there.
+    if (exiting.current) return;
+    exiting.current = true;
     row.inert = true;
     const now = getComputedStyle(row);
     for (const animation of row.getAnimations()) animation.cancel();
