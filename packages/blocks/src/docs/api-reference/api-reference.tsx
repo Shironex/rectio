@@ -47,7 +47,7 @@ export function PropsTable({ rows, label, labels, className }: PropsTableProps) 
   const text = { ...DEFAULT_LABELS, ...labels };
   return (
     <div data-slot="props-table" className={cn('@container min-w-0', className)}>
-      <div className="hidden overflow-hidden rounded-panel border border-line @2xl:block">
+      <div className="hidden overflow-hidden rounded-panel border border-line @3xl:block">
         <table aria-label={label} className="w-full border-collapse text-sm">
           <thead className="bg-surface-sunken text-start">
             <tr>
@@ -60,7 +60,7 @@ export function PropsTable({ rows, label, labels, className }: PropsTableProps) 
               <th scope="col" className="px-4 py-2.5 text-start font-medium text-fg">
                 {text.default}
               </th>
-              <th scope="col" className="w-2/5 px-4 py-2.5 text-start font-medium text-fg">
+              <th scope="col" className="px-4 py-2.5 text-start font-medium text-fg">
                 {text.description}
               </th>
             </tr>
@@ -90,7 +90,7 @@ export function PropsTable({ rows, label, labels, className }: PropsTableProps) 
           </tbody>
         </table>
       </div>
-      <dl aria-label={label} className="flex flex-col rounded-panel border border-line @2xl:hidden">
+      <dl aria-label={label} className="flex flex-col rounded-panel border border-line @3xl:hidden">
         {rows.map((row) => (
           <div
             key={row.name}
@@ -352,7 +352,12 @@ export function Endpoint({
     <section
       aria-labelledby={id}
       data-slot="endpoint"
-      className={cn('flex flex-col gap-5', className)}
+      className={cn(
+        'flex flex-col gap-5',
+        // Endpoints in a row read as sections: each one after the first opens under a hairline.
+        'not-first:mt-14 not-first:border-t not-first:border-line not-first:pt-10',
+        className,
+      )}
     >
       <div className="flex flex-col gap-3">
         <Heading id={id} className="scroll-mt-24 font-display text-xl font-heading text-fg">

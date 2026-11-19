@@ -88,8 +88,8 @@ export function matchRanges(text: string, query: string): [number, number][] {
 export function excerptAround(text: string, query: string, size = 140): string {
   const clean = text.replace(/\s+/g, ' ').trim();
   const first = matchRanges(clean, query)[0];
-  if (first === undefined || clean.length <= size) return clean.slice(0, size);
-  const start = Math.max(0, first[0] - Math.floor(size / 3));
+  if (clean.length <= size) return clean;
+  const start = first === undefined ? 0 : Math.max(0, first[0] - Math.floor(size / 3));
   const end = Math.min(clean.length, start + size);
   let slice = clean.slice(start, end);
   if (start > 0) slice = `…${slice.replace(/^\S*\s/, '')}`;

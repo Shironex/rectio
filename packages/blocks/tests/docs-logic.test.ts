@@ -203,6 +203,9 @@ describe('search', () => {
     expect(excerpt).toContain('backoff');
     expect(excerpt.startsWith('…')).toBe(true);
     expect(excerpt.endsWith('…')).toBe(true);
+    // Without a match in the text, the start of it, still cut at a word.
+    const opening = excerptAround('alpha beta gamma delta epsilon zeta', 'nothing', 20);
+    expect(opening).toBe('alpha beta gamma…');
   });
 
   it('keeps recent results newest first, without duplicates or excerpts', () => {

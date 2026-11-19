@@ -24,7 +24,8 @@ export function DocsProse({ children, className }: { children: ReactNode; classN
         '[&_p_a:hover,&_li_a:hover,&_td_a:hover]:decoration-accent-strong',
         '[&_p_a,&_li_a,&_td_a]:rounded-control [&_a]:outline-offset-2 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-focus',
         '[&>ul]:list-disc [&>ol]:list-decimal [&>ul,&>ol]:space-y-2 [&>ul,&>ol]:ps-6 [&>ul>li,&>ol>li]:ps-1 [&>ul>li,&>ol>li]:text-fg-muted [&_li]:marker:text-fg-subtle',
-        '[&_:not(pre)>code]:rounded-badge [&_:not(pre)>code]:border [&_:not(pre)>code]:border-line [&_:not(pre)>code]:bg-code-background [&_:not(pre)>code]:px-1 [&_:not(pre)>code]:py-px [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-sm [&_:not(pre)>code]:text-fg',
+        // Inline code from Markdown only: code that a component draws sets its own font-mono.
+        '[&_:not(pre)>code:not(.font-mono)]:rounded-badge [&_:not(pre)>code:not(.font-mono)]:border [&_:not(pre)>code:not(.font-mono)]:border-line [&_:not(pre)>code:not(.font-mono)]:bg-code-background [&_:not(pre)>code:not(.font-mono)]:px-1 [&_:not(pre)>code:not(.font-mono)]:py-px [&_:not(pre)>code:not(.font-mono)]:font-mono [&_:not(pre)>code:not(.font-mono)]:text-sm [&_:not(pre)>code:not(.font-mono)]:text-fg',
         '[&>blockquote]:border-s [&>blockquote]:border-line-strong [&>blockquote]:ps-5 [&>blockquote]:text-fg',
         '[&>hr]:my-12 [&>hr]:border-line',
         className,

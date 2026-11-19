@@ -64,7 +64,7 @@ function Marked({ text, query }: { text: string; query: string }) {
   for (const [start, end] of ranges) {
     if (start > at) parts.push(text.slice(at, start));
     parts.push(
-      <mark key={start} className="rounded-badge bg-accent-subtle px-px font-strong text-fg">
+      <mark key={start} className="bg-transparent font-strong text-accent-strong">
         {text.slice(start, end)}
       </mark>,
     );
@@ -392,7 +392,7 @@ function ResultRow({
       className={cn(
         'flex cursor-pointer scroll-my-1 items-start gap-3 rounded-(--rx-field-radius) px-3 py-2 text-fg outline-none select-none',
         'pointer-coarse:min-h-(--rx-field-height-touch)',
-        'data-highlighted:bg-accent-subtle',
+        'data-highlighted:bg-surface-hover',
       )}
     >
       <Icon

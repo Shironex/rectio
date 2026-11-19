@@ -113,7 +113,7 @@ export function DocsHero({
               <span aria-hidden className="text-code-token-comment select-none">
                 $
               </span>
-              <code className="min-w-0 truncate py-2">{install}</code>
+              <code className="min-w-0 truncate py-2 font-mono">{install}</code>
               <CopyButton value={install} label="Copy install command" />
             </div>
           )}
