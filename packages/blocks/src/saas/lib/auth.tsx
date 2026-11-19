@@ -1,6 +1,6 @@
 import { EyeIcon, EyeSlashIcon, WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
 import { Input, cn, type InputProps } from '@rectio/ui';
-import { useId, useState, type ComponentProps, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { focusRing, inlineLink, touchTarget } from './styles';
@@ -15,6 +15,16 @@ export interface AuthFrameProps extends Omit<ComponentProps<'section'>, 'title'>
   headingLevel?: 1 | 2;
   /** Drop the frame (border, surface, padding) to place the form in a layout of your own. */
   bare?: boolean;
+  /**
+   * A brand panel beside the form on wide containers: a product line, a customer quote, what the
+   * account unlocks. It folds away on narrow ones, where the form alone fills the frame.
+   */
+  aside?: ReactNode;
+  /**
+   * Moves focus to the heading on mount. Set it on a step that replaces another (a link sent, the
+   * next step of a reset), so keyboard and screen reader users hear where they are now.
+   */
+  focusHeading?: boolean;
 }
 
 /**
@@ -29,30 +39,29 @@ export function AuthFrame({
   footer,
   headingLevel = 1,
   bare = false,
+  aside,
+  focusHeading = false,
   className,
   children,
   ...props
 }: AuthFrameProps) {
   const { Reveal } = useBlockParts();
   const headingId = useId();
+  const heading = useRef<HTMLHeadingElement | null>(null);
+  useEffect(() => {
+    if (focusHeading) heading.current?.focus();
+  }, [focusHeading]);
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
-  return (
-    <section
-      aria-labelledby={headingId}
-      data-slot="block"
-      className={cn(
-        '@container mx-auto flex w-full max-w-md min-w-0 flex-col text-fg',
-        !bare && 'rounded-panel border border-line bg-surface shadow-raised',
-        className,
-      )}
-      {...props}
-    >
+  const form = (
+    <>
       <Reveal className={cn('flex flex-col gap-6', !bare && 'px-6 pt-7 pb-6 @sm:px-8 @sm:pt-9')}>
         <header className="flex flex-col gap-1.5">
           {brand !== undefined && <div className="mb-5 flex items-center text-fg">{brand}</div>}
           <Heading
+            ref={heading}
             id={headingId}
-            className="font-display text-2xl font-heading tracking-tight text-balance"
+            tabIndex={-1}
+            className="font-display text-2xl font-heading tracking-tight text-balance outline-none"
           >
             {title}
           </Heading>
@@ -66,11 +75,38 @@ export function AuthFrame({
         <footer
           className={cn(
             'text-center text-sm text-fg-muted',
-            !bare && 'rounded-b-panel border-t border-line bg-surface-sunken px-6 py-4',
+            !bare && 'mt-auto border-t border-line bg-surface-sunken px-6 py-4',
+            !bare && aside === undefined && 'rounded-b-panel',
           )}
         >
           {footer}
         </footer>
+      )}
+    </>
+  );
+  return (
+    <section
+      aria-labelledby={headingId}
+      data-slot="block"
+      className={cn(
+        '@container mx-auto flex w-full min-w-0 flex-col text-fg',
+        aside === undefined ? 'max-w-md' : 'max-w-5xl',
+        !bare && 'rounded-panel border border-line bg-surface shadow-raised',
+        // The panel and the footer meet the rounded corners: clip them to the frame.
+        !bare && aside !== undefined && 'overflow-clip',
+        className,
+      )}
+      {...props}
+    >
+      {aside === undefined ? (
+        form
+      ) : (
+        <div className="grid flex-1 @3xl:grid-cols-2">
+          <div className="hidden flex-col border-e border-line bg-surface-sunken p-10 @3xl:flex">
+            {aside}
+          </div>
+          <div className="mx-auto flex w-full max-w-md flex-col">{form}</div>
+        </div>
       )}
     </section>
   );
