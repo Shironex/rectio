@@ -88,11 +88,14 @@ async function smallestTarget(page: Page) {
         after.position === 'absolute'
           ? Math.min(Number.parseFloat(after.width), Number.parseFloat(after.height))
           : 0;
-      const size = Math.max(Math.min(box.width, box.height), hit);
+      // An input inside a framed field (amount, date) is hit through the whole frame.
+      const frame = element.closest('[data-slot="amount-input"], [data-slot="date-picker"]');
+      const height = frame === null ? box.height : frame.getBoundingClientRect().height;
+      const size = Math.max(Math.min(box.width, height), hit);
       if (size < smallest.size)
         smallest = {
           size,
-          name: element.getAttribute('aria-label') ?? element.textContent.trim().slice(0, 30),
+          name: `${element.tagName.toLowerCase()} ${element.getAttribute('aria-label') ?? element.textContent.trim().slice(0, 30)}`,
         };
     }
     return `${smallest.size.toFixed(1)}px (${smallest.name})`;
@@ -219,6 +222,26 @@ try {
     await page.getByRole('button', { name: 'Choose cookies' }).click();
     await settle(page);
     await page.screenshot({ path: join(out, 'cookie-preferences-open.png') });
+    await page.close();
+  }
+
+  // The contact form's error state, and the newsletter's success state.
+  if (wanted('states')) {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${base}?view=marketing&block=contact`);
+    await settle(page);
+    await page.getByRole('button', { name: 'Send message' }).click();
+    await settle(page);
+    await page.screenshot({ path: join(out, 'states-contact-errors.png'), fullPage: true });
+    await page.goto(`${base}?view=marketing&block=newsletter&theme=ledger&mode=dark`);
+    await settle(page);
+    await page.getByLabel('Email address').first().fill('ingrid@halden.example');
+    await page.getByRole('button', { name: 'Subscribe' }).first().click();
+    await page
+      .getByText(/Check your inbox/)
+      .first()
+      .waitFor();
+    await page.screenshot({ path: join(out, 'states-newsletter-done.png'), fullPage: true });
     await page.close();
   }
 

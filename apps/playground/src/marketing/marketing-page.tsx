@@ -1,4 +1,4 @@
-import { ArAging, CashFlowChart, InvoiceList, KpiRow } from '@rectio/blocks';
+import { ArAging, CashFlowChart, KpiRow } from '@rectio/blocks';
 import * as plain from '@rectio/blocks/marketing';
 import { saveConsent, type ConsentRecord } from '@rectio/blocks/marketing';
 import * as moving from '@rectio/blocks/marketing/motion';
@@ -18,6 +18,7 @@ import {
   CloseCalendar,
   CloseChecklist,
   ExactAmount,
+  InvoiceChase,
   PaidCard,
   SpendCard,
 } from './visuals';
@@ -189,14 +190,7 @@ function Landing({ blocks }: { blocks: Blocks }) {
                 'Credit notes in two clicks',
               ],
               action: { label: 'See invoicing', href: '#invoices' },
-              visual: (
-                <InvoiceList
-                  currency={EN.currency}
-                  locale={EN.locale}
-                  invoices={financeData.invoices(EN.rate).slice(0, 3)}
-                  today={financeData.TODAY}
-                />
-              ),
+              visual: <InvoiceChase />,
             },
             {
               id: 'aging',
@@ -224,12 +218,13 @@ function Landing({ blocks }: { blocks: Blocks }) {
               Finance teams that <Em>stopped working weekends</Em>
             </>
           }
-          testimonials={copy.TESTIMONIALS}
+          testimonials={copy.TESTIMONIALS.slice(0, 5)}
         />
         <blocks.Faq
           title="Questions, answered"
           description="Anything else? Our team replies within a working day."
           items={copy.FAQ}
+          defaultOpen={['f1']}
           aside={
             <plain.ActionLink
               action={{ label: 'Talk to us', href: '#contact' }}
@@ -245,20 +240,6 @@ function Landing({ blocks }: { blocks: Blocks }) {
           description="Start free with your own data. No card, and your export is always one click away."
           primary={copy.START}
           secondary={copy.DEMO}
-          visual={
-            <div className="grid gap-3 text-fg sm:grid-cols-3">
-              {[<ApprovalCard key="a" />, <PaidCard key="p" />, <SpendCard key="s" />].map(
-                (card) => (
-                  <div
-                    key={card.key}
-                    className="rounded-panel bg-surface-raised p-4 shadow-overlay"
-                  >
-                    {card}
-                  </div>
-                ),
-              )}
-            </div>
-          }
         />
       </main>
       <blocks.SiteFooter
@@ -583,7 +564,7 @@ function Gallery({
       return (
         <>
           <Labelled name="accordion">
-            <blocks.Faq title="Questions, answered" items={copy.FAQ} />
+            <blocks.Faq title="Questions, answered" items={copy.FAQ} defaultOpen={['f1']} />
           </Labelled>
           <Labelled name="numbered">
             <blocks.Faq

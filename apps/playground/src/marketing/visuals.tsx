@@ -123,7 +123,7 @@ export function ApprovalQueue() {
 export function CloseCalendar() {
   const [day, setDay] = useState<Date | undefined>(new Date(2026, 2, 31));
   return (
-    <div className="flex justify-center rounded-panel border border-line bg-surface p-3">
+    <div className="flex items-center justify-center rounded-panel border border-line bg-surface p-3">
       <Calendar
         mode="single"
         selected={day}
@@ -256,6 +256,59 @@ export function SpendCard() {
         <ArrowDownRightIcon aria-hidden weight="bold" className="size-3.5" />
         11% under plan
       </span>
+    </div>
+  );
+}
+
+const CHASE = [
+  {
+    id: 'c1',
+    customer: 'Kestrel Analytics',
+    number: 'INV-0121',
+    amount: 6240,
+    status: 'Second reminder sent',
+    tone: 'warning',
+  },
+  {
+    id: 'c2',
+    customer: 'Atelier Lune',
+    number: 'INV-0127',
+    amount: 3915,
+    status: 'Reminder in 2 days',
+    tone: 'neutral',
+  },
+  {
+    id: 'c3',
+    customer: 'Nordwind Logistik',
+    number: 'INV-0118',
+    amount: 18450,
+    status: 'Paid and matched',
+    tone: 'positive',
+  },
+] as const;
+
+/** Overdue invoices and where each one is in its reminder schedule. */
+export function InvoiceChase() {
+  return (
+    <div className="flex flex-col rounded-panel border border-line bg-surface">
+      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <span className="text-sm font-medium text-fg">Reminders this week</span>
+        <span className="text-sm text-fg-muted">3 invoices</span>
+      </div>
+      <ul className="flex flex-col divide-y divide-line">
+        {CHASE.map((row) => (
+          <li key={row.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3.5">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-base font-medium text-fg">{row.customer}</span>
+              <span className="text-sm text-fg-muted tabular-nums">{row.number}</span>
+            </div>
+            <Money amount={row.amount} currency={CURRENCY} locale={LOCALE} className="text-base" />
+            <Badge tone={row.tone} className="max-sm:order-last">
+              {row.status}
+            </Badge>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
