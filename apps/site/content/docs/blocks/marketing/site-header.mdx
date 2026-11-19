@@ -1,0 +1,82 @@
+---
+title: Site header
+description: 'The bar at the top of every page: brand, links and the main action.'
+pro: true
+---
+
+import SiteHeaderDemo from '@/demos/marketing-site-header';
+
+## Preview
+
+<Preview
+  name="marketing-site-header"
+  plain={<SiteHeaderDemo />}
+  importLine="import { SiteHeader } from '@rectio/blocks/marketing';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add site-header
+```
+
+This block has no motion variant: nothing on it moves.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+The bar at the top of every page: your brand, one line of links and the main action, with the links
+folded into a menu on narrow screens.
+
+## Usage
+
+Pass the brand as any node and name its link with `brandLabel`. Mark the current page with
+`currentHref` and its link gets `aria-current="page"`. The bar sticks to the top of the viewport
+unless you set `sticky={false}`.
+
+## Props
+
+<TypeTable
+  type={{
+    brand: {
+      type: 'ReactNode',
+      description: 'Your logo and name. It links home through brandHref.',
+    },
+    brandLabel: {
+      type: 'string',
+      description: 'Accessible name of the home link, such as "Northlake home".',
+    },
+    brandHref: { type: 'string', default: "'/'" },
+    links: {
+      type: 'readonly MarketingLink[]',
+      description: 'One line of links: label, href and optionally external.',
+    },
+    currentHref: {
+      type: 'string',
+      description: 'The current page. Its link is marked aria-current="page".',
+    },
+    primary: { type: 'MarketingAction', description: 'The main action, such as "Start free".' },
+    secondary: { type: 'MarketingAction', description: 'A quieter one, such as "Sign in".' },
+    sticky: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Stick to the top as the page scrolls.',
+    },
+    menuLabel: {
+      type: 'string',
+      default: "'Menu'",
+      description: 'Label of the button that opens the menu on narrow screens.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- Below the `md` breakpoint the links open as a sheet under the bar. It traps focus, closes on Escape or a link press and returns focus to its button.
+- The current page is marked with `aria-current="page"`, not only with colour.
+- Every link and button keeps a visible focus ring.
+- Links render through `Anchor`: swap it once for your router's link component.

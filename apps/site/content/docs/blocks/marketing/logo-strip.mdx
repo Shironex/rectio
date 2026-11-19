@@ -1,0 +1,79 @@
+---
+title: Logo strip
+description: 'The companies that use the product, logos only, in a row or a marquee.'
+pro: true
+---
+
+import LogoStripStaticDemo from '@/demos/marketing-logo-strip-static';
+import LogoStripStaticMotionDemo from '@/demos/marketing-logo-strip-static.motion';
+import LogoStripMarqueeDemo from '@/demos/marketing-logo-strip-marquee';
+import LogoStripMarqueeMotionDemo from '@/demos/marketing-logo-strip-marquee.motion';
+
+## Static row
+
+<Preview
+  name="marketing-logo-strip-static"
+  plain={<LogoStripStaticDemo />}
+  motion={<LogoStripStaticMotionDemo />}
+  importLine="import { LogoStrip } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Marquee
+
+<Preview
+  name="marketing-logo-strip-marquee"
+  plain={<LogoStripMarqueeDemo />}
+  motion={<LogoStripMarqueeMotionDemo />}
+  importLine="import { LogoStrip } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add logo-strip
+```
+
+The motion variant is `motion-logo-strip`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+The companies that use the product, logos only: no captions, no categories. It sits directly under
+the hero.
+
+## Usage
+
+Give each logo a `name` and, if you have one, an SVG or image in `currentColor` so it follows the
+theme. Without a logo the name is set as a wordmark. Use at most one moving strip per page.
+
+## Props
+
+<TypeTable
+  type={{
+    logos: {
+      type: 'readonly Logo[]',
+      description: 'Each company: name (its accessible name) and an optional logo node.',
+    },
+    title: {
+      type: 'ReactNode',
+      description: 'One quiet line above the logos, such as "Trusted by finance teams at".',
+    },
+    variant: {
+      type: "'static' | 'marquee'",
+      default: "'static'",
+      description: 'A wrapping row, or logos scrolling sideways.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- Logos take the muted text colour, so every brand reads at the same weight in both modes.
+- The static row is a list; the marquee is labelled "Customer logos" and pauses on hover and focus.
+- Under reduced motion the marquee holds still.

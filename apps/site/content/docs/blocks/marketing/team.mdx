@@ -1,0 +1,66 @@
+---
+title: Team
+description: 'An about section: what the team works by and the people, each with a line on what they do.'
+pro: true
+---
+
+import TeamDemo from '@/demos/marketing-team';
+import TeamMotionDemo from '@/demos/marketing-team.motion';
+
+## Preview
+
+<Preview
+  name="marketing-team"
+  plain={<TeamDemo />}
+  motion={<TeamMotionDemo />}
+  importLine="import { Team } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add team
+```
+
+The motion variant is `motion-team`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+An about section: who the team is, what it works by, and the people, each with their role and a line
+on what they do.
+
+## Usage
+
+Values are a short ruled list before the people. A member without an `avatar` shows their initials
+on a soft tint, so no photos are needed. Member links read with the person's name for screen
+readers.
+
+## Props
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode' },
+    description: { type: 'ReactNode' },
+    eyebrow: { type: 'ReactNode' },
+    members: {
+      type: 'readonly TeamMember[]',
+      description: 'Each person: id, name, role, and optionally avatar, bio and links.',
+    },
+    values: {
+      type: 'readonly TeamValue[]',
+      description: 'What the team believes or works by: id, title and description.',
+    },
+    tone: { type: "'plain' | 'tinted' | 'panel'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The people are a list labelled "Team"; values are a description list.
+- Each link is named with its person, such as "Profile, Ada Lindqvist".

@@ -1,0 +1,75 @@
+---
+title: Newsletter
+description: 'An email signup that checks the address, holds its place while sending and confirms.'
+pro: true
+---
+
+import NewsletterDemo from '@/demos/marketing-newsletter';
+import NewsletterMotionDemo from '@/demos/marketing-newsletter.motion';
+
+## Preview
+
+<Preview
+  name="marketing-newsletter"
+  plain={<NewsletterDemo />}
+  motion={<NewsletterMotionDemo />}
+  importLine="import { Newsletter } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add newsletter
+```
+
+The motion variant is `motion-newsletter`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+An email signup. The address is checked before it is sent, the button holds its place while
+sending, an error reads under the field, and success replaces the form with a status message that
+assistive technology announces.
+
+## Usage
+
+The block holds no list and sends nothing itself. Pass `onSubscribe`: resolve when the address is
+saved, or throw an `Error` to show its message under the field. Use `layout="compact"` in a footer
+column or a sidebar.
+
+## Props
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode' },
+    description: { type: 'ReactNode' },
+    onSubscribe: {
+      type: '(email: string) => Promise<void> | void',
+      description:
+        'Called with the address. Resolve when saved; throw an Error to show its message.',
+    },
+    layout: { type: "'band' | 'compact'", default: "'band'" },
+    note: {
+      type: 'ReactNode',
+      description: 'One line under the form: what you send, how often, how to leave.',
+    },
+    label: { type: 'string', default: "'Email address'" },
+    placeholder: { type: 'string', default: "'you@company.com'" },
+    submitLabel: { type: 'string', default: "'Subscribe'" },
+    successMessage: {
+      type: 'ReactNode',
+      description: 'Shown in place of the form once the address is saved.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The field has a real label, and its error reads under it.
+- The form sits in a polite live region, so the success message is announced when it appears.
+- The check is light: the real check is the confirmation email.

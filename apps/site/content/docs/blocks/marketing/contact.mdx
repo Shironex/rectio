@@ -1,0 +1,83 @@
+---
+title: Contact
+description: 'A contact section: a heading and other ways to reach you beside a form that says what to fix.'
+pro: true
+---
+
+import ContactSectionDemo from '@/demos/marketing-contact';
+import ContactSectionMotionDemo from '@/demos/marketing-contact.motion';
+
+## Preview
+
+<Preview
+  name="marketing-contact"
+  plain={<ContactSectionDemo />}
+  motion={<ContactSectionMotionDemo />}
+  importLine="import { ContactSection } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add contact
+```
+
+The motion variant is `motion-contact`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+A contact section: a heading and other ways to reach you on one side, a form on the other.
+
+## Usage
+
+The block sends nothing itself. Pass `onSubmit`: resolve when the message is on its way, or throw an
+`Error` to show its message above the button. Leave out `topics` for no topic field, and pass
+`consentLabel` to ask the sender to agree before sending.
+
+## Props
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode' },
+    description: { type: 'ReactNode' },
+    eyebrow: { type: 'ReactNode' },
+    onSubmit: {
+      type: '(values: ContactValues) => Promise<void> | void',
+      description:
+        'Called with the checked values. Throw an Error to show its message above the button.',
+    },
+    channels: {
+      type: 'readonly ContactChannel[]',
+      description: 'Other ways to reach you: id, label, value, and optionally href and icon.',
+    },
+    topics: {
+      type: 'readonly { value: string; label: string }[]',
+      description: 'Topics to choose from. Leave out for no topic field.',
+    },
+    consentLabel: {
+      type: 'ReactNode',
+      description: 'Asks the sender to agree before sending, with this label.',
+    },
+    submitLabel: { type: 'string', default: "'Send message'" },
+    successTitle: { type: 'string', default: "'Message sent'" },
+    successMessage: { type: 'ReactNode' },
+    tone: { type: "'plain' | 'tinted' | 'panel'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`validateContact(values, { needsTopic, needsConsent })` and `isEmail(value)` are exported, so a
+server can run the same checks. `EMPTY_CONTACT` is the empty form.
+
+## Accessibility
+
+- Every error says what to fix, in words.
+- The first invalid field takes focus on submit.
+- The button holds its place while sending, and a sent message replaces the form in a polite live region.

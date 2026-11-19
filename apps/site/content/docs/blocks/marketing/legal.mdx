@@ -1,0 +1,77 @@
+---
+title: Legal page
+description: 'A privacy, terms or cookie policy page with a table of contents, from a template you replace.'
+pro: true
+---
+
+import LegalDemo from '@/demos/marketing-legal';
+
+## Privacy policy template
+
+<Preview
+  name="marketing-legal"
+  plain={<LegalDemo />}
+  importLine="import { LegalPage } from '@rectio/blocks/marketing';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add legal
+```
+
+This block has no motion variant: nothing on it moves.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+A privacy policy, terms of service or cookie policy page: title, last updated date, a table of
+contents that follows the reader on wide screens and folds into a disclosure on narrow ones, and the
+text in prose styles.
+
+## Legal text is a template
+
+The exported `PRIVACY_POLICY_TEMPLATE`, `TERMS_TEMPLATE` and `COOKIE_POLICY_TEMPLATE` are
+placeholders, not legal text. Every bracketed value is yours to fill and every section must be
+rewritten for your business, your users and the law that applies to you, ideally with a lawyer.
+Replace with your own legal text: this is not legal advice. While `template` is on, the page shows
+a notice saying so. Leave it on until your own text is in.
+
+## Usage
+
+Turn a template into sections with `templateSections(template)`, or write your own `LegalSection`
+list: a title and content as plain HTML elements.
+
+## Props
+
+<TypeTable
+  type={{
+    title: { type: 'string' },
+    lastUpdated: {
+      type: 'string',
+      description: 'ISO date the text last changed, such as 2026-03-04.',
+    },
+    intro: { type: 'ReactNode', description: 'A short paragraph under the title.' },
+    sections: { type: 'readonly LegalSection[]', description: 'Each section: title and content.' },
+    template: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Shows the notice that the text is a template and not legal advice.',
+    },
+    contact: {
+      type: 'ReactNode',
+      description: 'A closing line, such as how to reach you with questions.',
+    },
+    locale: { type: 'string' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The table of contents is a labelled navigation and marks the section in view with `aria-current="location"`.
+- On narrow screens it folds into a disclosure that is closed by default.
+- Headings get unique ids made from their titles, so every section can be linked.

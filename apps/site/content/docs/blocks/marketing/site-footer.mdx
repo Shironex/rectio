@@ -1,0 +1,73 @@
+---
+title: Site footer
+description: 'The bottom of every page: brand, link columns, social links and the small print.'
+pro: true
+---
+
+import SiteFooterDemo from '@/demos/marketing-site-footer';
+
+## Preview
+
+<Preview
+  name="marketing-site-footer"
+  plain={<SiteFooterDemo />}
+  importLine="import { SiteFooter } from '@rectio/blocks/marketing';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add site-footer
+```
+
+This block has no motion variant: nothing on it moves.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+The bottom of every page: brand and tagline, link columns, social links and the small print.
+
+## Usage
+
+`layout="columns"` is a full site map; `minimal` folds everything into one or two rows for a
+single-page site. Use `extra` for a compact newsletter signup or a status badge. Add a "Cookie
+settings" link to `legal` that opens the cookie preferences.
+
+## Props
+
+<TypeTable
+  type={{
+    brand: { type: 'ReactNode' },
+    brandLabel: { type: 'string', description: 'Accessible name of the home link.' },
+    brandHref: { type: 'string', default: "'/'" },
+    tagline: { type: 'ReactNode', description: 'One line under the brand on what the product is.' },
+    columns: { type: 'readonly FooterColumn[]', description: 'Link columns: id, title and links.' },
+    legal: {
+      type: 'readonly MarketingLink[]',
+      description: 'Privacy, terms, cookies: the small print along the bottom.',
+    },
+    social: {
+      type: 'readonly SocialLink[]',
+      description: 'Links with an icon; the label stays as the accessible name.',
+    },
+    copyright: {
+      type: 'ReactNode',
+      description: 'The copyright line, such as "© 2026 Northlake Ltd".',
+    },
+    extra: {
+      type: 'ReactNode',
+      description: 'A slot for a compact newsletter signup or a status badge.',
+    },
+    layout: { type: "'columns' | 'minimal'", default: "'columns'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The block is a footer landmark with a Footer navigation and a Legal navigation.
+- Social links are icon-only, so each keeps its label as an accessible name.
+- Links render through `Anchor`: swap it once for your router's link component.

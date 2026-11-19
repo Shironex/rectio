@@ -1,0 +1,101 @@
+---
+title: Feature grid
+description: 'What the product does, as a ruled icon grid, alternating rows or a bento of live tiles.'
+pro: true
+---
+
+import FeatureGridIconsDemo from '@/demos/marketing-feature-grid-icons';
+import FeatureGridIconsMotionDemo from '@/demos/marketing-feature-grid-icons.motion';
+import FeatureGridRowsDemo from '@/demos/marketing-feature-grid-rows';
+import FeatureGridRowsMotionDemo from '@/demos/marketing-feature-grid-rows.motion';
+import FeatureGridBentoDemo from '@/demos/marketing-feature-grid-bento';
+import FeatureGridBentoMotionDemo from '@/demos/marketing-feature-grid-bento.motion';
+
+## Icon grid
+
+<Preview
+  name="marketing-feature-grid-icons"
+  plain={<FeatureGridIconsDemo />}
+  motion={<FeatureGridIconsMotionDemo />}
+  importLine="import { FeatureIconGrid } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Rows
+
+<Preview
+  name="marketing-feature-grid-rows"
+  plain={<FeatureGridRowsDemo />}
+  motion={<FeatureGridRowsMotionDemo />}
+  importLine="import { FeatureRows } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Bento
+
+<Preview
+  name="marketing-feature-grid-bento"
+  plain={<FeatureGridBentoDemo />}
+  motion={<FeatureGridBentoMotionDemo />}
+  importLine="import { FeatureBento } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add feature-grid
+```
+
+The motion variant is `motion-feature-grid`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+What the product does, in three layouts: a calm ruled grid for a long list, rows with the live
+feature beside the copy, or a bento of tiles with the product shown working.
+
+## Usage
+
+All three take a `title`, `description`, `eyebrow` and `tone`. Keep `FeatureRows` to two or three
+rows, then change the layout. In `FeatureBento`, plan the sizes so each row fills: a wide and a
+regular, three regulars, or a tall beside two stacked.
+
+## Props
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode', description: 'The section heading. Optional on FeatureRows.' },
+    description: { type: 'ReactNode' },
+    eyebrow: { type: 'ReactNode' },
+    tone: { type: "'plain' | 'tinted' | 'panel'" },
+    features: {
+      type: 'readonly IconFeature[]',
+      description: 'FeatureIconGrid: id, icon, title and description each.',
+    },
+    columns: {
+      type: '2 | 3 | 4',
+      default: '3',
+      description: 'FeatureIconGrid: how many columns on wide screens.',
+    },
+    rows: {
+      type: 'readonly FeatureRow[]',
+      description:
+        'FeatureRows: title, description, optional eyebrow, points (two to four) and action, and the live visual.',
+    },
+    items: {
+      type: 'readonly BentoItem[]',
+      description:
+        'FeatureBento: title, optional description and visual, a size (regular, wide, tall or full) and a tone.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- Each section is named by its heading; icons are decorative and the title carries the meaning.
+- Layouts reflow to one column on narrow screens and read in source order.

@@ -1,0 +1,22 @@
+{
+  "title": "Marketing",
+  "pages": [
+    "index",
+    "announcement-bar",
+    "site-header",
+    "hero",
+    "logo-strip",
+    "feature-grid",
+    "stat-row",
+    "testimonials",
+    "faq",
+    "cta-band",
+    "newsletter",
+    "team",
+    "contact",
+    "blog",
+    "site-footer",
+    "legal",
+    "cookie-consent"
+  ]
+}

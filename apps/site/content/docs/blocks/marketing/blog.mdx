@@ -1,0 +1,109 @@
+---
+title: Blog
+description: 'The latest articles as a grid or dated rows, and one article at a reading measure.'
+pro: true
+---
+
+import BlogListDemo from '@/demos/marketing-blog-list';
+import BlogListMotionDemo from '@/demos/marketing-blog-list.motion';
+import BlogArticleDemo from '@/demos/marketing-blog-article';
+import BlogArticleMotionDemo from '@/demos/marketing-blog-article.motion';
+
+## Article list
+
+<Preview
+  name="marketing-blog-list"
+  plain={<BlogListDemo />}
+  motion={<BlogListMotionDemo />}
+  importLine="import { ArticleList } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Article
+
+<Preview
+  name="marketing-blog-article"
+  plain={<BlogArticleDemo />}
+  motion={<BlogArticleMotionDemo />}
+  importLine="import { ArticleLayout } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add blog
+```
+
+The motion variant is `motion-blog`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+The latest articles as a large lead and a grid or as dated rows, and one article laid out at a
+reading measure.
+
+## Usage
+
+`ArticleList` takes summaries with an ISO `date`; set `layout="list"` for dated rows and `viewAll`
+for a link to every article. `ArticleLayout` takes the article body as plain HTML elements, set in
+the prose styles; give each `h2` the id of the matching entry in `headings` and an "On this page"
+list appears beside it on wide screens.
+
+## Props
+
+<TypeTable
+  type={{
+    articles: {
+      type: 'readonly ArticleSummary[]',
+      description:
+        'ArticleList: id, title, href, excerpt, date, author, and optionally tag, readingMinutes and cover.',
+    },
+    layout: {
+      type: "'grid' | 'list'",
+      default: "'grid'",
+      description: 'ArticleList: lead large with a grid, or dated rows.',
+    },
+    viewAll: { type: 'MarketingAction', description: 'ArticleList: a link to every article.' },
+    title: {
+      type: 'ReactNode',
+      description: 'ArticleList heading. On ArticleLayout it is the article title (a string).',
+    },
+    description: {
+      type: 'ReactNode',
+      description: 'ArticleList intro, or the article standfirst.',
+    },
+    date: { type: 'string', description: 'ArticleLayout: ISO date, such as 2026-03-04.' },
+    author: {
+      type: 'ArticleAuthor',
+      description: 'ArticleLayout: name, and optionally role and avatar.',
+    },
+    tag: { type: 'string' },
+    readingMinutes: { type: 'number' },
+    cover: { type: 'ReactNode', description: 'An image, or a small composition of your own UI.' },
+    back: { type: 'MarketingLink', description: 'ArticleLayout: a link back to the list.' },
+    headings: {
+      type: 'readonly ArticleHeading[]',
+      description: 'ArticleLayout: the sections listed beside the article.',
+    },
+    footer: {
+      type: 'ReactNode',
+      description: 'ArticleLayout: something after the body, such as a newsletter signup.',
+    },
+    locale: { type: 'string' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`readingMinutes(text)`, `formatDate(date, locale)` and `slugify(text)` are exported.
+
+## Accessibility
+
+- Each card is one link, named by the article's title, so it reads once; the whole card is the hit area.
+- Dates use a machine-readable `time` element.
+- Article text is set at a reading measure with real headings, and "On this page" is a labelled navigation.

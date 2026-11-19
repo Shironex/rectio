@@ -1,0 +1,76 @@
+---
+title: Stat row
+description: 'Three or four big figures with what each one counts.'
+pro: true
+---
+
+import StatRowDemo from '@/demos/marketing-stat-row';
+import StatRowMotionDemo from '@/demos/marketing-stat-row.motion';
+
+## Preview
+
+<Preview
+  name="marketing-stat-row"
+  plain={<StatRowDemo />}
+  motion={<StatRowMotionDemo />}
+  importLine="import { StatRow } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add stat-row
+```
+
+The motion variant is `motion-stat-row`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+Three or four big figures with what each one counts, divided by hairlines. With a `lead`, a sentence
+sets them up on the left. In the motion variant each figure counts up once, on first view, and
+lands exactly on its value.
+
+## Usage
+
+A stat's `format` says how to write it: `number` in full, `compact` shortened (14.2M), `percent`
+from a fraction (0.998 is 99.8%) or `currency` shortened. `suffix` adds text after the figure.
+
+## Props
+
+<TypeTable
+  type={{
+    stats: {
+      type: 'readonly Stat[]',
+      description:
+        'Each figure: id, value, format, label, and optionally currency, suffix and fractionDigits.',
+    },
+    lead: {
+      type: 'ReactNode',
+      description: 'A sentence that sets the figures up, shown beside them on wide screens.',
+    },
+    locale: { type: 'string', description: 'BCP 47 locale for the figures, such as en-GB.' },
+    label: {
+      type: 'string',
+      default: "'Key figures'",
+      description: 'Names the section when there is no lead.',
+    },
+    tone: { type: "'plain' | 'tinted' | 'panel'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`formatStat(stat, value, locale)` is exported, so a server or an image generator can write the same
+figure the block shows.
+
+## Accessibility
+
+- The section is named by the lead or by `label`.
+- The count-up lands exactly on its value.
+- Under reduced motion the motion variant renders the plain block.
