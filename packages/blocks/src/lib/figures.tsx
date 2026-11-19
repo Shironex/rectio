@@ -5,7 +5,12 @@ import { useBlockParts } from './block-parts';
 
 export interface Figure {
   label: ReactNode;
-  amount: number;
+  amount?: number;
+  /**
+   * A figure that is not money, such as a margin or a number of months, drawn in place of the
+   * amount in the same face.
+   */
+  value?: ReactNode;
   /** A short line under the figure, such as "4 invoices" or "since 1 March". */
   note?: ReactNode;
   /** Colour the figure by its sign; the sign itself is always printed. */
@@ -44,18 +49,30 @@ export function Figures({
         >
           <dt className="truncate text-sm text-fg-muted">{item.label}</dt>
           <dd className="flex flex-col items-start">
-            <Money
-              amount={item.amount}
-              currency={currency}
-              locale={locale}
-              tone={item.signed === true ? 'auto' : 'neutral'}
-              quietCurrency
-              className={cn(
-                'text-xl font-strong tracking-tight',
-                item.emphasis === 'negative' && 'text-negative-strong',
-                item.emphasis === 'warning' && 'text-warning-strong',
-              )}
-            />
+            {item.value === undefined ? (
+              <Money
+                amount={item.amount ?? 0}
+                currency={currency}
+                locale={locale}
+                tone={item.signed === true ? 'auto' : 'neutral'}
+                quietCurrency
+                className={cn(
+                  'text-xl font-strong tracking-tight',
+                  item.emphasis === 'negative' && 'text-negative-strong',
+                  item.emphasis === 'warning' && 'text-warning-strong',
+                )}
+              />
+            ) : (
+              <span
+                className={cn(
+                  'numeric text-xl font-strong tracking-tight',
+                  item.emphasis === 'negative' && 'text-negative-strong',
+                  item.emphasis === 'warning' && 'text-warning-strong',
+                )}
+              >
+                {item.value}
+              </span>
+            )}
             {item.note !== undefined && (
               <span
                 className={cn(

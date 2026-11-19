@@ -32,14 +32,25 @@ const SWATCH: Record<ChartColor, string> = {
   reference: 'bg-chart-reference',
 };
 
+/** How a legend key is drawn: a square for bars, a rule for lines, a broken rule for forecasts. */
+export type SwatchShape = 'bar' | 'line' | 'dashed';
+
 /** A legend key: a square for bars, a short rule for lines. Always next to its name. */
 export function Swatch({
   color,
   shape = 'bar',
 }: {
   color: ChartColor;
-  shape?: 'bar' | 'line' | undefined;
+  shape?: SwatchShape | undefined;
 }) {
+  if (shape === 'dashed') {
+    return (
+      <span aria-hidden className="inline-flex w-3.5 shrink-0 justify-between">
+        <span className={cn('h-0.5 w-1.5 rounded-full', SWATCH[color])} />
+        <span className={cn('h-0.5 w-1.5 rounded-full', SWATCH[color])} />
+      </span>
+    );
+  }
   return (
     <span
       aria-hidden
@@ -55,7 +66,7 @@ export function Swatch({
 export interface LegendItem {
   label: ReactNode;
   color: ChartColor;
-  shape?: 'bar' | 'line';
+  shape?: SwatchShape;
 }
 
 export function ChartLegend({ items }: { items: readonly LegendItem[] }) {
@@ -90,7 +101,7 @@ export interface TooltipRow {
   label: ReactNode;
   amount: number;
   color?: ChartColor;
-  shape?: 'bar' | 'line';
+  shape?: SwatchShape;
   /** Bold the row, for a total or a net figure. */
   strong?: boolean;
 }
