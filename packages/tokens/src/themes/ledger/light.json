@@ -20,7 +20,7 @@
       "$value": "{palette.paper.75}"
     },
     "selected": {
-      "$value": "{palette.citron.100}"
+      "$value": "{palette.citron.25}"
     },
     "inset": {
       "$value": "{palette.paper.75}",
