@@ -37,7 +37,7 @@ const withKey = () => deps({ RECTIO_LICENSE_KEY: KEY });
 
 describe('list_items', () => {
   it('lists every item with its tier and never any source', async () => {
-    const { text, isError } = await listItems(deps(), { limit: 200 });
+    const { text, isError } = await listItems(deps(), { limit: 500 });
     expect(isError).toBeUndefined();
     expect(text).toContain('button | component | free |');
     expect(text).toContain('ledger-summary | block | pro |');
@@ -50,7 +50,7 @@ describe('list_items', () => {
     expect(themes.text).toContain('theme-ledger');
     expect(themes.text).not.toContain('button |');
     // Pro items outnumber the default page, so ask for all of them.
-    const pro = await listItems(deps(), { tier: 'pro', limit: 200 });
+    const pro = await listItems(deps(), { tier: 'pro', limit: 500 });
     expect(pro.text).toContain('ledger-summary');
     // The motion add-on is pro too, every item of it.
     expect(pro.text).toContain('motion-toast | component | pro |');
