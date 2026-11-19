@@ -36,6 +36,9 @@ import {
   type Granularity,
 } from './cash-flow.logic';
 
+/** The focused period's bars get an outline in the text colour, so the pair stands out. */
+const ACTIVE_BAR = { stroke: 'var(--rx-text)', strokeWidth: 1.5 };
+
 export interface CashFlowChartProps {
   /** One point per month. Quarters are summed from them. */
   points: readonly CashFlowPoint[];
@@ -228,6 +231,7 @@ export function CashFlowChart({
                 fill={chartColor('series-1')}
                 radius={[2, 2, 0, 0]}
                 maxBarSize={32}
+                activeBar={ACTIVE_BAR}
                 isAnimationActive={false}
               />
               <Bar
@@ -237,6 +241,7 @@ export function CashFlowChart({
                 fill={chartColor('series-2')}
                 radius={[0, 0, 2, 2]}
                 maxBarSize={32}
+                activeBar={ACTIVE_BAR}
                 isAnimationActive={false}
               />
               {/* A halo under the net line keeps it legible where it crosses a bar. */}

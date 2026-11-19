@@ -215,3 +215,15 @@ export function ChartFigure({
     </figure>
   );
 }
+
+/**
+ * Round axis ticks from zero: `count` equal steps of 1, 2, 2.5 or 5 times a power of ten, the
+ * smallest that leaves headroom over `max`, so the tallest mark never touches the top line.
+ */
+export function niceTicks(max: number, count = 4): number[] {
+  if (!(max > 0)) return [0, 1];
+  const raw = (max * 1.05) / count;
+  const power = 10 ** Math.floor(Math.log10(raw));
+  const step = ([1, 2, 2.5, 5, 10].find((m) => m * power >= raw) ?? 10) * power;
+  return Array.from({ length: count + 1 }, (_, index) => index * step);
+}

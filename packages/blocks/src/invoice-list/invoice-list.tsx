@@ -175,7 +175,7 @@ export function InvoiceList({
                 Total, {shown.length} {shown.length === 1 ? 'invoice' : 'invoices'}
               </span>
               <span className="text-fg-muted">
-                Owed on sent invoices{voided > 0 && `, ${String(voided)} void not counted`}
+                Sum of the amounts shown{voided > 0 && `, ${String(voided)} void not counted`}
               </span>
             </span>
           );
@@ -249,7 +249,7 @@ export function InvoiceList({
                 className={cn(state === 'void' && 'text-fg-muted line-through')}
               />
               {partial && (
-                <span className="text-sm text-fg-muted">
+                <span className="text-sm whitespace-nowrap text-fg-muted">
                   of <Money amount={invoice.total} currency={currency} locale={locale} />
                 </span>
               )}
@@ -354,13 +354,19 @@ export function InvoiceList({
             <span className="flex flex-col items-center gap-3">
               <span className="flex flex-col items-center gap-1">
                 <span className="font-medium text-fg">
-                  {filter === 'overdue'
-                    ? 'Nothing is overdue'
-                    : `No ${filter === 'all' ? '' : `${FILTER_LABELS[filter].toLowerCase()} `}invoices in this period`}
+                  {invoices.length === 0
+                    ? 'No invoices yet'
+                    : filter === 'overdue'
+                      ? 'Nothing is overdue'
+                      : `No ${filter === 'all' ? '' : `${FILTER_LABELS[filter].toLowerCase()} `}invoices in this period`}
                 </span>
-                <span>Widen the period or show every status.</span>
+                <span>
+                  {invoices.length === 0
+                    ? 'Invoices you create appear here with their totals.'
+                    : 'Widen the period or show every status.'}
+                </span>
               </span>
-              {(filter !== 'all' || period !== 'all') && (
+              {invoices.length > 0 && (filter !== 'all' || period !== 'all') && (
                 <Button
                   variant="secondary"
                   size="sm"

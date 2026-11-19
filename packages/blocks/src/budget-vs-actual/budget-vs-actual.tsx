@@ -127,9 +127,11 @@ export function BudgetVsActual({
       title={title}
       description={[
         period,
-        summary.unfavourable === 0
-          ? 'every category on track'
-          : `${String(summary.unfavourable)} of ${String(lines.length)} ${kind === 'expense' ? 'over budget' : 'below target'}`,
+        lines.length === 0
+          ? 'no budget set'
+          : summary.unfavourable === 0
+            ? 'every category on track'
+            : `${String(summary.unfavourable)} of ${String(lines.length)} ${kind === 'expense' ? 'over budget' : 'below target'}`,
       ]
         .filter(Boolean)
         .join(', ')}

@@ -396,3 +396,12 @@ describe('expense approval', () => {
     expect(approvalReducer(reopened, { type: 'reopen', id: 'c', actor: 'Ola', at })).toBe(reopened);
   });
 });
+
+describe('niceTicks', () => {
+  it('steps evenly from zero with headroom over the largest value', async () => {
+    const { niceTicks } = await import('../src/lib/chart');
+    expect(niceTicks(36_600)).toEqual([0, 10_000, 20_000, 30_000, 40_000]);
+    expect(niceTicks(156_200)).toEqual([0, 50_000, 100_000, 150_000, 200_000]);
+    expect(niceTicks(0)).toEqual([0, 1]);
+  });
+});

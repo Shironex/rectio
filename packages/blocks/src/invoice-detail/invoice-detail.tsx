@@ -265,7 +265,7 @@ export function InvoiceDetail({
           )}
           {state !== 'draft' && state !== 'void' && (
             // One tinted row for the figure the page exists to answer.
-            <div className="col-span-2 mt-1 grid grid-cols-subgrid items-baseline rounded-control bg-surface-sunken py-2 -mx-3 px-3">
+            <div className="col-span-2 mt-1 grid grid-cols-subgrid items-baseline rounded-control bg-surface-sunken px-3 py-2">
               <dt className="font-medium">Balance due</dt>
               <dd className={cn('text-end', state === 'overdue' && 'text-negative-strong')}>
                 {money(totals.balance, 'text-lg font-strong')}

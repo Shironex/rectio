@@ -30,6 +30,7 @@ import {
   ChartTooltip,
   TOOLTIP_LIFT,
   activeDatum,
+  niceTicks,
   chartColor,
   type ChartColor,
 } from '../lib/chart';
@@ -101,6 +102,7 @@ export function ArAging({
     amount: report.buckets[bucket],
     share: report.shares[bucket],
   }));
+  const ticks = niceTicks(Math.max(...data.map((d) => d.amount)));
   const shown = report.customers.slice(0, customerLimit);
   const others = report.customers.length - shown.length;
   const late = formatPercent(report.total === 0 ? 0 : report.overdue / report.total, locale, {
@@ -135,7 +137,7 @@ export function ArAging({
     >
       {receivables.length === 0 ? (
         <EmptyNote title="Nothing outstanding">
-          Every invoice is paid. New invoices appear here by how late they are.
+          Unpaid invoices appear here, grouped by how late they are.
         </EmptyNote>
       ) : (
         <>
@@ -179,6 +181,8 @@ export function ArAging({
               <CartesianGrid vertical={false} />
               <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
               <YAxis
+                ticks={ticks}
+                domain={[0, ticks[ticks.length - 1] ?? 1]}
                 width="auto"
                 tickLine={false}
                 axisLine={false}
