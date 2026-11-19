@@ -193,7 +193,7 @@
         "$description": "How far a popup travels as it enters. Zero under reduced motion."
       },
       "tick": {
-        "$value": "{size.2}",
+        "$value": "{size.4}",
         "$description": "How far an amount nudges in the direction of a change. Zero under reduced motion."
       },
       "origin": {
