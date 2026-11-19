@@ -37,7 +37,8 @@ const PRESETS: DateRangePreset[] = [
     range: { from: new Date(2026, 2, 1), to: new Date(2026, 2, 15) },
   },
   { label: 'February', range: { from: new Date(2026, 1, 1), to: new Date(2026, 1, 28) } },
-  { label: 'Quarter to date', range: { from: new Date(2026, 0, 1), to: new Date(2026, 2, 31) } },
+  // The demo's today is 19 March, the date new lines default to.
+  { label: 'Quarter to date', range: { from: new Date(2026, 0, 1), to: new Date(2026, 2, 19) } },
 ];
 
 const shortDate = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short' });
@@ -177,6 +178,8 @@ function Report() {
     data: visible,
     columns,
     getRowId: (e) => e.id,
+    // Lines read in date order until someone sorts, and the Date header says so.
+    initialState: { sorting: [{ id: 'date', desc: false }] },
   });
   const selected = table.getSelectedRowModel().rows.map((row) => row.original);
 
@@ -265,10 +268,14 @@ function Report() {
             <div className="flex items-center gap-3">
               <p className="text-sm text-fg-muted">
                 {selected.length} selected,{' '}
-                <Money amount={sum(claimed(selected))} currency={CURRENCY} locale={LOCALE} />{' '}
-                counted
-                {selected.length > claimed(selected).length &&
-                  `, ${String(selected.length - claimed(selected).length)} rejected not counted`}
+                <Money amount={sum(claimed(selected))} currency={CURRENCY} locale={LOCALE} />
+                {/* Phones keep the short form, so the bar stays one line beside Remove. */}
+                <span className="hidden sm:inline">
+                  {' '}
+                  counted
+                  {selected.length > claimed(selected).length &&
+                    `, ${String(selected.length - claimed(selected).length)} rejected not counted`}
+                </span>
               </p>
               <Button variant="danger" size="sm" onClick={remove}>
                 <TrashIcon aria-hidden weight="bold" className="size-3.5" />
