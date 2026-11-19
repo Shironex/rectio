@@ -316,8 +316,8 @@ function ProgressGroup({ ui }: { ui: Moving }) {
           />
         </Tile>
         <Tile label="Ring">
-          <div className="flex flex-wrap items-end justify-around gap-4">
-            <ui.ProgressCircle value={72} size="xl" label="Profile complete" showLabel />
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <ui.ProgressCircle value={72} size="lg" label="Profile complete" showLabel />
             <ui.ProgressCircle
               value={3}
               max={5}
