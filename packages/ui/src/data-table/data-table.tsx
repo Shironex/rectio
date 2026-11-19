@@ -255,8 +255,8 @@ function SortButton({
         weight="bold"
         className={cn(
           'size-3 shrink-0',
-          sorted === false &&
-            'text-fg-subtle opacity-0 group-hover/sort:opacity-100 group-focus-visible/sort:opacity-100',
+          // Unsorted columns show a quiet cue, so it is clear which headers sort.
+          sorted === false && 'text-fg-disabled group-hover/sort:text-fg-subtle',
         )}
       />
     </button>
@@ -299,8 +299,11 @@ export function DataTableBody<TData extends RowData>({
                     aria-hidden
                     className={cn(
                       'inline-block h-3 rounded-(--rx-badge-radius) bg-surface-sunken align-middle',
-                      // Varied widths read as text; a uniform bar reads as a progress meter.
-                      ['w-16', 'w-28', 'w-20', 'w-24'][(index + columnIndex) % 4],
+                      // Widths relative to the column, so skeletons never widen the table. Varied
+                      // widths read as text; a uniform bar reads as a progress meter.
+                      column.id === 'select'
+                        ? 'size-4'
+                        : ['w-3/5', 'w-4/5', 'w-1/2', 'w-2/3'][(index + columnIndex) % 4],
                     )}
                   />
                 </TableCell>
@@ -399,13 +402,18 @@ export function selectionColumn<TData extends RowData>({
     enableSorting: false,
     meta: { className: 'w-0 pe-0' },
     header: ({ table }) => {
-      const all = table.getIsAllRowsSelected();
+      // Counted from the rows on hand, so a selection kept for rows that are not loaded (or an
+      // empty table) never shows a stale bar.
+      const rows = table.getCoreRowModel().rows;
+      const selected = rows.filter((row) => row.getIsSelected()).length;
+      const all = rows.length > 0 && selected === rows.length;
       return (
         <span className="flex items-center">
           <Checkbox
             aria-label={allLabel}
             checked={all}
-            indeterminate={table.getIsSomeRowsSelected() && !all}
+            indeterminate={selected > 0 && !all}
+            disabled={rows.length === 0}
             onCheckedChange={(checked) => {
               table.toggleAllRowsSelected(checked);
             }}
