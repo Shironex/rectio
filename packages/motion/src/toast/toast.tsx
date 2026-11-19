@@ -38,6 +38,8 @@ function transformY(element: HTMLElement): number {
  * When a toast arrives, leaves or is let through by the limit, the others glide to their new place
  * instead of jumping (a FLIP on transform only). Each glide starts from where the toast is drawn
  * now, so a second toast added mid glide continues the motion instead of snapping back first.
+ * A toast that changes height in place (an update with a longer text) moves the others without a
+ * glide: the stack reacts to toasts arriving, leaving and being let through.
  */
 function useStackReflow(on: boolean) {
   return useCallback(
