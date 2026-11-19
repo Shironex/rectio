@@ -2,32 +2,39 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-/** Real output of the rectio CLI against the local registry, trimmed of the install step. */
+/**
+ * Real output of the rectio CLI adding a pro block against the local registry (the license key
+ * comes from the user config file), trimmed of the package install step. Long lines wrap.
+ */
 const SCRIPT = [
-  { command: 'pnpm dlx rectio init --theme ledger' },
+  { command: 'npx rectio add invoice-list' },
   {
     output: [
-      'Set up rectio for next (Tailwind 4.3.5).',
-      'Installed theme-default@0.1.1, tokens@0.1.1, theme-ledger@0.1.1, cn@0.1.0',
-      '  + src/styles/rectio/themes/default.css',
-      '  + src/styles/rectio/tokens.css',
-      '  + src/styles/rectio/themes/ledger.css',
-      '  + src/lib/cn.ts',
-      '',
-      'Config: rectio.json. Add components with `rectio add button`.',
-    ],
-  },
-  { command: 'pnpm dlx rectio add data-table money' },
-  {
-    output: [
-      'Installed button@0.1.0, checkbox@0.1.0, data-table@0.1.0, money@0.1.0',
+      'Installed theme-default@0.2.1, tokens@0.2.1, cn@0.2.0, badge@0.1.0, button@0.2.0, checkbox@0.2.0, field@0.2.0, theme-scope@0.1.0, select@0.1.0, data-table@0.2.0, money@0.1.0, blocks-core@0.1.0, invoice-list@0.1.0',
+      '  + src/components/ui/badge.tsx',
       '  + src/components/ui/button.tsx',
       '  + src/components/ui/checkbox.tsx',
+      '  + src/components/ui/field.tsx',
+      '  + src/components/ui/theme-scope.tsx',
+      '  + src/components/ui/select.tsx',
       '  + src/components/ui/table.tsx',
       '  + src/components/ui/data-table.tsx',
       '  + src/components/ui/pagination.tsx',
+      '  + src/components/ui/sort.tsx',
       '  + src/components/ui/money.tsx',
-      '  added packages: @base-ui/react, @phosphor-icons/react, @tanstack/react-table',
+      '  + src/lib/finance/finance.ts',
+      '  + src/lib/finance/block-parts.tsx',
+      '  + src/lib/finance/block-panel.tsx',
+      '  + src/lib/finance/chart.tsx',
+      '  + src/lib/finance/choice-select.tsx',
+      '  + src/lib/finance/empty-note.tsx',
+      '  + src/lib/finance/figures.tsx',
+      '  + src/lib/finance/segmented.tsx',
+      '  + src/lib/finance/state-badge.tsx',
+      '  + src/components/blocks/finance/invoice-list.tsx',
+      '  + src/components/blocks/finance/invoice-list.logic.ts',
+      '  3 file(s) already up to date',
+      '  added packages: @base-ui/react, @phosphor-icons/react, @tanstack/react-table, recharts',
     ],
   },
 ] as const;
@@ -51,7 +58,7 @@ function readStagger(element: HTMLElement) {
  * output follows line by line. Typing speed comes from the theme's stagger token and varies per
  * character, as a person types. Reduced motion shows the finished session at once when it comes into view.
  */
-export function Terminal() {
+export function Terminal({ onDone }: { onDone?: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const [frame, setFrame] = useState(0);
   const done = frame >= FRAMES.length;
@@ -102,6 +109,10 @@ export function Terminal() {
     };
   }, []);
 
+  useEffect(() => {
+    if (done) onDone?.();
+  }, [done, onDone]);
+
   const at = FRAMES[Math.min(frame, FRAMES.length - 1)];
   const typingStep = done ? -1 : (at?.step ?? 0);
 
@@ -123,7 +134,7 @@ export function Terminal() {
       </pre>
       <div
         aria-hidden
-        className="min-h-160 overflow-x-auto px-4 py-4 sm:min-h-112 font-mono text-sm leading-6 text-fg sm:px-5"
+        className="flex h-104 flex-col justify-end overflow-hidden px-4 py-4 font-mono text-xs leading-5 text-fg sm:px-5 sm:text-sm sm:leading-6"
       >
         {frame === 0 && (
           <p className="whitespace-pre">
@@ -154,11 +165,11 @@ export function Terminal() {
                   key={l}
                   className={
                     line.startsWith('  +')
-                      ? 'whitespace-pre-wrap text-positive-strong sm:whitespace-pre'
-                      : 'whitespace-pre-wrap sm:whitespace-pre'
+                      ? 'whitespace-pre-wrap text-positive-strong'
+                      : 'whitespace-pre-wrap'
                   }
                 >
-                  {line === '' ? ' ' : line}
+                  {line}
                 </p>
               ))}
             </div>

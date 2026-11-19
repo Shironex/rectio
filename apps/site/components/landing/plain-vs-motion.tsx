@@ -1,24 +1,34 @@
 'use client';
 
 import { CheckIcon, MinusIcon, PlusIcon } from '@phosphor-icons/react';
-import * as motion from '@rectio/motion';
-import * as ui from '@rectio/ui';
+import {
+  Button as MotionButton,
+  Money as MotionMoney,
+  SelectContent as MotionSelectContent,
+  SelectItem as MotionSelectItem,
+} from '@rectio/motion';
+import {
+  Button,
+  Field,
+  FieldLabel,
+  Money,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@rectio/ui';
 import { useState } from 'react';
 
 import { ProBadge } from '@/components/pro-badge';
 
+// Named imports, not namespaces: a namespace import keeps every export of both packages.
 const KITS = {
-  plain: {
-    Button: ui.Button,
-    Money: ui.Money,
-    SelectContent: ui.SelectContent,
-    SelectItem: ui.SelectItem,
-  },
+  plain: { Button, Money, SelectContent, SelectItem },
   motion: {
-    Button: motion.Button,
-    Money: motion.Money,
-    SelectContent: motion.SelectContent,
-    SelectItem: motion.SelectItem,
+    Button: MotionButton,
+    Money: MotionMoney,
+    SelectContent: MotionSelectContent,
+    SelectItem: MotionSelectItem,
   },
 };
 
@@ -31,7 +41,12 @@ const STEP = 120;
 
 /** The same small approval panel, built from one kit or the other. */
 function Panel({ kind }: { kind: keyof typeof KITS }) {
-  const { Button, Money, SelectContent, SelectItem } = KITS[kind];
+  const {
+    Button: KitButton,
+    Money: KitMoney,
+    SelectContent: KitContent,
+    SelectItem: KitItem,
+  } = KITS[kind];
   const [amount, setAmount] = useState(2481.6);
   const [period, setPeriod] = useState<string | null>('march');
   const [approving, setApproving] = useState(false);
@@ -51,26 +66,31 @@ function Panel({ kind }: { kind: keyof typeof KITS }) {
         {kind === 'motion' && <ProBadge />}
       </div>
       <div className="flex flex-col gap-6 p-5 sm:p-6">
-        <ui.Field>
-          <ui.FieldLabel>Period</ui.FieldLabel>
-          <ui.Select items={PERIODS} value={period} onValueChange={setPeriod}>
-            <ui.SelectTrigger />
-            <SelectContent>
+        <Field>
+          <FieldLabel>Period</FieldLabel>
+          <Select items={PERIODS} value={period} onValueChange={setPeriod}>
+            <SelectTrigger />
+            <KitContent>
               {PERIODS.map((p) => (
-                <SelectItem key={p.value} value={p.value}>
+                <KitItem key={p.value} value={p.value}>
                   {p.label}
-                </SelectItem>
+                </KitItem>
               ))}
-            </SelectContent>
-          </ui.Select>
-        </ui.Field>
+            </KitContent>
+          </Select>
+        </Field>
         <div className="flex items-end justify-between gap-4">
           <div className="flex flex-col gap-1">
             <span className="text-sm text-fg-muted">To approve</span>
-            <Money amount={amount} currency="EUR" locale="en-IE" className="text-3xl font-strong" />
+            <KitMoney
+              amount={amount}
+              currency="EUR"
+              locale="en-IE"
+              className="text-3xl font-strong"
+            />
           </div>
           <div className="flex gap-1.5">
-            <Button
+            <KitButton
               variant="secondary"
               iconOnly
               aria-label={`Subtract ${String(STEP)} euro`}
@@ -79,8 +99,8 @@ function Panel({ kind }: { kind: keyof typeof KITS }) {
               }}
             >
               <MinusIcon aria-hidden weight="bold" className="size-4" />
-            </Button>
-            <Button
+            </KitButton>
+            <KitButton
               variant="secondary"
               iconOnly
               aria-label={`Add ${String(STEP)} euro`}
@@ -89,10 +109,10 @@ function Panel({ kind }: { kind: keyof typeof KITS }) {
               }}
             >
               <PlusIcon aria-hidden weight="bold" className="size-4" />
-            </Button>
+            </KitButton>
           </div>
         </div>
-        <Button
+        <KitButton
           loading={approving}
           onClick={() => {
             setApproving(true);
@@ -105,7 +125,7 @@ function Panel({ kind }: { kind: keyof typeof KITS }) {
         >
           <CheckIcon aria-hidden weight="bold" className="size-4" />
           {approved ? 'Approved' : 'Approve'}
-        </Button>
+        </KitButton>
       </div>
     </div>
   );
