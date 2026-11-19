@@ -69,6 +69,19 @@ const MB = 1024 * 1024;
 
 const sectionClass = 'scroll-mt-24 p-5 sm:p-8';
 
+/** Marks the fields the form cannot save without. */
+function RequiredMark() {
+  return <span className="text-sm font-regular text-fg-subtle">Required</span>;
+}
+
+/** Scrolls to the first field with an error and puts the cursor in it. */
+function focusFirstInvalid(form: HTMLFormElement) {
+  const field = form.querySelector<HTMLElement>('[aria-invalid="true"]');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  field?.scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' });
+  field?.focus({ preventScroll: true });
+}
+
 function AppearanceSection() {
   const { theme, mode } = useAppearance();
   return (
@@ -146,7 +159,7 @@ function SettingsForm({ forceInvalid }: { forceInvalid: boolean }) {
     event.preventDefault();
     setTried(true);
     if (problems > 0) {
-      event.currentTarget.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+      focusFirstInvalid(event.currentTarget);
       return;
     }
     setDirty(false);
@@ -187,8 +200,11 @@ function SettingsForm({ forceInvalid }: { forceInvalid: boolean }) {
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <Field invalid={show('name') !== null}>
-                <FieldLabel>Company name</FieldLabel>
+                <FieldLabel>
+                  Company name <RequiredMark />
+                </FieldLabel>
                 <Input
+                  required
                   value={name}
                   onChange={(event) => {
                     setName(event.target.value);
@@ -202,8 +218,11 @@ function SettingsForm({ forceInvalid }: { forceInvalid: boolean }) {
                 <Input defaultValue={COMPANY.legalName} />
               </Field>
               <Field invalid={show('taxId') !== null}>
-                <FieldLabel>VAT number</FieldLabel>
+                <FieldLabel>
+                  VAT number <RequiredMark />
+                </FieldLabel>
                 <Input
+                  required
                   value={taxId}
                   onChange={(event) => {
                     setTaxId(event.target.value);
@@ -213,8 +232,11 @@ function SettingsForm({ forceInvalid }: { forceInvalid: boolean }) {
                 <FieldError>{show('taxId')}</FieldError>
               </Field>
               <Field invalid={show('email') !== null}>
-                <FieldLabel>Billing email</FieldLabel>
+                <FieldLabel>
+                  Billing email <RequiredMark />
+                </FieldLabel>
                 <Input
+                  required
                   type="email"
                   value={email}
                   onChange={(event) => {
@@ -273,9 +295,12 @@ function SettingsForm({ forceInvalid }: { forceInvalid: boolean }) {
                 />
               </Field>
               <Field invalid={show('prefix') !== null}>
-                <FieldLabel>Number prefix</FieldLabel>
+                <FieldLabel>
+                  Number prefix <RequiredMark />
+                </FieldLabel>
                 <InputGroup>
                   <InputGroupInput
+                    required
                     value={prefix}
                     onChange={(event) => {
                       setPrefix(event.target.value);
@@ -378,17 +403,28 @@ function SettingsForm({ forceInvalid }: { forceInvalid: boolean }) {
               )}
             >
               {failing ? (
-                <WarningCircleIcon aria-hidden weight="bold" className="size-4 shrink-0" />
-              ) : dirty ? (
-                <PencilSimpleIcon aria-hidden weight="bold" className="size-4 shrink-0" />
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 rounded-control font-medium underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus pointer-coarse:min-h-(--rx-control-height-touch)"
+                  onClick={(event) => {
+                    const form = event.currentTarget.closest('form');
+                    if (form !== null) focusFirstInvalid(form);
+                  }}
+                >
+                  <WarningCircleIcon aria-hidden weight="bold" className="size-4 shrink-0" />
+                  {`${String(problems)} ${problems === 1 ? 'field needs' : 'fields need'} attention`}
+                  <span className="sr-only">, go to the first one</span>
+                </button>
               ) : (
-                <CheckCircleIcon aria-hidden weight="bold" className="size-4 shrink-0" />
+                <>
+                  {dirty ? (
+                    <PencilSimpleIcon aria-hidden weight="bold" className="size-4 shrink-0" />
+                  ) : (
+                    <CheckCircleIcon aria-hidden weight="bold" className="size-4 shrink-0" />
+                  )}
+                  {dirty ? 'Unsaved changes' : 'All changes saved'}
+                </>
               )}
-              {failing
-                ? `${String(problems)} ${problems === 1 ? 'field needs' : 'fields need'} attention`
-                : dirty
-                  ? 'Unsaved changes'
-                  : 'All changes saved'}
             </p>
             <div className="ms-auto flex shrink-0 gap-2">
               <Button
