@@ -1,6 +1,6 @@
 import { ArrowLeftIcon } from '@phosphor-icons/react';
 import { Money, ThemeScope, formatMoney } from '@rectio/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { Mode, ThemeId } from '../themes';
 import { AddExpenseDialog } from './add-expense-dialog';
@@ -8,6 +8,8 @@ import { EXPENSES, categoryLabel, type Expense } from './data';
 
 const CURRENCY = 'EUR';
 const LOCALE = 'en-IE';
+/** Long enough to read twice; the highlighted row stays as the lasting trace. */
+const STATUS_MS = 6000;
 
 /** The finance composition: an expense report with the add expense dialog. */
 export function ExpenseReport({ theme, mode }: { theme: ThemeId; mode: Mode }) {
@@ -15,6 +17,20 @@ export function ExpenseReport({ theme, mode }: { theme: ThemeId; mode: Mode }) {
   const [status, setStatus] = useState('');
   const [lastAdded, setLastAdded] = useState<string | null>(null);
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+  useEffect(() => {
+    if (lastAdded === null) return;
+    document.querySelector(`[data-row="${lastAdded}"]`)?.scrollIntoView({
+      block: 'nearest',
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+    const timer = window.setTimeout(() => {
+      setStatus('');
+    }, STATUS_MS);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [lastAdded]);
 
   return (
     <ThemeScope theme={theme} mode={mode} className="min-h-dvh">
@@ -74,6 +90,7 @@ export function ExpenseReport({ theme, mode }: { theme: ThemeId; mode: Mode }) {
               {expenses.map((e) => (
                 <tr
                   key={e.id}
+                  data-row={e.id}
                   data-new={e.id === lastAdded || undefined}
                   className="border-b border-line transition-colors duration-slow ease-standard data-new:bg-surface-hover"
                 >
