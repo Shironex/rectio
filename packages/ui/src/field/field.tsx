@@ -17,13 +17,11 @@ export const controlSurface = cn(
 );
 
 /**
- * Focus ring for the element that holds keyboard focus. It sits outside the border, so an invalid
- * field keeps its red edge while focused, and turns negative too so focus never reads as valid.
+ * Focus ring for the element that holds keyboard focus. One signal everywhere: it sits outside the
+ * border, so an invalid field shows its red edge and the focus ring together.
  */
-export const controlFocus = cn(
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-  'data-invalid:focus-visible:outline-negative data-invalid:focus-visible:ring-0',
-);
+export const controlFocus =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
 
 export type FieldProps = WithClassName<ComponentProps<typeof BaseField.Root>>;
 
@@ -44,14 +42,28 @@ export function Field({ className, invalid, ...props }: FieldProps) {
   );
 }
 
-export type FieldLabelProps = WithClassName<ComponentProps<typeof BaseField.Label>>;
+export type FieldLabelProps = WithClassName<ComponentProps<typeof BaseField.Label>> & {
+  /**
+   * Marks the field as optional. Forms mark the minority: when most fields are required, label the
+   * optional ones, and the rest read as required.
+   */
+  optional?: boolean;
+};
 
-export function FieldLabel({ className, ...props }: FieldLabelProps) {
+export function FieldLabel({ className, optional = false, children, ...props }: FieldLabelProps) {
   return (
     <BaseField.Label
-      className={cn('w-fit text-sm font-medium text-fg data-disabled:text-fg-disabled', className)}
+      className={cn(
+        'flex w-fit items-baseline gap-1.5 text-sm font-medium text-fg data-disabled:text-fg-disabled',
+        className,
+      )}
       {...props}
-    />
+    >
+      {children}
+      {/* The space keeps "Note Optional" as two words in the accessible name; flex drops it visually. */}
+      {optional && ' '}
+      {optional && <span className="font-regular text-fg-subtle">Optional</span>}
+    </BaseField.Label>
   );
 }
 

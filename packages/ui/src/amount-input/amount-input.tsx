@@ -72,7 +72,6 @@ export function AmountInput({
           controlSurface,
           'flex items-center gap-2 px-(--rx-field-padding-x) numeric',
           'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus',
-          'data-invalid:has-focus-visible:outline-negative data-invalid:has-focus-visible:ring-0',
         )}
       >
         {before && affix}

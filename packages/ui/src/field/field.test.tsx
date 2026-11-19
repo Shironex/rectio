@@ -58,3 +58,15 @@ describe('Field invalid set by the app', () => {
     expect(input).toHaveAccessibleDescription('No cost centre CC-9.');
   });
 });
+
+describe('FieldLabel optional', () => {
+  it('adds the word to the accessible name, not only a visual marker', () => {
+    render(
+      <Field>
+        <FieldLabel optional>Note</FieldLabel>
+        <Input />
+      </Field>,
+    );
+    expect(screen.getByRole('textbox', { name: 'Note Optional' })).toBeInTheDocument();
+  });
+});
