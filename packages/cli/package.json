@@ -26,6 +26,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@rectio/registry": "workspace:*",
     "diff": "^9.0.0",
     "zod": "^4.6.7"
