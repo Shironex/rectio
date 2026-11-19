@@ -298,7 +298,8 @@ export function DataTableBody<TData extends RowData>({
                   <span
                     aria-hidden
                     className={cn(
-                      'inline-block h-3 rounded-(--rx-badge-radius) bg-surface-sunken align-middle',
+                      // The border colour stays visible on the canvas in light and dark alike.
+                      'inline-block h-3 rounded-(--rx-badge-radius) bg-line align-middle',
                       // Widths relative to the column, so skeletons never widen the table. Varied
                       // widths read as text; a uniform bar reads as a progress meter.
                       column.id === 'select'

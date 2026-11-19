@@ -63,10 +63,11 @@ const CLASS_NAMES: DayPickerProps['classNames'] = {
     '[&>button]:bg-accent [&>button]:font-medium [&>button]:text-accent-contrast',
     '[&>button]:hover:bg-accent-hover',
   ),
-  range_start: 'rounded-s-(--rx-calendar-radius) bg-accent-subtle',
-  range_end: 'rounded-e-(--rx-calendar-radius) bg-accent-subtle',
+  // The band between the ends uses the same quiet tint as a selected table row.
+  range_start: 'rounded-s-(--rx-calendar-radius) bg-surface-selected',
+  range_end: 'rounded-e-(--rx-calendar-radius) bg-surface-selected',
   range_middle: cn(
-    'bg-accent-subtle',
+    'bg-surface-selected',
     '[&>button]:rounded-none! [&>button]:bg-transparent! [&>button]:font-regular! [&>button]:text-fg!',
     '[&>button]:hover:bg-surface-hover!',
   ),
