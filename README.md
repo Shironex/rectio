@@ -188,7 +188,8 @@ key also installs the free DataTable, Badge and Money it renders.
 `diff`).
 
 ```sh
-rectio init [--theme ledger] [--css src/index.css] [--registry <url|folder>]
+rectio init [--theme ledger] [--css src/index.css] [--framework vite|next|tanstack-start]
+            [--force] [--dry-run] [--no-install] [--registry <url|folder>]
 rectio add button dialog money [--overwrite] [--dry-run] [--no-install]
 rectio diff dialog
 rectio list [--type theme] [--tier pro]
@@ -201,6 +202,9 @@ rectio mcp [--registry <url|folder>]
   on v3 with the upgrade command), finds the CSS file that imports Tailwind and the import alias
   in `tsconfig.json` (following references and relative `extends`). It writes `rectio.json` and
   installs `tokens`, the chosen theme and `cn`. Without an alias it stops and says what to add.
+  `--framework` names the framework when detection fails, `--force` rewrites an existing
+  `rectio.json`, `--dry-run` prints the plan and writes nothing, and `--no-install` leaves the
+  package manager alone. A non-default theme prints one note: set `data-theme` on `<html>`.
 - **add** resolves the dependency graph from the index (cycles and unknown items are named),
   fetches every item, checks its schema and integrity, plans every write, and only then writes.
   A file the user edited since rectio wrote it stops the whole add (nothing written) unless
