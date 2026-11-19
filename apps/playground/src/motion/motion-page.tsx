@@ -109,7 +109,7 @@ function Specimen({
         <p className="min-h-[2lh] max-w-prose text-sm text-fg-muted">{note}</p>
         {/* One fixed slot for the timing in both columns, so each pair starts level. */}
         <p
-          className="min-h-[2lh] font-mono text-xs text-fg-muted"
+          className="mt-1 min-h-[2lh] font-mono text-xs text-fg-muted"
           ref={(element) => {
             if (element === null) return;
             const tokens = readMotionTokens(element);
@@ -131,10 +131,10 @@ function ButtonSpecimen() {
       title="Button"
       plainSpec={(t) => `Press: CSS scale, ${ms(t.duration.fast)}. Loading: instant swap.`}
       spec={(t) =>
-        `Press: ${springSpec(t.spring.press)}. Loading: label out in ${ms(t.duration.fast)}, spinner in from ${ms(t.duration.fast * 0.4)}.`
+        `Press: ${springSpec(t.spring.press)}. Loading: label out in ${ms(t.duration.fast)}, spinner in from ${ms(t.duration.fast * 0.6)}.`
       }
       plain="Press scales in CSS. Loading swaps the label for a spinner, same width."
-      motion="Press returns to rest on a spring. Loading lifts the label out and the spinner in."
+      motion="Press eases back to rest with no overshoot. Loading lifts the label out, then the spinner in."
     >
       <Button
         loading={saving}
@@ -339,7 +339,7 @@ function SelectSpecimen() {
         `List: ${springSpec(t.spring.overlay)}. Highlight: ${springSpec(t.spring.press)}.`
       }
       plain="The list fades in from its trigger; each option highlights itself."
-      motion="The list springs from its trigger. On arrow keys, one highlight glides to the next option."
+      motion="The list grows from its trigger. On arrow keys, one highlight glides to the next option."
     >
       <Field className="w-56">
         <FieldLabel>Category</FieldLabel>
@@ -441,18 +441,20 @@ function Page({
               Expense report with motion
             </a>
           </nav>
-          <label className="inline-flex min-h-6 w-fit items-center gap-2 text-sm text-fg">
+          <label className="flex min-h-6 w-fit items-start gap-2 text-sm text-fg">
             <input
               type="checkbox"
               checked={off}
               onChange={(event) => {
                 onOffChange(event.target.checked);
               }}
-              className="size-4 accent-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              className="mt-0.5 size-4 shrink-0 accent-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             />
-            Turn motion off (what{' '}
-            <code className="font-mono text-sm">{'<MotionPreferenceProvider value="off">'}</code>{' '}
-            does)
+            <span>
+              Turn motion off (what{' '}
+              <code className="font-mono text-sm">{'<MotionPreferenceProvider value="off">'}</code>{' '}
+              does)
+            </span>
           </label>
           {still && (
             <p role="note" className="max-w-prose text-sm text-fg-muted">
