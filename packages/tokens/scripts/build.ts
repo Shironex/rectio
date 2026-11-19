@@ -207,6 +207,14 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   font-variant-numeric: tabular-nums lining-nums;
 }`;
 
+  const scrollbar = `/* A row that scrolls sideways without a bar, such as filter tabs on a phone. */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}`;
+
   return `${HEADER}
 @import './themes.css';
 
@@ -231,6 +239,8 @@ ${map.map((m) => `  ${m}`).join('\n')}
 ${durations.join('\n\n')}
 
 ${numeric}
+
+${scrollbar}
 `;
 }
 
