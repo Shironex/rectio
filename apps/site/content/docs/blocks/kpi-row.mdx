@@ -60,9 +60,37 @@ tab shows the preview's usage. The block's own source comes with the license.
       default: "'Key figures'",
       description: 'Names the row for assistive technology.',
     },
+    messages: {
+      type: 'Partial<KpiRowMessages>',
+      description: 'The block\'s words. Pass the keys you change; see `KPI_ROW_MESSAGES`.',
+    },
     className: { type: 'string' },
   }}
 />
+
+## Messages
+
+Every word the block prints, including what screen readers hear, comes from `messages`. The full
+English defaults are exported as `KPI_ROW_MESSAGES`, typed as `KpiRowMessages`. Pass only the keys you
+change; a message that counts or names a figure is a small function, so a language can order the
+words and choose its plural form with `plural()`.
+
+```tsx
+<KpiRow
+  kpis={kpis}
+  currency="PLN"
+  locale="pl-PL"
+  comparison="vs luty"
+  messages={{
+    label: 'Kluczowe wskaźniki',
+    better: 'korzystnie',
+    worse: 'niekorzystnie',
+    points: (points) => `${points} p.p.`,
+  }}
+/>
+```
+
+A complete set typed as `KpiRowMessages` fails to compile when a key is missing.
 
 ## Logic
 

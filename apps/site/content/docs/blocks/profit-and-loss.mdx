@@ -1,0 +1,136 @@
+---
+title: Profit and loss
+description: 'An income statement for a period, with subtotals, margins and the change against a comparison period.'
+pro: true
+---
+
+<Preview
+  name="profit-and-loss"
+  plain={<Demo name="profit-and-loss" />}
+  motion={<Demo name="profit-and-loss.motion" />}
+  importLine="import { ProfitAndLoss } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add profit-and-loss
+```
+
+The motion variant is `motion-profit-and-loss`. It installs the plain block too and changes only how
+the block enters.
+
+## Usage
+
+Each account line names its section: revenue, cost of sales, operating expenses, other income,
+other expenses or tax. Amounts are as the books show them, revenue and costs both positive. The
+statement works down from revenue to gross profit, operating profit, profit before tax and the net
+line, printing each result only where the sections above it make it differ, with its margin on
+revenue.
+
+Give lines a `comparison` amount and the statement adds the comparison column and the change. The
+change carries three signals that agree: the amount signed as current minus comparison, an arrow
+with the words up or down, and colour for whether it helps profit, which flips for costs. On a
+narrow block the comparison and change fold under the amount.
+
+Each section folds to its subtotal with its heading button; `defaultCollapsed` starts sections
+folded, and Collapse all folds the whole statement to its subtotals.
+
+```tsx
+<ProfitAndLoss
+  lines={lines}
+  currency="EUR"
+  locale="en-GB"
+  period="Q1 2026"
+  comparisonPeriod="Q1 2025"
+  defaultCollapsed={['operatingExpenses']}
+/>
+```
+
+The block is data-agnostic: it takes plain records and never fetches.
+
+## Props
+
+<TypeTable
+  type={{
+    lines: {
+      type: 'readonly PlLine[]',
+      description: 'id, section, account, optional code, current and optional comparison amount.',
+    },
+    currency: {
+      type: 'string',
+      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+    },
+    locale: {
+      type: 'string',
+      default: 'the runtime locale',
+      description: 'BCP 47 locale for figures, such as en-GB or pl-PL.',
+    },
+    period: { type: 'string', description: 'The period, such as "Q1 2026". Heads the amount column.' },
+    comparisonPeriod: {
+      type: 'string',
+      description: 'The comparison period, such as "Q1 2025". Heads its column.',
+    },
+    defaultCollapsed: {
+      type: 'readonly PlSection[]',
+      default: '[]',
+      description: 'Sections that start folded to their subtotal.',
+    },
+    title: { type: 'string', default: "'Profit and loss'" },
+    messages: {
+      type: 'Partial<ProfitAndLossMessages>',
+      description: "The block's words. Pass the keys you change; see `PROFIT_AND_LOSS_MESSAGES`.",
+    },
+    emptyAction: {
+      type: 'ReactNode',
+      description: 'Shown in the empty state under its note, such as a button that connects the books.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Messages
+
+Every word the block prints comes from `messages`. The English defaults are exported as
+`PROFIT_AND_LOSS_MESSAGES`, typed as `ProfitAndLossMessages`. Pass only the keys you change; a
+message that names a figure is a small function, so a language orders the words itself.
+
+```tsx
+<ProfitAndLoss
+  lines={lines}
+  currency="PLN"
+  locale="pl-PL"
+  messages={{
+    title: 'Rachunek zysków i strat',
+    results: {
+      grossProfit: 'Zysk brutto ze sprzedaży',
+      operatingProfit: 'Zysk operacyjny',
+      profitBeforeTax: 'Zysk przed opodatkowaniem',
+      netProfit: 'Zysk netto',
+    },
+    changeWords: (direction, share) =>
+      `${direction === 'up' ? 'wzrost' : 'spadek'}${share === null ? '' : ` o ${share}`}`,
+  }}
+/>
+```
+
+A complete set typed as `ProfitAndLossMessages` fails to compile when a key is missing.
+
+## Logic
+
+The money logic is exported and tested on its own, so a server can compute the same figures:
+`profitAndLoss(lines, currency)` returns section subtotals, results, margins and changes, every sum
+in minor units; `lineChange(line, currency)` and `plChange(current, comparison, income, currency)`
+give one change.
+
+## Accessibility
+
+- The statement is one table: section toggles are buttons with `aria-expanded` and `aria-controls`, reachable by keyboard.
+- A change never rests on colour: it has a sign, an arrow and the words up or down.
+- Every figure is in tabular numerals with a true minus sign.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

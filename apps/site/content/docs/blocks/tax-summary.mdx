@@ -1,0 +1,111 @@
+---
+title: Tax summary
+description: 'VAT or sales tax for a filing period: output and input per rate, net payable or refund, due date and status.'
+pro: true
+---
+
+<Preview
+  name="tax-summary"
+  plain={<Demo name="tax-summary" />}
+  motion={<Demo name="tax-summary.motion" />}
+  importLine="import { TaxSummary } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add tax-summary
+```
+
+The motion variant is `motion-tax-summary`. It installs the plain block too and changes only how the
+block enters.
+
+## Usage
+
+Pass one entry per rate with the taxable base of sales and purchases; the tax is worked out from the
+rate when you leave it out, or taken as given when your books already hold it. Rates are fractions
+(0.23 for 23%), or `exempt`. The block reads the net in words: tax to pay and by when, or a refund to
+reclaim.
+
+`status` is `open`, `ready`, `filed` or `paid`. The due date shows the days left and turns overdue
+once it passes with the return not filed, or filed with tax still to pay. While the return is open
+the primary action is Prepare return, once ready it is File return; both call `onFile`. `onExport`
+adds an Export button.
+
+```tsx
+<TaxSummary
+  entries={entries}
+  currency="EUR"
+  locale="en-GB"
+  period="Q1 2026"
+  due={new Date(2026, 3, 25)}
+  status="open"
+  onFile={() => openReturn()}
+  onExport={() => downloadCsv()}
+/>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    entries: {
+      type: 'readonly TaxRateEntry[]',
+      description: 'id, rate, outputBase, inputBase and optional outputTax and inputTax.',
+    },
+    currency: { type: 'string', description: 'ISO 4217 code every amount is in.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    period: { type: 'string', description: 'The filing period, such as "Q1 2026".' },
+    due: { type: 'Date', description: 'When the return and any tax due must be in.' },
+    status: { type: "'open' | 'ready' | 'filed' | 'paid'" },
+    today: { type: 'Date', default: 'new Date()' },
+    onFile: { type: '() => void', description: 'Prepares the return while open, files it once ready.' },
+    onExport: { type: '() => void', description: 'Adds an Export button.' },
+    title: { type: 'string', default: "'VAT return'" },
+    messages: {
+      type: 'Partial<TaxSummaryMessages>',
+      description: "The block's words. Pass the keys you change; see `TAX_SUMMARY_MESSAGES`.",
+    },
+    emptyAction: {
+      type: 'ReactNode',
+      description: 'Shown in the empty state under its note, such as a link to the invoices.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Messages
+
+Every word comes from `messages`; the English defaults are `TAX_SUMMARY_MESSAGES`, typed as
+`TaxSummaryMessages`. For sales tax, change the title and the figure names:
+
+```tsx
+<TaxSummary
+  {...props}
+  messages={{
+    title: 'Sales tax',
+    outputFigure: 'Sales tax collected',
+    inputFigure: 'Tax paid on purchases',
+  }}
+/>
+```
+
+`dueState(state, days)` words the due date, so a language picks its own plural for the days left.
+
+## Logic
+
+`taxSummary(entries, currency)` returns rows per rate, totals and whether the period is payable or a
+refund, every sum in minor units. `taxOn(base, rate, currency)`, `daysToDue(due, today)` and
+`isTaxOverdue(status, due, today, position)` are exported too.
+
+## Accessibility
+
+- Status reads in words with an icon on its badge, never colour alone; overdue adds a warning icon and words.
+- On a narrow block output and input tax fold under each rate, so no column is lost.
+- Every figure is in tabular numerals with a true minus sign.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

@@ -1,0 +1,118 @@
+---
+title: Vendors list
+description: 'Suppliers with what you owe them, what is overdue and when the next bill falls due.'
+pro: true
+---
+
+<Preview
+  name="vendors-list"
+  plain={<Demo name="vendors-list" />}
+  motion={<Demo name="vendors-list.motion" />}
+  importLine="import { VendorsList } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add vendors-list
+```
+
+The motion variant is `motion-vendors-list`. It installs the plain block too and changes only how
+the block enters.
+
+## Usage
+
+Pass each vendor with its unpaid bills; the block works out the balance, what is overdue, the next
+due date and what falls due in the next `horizonDays`. The list opens sorted by overdue, largest
+first. Search matches every word in the name or contact, folding accents, so "lodz" finds "Łódź".
+Terms and the last payment get their own columns from a 64rem block; narrower blocks fold terms,
+the next due date and status under the vendor, and a phone sorts with a Sort by control.
+
+The block is data-agnostic: it takes plain records and calls you back; it never fetches.
+
+## Props
+
+<TypeTable
+  type={{
+    vendors: {
+      type: 'readonly Vendor[]',
+      description: 'name, contact, termsDays, status, unpaid bills and the last payment.',
+    },
+    currency: {
+      type: 'string',
+      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+    },
+    locale: {
+      type: 'string',
+      default: 'the runtime locale',
+      description: 'BCP 47 locale for figures, dates and name sorting, such as en-GB or pl-PL.',
+    },
+    today: { type: 'Date', default: 'new Date()' },
+    defaultFilter: {
+      type: "'all' | 'active' | 'on-hold' | 'archived'",
+      default: "'all'",
+    },
+    horizonDays: { type: 'number', default: '7' },
+    onOpenVendor: {
+      type: '(vendor: Vendor) => void',
+      description: 'The name becomes a button that opens the vendor.',
+    },
+    onAddVendor: { type: '() => void', description: 'Shows an Add vendor button in the header.' },
+    title: { type: 'string', default: "'Vendors'" },
+    messages: {
+      type: 'Partial<VendorsListMessages>',
+      description: "The block's words. Pass the keys you change; see `VENDORS_LIST_MESSAGES`.",
+    },
+    emptyAction: {
+      type: 'ReactNode',
+      description: 'A button that imports vendors. Shown in the empty state under its note.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Messages
+
+Every word the block prints, including what screen readers hear, comes from `messages`. The full
+English defaults are exported as `VENDORS_LIST_MESSAGES`, typed as `VendorsListMessages`. Pass only
+the keys you change; a message that counts or names a figure is a small function, so a language can
+order the words and choose its plural form with `plural()`.
+
+```tsx
+import { plural } from '@rectio/blocks';
+
+<VendorsList
+  vendors={vendors}
+  currency="PLN"
+  locale="pl-PL"
+  messages={{
+    title: 'Dostawcy',
+    searchLabel: 'Szukaj dostawców',
+    termsValue: (days) => `${days} dni`,
+    totalRow: (count) =>
+      `Razem, ${count} ${plural(count, { one: 'dostawca', few: 'dostawcy', many: 'dostawców', other: 'dostawcy' }, 'pl-PL')}`,
+  }}
+/>;
+```
+
+A complete set typed as `VendorsListMessages` fails to compile when a key is missing.
+
+## Logic
+
+The money logic is exported and tested on its own, so a server can compute the same figures:
+`vendorFigures(vendor, today, currency)`, `vendorTotals(vendors, today, currency)`,
+`searchVendors(vendors, query)`, `foldSearchText(text)` and
+`sortVendors(vendors, key, { today, currency, locale, descending })`.
+
+## Accessibility
+
+- The search field has a visible label; no results says so in a status and offers to clear the search and filter.
+- Every status is a badge with a word and an icon, never colour alone; overdue amounts say "overdue" in words where their column is folded.
+- Column headers sort and announce the new order; a narrow block sorts with a labelled Sort by control.
+- Every figure is in tabular numerals and every sum runs in minor units.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

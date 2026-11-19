@@ -1,0 +1,109 @@
+---
+title: Cash runway
+description: 'Cash now, average monthly burn and months of runway, with the balance projected toward zero.'
+pro: true
+---
+
+<Preview
+  name="cash-runway"
+  plain={<Demo name="cash-runway" />}
+  motion={<Demo name="cash-runway.motion" />}
+  importLine="import { CashRunway } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add cash-runway
+```
+
+The motion variant is `motion-cash-runway`. It installs the plain block too and changes only how
+the block enters.
+
+## Usage
+
+Pass the monthly history of cash in and out and the balance at the end of its last month. The block
+averages the net burn over the last 3, 6 or 12 months (a switch offers the windows the history
+fills), divides the balance by it for the runway, and says in words the month cash runs out. When
+more comes in than goes out it says cash is not burning instead of a number.
+
+The chart shows month-end balances: the history solid, worked back from today's balance, then the
+projection dashed toward the zero line. `planned` adds known one-offs to the projection, such as a
+funding round or an annual licence; `threshold` draws a minimum cash line and names the month the
+balance drops below it. A runway under `alertMonths` (6 by default) is emphasised.
+
+```tsx
+<CashRunway
+  history={history}
+  balance={412_600}
+  currency="EUR"
+  planned={[{ month: new Date(2026, 5, 1), amount: -18_000, label: 'Annual insurance' }]}
+  threshold={100_000}
+/>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    history: {
+      type: 'readonly RunwayMonth[]',
+      description: 'month, inflow and outflow (positive) per month.',
+    },
+    balance: { type: 'number', description: 'Cash at the end of the last month of history.' },
+    currency: { type: 'string', description: 'ISO 4217 code every amount is in.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    planned: {
+      type: 'readonly PlannedChange[]',
+      description: 'month, signed amount and label of each known one-off ahead.',
+    },
+    threshold: { type: 'number', description: 'Cash you do not want to go below.' },
+    alertMonths: { type: 'number', default: '6', description: 'Runway under this is a warning.' },
+    defaultWindow: { type: '3 | 6 | 12', default: '3' },
+    horizon: { type: 'number', default: '24', description: 'Months the projection may run at most.' },
+    title: { type: 'string', default: "'Cash runway'" },
+    messages: {
+      type: 'Partial<CashRunwayMessages>',
+      description: "The block's words. Pass the keys you change; see `CASH_RUNWAY_MESSAGES`.",
+    },
+    emptyAction: {
+      type: 'ReactNode',
+      description: 'Shown in the empty state under its note, such as a button that connects a bank.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Messages
+
+Every word comes from `messages`; the English defaults are `CASH_RUNWAY_MESSAGES`, typed as
+`CashRunwayMessages`. Messages that name a month get a `MonthWords` with the formatted text and the
+date itself, so a language that needs another case of the month's name can build it:
+
+```tsx
+<CashRunway
+  {...props}
+  messages={{
+    runwayMonths: (months, count) =>
+      `${months} ${plural(count, { one: 'miesiąc', few: 'miesiące', many: 'miesięcy', other: 'miesiąca' }, 'pl-PL')}`,
+  }}
+/>
+```
+
+## Logic
+
+`averageBurn(history, currency, window)` and `cashRunway(history, balance, currency, options)` are
+exported and tested on their own: burn, runway in months, the zero-cash and threshold months and
+the balance series, every sum in minor units.
+
+## Accessibility
+
+- The chart has a summary read before the plot and a table of the same balances, with planned changes named.
+- Arrow keys on the chart step through the months; the tooltip follows.
+- The runway and the month cash runs out are said in words, not left to the line.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

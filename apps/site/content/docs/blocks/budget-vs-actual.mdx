@@ -55,9 +55,40 @@ tab shows the preview's usage. The block's own source comes with the license.
     },
     period: { type: 'string', description: 'Such as "Q1 2026, 11 of 13 weeks".' },
     title: { type: 'string', default: "'Budget vs actual'" },
+    messages: {
+      type: 'Partial<BudgetVsActualMessages>',
+      description: 'The block\'s words. Pass the keys you change; see `BUDGET_VS_ACTUAL_MESSAGES`.',
+    },
+    emptyAction: {
+      type: 'ReactNode',
+      description: 'A button that sets the first budget.. Shown in the empty state under its note.',
+    },
     className: { type: 'string' },
   }}
 />
+
+## Messages
+
+Every word the block prints, including what screen readers hear, comes from `messages`. The full
+English defaults are exported as `BUDGET_VS_ACTUAL_MESSAGES`, typed as `BudgetVsActualMessages`. Pass only the keys you
+change; a message that counts or names a figure is a small function, so a language can order the
+words and choose its plural form with `plural()`.
+
+```tsx
+<BudgetVsActual
+  lines={lines}
+  currency="PLN"
+  locale="pl-PL"
+  messages={{
+    title: 'Budżet i wykonanie',
+    onBudget: 'Zgodnie z budżetem',
+    varianceWords: (position, percent) =>
+      `${percent ?? ''} ${position === 'over' ? 'powyżej' : 'poniżej'}`.trim(),
+  }}
+/>
+```
+
+A complete set typed as `BudgetVsActualMessages` fails to compile when a key is missing.
 
 ## Logic
 

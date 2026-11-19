@@ -55,9 +55,39 @@ tab shows the preview's usage. The block's own source comes with the license.
     onRecordPayment: { type: '() => void', description: 'Shown while a balance is open.' },
     onSend: { type: '() => void', description: 'Shown for drafts.' },
     onDownload: { type: '() => void', description: 'Shows a PDF button.' },
+    messages: {
+      type: 'Partial<InvoiceDetailMessages>',
+      description: 'The block\'s words. Pass the keys you change; see `INVOICE_DETAIL_MESSAGES`.',
+    },
     className: { type: 'string' },
   }}
 />
+
+## Messages
+
+Every word the block prints, including what screen readers hear, comes from `messages`. The full
+English defaults are exported as `INVOICE_DETAIL_MESSAGES`, typed as `InvoiceDetailMessages`. Pass only the keys you
+change; a message that counts or names a figure is a small function, so a language can order the
+words and choose its plural form with `plural()`.
+
+```tsx
+import { plural } from '@rectio/blocks';
+
+<InvoiceDetail
+  invoice={invoice}
+  currency="PLN"
+  locale="pl-PL"
+  messages={{
+    heading: (number) => <>Faktura {number}</>,
+    billedTo: 'Nabywca',
+    balanceDue: 'Do zapłaty',
+    overdueDescription: (days, due) =>
+      `${days} ${plural(days, { one: 'dzień', other: 'dni' }, 'pl-PL')} po terminie, termin ${due}`,
+  }}
+/>
+```
+
+A complete set typed as `InvoiceDetailMessages` fails to compile when a key is missing.
 
 ## Logic
 
