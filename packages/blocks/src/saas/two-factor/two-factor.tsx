@@ -9,6 +9,7 @@ import { inlineLink } from '../lib/styles';
 import {
   backupCodeError,
   formatTwoFactorWait,
+  maskTwoFactorDestination,
   normalizeBackupCode,
   twoFactorCodeComplete,
   twoFactorInstruction,
@@ -50,7 +51,7 @@ export interface TwoFactorProps {
   className?: string;
 }
 
-/** Ticks once a second while a countdown runs, so the resend button can wake up. */
+/** Ticks once a second while a countdown runs, so the resend link can wake up. */
 function useTicker(running: boolean): Date {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -97,14 +98,15 @@ export function TwoFactor({
   const [remember, setRemember] = useState(false);
   const [tried, setTried] = useState(false);
   const canResend = onResend !== undefined && method !== 'app';
-  const now = useTicker(canResend && sentAt !== undefined);
-  const wait = canResend ? twoFactorResendWait(sentAt, now, resendCooldown) : 0;
   const hasError = error !== undefined && error !== null && error !== false;
   const firstSlot = useRef<HTMLInputElement>(null);
-  // A refused code sends focus back to the start, ready for the next attempt.
+  // A refused code sends focus back to the start, ready for the next attempt. Only on the change
+  // to refused: a parent re-render with the same error must not pull focus again.
+  const hadError = useRef(false);
   useEffect(() => {
-    if (hasError) firstSlot.current?.focus();
-  }, [hasError, error]);
+    if (hasError && !hadError.current) firstSlot.current?.focus();
+    hadError.current = hasError;
+  }, [hasError]);
 
   const verify = (value: string) => {
     if (pending || !twoFactorCodeComplete(value, length)) return;
@@ -154,7 +156,7 @@ export function TwoFactor({
       {...frame}
       focusHeading={switched}
       title={title ?? 'Enter your verification code'}
-      description={`${twoFactorInstruction(method, length, destination)} We check it as soon as you enter the last digit.`}
+      description={<Instruction method={method} length={length} destination={destination} />}
     >
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
         <Field invalid={hasError || incomplete}>
@@ -216,32 +218,14 @@ export function TwoFactor({
         )}
 
         {/* The code is checked on the last digit; this button is for paste and assistive use. */}
-        <Button type="submit" variant="secondary" loading={pending} className="w-full">
+        <Button type="submit" loading={pending} className="w-full">
           Verify
         </Button>
 
         {(canResend || onUseBackupCode !== undefined) && (
           <div className="flex items-center justify-between gap-3 border-t border-line pt-4 text-sm">
             {canResend && (
-              <button
-                type="button"
-                disabled={wait > 0}
-                onClick={onResend}
-                className={cn(
-                  inlineLink,
-                  'pointer-coarse:py-2',
-                  // The countdown stays readable: muted text, only the link's underline goes.
-                  'disabled:cursor-not-allowed disabled:font-regular disabled:text-fg-muted disabled:no-underline',
-                )}
-              >
-                {wait > 0 ? (
-                  <>
-                    New code in <span className="numeric">{formatTwoFactorWait(wait)}</span>
-                  </>
-                ) : (
-                  'Send a new code'
-                )}
-              </button>
+              <ResendButton onResend={onResend} sentAt={sentAt} cooldown={resendCooldown} />
             )}
             {onUseBackupCode !== undefined && (
               <AuthLink
@@ -258,6 +242,76 @@ export function TwoFactor({
         )}
       </form>
     </AuthFrame>
+  );
+}
+
+/** The line under the heading, with the masked number or address kept on one line. */
+function Instruction({
+  method,
+  length,
+  destination,
+}: {
+  method: TwoFactorMethod;
+  length: number;
+  destination: string | undefined;
+}) {
+  const text = twoFactorInstruction(method, length, destination);
+  const masked =
+    method === 'app' || destination === undefined
+      ? undefined
+      : maskTwoFactorDestination(destination, method);
+  const at = masked === undefined ? -1 : text.indexOf(masked);
+  return (
+    <>
+      {at < 0 || masked === undefined ? (
+        text
+      ) : (
+        <>
+          {text.slice(0, at)}
+          <span className="whitespace-nowrap">{masked}</span>
+          {text.slice(at + masked.length)}
+        </>
+      )}{' '}
+      We check it as soon as you enter the last digit.
+    </>
+  );
+}
+
+/**
+ * "Send a new code", held back until the cooldown ends. It owns the one-second tick, so only this
+ * link re-renders while it counts down, not the code slots.
+ */
+function ResendButton({
+  onResend,
+  sentAt,
+  cooldown,
+}: {
+  onResend: () => void;
+  sentAt: Date | undefined;
+  cooldown: number;
+}) {
+  const now = useTicker(sentAt !== undefined);
+  const wait = twoFactorResendWait(sentAt, now, cooldown);
+  return (
+    <button
+      type="button"
+      disabled={wait > 0}
+      onClick={onResend}
+      className={cn(
+        inlineLink,
+        'pointer-coarse:py-2',
+        // The countdown stays readable: muted text, only the link's underline goes.
+        'disabled:cursor-not-allowed disabled:font-regular disabled:text-fg-muted disabled:no-underline',
+      )}
+    >
+      {wait > 0 ? (
+        <>
+          New code in <span className="numeric">{formatTwoFactorWait(wait)}</span>
+        </>
+      ) : (
+        'Send a new code'
+      )}
+    </button>
   );
 }
 

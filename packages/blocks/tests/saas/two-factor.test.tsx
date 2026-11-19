@@ -116,4 +116,19 @@ describe('TwoFactor', () => {
     render(<TwoFactor onVerify={vi.fn()} autoFocus />);
     expect(screen.getByRole('textbox', { name: 'Verification code' })).toHaveFocus();
   });
+
+  it('refocuses only when the code is first refused, not on every render', async () => {
+    const { rerender } = render(<TwoFactor onVerify={vi.fn()} error={<span>Expired.</span>} />);
+    const remember = screen.getByRole('textbox', { name: 'Verification code' });
+    expect(remember).toHaveFocus();
+    await userEvent.tab();
+    expect(remember).not.toHaveFocus();
+    rerender(<TwoFactor onVerify={vi.fn()} error={<span>Expired.</span>} />);
+    expect(remember).not.toHaveFocus();
+  });
+
+  it('keeps the masked number on one line', () => {
+    render(<TwoFactor onVerify={vi.fn()} method="sms" destination="+44 7700 900829" />);
+    expect(screen.getByText('+44 ••• 829')).toHaveClass('whitespace-nowrap');
+  });
 });
