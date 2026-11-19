@@ -1,5 +1,5 @@
 // @ts-check
-import { findDesignValueViolations } from './detect.js';
+import { SELECTOR_METHODS, findDesignValueViolations } from './detect.js';
 
 /** Style properties that carry a design decision and must read a token (`var(--rx-...)`). */
 const DESIGN_STYLE_PROPS = new Set([
@@ -20,6 +20,24 @@ const DESIGN_STYLE_PROPS = new Set([
   'animationDuration',
   'animationTimingFunction',
 ]);
+
+/**
+ * True when `node` is the first argument of `x.querySelector(...)`, `x.closest(...)` and the other
+ * selector methods, optional chaining included.
+ *
+ * @param {any} node
+ */
+function isSelectorArgument(node) {
+  const call = node.parent;
+  if (call?.type !== 'CallExpression' || call.arguments[0] !== node) return false;
+  const callee = call.callee;
+  return (
+    callee.type === 'MemberExpression' &&
+    !callee.computed &&
+    callee.property.type === 'Identifier' &&
+    SELECTOR_METHODS.has(callee.property.name)
+  );
+}
 
 /** @type {import('eslint').Rule.RuleModule} */
 const noHardcodedDesignValues = {
@@ -43,11 +61,12 @@ const noHardcodedDesignValues = {
      * @param {import('estree').Node} node
      * @param {string} text
      * @param {number} offset Where `text` starts inside the node's source range.
+     * @param {boolean} [selector] The text is a CSS selector, not a class list.
      */
-    function check(node, text, offset) {
+    function check(node, text, offset, selector = false) {
       const start = node.range?.[0];
       if (start === undefined) return;
-      for (const v of findDesignValueViolations(text)) {
+      for (const v of findDesignValueViolations(text, { selector })) {
         const begin = start + offset + v.index;
         context.report({
           node,
@@ -63,10 +82,11 @@ const noHardcodedDesignValues = {
 
     return {
       Literal(node) {
-        if (typeof node.value === 'string') check(node, node.value, 1);
+        if (typeof node.value === 'string') check(node, node.value, 1, isSelectorArgument(node));
       },
       TemplateElement(node) {
-        check(node, node.value.raw, 0);
+        // A template element sits in a template literal; the literal is the call's argument.
+        check(node, node.value.raw, 0, isSelectorArgument(/** @type {any} */ (node).parent));
       },
       /** @param {any} node */
       JSXAttribute(node) {

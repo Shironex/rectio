@@ -1,44 +1,8 @@
 import type { IMetaCtx, IMetaRule, IViolation } from '@noctcore/harness';
 import { findDesignValueViolations } from '@rectio/design-rules';
-import ts from 'typescript';
+import { stringPieces } from '@rectio/design-rules/pieces';
 
 const RULE = 'ui-no-hardcoded-design-values';
-
-/** String and template literal pieces of a TS/TSX file, with their offsets. */
-function stringPieces(text: string, jsx: boolean): { text: string; offset: number }[] {
-  const scanner = ts.createScanner(
-    ts.ScriptTarget.Latest,
-    false,
-    jsx ? ts.LanguageVariant.JSX : ts.LanguageVariant.Standard,
-    text,
-  );
-  const pieces: { text: string; offset: number }[] = [];
-  const kinds = new Set([
-    ts.SyntaxKind.StringLiteral,
-    ts.SyntaxKind.NoSubstitutionTemplateLiteral,
-    ts.SyntaxKind.TemplateHead,
-    ts.SyntaxKind.TemplateMiddle,
-    ts.SyntaxKind.TemplateTail,
-  ]);
-  // The scanner alone cannot tell the `}` that closes a `${...}` from any other brace, so it would
-  // read the code after a template expression as template text. A stack of open braces says which
-  // `}` ends a substitution, and the template is rescanned from there.
-  const braces: ('code' | 'template')[] = [];
-  for (let kind = scanner.scan(); kind !== ts.SyntaxKind.EndOfFileToken; kind = scanner.scan()) {
-    if (kind === ts.SyntaxKind.OpenBraceToken) braces.push('code');
-    if (kind === ts.SyntaxKind.TemplateHead) braces.push('template');
-    if (kind === ts.SyntaxKind.CloseBraceToken) {
-      if (braces.pop() === 'template') {
-        kind = scanner.reScanTemplateToken(false);
-        if (kind === ts.SyntaxKind.TemplateMiddle) braces.push('template');
-      }
-    }
-    if (kinds.has(kind)) {
-      pieces.push({ text: scanner.getTokenText(), offset: scanner.getTokenStart() });
-    }
-  }
-  return pieces;
-}
 
 function lineAndColumn(text: string, index: number): { line: number; column: number } {
   const before = text.slice(0, index).split('\n');
@@ -66,10 +30,17 @@ export const uiNoHardcodedDesignValues: IMetaRule = {
       const text = ctx.read(file);
       if (text === null) continue;
       const pieces = file.endsWith('.css')
-        ? [{ text: text.replace(/\/\*[\s\S]*?\*\//g, (c) => ' '.repeat(c.length)), offset: 0 }]
+        ? [
+            {
+              text: text.replace(/\/\*[\s\S]*?\*\//g, (c) => ' '.repeat(c.length)),
+              offset: 0,
+              selector: false,
+            },
+          ]
         : stringPieces(text, file.endsWith('.tsx'));
       for (const piece of pieces) {
-        for (const v of findDesignValueViolations(piece.text)) {
+        // A selector passed to querySelector, closest or matches is not a class list.
+        for (const v of findDesignValueViolations(piece.text, { selector: piece.selector })) {
           violations.push({
             file,
             rule: RULE,

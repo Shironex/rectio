@@ -48,6 +48,18 @@ describe('findDesignValueViolations', () => {
     expect(matches(text)).toContain(expected);
   });
 
+  it('reads brackets in a selector as attribute selectors, and still checks the rest', () => {
+    /** @param {string} text */
+    const select = (text) =>
+      findDesignValueViolations(text, { selector: true }).map((v) => v.match);
+    expect(select('[data-slot="select-item"][data-highlighted]')).toEqual([]);
+    expect(select(':scope > [data-part=cell]')).toEqual([]);
+    // Without the flag the same text is an arbitrary value, so class lists stay guarded.
+    expect(matches('[data-slot="select-item"]')).toEqual(['[data-slot="select-item"]']);
+    // The flag skips only the arbitrary value check: a colour in a selector is still a colour.
+    expect(select('[style*="#fff"]')).toContain('#fff');
+  });
+
   it('reports the offset of each match', () => {
     const [violation] = findDesignValueViolations('px-2 rounded-[6px]');
     expect(violation?.index).toBe(5);

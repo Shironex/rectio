@@ -58,7 +58,18 @@ const FONT_NAMES = [
 ];
 
 /**
- * @type {{ pattern: RegExp, reason: string, accept?: (match: RegExpExecArray) => boolean }[]}
+ * DOM methods whose first argument is a CSS selector. An attribute selector such as
+ * `[data-slot="x"]` there is not an arbitrary Tailwind value, so the feeders mark those strings.
+ */
+export const SELECTOR_METHODS = new Set([
+  'querySelector',
+  'querySelectorAll',
+  'closest',
+  'matches',
+]);
+
+/**
+ * @type {{ pattern: RegExp, reason: string, arbitrary?: true, accept?: (match: RegExpExecArray) => boolean }[]}
  */
 const CHECKS = [
   {
@@ -74,6 +85,7 @@ const CHECKS = [
     // arbitrary variant such as `data-[side=top]:` is fine, so a match followed by `:` passes.
     pattern: /(?:^|[\s"'`:])!?(?:[a-z][\w-]*-)?\[[^\]\s]+\](?![\w-]*:)/g,
     reason: 'arbitrary Tailwind value: add a token, or use a token utility',
+    arbitrary: true,
     // A transition property list (`transition-[opacity,scale]`) names properties, not values.
     accept: (m) => /transition-\[[a-z-]+(?:,[a-z-]+)*\]$/.test(m[0]),
   },
@@ -129,12 +141,16 @@ const CHECKS = [
 
 /**
  * @param {string} text
+ * @param {{ selector?: boolean }} [options] `selector`: the text is a CSS selector passed to one of
+ *   `SELECTOR_METHODS`, so brackets are attribute selectors, not arbitrary values. Every other check
+ *   still runs.
  * @returns {Violation[]}
  */
-export function findDesignValueViolations(text) {
+export function findDesignValueViolations(text, options = {}) {
   /** @type {Violation[]} */
   const found = [];
   for (const check of CHECKS) {
+    if (options.selector === true && check.arbitrary === true) continue;
     check.pattern.lastIndex = 0;
     let m;
     while ((m = check.pattern.exec(text)) !== null) {
