@@ -22,7 +22,7 @@ export function PageIntro({
 }) {
   return (
     <Section
-      tone="tinted"
+      tone="plain"
       width="wide"
       labelledBy="page-title"
       className="pt-12 pb-10 sm:pt-16 sm:pb-14"

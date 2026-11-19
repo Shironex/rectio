@@ -20,7 +20,7 @@ export function ChangelogPage() {
         title="Changelog"
         description="What shipped, when. New releases every few weeks, small fixes every day."
       />
-      <Section label="Releases" className="pt-0 sm:pt-0">
+      <Section width="wide" label="Releases" className="pt-0 sm:pt-0">
         <div className="grid gap-12 lg:grid-cols-12">
           <Timeline className="lg:col-span-8">
             {RELEASES.map((release, index) => (
@@ -29,16 +29,12 @@ export function ChangelogPage() {
                 id={`v${release.version.replace('.', '-')}`}
                 tone={index === 0 ? 'accent' : 'neutral'}
                 time={{ dateTime: release.date, label: formatDate(release.date, 'en-GB') }}
-                title={
-                  <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="font-display text-2xl font-strong tracking-tight text-fg">
-                      {release.title}
-                    </span>
-                    <span className="numeric text-sm text-fg-muted">Version {release.version}</span>
-                  </span>
-                }
+                title={<span className="numeric text-fg-muted">Version {release.version}</span>}
               >
-                <div className="flex flex-col gap-4 pb-6">
+                <div className="flex flex-col gap-4 pt-2 pb-6">
+                  <h2 className="font-display text-2xl font-strong tracking-tight text-fg">
+                    {release.title}
+                  </h2>
                   <p className="max-w-prose text-lg text-pretty text-fg-muted">{release.summary}</p>
                   <ul className="flex flex-col gap-2.5">
                     {release.changes.map((change) => (

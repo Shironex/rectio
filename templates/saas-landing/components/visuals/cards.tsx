@@ -11,7 +11,7 @@ import { Button, Meter } from '@rectio/motion';
 import { Avatar, Badge, SwitchField, cn } from '@rectio/ui';
 import { useState } from 'react';
 
-import { OPEN_SHIFTS } from '@/data/schedule';
+import { DAYS, OPEN_SHIFTS, TEAM_WEEK } from '@/data/schedule';
 
 /**
  * Small pieces of the product, built from rectio components and every one live: the swap approves,
@@ -40,15 +40,16 @@ export function SwapCard() {
       <div className="flex items-center gap-3">
         <Avatar name="Ana Ribeiro" size="md" />
         <div className="flex min-w-0 flex-col">
-          <span className="truncate font-medium text-fg">Ana gives Thu 07:00 to Marco</span>
+          <span className="font-medium text-pretty text-fg">Ana swaps Thu 07:00 with Marco</span>
           <span className="text-sm text-fg-muted">Both qualified for Front desk</span>
         </div>
       </div>
       {state === 'pending' && (
         <div className="grid grid-cols-2 gap-2">
           <Button
-            size="sm"
+            size="md"
             variant="secondary"
+            aria-label="Decline Ana's swap with Marco"
             onClick={() => {
               setState('declined');
             }}
@@ -56,7 +57,8 @@ export function SwapCard() {
             Decline
           </Button>
           <Button
-            size="sm"
+            size="md"
+            aria-label="Approve Ana's swap with Marco"
             onClick={() => {
               setState('approved');
             }}
@@ -118,10 +120,11 @@ export function OpenShiftBoard() {
               </Badge>
             ) : (
               <Button
-                size="sm"
+                size="md"
                 variant="secondary"
                 className="w-24"
                 disabled={claimed !== null}
+                aria-label={`Claim ${shift.day}, ${shift.start} to ${shift.end}`}
                 onClick={() => {
                   setClaimed(shift.id);
                 }}
@@ -140,6 +143,8 @@ const AVAILABILITY = [
   { id: 'mornings', label: 'Weekday mornings', description: 'Before 12:00', on: true },
   { id: 'evenings', label: 'Weekday evenings', description: 'After 17:00', on: false },
   { id: 'weekends', label: 'Weekends', description: 'Saturday and Sunday', on: true },
+  { id: 'nights', label: 'Night shifts', description: 'After 22:00', on: false },
+  { id: 'split', label: 'Split shifts', description: 'Two parts in one day', on: false },
 ] as const;
 
 export function AvailabilityCard() {
@@ -183,9 +188,10 @@ export function TimeOffCard() {
               </Badge>
             ) : (
               <Button
-                size="sm"
+                size="md"
                 variant="secondary"
                 className="w-24"
+                aria-label={`Approve time off for ${request.name}`}
                 onClick={() => {
                   setApproved((current) => new Set(current).add(request.id));
                 }}
@@ -250,6 +256,50 @@ export function RequestCard() {
         <span className="font-medium text-fg">Holiday approved</span>
         <span className="text-sm text-fg-muted">Priya, 1 to 5 December</span>
       </div>
+    </div>
+  );
+}
+
+/** One person's week as the app shows it on their phone: every shift, and the one they offered. */
+export function MyWeekCard() {
+  const person = TEAM_WEEK[0];
+  if (person === undefined) return null;
+  return (
+    <div className="flex flex-col gap-4 bg-surface p-5 text-fg">
+      <div className="flex items-center gap-3">
+        <Avatar name={person.name} size="lg" />
+        <div className="flex min-w-0 flex-col">
+          <span className="font-medium">Your week, {person.name.split(' ')[0]}</span>
+          <span className="text-sm text-fg-muted">40 hours across 5 shifts</span>
+        </div>
+      </div>
+      <ul className="flex flex-col divide-y divide-line rounded-panel border border-line">
+        {person.week.map((shift, index) => {
+          const day = DAYS[index];
+          if (day === undefined) return null;
+          return (
+            <li key={day.short} className="flex items-center gap-4 px-4 py-2.5">
+              <span className="flex w-10 shrink-0 flex-col">
+                <span className="text-xs text-fg-muted">{day.short}</span>
+                <span className="numeric text-lg font-strong">{day.date}</span>
+              </span>
+              {shift === null ? (
+                <span className="text-sm text-fg-subtle">Day off</span>
+              ) : (
+                <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                  <span className="flex min-w-0 flex-col">
+                    <span className="numeric text-sm font-medium">
+                      {shift.start} to {shift.end}
+                    </span>
+                    <span className="text-sm text-fg-muted">Front desk</span>
+                  </span>
+                  {index === 3 && <Badge tone="warning">Swap offered</Badge>}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

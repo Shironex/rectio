@@ -8,8 +8,11 @@ import { SITE } from '@/data/site';
 import { BOOT_SCRIPT } from '@/lib/theme-script';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   title: { default: `${SITE.name}: ${SITE.tagline}`, template: `%s | ${SITE.name}` },
   description: SITE.description,
+  openGraph: { type: 'website', siteName: SITE.name, locale: 'en_GB' },
+  twitter: { card: 'summary_large_image' },
 };
 
 export const viewport: Viewport = {

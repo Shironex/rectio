@@ -2,7 +2,6 @@
 
 import { ArticleLayout, ArticleList, readingMinutes } from '@rectio/blocks/marketing/motion';
 
-import { ArticleCover } from '@/components/article-cover';
 import { ARTICLES, articleText, type Article, type ArticleBlock } from '@/data/blog';
 
 /** A key from the block's own content: every block in an article says something different. */
@@ -73,7 +72,6 @@ export function ArticlePage({ article }: { article: Article }) {
         readingMinutes={readingMinutes(articleText(article))}
         author={article.author}
         back={{ label: 'All articles', href: '/blog' }}
-        cover={<ArticleCover cover={article.cover} className="py-12" />}
         headings={article.body.flatMap((block) =>
           block.type === 'h2' ? [{ id: block.id, title: block.text }] : [],
         )}
@@ -83,13 +81,7 @@ export function ArticlePage({ article }: { article: Article }) {
           <Block key={blockKey(block)} block={block} />
         ))}
       </ArticleLayout>
-      <ArticleList
-        layout="list"
-        title="Keep reading"
-        articles={related}
-        locale="en-GB"
-        tone="tinted"
-      />
+      <ArticleList layout="list" title="Keep reading" articles={related} locale="en-GB" />
     </>
   );
 }

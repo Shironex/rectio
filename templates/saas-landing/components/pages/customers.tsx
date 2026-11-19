@@ -8,7 +8,7 @@ import {
   Section,
   SectionHeader,
   StatRow,
-  TestimonialMarquee,
+  TestimonialGrid,
   TestimonialQuote,
 } from '@rectio/blocks/marketing/motion';
 import { cn } from '@rectio/ui';
@@ -34,7 +34,7 @@ function CaseStudyCard({ study }: { study: CaseStudy }) {
           'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         )}
       >
-        <span className="flex items-center justify-between gap-3 text-fg">
+        <span className="flex flex-col gap-2 text-fg">
           {logo ?? <span className="font-display text-lg font-strong">{study.company}</span>}
           <span className="text-sm text-fg-muted">{study.industry}</span>
         </span>
@@ -72,8 +72,8 @@ export function CustomersPage() {
         }
         description="Cafés, clinics, shops and warehouses, from one site to forty. Here is what changed for them."
       />
-      <LogoStrip logos={CUSTOMERS} className="pt-0" />
-      <Section labelledBy="stories-title">
+      <LogoStrip logos={CUSTOMERS.slice(0, 6)} className="pt-0 sm:pt-0" />
+      <Section width="wide" labelledBy="stories-title">
         <SectionHeader id="stories-title" title="Customer stories" />
         <ul className="mt-10 grid gap-4 md:grid-cols-3">
           {CASE_STUDIES.map((study) => (
@@ -85,11 +85,13 @@ export function CustomersPage() {
         <TestimonialQuote
           testimonial={LEAD}
           metric={{ value: '31%', label: 'fewer calls to the ward phone in six months' }}
-          tone="tinted"
         />
       )}
       <StatRow stats={STATS} locale="en-GB" label="Rostra in numbers" />
-      <TestimonialMarquee title="In their words" testimonials={TESTIMONIALS} />
+      <TestimonialGrid
+        title="In their words"
+        testimonials={TESTIMONIALS.filter((t) => t.id !== 't3').slice(0, 5)}
+      />
       <CtaBand
         layout="split"
         title="Your team could be the next story"

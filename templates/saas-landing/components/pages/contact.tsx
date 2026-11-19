@@ -23,7 +23,7 @@ export function ContactPage() {
         onSubmit={sendContact}
         className="pt-0 sm:pt-0"
       />
-      <Faq title="Before you write" items={FAQ.slice(0, 3)} tone="tinted" />
+      <Faq title="Before you write" items={FAQ.slice(0, 3)} defaultOpen={['f1']} />
     </>
   );
 }

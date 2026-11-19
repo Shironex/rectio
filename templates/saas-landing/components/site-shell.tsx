@@ -104,6 +104,16 @@ export function SiteShell({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
+      {/* Early in the page, so a keyboard reaches the banner before the content it covers. */}
+      {known && (
+        <CookieConsent
+          categories={COOKIE_CATEGORIES}
+          version={CONSENT_VERSION}
+          consent={consent}
+          policyHref="/cookies"
+          onSave={save}
+        />
+      )}
       {!dismissed && (
         <div className="site-announcement">
           <AnnouncementBar
@@ -151,15 +161,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
           </div>
         }
       />
-      {known && (
-        <CookieConsent
-          categories={COOKIE_CATEGORIES}
-          version={CONSENT_VERSION}
-          consent={consent}
-          policyHref="/cookies"
-          onSave={save}
-        />
-      )}
       <CookiePreferences
         open={preferences}
         onOpenChange={setPreferences}

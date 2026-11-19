@@ -15,11 +15,11 @@ import { Panel } from '@/components/panel';
 import {
   AvailabilityCard,
   HoursCard,
+  MyWeekCard,
   OpenShiftBoard,
   SwapCard,
   TimeOffCard,
 } from '@/components/visuals/cards';
-import { WeekSchedule } from '@/components/visuals/week-schedule';
 import { ICON_FEATURES, TESTIMONIALS } from '@/data/marketing';
 import { DEMO, START } from '@/data/site';
 
@@ -38,7 +38,7 @@ export function FeaturesPage() {
         description="Plan the rota, fill the gaps and approve the changes without leaving Rostra."
         primary={START}
         secondary={DEMO}
-        visual={<WeekSchedule />}
+        visual={<MyWeekCard />}
       />
       <FeatureIconGrid
         title="Built for the way shift teams work"
@@ -102,7 +102,6 @@ export function FeaturesPage() {
         <TestimonialQuote
           testimonial={FEATURED}
           metric={{ value: '−19%', label: 'overtime in the first quarter on Rostra' }}
-          tone="tinted"
         />
       )}
       <CtaBand

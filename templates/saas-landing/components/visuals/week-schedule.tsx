@@ -33,6 +33,13 @@ const DAY_VISIBILITY = [
   'hidden @lg:table-cell',
 ];
 
+/** First name and initial, such as "Priya N.", so every name fits its column. */
+function shortName(name: string): string {
+  const [first, ...rest] = name.split(' ');
+  const last = rest.at(-1);
+  return last === undefined ? (first ?? name) : `${first ?? ''} ${last.charAt(0)}.`;
+}
+
 const FALLBACK_ROLE: Role = { id: 'front', label: 'Shift', identity: 1 };
 
 function roleOf(shift: Shift): Role {
@@ -117,7 +124,7 @@ export function WeekSchedule({ className }: { className?: string }) {
                   <Avatar name={person.name} size="sm" />
                   <span className="truncate text-fg">
                     <span className="@md:hidden">{person.name.split(' ')[0]}</span>
-                    <span className="hidden @md:inline">{person.name}</span>
+                    <span className="hidden @md:inline">{shortName(person.name)}</span>
                   </span>
                 </span>
               </th>

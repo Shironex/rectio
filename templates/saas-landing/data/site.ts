@@ -11,6 +11,8 @@ export const SITE = {
   tagline: 'Shift scheduling for teams that run on rotas.',
   description:
     'Rostra builds the week for shift teams: availability in, a fair rota out, swaps and time off handled in the app.',
+  /** The site's own address, for links in metadata, the sitemap and robots.txt. */
+  url: 'https://rostra.example',
   /** Where the product itself lives. Point these at your app. */
   appUrl: 'https://app.rostra.example',
   email: {
@@ -73,7 +75,7 @@ export const FOOTER_COLUMNS = [
 export const ANNOUNCEMENT = {
   id: '2026-11-open-shifts',
   tag: 'New',
-  message: 'Open shifts: post a gap, the first qualified person claims it',
+  message: 'Open shifts are here',
   action: { label: 'Read the changelog', href: '/changelog' },
 } as const;
 

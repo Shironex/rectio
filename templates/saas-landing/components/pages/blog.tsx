@@ -1,12 +1,11 @@
 'use client';
 
-import { ArticleList, Newsletter } from '@rectio/blocks/marketing/motion';
+import { ArticleList, Newsletter, readingMinutes } from '@rectio/blocks/marketing/motion';
 
 import { ArticleCover } from '@/components/article-cover';
 import { PageIntro } from '@/components/page-intro';
 import { ARTICLES, articleText } from '@/data/blog';
 import { subscribe } from '@/lib/forms';
-import { readingMinutes } from '@rectio/blocks/marketing';
 
 const SUMMARIES = ARTICLES.map((article) => ({
   id: article.slug,
@@ -27,7 +26,12 @@ export function BlogPage() {
         title="The Rostra blog"
         description="Customer stories, guides to running fair rotas, and what is new in the product."
       />
-      <ArticleList title="All articles" articles={SUMMARIES} locale="en-GB" className="pt-0" />
+      <ArticleList
+        title="All articles"
+        articles={SUMMARIES}
+        locale="en-GB"
+        className="pt-0 sm:pt-0"
+      />
       <Newsletter
         title="The rota letter"
         description="One email a month: a new guide, a customer story and what shipped. No tracking pixels."

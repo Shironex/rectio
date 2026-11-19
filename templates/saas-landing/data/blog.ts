@@ -60,6 +60,24 @@ export const ARTICLES: readonly Article[] = [
           'Thursday: the rota is published and everyone gets their shifts on their phone.',
         ],
       },
+      {
+        type: 'p',
+        text: 'Wednesday is the only day the rota is edited by hand. Anything that changes after Thursday goes through a swap or an open shift, so the published week stays the week people plan their lives around.',
+      },
+      { type: 'h2', id: 'gaps', text: 'Filling the gaps' },
+      {
+        type: 'p',
+        text: 'Saturdays were always the hard day. Instead of asking around, Hannah now posts the short shifts on the open shift board on Wednesday with the weekend rate attached. Most are claimed within the hour, usually by the same three people who like the extra hours.',
+      },
+      {
+        type: 'p',
+        text: 'To keep it fair, nobody can claim more than two open shifts a week, and the weekend balance on each profile shows who has carried more than their share lately.',
+      },
+      {
+        type: 'quote',
+        text: "The board did what the group chat never could: it made a gap somebody's job in under an hour.",
+        cite: 'Kofi Mensah, shift lead',
+      },
       { type: 'h2', id: 'results', text: 'What changed' },
       {
         type: 'p',

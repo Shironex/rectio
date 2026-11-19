@@ -50,6 +50,14 @@ export const VALUES: readonly TeamValue[] = [
   },
 ];
 
+/** The company at a glance, for the About page. */
+export const COMPANY_FACTS = [
+  { label: 'Founded', value: '2021' },
+  { label: 'People', value: '40' },
+  { label: 'Countries we hire in', value: '9' },
+  { label: 'Teams on Rostra', value: '3,180' },
+] as const;
+
 export const OPENINGS = [
   { id: 'r1', title: 'Senior product engineer', team: 'Engineering', place: 'Remote, Europe' },
   { id: 'r2', title: 'Product designer, mobile', team: 'Design', place: 'Dublin or remote' },

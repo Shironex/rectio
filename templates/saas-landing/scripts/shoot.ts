@@ -199,7 +199,7 @@ try {
         });
         await settle(page);
         await page.getByRole('button', { name: 'Menu' }).click();
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1200);
         await page.screenshot({ path: join(out, `menu-phone-${mode}.png`) });
         count += 1;
         await context.close();

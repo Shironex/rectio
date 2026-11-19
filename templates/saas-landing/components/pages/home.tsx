@@ -46,8 +46,7 @@ export function HomePage() {
         visual={<WeekSchedule className="rounded-none border-0" />}
         cards={[
           { id: 'published', position: 'top-end', content: <PublishedCard /> },
-          { id: 'swap', position: 'bottom-start', content: <SwapCard /> },
-          { id: 'coverage', position: 'bottom-end', content: <CoverageCard /> },
+          { id: 'clock', position: 'bottom-start', content: <ClockInCard /> },
         ]}
       />
       <LogoStrip
@@ -69,16 +68,16 @@ export function HomePage() {
             title: 'Gaps fill themselves',
             description: 'Post an open shift; the first qualified person claims it.',
             size: 'wide',
-            tone: 'tinted',
+            tone: 'sunken',
             visual: <OpenShiftBoard />,
           },
           {
             id: 'clock',
-            title: 'Clock in from the floor',
-            description: 'Times land on the timesheet, not on paper.',
+            title: 'Swaps, approved on the bus',
+            description: 'Only qualified people can swap, and you approve in a tap.',
             visual: (
               <Panel compact>
-                <ClockInCard />
+                <SwapCard />
               </Panel>
             ),
           },
@@ -113,7 +112,7 @@ export function HomePage() {
             title: 'Short days, flagged early',
             description: 'Coverage per day against what each day needs, before anyone notices.',
             size: 'wide',
-            tone: 'tinted',
+            tone: 'sunken',
             visual: (
               <Panel>
                 <CoverageCard />
@@ -130,7 +129,7 @@ export function HomePage() {
         }
         stats={STATS}
         locale="en-GB"
-        tone="panel"
+        tone="plain"
       />
       <FeatureRows
         rows={[

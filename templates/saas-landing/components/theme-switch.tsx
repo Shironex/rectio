@@ -24,7 +24,7 @@ export function ThemeSwitch() {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <ToggleGroup
-        size="sm"
+        size="md"
         aria-label="Theme"
         value={[choice.theme]}
         onValueChange={(value) => {
@@ -39,7 +39,7 @@ export function ThemeSwitch() {
         ))}
       </ToggleGroup>
       <ToggleGroup
-        size="sm"
+        size="md"
         aria-label="Colour mode"
         value={[choice.mode]}
         onValueChange={(value) => {

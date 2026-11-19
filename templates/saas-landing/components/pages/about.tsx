@@ -2,12 +2,11 @@
 
 import { ArrowRightIcon } from '@phosphor-icons/react';
 import { CtaBand, Em, Prose, Section, SectionHeader, Team } from '@rectio/blocks/marketing/motion';
-import { Badge, cn } from '@rectio/ui';
+import { Badge, cn, Stat, StatGroup } from '@rectio/ui';
 
 import { PageIntro } from '@/components/page-intro';
 import { Panel } from '@/components/panel';
-import { WeekSchedule } from '@/components/visuals/week-schedule';
-import { OPENINGS, TEAM, VALUES } from '@/data/company';
+import { COMPANY_FACTS, OPENINGS, TEAM, VALUES } from '@/data/company';
 import { SITE } from '@/data/site';
 
 export function AboutPage() {
@@ -21,7 +20,7 @@ export function AboutPage() {
         }
         description="Rostra started in a café back office in 2021. Today forty people in Dublin and across Europe build it."
       />
-      <Section labelledBy="story-title" className="pt-0 sm:pt-0">
+      <Section width="wide" labelledBy="story-title" className="pt-0 sm:pt-0">
         <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
           <div className="flex flex-col gap-6 lg:col-span-6">
             <SectionHeader id="story-title" title="Why Rostra exists" size="md" />
@@ -41,8 +40,12 @@ export function AboutPage() {
               </p>
             </Prose>
           </div>
-          <Panel className="lg:col-span-6 lg:col-start-7">
-            <WeekSchedule />
+          <Panel className="lg:col-span-5 lg:col-start-8">
+            <StatGroup className="grid grid-cols-2 gap-6">
+              {COMPANY_FACTS.map((fact) => (
+                <Stat key={fact.label} label={fact.label} value={fact.value} size="lg" />
+              ))}
+            </StatGroup>
           </Panel>
         </div>
       </Section>
@@ -56,9 +59,8 @@ export function AboutPage() {
         description="Most of us have run or worked a rota. It shows in what we build and what we leave out."
         values={VALUES}
         members={TEAM}
-        tone="tinted"
       />
-      <Section labelledBy="jobs-title">
+      <Section width="wide" labelledBy="jobs-title">
         <SectionHeader
           id="jobs-title"
           title="Open roles"

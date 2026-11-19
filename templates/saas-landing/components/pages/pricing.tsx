@@ -3,6 +3,7 @@
 import { CheckIcon, MinusIcon } from '@phosphor-icons/react';
 import {
   ActionLink,
+  Container,
   CtaBand,
   Em,
   Faq,
@@ -23,6 +24,7 @@ import {
   TableRow,
   Toggle,
   cn,
+  formatMoney,
 } from '@rectio/ui';
 import { Fragment, useState } from 'react';
 
@@ -55,7 +57,7 @@ function BillingSwitch({ value, onChange }: { value: Billing; onChange: (next: B
       <Toggle value="monthly">Monthly</Toggle>
       <Toggle value="yearly">
         Yearly
-        <span className="text-sm font-regular text-positive-strong">save {SAVING}%</span>
+        <Badge tone="positive">Save {SAVING}%</Badge>
       </Toggle>
     </ToggleGroup>
   );
@@ -78,7 +80,7 @@ function PlanCard({ plan, billing }: { plan: Plan; billing: Billing }) {
           <h3 className="font-display text-2xl font-strong tracking-tight text-fg">{plan.name}</h3>
           {plan.featured === true && <Badge tone="info">Most teams pick this</Badge>}
         </div>
-        <p className="text-base text-fg-muted">{plan.summary}</p>
+        <p className="min-h-12 text-base text-fg-muted">{plan.summary}</p>
       </div>
       <div className="flex flex-col gap-1">
         <p className="flex items-baseline gap-2">
@@ -91,6 +93,12 @@ function PlanCard({ plan, billing }: { plan: Plan; billing: Billing }) {
               locale={LOCALE}
               className="font-display text-5xl font-strong tracking-tight text-fg"
             />
+          )}
+          {!free && billing === 'yearly' && (
+            <s className="text-xl text-fg-subtle">
+              <span className="sr-only">Was </span>
+              <Money amount={plan.price.monthly / 100} currency={CURRENCY} locale={LOCALE} />
+            </s>
           )}
           {!free && <span className="text-base text-fg-muted">per person a month</span>}
         </p>
@@ -125,7 +133,7 @@ function Estimator({ billing }: { billing: Billing }) {
   const count = people ?? 0;
   return (
     <div className="grid gap-8 rounded-panel border border-line bg-surface-sunken p-6 sm:p-8 lg:grid-cols-12 lg:items-center">
-      <div className="flex flex-col gap-4 lg:col-span-4">
+      <div className="flex flex-col gap-4 lg:col-span-5">
         <h2 className="font-display text-2xl font-regular tracking-tight text-fg sm:text-3xl">
           What would <Em>your team</Em> pay?
         </h2>
@@ -144,7 +152,16 @@ function Estimator({ billing }: { billing: Billing }) {
           <FieldDescription>Managers who never work a shift are free.</FieldDescription>
         </Field>
       </div>
-      <dl className="grid gap-3 sm:grid-cols-3 lg:col-span-8" aria-live="polite">
+      <p aria-live="polite" className="sr-only">
+        {(() => {
+          const team = PLANS.find((plan) => plan.id === 'team');
+          const total = team === undefined ? null : monthlyTotal(team, billing, count);
+          return total === null
+            ? ''
+            : `Team for ${String(count)} people: ${formatMoney(total / 100, CURRENCY, { locale: LOCALE })} a month.`;
+        })()}
+      </p>
+      <dl className="grid gap-3 sm:grid-cols-3 lg:col-span-7">
         {PLANS.map((plan) => {
           const total = monthlyTotal(plan, billing, count);
           return (
@@ -156,10 +173,8 @@ function Estimator({ billing }: { billing: Billing }) {
               <dd className="flex flex-col gap-0.5">
                 {total === null ? (
                   <>
-                    <span className="font-display text-2xl font-strong text-fg-subtle">
-                      Not available
-                    </span>
-                    <span className="text-sm text-fg-muted">Up to {plan.limit ?? 0} people</span>
+                    <span className="text-base text-fg">Covers up to {plan.limit ?? 0} people</span>
+                    <span className="text-sm text-fg-muted">Try Team for a bigger rota</span>
                   </>
                 ) : (
                   <>
@@ -169,7 +184,9 @@ function Estimator({ billing }: { billing: Billing }) {
                       locale={LOCALE}
                       className="font-display text-2xl font-strong text-fg"
                     />
-                    <span className="text-sm text-fg-muted">a month</span>
+                    <span className="text-sm text-fg-muted">
+                      {billing === 'yearly' ? 'a month, billed yearly' : 'a month'}
+                    </span>
                   </>
                 )}
               </dd>
@@ -203,9 +220,15 @@ function CellValue({ value }: { value: Cell }) {
 
 function Comparison() {
   return (
-    <Section width="default" labelledBy="compare-title">
+    <Section width="wide" labelledBy="compare-title" className="pt-8 sm:pt-12">
       <SectionHeader id="compare-title" title="Compare every plan" size="md" />
-      <div className="mt-8 overflow-x-auto">
+      {/* Focusable so a keyboard can scroll the plans into view on a narrow screen. */}
+      <div
+        role="region"
+        aria-label="Plan comparison"
+        tabIndex={0}
+        className="relative mt-8 overflow-x-auto rounded-control outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus"
+      >
         <Table className="min-w-xl">
           <TableHeader>
             <TableRow>
@@ -233,7 +256,7 @@ function Comparison() {
                   <TableRow key={row.feature}>
                     <TableHead
                       scope="row"
-                      className="h-(--rx-table-row-height) border-line bg-transparent text-base font-regular whitespace-normal text-fg"
+                      className="sticky start-0 h-(--rx-table-row-height) border-line bg-surface-canvas text-base font-regular whitespace-normal text-fg"
                     >
                       {row.feature}
                     </TableHead>
@@ -268,15 +291,18 @@ export function PricingPage() {
       >
         <BillingSwitch value={billing} onChange={setBilling} />
       </PageIntro>
-      <section id="plans" aria-label="Plans" className="pb-4 text-fg">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 sm:px-6 lg:px-8">
+      <section id="plans" aria-labelledby="plans-title" className="pb-4 text-fg">
+        <h2 id="plans-title" className="sr-only">
+          Plans
+        </h2>
+        <Container width="wide" className="flex flex-col gap-10">
           <ul className="grid gap-4 lg:grid-cols-3">
             {PLANS.map((plan) => (
               <PlanCard key={plan.id} plan={plan} billing={billing} />
             ))}
           </ul>
           <Estimator billing={billing} />
-        </div>
+        </Container>
       </section>
       <Comparison />
       <Faq
@@ -284,7 +310,6 @@ export function PricingPage() {
         title="Billing questions"
         description="The four things teams ask before they pay."
         items={PRICING_FAQ}
-        tone="tinted"
       />
       <CtaBand
         tone="tinted"
