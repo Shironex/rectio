@@ -7,4 +7,5 @@ export {
   Money,
   SelectContent,
   TableRows,
+  ToastProvider,
 } from '../../src/index';

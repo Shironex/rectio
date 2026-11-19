@@ -25,3 +25,4 @@ export {
   type SelectItemProps,
 } from './select/select';
 export { DataTableBody, TableCell, TableRow, TableRows } from './table/table';
+export { ToastProvider, useToast, type ToastProviderProps, type ToastType } from './toast/toast';

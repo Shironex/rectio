@@ -40,7 +40,8 @@ describe('bundle cost', () => {
 
     const added = (motion.gzip - plain.gzip) / 1024;
     console.info(`motion add-on: +${added.toFixed(1)} kB gzip over the plain components`);
-    // Measured at 12.6 kB: mini animate and spring, AnimatePresence for rows, the components.
+    // Measured at 13.1 kB: mini animate and spring, AnimatePresence for rows, the components
+    // (the toast's stack reflow added 0.4 kB).
     // A jump past this means a heavier Motion entry point (motion/react `motion.*`) slipped in.
     expect(added).toBeLessThan(14);
   }, 120_000);

@@ -11,7 +11,7 @@ Private and unlicensed. Nothing here is published.
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@rectio/tokens`       | DTCG token sources, built with Style Dictionary into CSS variables, a Tailwind v4 theme, font faces and resolved JSON                             |
 | `@rectio/ui`           | Button, Field and Input, AmountInput, Select, Dialog, Money, ThemeScope, Badge, Checkbox, DataTable, Calendar, DatePicker, DateRangePicker, Toast |
-| `@rectio/motion`       | The motion add-on: motioned Button, AmountInput, Money, Dialog, Select popup and DataTable rows, same props as the plain                          |
+| `@rectio/motion`       | The motion add-on: motioned Button, AmountInput, Money, Dialog, Select popup, DataTable rows and Toast, same props as the plain                   |
 | `@rectio/playground`   | Vite app: every component in every state, both themes, both modes, plus an expense report composition                                             |
 | `@rectio/design-rules` | The check that keeps hardcoded design values out of `packages/ui/src` and `packages/motion/src` (in `tooling/`)                                   |
 | `@rectio/registry`     | Registry item schema, the build that turns ui and tokens into static registry JSON, a local dev server                                            |
@@ -58,7 +58,7 @@ import { Button, Money, SelectContent } from '@rectio/motion';
 - **Tokens only.** Durations, easings, distances and springs (`--rx-motion-spring-*`, damping ratio
   at or near 1, so nothing bounces) are read from the theme at the moment an animation starts.
 - **Bundle cost.** Built on `motion/mini` (Web Animations), Motion's spring generator and
-  `AnimatePresence` for row exits: about 12.7 kB gzip over the plain components, measured by
+  `AnimatePresence` for row exits: about 13.1 kB gzip over the plain components, measured by
   `packages/motion/tests/bundle.test.ts`. An app that imports only `@rectio/ui` pulls in no Motion
   code; the same test checks that.
 
