@@ -35,3 +35,68 @@
     );
   }
 }
+
+/*
+ * Arrival on load: the hero's parts rise in a short, uneven stagger. Pure CSS, so it plays on the
+ * first paint, before any script. Under reduced motion the reveal distance token is zero and only
+ * the fade remains.
+ */
+@keyframes site-rise {
+  from {
+    opacity: 0;
+    translate: 0 var(--rx-motion-distance-reveal);
+  }
+}
+
+.site-enter {
+  animation: site-rise var(--rx-motion-duration-reveal) var(--rx-motion-easing-enter) both;
+  animation-delay: calc(var(--rx-motion-duration-stagger) * var(--site-i, 0));
+}
+
+/*
+ * Scroll-linked reveals: content settles as it scrolls into view, driven by the scroll position
+ * itself (no script, no listener). Browsers without scroll timelines show it at rest.
+ */
+@supports (animation-timeline: view()) {
+  .site-reveal {
+    animation: site-rise linear both;
+    animation-timing-function: var(--rx-motion-easing-enter);
+    animation-timeline: view();
+    animation-range: entry calc(var(--site-i, 0) * 8%) entry calc(55% + var(--site-i, 0) * 8%);
+  }
+}
+
+/* Uneven steps for items revealed together: never a metronome. */
+.site-step-1 {
+  --site-i: 1;
+}
+.site-step-2 {
+  --site-i: 1.8;
+}
+.site-step-3 {
+  --site-i: 2.4;
+}
+.site-step-4 {
+  --site-i: 2.9;
+}
+.site-step-5 {
+  --site-i: 3.3;
+}
+
+/* A pressable surface that is not a rectio Button (links styled as actions): press feedback. */
+.site-press {
+  transition: scale var(--rx-motion-duration-fast) var(--rx-motion-easing-enter);
+}
+.site-press:active {
+  scale: var(--rx-motion-scale-press);
+}
+
+/* The terminal caret blinks only while a command is being typed. */
+@keyframes site-caret {
+  50% {
+    opacity: 0;
+  }
+}
+.site-caret {
+  animation: site-caret var(--rx-motion-duration-loop) var(--rx-motion-easing-standard) infinite;
+}
