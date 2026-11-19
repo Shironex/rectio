@@ -63,3 +63,13 @@ describe('Pagination', () => {
     expect(screen.queryByRole('button', { name: 'Page 4' })).not.toBeInTheDocument();
   });
 });
+
+describe('Pagination with links', () => {
+  it('keeps the unavailable end control in the tab order', () => {
+    render(<Pagination page={1} pageCount={5} getHref={(page) => `?page=${String(page)}`} />);
+    const previous = screen.getByRole('link', { name: 'Previous' });
+    expect(previous).toHaveAttribute('aria-disabled', 'true');
+    previous.focus();
+    expect(previous).toHaveFocus();
+  });
+});

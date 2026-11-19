@@ -103,7 +103,8 @@ export function Pagination({
           {content}
         </button>
       ) : (
-        <a role="link" aria-disabled="true" {...common}>
+        // An anchor without href is not focusable on its own.
+        <a role="link" aria-disabled="true" tabIndex={0} {...common}>
           {content}
         </a>
       );
