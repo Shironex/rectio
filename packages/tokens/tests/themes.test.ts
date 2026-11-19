@@ -112,7 +112,7 @@ const VISIONS: (ColorVision | undefined)[] = [undefined, 'protan', 'deutan', 'tr
 /** Marks that sit side by side: well past a just noticeable difference (about 0.02). */
 const SERIES_APART = 0.09;
 /** Neighbouring aging steps: clearly apart for every colour vision type, not just noticeable. */
-const SEQUENCE_APART = 0.09;
+const SEQUENCE_APART = 0.1;
 
 describe('chart colours', () => {
   it.each(themeModes)('$key marks hold 3:1 against the surfaces they sit on', ({ tokens }) => {
