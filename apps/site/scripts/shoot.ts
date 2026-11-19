@@ -37,6 +37,10 @@ const MODES = ['light', 'dark'] as const;
 /** Wait for fonts and every finite animation, so a shot never catches a half state. */
 async function settle(page: Page) {
   await page.evaluate(() => document.fonts.ready);
+  // The landing terminal types once it is seen; let it finish so stills show the whole session.
+  await page.waitForFunction(() => document.querySelector('[data-typing]') === null, undefined, {
+    timeout: 15000,
+  });
   await page.waitForFunction(
     () =>
       document

@@ -12,8 +12,8 @@ export default function Layout({ children }: { children: ReactNode }) {
     <DocsLayout
       tree={source.getPageTree()}
       {...base}
+      // The sidebar is the docs navigation; the site links would repeat it, so only home stays.
       links={[
-        ...(base.links ?? []),
         {
           type: 'icon',
           icon: <HouseIcon aria-hidden />,

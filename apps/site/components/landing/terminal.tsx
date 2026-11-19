@@ -70,12 +70,12 @@ export function Terminal() {
       const outputEnds = current !== undefined && current.lines > 0 && next?.chars === 1;
       // Characters at an uneven typing pace; a beat before output, a longer one before the next command.
       const wait = commandEnds
-        ? stagger * 9
+        ? stagger * 7
         : outputEnds
-          ? stagger * 16
+          ? stagger * 12
           : current !== undefined && current.lines > 0
-            ? stagger * 1.4
-            : stagger * (0.9 + ((index * 7) % 5) * 0.25);
+            ? stagger
+            : stagger * (0.6 + ((index * 7) % 5) * 0.2);
       timer = setTimeout(() => {
         tick(index + 1);
       }, wait);
@@ -107,6 +107,7 @@ export function Terminal() {
   return (
     <div
       ref={ref}
+      data-typing={done ? undefined : ''}
       className="flex flex-col overflow-hidden rounded-panel border border-line bg-surface-sunken"
     >
       <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
