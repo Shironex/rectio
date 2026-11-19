@@ -1,6 +1,89 @@
 ---
-title: motion
-description: TODO
+title: Motion add-on
+description: Motion that confirms a change, from the same props and the same tokens.
+pro: true
 ---
 
-TODO
+import DataTableDemo from '@/demos/data-table';
+import DataTableMotionDemo from '@/demos/data-table.motion';
+
+The motion add-on gives the components that move a motioned twin. Each twin has the same name and
+the same props as the plain component, so you choose motion per component by its import path.
+Motion here confirms what happened: a row arrived, a total changed, a step landed. It never
+decorates.
+
+<Preview
+  name="data-table"
+  plain={<DataTableDemo />}
+  motion={<DataTableMotionDemo />}
+  importLine="import { DataTableBody, Money } from '@rectio/motion';"
+/>
+
+Switch the preview to Motion, then add and remove the Deutsche Bahn line: the row opens in place,
+and the total counts to its new figure once the row has landed.
+
+## Mix plain and motioned
+
+Plain and motioned parts sit in one screen. Only the import changes:
+
+```tsx
+import { Field, Select, SelectTrigger } from '@rectio/ui';
+import { Button, Money, SelectContent } from '@rectio/motion';
+```
+
+## Components with a motion twin
+
+| Component                                                                    | Motion                                                                           |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [Button](/docs/components/button)                                            | Presses with a spring; the label and the spinner trade places when loading.      |
+| [AmountInput](/docs/components/amount-input)                                 | The figures nudge in the direction of a stepped change. Typing never moves them. |
+| [Money](/docs/components/money)                                              | Counts to a new amount, after the change that caused it has landed.              |
+| [Dialog, DialogTrigger, DialogContent](/docs/components/dialog)              | The popup grows from the trigger that opened it, and returns there on close.     |
+| [SelectContent, SelectItem](/docs/components/select)                         | The list opens with a spring; the highlight glides between items.                |
+| [DataTableBody, TableRow, TableCell, TableRows](/docs/components/data-table) | New rows open in place; removed rows fade, then close the gap.                   |
+
+`TableRows`, `TableRow` and `TableCell` are for tables you build from the Table parts: wrap the rows
+in `TableRows` and use the motion `TableRow` and `TableCell` inside it.
+
+## Reduced motion
+
+Every motioned component collapses to its plain twin when:
+
+- the system asks for reduced motion,
+- the app turns motion off with `<MotionPreferenceProvider value="off">`, for a setting stored in the
+  app, or
+- the browser has no Web Animations API.
+
+```tsx
+import { MotionPreferenceProvider } from '@rectio/motion';
+
+<MotionPreferenceProvider value={settings.reduceMotion ? 'off' : 'user'}>
+  <App />
+</MotionPreferenceProvider>;
+```
+
+`user`, the default, follows the system setting. The provider is optional. `usePlainMotion()` tells
+your own code whether motion is off for any of these reasons.
+
+## Tokens only
+
+Durations, easings, distances and springs come from the theme, read from the element at the moment
+an animation starts. A dialog inside a `ledger` scope moves with ledger's slower timing while one
+beside it keeps the default. The springs (`--rx-motion-spring-press-*`, `--rx-motion-spring-overlay-*`)
+have a damping ratio at or near 1, so nothing bounces. Without the token stylesheet there is no
+motion at all, never a guessed duration.
+
+## Bundle cost
+
+The add-on is built on `motion/mini` (Web Animations), Motion's spring generator and
+`AnimatePresence` for row exits. It adds about 12.7 kB gzip over the plain components, measured by
+the add-on's bundle test. An app that imports only the plain components loads no Motion code; the
+same test checks that.
+
+## Install
+
+<Callout>
+  The motion add-on is part of rectio Pro. Its registry items are not published yet. Once they are,
+  they install with `rectio add` and a license key, as described in
+  [Installation](/docs/installation#pro-license-key).
+</Callout>

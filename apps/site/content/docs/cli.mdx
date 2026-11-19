@@ -1,6 +1,147 @@
 ---
-title: cli
-description: TODO
+title: CLI
+description: Every rectio command, its flags and what it writes.
 ---
 
-TODO
+The `rectio` command copies registry items into your project and keeps track of them. It needs
+Node 22.12 or later. It asks nothing: every choice is a flag, so it runs the same in a script.
+
+```sh
+pnpm dlx rectio <command> [options]
+```
+
+## Commands
+
+### init
+
+Sets up a project: detects the framework, checks Tailwind v4, finds the CSS entry and the import
+alias, writes `rectio.json`, and installs `tokens`, a theme and `cn`.
+[Installation](/docs/installation) walks through it.
+
+```sh
+rectio init [--theme ledger] [--css src/index.css] [--framework vite|next|tanstack-start]
+            [--registry <url|folder>] [--force] [--dry-run] [--no-install]
+```
+
+| Flag                 | What it does                                                |
+| -------------------- | ----------------------------------------------------------- |
+| `--theme <id>`       | Theme to install. Defaults to `default`.                    |
+| `--css <path>`       | The CSS file that imports Tailwind.                         |
+| `--framework <name>` | `vite`, `next` or `tanstack-start`, when detection fails.   |
+| `--force`            | Rewrite `rectio.json` even if it exists.                    |
+| `--dry-run`          | Show the plan, write nothing.                               |
+| `--no-install`       | Add packages to `package.json` without running the install. |
+
+Running `init` again with another `--theme` installs that theme and records it in `rectio.json`.
+
+### add
+
+Adds items and everything they depend on.
+
+```sh
+rectio add button dialog money [--overwrite] [--dry-run] [--no-install]
+```
+
+1. Resolves the dependency graph from the registry index. A cycle or an unknown item is named.
+2. Fetches every item and checks its schema and its integrity hash.
+3. Plans every write. A file you edited since rectio wrote it stops the whole add, and nothing is
+   written, unless you pass `--overwrite`.
+4. Writes the files with imports rewritten to your aliases, adds theme and style CSS to the managed
+   block in your CSS entry, and records everything in `rectio.lock.json`.
+5. Adds missing packages to `package.json` (ranges already there win) and runs the install of the
+   package manager whose lockfile is nearest: pnpm, npm, yarn or bun.
+
+| Flag           | What it does                                              |
+| -------------- | --------------------------------------------------------- |
+| `--overwrite`  | Replace files you changed.                                |
+| `--dry-run`    | Show what would be installed and written, write nothing.  |
+| `--no-install` | Update `package.json` but do not run the package manager. |
+
+### diff
+
+Compares an installed item with the latest registry version.
+
+```sh
+rectio diff dialog
+```
+
+It lists each file as the same (`=`), changed (`~`) or missing (`!`), marks the ones you edited since
+install, and prints a unified patch from your file to the registry's.
+
+### list
+
+Lists registry items with their type, tier, version and title.
+
+```sh
+rectio list [--type component|block|theme|lib|hook|style] [--tier free|pro]
+```
+
+In a project, `*` marks an installed item and `^` one with a newer version available.
+
+### search
+
+Finds items by a word. Name matches come first, then title, category and description matches.
+
+```sh
+rectio search money
+```
+
+### update
+
+Reports the installed items that have a newer version, then stops.
+
+```sh
+rectio update
+```
+
+It does not merge yet. Until it does, review a change with `rectio diff <item>`, then replace the
+files with `rectio add <item> --overwrite`.
+
+The merge it is designed to do: files you never edited are replaced outright; edited files get a
+three-way merge between the locked version, the latest version and your file. Clean merges are
+written, conflicts get standard markers and are listed, and the previous files are backed up first
+so the update can be undone. The lock moves forward only for items that merged cleanly.
+
+### mcp
+
+Runs a read-only MCP server for coding agents. See [MCP server](/docs/mcp).
+
+```sh
+rectio mcp [--registry <url|folder>]
+```
+
+## Shared options
+
+| Option             | What it does                                        |
+| ------------------ | --------------------------------------------------- |
+| `--cwd <dir>`      | The project folder. Defaults to the current folder. |
+| `--registry <url>` | A registry URL or folder for this run.              |
+| `-h`, `--help`     | Show the help.                                      |
+| `-v`, `--version`  | Show the version.                                   |
+
+A command that fails prints one message and a hint, and exits with code 1.
+
+## Registry URL
+
+The CLI uses the first of:
+
+1. `--registry`
+2. the `RECTIO_REGISTRY_URL` environment variable
+3. `registry` in `rectio.json`
+4. `https://rectio.dev/r`
+
+A plain folder or a `file://` URL works for development, as does the
+[local registry server](/docs/registry#local-registry).
+
+<Callout>
+  `https://rectio.dev/r` is a placeholder until the hosted registry exists. Point the CLI at a local
+  registry for now.
+</Callout>
+
+## Pro items
+
+Pro items need a license key, from `RECTIO_LICENSE_KEY` or `auth.json` in your user config folder
+([where it lives](/docs/installation#pro-license-key)). The key is sent as a bearer token, only with
+requests for Pro items, and never stored in the project. Without a key, `add` names the Pro items
+and writes nothing. A refused key (401) or a key that does not cover an item (403) also leaves the
+project untouched. A local folder registry does not check keys.

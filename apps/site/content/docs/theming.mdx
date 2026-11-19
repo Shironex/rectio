@@ -1,6 +1,108 @@
 ---
-title: theming
-description: TODO
+title: Theming
+description: Tokens, the two themes, light and dark, density and reduced motion.
 ---
 
-TODO
+import ThemeScopeDemo from '@/demos/theme-scope';
+
+Every visual decision in rectio is a token: a CSS variable that starts with `--rx-`. Components read
+tokens and nothing else, so a theme changes the whole interface by changing values, not code.
+
+<Preview name="theme-scope" plain={<ThemeScopeDemo />} />
+
+## Three tiers
+
+1. **Primitives**: OKLCH colour ramps, sizes, font families, durations and easings. They are inputs
+   to the themes and are never emitted as CSS.
+2. **Semantic**: what a value is for. Surfaces, text, borders, accent, status colours, focus, radius,
+   type, density, shadow and motion, such as `--rx-surface`, `--rx-text-muted`, `--rx-border`,
+   `--rx-positive-strong`, `--rx-radius-control` and `--rx-motion-duration-base`. Each theme defines
+   them for each mode, and every theme must define the same set: the build fails otherwise.
+3. **Component**: values one component reads, mostly aliases of semantic tokens. For example
+   `--rx-button-height-md`, `--rx-field-height`, `--rx-table-row-height`, `--rx-dialog-width` and
+   `--rx-money-family`.
+
+The Tailwind theme that `init` installs maps utilities onto the semantic tokens and clears
+Tailwind's own palette, radii, shadows and easings, so only tokens remain.
+
+| Utility                                                | Token                                                        |
+| ------------------------------------------------------ | ------------------------------------------------------------ |
+| `bg-surface`, `bg-surface-canvas`, `bg-surface-sunken` | `--rx-surface`, `--rx-surface-canvas`, `--rx-surface-sunken` |
+| `text-fg`, `text-fg-muted`, `text-fg-subtle`           | `--rx-text`, `--rx-text-muted`, `--rx-text-subtle`           |
+| `border-line`, `border-line-strong`                    | `--rx-border`, `--rx-border-strong`                          |
+| `bg-accent`, `text-positive-strong`                    | `--rx-accent`, `--rx-positive-strong`                        |
+| `rounded-control`, `rounded-panel`                     | `--rx-radius-control`, `--rx-radius-panel`                   |
+| `shadow-raised`, `shadow-overlay`                      | `--rx-shadow-raised`, `--rx-shadow-overlay`                  |
+| `duration-fast`, `duration-base`, `duration-slow`      | `--rx-motion-duration-fast`, `-base`, `-slow`                |
+| `ease-standard`, `ease-enter`, `ease-exit`             | `--rx-motion-easing-standard`, `-enter`, `-exit`             |
+| `font-sans`, `font-display`, `font-mono`               | `--rx-font-family-sans`, `-display`, `-mono`                 |
+| `numeric`                                              | `--rx-font-family-numeric`, with tabular, lining figures     |
+
+A component token is used directly: `h-(--rx-button-height-md)`.
+
+## The token rule
+
+rectio's components never hardcode a colour, radius, font, shadow, duration or easing. In its own
+source these fail the lint rule `rectio/no-hardcoded-design-values` and the repository check
+(`harness lint-meta`):
+
+- hex colours and colour functions: `#fff`, `rgb(`, `oklch(`
+- arbitrary Tailwind values: `rounded-[6px]`, `duration-[200ms]`, `[color:red]`
+- Tailwind's own palette, radii, shadows, durations and easings: `bg-slate-900`, `rounded-md`,
+  `duration-200`
+- raw font names, `font-serif`, and `dark:`, because dark mode lives in the tokens
+- CSS variables outside `--rx-` (Base UI's geometry variables are allowed)
+
+Follow the same rule in the code you build on rectio, and a theme change reaches it too.
+
+## Themes
+
+Two themes ship, both free, each with a light and a dark mode. Tests check the contrast of every
+text and surface pair against WCAG in every theme and mode.
+
+| Theme     | Character                                                  | Fonts (all SIL OFL 1.1)                                                    |
+| --------- | ---------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `default` | Warm stone neutrals, cobalt accent, 4px controls           | IBM Plex Sans, IBM Plex Mono                                               |
+| `ledger`  | Green-black ink, citron accent, 2px corners, slower motion | Source Serif 4 (headings), Schibsted Grotesk (UI), IBM Plex Sans (figures) |
+
+Figures are always tabular and lining, through the `numeric` utility and `Money`.
+
+## Attributes
+
+Themes apply through attributes on any element. Everything inside follows.
+
+| Attribute                          | Effect                                                                |
+| ---------------------------------- | --------------------------------------------------------------------- |
+| `data-theme="default" \| "ledger"` | The theme. `:root` without `data-theme` uses `default`.               |
+| `data-mode="light" \| "dark"`      | The mode. Without `data-mode`, the system colour scheme decides.      |
+| `data-density="compact"`           | Smaller controls, rows and calendar days, and a tighter spacing unit. |
+
+Set them on the root for the whole app: `<html data-theme="ledger" data-mode="dark">`.
+
+Dark mode needs no `dark:` classes: the tokens change, and the components follow. The token CSS
+does define a `dark:` variant that follows `data-mode="dark"`, for the rare case your own code needs
+it.
+
+### ThemeScope
+
+[`ThemeScope`](/docs/components/theme-scope) sets the same attributes on a subtree, and makes popups
+opened inside it (select lists, dialogs, date pickers, toasts) render inside it, so they keep its
+tokens. Use it for a preview, a tenant's own theme, or a dark panel in a light page.
+
+```tsx
+<ThemeScope theme="ledger" mode="dark" density="compact">
+  <Ledger />
+</ThemeScope>
+```
+
+### Compact density
+
+`data-density="compact"` (or `density="compact"` on a ThemeScope) lowers the control heights, row
+heights, header heights, cell padding and calendar day size, and tightens the spacing unit every
+spacing utility uses. Use it for dense working screens such as a ledger.
+
+### Reduced motion
+
+When the system asks for reduced motion, the motion distances drop to zero and the scales to one.
+Components keep their fades and lose their movement. The [motion add-on](/docs/motion) goes further
+and renders its plain twins.

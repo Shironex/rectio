@@ -1,6 +1,140 @@
 ---
-title: installation
-description: TODO
+title: Installation
+description: Set up rectio in a React project and add your first component.
 ---
 
-TODO
+## Requirements
+
+- React 19 and Tailwind CSS v4. `init` stops on Tailwind v3 and prints the upgrade command.
+- Vite, Next.js or TanStack Start.
+- A CSS file that imports Tailwind (`@import "tailwindcss";`).
+- An import alias in `tsconfig.json`, such as `"@/*": ["./src/*"]`. Without one, `init` stops and
+  says what to add.
+- Node 22.12 or later to run the CLI.
+
+## Set up
+
+<Steps>
+<Step>
+
+### Run init
+
+```sh
+pnpm dlx rectio init
+```
+
+`init` reads the project, then installs the tokens, a theme and the `cn` helper. It asks nothing:
+every choice is a flag.
+
+| Flag                 | What it does                                                        |
+| -------------------- | ------------------------------------------------------------------- |
+| `--theme <id>`       | The theme to install: `default` (the default) or `ledger`.          |
+| `--css <path>`       | The CSS file that imports Tailwind, when it is not found.           |
+| `--framework <name>` | `vite`, `next` or `tanstack-start`, when detection fails.           |
+| `--registry <url>`   | A registry URL or folder. See [CLI](/docs/cli#registry-url).        |
+| `--force`            | Rewrite `rectio.json` even if it exists.                            |
+| `--dry-run`          | Show the plan and write nothing.                                    |
+| `--no-install`       | Add packages to `package.json` without running the package manager. |
+| `--cwd <dir>`        | The project folder, when it is not the current one.                 |
+
+</Step>
+<Step>
+
+### What init finds
+
+- **The framework**, from `package.json` and config files, in this order: TanStack Start, then
+  Next.js, then Vite. TanStack Start runs on Vite, so it is checked first.
+- **Tailwind v4**, from the installed package. It warns when neither `@tailwindcss/vite` nor
+  `@tailwindcss/postcss` is in the project.
+- **The CSS entry**: the first of the usual files (`src/index.css`, `src/styles.css`,
+  `app/globals.css` and others) that imports Tailwind, then any such file under `src` or `app`.
+- **The import alias**, from `tsconfig.json`, its references (such as Vite's `tsconfig.app.json`)
+  and its relative `extends`. `@/` wins when there are several.
+
+</Step>
+<Step>
+
+### What init writes
+
+`rectio.json` at the project root:
+
+```json title="rectio.json"
+{
+  "$schema": "https://rectio.dev/r/schema/config.json",
+  "schemaVersion": 1,
+  "registry": "https://rectio.dev/r",
+  "framework": "vite",
+  "css": "src/index.css",
+  "theme": "default",
+  "aliases": {
+    "ui": "@/components/ui",
+    "blocks": "@/components/blocks",
+    "lib": "@/lib",
+    "hooks": "@/hooks",
+    "styles": "@/styles/rectio"
+  }
+}
+```
+
+The `tokens`, `theme-default` (and your chosen theme) and `cn` items, as files in your project. The
+theme and token CSS is imported from your CSS entry in a block the CLI manages:
+
+```css title="src/index.css"
+@import 'tailwindcss';
+/* rectio:start (managed by the rectio CLI, do not edit between the markers) */
+@import './styles/rectio/themes/default.css';
+@import './styles/rectio/tokens.css';
+/* rectio:end */
+```
+
+The font packages the theme uses are added to `package.json` and installed with the package manager
+of the nearest lockfile: pnpm, npm, yarn or bun. With a theme other than `default`, set
+`data-theme` on `<html>`, as `init` reminds you.
+
+</Step>
+<Step>
+
+### Add components
+
+```sh
+pnpm dlx rectio add button dialog money
+```
+
+`add` installs the items and everything they depend on. It fetches each item, checks its schema and
+integrity, plans every write, and only then writes. Components land in your `ui` alias
+(`@/components/ui/button.tsx`), with imports rewritten to your aliases.
+
+```tsx
+import { Button } from '@/components/ui/button';
+```
+
+</Step>
+</Steps>
+
+## The lockfile
+
+`rectio.lock.json` records each item's version, tier and integrity, and the sha256 of every file as
+it was written. Commit it.
+
+It is how rectio tells your edits from its own. A file you changed since rectio wrote it stops the
+whole `add`, and nothing is written, unless you pass `--overwrite`. `rectio diff <item>` shows what
+changed. Files with CRLF line endings compare equal to the LF originals, so a Windows checkout and a
+macOS one agree on what was edited.
+
+## Pro license key
+
+Pro items need a license key. The CLI reads it from the `RECTIO_LICENSE_KEY` environment variable
+first, then from `auth.json` in your user config folder:
+
+```json title="auth.json"
+{ "licenseKey": "<your key>" }
+```
+
+| System       | Folder                                                      |
+| ------------ | ----------------------------------------------------------- |
+| macOS, Linux | `$XDG_CONFIG_HOME/rectio`, or `~/.config/rectio` without it |
+| Windows      | `%APPDATA%\rectio`                                          |
+
+The key is sent only with requests for Pro items and is never written into the project, so it
+cannot be committed by accident. There is no `--key` flag, because keys in shell history leak.
+Without a key, `add` names the Pro items it needs and writes nothing.

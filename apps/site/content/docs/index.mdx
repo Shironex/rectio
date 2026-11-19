@@ -1,6 +1,59 @@
 ---
 title: Introduction
-description: What rectio is.
+description: React components and design tokens for finance and back-office screens.
 ---
 
-Hello.
+rectio is a React design library for the screens finance teams work in: expense reports, ledgers,
+invoices, approvals. It ships tokens, two themes and accessible components on
+[Base UI](https://base-ui.com), styled only through the tokens.
+
+It is for product engineers who build those screens, and for the people who use them all day:
+finance staff, accountants and approvers who scan columns of figures, enter amounts precisely and
+cannot afford doubt about a sign, a currency or a validation message.
+
+## How it ships
+
+rectio ships as source. `rectio add` copies a component into your project, rewritten to your import
+aliases, and you own the code from then on. A lockfile records what was written, so rectio can tell
+your edits from its own updates.
+
+| Part                       | What it is                                                                                                                                            |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tokens                     | Colour, type, radius, shadow, density and motion values as CSS variables, with a Tailwind v4 theme that maps utilities onto them.                     |
+| Themes                     | `default` and `ledger`, each in light and dark, with a compact density.                                                                               |
+| Components                 | Button, Field and Input, AmountInput, Select, Checkbox, DatePicker and DateRangePicker, Calendar, Money, Badge, DataTable, Dialog, Toast, ThemeScope. |
+| [CLI](/docs/cli)           | `rectio init`, `add`, `diff`, `list`, `search` and `update`.                                                                                          |
+| [Registry](/docs/registry) | The static JSON the CLI installs from, with versions and integrity hashes.                                                                            |
+| [MCP server](/docs/mcp)    | `rectio mcp`, so a coding agent can read items, tokens and source instead of guessing.                                                                |
+
+### Free and Pro
+
+The components, the tokens and both themes are free. rectio Pro adds the
+[motion add-on](/docs/motion), a motioned twin of the components that move, and further theme packs.
+Pro pages carry a <ProBadge /> mark.
+
+## Principles
+
+1. **Numbers first.** Figures are tabular and lining, the minus sign is the true minus, and the
+   currency is always explicit.
+2. **Never colour alone.** Signs, icons and words carry meaning; colour reinforces it.
+3. **Keyboard complete.** Every control is reachable and operable without a pointer.
+4. **Tokens only.** Components never hardcode a colour, radius, font, shadow, duration or easing.
+   A lint rule and a repository check fail on one that does.
+
+## Next
+
+<Cards>
+  <Card title="Installation" href="/docs/installation">
+    Set up a project with `rectio init` and add your first component.
+  </Card>
+  <Card title="Theming" href="/docs/theming">
+    The token tiers, the two themes, modes and density.
+  </Card>
+  <Card title="Components" href="/docs/components/button">
+    Every component with a live preview, its props and its keyboard behaviour.
+  </Card>
+  <Card title="Motion add-on" href="/docs/motion">
+    Motion that confirms a change, built from the same tokens.
+  </Card>
+</Cards>
