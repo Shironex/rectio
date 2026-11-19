@@ -111,7 +111,7 @@ function NeedsAttention() {
       icon: <NotePencilIcon aria-hidden weight="bold" className="size-4" />,
       tone: 'neutral',
       title: `${plural(drafts.length, 'draft', 'drafts')} not sent`,
-      detail: drafts.map((d) => d.customer.split(' ')[0]).join(', '),
+      detail: [...new Set(drafts.map((d) => d.customer))].join(', '),
       amount: sumMoney(
         drafts.map((d) => d.total),
         CURRENCY,

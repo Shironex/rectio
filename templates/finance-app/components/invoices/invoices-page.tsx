@@ -22,7 +22,8 @@ export function InvoicesPage() {
   const toast = useToast();
   const { openNewInvoice } = useAppData();
   const filterParam = useQueryParam('filter');
-  const filter = FILTERS.find((f) => f === filterParam) ?? 'all';
+  // Open on what still needs collecting, most overdue first; ?filter=all shows the whole year.
+  const filter = FILTERS.find((f) => f === filterParam) ?? 'outstanding';
   const totals = invoiceTotals(INVOICES, TODAY, CURRENCY);
 
   return (

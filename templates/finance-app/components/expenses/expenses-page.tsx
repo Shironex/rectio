@@ -179,6 +179,8 @@ export function ExpensesPage() {
   const empty = state === 'empty';
   const requests = empty ? [] : expenses.requests;
   const events = empty ? [] : expenses.events;
+  // The trail under the queue is titled Recent decisions, so submissions stay out of it.
+  const decisionsOnly = events.filter((e) => e.action !== 'submitted');
 
   const submit = (
     <Button onClick={openSubmitExpense}>
@@ -242,7 +244,7 @@ export function ExpensesPage() {
           <TabsPanel value="pending" className="pt-6">
             <ExpenseApproval
               requests={requests}
-              events={events}
+              events={decisionsOnly}
               currency={CURRENCY}
               locale={LOCALE}
               trailLength={6}
