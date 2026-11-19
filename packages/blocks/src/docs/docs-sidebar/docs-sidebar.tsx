@@ -31,7 +31,7 @@ const ROW = cn(
 );
 
 const CURRENT =
-  'aria-[current=page]:bg-accent-subtle aria-[current=page]:font-medium aria-[current=page]:text-accent-strong';
+  'aria-[current=page]:bg-(--rx-sidebar-item-active) aria-[current=page]:font-medium aria-[current=page]:text-accent-strong';
 
 /**
  * The docs navigation: titled sections, nested pages that open and close, the current page marked,
