@@ -1,0 +1,479 @@
+import {
+  ArrowClockwiseIcon,
+  EnvelopeSimpleIcon,
+  PaperPlaneTiltIcon,
+  UserMinusIcon,
+  UserPlusIcon,
+  XIcon,
+} from '@phosphor-icons/react';
+import {
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  cn,
+} from '@rectio/ui';
+import { useId, useState, type SyntheticEvent } from 'react';
+
+import { useBlockParts } from '../../lib/block-parts';
+import { BlockPanel } from '../../lib/block-panel';
+import { resolveLocale } from '../../lib/finance';
+import { ActionMenu } from '../lib/action-menu';
+import { Avatar } from '../lib/avatar';
+import { plural, relativeTime } from '../lib/saas';
+import { useSaasParts } from '../lib/saas-parts';
+import {
+  ROLE_HINTS,
+  ROLE_LABELS,
+  assignableRoles,
+  canManage,
+  inviteError,
+  parseInviteEmails,
+  seatUsage,
+  sortMembers,
+  type PendingInvite,
+  type TeamMember,
+  type TeamRole,
+} from './team-members.logic';
+
+export interface TeamMembersProps {
+  members: readonly TeamMember[];
+  invites?: readonly PendingInvite[];
+  /** The role of the person looking: it decides who they may invite, change and remove. */
+  currentRole: TeamRole;
+  /** Seats on the plan; pending invites hold a seat. Omit for no limit. */
+  seats?: number;
+  /** Shows the invite form. Called with valid, new addresses only. */
+  onInvite?: (emails: string[], role: TeamRole) => void;
+  onChangeRole?: (memberId: string, role: TeamRole) => void;
+  /** Asked to confirm first, in a dialog naming the person. */
+  onRemove?: (memberId: string) => void;
+  onResendInvite?: (inviteId: string) => void;
+  onRevokeInvite?: (inviteId: string) => void;
+  /** The moment "last active" is measured from. */
+  now?: Date;
+  locale?: string;
+  title?: string;
+  className?: string;
+}
+
+/**
+ * Who is on the team and what they may do: members with their role, pending invites with resend
+ * and revoke, and an invite form that takes pasted addresses. Roles follow one rule set (see
+ * `canManage`), so nobody can lock the workspace out of its last owner.
+ */
+export function TeamMembers({
+  members,
+  invites = [],
+  currentRole,
+  seats,
+  onInvite,
+  onChangeRole,
+  onRemove,
+  onResendInvite,
+  onRevokeInvite,
+  now = new Date(),
+  locale: requestedLocale,
+  title = 'Team members',
+  className,
+}: TeamMembersProps) {
+  const locale = resolveLocale(requestedLocale);
+  const { Button } = useBlockParts();
+  const { Items, Item } = useSaasParts();
+  const [inviting, setInviting] = useState(false);
+  const [removing, setRemoving] = useState<TeamMember | null>(null);
+  const usage = seatUsage(members, invites, seats);
+  const canInvite = onInvite !== undefined && assignableRoles(currentRole).length > 0;
+  const sorted = sortMembers(members);
+  const alone = members.length <= 1 && invites.length === 0;
+
+  const description = [
+    plural(members.length, 'member'),
+    invites.length > 0 ? `${String(invites.length)} invited` : null,
+    usage.left === null ? null : `${plural(usage.left, 'seat')} left`,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
+  return (
+    <BlockPanel
+      title={title}
+      description={description}
+      actions={
+        canInvite && !inviting ? (
+          <Button
+            onClick={() => {
+              setInviting(true);
+            }}
+          >
+            <UserPlusIcon aria-hidden weight="bold" className="size-4" />
+            Invite people
+          </Button>
+        ) : undefined
+      }
+      className={className}
+      bodyClassName="gap-5"
+    >
+      {canInvite && inviting && (
+        <InviteForm
+          members={members}
+          invites={invites}
+          currentRole={currentRole}
+          seatsLeft={usage.left}
+          onCancel={() => {
+            setInviting(false);
+          }}
+          onInvite={(emails, role) => {
+            onInvite(emails, role);
+            setInviting(false);
+          }}
+        />
+      )}
+
+      <ul aria-label="Members" className="-mx-2 flex flex-col">
+        <Items>
+          {sorted.map((member) => {
+            const manageable = canManage(currentRole, member, members);
+            return (
+              <Item
+                key={member.id}
+                className="flex items-center gap-3 rounded-control px-2 py-2.5 not-last:border-b not-last:border-line"
+              >
+                <Avatar name={member.name} src={member.avatarUrl} />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="flex items-center gap-2">
+                    <span className="truncate font-medium">{member.name}</span>
+                    {member.you === true && <Badge>You</Badge>}
+                  </span>
+                  <span className="truncate text-sm text-fg-muted">
+                    {member.email}
+                    <span className="@xl:hidden">, {ROLE_LABELS[member.role]}</span>
+                  </span>
+                </div>
+                <span className="hidden w-32 text-sm text-fg-subtle @2xl:block">
+                  {member.lastActive === undefined
+                    ? 'Never signed in'
+                    : `Active ${relativeTime(member.lastActive, now, locale)}`}
+                </span>
+                <span className="hidden @xl:block">
+                  {manageable && onChangeRole !== undefined ? (
+                    <RoleSelect
+                      label={`Role for ${member.name}`}
+                      value={member.role}
+                      roles={assignableRoles(currentRole)}
+                      onChange={(role) => {
+                        onChangeRole(member.id, role);
+                      }}
+                    />
+                  ) : (
+                    <span className="inline-flex h-(--rx-control-height-sm) w-32 items-center px-2.5 text-sm text-fg-muted">
+                      {ROLE_LABELS[member.role]}
+                    </span>
+                  )}
+                </span>
+                <span className="flex w-(--rx-button-height-sm) justify-end">
+                  {manageable && (onRemove !== undefined || onChangeRole !== undefined) && (
+                    <ActionMenu
+                      label={`Actions for ${member.name}`}
+                      actions={[
+                        ...(onChangeRole === undefined
+                          ? []
+                          : assignableRoles(currentRole)
+                              .filter((role) => role !== member.role)
+                              .map((role) => ({
+                                id: `role-${role}`,
+                                label: `Make ${ROLE_LABELS[role].toLowerCase()}`,
+                                onSelect: () => {
+                                  onChangeRole(member.id, role);
+                                },
+                              }))),
+                        ...(onRemove === undefined
+                          ? []
+                          : [
+                              {
+                                id: 'remove',
+                                label: 'Remove from team',
+                                icon: UserMinusIcon,
+                                danger: true,
+                                onSelect: () => {
+                                  setRemoving(member);
+                                },
+                              },
+                            ]),
+                      ]}
+                    />
+                  )}
+                </span>
+              </Item>
+            );
+          })}
+        </Items>
+      </ul>
+
+      {invites.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <h3 className="text-sm font-medium text-fg-muted">
+            Pending invites <span className="numeric text-fg-subtle">{invites.length}</span>
+          </h3>
+          <ul aria-label="Pending invites" className="-mx-2 flex flex-col">
+            <Items>
+              {invites.map((invite) => (
+                <Item
+                  key={invite.id}
+                  className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-control px-2 py-2.5 not-last:border-b not-last:border-line"
+                >
+                  <span
+                    aria-hidden
+                    className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-dashed border-line-strong text-fg-subtle"
+                  >
+                    <EnvelopeSimpleIcon weight="bold" className="size-4" />
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate font-medium">{invite.email}</span>
+                    <span className="truncate text-sm text-fg-muted">
+                      {ROLE_LABELS[invite.role]}, invited{' '}
+                      {relativeTime(invite.invitedAt, now, locale)}
+                      {invite.invitedBy !== undefined && ` by ${invite.invitedBy}`}
+                    </span>
+                  </div>
+                  <span className="flex items-center gap-2 pointer-coarse:gap-5">
+                    {onResendInvite !== undefined && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Resend invite to ${invite.email}`}
+                        onClick={() => {
+                          onResendInvite(invite.id);
+                        }}
+                      >
+                        <ArrowClockwiseIcon aria-hidden weight="bold" className="size-3.5" />
+                        Resend
+                      </Button>
+                    )}
+                    {onRevokeInvite !== undefined && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Revoke invite to ${invite.email}`}
+                        onClick={() => {
+                          onRevokeInvite(invite.id);
+                        }}
+                      >
+                        <XIcon aria-hidden weight="bold" className="size-3.5" />
+                        Revoke
+                      </Button>
+                    )}
+                  </span>
+                </Item>
+              ))}
+            </Items>
+          </ul>
+        </div>
+      )}
+
+      {alone && (
+        <p className="rounded-control border border-dashed border-line px-4 py-6 text-center text-sm text-fg-muted">
+          <span className="block font-medium text-fg">It is just you so far</span>
+          {canInvite
+            ? 'Invite the people you work with. They get an email and join with the role you pick.'
+            : 'An owner or admin can invite the people you work with.'}
+        </p>
+      )}
+
+      <RemoveDialog
+        member={removing}
+        onCancel={() => {
+          setRemoving(null);
+        }}
+        onConfirm={(member) => {
+          onRemove?.(member.id);
+          setRemoving(null);
+        }}
+      />
+    </BlockPanel>
+  );
+}
+
+function RoleSelect({
+  label,
+  value,
+  roles,
+  onChange,
+  className,
+}: {
+  label: string;
+  value: TeamRole;
+  roles: readonly TeamRole[];
+  onChange: (role: TeamRole) => void;
+  className?: string;
+}) {
+  const items = roles.map((role) => ({ value: role, label: ROLE_LABELS[role] }));
+  return (
+    <Select
+      items={items}
+      value={value}
+      onValueChange={(next) => {
+        const role = roles.find((r) => r === next);
+        if (role !== undefined) onChange(role);
+      }}
+    >
+      <SelectTrigger
+        aria-label={label}
+        className={cn('h-(--rx-control-height-sm) w-32 text-sm', className)}
+      />
+      <SelectContent className="max-w-72">
+        {roles.map((role) => (
+          <SelectItem key={role} value={role}>
+            <span className="flex flex-col py-0.5">
+              <span>{ROLE_LABELS[role]}</span>
+              <span className="text-sm whitespace-normal text-fg-muted">{ROLE_HINTS[role]}</span>
+            </span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function InviteForm({
+  members,
+  invites,
+  currentRole,
+  seatsLeft,
+  onCancel,
+  onInvite,
+}: {
+  members: readonly TeamMember[];
+  invites: readonly PendingInvite[];
+  currentRole: TeamRole;
+  seatsLeft: number | null;
+  onCancel: () => void;
+  onInvite: (emails: string[], role: TeamRole) => void;
+}) {
+  const { Button } = useBlockParts();
+  const headingId = useId();
+  const roles = assignableRoles(currentRole);
+  const [text, setText] = useState('');
+  const [role, setRole] = useState<TeamRole>(roles.includes('member') ? 'member' : 'viewer');
+  const [tried, setTried] = useState(false);
+  const parse = parseInviteEmails(text, members, invites);
+  const error = inviteError(parse, seatsLeft);
+
+  const submit = (event: SyntheticEvent) => {
+    event.preventDefault();
+    setTried(true);
+    if (error !== null) return;
+    onInvite(parse.valid, role);
+  };
+
+  return (
+    <form
+      onSubmit={submit}
+      noValidate
+      aria-labelledby={headingId}
+      className="flex flex-col gap-3 rounded-control border border-line bg-surface-sunken p-4"
+    >
+      <h3 id={headingId} className="font-medium">
+        Invite people
+      </h3>
+      <div className="flex flex-col gap-3 @xl:flex-row @xl:items-start">
+        <Field invalid={tried && error !== null} className="flex-1">
+          <FieldLabel>Email addresses</FieldLabel>
+          <Input
+            autoFocus
+            value={text}
+            placeholder="ines@fernhill.io, tomasz@fernhill.io"
+            onChange={(event) => {
+              setText(event.target.value);
+            }}
+          />
+          {tried && error !== null ? (
+            <FieldError>{error}</FieldError>
+          ) : (
+            <FieldDescription>
+              {parse.valid.length > 0
+                ? `${plural(parse.valid.length, 'invite')} ready to send`
+                : 'Separate several with commas or spaces.'}
+            </FieldDescription>
+          )}
+        </Field>
+        <Field className="@xl:w-40">
+          <FieldLabel>Role</FieldLabel>
+          <RoleSelect
+            label="Role for the invited people"
+            value={role}
+            roles={roles}
+            onChange={setRole}
+            className="h-(--rx-field-height) w-full text-base"
+          />
+        </Field>
+      </div>
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="secondary" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit">
+          <PaperPlaneTiltIcon aria-hidden weight="bold" className="size-4" />
+          {parse.valid.length > 1 ? `Send ${String(parse.valid.length)} invites` : 'Send invite'}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function RemoveDialog({
+  member,
+  onCancel,
+  onConfirm,
+}: {
+  member: TeamMember | null;
+  onCancel: () => void;
+  onConfirm: (member: TeamMember) => void;
+}) {
+  const { Button } = useBlockParts();
+  // While the dialog closes it keeps naming the person, instead of an empty title.
+  const [shown, setShown] = useState(member);
+  if (member !== null && member !== shown) setShown(member);
+  return (
+    <Dialog
+      open={member !== null}
+      onOpenChange={(open) => {
+        if (!open) onCancel();
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Remove {shown?.name}?</DialogTitle>
+          <DialogDescription>
+            They lose access at once and their seat frees up. Their work stays in the workspace.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              if (shown !== null) onConfirm(shown);
+            }}
+          >
+            Remove from team
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

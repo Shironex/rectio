@@ -97,3 +97,10 @@ export {
   type VendorsListProps,
 } from './vendors-list/vendors-list';
 export * from './vendors-list/vendors-list.logic';
+// SaaS and app blocks, installed under @blocks/saas/.
+export * from './saas/lib/saas';
+export { SocialButton, type LinkTarget } from './saas/lib/auth';
+export { SignIn, type SignInProps } from './saas/sign-in/sign-in';
+export * from './saas/sign-in/sign-in.logic';
+export { TeamMembers, type TeamMembersProps } from './saas/team-members/team-members';
+export * from './saas/team-members/team-members.logic';

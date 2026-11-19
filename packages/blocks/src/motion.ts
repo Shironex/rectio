@@ -25,3 +25,6 @@ export { VendorsList, type VendorsListProps } from './vendors-list/vendors-list.
 export { ProfitAndLoss, type ProfitAndLossProps } from './profit-and-loss/profit-and-loss.motion';
 export { TaxSummary, type TaxSummaryProps } from './tax-summary/tax-summary.motion';
 export { CashRunway, type CashRunwayProps } from './cash-runway/cash-runway.motion';
+// SaaS and app blocks.
+export { SignIn, type SignInProps } from './saas/sign-in/sign-in.motion';
+export { TeamMembers, type TeamMembersProps } from './saas/team-members/team-members.motion';
