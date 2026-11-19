@@ -101,7 +101,7 @@ export function NavigationBarSection() {
       note="A top bar for sites and simple apps. Panels open on hover or click; below the medium breakpoint the links move into a sheet."
     >
       <NavigationBar
-        className="rounded-card border border-line"
+        className="rounded-panel border border-line"
         brand={<span className="font-display text-lg font-heading">Fernhill</span>}
         actions={
           <Button size="sm" variant="secondary">
@@ -311,7 +311,7 @@ export function MenuSection() {
         <ContextMenu>
           <ContextMenuTrigger
             tabIndex={0}
-            className="flex h-24 w-full max-w-sm items-center justify-center rounded-card border border-dashed border-line-strong px-4 text-center text-sm text-fg-muted focus-visible:outline-2 focus-visible:outline-focus"
+            className="flex h-24 w-full max-w-sm items-center justify-center rounded-panel border border-dashed border-line-strong px-4 text-center text-sm text-fg-muted focus-visible:outline-2 focus-visible:outline-focus"
           >
             Right-click or long-press INV-2026-0124 (or focus it and press Shift F10)
           </ContextMenuTrigger>

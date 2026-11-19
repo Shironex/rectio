@@ -162,7 +162,7 @@ export function ShellPage({
       <SidebarHeader>
         <span
           aria-hidden
-          className="flex size-7 shrink-0 items-center justify-center rounded-control bg-accent text-sm font-semibold text-accent-contrast"
+          className="flex size-7 shrink-0 items-center justify-center rounded-control bg-accent text-sm font-strong text-accent-contrast"
         >
           F
         </span>
@@ -418,7 +418,7 @@ function AccountMenu({
           <Button variant="ghost" iconOnly aria-label="Account, Niamh Walsh">
             <span
               aria-hidden
-              className="flex size-7 items-center justify-center rounded-full bg-accent-subtle text-xs font-semibold text-accent-strong"
+              className="flex size-7 items-center justify-center rounded-full bg-accent-subtle text-xs font-strong text-accent-strong"
             >
               NW
             </span>
@@ -444,9 +444,7 @@ function AccountMenu({
           </MenuSub>
         </MenuGroup>
         <MenuSeparator />
-        <MenuItem icon={icon(SignOutIcon)} tone="danger">
-          Sign out
-        </MenuItem>
+        <MenuItem icon={icon(SignOutIcon)}>Sign out</MenuItem>
       </MenuContent>
     </Menu>
   );
