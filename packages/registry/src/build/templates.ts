@@ -200,7 +200,9 @@ export function buildTemplate(
             continue;
           }
           const name = packageName(specifier);
-          if (!declared.has(name)) {
+          // A types-only package (`mdast`) is declared through its `@types/` package.
+          const types = `@types/${name.startsWith('@') ? name.slice(1).replace('/', '__') : name}`;
+          if (!declared.has(name) && !declared.has(types)) {
             problems.push(
               `${label}: ${rel} imports ${name}, which its package.json does not declare`,
             );

@@ -150,24 +150,41 @@ export function rewriteWorkspaceImports(
   const edits: { start: number; end: number; text: string }[] = [];
   const items = new Set<string>();
   for (const statement of tree.statements) {
-    if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier))
-      continue;
-    const pkg = statement.moduleSpecifier.text;
+    // `import { A } from 'pkg'` and the re-export `export { A } from 'pkg'` both name items.
+    const isImport = ts.isImportDeclaration(statement);
+    if (!isImport && !ts.isExportDeclaration(statement)) continue;
+    const specifier = statement.moduleSpecifier;
+    if (specifier === undefined || !ts.isStringLiteral(specifier)) continue;
+    const pkg = specifier.text;
     const barrel = barrels.get(pkg);
     if (barrel === undefined) continue;
-    const clause = statement.importClause;
-    const named = clause?.namedBindings;
-    if (
-      clause === undefined ||
-      clause.name !== undefined ||
-      named === undefined ||
-      !ts.isNamedImports(named)
-    ) {
-      problems.push(`${file}: import only named exports from ${pkg}`);
-      continue;
+    let elements: ts.NodeArray<ts.ImportSpecifier | ts.ExportSpecifier>;
+    let typeOnly: boolean;
+    if (isImport) {
+      const clause = statement.importClause;
+      const named = clause?.namedBindings;
+      if (
+        clause === undefined ||
+        clause.name !== undefined ||
+        named === undefined ||
+        !ts.isNamedImports(named)
+      ) {
+        problems.push(`${file}: import only named exports from ${pkg}`);
+        continue;
+      }
+      elements = named.elements;
+      typeOnly = clause.phaseModifier === ts.SyntaxKind.TypeKeyword;
+    } else {
+      const clause = statement.exportClause;
+      if (clause === undefined || !ts.isNamedExports(clause)) {
+        problems.push(`${file}: re-export only named exports from ${pkg}`);
+        continue;
+      }
+      elements = clause.elements;
+      typeOnly = statement.isTypeOnly;
     }
     const groups = new Map<string, string[]>();
-    for (const element of named.elements) {
+    for (const element of elements) {
       const name = (element.propertyName ?? element.name).text;
       const target = barrel.get(name);
       const hit = target === undefined ? undefined : owner.get(target);
@@ -179,8 +196,7 @@ export function rewriteWorkspaceImports(
       const path = REGISTRY_IMPORT_PREFIX + stripExtension(hit.path);
       groups.set(path, [...(groups.get(path) ?? []), element.getText(tree)]);
     }
-    const typeOnly = clause.phaseModifier === ts.SyntaxKind.TypeKeyword;
-    const keyword = typeOnly ? 'import type' : 'import';
+    const keyword = `${isImport ? 'import' : 'export'}${typeOnly ? ' type' : ''}`;
     const text = [...groups]
       .map(([path, names]) => `${keyword} { ${names.join(', ')} } from '${path}';`)
       .join('\n');
