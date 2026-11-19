@@ -3,6 +3,7 @@ import {
   CreditCardIcon,
   PencilSimpleIcon,
   PlusIcon,
+  PulseIcon,
   ShieldCheckIcon,
   TrashIcon,
   UserPlusIcon,
@@ -13,7 +14,7 @@ import { useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
-import { EmptyNote } from '../../lib/empty-note';
+import { ChoiceSelect } from '../../lib/choice-select';
 import { resolveLocale } from '../../lib/finance';
 import { Segmented } from '../../lib/segmented';
 import { Avatar } from '../lib/avatar';
@@ -85,27 +86,56 @@ export function ActivityFeed({
   return (
     <BlockPanel
       title={title}
-      description={events.length === 0 ? 'Nothing yet' : 'Newest first'}
+      description={events.length === 0 ? 'Who did what, and when' : 'Newest first'}
       className={className}
       bodyClassName="gap-5"
     >
       {events.length === 0 ? (
-        <EmptyNote title="No activity yet">
-          Comments, changes and new members show up here as your team works.
-        </EmptyNote>
+        <div
+          role="status"
+          className="flex flex-col items-center gap-3 rounded-control bg-surface-sunken px-6 py-10 text-center"
+        >
+          <span
+            aria-hidden
+            className="inline-flex size-10 items-center justify-center rounded-full bg-surface text-fg-muted ring-1 ring-line"
+          >
+            <PulseIcon weight="bold" className="size-5" />
+          </span>
+          <div className="flex flex-col gap-1">
+            <p className="font-medium">No activity yet</p>
+            <p className="max-w-sm text-sm text-pretty text-fg-muted">
+              Invite your team or create a project: comments, changes and new members appear here as
+              they happen.
+            </p>
+          </div>
+        </div>
       ) : (
         <>
           {filterable && filters.length > 2 && (
-            <Segmented
-              label="Show activity"
-              value={filter}
-              onValueChange={setFilter}
-              options={filters.map((value) => ({
-                value,
-                label: ACTIVITY_FILTER_LABELS[value],
-                hint: counts[value],
-              }))}
-            />
+            <>
+              <Segmented
+                label="Show activity"
+                value={filter}
+                onValueChange={setFilter}
+                className="hidden @lg:flex"
+                options={filters.map((value) => ({
+                  value,
+                  label: ACTIVITY_FILTER_LABELS[value],
+                  hint: counts[value],
+                }))}
+              />
+              {/* Narrow: one select instead of a filter row that wraps. */}
+              <ChoiceSelect
+                label="Show"
+                value={filter}
+                onValueChange={setFilter}
+                className="w-full @lg:hidden"
+                choices={filters.map((value) => ({
+                  value,
+                  label: `${ACTIVITY_FILTER_LABELS[value]} (${String(counts[value])})`,
+                }))}
+              />
+            </>
           )}
           {days.length === 0 ? (
             <p className="py-6 text-center text-sm text-fg-muted">
@@ -122,50 +152,11 @@ export function ActivityFeed({
                     <Items>
                       {day.events.map((event, index) => (
                         <Item key={event.id} className="relative flex gap-3 py-2.5">
-                          {/* The thread that joins one day's events, behind the avatars. */}
-                          {index < day.events.length - 1 && (
-                            <span
-                              aria-hidden
-                              className="absolute start-4 top-11 -bottom-2 w-px -translate-x-1/2 bg-line rtl:translate-x-1/2"
-                            />
-                          )}
-                          <EventMark event={event} />
-                          <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1">
-                            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                              <p className="min-w-0 text-pretty">
-                                <span className="font-medium">{event.actor.name}</span>{' '}
-                                <span className="text-fg-muted">{event.verb}</span>
-                                {event.target !== undefined && (
-                                  <>
-                                    {' '}
-                                    <span className="font-medium">{event.target}</span>
-                                  </>
-                                )}
-                              </p>
-                              <time
-                                dateTime={event.at.toISOString()}
-                                title={formatDateTime(event.at, locale)}
-                                className="shrink-0 text-sm text-fg-subtle"
-                              >
-                                {relativeTime(event.at, now, locale)}
-                                <span className="sr-only">
-                                  , {formatDateTime(event.at, locale)}
-                                </span>
-                              </time>
-                            </div>
-                            {event.detail !== undefined && (
-                              <p
-                                className={cn(
-                                  'text-sm text-pretty',
-                                  event.kind === 'comment'
-                                    ? 'rounded-control border border-line bg-surface-sunken px-3 py-2 text-fg'
-                                    : 'text-fg-muted',
-                                )}
-                              >
-                                {event.detail}
-                              </p>
-                            )}
-                          </div>
+                          <Thread index={index} count={day.events.length} />
+                          <span className="relative">
+                            <Avatar name={event.actor.name} src={event.actor.avatarUrl} />
+                          </span>
+                          <EventText event={event} now={now} locale={locale} />
                         </Item>
                       ))}
                     </Items>
@@ -190,23 +181,64 @@ export function ActivityFeed({
   );
 }
 
-/** The actor's avatar with the event's kind as a small icon on its corner. */
-function EventMark({ event }: { event: ActivityEvent }) {
-  const KindIcon = KIND_ICONS[event.kind];
+/**
+ * One day's thread behind the avatars: from the first avatar's centre to the last one's, drawn
+ * as one segment per row so it never breaks between rows.
+ */
+function Thread({ index, count }: { index: number; count: number }) {
+  if (count < 2) return null;
+  const first = index === 0;
+  const last = index === count - 1;
   return (
-    <span className="relative inline-flex size-8 shrink-0">
-      <Avatar name={event.actor.name} src={event.actor.avatarUrl} />
-      <span
-        aria-hidden
-        className={cn(
-          'absolute -end-1.5 -bottom-1.5 inline-flex size-4 items-center justify-center rounded-full ring-2 ring-surface',
-          event.kind === 'delete' || event.kind === 'security'
-            ? 'bg-surface-raised text-negative-strong'
-            : 'bg-surface-raised text-fg-muted',
+    <span
+      aria-hidden
+      className={cn(
+        'absolute start-4 w-px -translate-x-1/2 bg-line-strong rtl:translate-x-1/2',
+        first ? 'top-6.5 bottom-0' : 'top-0',
+        last ? 'h-6.5' : 'bottom-0',
+      )}
+    />
+  );
+}
+
+/** The sentence, then its kind and time in a quiet tail; a comment quoted under it. */
+function EventText({ event, now, locale }: { event: ActivityEvent; now: Date; locale: string }) {
+  const KindIcon = KIND_ICONS[event.kind];
+  const quoted = event.kind === 'comment' && event.detail !== undefined;
+  return (
+    <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-1">
+      <p className="min-w-0 text-pretty">
+        <span className="font-medium">{event.actor.name}</span>{' '}
+        <span className="text-fg-muted">{event.verb}</span>
+        {event.target !== undefined && (
+          <>
+            {' '}
+            <span className="font-medium">{event.target}</span>
+          </>
         )}
-      >
-        <KindIcon weight="bold" className="size-3" />
-      </span>
-    </span>
+        {!quoted && event.detail !== undefined && (
+          <span className="text-fg-muted">, {event.detail}</span>
+        )}
+        <span className="ms-2 inline-flex items-baseline gap-1 text-sm whitespace-nowrap text-fg-subtle">
+          <KindIcon
+            aria-hidden
+            weight="bold"
+            className={cn(
+              'size-3.5 self-center',
+              (event.kind === 'delete' || event.kind === 'security') && 'text-negative-strong',
+            )}
+          />
+          <time dateTime={event.at.toISOString()} title={formatDateTime(event.at, locale)}>
+            {relativeTime(event.at, now, locale)}
+            <span className="sr-only">, {formatDateTime(event.at, locale)}</span>
+          </time>
+        </span>
+      </p>
+      {quoted && (
+        <blockquote className="rounded-control border border-line bg-surface-sunken px-3 py-2 text-sm text-pretty text-fg">
+          {event.detail}
+        </blockquote>
+      )}
+    </div>
   );
 }
