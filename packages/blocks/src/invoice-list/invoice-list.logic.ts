@@ -30,15 +30,42 @@ export function balanceDue(invoice: InvoiceSummary, currency: string): number {
   return sumMoney([invoice.total, -(invoice.amountPaid ?? 0)], currency);
 }
 
-/** "Due today", "Due in 3 days", "4 days overdue": the due date as the reader thinks of it. */
-export function dueText(invoice: InvoiceSummary, today: Date): string | null {
+/** How an open invoice relates to its due date, for a language to put into words. */
+export type DueInfo =
+  | { kind: 'today' }
+  | { kind: 'tomorrow' }
+  | { kind: 'in'; days: number }
+  | { kind: 'overdue'; days: number };
+
+/** The due date as a code: null unless the invoice is due or overdue. */
+export function dueInfo(invoice: InvoiceSummary, today: Date): DueInfo | null {
   const state = invoiceState(invoice, today);
   if (state !== 'due' && state !== 'overdue') return null;
   const days = daysBetween(today, invoice.due);
-  if (days === 0) return 'Due today';
-  if (days === 1) return 'Due tomorrow';
-  if (days > 1) return `Due in ${String(days)} days`;
-  return days === -1 ? '1 day overdue' : `${String(-days)} days overdue`;
+  if (days === 0) return { kind: 'today' };
+  if (days === 1) return { kind: 'tomorrow' };
+  if (days > 1) return { kind: 'in', days };
+  return { kind: 'overdue', days: -days };
+}
+
+/** English words for a due code: "Due today", "Due in 3 days", "4 days overdue". */
+export function englishDue(info: DueInfo): string {
+  switch (info.kind) {
+    case 'today':
+      return 'Due today';
+    case 'tomorrow':
+      return 'Due tomorrow';
+    case 'in':
+      return `Due in ${String(info.days)} days`;
+    case 'overdue':
+      return info.days === 1 ? '1 day overdue' : `${String(info.days)} days overdue`;
+  }
+}
+
+/** "Due today", "Due in 3 days", "4 days overdue": the due date as the reader thinks of it. */
+export function dueText(invoice: InvoiceSummary, today: Date): string | null {
+  const info = dueInfo(invoice, today);
+  return info === null ? null : englishDue(info);
 }
 
 export type InvoicePeriod = 'this-month' | 'last-month' | 'quarter' | 'year' | 'all';

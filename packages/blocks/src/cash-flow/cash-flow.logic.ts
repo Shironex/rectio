@@ -92,11 +92,19 @@ export function periodLabel(
   granularity: Granularity,
   locale: string | undefined,
   short = false,
+  /** Words a quarter in another language; the default is "Q1 2026". */
+  quarterLabel: (quarter: number, year: number, short: boolean) => string = (
+    quarter,
+    year,
+    isShort,
+  ) =>
+    isShort
+      ? `Q${String(quarter)} ${String(year).slice(2)}`
+      : `Q${String(quarter)} ${String(year)}`,
 ): string {
   if (granularity === 'quarter') {
     const quarter = Math.floor(period.start.getMonth() / 3) + 1;
-    const year = String(period.start.getFullYear());
-    return short ? `Q${String(quarter)} ${year.slice(2)}` : `Q${String(quarter)} ${year}`;
+    return quarterLabel(quarter, period.start.getFullYear(), short);
   }
   return new Intl.DateTimeFormat(locale, {
     month: 'short',

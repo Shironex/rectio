@@ -11,13 +11,14 @@ import {
   TableRow,
   cn,
 } from '@rectio/ui';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
 import { ChoiceSelect } from '../lib/choice-select';
 import { EmptyNote } from '../lib/empty-note';
 import { formatShortDate, resolveLocale } from '../lib/finance';
+import { COMMON_MESSAGES, mergeMessages, type CommonMessages } from '../lib/messages';
 import {
   journalTotals,
   runningBalances,
@@ -38,8 +39,94 @@ export interface LedgerProps {
   title?: string;
   /** The period the lines cover, shown under the title, such as "March 2026". */
   period?: string;
+  /** Shown in the empty state under its note, such as a button that adds the first entry. */
+  emptyAction?: ReactNode;
+  /** The block's words; pass the keys you change. See `LEDGER_MESSAGES`. */
+  messages?: Partial<LedgerMessages>;
   className?: string;
 }
+
+export interface LedgerMessages extends CommonMessages {
+  title: string;
+  /** Under the title for the whole journal: the period and the entry count. */
+  journalDescription: (period: string | undefined, entries: number) => string;
+  /** Under an account's title: "Account ledger, March 2026, debit balance". */
+  accountDescription: (period: string | undefined, normal: 'debit' | 'credit') => string;
+  accountLabel: string;
+  allAccounts: string;
+  emptyTitle: string;
+  emptyNote: string;
+  /** The table's accessible caption; `account` is the account's name, absent for the journal. */
+  tableCaption: (account: string | undefined, currency: string) => string;
+  date: string;
+  reference: string;
+  entryAndAccount: string;
+  description: string;
+  debit: string;
+  credit: string;
+  amount: string;
+  balance: string;
+  openingBalance: string;
+  noPostings: string;
+  doesNotBalance: string;
+  /** The short side marks beside an amount on a narrow block (Dr, Cr) and their full words. */
+  debitShort: string;
+  creditShort: string;
+  debitWord: string;
+  creditWord: string;
+  totals: string;
+  closingBalance: string;
+  balanced: string;
+  balancedNote: string;
+  outOfBalance: string;
+  /** "Debits exceed credits by €40, in JE-12."; `references` is empty when no entry is named. */
+  exceeds: (
+    excess: 'debits' | 'credits',
+    difference: ReactNode,
+    references: readonly string[],
+  ) => ReactNode;
+}
+
+export const LEDGER_MESSAGES: LedgerMessages = {
+  ...COMMON_MESSAGES,
+  title: 'General journal',
+  journalDescription: (period, entries) =>
+    [period, `${String(entries)} entries`].filter(Boolean).join(', '),
+  accountDescription: (period, normal) =>
+    `Account ledger${period === undefined ? '' : `, ${period}`}, ${normal} balance`,
+  accountLabel: 'Account',
+  allAccounts: 'All accounts',
+  emptyTitle: 'No entries in the period',
+  emptyNote: 'Journal entries appear here as they are posted.',
+  tableCaption: (account, currency) =>
+    `${account === undefined ? 'Journal lines' : `Ledger of ${account}`}, amounts in ${currency}`,
+  date: 'Date',
+  reference: 'Reference',
+  entryAndAccount: 'Entry and account',
+  description: 'Description',
+  debit: 'Debit',
+  credit: 'Credit',
+  amount: 'Amount',
+  balance: 'Balance',
+  openingBalance: 'Opening balance',
+  noPostings: '{m.noPostings}',
+  doesNotBalance: 'Does not balance',
+  debitShort: 'Dr',
+  creditShort: 'Cr',
+  debitWord: 'debit',
+  creditWord: 'credit',
+  totals: 'Totals',
+  closingBalance: 'Closing balance',
+  balanced: 'Balanced',
+  balancedNote: 'Debits equal credits for every entry.',
+  outOfBalance: 'Out of balance',
+  exceeds: (excess, difference, references) => (
+    <>
+      {excess === 'debits' ? 'Debits exceed credits' : 'Credits exceed debits'} by {difference}
+      {references.length > 0 && `, in ${references.join(', ')}`}.
+    </>
+  ),
+};
 
 const ALL = 'all';
 
@@ -54,11 +141,14 @@ export function Ledger({
   locale: requestedLocale,
   openingBalances = {},
   defaultAccount = ALL,
-  title = 'General journal',
+  title,
   period,
+  emptyAction,
+  messages,
   className,
 }: LedgerProps) {
   const locale = resolveLocale(requestedLocale);
+  const m = mergeMessages(LEDGER_MESSAGES, messages);
   const { Money } = useBlockParts();
   const [accountCode, setAccountCode] = useState(defaultAccount);
   const account = accounts.find((a) => a.code === accountCode);
@@ -83,21 +173,19 @@ export function Ledger({
 
   return (
     <BlockPanel
-      title={account === undefined ? title : `${account.code} ${account.name}`}
+      title={account === undefined ? (title ?? m.title) : `${account.code} ${account.name}`}
       description={
         account === undefined
-          ? [period, `${String(new Set(lines.map((l) => l.entryId)).size)} entries`]
-              .filter(Boolean)
-              .join(', ')
-          : `Account ledger${period === undefined ? '' : `, ${period}`}, ${account.normal} balance`
+          ? m.journalDescription(period, new Set(lines.map((l) => l.entryId)).size)
+          : m.accountDescription(period, account.normal)
       }
       actions={
         <ChoiceSelect
-          label="Account"
+          label={m.accountLabel}
           value={accountCode}
           onValueChange={setAccountCode}
           choices={[
-            { value: ALL, label: 'All accounts' },
+            { value: ALL, label: m.allAccounts },
             ...accounts.map((a) => ({ value: a.code, label: `${a.code} ${a.name}` })),
           ]}
           className="min-w-56"
@@ -107,31 +195,28 @@ export function Ledger({
       bodyClassName="gap-4"
     >
       {account === undefined && ordered.length === 0 ? (
-        <EmptyNote title="No entries in the period">
-          Journal entries appear here as they are posted.
+        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+          {m.emptyNote}
         </EmptyNote>
       ) : (
         <Table>
-          <TableCaption className="sr-only">
-            {account === undefined ? 'Journal lines' : `Ledger of ${account.name}`}, amounts in{' '}
-            {currency}
-          </TableCaption>
+          <TableCaption className="sr-only">{m.tableCaption(account?.name, currency)}</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="hidden w-20 @xl:table-cell">Date</TableHead>
-              <TableHead className="hidden w-28 @2xl:table-cell">Reference</TableHead>
-              <TableHead>{account === undefined ? 'Entry and account' : 'Description'}</TableHead>
+              <TableHead className="hidden w-20 @xl:table-cell">{m.date}</TableHead>
+              <TableHead className="hidden w-28 @2xl:table-cell">{m.reference}</TableHead>
+              <TableHead>{account === undefined ? m.entryAndAccount : m.description}</TableHead>
               <TableHead align="end" className="hidden @xl:table-cell">
-                Debit
+                {m.debit}
               </TableHead>
               <TableHead align="end" className="hidden @xl:table-cell">
-                Credit
+                {m.credit}
               </TableHead>
               {/* Narrow: one amount column, each figure marked Dr or Cr. */}
               <TableHead align="end" className="@xl:hidden">
-                Amount
+                {m.amount}
               </TableHead>
-              {account !== undefined && <TableHead align="end">Balance</TableHead>}
+              {account !== undefined && <TableHead align="end">{m.balance}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -139,7 +224,7 @@ export function Ledger({
               <TableRow>
                 <TableCell className="hidden @xl:table-cell" />
                 <TableCell className="hidden @2xl:table-cell" />
-                <TableCell className="text-fg-muted">Opening balance</TableCell>
+                <TableCell className="text-fg-muted">{m.openingBalance}</TableCell>
                 <TableCell className="hidden @xl:table-cell" />
                 <TableCell className="hidden @xl:table-cell" />
                 <TableCell className="@xl:hidden" />
@@ -198,7 +283,7 @@ export function Ledger({
                             {unbalanced && (
                               <Badge tone="negative">
                                 <WarningCircleIcon aria-hidden weight="bold" />
-                                Does not balance
+                                {m.doesNotBalance}
                               </Badge>
                             )}
                           </span>
@@ -231,8 +316,10 @@ export function Ledger({
                     <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
                       {money(line.debit > 0 ? line.debit : line.credit)}
                       <span className="text-sm text-fg-muted">
-                        <span aria-hidden>{line.debit > 0 ? 'Dr' : 'Cr'}</span>
-                        <span className="sr-only">{line.debit > 0 ? 'debit' : 'credit'}</span>
+                        <span aria-hidden>{line.debit > 0 ? m.debitShort : m.creditShort}</span>
+                        <span className="sr-only">
+                          {line.debit > 0 ? m.debitWord : m.creditWord}
+                        </span>
                       </span>
                     </span>
                   </TableCell>
@@ -256,7 +343,7 @@ export function Ledger({
                 <TableHead scope="row" className="hidden @xl:table-cell" />
                 <TableHead scope="row" className="hidden @2xl:table-cell" />
                 <TableHead scope="row" className="text-fg">
-                  {account === undefined ? 'Totals' : 'Closing balance'}
+                  {account === undefined ? m.totals : m.closingBalance}
                 </TableHead>
                 <TableCell align="end" className="hidden @xl:table-cell">
                   <Money
@@ -288,8 +375,10 @@ export function Ledger({
                           className="font-strong"
                         />
                         <span className="text-sm text-fg-muted">
-                          <span aria-hidden>{side === 'debit' ? 'Dr' : 'Cr'}</span>
-                          <span className="sr-only">{side}</span>
+                          <span aria-hidden>{side === 'debit' ? m.debitShort : m.creditShort}</span>
+                          <span className="sr-only">
+                            {side === 'debit' ? m.debitWord : m.creditWord}
+                          </span>
                         </span>
                       </span>
                     ))}
@@ -318,25 +407,27 @@ export function Ledger({
             <>
               <Badge tone="positive">
                 <CheckCircleIcon aria-hidden weight="bold" />
-                Balanced
+                {m.balanced}
               </Badge>
-              <span className="text-fg-muted">Debits equal credits for every entry.</span>
+              <span className="text-fg-muted">{m.balancedNote}</span>
             </>
           ) : (
             <>
               <Badge tone="negative">
                 <WarningCircleIcon aria-hidden weight="bold" />
-                Out of balance
+                {m.outOfBalance}
               </Badge>
               <span>
-                {totals.difference > 0 ? 'Debits exceed credits' : 'Credits exceed debits'} by{' '}
-                <Money
-                  amount={Math.abs(totals.difference)}
-                  currency={currency}
-                  locale={locale}
-                  className="font-medium"
-                />
-                {broken.length > 0 && `, in ${broken.map((b) => b.reference).join(', ')}`}.
+                {m.exceeds(
+                  totals.difference > 0 ? 'debits' : 'credits',
+                  <Money
+                    amount={Math.abs(totals.difference)}
+                    currency={currency}
+                    locale={locale}
+                    className="font-medium"
+                  />,
+                  broken.map((b) => b.reference),
+                )}
               </span>
             </>
           )}
