@@ -124,6 +124,16 @@ describe('DatePicker', () => {
     expect(screen.getByRole('textbox', { name: 'Date' })).toHaveValue('20/03/2026');
   });
 
+  it('keeps the date when the chosen day is pressed again', async () => {
+    const onChange = vi.fn();
+    render(<Controlled locale="en-GB" initial={new Date(2026, 2, 19)} onChange={onChange} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Choose date, 19/03/2026' }));
+    const grid = await screen.findByRole('grid');
+    await userEvent.click(within(grid).getByRole('button', { name: /19 March 2026/ }));
+    expect(ymd(onChange.mock.lastCall?.[0] as Date)).toBe('2026-03-19');
+    expect(screen.getByRole('textbox', { name: 'Date' })).toHaveValue('19/03/2026');
+  });
+
   it('opens with Alt + Down from the input', async () => {
     render(<Controlled locale="en-GB" />);
     screen.getByRole('textbox', { name: 'Date' }).focus();

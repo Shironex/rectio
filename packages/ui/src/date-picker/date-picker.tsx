@@ -217,7 +217,8 @@ export function DatePicker({
           {...(value === null ? {} : { defaultMonth: value })}
           disabled={disabledDays}
           onSelect={(date) => {
-            const next = date ?? null;
+            // Pressing the chosen day again confirms it; it never empties the field.
+            const next = date ?? value;
             setShownValue(next);
             setText(next === null ? '' : formatDate(next, dateLocale));
             onValueChange(next);
