@@ -1,16 +1,16 @@
 export interface Category {
   value: string;
   label: string;
-  group: 'Travel' | 'Operations';
+  group: 'Travel' | 'Meals' | 'Tools';
 }
 
 export const CATEGORIES: Category[] = [
   { value: 'flights', label: 'Flights', group: 'Travel' },
   { value: 'rail', label: 'Rail', group: 'Travel' },
   { value: 'travel', label: 'Hotels', group: 'Travel' },
-  { value: 'meals', label: 'Client meals', group: 'Operations' },
-  { value: 'software', label: 'Software', group: 'Operations' },
-  { value: 'office', label: 'Office supplies', group: 'Operations' },
+  { value: 'meals', label: 'Client meals', group: 'Meals' },
+  { value: 'software', label: 'Software', group: 'Tools' },
+  { value: 'office', label: 'Office supplies', group: 'Tools' },
 ];
 
 export interface Expense {

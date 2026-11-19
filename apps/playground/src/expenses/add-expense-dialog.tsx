@@ -26,7 +26,7 @@ import { useRef, useState, type KeyboardEvent, type SyntheticEvent } from 'react
 
 import { CATEGORIES, type Expense } from './data';
 
-const GROUPS = ['Travel', 'Operations'] as const;
+const GROUPS = ['Travel', 'Meals', 'Tools'] as const;
 const ITEMS = CATEGORIES.map((c) => ({ value: c.value, label: c.label }));
 const SAVE_DELAY_MS = 700;
 const IS_APPLE = /Mac|iPhone|iPad/.test(navigator.userAgent);
@@ -47,7 +47,8 @@ const EMPTY: Draft = { merchant: '', amount: null, category: null, note: '' };
 function validate(draft: Draft): Errors {
   const errors: Errors = {};
   if (draft.merchant.trim() === '') errors.merchant = 'Enter the merchant name.';
-  if (draft.amount === null || draft.amount <= 0) errors.amount = 'Enter an amount above zero.';
+  if (draft.amount === null || draft.amount <= 0)
+    errors.amount = 'Enter an amount above zero, such as 129.40.';
   if (draft.category === null) errors.category = 'Choose a category.';
   return errors;
 }
@@ -59,7 +60,20 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
   const [saving, setSaving] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
+  /**
+   * A field the user has changed re-checks itself on blur, so errors show before Save. An untouched
+   * field does not: blurring it toward Save would insert an error line and move the button away
+   * from the pointer mid-click.
+   */
+  const [dirty, setDirty] = useState<ReadonlySet<keyof Draft>>(new Set());
+  const checkOnBlur = (key: keyof Errors) => () => {
+    if (!dirty.has(key)) return;
+    const message = validate(draft)[key];
+    setErrors((e) => ({ ...e, [key]: message }));
+  };
+
   const update = <K extends keyof Draft>(key: K, value: Draft[K]) => {
+    setDirty((d) => new Set(d).add(key));
     setDraft((d) => ({ ...d, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
   };
@@ -68,6 +82,7 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
     if (saving) return;
     setOpen(next);
     if (!next) {
+      setDirty(new Set());
       setDraft(EMPTY);
       setErrors({});
     }
@@ -124,6 +139,7 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
               <FieldLabel>Merchant</FieldLabel>
               <Input
                 autoFocus
+                onBlur={checkOnBlur('merchant')}
                 value={draft.merchant}
                 onValueChange={(value) => {
                   update('merchant', value);
@@ -132,10 +148,11 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
               />
               {errors.merchant !== undefined && <FieldError>{errors.merchant}</FieldError>}
             </Field>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <Field invalid={errors.amount !== undefined}>
                 <FieldLabel>Amount, EUR</FieldLabel>
                 <AmountInput
+                  onBlur={checkOnBlur('amount')}
                   currency="EUR"
                   locale="en-IE"
                   value={draft.amount}
@@ -182,7 +199,7 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
             </Field>
           </DialogBody>
           <DialogFooter>
-            <p className="me-auto flex items-center gap-1 text-sm text-fg-subtle">
+            <p className="me-auto hidden items-center gap-1 text-sm text-fg-subtle sm:flex">
               <kbd className={KBD}>{IS_APPLE ? '⌘' : 'Ctrl'}</kbd>
               <kbd className={KBD}>Enter</kbd>
               <span className="ms-1">to save</span>
