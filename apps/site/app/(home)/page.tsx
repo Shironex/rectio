@@ -37,7 +37,7 @@ export default function Home() {
         </Section>
 
         <Section className="grid gap-12 py-14 md:py-16 lg:grid-cols-12 lg:gap-16">
-          <div className="flex flex-col gap-8 lg:col-span-5">
+          <div className="flex min-w-0 flex-col gap-8 lg:col-span-5">
             <SectionIntro title="Source you own, from a registry you trust.">
               rectio installs components as files in your project, records what it wrote, and shows
               the diff when a new version lands.
@@ -61,7 +61,7 @@ export default function Home() {
               ))}
             </dl>
           </div>
-          <div className="site-reveal site-step-1 lg:col-span-7">
+          <div className="site-reveal site-step-1 min-w-0 lg:col-span-7">
             <Terminal />
           </div>
         </Section>
