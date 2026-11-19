@@ -1,4 +1,4 @@
-import { ArrowDownIcon, ArrowUpIcon } from '@phosphor-icons/react';
+import { ArrowDownIcon, ArrowUpIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
 import type { RowData } from '@tanstack/react-table';
 
 import { Button } from '../button/button';
@@ -85,7 +85,10 @@ export function DataTableSort<TData extends RowData>({
           if (current !== undefined) table.setSorting([{ id: current.id, desc: !current.desc }]);
         }}
       >
-        {current?.desc === true ? (
+        {/* The neutral arrows of the header while nothing sorts: no direction to show yet. */}
+        {current === undefined ? (
+          <ArrowsDownUpIcon aria-hidden weight="bold" className="size-4" />
+        ) : current.desc ? (
           <ArrowDownIcon aria-hidden weight="bold" className="size-4" />
         ) : (
           <ArrowUpIcon aria-hidden weight="bold" className="size-4" />
