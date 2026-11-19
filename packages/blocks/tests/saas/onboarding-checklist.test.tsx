@@ -51,15 +51,20 @@ describe('OnboardingChecklist', () => {
     expect(onSelect).toHaveBeenCalled();
     expect(screen.getByRole('meter', { name: 'Setup progress' })).toHaveAttribute(
       'aria-valuetext',
-      '33%',
+      '1 of 3 done',
     );
+    expect(current).toHaveTextContent('Next');
   });
 
   it('marks a step done by hand', async () => {
     const onToggleStep = vi.fn();
     render(<OnboardingChecklist steps={STEPS} onToggleStep={onToggleStep} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Mark Invite your team as done' }));
+    await userEvent.click(screen.getByRole('button', { name: 'More for Invite your team' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Mark as done' }));
     expect(onToggleStep).toHaveBeenCalledWith('c', true);
+    await userEvent.click(screen.getByRole('button', { name: 'More for Name your workspace' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Mark as not done' }));
+    expect(onToggleStep).toHaveBeenCalledWith('a', false);
   });
 
   it('folds the steps away and back', async () => {
