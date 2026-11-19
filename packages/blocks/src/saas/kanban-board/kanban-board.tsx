@@ -119,21 +119,8 @@ export function KanbanBoard({
   const pending = useRef<({ cardId: string } & KanbanPosition) | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [dropColumn, setDropColumn] = useState<string | null>(null);
-  // Narrow widths show one column at a time; this is the one in view.
+  // Narrow widths show one column at a time, picked from the switcher; this is the one shown.
   const [shown, setShown] = useState(0);
-  const tabs = useRef<HTMLDivElement>(null);
-  const scrollFrame = useRef<number | null>(null);
-  useEffect(
-    () => () => {
-      if (scrollFrame.current !== null) cancelAnimationFrame(scrollFrame.current);
-    },
-    [],
-  );
-
-  const showColumn = (index: number) => {
-    setShown(index);
-    board.current?.children[index]?.scrollIntoView({ block: 'nearest', inline: 'start' });
-  };
 
   useEffect(() => {
     const target = pending.current;
@@ -161,7 +148,12 @@ export function KanbanBoard({
     announce(
       `${card.title} moved to ${columnTitle(to.columnId)}, position ${String(to.index + 1)} of ${String(size)}.`,
     );
-    if (keepFocus) pending.current = { cardId: card.id, ...to };
+    if (keepFocus) {
+      pending.current = { cardId: card.id, ...to };
+      // Narrow: follow the card to its new column, so focus has somewhere to land.
+      const index = columns.findIndex((column) => column.id === to.columnId);
+      if (index !== -1) setShown(index);
+    }
   };
 
   const onCardKeyDown = (event: KeyboardEvent, card: KanbanCard) => {
@@ -226,24 +218,6 @@ export function KanbanBoard({
     [],
   );
 
-  // Which column is in view is read at most once a frame while the board scrolls.
-  const onBoardScroll = () => {
-    if (scrollFrame.current !== null) return;
-    scrollFrame.current = requestAnimationFrame(() => {
-      scrollFrame.current = null;
-      const el = board.current;
-      if (el === null) return;
-      const first = el.children[0] as HTMLElement | undefined;
-      const gap = Number.parseFloat(getComputedStyle(el).columnGap) || 0;
-      const step = (first?.offsetWidth ?? el.clientWidth) + gap;
-      const index = Math.min(columns.length - 1, Math.round(el.scrollLeft / step));
-      if (index === shown) return;
-      setShown(index);
-      // Keep the matching tab in view, so the strip follows a swipe.
-      tabs.current?.children[index]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    });
-  };
-
   const onDrop = (event: DragEvent, columnId: string) => {
     event.preventDefault();
     setDropColumn(null);
@@ -278,13 +252,9 @@ export function KanbanBoard({
         </EmptyNote>
       ) : (
         <>
-          {/* The end padding outruns the fade, so the last tab scrolls fully into view. */}
-          <div
-            ref={tabs}
-            role="group"
-            aria-label="Columns"
-            className="-mx-5 flex snap-x snap-mandatory scroll-px-5 gap-1 overflow-x-auto mask-r-from-85% px-5 pe-20 @xl:hidden"
-          >
+          {/* Narrow: every column as an equal button in two columns, so no name is ever cut off;
+              three or five columns simply wrap to another row. */}
+          <div role="group" aria-label="Columns" className="grid grid-cols-2 gap-1 @xl:hidden">
             {columns.map((column, index) => (
               <button
                 key={column.id}
@@ -292,15 +262,17 @@ export function KanbanBoard({
                 aria-current={shown === index ? 'true' : undefined}
                 data-current={shown === index || undefined}
                 onClick={() => {
-                  showColumn(index);
+                  setShown(index);
                 }}
                 className={cn(
-                  'flex h-(--rx-control-height-sm) shrink-0 cursor-pointer snap-start items-center gap-1.5 rounded-control px-3 text-sm whitespace-nowrap text-fg-muted pointer-coarse:h-(--rx-control-height-touch)',
-                  'data-current:bg-surface-sunken data-current:font-medium data-current:text-fg',
+                  'flex h-(--rx-control-height-sm) min-w-0 cursor-pointer items-center justify-between gap-1.5 rounded-control border border-line px-3 text-sm text-fg-muted pointer-coarse:h-(--rx-control-height-touch)',
+                  'data-current:border-line-strong data-current:bg-surface-sunken data-current:font-medium data-current:text-fg',
                   focusRing,
                 )}
               >
-                <span>{column.title}</span>
+                <span className="truncate" title={column.title}>
+                  {column.title}
+                </span>
                 <span className="shrink-0 text-fg-subtle numeric">{cardsIn(column.id).length}</span>
               </button>
             ))}
@@ -316,10 +288,10 @@ export function KanbanBoard({
           )}
           <div
             ref={board}
-            onScroll={onBoardScroll}
-            className="-mx-5 flex scroll-px-5 @max-xl:snap-x @max-xl:snap-mandatory items-start gap-5 overflow-x-auto px-5 pb-2 @4xl:items-stretch @xl:gap-3"
+            className="flex items-start gap-3 @xl:-mx-5 @xl:overflow-x-auto @xl:px-5 @xl:pb-2 @4xl:items-stretch"
           >
             {columns.map((column, columnIndex) => {
+              // Narrow: only the chosen column is laid out, so the board is as tall as it is.
               const columnCards = cardsIn(column.id);
               const over = kanbanOverLimit(column, columnCards.length);
               const headingId = `${hintId}-${column.id}`;
@@ -342,11 +314,12 @@ export function KanbanBoard({
                     onDrop(event, column.id);
                   }}
                   className={cn(
-                    'flex w-full shrink-0 snap-start flex-col gap-2 @max-xl:min-h-96 rounded-control border border-line bg-surface-sunken p-2 @xl:w-72 @4xl:w-auto @4xl:min-w-52 @4xl:flex-1',
+                    'flex w-full shrink-0 flex-col gap-2 rounded-control border border-line bg-surface-sunken p-2 @xl:w-72 @4xl:w-auto @4xl:min-w-52 @4xl:flex-1',
                     'transition-[border-color,background-color] duration-fast ease-standard',
                     'data-drop:border-accent data-drop:bg-accent-subtle',
                     over && 'border-warning-strong/40',
                     cards.length === 0 && 'min-h-48 border-dashed bg-transparent',
+                    columnIndex !== shown && '@max-xl:hidden',
                   )}
                 >
                   <header className="flex items-center justify-between gap-2 px-1.5 pt-1">
