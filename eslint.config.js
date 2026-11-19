@@ -107,9 +107,9 @@ export default tseslint.config(
     },
   },
 
-  // The token rule: components never hardcode a design value.
+  // The token rule: components and the motion add-on never hardcode a design value.
   {
-    files: ['packages/ui/src/**/*.{ts,tsx}'],
+    files: ['packages/ui/src/**/*.{ts,tsx}', 'packages/motion/src/**/*.{ts,tsx}'],
     ignores: ['**/*.test.{ts,tsx}'],
     plugins: { rectio: designRules },
     rules: { 'rectio/no-hardcoded-design-values': 'error' },

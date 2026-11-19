@@ -35,7 +35,7 @@ function lineAndColumn(text: string, index: number): { line: number; column: num
 
 /**
  * The CI-critical twin of the ESLint rule `rectio/no-hardcoded-design-values`. It reads every
- * file under packages/ui/src straight from disk, so an inline eslint-disable cannot hide a value,
+ * file under packages/ui/src and packages/motion/src straight from disk, so an inline eslint-disable cannot hide a value,
  * and it covers CSS files ESLint never sees.
  */
 export const uiNoHardcodedDesignValues: IMetaRule = {
@@ -43,12 +43,13 @@ export const uiNoHardcodedDesignValues: IMetaRule = {
   category: 'source-text',
   ciCritical: true,
   description:
-    'Components in packages/ui never hardcode colour, radius, font, shadow, duration or easing.',
+    'Components in packages/ui and packages/motion never hardcode colour, radius, font, shadow, duration, easing or spring.',
   run(ctx: IMetaCtx): IViolation[] {
     const violations: IViolation[] = [];
-    const files = ctx
-      .glob('packages/ui/src/**/*')
-      .filter((file) => /\.(tsx?|css)$/.test(file) && !/\.test\.tsx?$/.test(file));
+    const files = [
+      ...ctx.glob('packages/ui/src/**/*'),
+      ...ctx.glob('packages/motion/src/**/*'),
+    ].filter((file) => /\.(tsx?|css)$/.test(file) && !/\.test\.tsx?$/.test(file));
     for (const file of files) {
       const text = ctx.read(file);
       if (text === null) continue;
