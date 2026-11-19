@@ -162,27 +162,34 @@ export function PricingTable({
                         </span>
                       </span>
                     )}
-                    {price !== 0 && (
-                      <span className="text-sm text-fg-muted">
-                        {price === null ? (
-                          'Priced for your volume, billed yearly'
-                        ) : cycle === 'yearly' && plan.yearly !== undefined ? (
-                          <>
-                            <span className="numeric">
-                              {pricingPriceText(plan.yearly, currency, locale)}
-                            </span>{' '}
-                            billed yearly
-                            {planSaving > 0 && (
-                              <span className="text-positive-strong">
-                                , you save {formatPercent(planSaving, locale, { digits: 0 })}
+                    {/* Every card says one line here, so no card keeps an empty slot. */}
+                    <span className="text-sm text-balance text-fg-muted">
+                      {price === null ? (
+                        'Priced for your volume, billed yearly'
+                      ) : price === 0 ? (
+                        'No card needed'
+                      ) : cycle === 'yearly' && plan.yearly !== undefined ? (
+                        <>
+                          <span className="numeric">
+                            {pricingPriceText(plan.yearly, currency, locale)}
+                          </span>{' '}
+                          billed yearly
+                          {planSaving > 0 && (
+                            <>
+                              {' '}
+                              <span aria-hidden className="text-fg-subtle">
+                                ·
+                              </span>{' '}
+                              <span className="whitespace-nowrap text-positive-strong">
+                                Save {formatPercent(planSaving, locale, { digits: 0 })}
                               </span>
-                            )}
-                          </>
-                        ) : (
-                          'Billed monthly, cancel any time'
-                        )}
-                      </span>
-                    )}
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        'Billed monthly, cancel any time'
+                      )}
+                    </span>
                   </div>
 
                   {plan.highlights !== undefined && plan.highlights.length > 0 ? (
@@ -205,7 +212,7 @@ export function PricingTable({
                   {/* The last shared row, so every button sits on the cards' bottom edge. */}
                   <div className="flex flex-col justify-end">
                     {current ? (
-                      <p className="flex min-h-(--rx-control-height-md) items-center justify-center gap-2 text-sm font-medium text-fg-muted pointer-coarse:min-h-(--rx-control-height-touch)">
+                      <p className="flex min-h-(--rx-control-height-md) items-center justify-center gap-2 rounded-control border border-line text-sm font-medium text-fg-muted pointer-coarse:min-h-(--rx-control-height-touch)">
                         <CheckIcon
                           aria-hidden
                           weight="bold"
@@ -332,7 +339,8 @@ function Comparison({
                   scope="col"
                   className={cn(
                     'w-1/6 rounded-t-control px-2 py-2 text-center font-medium',
-                    plan.recommended === true && 'bg-surface-sunken text-accent-strong',
+                    plan.recommended === true &&
+                      'border-t-2 border-accent bg-accent-subtle/40 text-accent-strong',
                   )}
                 >
                   {plan.name}
@@ -367,7 +375,7 @@ function Comparison({
                         key={plan.id}
                         className={cn(
                           'px-2 py-2.5 text-center text-fg-muted',
-                          plan.recommended === true && 'bg-surface-sunken',
+                          plan.recommended === true && 'bg-accent-subtle/40',
                         )}
                       >
                         <FeatureValue value={feature.values[plan.id]} />
