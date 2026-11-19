@@ -153,13 +153,13 @@ describe('template items', () => {
     expect(run).toThrow('components/row.tsx imports clsx, which its package.json does not declare');
   });
 
-  it('fails on a file where kit items install and on a workspace line left unmarked', () => {
+  it('fails on a file at a kit path and on a workspace line left unmarked', () => {
     const { run } = build({
       'templates/books/lib/cn.ts': 'export const cn = 1;\n',
       'templates/books/app/extra.css': "@import '@fixture/tokens/a.css';\n",
     });
     expect(run).toThrow(
-      /app\/extra\.css still names[\s\S]*lib\/cn\.ts sits where kit items install/,
+      /app\/extra\.css still names[\s\S]*lib\/cn\.ts is also the path of a kit file/,
     );
   });
 

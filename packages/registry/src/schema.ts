@@ -26,6 +26,18 @@ export type AliasKey = (typeof ALIAS_KEYS)[number];
  */
 export const PROJECT_PLACEHOLDER = 'project';
 
+/**
+ * Where each alias points in a project made from a template (its tsconfig maps `@/*` to the root),
+ * so the CLI writes kit items there and the build can check a template never collides with one.
+ */
+export const TEMPLATE_ALIAS_DIRS: Record<AliasKey, string> = {
+  ui: 'components/ui',
+  blocks: 'components/blocks',
+  lib: 'lib',
+  hooks: 'hooks',
+  styles: 'styles/rectio',
+};
+
 export const itemNameSchema = z
   .string()
   .regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/, 'lowercase kebab-case, starting with a letter')

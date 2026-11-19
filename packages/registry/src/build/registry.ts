@@ -4,9 +4,11 @@ import { join } from 'node:path';
 import { itemIntegrity, sha256Hex } from '../integrity.ts';
 import {
   SCHEMA_VERSION,
+  TEMPLATE_ALIAS_DIRS,
   TOKEN_CONTRACT_VERSION,
   registryIndexSchema,
   registryItemSchema,
+  type AliasKey,
   type RegistryIndex,
   type RegistryItem,
 } from '../schema.ts';
@@ -71,43 +73,6 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
       targetFolder: addon.targetFolder,
     })),
   ];
-  const themeIds = config.tokens?.themes.map((theme) => `theme-${theme.id}`) ?? [];
-  for (const folder of findTemplates(config.templates?.dir ?? '')) {
-    const built = buildTemplate(folder, roots, config.workspacePackages ?? {});
-    const { manifest } = built;
-    items.push(
-      finish({
-        ...base(manifest.name, built.version),
-        type: 'template',
-        tier: manifest.tier,
-        title: manifest.title,
-        description: manifest.description,
-        categories: ['template', manifest.category],
-        // The template's own package.json carries its npm packages; the kit items bring theirs.
-        dependencies: {},
-        devDependencies: {},
-        // A template switches theme at runtime, so it installs the tokens and every theme.
-        registryDependencies: [
-          ...new Set([...(hasTokens ? [TOKENS_ITEM, ...themeIds] : []), ...built.uses]),
-        ].sort(),
-        requires: {
-          ...(built.reactRange === undefined ? {} : { react: built.reactRange }),
-          tailwindcss: TAILWIND_RANGE,
-          ...(hasTokens ? { tokenContract: TOKEN_CONTRACT_VERSION } : {}),
-        },
-        files: built.files,
-        template: {
-          category: manifest.category,
-          framework: 'next',
-          pages: manifest.pages,
-          uses: built.uses,
-          screenshots: manifest.screenshots,
-        },
-        docs: `Run the app with your package manager's dev script. Pages: ${manifest.pages.join(', ')}.`,
-      }),
-    );
-  }
-
   for (const built of buildSourceItems(roots, ranges, config.workspacePackages)) {
     const { config: item } = built;
     const styled = item.type === 'component' || item.type === 'block';
@@ -212,6 +177,56 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
         }),
       );
     }
+  }
+
+  // Templates last: they rest on every kit item, and must not collide with any kit file.
+  const themeIds = config.tokens?.themes.map((theme) => `theme-${theme.id}`) ?? [];
+  const kitPaths = new Set(
+    items.flatMap((item) => [
+      ...item.files.map((file) => {
+        const slash = file.target.indexOf('/');
+        const key = file.target.slice(1, slash) as AliasKey;
+        return `${TEMPLATE_ALIAS_DIRS[key]}/${file.target.slice(slash + 1)}`;
+      }),
+      ...(item.cssVars === undefined
+        ? []
+        : [`${TEMPLATE_ALIAS_DIRS.styles}/vars/${item.name}.css`]),
+    ]),
+  );
+  for (const folder of findTemplates(config.templates?.dir ?? '')) {
+    const built = buildTemplate(folder, roots, config.workspacePackages ?? {}, kitPaths);
+    const { manifest } = built;
+    items.push(
+      finish({
+        ...base(manifest.name, built.version),
+        type: 'template',
+        tier: manifest.tier,
+        title: manifest.title,
+        description: manifest.description,
+        categories: ['template', manifest.category],
+        // The template's own package.json carries its npm packages; the kit items bring theirs.
+        dependencies: {},
+        devDependencies: {},
+        // A template switches theme at runtime, so it installs the tokens and every theme.
+        registryDependencies: [
+          ...new Set([...(hasTokens ? [TOKENS_ITEM, ...themeIds] : []), ...built.uses]),
+        ].sort(),
+        requires: {
+          ...(built.reactRange === undefined ? {} : { react: built.reactRange }),
+          tailwindcss: TAILWIND_RANGE,
+          ...(hasTokens ? { tokenContract: TOKEN_CONTRACT_VERSION } : {}),
+        },
+        files: built.files,
+        template: {
+          category: manifest.category,
+          framework: 'next',
+          pages: manifest.pages,
+          uses: built.uses,
+          screenshots: manifest.screenshots,
+        },
+        docs: `Run the app with your package manager's dev script. Pages: ${manifest.pages.join(', ')}.`,
+      }),
+    );
   }
 
   checkGraph(items);

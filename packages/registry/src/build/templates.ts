@@ -24,10 +24,10 @@ const SKIP_ROOT_FILES = new Set([TEMPLATE_MANIFEST, 'turbo.json', 'next-env.d.ts
 const SHIPPED = /\.(?:tsx?|mts|mjs|cjs|jsx?|css|json|md|mdx|txt)$|^\.gitignore$/;
 const SCRIPT = /\.(?:tsx?|mts|mjs|cjs|jsx?)$/;
 /**
- * Where kit items install in the new project (`@/components/ui`, `@/lib`, ...). A template file
- * there would collide with an installed item.
+ * Folders that belong to the kit in the new project. `lib/` and `hooks/` are shared: a template may
+ * keep its own helpers there, as long as no kit file has the same path (`kitPaths`).
  */
-const RESERVED = ['components/ui/', 'components/blocks/', 'lib/', 'hooks/', 'styles/rectio/'];
+const RESERVED = ['components/ui/', 'components/blocks/', 'styles/rectio/'];
 /** A line that only works inside the rectio repo ends with this marker; the build drops it. */
 const WORKSPACE_LINE = /^.*(?:\/\/\s*rectio:workspace|\/\*\s*rectio:workspace\s*\*\/)\s*$\n?/gm;
 /** package.json fields that only serve the repo: its screenshot script and the root lint. */
@@ -127,6 +127,8 @@ export function buildTemplate(
   folder: string,
   roots: readonly SourceRoot[],
   workspacePackages: Readonly<Record<string, string>>,
+  /** Project paths kit items write to (`lib/cn.ts`, ...): a template file there would collide. */
+  kitPaths: ReadonlySet<string> = new Set(),
 ): BuiltTemplate {
   const problems: string[] = [];
   const manifest = readTemplateManifest(folder);
@@ -168,6 +170,10 @@ export function buildTemplate(
   for (const rel of listFiles(folder)) {
     if (RESERVED.some((prefix) => rel.startsWith(prefix))) {
       problems.push(`${label}: ${rel} sits where kit items install (${RESERVED.join(', ')})`);
+      continue;
+    }
+    if (kitPaths.has(rel)) {
+      problems.push(`${label}: ${rel} is also the path of a kit file; rename or move it`);
       continue;
     }
     let content = normalizeLineEndings(readFileSync(join(folder, rel), 'utf8'));

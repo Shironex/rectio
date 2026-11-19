@@ -1,7 +1,12 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 
-import { PROJECT_PLACEHOLDER, type IndexEntry, type RegistryItem } from '@rectio/registry';
+import {
+  PROJECT_PLACEHOLDER,
+  TEMPLATE_ALIAS_DIRS,
+  type IndexEntry,
+  type RegistryItem,
+} from '@rectio/registry';
 
 import { registryUrl, writeConfig, type RectioConfig } from '../core/config.ts';
 import { CliError, type CliContext } from '../core/context.ts';
@@ -44,13 +49,9 @@ export interface InitTemplateResult {
 }
 
 /** Templates import kit code through `@/`; the new project's tsconfig maps `@/*` to its root. */
-const TEMPLATE_ALIASES: RectioConfig['aliases'] = {
-  ui: '@/components/ui',
-  blocks: '@/components/blocks',
-  lib: '@/lib',
-  hooks: '@/hooks',
-  styles: '@/styles/rectio',
-};
+const TEMPLATE_ALIASES = Object.fromEntries(
+  Object.entries(TEMPLATE_ALIAS_DIRS).map(([key, dir]) => [key, `@/${dir}`]),
+) as RectioConfig['aliases'];
 const PROJECT_PREFIX = `@${PROJECT_PLACEHOLDER}/`;
 
 /** A folder name as an npm package name: `My Books` -> `my-books`. */
