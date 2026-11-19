@@ -10,6 +10,9 @@ const Matrix = lazy(() => import('./gallery/matrix').then((m) => ({ default: m.M
 const BlocksPage = lazy(() =>
   import('./blocks/blocks-page').then((m) => ({ default: m.BlocksPage })),
 );
+const DisplayPage = lazy(() =>
+  import('./display/display-page').then((m) => ({ default: m.DisplayPage })),
+);
 const MotionPage = lazy(() =>
   import('./motion/motion-page').then((m) => ({ default: m.MotionPage })),
 );
@@ -22,6 +25,8 @@ export function App() {
         <ExpenseReport theme={theme} mode={mode} motion={motion} />
       ) : view === 'blocks' ? (
         <BlocksPage theme={theme} mode={mode} motion={motion} />
+      ) : view === 'display' ? (
+        <DisplayPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'motion' ? (
         <MotionPage theme={theme} mode={mode} />
       ) : (
