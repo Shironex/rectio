@@ -2,6 +2,7 @@
  * Plans and prices. Prices are per person per month in minor units (cents), so the page never
  * does float arithmetic on money; yearly prices are the monthly equivalent when billed yearly.
  */
+import { SITE } from './site';
 
 export type Billing = 'monthly' | 'yearly';
 
@@ -28,7 +29,7 @@ export const PLANS: readonly Plan[] = [
     summary: 'For a small team with one site.',
     price: { monthly: 0, yearly: 0 },
     limit: 10,
-    cta: { label: 'Start free', href: 'https://app.rostra.example/sign-up' },
+    cta: { label: 'Start free', href: `${SITE.appUrl}/sign-up` },
     highlights: ['Up to 10 people', 'One site', 'Rota builder and app', 'Shift swaps'],
   },
   {
@@ -37,7 +38,7 @@ export const PLANS: readonly Plan[] = [
     summary: 'For growing teams that plan every week.',
     price: { monthly: 350, yearly: 290 },
     limit: null,
-    cta: { label: 'Start a 30 day trial', href: 'https://app.rostra.example/sign-up?plan=team' },
+    cta: { label: 'Start a 30 day trial', href: `${SITE.appUrl}/sign-up?plan=team` },
     featured: true,
     highlights: [
       'Everything in Free',

@@ -29,6 +29,7 @@ export function FeaturesPage() {
   return (
     <>
       <HeroSplit
+        className="from-accent-subtle/40"
         eyebrow="Features"
         title={
           <>

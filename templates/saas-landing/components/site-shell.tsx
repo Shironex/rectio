@@ -52,6 +52,8 @@ function useConsent() {
       ? undefined
       : loadConsent({ getItem: (key) => (key === STORAGE.consent ? raw : null) }, STORAGE.consent);
   const save = (record: ConsentRecord) => {
+    // The announcement waits for the cookie choice, so a first visit never stacks two bars.
+    document.documentElement.classList.add('consent-decided');
     // saveConsent reports blocked storage; the choice still holds for this page view.
     saveConsent(
       {
@@ -70,7 +72,7 @@ function useConsent() {
 function SiteSettings({ onCookieSettings }: { onCookieSettings: () => void }) {
   return (
     <div className="flex flex-col gap-3 border-t border-line pt-6">
-      <h3 className="text-sm font-strong text-fg">Appearance</h3>
+      <h2 className="text-sm font-strong text-fg">Appearance</h2>
       <ThemeSwitch />
       <button
         type="button"
@@ -134,7 +136,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         primary={START}
         secondary={SIGN_IN}
       />
-      <main id="main" className="flex-1">
+      <main id="main" tabIndex={-1} className="flex-1 outline-none">
         {children}
       </main>
       <SiteFooter

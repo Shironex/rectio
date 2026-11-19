@@ -83,31 +83,23 @@ function PlanCard({ plan, billing }: { plan: Plan; billing: Billing }) {
         <p className="min-h-12 text-base text-fg-muted">{plan.summary}</p>
       </div>
       <div className="flex flex-col gap-1">
-        <p className="flex items-baseline gap-2">
-          {free ? (
-            <span className="font-display text-5xl font-strong tracking-tight text-fg">Free</span>
-          ) : (
-            <Money
-              amount={price}
-              currency={CURRENCY}
-              locale={LOCALE}
-              className="font-display text-5xl font-strong tracking-tight text-fg"
-            />
-          )}
-          {!free && billing === 'yearly' && (
-            <s className="text-xl text-fg-subtle">
-              <span className="sr-only">Was </span>
-              <Money amount={plan.price.monthly / 100} currency={CURRENCY} locale={LOCALE} />
-            </s>
-          )}
-          {!free && <span className="text-base text-fg-muted">per person a month</span>}
+        <p className="font-display text-5xl font-strong tracking-tight text-fg">
+          {free ? 'Free' : <Money amount={price} currency={CURRENCY} locale={LOCALE} />}
         </p>
         <p className="text-sm text-fg-muted">
-          {free
-            ? `Up to ${String(plan.limit ?? 0)} people, for as long as you like.`
-            : billing === 'yearly'
-              ? 'Billed yearly.'
-              : 'Billed monthly, cancel any time.'}
+          {free ? (
+            `Up to ${String(plan.limit ?? 0)} people, for as long as you like.`
+          ) : billing === 'yearly' ? (
+            <>
+              Per person a month, billed yearly.{' '}
+              <span className="text-fg-subtle">
+                <Money amount={plan.price.monthly / 100} currency={CURRENCY} locale={LOCALE} /> on
+                monthly billing.
+              </span>
+            </>
+          ) : (
+            'Per person a month, billed monthly. Cancel any time.'
+          )}
         </p>
       </div>
       <ActionLink
@@ -218,16 +210,55 @@ function CellValue({ value }: { value: Cell }) {
   return <span className="text-fg">{value}</span>;
 }
 
+/** On a phone, one plan at a time: pick it, and its column reads as a list. */
+function PhoneComparison() {
+  const [planId, setPlanId] = useState<Plan['id']>('team');
+  return (
+    <div className="mt-8 flex flex-col gap-6 sm:hidden">
+      <ToggleGroup
+        aria-label="Plan to compare"
+        value={[planId]}
+        onValueChange={(next) => {
+          const found = PLANS.find((plan) => plan.id === next[0]);
+          if (found !== undefined) setPlanId(found.id);
+        }}
+      >
+        {PLANS.map((plan) => (
+          <Toggle key={plan.id} value={plan.id}>
+            {plan.name}
+          </Toggle>
+        ))}
+      </ToggleGroup>
+      {COMPARISON.map((group) => (
+        <div key={group.id} className="flex flex-col gap-2">
+          <h3 className="text-sm font-strong text-fg">{group.title}</h3>
+          <dl className="flex flex-col divide-y divide-line border-y border-line">
+            {group.rows.map((row) => (
+              <div key={row.feature} className="flex items-center justify-between gap-4 py-3">
+                <dt className="text-base text-fg">{row.feature}</dt>
+                <dd className="shrink-0 text-end">
+                  <CellValue value={row.cells[planId]} />
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Comparison() {
   return (
     <Section width="wide" labelledBy="compare-title" className="pt-8 sm:pt-12">
       <SectionHeader id="compare-title" title="Compare every plan" size="md" />
-      {/* Focusable so a keyboard can scroll the plans into view on a narrow screen. */}
+      <PhoneComparison />
+      {/* Focusable so a keyboard can scroll the plans into view if the screen is narrow. */}
       <div
         role="region"
         aria-label="Plan comparison"
         tabIndex={0}
-        className="relative mt-8 overflow-x-auto rounded-control outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus"
+        className="relative mt-8 hidden overflow-x-auto sm:block rounded-control outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus"
       >
         <Table className="min-w-xl">
           <TableHeader>

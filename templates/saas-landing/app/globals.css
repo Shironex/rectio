@@ -30,3 +30,9 @@ html[data-mode='dark'] {
 html[data-announcement='dismissed'] .site-announcement {
   display: none;
 }
+
+/* On a first visit the announcement waits until the cookie choice is made, so a phone never
+   shows two bars over the hero. The boot script marks a returning visitor before paint. */
+html:not(.consent-decided) .site-announcement {
+  display: none;
+}

@@ -190,6 +190,21 @@ try {
         count += 1;
         await context.close();
       }
+      // The contact form: empty submit (errors), then a sent message, phone and desktop.
+      for (const view of VIEWPORTS) {
+        const { context, page } = await open(browser, base, '/contact', {
+          ...view,
+          mode: 'light',
+          theme: 'default',
+        });
+        await settle(page);
+        const form = page.locator('form').first();
+        await form.getByRole('button', { name: /send/i }).click();
+        await page.waitForTimeout(400);
+        await form.screenshot({ path: join(out, `contact-errors-${view.name}.png`) });
+        count += 1;
+        await context.close();
+      }
       // The phone menu, open, in both modes.
       for (const mode of MODES) {
         const { context, page } = await open(browser, base, '/pricing', {

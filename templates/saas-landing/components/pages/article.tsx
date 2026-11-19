@@ -1,8 +1,14 @@
 'use client';
 
-import { ArticleLayout, ArticleList, readingMinutes } from '@rectio/blocks/marketing/motion';
+import {
+  ArticleLayout,
+  ArticleList,
+  CtaBand,
+  readingMinutes,
+} from '@rectio/blocks/marketing/motion';
 
 import { ARTICLES, articleText, type Article, type ArticleBlock } from '@/data/blog';
+import { DEMO, START } from '@/data/site';
 
 /** A key from the block's own content: every block in an article says something different. */
 function blockKey(block: ArticleBlock): string {
@@ -81,6 +87,14 @@ export function ArticlePage({ article }: { article: Article }) {
           <Block key={blockKey(block)} block={block} />
         ))}
       </ArticleLayout>
+      <CtaBand
+        tone="tinted"
+        layout="split"
+        title="Plan next week in Rostra"
+        description="Free for teams of up to ten. Import your people from a spreadsheet and publish this afternoon."
+        primary={START}
+        secondary={DEMO}
+      />
       <ArticleList layout="list" title="Keep reading" articles={related} locale="en-GB" />
     </>
   );

@@ -9,7 +9,7 @@ import {
 } from '@phosphor-icons/react';
 import { Button, Meter } from '@rectio/motion';
 import { Avatar, Badge, SwitchField, cn } from '@rectio/ui';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { DAYS, OPEN_SHIFTS, TEAM_WEEK } from '@/data/schedule';
 
@@ -20,22 +20,40 @@ import { DAYS, OPEN_SHIFTS, TEAM_WEEK } from '@/data/schedule';
 
 const ROW = 'flex items-center justify-between gap-3';
 
+/** Where focus lands once the button it was on goes away, so a keyboard keeps its place. */
+const LANDING =
+  'rounded-control outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus';
+
+/** A container to move focus to after an action replaces the control that ran it. */
+function useLanding<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const land = () => {
+    requestAnimationFrame(() => {
+      ref.current?.focus();
+    });
+  };
+  return { ref, land };
+}
+
 export function SwapCard() {
   const [state, setState] = useState<'pending' | 'approved' | 'declined'>('pending');
+  const { ref, land } = useLanding<HTMLDivElement>();
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={ref} tabIndex={-1} className={cn('flex flex-col gap-3', LANDING)}>
       <div className={ROW}>
         <span className="inline-flex items-center gap-1.5 text-sm text-fg-muted">
           <ArrowsLeftRightIcon aria-hidden weight="bold" className="size-4" />
           Shift swap
         </span>
-        {state === 'pending' ? (
-          <Badge tone="warning">Needs you</Badge>
-        ) : (
-          <Badge tone={state === 'approved' ? 'positive' : 'neutral'}>
-            {state === 'approved' ? 'Approved' : 'Declined'}
-          </Badge>
-        )}
+        <span aria-live="polite">
+          {state === 'pending' ? (
+            <Badge tone="warning">Needs you</Badge>
+          ) : (
+            <Badge tone={state === 'approved' ? 'positive' : 'neutral'}>
+              {state === 'approved' ? 'Swap approved' : 'Swap declined'}
+            </Badge>
+          )}
+        </span>
       </div>
       <div className="flex items-center gap-3">
         <Avatar name="Ana Ribeiro" size="md" />
@@ -52,6 +70,7 @@ export function SwapCard() {
             aria-label="Decline Ana's swap with Marco"
             onClick={() => {
               setState('declined');
+              land();
             }}
           >
             Decline
@@ -61,6 +80,7 @@ export function SwapCard() {
             aria-label="Approve Ana's swap with Marco"
             onClick={() => {
               setState('approved');
+              land();
             }}
           >
             Approve
@@ -99,43 +119,51 @@ export function PublishedCard() {
 /** The open shift board: claim a gap and it is yours, with no one to chase. */
 export function OpenShiftBoard() {
   const [claimed, setClaimed] = useState<string | null>(null);
+  const { ref, land } = useLanding<HTMLDivElement>();
+  const taken = OPEN_SHIFTS.find((item) => item.id === claimed);
   return (
-    <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-panel border border-line bg-surface">
-      {OPEN_SHIFTS.map((shift) => {
-        const mine = claimed === shift.id;
-        return (
-          <li key={shift.id} className="flex items-center gap-3 px-4 py-3">
-            <div className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate font-medium text-fg">
-                {shift.day}, <span className="numeric">{shift.start}</span> to{' '}
-                <span className="numeric">{shift.end}</span>
-              </span>
-              <span className="text-sm text-fg-muted">
-                {shift.role}, {shift.pay.toLowerCase()}
-              </span>
-            </div>
-            {mine ? (
-              <Badge tone="positive" className="w-24 justify-center">
-                Yours
-              </Badge>
-            ) : (
-              <Button
-                size="md"
-                variant="secondary"
-                className="w-24"
-                disabled={claimed !== null}
-                aria-label={`Claim ${shift.day}, ${shift.start} to ${shift.end}`}
-                onClick={() => {
-                  setClaimed(shift.id);
-                }}
-              >
-                Claim
-              </Button>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+    <div ref={ref} tabIndex={-1} className={LANDING}>
+      <p aria-live="polite" className="sr-only">
+        {taken === undefined ? '' : `You claimed ${taken.day}, ${taken.start} to ${taken.end}.`}
+      </p>
+      <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-panel border border-line bg-surface">
+        {OPEN_SHIFTS.map((shift) => {
+          const mine = claimed === shift.id;
+          return (
+            <li key={shift.id} className="flex items-center gap-3 px-4 py-3">
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate font-medium text-fg">
+                  {shift.day}, <span className="numeric">{shift.start}</span> to{' '}
+                  <span className="numeric">{shift.end}</span>
+                </span>
+                <span className="text-sm text-fg-muted">
+                  {shift.role}, {shift.pay.toLowerCase()}
+                </span>
+              </div>
+              {mine ? (
+                <Badge tone="positive" className="w-24 justify-center">
+                  Yours
+                </Badge>
+              ) : (
+                <Button
+                  size="md"
+                  variant="secondary"
+                  className="w-24"
+                  disabled={claimed !== null}
+                  aria-label={`Claim ${shift.day}, ${shift.start} to ${shift.end}`}
+                  onClick={() => {
+                    setClaimed(shift.id);
+                    land();
+                  }}
+                >
+                  Claim
+                </Button>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -169,40 +197,49 @@ const TIME_OFF = [
 
 export function TimeOffCard() {
   const [approved, setApproved] = useState<ReadonlySet<string>>(new Set());
+  const [last, setLast] = useState<string | null>(null);
+  const { ref, land } = useLanding<HTMLDivElement>();
   return (
-    <ul className="flex flex-col gap-3">
-      {TIME_OFF.map((request) => {
-        const done = approved.has(request.id);
-        return (
-          <li key={request.id} className="flex items-center gap-3">
-            <Avatar name={request.name} size="md" />
-            <div className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate font-medium text-fg">{request.name}</span>
-              <span className="text-sm text-fg-muted">
-                {request.kind}, {request.when}
-              </span>
-            </div>
-            {done ? (
-              <Badge tone="positive" className="w-24 justify-center">
-                Approved
-              </Badge>
-            ) : (
-              <Button
-                size="md"
-                variant="secondary"
-                className="w-24"
-                aria-label={`Approve time off for ${request.name}`}
-                onClick={() => {
-                  setApproved((current) => new Set(current).add(request.id));
-                }}
-              >
-                Approve
-              </Button>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+    <div ref={ref} tabIndex={-1} className={LANDING}>
+      <p aria-live="polite" className="sr-only">
+        {last === null ? '' : `Time off approved for ${last}.`}
+      </p>
+      <ul className="flex flex-col gap-3">
+        {TIME_OFF.map((request) => {
+          const done = approved.has(request.id);
+          return (
+            <li key={request.id} className="flex items-center gap-3">
+              <Avatar name={request.name} size="md" />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate font-medium text-fg">{request.name}</span>
+                <span className="text-sm text-fg-muted">
+                  {request.kind}, {request.when}
+                </span>
+              </div>
+              {done ? (
+                <Badge tone="positive" className="w-24 justify-center">
+                  Approved
+                </Badge>
+              ) : (
+                <Button
+                  size="md"
+                  variant="secondary"
+                  className="w-24"
+                  aria-label={`Approve time off for ${request.name}`}
+                  onClick={() => {
+                    setApproved((current) => new Set(current).add(request.id));
+                    setLast(request.name);
+                    land();
+                  }}
+                >
+                  Approve
+                </Button>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 

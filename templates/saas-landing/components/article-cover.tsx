@@ -12,7 +12,7 @@ const COVER: Record<Article['cover'], { tone: string; card: () => React.ReactNod
   request: { tone: 'from-warning-subtle', card: () => <RequestCard /> },
 };
 
-/** A cover made of the product itself: a tinted field holding one live card. */
+/** A cover made of the product itself: a tinted field holding one card, shown as a picture. */
 export function ArticleCover({
   cover,
   className,
@@ -29,7 +29,12 @@ export function ArticleCover({
         className,
       )}
     >
-      <div className="w-full max-w-64 rounded-panel border border-line bg-surface-raised p-4 shadow-overlay">
+      {/* A picture of the product: inert, so the card's link stays the only thing to click. */}
+      <div
+        inert
+        aria-hidden
+        className="w-full max-w-64 rounded-panel border border-line bg-surface-raised p-4 shadow-overlay"
+      >
         {card()}
       </div>
     </div>

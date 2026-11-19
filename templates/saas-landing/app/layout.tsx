@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: { default: `${SITE.name}: ${SITE.tagline}`, template: `%s | ${SITE.name}` },
   description: SITE.description,
   openGraph: { type: 'website', siteName: SITE.name, locale: 'en_GB' },
-  twitter: { card: 'summary_large_image' },
+  twitter: { card: 'summary' },
 };
 
 export const viewport: Viewport = {
@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" data-theme="default" suppressHydrationWarning>
+    <html lang="en-GB" data-theme="default" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: BOOT_SCRIPT }} />
       </head>

@@ -5,7 +5,6 @@ import { CtaBand, Em, Prose, Section, SectionHeader, Team } from '@rectio/blocks
 import { Badge, cn, Stat, StatGroup } from '@rectio/ui';
 
 import { PageIntro } from '@/components/page-intro';
-import { Panel } from '@/components/panel';
 import { COMPANY_FACTS, OPENINGS, TEAM, VALUES } from '@/data/company';
 import { SITE } from '@/data/site';
 
@@ -40,13 +39,11 @@ export function AboutPage() {
               </p>
             </Prose>
           </div>
-          <Panel className="lg:col-span-5 lg:col-start-8">
-            <StatGroup className="grid grid-cols-2 gap-6">
-              {COMPANY_FACTS.map((fact) => (
-                <Stat key={fact.label} label={fact.label} value={fact.value} size="lg" />
-              ))}
-            </StatGroup>
-          </Panel>
+          <StatGroup aria-label="Rostra at a glance" className="lg:col-span-5 lg:col-start-8">
+            {COMPANY_FACTS.map((fact) => (
+              <Stat key={fact.label} label={fact.label} value={fact.value} size="lg" />
+            ))}
+          </StatGroup>
         </div>
       </Section>
       <Team

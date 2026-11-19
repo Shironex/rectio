@@ -22,7 +22,7 @@ import { DEMO, START } from '@/data/site';
 const LEAD = TESTIMONIALS.find((t) => t.id === 't3') ?? TESTIMONIALS[0];
 
 function CaseStudyCard({ study }: { study: CaseStudy }) {
-  const logo = CUSTOMERS.find((customer) => customer.name === study.company)?.logo;
+  const logo = CUSTOMERS.find((customer) => study.company.startsWith(customer.name))?.logo;
   return (
     <li>
       <a
@@ -72,7 +72,7 @@ export function CustomersPage() {
         }
         description="Cafés, clinics, shops and warehouses, from one site to forty. Here is what changed for them."
       />
-      <LogoStrip logos={CUSTOMERS.slice(0, 6)} className="pt-0 sm:pt-0" />
+      <LogoStrip logos={CUSTOMERS.slice(0, 4)} className="pt-0 sm:pt-0" />
       <Section width="wide" labelledBy="stories-title">
         <SectionHeader id="stories-title" title="Customer stories" />
         <ul className="mt-10 grid gap-4 md:grid-cols-3">

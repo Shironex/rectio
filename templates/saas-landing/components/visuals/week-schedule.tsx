@@ -27,10 +27,10 @@ const DAY_VISIBILITY = [
   '',
   '',
   '',
-  'hidden @sm:table-cell',
-  'hidden @md:table-cell',
-  'hidden @lg:table-cell',
-  'hidden @lg:table-cell',
+  '@max-sm:sr-only',
+  '@max-md:sr-only',
+  '@max-lg:sr-only',
+  '@max-lg:sr-only',
 ];
 
 /** First name and initial, such as "Priya N.", so every name fits its column. */

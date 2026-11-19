@@ -35,6 +35,7 @@ export function HomePage() {
   return (
     <>
       <HeroFloating
+        className="from-accent-subtle/40"
         title={
           <>
             Next week&apos;s rota, <Em>out by Thursday</Em>
@@ -56,11 +57,7 @@ export function HomePage() {
       />
       <FeatureBento
         eyebrow="Product"
-        title={
-          <>
-            Everything a shift week needs, <Em>in one place</Em>
-          </>
-        }
+        title={<>Everything a shift week needs, in one place</>}
         description="Each tile is the real product. Claim a shift, flip a switch, see the week fill up."
         items={[
           {
@@ -170,11 +167,7 @@ export function HomePage() {
       />
       <TestimonialGrid
         eyebrow="Customers"
-        title={
-          <>
-            Teams that <Em>stopped texting about shifts</Em>
-          </>
-        }
+        title={<>Teams that stopped texting about shifts</>}
         testimonials={TESTIMONIALS.slice(0, 5)}
       />
       <Faq
