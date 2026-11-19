@@ -1,0 +1,77 @@
+---
+title: Sign up
+description: 'Name, work email and a password checked against its rules as it is typed, with your terms.'
+pro: true
+---
+
+import SignUpDemo from '@/demos/sign-up';
+import SignUpMotionDemo from '@/demos/sign-up.motion';
+
+<Preview
+  name="sign-up"
+  plain={<SignUpDemo />}
+  motion={<SignUpMotionDemo />}
+  importLine="import { SignUp } from '@rectio/blocks/motion';"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add sign-up
+```
+
+The motion variant is `motion-sign-up`. It installs the plain block too and changes only how the
+block enters.
+
+## Usage
+
+The block holds only what is typed. The password rules tick off as the password is typed, under a
+four-step strength bar; on submit every field is checked and `onSubmit` gets valid, trimmed values.
+Your app creates the account, sets `pending` while it waits and passes a refusal back as `error`. When the address is already registered, set `emailTaken` instead: the block says so under the email field, with a link to `signIn`.
+
+Pass `terms` (and `privacy`) as URLs or handlers to show the agreement checkbox; it is required
+once shown. Provider buttons go in the `social` slot, as on [Sign in](/docs/blocks/saas/sign-in).
+
+## Props
+
+<TypeTable
+  type={{
+    onSubmit: {
+      type: '(values: SignUpValues) => void',
+      description: 'name, email, password, acceptedTerms.',
+    },
+    social: { type: 'ReactNode' },
+    pending: { type: 'boolean', default: 'false' },
+    error: { type: 'ReactNode', description: 'Why the server refused, above the form.' },
+    emailTaken: {
+      type: 'boolean',
+      description: 'The email is already registered: said under the field with a sign-in link.',
+    },
+    minPasswordLength: { type: 'number', default: '12' },
+    terms: { type: 'string | (() => void)', description: 'Shows the agreement checkbox.' },
+    privacy: { type: 'string | (() => void)' },
+    signIn: { type: 'string | (() => void)' },
+    defaultEmail: { type: 'string' },
+    brand: { type: 'ReactNode' },
+    title: { type: 'ReactNode', default: "'Create your account'" },
+    description: { type: 'ReactNode' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`signUpErrors` returns the message per field. The password rules come from `passwordChecks`,
+`passwordStrength` and `passwordAccepted`, shared with [Reset password](/docs/blocks/saas/reset-password),
+so a server can hold a new password to the same bar.
+
+## Accessibility
+
+- Each password rule says met or not met to screen readers, and the strength is written in words, never colour alone.
+- The password field points at its rules, and carries `autocomplete="new-password"` so password managers offer a strong one.
+- Errors appear after the first submit, under their field and tied to it; a server refusal is announced at once.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

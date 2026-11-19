@@ -49,7 +49,8 @@ describe('list_items', () => {
     const themes = await listItems(deps(), { type: 'theme' });
     expect(themes.text).toContain('theme-ledger');
     expect(themes.text).not.toContain('button |');
-    const pro = await listItems(deps(), { tier: 'pro' });
+    // Pro items outnumber the default page, so ask for all of them.
+    const pro = await listItems(deps(), { tier: 'pro', limit: 200 });
     expect(pro.text).toContain('ledger-summary');
     // The motion add-on is pro too, every item of it.
     expect(pro.text).toContain('motion-toast | component | pro |');

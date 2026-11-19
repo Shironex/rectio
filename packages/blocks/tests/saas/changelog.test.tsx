@@ -1,0 +1,113 @@
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
+import { describe, expect, it, vi } from 'vitest';
+
+import {
+  Changelog,
+  changelogCounts,
+  changelogReleaseCounts,
+  filterChangelog,
+  isReleaseUnseen,
+  unseenReleaseCount,
+  type ChangelogRelease,
+} from '../../src/index';
+
+const RELEASES: ChangelogRelease[] = [
+  {
+    id: 'old',
+    version: '2.12',
+    date: new Date(2026, 1, 20),
+    changes: [{ kind: 'fixed', text: 'CSV exports keep leading zeros.' }],
+  },
+  {
+    id: 'new',
+    version: '2.14',
+    date: new Date(2026, 2, 17),
+    title: 'Approvals on the go',
+    changes: [
+      { kind: 'new', text: 'Approve from the notification.' },
+      { kind: 'fixed', text: 'Bulk approvals keep the last row.' },
+    ],
+  },
+];
+
+describe('changelog logic', () => {
+  it('orders releases, filters changes and drops empty releases', () => {
+    expect(filterChangelog(RELEASES, 'all').map((r) => r.id)).toEqual(['new', 'old']);
+    const fresh = filterChangelog(RELEASES, 'new');
+    expect(fresh.map((r) => r.id)).toEqual(['new']);
+    expect(fresh[0]?.changes).toHaveLength(1);
+    expect(changelogCounts(RELEASES)).toEqual({ all: 3, new: 1, improved: 0, fixed: 2 });
+  });
+
+  it('marks releases after the last visit, and none without one', () => {
+    const lastSeen = new Date(2026, 2, 1);
+    const [older, newer] = RELEASES as [ChangelogRelease, ChangelogRelease];
+    expect(isReleaseUnseen(newer, lastSeen)).toBe(true);
+    expect(isReleaseUnseen(older, lastSeen)).toBe(false);
+    expect(unseenReleaseCount(RELEASES, undefined)).toBe(0);
+  });
+});
+
+describe('Changelog', () => {
+  it('marks what is new since the last visit and lets the app mark it read', async () => {
+    const onMarkSeen = vi.fn();
+    render(
+      <Changelog
+        releases={RELEASES}
+        lastSeen={new Date(2026, 2, 1)}
+        onMarkSeen={onMarkSeen}
+        locale="en-GB"
+      />,
+    );
+    expect(screen.getByText('1 release since your last visit')).toBeInTheDocument();
+    expect(
+      screen.getAllByRole('heading', { level: 3, name: 'New since your last visit' }),
+    ).toHaveLength(1);
+    expect(screen.getByRole('heading', { level: 3, name: 'Earlier' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 4, name: '2.12' })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Mark as read' }));
+    expect(onMarkSeen).toHaveBeenCalled();
+  });
+
+  it('filters to one kind of change', async () => {
+    render(<Changelog releases={RELEASES} locale="en-GB" />);
+    expect(screen.getByRole('heading', { name: /^2\.12/ })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /^New/ }));
+    expect(screen.queryByRole('heading', { name: /^2\.12/ })).not.toBeInTheDocument();
+    expect(screen.queryByText('Bulk approvals keep the last row.')).not.toBeInTheDocument();
+  });
+
+  it('says what will appear when there are no releases, and offers to subscribe', async () => {
+    const onSubscribe = vi.fn();
+    render(<Changelog releases={[]} onSubscribe={onSubscribe} />);
+    expect(screen.getByRole('status')).toHaveTextContent('Nothing released yet');
+    await userEvent.click(screen.getByRole('button', { name: 'Subscribe to updates' }));
+    expect(onSubscribe).toHaveBeenCalled();
+  });
+
+  it('counts releases per kind, the unit the description uses', () => {
+    expect(changelogReleaseCounts(RELEASES)).toMatchObject({ all: RELEASES.length });
+  });
+
+  it('moves focus to the release list when "Mark as read" leaves', async () => {
+    function Harness() {
+      const [lastSeen, setLastSeen] = useState(new Date(2026, 2, 1));
+      return (
+        <Changelog
+          releases={RELEASES}
+          lastSeen={lastSeen}
+          onMarkSeen={() => {
+            setLastSeen(new Date(2026, 11, 31));
+          }}
+          locale="en-GB"
+        />
+      );
+    }
+    render(<Harness />);
+    await userEvent.click(screen.getByRole('button', { name: 'Mark as read' }));
+    expect(screen.queryByRole('button', { name: 'Mark as read' })).not.toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Releases' })).toHaveFocus();
+  });
+});

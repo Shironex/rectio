@@ -58,6 +58,30 @@ const blockItems = (
   },
 ];
 
+/** A SaaS or app block: pro, installed under `@blocks/saas/`, with its motioned twin beside it. */
+const saasItems = (name: string, title: string, description: string) => [
+  {
+    name,
+    type: 'block' as const,
+    tier: 'pro' as const,
+    version: '0.1.0',
+    title,
+    description,
+    categories: ['saas', 'blocks'],
+    files: [`${name}/${name}.tsx`, `${name}/${name}.logic.ts`],
+  },
+  {
+    name: `motion-${name}`,
+    type: 'block' as const,
+    tier: 'pro' as const,
+    version: '0.1.0',
+    title: `Motion ${title}`,
+    description: `${title} with entrances that play once and list items that arrive and leave in place.`,
+    categories: ['saas', 'blocks', 'motion'],
+    files: [`${name}/${name}.motion.tsx`],
+  },
+];
+
 /**
  * A marketing block: pro, installed under `@blocks/marketing/`. `logic` adds its logic file; `motion`
  * adds a `motion-<name>` twin for blocks with something to animate.
@@ -1219,6 +1243,136 @@ export default defineRegistry({
           'A banner with accept and reject at equal weight, per-category preferences and a consent record.',
           'cookie-consent',
           { logic: true },
+        ),
+      ],
+    },
+    {
+      sourceDir: join(blocks, 'src', 'saas'),
+      targetFolder: 'saas',
+      requireEveryFolder: true,
+      items: [
+        {
+          name: 'saas-core',
+          type: 'lib',
+          tier: 'pro',
+          version: '0.1.0',
+          title: 'SaaS blocks core',
+          description:
+            'Account form frame, password and email rules, relative time and sizes, focus helpers, and the avatar, menu, popover and meter the SaaS blocks share.',
+          categories: ['saas', 'blocks'],
+          files: [
+            'lib/saas.ts',
+            'lib/saas-parts.tsx',
+            'lib/styles.ts',
+            'lib/auth.tsx',
+            'lib/avatar.tsx',
+            'lib/action-menu.tsx',
+            'lib/popover.tsx',
+            'lib/meter.tsx',
+            'lib/password-rules.tsx',
+            'lib/focus.ts',
+          ],
+        },
+        {
+          name: 'motion-saas-core',
+          type: 'lib',
+          tier: 'pro',
+          version: '0.1.0',
+          title: 'Motion SaaS blocks core',
+          description: 'List items that arrive with a short rise and leave without a jump.',
+          categories: ['saas', 'blocks', 'motion'],
+          files: ['lib/saas-motion-parts.tsx'],
+        },
+        // SAAS-BLOCKS
+        ...saasItems(
+          'sign-in',
+          'Sign in',
+          'Email and password, an emailed link, your provider buttons and errors tied to fields.',
+        ),
+        ...saasItems(
+          'team-members',
+          'Team members',
+          'Members and roles, pending invites with resend and revoke, and an invite form.',
+        ),
+        ...saasItems(
+          'sign-up',
+          'Sign up',
+          'Name, work email and a password checked against its rules as it is typed, with your terms to accept.',
+        ),
+        ...saasItems(
+          'two-factor',
+          'Two-factor step',
+          'A one-time code in slots that paste and autofill in one go, a resend that counts down, and backup codes.',
+        ),
+        ...saasItems(
+          'reset-password',
+          'Reset password',
+          'Request a link by email, a sent note with resend, a new password typed twice, and a confirmation.',
+        ),
+        ...saasItems(
+          'profile-settings',
+          'Profile settings',
+          'Picture, name, email with its verification, job title and time zone, a save bar, and a danger zone.',
+        ),
+        ...saasItems(
+          'billing',
+          'Billing and plan',
+          'Current plan and renewal, usage meters with levels in words, the card on file and invoices with downloads.',
+        ),
+        ...saasItems(
+          'api-keys',
+          'API keys',
+          'Keys with scope, last use and expiry, a create form that shows the new secret once, and revoke behind a confirm.',
+        ),
+        ...saasItems(
+          'notification-preferences',
+          'Notification preferences',
+          'Events against channels in a grouped matrix with column toggles and required events locked on.',
+        ),
+        ...saasItems(
+          'pricing-table',
+          'Pricing table',
+          'Plans with a monthly and yearly switch showing the saving, a recommended and a current plan, and a feature comparison.',
+        ),
+        ...saasItems(
+          'onboarding-checklist',
+          'Onboarding checklist',
+          'Setup steps with their actions, the next one brought forward, and progress as a count and a bar.',
+        ),
+        ...saasItems(
+          'activity-feed',
+          'Activity feed',
+          'Workspace activity grouped by day, with who did what, kind icons, filters and older pages.',
+        ),
+        ...saasItems(
+          'notifications-center',
+          'Notifications center',
+          'A bell with the unread count, and the list behind it with All and Unread and mark as read.',
+        ),
+        ...saasItems(
+          'changelog',
+          'Changelog',
+          'Release notes tagged New, Improved and Fixed, filtered by kind, with what is new since the last visit.',
+        ),
+        ...saasItems(
+          'users-table',
+          'Users table',
+          'Every user in a workspace with search, role and status filters, bulk role changes, suspend and remove.',
+        ),
+        ...saasItems(
+          'kanban-board',
+          'Kanban board',
+          'Work in columns with limits, cards with tags, due dates and assignees, moved by menu or keyboard.',
+        ),
+        ...saasItems(
+          'comment-thread',
+          'Comment thread',
+          'A discussion with one level of replies, edit and delete for your own comments, mentions and a resolved state.',
+        ),
+        ...saasItems(
+          'file-manager',
+          'File manager',
+          'One folder of files with a path, sorting, rename in place, bulk delete and storage use.',
         ),
       ],
     },

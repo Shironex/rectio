@@ -1,0 +1,70 @@
+---
+title: Changelog
+description: 'Release notes with New, Improved and Fixed changes, and a marker for what is new since the last visit.'
+pro: true
+---
+
+import ChangelogDemo from '@/demos/changelog';
+import ChangelogMotionDemo from '@/demos/changelog.motion';
+
+<Preview
+  name="changelog"
+  plain={<ChangelogDemo />}
+  motion={<ChangelogMotionDemo />}
+  importLine="import { Changelog } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add changelog
+```
+
+The motion variant is `motion-changelog`. It installs the plain block too; the block enters once, on first view.
+
+## Usage
+
+Pass the releases, each with its version, date and changes tagged `new`, `improved` or `fixed`.
+The block lists them newest first, each headed by its version and date, with its changes grouped
+under New, Improved and Fixed. `title` and `summary` are optional. The filter row keeps only one
+kind of change and drops releases left empty.
+
+Pass the reader's `lastSeen` to set apart the releases since their last visit under one marker, and `onMarkSeen` to offer
+Mark as read while something is unseen. For older pages, pass `hasMore` and `onLoadMore`.
+
+## Props
+
+<TypeTable
+  type={{
+    releases: {
+      type: 'readonly ChangelogRelease[]',
+      description: 'id, version, date, changes, optional title and summary.',
+    },
+    lastSeen: { type: 'Date', description: 'Releases after it are marked as new.' },
+    onMarkSeen: { type: '() => void' },
+    hasMore: { type: 'boolean', default: 'false' },
+    loadingMore: { type: 'boolean', default: 'false' },
+    onLoadMore: { type: '() => void' },
+    onSubscribe: { type: '() => void', description: 'Offered in the empty state when set.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: "'Changelog'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`filterChangelog`, `changelogCounts`, `isReleaseUnseen` and `unseenReleaseCount` are exported and
+tested on their own.
+
+## Accessibility
+
+- Each group of changes has a subhead in words with an icon; colour only reinforces it.
+- The new since your last visit marker is a labelled separator, each new release says so in its heading, and the count in the description is announced as it changes.
+- Release dates are `<time>` elements in the reader's locale.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

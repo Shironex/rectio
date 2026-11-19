@@ -25,3 +25,40 @@ export { VendorsList, type VendorsListProps } from './vendors-list/vendors-list.
 export { ProfitAndLoss, type ProfitAndLossProps } from './profit-and-loss/profit-and-loss.motion';
 export { TaxSummary, type TaxSummaryProps } from './tax-summary/tax-summary.motion';
 export { CashRunway, type CashRunwayProps } from './cash-runway/cash-runway.motion';
+// SaaS and app blocks.
+export { SignIn, type SignInProps } from './saas/sign-in/sign-in.motion';
+export { TeamMembers, type TeamMembersProps } from './saas/team-members/team-members.motion';
+export { SignUp, type SignUpProps } from './saas/sign-up/sign-up.motion';
+export { TwoFactor, type TwoFactorProps } from './saas/two-factor/two-factor.motion';
+export {
+  ResetPassword,
+  type ResetPasswordProps,
+} from './saas/reset-password/reset-password.motion';
+export {
+  ProfileSettings,
+  type ProfileSettingsProps,
+} from './saas/profile-settings/profile-settings.motion';
+export { Billing, type BillingProps } from './saas/billing/billing.motion';
+export { ApiKeys, type ApiKeysProps } from './saas/api-keys/api-keys.motion';
+export {
+  NotificationPreferences,
+  type NotificationPreferencesProps,
+} from './saas/notification-preferences/notification-preferences.motion';
+export { PricingTable, type PricingTableProps } from './saas/pricing-table/pricing-table.motion';
+export {
+  OnboardingChecklist,
+  type OnboardingChecklistProps,
+} from './saas/onboarding-checklist/onboarding-checklist.motion';
+export { ActivityFeed, type ActivityFeedProps } from './saas/activity-feed/activity-feed.motion';
+export {
+  NotificationsCenter,
+  type NotificationsCenterProps,
+} from './saas/notifications-center/notifications-center.motion';
+export { Changelog, type ChangelogProps } from './saas/changelog/changelog.motion';
+export { UsersTable, type UsersTableProps } from './saas/users-table/users-table.motion';
+export { KanbanBoard, type KanbanBoardProps } from './saas/kanban-board/kanban-board.motion';
+export {
+  CommentThread,
+  type CommentThreadProps,
+} from './saas/comment-thread/comment-thread.motion';
+export { FileManager, type FileManagerProps } from './saas/file-manager/file-manager.motion';

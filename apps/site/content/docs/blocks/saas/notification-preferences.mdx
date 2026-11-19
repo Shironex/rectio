@@ -1,0 +1,77 @@
+---
+title: Notification preferences
+description: 'Events against channels in a grouped matrix, with column toggles and required events locked on.'
+pro: true
+---
+
+import NotificationPreferencesDemo from '@/demos/notification-preferences';
+import NotificationPreferencesMotionDemo from '@/demos/notification-preferences.motion';
+
+<Preview
+  name="notification-preferences"
+  plain={<NotificationPreferencesDemo />}
+  motion={<NotificationPreferencesMotionDemo />}
+  importLine="import { NotificationPreferences } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add notification-preferences
+```
+
+The motion variant is `motion-notification-preferences`. It installs the plain block too.
+
+## Usage
+
+Pass the channels, the events (each with a group) and the current matrix: for each event id, the
+channel ids it goes to. The block is controlled; `onChange` gets the whole new matrix, so save it as
+it comes or behind your own button. An All events row under the channel names turns a whole column on or off and
+shows a mixed state when only some are on. Channels listed in an event's `required` stay checked,
+carry a lock and say why. On a narrow block each event becomes its own row of labelled boxes.
+
+## Props
+
+<TypeTable
+  type={{
+    channels: { type: 'readonly NotificationChannel[]', description: 'id and a short label.' },
+    events: {
+      type: 'readonly NotificationEvent[]',
+      description: 'id, label, group and optional description and required channel ids.',
+    },
+    value: {
+      type: 'NotificationMatrix',
+      description: 'Event id to the channel ids it is sent on.',
+    },
+    onChange: { type: '(value: NotificationMatrix) => void' },
+    onUseRecommended: {
+      type: '() => void',
+      description: 'Offered as a button while nothing beyond the required events is on.',
+    },
+    disabled: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Turns every box off while you save.',
+    },
+    title: { type: 'string', default: "'Notifications'" },
+    description: { type: 'string', default: 'how many are on' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`notificationOn`, `setNotification`, `notificationColumnState`, `setNotificationColumn`,
+`groupNotificationEvents` and `notificationCount` are exported and tested on their own; none of them
+ever turns a required channel off.
+
+## Accessibility
+
+- A real table with column, row and group headers; every box is named for its event and channel.
+- Column boxes report a mixed state; locked boxes are described by the note that explains them.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant renders the plain block under reduced motion.

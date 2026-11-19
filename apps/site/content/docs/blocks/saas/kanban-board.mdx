@@ -1,0 +1,77 @@
+---
+title: Kanban board
+description: 'Work in columns with limits, cards with tags, due dates and assignees, moved by drag or keyboard.'
+pro: true
+---
+
+import KanbanBoardDemo from '@/demos/kanban-board';
+import KanbanBoardMotionDemo from '@/demos/kanban-board.motion';
+
+<Preview
+  name="kanban-board"
+  plain={<KanbanBoardDemo />}
+  motion={<KanbanBoardMotionDemo />}
+  importLine="import { KanbanBoard } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add kanban-board
+```
+
+The motion variant is `motion-kanban-board`. It installs the plain block too; cards glide to their
+new place.
+
+## Usage
+
+Pass the columns and the cards; a column shows its cards in the order they appear in `cards`. The
+board holds no cards itself: every move calls `onMoveCard(cardId, toColumnId, index)`, and
+`moveKanbanCard` applies it for you.
+
+A card moves three ways: drag it, open its Move menu (to any column, up, down), or focus it and
+press Alt with an arrow key. A column with a `limit` shows its count against it and says in words
+when it runs over. Due dates turn into "Overdue" and "Due today" as the day comes. On narrow
+widths the columns scroll sideways and snap.
+
+## Props
+
+<TypeTable
+  type={{
+    columns: {
+      type: 'readonly KanbanColumn[]',
+      description: 'id, title, optional limit, and done for a finished column.',
+    },
+    cards: {
+      type: 'readonly KanbanCard[]',
+      description: 'id, columnId, title, optional reference, tags, assignee, due and priority.',
+    },
+    onMoveCard: { type: '(cardId: string, toColumnId: string, index: number) => void' },
+    onOpenCard: { type: '(card: KanbanCard) => void', description: 'Titles become buttons.' },
+    onAddCard: { type: '(columnId: string) => void', description: 'Adds an Add card button.' },
+    today: { type: 'Date', description: 'The day due dates are measured from.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: "'Board'" },
+    description: { type: 'string', description: 'Defaults to the card and column count.' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+Moves are plain functions, tested on their own: `moveKanbanCard`, `kanbanStep`,
+`kanbanColumnCards`, `kanbanPositionOf`, `kanbanOverLimit` and `kanbanDueState`.
+
+## Accessibility
+
+- Every card is one focus stop, described by the hint that explains Alt and the arrow keys.
+- Each move is read out in a polite live region, with the column and the new position, and focus
+  stays on the card.
+- The Move menu does everything a drag can, so no move needs a pointer.
+- Limits and due dates are written in words with an icon, never by colour alone.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity and renders the plain block under reduced motion.

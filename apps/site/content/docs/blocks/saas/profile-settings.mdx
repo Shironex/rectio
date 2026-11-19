@@ -1,0 +1,79 @@
+---
+title: Profile settings
+description: 'Picture, name, email with its verification, job title and time zone, with a danger zone.'
+pro: true
+---
+
+import ProfileSettingsDemo from '@/demos/profile-settings';
+import ProfileSettingsMotionDemo from '@/demos/profile-settings.motion';
+
+<Preview
+  name="profile-settings"
+  plain={<ProfileSettingsDemo />}
+  motion={<ProfileSettingsMotionDemo />}
+  importLine="import { ProfileSettings } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add profile-settings
+```
+
+The motion variant is `motion-profile-settings`. It installs the plain block too and changes only how the
+block enters.
+
+## Usage
+
+Pass the saved `profile`. The form edits a draft of it: a bar at the end counts the unsaved
+changes and offers Discard and Save, and `onSave` gets the trimmed values with the list of fields
+that changed. Pass the saved profile back after saving and the form starts again from it.
+
+A changed email says a confirmation link will go to the new address; an unverified one shows a
+badge and, with `onResendVerification`, a resend link. `onAvatarChange` gets the chosen image file
+to upload. `onDeleteAccount` adds a danger zone that asks for the email typed back before it calls
+you.
+
+## Props
+
+<TypeTable
+  type={{
+    profile: {
+      type: 'ProfileValues & { avatarUrl?, emailVerified? }',
+      description: 'name, email, jobTitle and timeZone (IANA).',
+    },
+    onSave: { type: '(values: ProfileValues, changed: (keyof ProfileValues)[]) => void' },
+    onAvatarChange: { type: '(file: File) => void' },
+    onAvatarRemove: { type: '() => void' },
+    onResendVerification: { type: '() => void' },
+    onDeleteAccount: { type: '() => void', description: 'Called after the email is typed back.' },
+    timeZones: { type: 'readonly string[]', description: 'IANA zones to offer.' },
+    savedAt: {
+      type: 'Date',
+      description: 'When the profile was last saved, shown in the bar while nothing is changed.',
+    },
+    pending: { type: 'boolean', default: 'false' },
+    error: { type: 'ReactNode' },
+    now: { type: 'Date', description: 'When time zone offsets are read.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: "'Profile'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`profileErrors`, `profileChanges`, `profileEmailChanged`, `profileDeleteConfirmed` and
+`timeZoneLabel` are exported and tested.
+
+## Accessibility
+
+- Every field has a visible label and its error tied to it; the count of unsaved changes is announced politely.
+- The picture button opens the file picker; the picker input itself stays out of the tab order.
+- Deleting asks for the email typed back in a dialog, and the delete button stays disabled until it matches.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

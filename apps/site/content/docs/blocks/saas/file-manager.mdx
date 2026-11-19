@@ -1,0 +1,84 @@
+---
+title: File manager
+description: 'One folder of files with a path, sorting, rename in place, bulk delete and storage use.'
+pro: true
+---
+
+import FileManagerDemo from '@/demos/file-manager';
+import FileManagerMotionDemo from '@/demos/file-manager.motion';
+
+<Preview
+  name="file-manager"
+  plain={<FileManagerDemo />}
+  motion={<FileManagerMotionDemo />}
+  importLine="import { FileManager } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add file-manager
+```
+
+The motion variant is `motion-file-manager`. It installs the plain block too; rows arrive and leave
+in place.
+
+## Usage
+
+Pass the path from the root and what the current folder holds. Folders come first, then files with
+an icon for their kind, size, owner and last change. Sort by name (as people read them, so Q2 before
+Q10), last modified or size. Each row has a menu to open, rename in place, download and delete;
+select rows to download or delete several at once. Deleting always asks first and warns when a
+folder takes its contents with it.
+
+Pass `storage` for a meter that warns from 80 percent. On narrow widths size, owner and date fold
+under the name.
+
+## Props
+
+<TypeTable
+  type={{
+    path: { type: 'readonly FilePathSegment[]', description: 'Root first; the last is shown.' },
+    entries: {
+      type: 'readonly FileEntry[]',
+      description:
+        "id, name, type ('folder' or 'file'), modified, optional size, owner, itemCount.",
+    },
+    storage: { type: '{ used: number; total: number }', description: 'In bytes.' },
+    onOpen: { type: '(entry: FileEntry) => void', description: 'Names become buttons.' },
+    onNavigate: { type: '(folderId: string) => void', description: 'The path becomes buttons.' },
+    onUpload: { type: '() => void' },
+    onCreateFolder: { type: '() => void' },
+    onRename: { type: '(entryId: string, name: string) => void' },
+    onDownload: { type: '(entryIds: string[]) => void' },
+    onDelete: { type: '(entryIds: string[]) => void', description: 'Asked to confirm first.' },
+    onDropFiles: {
+      type: '(files: File[]) => void',
+      description: 'Makes the empty folder a drop target for files.',
+    },
+    now: { type: 'Date', description: 'The moment "modified" is measured from.' },
+    onUpgrade: { type: '() => void', description: 'Offered beside the storage note.' },
+    defaultSelectedIds: { type: 'string[]', description: 'Entries selected on first render.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: 'the current folder' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+Sorting and checks are exported and tested on their own: `sortFileEntries`, `fileKindOf`,
+`fileNameError`, `fileEntriesSize` and `storageLevel`.
+
+## Accessibility
+
+- The path is a labelled navigation with the current folder marked.
+- Every checkbox, menu and rename field names the file it acts on; rename errors are tied to the
+  field and Escape cancels.
+- The selection count is read out as it changes; file kinds are written for screen readers.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity and renders the plain block under reduced motion.

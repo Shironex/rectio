@@ -1,0 +1,75 @@
+---
+title: Activity feed
+description: 'What happened in the workspace, grouped by day, with who did what and when.'
+pro: true
+---
+
+import ActivityFeedDemo from '@/demos/activity-feed';
+import ActivityFeedMotionDemo from '@/demos/activity-feed.motion';
+
+<Preview
+  name="activity-feed"
+  plain={<ActivityFeedDemo />}
+  motion={<ActivityFeedMotionDemo />}
+  importLine="import { ActivityFeed } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add activity-feed
+```
+
+The motion variant is `motion-activity-feed`. It installs the plain block too; new events arrive in place.
+
+## Usage
+
+Pass the events in any order; the block sorts them newest first and groups them under Today,
+Yesterday or their date. Each event is a sentence: the actor, a past tense `verb` and an optional
+`target`, then a muted `detail` on the same line (a status move such as "In review to Approved"),
+or under it as a quote for comments. The `kind` picks the small icon beside the time and the
+filter it belongs to.
+
+`filterable` adds a filter row of comments, changes, people and account, leaving out filters with
+nothing in them; on narrow widths it becomes one select. For older pages, pass `hasMore`, `onLoadMore` and `loadingMore`.
+
+## Props
+
+<TypeTable
+  type={{
+    events: {
+      type: 'readonly ActivityEvent[]',
+      description: 'id, at, actor, kind, verb, optional target, detail and a from and to change.',
+    },
+    filterable: { type: 'boolean', default: 'false' },
+    hasMore: { type: 'boolean', default: 'false' },
+    loadingMore: { type: 'boolean', default: 'false' },
+    onLoadMore: { type: '() => void' },
+    onInvite: { type: '() => void', description: 'Offered in the empty state when set.' },
+    lastSeen: {
+      type: 'Date',
+      description: 'Marks the events after it as new, under a last visit rule.',
+    },
+    now: { type: 'Date', description: 'The moment relative times and Today are measured from.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: "'Activity'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`groupActivityByDay`, `activityMatches` and `activityFilterCounts` are exported and tested on
+their own.
+
+## Accessibility
+
+- Each day is a labelled region with its own heading, and each event a list item that reads as a sentence.
+- Times are `<time>` elements with the exact moment, shown on hover and read out after the relative time.
+- Kind icons are decoration; the verb carries the meaning.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.
