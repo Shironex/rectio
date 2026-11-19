@@ -20,7 +20,19 @@ function stringPieces(text: string, jsx: boolean): { text: string; offset: numbe
     ts.SyntaxKind.TemplateMiddle,
     ts.SyntaxKind.TemplateTail,
   ]);
+  // The scanner alone cannot tell the `}` that closes a `${...}` from any other brace, so it would
+  // read the code after a template expression as template text. A stack of open braces says which
+  // `}` ends a substitution, and the template is rescanned from there.
+  const braces: ('code' | 'template')[] = [];
   for (let kind = scanner.scan(); kind !== ts.SyntaxKind.EndOfFileToken; kind = scanner.scan()) {
+    if (kind === ts.SyntaxKind.OpenBraceToken) braces.push('code');
+    if (kind === ts.SyntaxKind.TemplateHead) braces.push('template');
+    if (kind === ts.SyntaxKind.CloseBraceToken) {
+      if (braces.pop() === 'template') {
+        kind = scanner.reScanTemplateToken(false);
+        if (kind === ts.SyntaxKind.TemplateMiddle) braces.push('template');
+      }
+    }
     if (kinds.has(kind)) {
       pieces.push({ text: scanner.getTokenText(), offset: scanner.getTokenStart() });
     }
