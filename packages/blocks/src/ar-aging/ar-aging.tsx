@@ -215,6 +215,12 @@ export function ArAging({
                 share: formatPercent(report.shares[b], locale, { digits: 0 }),
               })),
             )}
+            // A key at legible size: the bars of the late buckets are often small, so their steps
+            // read here too, each beside its name.
+            legend={AGING_BUCKETS.map((bucket) => ({
+              label: BUCKET_LABEL[bucket],
+              color: BUCKET_COLOR[bucket],
+            }))}
             plotClassName="h-48"
             showTableLabel={m.showTable}
             hideTableLabel={m.hideTable}
