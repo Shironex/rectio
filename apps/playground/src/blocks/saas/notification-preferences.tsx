@@ -44,7 +44,7 @@ const EVENTS: NotificationEvent[] = [
     id: 'usage',
     group: 'Billing',
     label: 'Usage alerts',
-    description: 'At 80 and 100 per cent of an allowance',
+    description: 'At 90 and 100 per cent of an allowance',
   },
   {
     id: 'sign-in',
@@ -83,6 +83,9 @@ export function NotificationPreferencesDemo({ motion, empty }: DemoProps) {
       events={EVENTS}
       value={value}
       onChange={setValue}
+      onUseRecommended={() => {
+        setValue(START);
+      }}
     />
   );
 }

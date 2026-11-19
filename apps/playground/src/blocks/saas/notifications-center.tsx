@@ -68,13 +68,11 @@ export function NotificationsCenterDemo({ motion, empty, locale }: DemoProps) {
       setItems(markAllNotificationsRead(items));
     },
   };
+  // The bell, and under it the same centre drawn open, so the panel reads as its popover.
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-end gap-2 rounded-panel border border-line bg-surface px-4 py-2">
-        <span className="me-auto text-sm text-fg-muted">App header with the bell</span>
-        <NotificationsCenter {...common} />
-      </div>
-      <NotificationsCenter {...common} inline className="max-w-md" />
+    <div className="flex flex-col items-end gap-2">
+      <NotificationsCenter {...common} />
+      <NotificationsCenter {...common} inline className="w-full max-w-md shadow-raised" />
     </div>
   );
 }

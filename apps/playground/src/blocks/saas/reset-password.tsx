@@ -19,7 +19,7 @@ export function ResetPasswordDemo({ motion, empty }: DemoProps) {
   return (
     <ResetPassword
       step={step}
-      brand={step === 'request' ? <Brand /> : undefined}
+      brand={<Brand />}
       sentTo={sentTo}
       signIn={() => {
         setStep('request');

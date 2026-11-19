@@ -10,6 +10,7 @@ const SCOPES: ApiKeyScopeOption[] = [
   {
     value: 'admin',
     label: 'Full access',
+    elevated: true,
     description: 'Everything, including members and billing',
   },
 ];
@@ -59,6 +60,7 @@ export function ApiKeysDemo({ motion, empty, locale }: DemoProps) {
     <ApiKeys
       keys={keys}
       scopes={SCOPES}
+      docsHref="#api"
       now={NOW}
       locale={locale}
       createdKey={revealed}

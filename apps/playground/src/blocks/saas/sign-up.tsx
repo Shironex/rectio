@@ -13,7 +13,7 @@ export function SignUpDemo({ motion, empty }: DemoProps) {
     <SignUp
       brand={<Brand />}
       pending={pending}
-      error={empty ? undefined : 'An account with this email already exists. Sign in instead.'}
+      emailTaken={!empty}
       defaultEmail={empty ? '' : 'margot.leclerc@fernhill.io'}
       social={
         empty ? undefined : (
