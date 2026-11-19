@@ -45,4 +45,16 @@ describe('bundle cost', () => {
     // A jump past this means a heavier Motion entry point (motion/react `motion.*`) slipped in.
     expect(added).toBeLessThan(14);
   }, 120_000);
+
+  it('adds little for the display components: their entrances use the Web Animations API directly', async () => {
+    const plain = await bundle('display-plain-entry.ts');
+    const motion = await bundle('display-motion-entry.ts');
+    // No Motion library at all: entrances and exits are element.animate calls. Measured at 4.2 kB:
+    // the token reader and reduced motion switch (shared with the rest of the add-on), the
+    // first-view and presence helpers, and eight thin wrappers.
+    expect(motion.modules.filter((id) => MOTION.test(id))).toEqual([]);
+    const added = (motion.gzip - plain.gzip) / 1024;
+    console.info(`motion display components: +${added.toFixed(1)} kB gzip over the plain ones`);
+    expect(added).toBeLessThan(5);
+  }, 120_000);
 });
