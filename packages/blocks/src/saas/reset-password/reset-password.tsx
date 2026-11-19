@@ -1,4 +1,4 @@
-import { CheckCircleIcon, EnvelopeOpenIcon, LockKeyIcon } from '@phosphor-icons/react';
+import { SignOutIcon } from '@phosphor-icons/react';
 import { Field, FieldDescription, FieldError, FieldLabel, Input } from '@rectio/ui';
 import { useId, useState, type ReactNode, type SyntheticEvent } from 'react';
 
@@ -37,14 +37,6 @@ export interface ResetPasswordProps {
   className?: string;
 }
 
-function Mark({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-flex size-11 items-center justify-center rounded-full bg-accent-subtle text-accent-strong [&_svg]:size-5">
-      {children}
-    </span>
-  );
-}
-
 /**
  * Forgotten password, end to end: request a link by email, a note that it went out with a resend,
  * a new password checked against its rules and typed twice, and a confirmation. The block shows one
@@ -67,23 +59,20 @@ export function ResetPassword({
 }: ResetPasswordProps) {
   const { Button } = useBlockParts();
   const hasError = error !== undefined && error !== null && error !== false;
+  // Every step carries the same way out, so the four read as one flow.
   const back =
     signIn === undefined ? undefined : (
       <>
-        Remembered it? <AuthLink to={signIn}>Back to sign in</AuthLink>
+        {step !== 'done' && 'Remembered it? '}
+        <AuthLink to={signIn}>Back to sign in</AuthLink>
       </>
     );
+  const frame: StepFrame = { brand, className, footer: back };
 
   if (step === 'sent') {
     return (
       <AuthFrame
-        brand={
-          brand ?? (
-            <Mark>
-              <EnvelopeOpenIcon aria-hidden weight="bold" />
-            </Mark>
-          )
-        }
+        {...frame}
         title="Check your email"
         description={
           <>
@@ -92,8 +81,6 @@ export function ResetPassword({
             its password is on its way. It expires in 30 minutes.
           </>
         }
-        footer={back}
-        className={className}
       >
         {hasError && <FormMessage tone="error" title={error} />}
         <div className="flex flex-col gap-2">
@@ -119,16 +106,9 @@ export function ResetPassword({
   if (step === 'done') {
     return (
       <AuthFrame
-        brand={
-          brand ?? (
-            <span className="inline-flex size-11 items-center justify-center rounded-full bg-positive-subtle text-positive-strong">
-              <CheckCircleIcon aria-hidden weight="bold" className="size-5" />
-            </span>
-          )
-        }
+        {...frame}
         title="Your password is changed"
         description="You are signed out everywhere else. Sign in again with the new password."
-        className={className}
       >
         {signIn !== undefined &&
           (typeof signIn === 'string' ? (
@@ -147,8 +127,7 @@ export function ResetPassword({
   if (step === 'reset') {
     return (
       <NewPassword
-        brand={brand}
-        className={className}
+        frame={frame}
         pending={pending}
         error={hasError ? error : undefined}
         minLength={minPasswordLength}
@@ -160,9 +139,7 @@ export function ResetPassword({
 
   return (
     <RequestLink
-      brand={brand}
-      className={className}
-      footer={back}
+      frame={frame}
       pending={pending}
       error={hasError ? error : undefined}
       defaultEmail={defaultEmail}
@@ -171,18 +148,21 @@ export function ResetPassword({
   );
 }
 
+/** What every step's frame shares: your brand, your class and the way back to sign in. */
+interface StepFrame {
+  brand: ReactNode;
+  className: string | undefined;
+  footer: ReactNode;
+}
+
 function RequestLink({
-  brand,
-  className,
-  footer,
+  frame,
   pending,
   error,
   defaultEmail,
   onRequest,
 }: {
-  brand: ReactNode;
-  className: string | undefined;
-  footer: ReactNode;
+  frame: StepFrame;
   pending: boolean;
   error: ReactNode;
   defaultEmail: string;
@@ -202,11 +182,9 @@ function RequestLink({
 
   return (
     <AuthFrame
-      brand={brand}
+      {...frame}
       title="Reset your password"
       description="Enter the email you sign in with and we will send you a link to choose a new password."
-      footer={footer}
-      className={className}
     >
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         {error !== undefined && <FormMessage tone="error" title={error} />}
@@ -223,9 +201,13 @@ function RequestLink({
               setEmail(event.target.value);
             }}
           />
+          <FieldDescription>
+            The link works once and expires in 30 minutes. We send the same reply whether or not an
+            account uses this address.
+          </FieldDescription>
           {problem !== null && <FieldError>{problem}</FieldError>}
         </Field>
-        <Button type="submit" loading={pending} className="mt-1 w-full">
+        <Button type="submit" loading={pending} className="mt-2 w-full">
           Email me a reset link
         </Button>
       </form>
@@ -234,16 +216,14 @@ function RequestLink({
 }
 
 function NewPassword({
-  brand,
-  className,
+  frame,
   pending,
   error,
   minLength,
   onReset,
   onRestart,
 }: {
-  brand: ReactNode;
-  className: string | undefined;
+  frame: StepFrame;
   pending: boolean;
   error: ReactNode;
   minLength: number;
@@ -255,6 +235,8 @@ function NewPassword({
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [tried, setTried] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const showRules = focused || password !== '';
   const errors: NewPasswordErrors = tried ? newPasswordErrors(password, confirm, minLength) : {};
 
   const submit = (event: SyntheticEvent) => {
@@ -266,16 +248,9 @@ function NewPassword({
 
   return (
     <AuthFrame
-      brand={
-        brand ?? (
-          <Mark>
-            <LockKeyIcon aria-hidden weight="bold" />
-          </Mark>
-        )
-      }
+      {...frame}
       title="Choose a new password"
       description="Use one you do not use anywhere else."
-      className={className}
     >
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         {error !== undefined && (
@@ -292,14 +267,20 @@ function NewPassword({
           <PasswordInput
             name="new-password"
             autoComplete="new-password"
-            aria-describedby={rulesId}
+            aria-describedby={showRules ? rulesId : undefined}
             value={password}
             onChange={(event) => {
               setPassword(event.target.value);
             }}
+            onFocus={() => {
+              setFocused(true);
+            }}
+            onBlur={() => {
+              setFocused(false);
+            }}
           />
           {errors.password !== undefined && <FieldError>{errors.password}</FieldError>}
-          <PasswordRules id={rulesId} password={password} minLength={minLength} />
+          {showRules && <PasswordRules id={rulesId} password={password} minLength={minLength} />}
         </Field>
         <Field invalid={errors.confirm !== undefined}>
           <FieldLabel>Confirm new password</FieldLabel>
@@ -311,13 +292,14 @@ function NewPassword({
               setConfirm(event.target.value);
             }}
           />
-          {errors.confirm !== undefined ? (
-            <FieldError>{errors.confirm}</FieldError>
-          ) : (
-            <FieldDescription>Signing in elsewhere ends once it is saved.</FieldDescription>
-          )}
+          {errors.confirm !== undefined && <FieldError>{errors.confirm}</FieldError>}
         </Field>
-        <Button type="submit" loading={pending} className="mt-1 w-full">
+        <p className="mt-2 flex items-start gap-2.5 text-base text-fg">
+          <SignOutIcon aria-hidden weight="bold" className="mt-1 size-4 shrink-0 text-fg-muted" />
+          Saving signs you out on every other device, so anyone using your old password loses
+          access.
+        </p>
+        <Button type="submit" loading={pending} className="w-full">
           Save new password
         </Button>
       </form>

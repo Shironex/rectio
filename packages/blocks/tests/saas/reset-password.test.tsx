@@ -76,4 +76,17 @@ describe('ResetPassword', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Continue to sign in' }));
     expect(signIn).toHaveBeenCalled();
   });
+
+  it('keeps the way back to sign in on every step', () => {
+    for (const step of ['request', 'sent', 'reset', 'done'] as const) {
+      const { unmount } = render(
+        <ResetPassword step={step} signIn="/sign-in" onRequest={noop} onReset={noop} />,
+      );
+      expect(screen.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute(
+        'href',
+        '/sign-in',
+      );
+      unmount();
+    }
+  });
 });
