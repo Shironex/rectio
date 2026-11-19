@@ -1,0 +1,111 @@
+---
+title: Toggle and toggle group
+description: Buttons that stay pressed, alone or as a segmented control.
+---
+
+import ToggleDemo from '@/demos/toggle';
+import ToggleMotionDemo from '@/demos/toggle.motion';
+
+<Preview
+  name="toggle"
+  plain={<ToggleDemo />}
+  motion={<ToggleMotionDemo />}
+  importLine="import { ToggleGroup } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add toggle
+```
+
+## Usage
+
+```tsx
+import { Toggle, ToggleGroup } from '@/components/ui/toggle';
+
+<ToggleGroup legend="Period" value={period} onValueChange={setPeriod}>
+  <Toggle value="week">Week</Toggle>
+  <Toggle value="month">Month</Toggle>
+  <Toggle value="quarter">Quarter</Toggle>
+</ToggleGroup>;
+
+<ToggleGroup aria-label="View" defaultValue={['list']} size="sm">
+  <Toggle value="list" iconOnly aria-label="List">
+    <ListIcon aria-hidden />
+  </Toggle>
+  <Toggle value="board" iconOnly aria-label="Board">
+    <SquaresFourIcon aria-hidden />
+  </Toggle>
+</ToggleGroup>;
+
+<Toggle pressed={archived} onPressedChange={setArchived}>
+  Show archived
+</Toggle>;
+```
+
+A toggle is a button that stays down: a view option or a filter that applies at once. A
+`ToggleGroup` draws its toggles as one segmented control and sets their size.
+
+The group picks one toggle by default, and keeps one picked: pressing the chosen toggle again does
+nothing. Set `allowEmpty` to let it clear, or `multiple` for independent filters such as Open,
+Overdue and Paid. The value is always an array of toggle values, also with single selection.
+
+Name the group with a visible `legend` or with `aria-label`. For a choice that is part of a form
+and needs a description or an error, use a `RadioGroup`.
+
+The motion variant of `ToggleGroup` slides one raised chip to the chosen segment. Only a group
+with single selection glides; with `multiple` it is the plain group.
+
+## Props
+
+### Toggle
+
+Every prop of Base UI's `Toggle` is accepted as well: `pressed`, `defaultPressed`,
+`onPressedChange`, `value`, `disabled` and the rest.
+
+<TypeTable
+  type={{
+    size: {
+      type: "'sm' | 'md'",
+      default: "'md'",
+      description: 'Ignored inside a ToggleGroup, which sets the size.',
+    },
+    iconOnly: {
+      type: 'boolean',
+      default: 'false',
+      description: 'A square toggle holding only an icon. Give it an aria-label.',
+    },
+  }}
+/>
+
+### ToggleGroup
+
+Every prop of Base UI's `ToggleGroup` is accepted as well: `value`, `defaultValue`,
+`onValueChange`, `multiple`, `disabled`, `orientation`, `loopFocus` and the rest.
+
+<TypeTable
+  type={{
+    size: { type: "'sm' | 'md'", default: "'md'", description: 'The size of every toggle.' },
+    legend: {
+      type: 'ReactNode',
+      description: 'A visible name above the group. Without it, pass aria-label.',
+    },
+    allowEmpty: {
+      type: 'boolean',
+      default: 'false',
+      description: 'With single selection, pressing the chosen toggle again clears the choice.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Each toggle is a button with `aria-pressed`. Space and Enter press it.
+- In a group, the arrow keys move between toggles and Tab leaves the group.
+- A pressed toggle shows a raised chip in a group, or a filled surface with an edge alone, as well
+  as the stronger text colour.
+- Icon only toggles need an `aria-label`.
+- A group grows to 44px on touch screens; a small toggle alone reaches it through its hit area.
+
+<ComponentSource path="toggle/toggle.tsx" />

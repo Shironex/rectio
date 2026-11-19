@@ -1,0 +1,98 @@
+---
+title: Slider
+description: A value or a range picked by position, with formatted figures.
+---
+
+import SliderDemo from '@/demos/slider';
+
+<Preview name="slider" plain={<SliderDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add slider
+```
+
+## Usage
+
+```tsx
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Slider } from '@/components/ui/slider';
+
+<Slider
+  label="Second approver above"
+  showValue
+  marks
+  value={threshold}
+  onValueChange={setThreshold}
+  max={10000}
+  step={250}
+  format={{ style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }}
+  locale="en-IE"
+/>;
+
+<Field>
+  <FieldLabel>Invoice amount</FieldLabel>
+  <Slider
+    showValue
+    value={range}
+    onValueChange={setRange}
+    max={10000}
+    thumbLabels={['Minimum amount', 'Maximum amount']}
+  />
+</Field>;
+```
+
+Use a slider where the rough position matters more than the exact figure: a threshold, a discount,
+a filter range. When the figure itself matters, such as an amount on an invoice, use an
+`AmountInput`.
+
+Pass an array as the value for a range with two thumbs, and name each thumb with `thumbLabels`.
+`format` and `locale` format the shown value and the marks with Intl, for currency, percent or
+units. A range reads "€500 to €4,000"; pass `formatValue` for other wording or another language.
+
+`marks` labels the ends with min and max, or labels the values you list and draws a tick for each
+inside the track. The slider never animates: the thumb follows the pointer and the keys directly.
+
+## Props
+
+Every prop of Base UI's `Slider.Root` is accepted as well: `value`, `defaultValue`,
+`onValueChange`, `onValueCommitted`, `min`, `max`, `step`, `largeStep`, `minStepsBetweenValues`,
+`format`, `locale`, `disabled`, `name` and the rest.
+
+<TypeTable
+  type={{
+    label: {
+      type: 'ReactNode',
+      description: 'A label set on one line with the value. A FieldLabel above works as well.',
+    },
+    showValue: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Shows the current value, formatted, at the end of the top line.',
+    },
+    marks: {
+      type: 'boolean | number[]',
+      description: 'true labels min and max; an array labels those values with ticks.',
+    },
+    thumbLabels: {
+      type: '[string, string]',
+      description: 'Accessible names for the two thumbs of a range.',
+    },
+    formatValue: {
+      type: '(formatted: string[], values: number[]) => ReactNode',
+      description: 'Writes the shown value. A range reads "a to b" by default.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Each thumb is a native range input, named by the label or its `thumbLabels` entry and linked to
+  the field's description and error.
+- Arrow keys step by `step`, Page Up and Page Down by `largeStep`, Home and End jump to the ends.
+- Screen readers hear the formatted value, such as "€2,500", not the raw number.
+- The marks are decorative and hidden from screen readers; the thumbs announce every value.
+- The thumb has a 44px hit area on touch screens, and the control grows to the touch height.
+
+<ComponentSource path="slider/slider.tsx" />
