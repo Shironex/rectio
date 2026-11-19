@@ -219,7 +219,7 @@ export function SearchInput({
             {/* Decorative: the shortcut is announced through aria-keyshortcuts when it is live. */}
             <kbd
               aria-hidden
-              className="rounded-(--rx-badge-radius) border border-line bg-surface-sunken px-1.5 font-sans text-xs text-fg-muted"
+              className="rounded-(--rx-badge-radius) border border-line bg-surface-sunken px-1.5 font-sans text-xs text-fg"
             >
               {hint}
             </kbd>
