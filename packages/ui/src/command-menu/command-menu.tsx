@@ -59,7 +59,9 @@ export interface CommandMenuProps {
   emptyState?: (query: string) => ReactNode;
   /** Shows the keyboard hints under the list on screens with a pointer. Default true. */
   showHints?: boolean;
-  /** Name of the close button screen readers find in the dialog. Default "Close". */
+  /** The keyboard hints in words, read with the search field. */
+  hintsLabel?: string;
+  /** Name of the close button, shown on touch screens. Default "Close". */
   closeLabel?: string;
   /** What is announced as the results change. Default "1 result", "3 results", "No results". */
   formatCount?: (count: number) => string;
@@ -129,18 +131,18 @@ function Highlighted({ text, indices }: { text: string; indices: number[] }) {
   return parts;
 }
 
-/**
- * A command palette: one field to jump anywhere or run any action. Type to filter (fuzzy, so
- * `nwinv` finds "New invoice"), ArrowUp and ArrowDown move, Enter runs, Escape closes. It opens
- * without an entrance on purpose: it is used dozens of times a day, and the field is ready the
- * moment the shortcut is pressed.
- */
 type Handle = ReturnType<typeof BaseDialog.createHandle>;
 const HandleContext = createContext<Handle | null>(null);
 
 const defaultCount = (count: number) =>
   count === 0 ? 'No results' : count === 1 ? '1 result' : `${String(count)} results`;
 
+/**
+ * A command palette: one field to jump anywhere or run any action. Type to filter (fuzzy, so
+ * `nwinv` finds "New invoice"), ArrowUp and ArrowDown move, Enter runs, Escape closes. It opens
+ * without an entrance on purpose: it is used dozens of times a day, and the field is ready the
+ * moment the shortcut is pressed.
+ */
 export function CommandMenu({
   groups,
   open: openProp,
@@ -152,6 +154,7 @@ export function CommandMenu({
   emptyState,
   showHints = true,
   closeLabel = 'Close',
+  hintsLabel = 'Arrow keys move through the results, Enter runs one, Escape closes.',
   formatCount = defaultCount,
   children,
   className,
@@ -246,8 +249,15 @@ export function CommandMenu({
                       'placeholder:text-fg-subtle pointer-coarse:text-lg',
                     )}
                   />
-                  {/* For screen readers browsing the dialog; Tab skips it, Escape and the backdrop close. */}
-                  <BaseDialog.Close tabIndex={-1} className="sr-only">
+                  {/* Tab skips it: Escape and the backdrop close. On touch, with no Escape key, it shows. */}
+                  <BaseDialog.Close
+                    tabIndex={-1}
+                    className={cn(
+                      'sr-only pointer-coarse:not-sr-only pointer-coarse:-me-2 pointer-coarse:inline-flex',
+                      'pointer-coarse:h-(--rx-control-height-touch) pointer-coarse:shrink-0 pointer-coarse:items-center pointer-coarse:px-2',
+                      'pointer-coarse:text-base pointer-coarse:font-medium pointer-coarse:text-accent-strong',
+                    )}
+                  >
                     {closeLabel}
                   </BaseDialog.Close>
                 </div>
@@ -298,8 +308,13 @@ export function CommandMenu({
                 </div>
 
                 {showHints && (
+                  <p id={hintsId} className="sr-only">
+                    {hintsLabel}
+                  </p>
+                )}
+                {showHints && (
                   <div
-                    id={hintsId}
+                    aria-hidden
                     className="flex items-center gap-4 border-t border-line bg-(--rx-dialog-footer-background) px-4 py-2 text-xs text-fg-muted pointer-coarse:hidden"
                   >
                     <span className="flex items-center gap-1.5">
