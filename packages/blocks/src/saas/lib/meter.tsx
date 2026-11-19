@@ -49,7 +49,7 @@ export function UsageMeter({
         <span className="text-sm text-fg-muted numeric">{valueText}</span>
       </div>
       {/* The track is the sunken surface with a hairline, so an empty meter still reads as one. */}
-      <Meter.Track className="h-1.5 w-full overflow-hidden rounded-full bg-surface-sunken ring-1 ring-line ring-inset">
+      <Meter.Track className="h-1 w-full overflow-hidden rounded-full bg-surface-sunken ring-1 ring-line ring-inset">
         <Meter.Indicator className={cn('h-full rounded-full', FILL[level])} />
       </Meter.Track>
       {note !== undefined && (
