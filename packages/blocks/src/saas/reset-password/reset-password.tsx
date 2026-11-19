@@ -4,6 +4,7 @@ import { useId, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { AuthFrame, AuthLink, FormMessage, PasswordInput, type LinkTarget } from '../lib/auth';
+import { focusFirstInvalid } from '../lib/focus';
 import { hasErrors } from '../lib/saas';
 import { PasswordRules } from '../lib/password-rules';
 import {
@@ -34,6 +35,8 @@ export interface ResetPasswordProps {
   signIn?: LinkTarget;
   defaultEmail?: string;
   brand?: ReactNode;
+  /** A brand panel beside the form on wide containers; it folds away on narrow ones. */
+  aside?: ReactNode;
   className?: string;
 }
 
@@ -73,6 +76,8 @@ export function ResetPassword({
     return (
       <AuthFrame
         {...frame}
+        // This step replaces the one before it, so focus moves to its heading.
+        focusHeading
         title="Check your email"
         description={
           <>
@@ -107,6 +112,8 @@ export function ResetPassword({
     return (
       <AuthFrame
         {...frame}
+        // This step replaces the one before it, so focus moves to its heading.
+        focusHeading
         title="Your password is changed"
         description="You are signed out everywhere else. Sign in again with the new password."
       >
@@ -173,10 +180,14 @@ function RequestLink({
   const [tried, setTried] = useState(false);
   const problem = tried ? resetRequestError(email) : null;
 
-  const submit = (event: SyntheticEvent) => {
+  const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTried(true);
-    if (pending || resetRequestError(email) !== null) return;
+    if (resetRequestError(email) !== null) {
+      focusFirstInvalid(event.currentTarget);
+      return;
+    }
+    if (pending) return;
     onRequest(email.trim());
   };
 
@@ -237,17 +248,24 @@ function NewPassword({
   const [tried, setTried] = useState(false);
   const matches = confirm !== '' && confirm === password;
   const errors: NewPasswordErrors = tried ? newPasswordErrors(password, confirm, minLength) : {};
+  const showMatch = confirm !== '' && errors.confirm === undefined;
 
-  const submit = (event: SyntheticEvent) => {
+  const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTried(true);
-    if (pending || hasErrors(newPasswordErrors(password, confirm, minLength))) return;
+    if (hasErrors(newPasswordErrors(password, confirm, minLength))) {
+      focusFirstInvalid(event.currentTarget);
+      return;
+    }
+    if (pending) return;
     onReset(password);
   };
 
   return (
     <AuthFrame
       {...frame}
+      // This step replaces the one before it, so focus moves to its heading.
+      focusHeading
       title="Choose a new password"
       description="Use one you do not use anywhere else."
     >
@@ -286,32 +304,36 @@ function NewPassword({
               setConfirm(event.target.value);
             }}
           />
-          {errors.confirm !== undefined ? (
-            <FieldError>{errors.confirm}</FieldError>
-          ) : (
-            confirm !== '' && (
-              <FieldDescription
-                aria-live="polite"
-                className={cn(
-                  'flex items-center gap-1.5',
-                  matches ? 'text-positive-strong' : 'text-fg-muted',
-                )}
-              >
+          {errors.confirm !== undefined && <FieldError>{errors.confirm}</FieldError>}
+          {/* Always mounted, so a screen reader hears the match state change as it is typed. */}
+          <p
+            aria-live="polite"
+            className={cn(
+              'flex items-center gap-1.5 text-sm empty:hidden',
+              matches ? 'text-positive-strong' : 'text-fg-muted',
+            )}
+          >
+            {showMatch && (
+              <>
                 {matches ? (
                   <CheckIcon aria-hidden weight="bold" className="size-3.5 shrink-0" />
                 ) : (
                   <XIcon aria-hidden weight="bold" className="size-3.5 shrink-0" />
                 )}
                 {matches ? 'Passwords match' : 'Passwords do not match yet'}
-              </FieldDescription>
-            )
-          )}
+              </>
+            )}
+          </p>
         </Field>
-        <p className="flex items-start gap-2.5 rounded-control bg-surface-sunken px-3 py-2.5 text-sm text-fg">
-          <SignOutIcon aria-hidden weight="bold" className="mt-0.5 size-4 shrink-0 text-fg-muted" />
-          Saving signs you out on every other device, so anyone using your old password loses
-          access.
-        </p>
+        <div className="flex items-start gap-3 rounded-control border border-line bg-surface-sunken px-3.5 py-3">
+          <SignOutIcon aria-hidden weight="fill" className="mt-0.5 size-5 shrink-0 text-fg" />
+          <div className="flex flex-col gap-0.5 text-sm">
+            <p className="font-medium text-fg">You will be signed out elsewhere</p>
+            <p className="text-fg-muted">
+              Saving ends every other session, so anyone using your old password loses access.
+            </p>
+          </div>
+        </div>
         <Button type="submit" loading={pending} className="w-full">
           Save new password
         </Button>

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -97,5 +97,33 @@ describe('ResetPassword', () => {
     expect(screen.getByText('Passwords do not match yet')).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText('Confirm new password'), '-Lines-42');
     expect(screen.getByText('Passwords match')).toBeInTheDocument();
+    expect(screen.getByText('You will be signed out elsewhere')).toBeInTheDocument();
+  });
+
+  it('points the new password at both its rules and its error', async () => {
+    render(<ResetPassword step="reset" onRequest={noop} onReset={noop} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Save new password' }));
+    const password = screen.getByLabelText('New password');
+    const ids = (password.getAttribute('aria-describedby') ?? '').split(' ');
+    const described = ids.map((id) => document.getElementById(id)?.textContent ?? '').join(' ');
+    expect(described).toContain('Upper and lower case letters');
+    expect(described.length).toBeGreaterThan('Upper and lower case letters'.length);
+    await waitFor(() => {
+      expect(password).toHaveFocus();
+    });
+  });
+
+  it('keeps one live region for the match state', async () => {
+    const { container } = render(<ResetPassword step="reset" onRequest={noop} onReset={noop} />);
+    const live = container.querySelector('[aria-live="polite"]');
+    expect(live).toBeEmptyDOMElement();
+    await userEvent.type(screen.getByLabelText('Confirm new password'), 'x');
+    expect(container.querySelector('[aria-live="polite"]')).toBe(live);
+    expect(live).toHaveTextContent('Passwords do not match yet');
+  });
+
+  it('moves focus to the heading of a step that replaces another', () => {
+    render(<ResetPassword step="sent" sentTo="a@b.io" onRequest={noop} onReset={noop} />);
+    expect(screen.getByRole('heading', { name: 'Check your email' })).toHaveFocus();
   });
 });
