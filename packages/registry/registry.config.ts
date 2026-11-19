@@ -122,6 +122,52 @@ const marketingItems = (
 ];
 
 /**
+ * A docs block: pro, installed under `@blocks/docs/`. `files` overrides the default
+ * `<folder>/<folder>.tsx`; `logic` adds its logic file; `motion` adds a `motion-<name>` twin for
+ * blocks with something to animate.
+ */
+const docsItems = (
+  name: string,
+  title: string,
+  description: string,
+  folder: string,
+  {
+    logic = false,
+    motion = false,
+    files,
+  }: { logic?: boolean; motion?: boolean; files?: string[] } = {},
+) => [
+  {
+    name,
+    type: 'block' as const,
+    tier: 'pro' as const,
+    version: '0.1.0',
+    title,
+    description,
+    categories: ['docs', 'blocks'],
+    files: [
+      ...(files ?? [`${folder}/${folder}.tsx`]),
+      ...(logic ? [`${folder}/${folder}.logic.ts`] : []),
+    ],
+  },
+  ...(motion
+    ? [
+        {
+          name: `motion-${name}`,
+          type: 'block' as const,
+          tier: 'pro' as const,
+          version: '0.1.0',
+          title: `Motion ${title}`,
+          description: `${title} with the motion parts: entrances once on first view, gliding indicators.`,
+          categories: ['docs', 'blocks', 'motion'],
+          files: [`${folder}/${folder}.motion.tsx`],
+          client: true,
+        },
+      ]
+    : []),
+];
+
+/**
  * What the registry publishes. Every folder in packages/ui/src must belong to an item, so a new
  * component fails the build until it is listed here with its tier and version. Bump an item's
  * version whenever its published content changes: versioned copies are immutable.
@@ -801,6 +847,7 @@ export default defineRegistry({
   workspacePackages: {
     '@rectio/ui': join(ui, 'src', 'index.ts'),
     '@rectio/motion': join(motion, 'src', 'index.ts'),
+    '@rectio/motion/navigation': join(motion, 'src', 'navigation.ts'),
   },
   addons: [
     {
@@ -1373,6 +1420,136 @@ export default defineRegistry({
           'file-manager',
           'File manager',
           'One folder of files with a path, sorting, rename in place, bulk delete and storage use.',
+        ),
+      ],
+    },
+    {
+      sourceDir: join(blocks, 'src', 'docs'),
+      targetFolder: 'docs',
+      requireEveryFolder: true,
+      items: [
+        {
+          name: 'docs-core',
+          type: 'lib',
+          tier: 'pro',
+          version: '0.1.0',
+          title: 'Docs core',
+          description:
+            'The navigation tree helpers, the one link every docs block draws, badges, the copy button and the parts the motion twins swap.',
+          categories: ['docs', 'blocks'],
+          files: [
+            'lib/docs.ts',
+            'lib/link.tsx',
+            'lib/parts.tsx',
+            'lib/badge.tsx',
+            'lib/copy-button.tsx',
+            'lib/nav-context.ts',
+          ],
+        },
+        {
+          name: 'motion-docs-core',
+          type: 'lib',
+          tier: 'pro',
+          version: '0.1.0',
+          title: 'Motion docs core',
+          description:
+            'First-view entrances, the gliding table of contents marker and tab indicator, and a state that fades in place.',
+          categories: ['docs', 'blocks', 'motion'],
+          files: ['lib/motion-parts.tsx'],
+        },
+        ...docsItems(
+          'docs-layout',
+          'Docs layout',
+          'Header with search and switchers, navigation down the start edge, the page at a reading measure and the table of contents beside it.',
+          'docs-layout',
+        ),
+        ...docsItems(
+          'docs-sidebar',
+          'Docs sidebar',
+          'Sections and nested pages that open and close, the current page marked, New and Beta badges, in a sheet on phones.',
+          'docs-sidebar',
+        ),
+        ...docsItems(
+          'docs-toc',
+          'Table of contents',
+          'On this page with scroll spy, smooth scrolling that respects reduced motion and focus moved to the section.',
+          'docs-toc',
+          { logic: true, motion: true },
+        ),
+        ...docsItems(
+          'docs-prose',
+          'Docs prose and MDX components',
+          'Prose styles, headings with anchor links, callouts, steps, file tree, tables, figures and the MDX component map.',
+          'prose',
+          {
+            files: [
+              'prose/prose.tsx',
+              'prose/callout.tsx',
+              'prose/steps.tsx',
+              'prose/file-tree.tsx',
+              'prose/mdx.tsx',
+            ],
+          },
+        ),
+        ...docsItems(
+          'docs-code-block',
+          'Code block',
+          'Highlighted tokens from any build-time highlighter, file name, line highlights, line numbers, diff marks and copy.',
+          'code-block',
+          { logic: true },
+        ),
+        ...docsItems(
+          'docs-code-tabs',
+          'Code tabs',
+          'One example in several forms, and package manager tabs for npm, pnpm, yarn and bun with the choice remembered.',
+          'code-tabs',
+          { logic: true, motion: true },
+        ),
+        ...docsItems(
+          'docs-api-reference',
+          'API reference',
+          'A props table that stacks in narrow columns, signature cards and HTTP endpoints with parameters and example responses.',
+          'api-reference',
+        ),
+        ...docsItems(
+          'docs-search',
+          'Docs search',
+          'A search dialog over any provider, grouped results with the query marked, recent searches and a local index provider.',
+          'docs-search',
+          { logic: true },
+        ),
+        ...docsItems(
+          'docs-page-nav',
+          'Page navigation',
+          'Previous and next page, a breadcrumb through your router, edit this page and last updated.',
+          'page-nav',
+        ),
+        ...docsItems(
+          'docs-switchers',
+          'Version and language switchers',
+          'Menus that link to other versions and languages, each language named in its own tongue.',
+          'switchers',
+        ),
+        ...docsItems(
+          'docs-feedback',
+          'Feedback widget',
+          'Was this page helpful: a vote, an optional comment, a sending state and an error that keeps the comment.',
+          'feedback',
+          { logic: true, motion: true },
+        ),
+        ...docsItems(
+          'docs-home',
+          'Docs home',
+          'A home hero with the two ways in and a command to copy, and link cards or a compact list for the main routes.',
+          'docs-home',
+          { motion: true },
+        ),
+        ...docsItems(
+          'docs-changelog',
+          'Changelog',
+          'Release notes newest first, versions that stay in view beside their changes, grouped from breaking to deprecated.',
+          'changelog',
+          { logic: true, motion: true },
         ),
       ],
     },

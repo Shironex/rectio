@@ -286,6 +286,20 @@ describe('the rectio registry', () => {
       'data-table',
       'date-picker',
       'dialog',
+      'docs-api-reference',
+      'docs-changelog',
+      'docs-code-block',
+      'docs-code-tabs',
+      'docs-core',
+      'docs-feedback',
+      'docs-home',
+      'docs-layout',
+      'docs-page-nav',
+      'docs-prose',
+      'docs-search',
+      'docs-sidebar',
+      'docs-switchers',
+      'docs-toc',
       'empty-state',
       'expense-approval',
       'faq',
@@ -332,6 +346,12 @@ describe('the rectio registry', () => {
       'motion-cta-band',
       'motion-data-table',
       'motion-dialog',
+      'motion-docs-changelog',
+      'motion-docs-code-tabs',
+      'motion-docs-core',
+      'motion-docs-feedback',
+      'motion-docs-home',
+      'motion-docs-toc',
       'motion-expense-approval',
       'motion-faq',
       'motion-feature-grid',
@@ -610,6 +630,43 @@ describe('the rectio registry', () => {
     expect(signIn?.target).toBe('@blocks/saas/sign-in.tsx');
     expect(signIn?.content).toContain("from '@registry/lib/saas/auth'");
     expect(signIn?.content).not.toMatch(/@rectio\/(ui|motion)/);
+  });
+
+  it('publishes the docs blocks under their own folder, built on the docs core', () => {
+    const withMotion = [
+      'docs-toc',
+      'docs-code-tabs',
+      'docs-feedback',
+      'docs-home',
+      'docs-changelog',
+    ];
+    const plainOnly = [
+      'docs-layout',
+      'docs-sidebar',
+      'docs-prose',
+      'docs-code-block',
+      'docs-api-reference',
+      'docs-page-nav',
+    ];
+    for (const name of [...withMotion, ...plainOnly]) {
+      const item = byName.get(name);
+      expect(item, name).toBeDefined();
+      expect(item?.tier, name).toBe('pro');
+      expect(item?.categories, name).toEqual(['docs', 'blocks']);
+      expect(item?.registryDependencies, name).toContain('docs-core');
+      for (const file of item?.files ?? []) expect(file.target).toMatch(/^@blocks\/docs\//);
+    }
+    for (const name of withMotion) {
+      expect(byName.get(`motion-${name}`)?.registryDependencies).toEqual(
+        expect.arrayContaining([name, 'motion-docs-core']),
+      );
+    }
+    for (const name of plainOnly) expect(byName.has(`motion-${name}`), name).toBe(false);
+    // The motioned tab indicator comes from the motion add-on's navigation entry.
+    expect(byName.get('motion-docs-core')?.registryDependencies).toContain('motion-tabs');
+    // Code tabs build on the code block; the MDX map pulls in what a page can write.
+    expect(byName.get('docs-code-tabs')?.registryDependencies).toContain('docs-code-block');
+    expect(byName.get('docs-prose')?.registryDependencies).toContain('docs-api-reference');
   });
 
   it('writes the pro motion items under pro/ only', () => {
