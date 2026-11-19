@@ -268,6 +268,9 @@ export interface DateRangePreset {
   range: { from: Date; to: Date };
 }
 
+const formatRange = ({ from, to }: DateRangePreset['range'], dateLocale: DayPickerLocale) =>
+  `${format(from, 'd MMM', { locale: dateLocale })} to ${format(to, 'd MMM yyyy', { locale: dateLocale })}`;
+
 const sameRange = (a: DateRange | undefined, b: DateRangePreset['range']) =>
   a?.from !== undefined && a.to !== undefined && isSameDay(a.from, b.from) && isSameDay(a.to, b.to);
 
@@ -340,14 +343,23 @@ export function DateRangePicker({
                       onOpenChange(false);
                     }}
                     className={cn(
-                      'flex h-(--rx-button-height-sm) w-full cursor-pointer items-center rounded-(--rx-button-radius) px-(--rx-button-padding-x-sm)',
+                      'flex min-h-(--rx-button-height-sm) w-full cursor-pointer items-center rounded-(--rx-button-radius) px-(--rx-button-padding-x-sm) py-1',
                       'text-start text-sm whitespace-nowrap text-fg-muted hover:bg-surface-hover hover:text-fg',
                       'aria-pressed:bg-surface-selected aria-pressed:font-medium aria-pressed:text-fg',
                       'transition-colors duration-fast ease-standard',
                       'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
                     )}
                   >
-                    {preset.label}
+                    <span className="flex flex-col">
+                      <span>
+                        {preset.label}
+                        <span className="sr-only">, </span>
+                      </span>
+                      {/* The dates themselves, so a preset never surprises. */}
+                      <span className="text-xs font-regular text-fg-subtle numeric">
+                        {formatRange(preset.range, dateLocale)}
+                      </span>
+                    </span>
                   </button>
                 </li>
               ))}

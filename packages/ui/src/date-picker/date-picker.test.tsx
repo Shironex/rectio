@@ -195,11 +195,13 @@ describe('DateRangePicker', () => {
       />,
     );
     await userEvent.click(screen.getByRole('button', { name: /^Period/ }));
-    expect(await screen.findByRole('button', { name: 'March' })).toHaveAttribute(
+    expect(await screen.findByRole('button', { name: /^March/ })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
-    await userEvent.click(screen.getByRole('button', { name: 'February' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /^February, ?1 Feb to 28 Feb 2026$/ }),
+    );
     const last = onChange.mock.lastCall?.[0] as DateRange;
     expect([ymd(last.from), ymd(last.to)]).toEqual(['2026-02-01', '2026-02-28']);
     await waitFor(() => {
