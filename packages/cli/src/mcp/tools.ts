@@ -1,0 +1,400 @@
+import {
+  itemTypeSchema,
+  resolveGraph,
+  tierSchema,
+  type IndexEntry,
+  type RegistryIndex,
+  type RegistryItem,
+} from '@rectio/registry';
+
+import { rankMatches } from '../commands/list.ts';
+import { readConfig, type RectioConfig } from '../core/config.ts';
+import { CliError, type CliContext } from '../core/context.ts';
+import { authFile, findLicenseKey, LICENSE_ENV } from '../core/license.ts';
+import type { RegistryClient } from '../core/registry-client.ts';
+import { projectContent } from '../core/transform.ts';
+import { themeValues, tailwindUtilities } from './tokens.ts';
+
+/** What the tools read from. Nothing here writes: the MCP server is read-only. */
+export interface McpDeps {
+  client: RegistryClient;
+  env: CliContext['env'];
+  /** The project folder, to read rectio.json (aliases, registry) from. */
+  cwd: string;
+  /** Set only when `rectio mcp --registry` was given: repeated in the add commands it returns. */
+  registryFlag?: string;
+}
+
+export interface ToolResult {
+  text: string;
+  isError?: boolean;
+}
+
+export const ITEM_TYPES = itemTypeSchema.options;
+export const TIERS = tierSchema.options;
+
+const DEFAULT_LIMIT = 40;
+const TOKENS_ITEM = 'tokens';
+const THEME_PREFIX = 'theme-';
+
+/** Turns an expected failure into a tool error with the same message the CLI would print. */
+export async function guard(run: () => Promise<ToolResult>): Promise<ToolResult> {
+  try {
+    return await run();
+  } catch (error) {
+    if (error instanceof CliError) {
+      return {
+        text: error.hint === undefined ? error.message : `${error.message}\n${error.hint}`,
+        isError: true,
+      };
+    }
+    throw error;
+  }
+}
+
+const fail = (text: string): ToolResult => ({ text, isError: true });
+
+function line(entry: IndexEntry, withDescription: boolean): string {
+  const head = `${entry.name} | ${entry.type} | ${entry.tier} | ${entry.version} | ${entry.title}`;
+  return withDescription ? `${head}\n  ${entry.description}` : head;
+}
+
+function findEntry(index: RegistryIndex, name: string): IndexEntry {
+  const entry = index.items.find((e) => e.name === name);
+  if (entry !== undefined) return entry;
+  const close = rankMatches(index.items, name)
+    .slice(0, 3)
+    .map((e) => e.name);
+  throw new CliError(
+    `no item named "${name}"`,
+    close.length > 0
+      ? `Did you mean: ${close.join(', ')}? Use list_items to see all.`
+      : 'Use list_items to see all.',
+  );
+}
+
+function noKeyMessage(deps: McpDeps, entry: IndexEntry, homepage: string | undefined): ToolResult {
+  return fail(
+    [
+      `"${entry.name}" is a pro item. Its source and file details are only available with a valid license key, so none is shown.`,
+      `Get a key${homepage === undefined ? '' : ` at ${homepage}`}, then set ${LICENSE_ENV} in the "env" of this MCP server's config, or save {"licenseKey": "<key>"} to ${authFile(deps.env)}.`,
+      `Metadata is still available through get_item.`,
+    ].join('\n'),
+  );
+}
+
+type Loaded = { item: RegistryItem } | { blocked: ToolResult };
+
+/** A free item, or a pro item when a license key exists. Never returns pro content without one. */
+async function loadItem(deps: McpDeps, index: RegistryIndex, entry: IndexEntry): Promise<Loaded> {
+  if (entry.tier === 'free') return { item: await deps.client.item(entry) };
+  const key = findLicenseKey(deps.env);
+  if (key === undefined) return { blocked: noKeyMessage(deps, entry, index.homepage) };
+  return { item: await deps.client.item(entry, key.key) };
+}
+
+function safeConfig(cwd: string): RectioConfig | undefined {
+  try {
+    return readConfig(cwd);
+  } catch {
+    return undefined;
+  }
+}
+
+function filtered(
+  entries: readonly IndexEntry[],
+  type: string | undefined,
+  tier: string | undefined,
+): IndexEntry[] {
+  return entries.filter(
+    (e) => (type === undefined || e.type === type) && (tier === undefined || e.tier === tier),
+  );
+}
+
+function render(entries: readonly IndexEntry[], limit: number, withDescription: boolean): string {
+  if (entries.length === 0) return 'No items match.';
+  const shown = entries.slice(0, limit);
+  const rows = [
+    'name | type | tier | version | title',
+    ...shown.map((e) => line(e, withDescription)),
+  ];
+  if (entries.length > shown.length) {
+    rows.push(`... ${entries.length - shown.length} more; narrow the filters or raise limit.`);
+  }
+  return rows.join('\n');
+}
+
+export interface ListArgs {
+  type?: string | undefined;
+  tier?: string | undefined;
+  limit?: number | undefined;
+}
+
+export async function listItems(deps: McpDeps, args: ListArgs): Promise<ToolResult> {
+  const { items } = await deps.client.index();
+  const matches = filtered(items, args.type, args.tier);
+  return {
+    text: `${matches.length} item(s)\n${render(matches, args.limit ?? DEFAULT_LIMIT, false)}`,
+  };
+}
+
+export interface SearchArgs extends ListArgs {
+  query: string;
+}
+
+export async function searchItems(deps: McpDeps, args: SearchArgs): Promise<ToolResult> {
+  const words = args.query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return fail('give a query, for example "money" or "date picker"');
+  const { items } = await deps.client.index();
+  const pool = filtered(items, args.type, args.tier);
+  // Every word must match somewhere (name, title, categories, description); the first word ranks.
+  const all = pool.filter((e) => words.every((w) => rankMatches([e], w).length > 0));
+  const matches = rankMatches(all, words[0] ?? '');
+  return {
+    text: `${matches.length} match(es) for "${args.query}"\n${render(matches, args.limit ?? 10, true)}`,
+  };
+}
+
+function listFiles(item: RegistryItem): string[] {
+  return item.files.map(
+    (f) => `  ${f.path} -> ${f.target} (${f.type}, ${f.content.split('\n').length} lines)`,
+  );
+}
+
+function installSet(index: RegistryIndex, names: readonly string[]): IndexEntry[] {
+  const byName = new Map(index.items.map((e) => [e.name, e]));
+  try {
+    return resolveGraph(names, (n) => byName.get(n));
+  } catch (error) {
+    throw new CliError((error as Error).message, 'Use list_items to see the available items.');
+  }
+}
+
+export async function getItem(deps: McpDeps, args: { name: string }): Promise<ToolResult> {
+  const index = await deps.client.index();
+  const entry = findEntry(index, args.name);
+  const lines = [
+    `${entry.name} | ${entry.type} | ${entry.tier} | ${entry.version}`,
+    entry.title,
+    entry.description,
+    `Categories: ${entry.categories.join(', ') || 'none'}`,
+    `Versions: ${entry.versions.join(', ')}`,
+  ];
+  const withDeps = installSet(index, [entry.name])
+    .map((e) => e.name)
+    .filter((n) => n !== entry.name);
+  lines.push(`Registry dependencies (installed with it): ${withDeps.join(', ') || 'none'}`);
+
+  const loaded = await loadItem(deps, index, entry);
+  if ('blocked' in loaded) {
+    lines.push(
+      'Files, npm packages and requirements: pro item, a license key is needed to see them.',
+    );
+  } else {
+    const { item } = loaded;
+    const npm = Object.entries(item.dependencies).map(([n, v]) => `${n}@${v}`);
+    const requires = Object.entries(item.requires).map(([n, v]) => `${n} ${String(v)}`);
+    lines.push(
+      `npm packages: ${npm.join(', ') || 'none'}`,
+      `Requires: ${requires.join(', ') || 'none'}`,
+      `Files (${item.files.length}):`,
+      ...listFiles(item),
+    );
+    if (item.docs !== undefined) lines.push(`Notes: ${item.docs}`);
+  }
+  lines.push(`Add: rectio add ${entry.name}`);
+  return { text: lines.join('\n') };
+}
+
+export async function getItemSource(
+  deps: McpDeps,
+  args: { name: string; file?: string | undefined },
+): Promise<ToolResult> {
+  const index = await deps.client.index();
+  const entry = findEntry(index, args.name);
+  const loaded = await loadItem(deps, index, entry);
+  if ('blocked' in loaded) return loaded.blocked;
+  const { item } = loaded;
+  const wanted = args.file?.replace(/\\/g, '/');
+  const files =
+    wanted === undefined
+      ? item.files
+      : item.files.filter(
+          (f) => f.path === wanted || f.target === wanted || f.path.endsWith(`/${wanted}`),
+        );
+  if (files.length === 0) {
+    return fail(
+      `${entry.name} has no file "${wanted ?? ''}". Files: ${item.files.map((f) => f.path).join(', ')}`,
+    );
+  }
+  const config = safeConfig(deps.cwd);
+  const parts = [
+    `${entry.name}@${item.version}: ${files.length} of ${item.files.length} file(s). ${
+      config === undefined
+        ? 'Imports use the registry form (@registry/<alias>/...); `rectio add` rewrites them to your aliases.'
+        : 'Imports are rewritten to the aliases in rectio.json.'
+    }`,
+  ];
+  for (const file of files) {
+    const content = config === undefined ? file.content : projectContent(file, config.aliases);
+    parts.push(`--- ${file.path} (installs as ${file.target})\n${content.trimEnd()}`);
+  }
+  return { text: parts.join('\n\n') };
+}
+
+export interface TokenArgs {
+  theme?: string | undefined;
+  mode?: 'light' | 'dark' | undefined;
+  filter?: string | undefined;
+}
+
+export async function getTokens(deps: McpDeps, args: TokenArgs): Promise<ToolResult> {
+  const index = await deps.client.index();
+  const themes = index.items.filter((e) => e.type === 'theme');
+  const id = (args.theme ?? 'default').replace(THEME_PREFIX, '');
+  const entry = themes.find((e) => e.name === `${THEME_PREFIX}${id}`);
+  if (entry === undefined) {
+    return fail(
+      `no theme "${id}". Themes: ${themes.map((e) => e.name.slice(THEME_PREFIX.length)).join(', ')}`,
+    );
+  }
+  const loaded = await loadItem(deps, index, entry);
+  if ('blocked' in loaded) return loaded.blocked;
+  const css = loaded.item.files.find((f) => f.type === 'theme')?.content ?? '';
+  const mode = args.mode ?? 'light';
+  const values = themeValues(css, id, mode);
+
+  let utilities = new Map<string, string>();
+  const tokensEntry = index.items.find((e) => e.name === TOKENS_ITEM);
+  if (tokensEntry !== undefined) {
+    const tokens = await loadItem(deps, index, tokensEntry);
+    if ('item' in tokens) {
+      utilities = tailwindUtilities(tokens.item.files.map((f) => f.content).join('\n'));
+    }
+  }
+
+  const needle = args.filter?.toLowerCase();
+  const rows: string[] = [];
+  let family = '';
+  for (const [name, value] of values) {
+    const short = name.slice('--rx-'.length);
+    if (needle !== undefined && !short.includes(needle)) continue;
+    const head = short.split('-')[0] ?? '';
+    if (head !== family) {
+      if (family !== '') rows.push('');
+      family = head;
+    }
+    const utility = utilities.get(name);
+    rows.push(`${name}: ${value}${utility === undefined ? '' : `   [tailwind: ${utility}]`}`);
+  }
+  if (rows.length === 0) return fail(`no token of theme "${id}" contains "${args.filter ?? ''}"`);
+  return {
+    text: [
+      `Theme "${id}", ${mode} mode: ${values.size} tokens${needle === undefined ? '' : ` (filtered by "${needle}")`}.`,
+      'Style with the Tailwind utilities in brackets (color-surface means bg-surface, text-surface, border-surface; text-*, radius-*, shadow-* and ease-* are sizes and effects), never raw values. Set data-theme and data-mode on <html> or inside ThemeScope.',
+      '',
+      ...rows,
+    ].join('\n'),
+  };
+}
+
+const GENERAL_DOCS = [
+  'rectio: finance and back-office components, copied into your project as source (you own the code).',
+  '',
+  'Workflow: `rectio init` once (rectio.json, tokens, a theme, the cn helper), then `rectio add <items>`. Dependencies between items are installed with them. `rectio diff <item>` compares with upstream.',
+  'Styling: components read semantic tokens only. Use Tailwind utilities such as bg-surface, text-fg, border-line, bg-accent; never hex or the default Tailwind palette (it is removed). get_tokens lists them with values.',
+  'Theming: data-theme="<id>" on <html> (or a ThemeScope component for a subtree) picks a theme; data-mode="dark" picks dark (without it the system setting decides); data-density="compact" tightens controls.',
+  'Money and quantities: the `numeric` utility gives tabular lining figures.',
+  'Pro items need a license key (RECTIO_LICENSE_KEY or auth.json in the user config folder). Without one this server shows metadata only.',
+  'This MCP server is read-only: get_add_command returns the command, you run it.',
+  'Per-item notes: call get_docs with an item name.',
+].join('\n');
+
+function exportsOf(content: string): string[] {
+  const names = new Set<string>();
+  for (const m of content.matchAll(
+    /^export\s+(?:default\s+)?(?:declare\s+)?(?:async\s+)?(?:function|const|class|type|interface|enum)\s+([A-Za-z_$][\w$]*)/gm,
+  )) {
+    names.add(m[1] ?? '');
+  }
+  for (const m of content.matchAll(/^export\s+(?:type\s+)?\{([^}]*)\}/gm)) {
+    for (const part of (m[1] ?? '').split(',')) {
+      const name = part
+        .trim()
+        .split(/\s+as\s+/)
+        .pop()
+        ?.trim();
+      if (name !== undefined && name !== '') names.add(name);
+    }
+  }
+  return [...names];
+}
+
+export async function getDocs(
+  deps: McpDeps,
+  args: { item?: string | undefined },
+): Promise<ToolResult> {
+  if (args.item === undefined) return { text: GENERAL_DOCS };
+  const index = await deps.client.index();
+  const entry = findEntry(index, args.item);
+  const loaded = await loadItem(deps, index, entry);
+  if ('blocked' in loaded) return loaded.blocked;
+  const { item } = loaded;
+  const lines = [`${item.name}@${item.version}: ${item.title}`, item.description];
+  if (item.docs === undefined) {
+    lines.push(
+      'The registry has no usage notes for this item; this summary is derived from its source.',
+    );
+  } else {
+    lines.push(`Usage notes: ${item.docs}`);
+  }
+  for (const file of item.files) {
+    if (!/\.[cm]?[jt]sx?$/.test(file.path)) continue;
+    const names = exportsOf(file.content);
+    if (names.length > 0)
+      lines.push(
+        `Exports of ${file.path} (import from the "${file.target.split('/')[0]}" alias): ${names.join(', ')}`,
+      );
+  }
+  if (item.theme !== undefined) {
+    lines.push(
+      `Theme "${item.theme.id}": modes ${item.theme.modes.join(', ')}; densities ${item.theme.densities.join(', ')}. See get_tokens.`,
+    );
+  }
+  if (item.registryDependencies.length > 0)
+    lines.push(`Installs with: ${item.registryDependencies.join(', ')}`);
+  lines.push('For the full source use get_item_source.');
+  return { text: lines.join('\n') };
+}
+
+export interface AddArgs {
+  items: string[];
+  overwrite?: boolean | undefined;
+  dry_run?: boolean | undefined;
+}
+
+export async function getAddCommand(deps: McpDeps, args: AddArgs): Promise<ToolResult> {
+  const index = await deps.client.index();
+  for (const name of args.items) findEntry(index, name);
+  const set = installSet(index, args.items);
+  const flags = [
+    ...(args.overwrite === true ? ['--overwrite'] : []),
+    ...(args.dry_run === true ? ['--dry-run'] : []),
+    ...(deps.registryFlag === undefined ? [] : ['--registry', JSON.stringify(deps.registryFlag)]),
+  ];
+  const command = ['rectio add', ...args.items, ...flags].join(' ');
+  const lines = [command];
+  const extra = set.map((e) => e.name).filter((n) => !args.items.includes(n));
+  if (extra.length > 0) lines.push(`Also installs: ${extra.join(', ')}`);
+  const pro = set.filter((e) => e.tier === 'pro').map((e) => e.name);
+  if (pro.length > 0) {
+    lines.push(
+      `Pro items: ${pro.join(', ')}. ${findLicenseKey(deps.env) === undefined ? `No license key found: set ${LICENSE_ENV} or save it to ${authFile(deps.env)} first.` : 'A license key was found.'}`,
+    );
+  }
+  if (safeConfig(deps.cwd) === undefined) {
+    lines.push('No valid rectio.json here: run `rectio init` first.');
+  }
+  lines.push('Run it in the project folder. This server does not write files.');
+  return { text: lines.join('\n') };
+}

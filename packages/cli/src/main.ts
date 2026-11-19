@@ -6,6 +6,7 @@ import { runAdd } from './commands/add.ts';
 import { runDiff } from './commands/diff.ts';
 import { runInit } from './commands/init.ts';
 import { runList, runSearch } from './commands/list.ts';
+import { runMcp } from './commands/mcp.ts';
 import { runUpdate } from './commands/update.ts';
 import { CliError, type CliContext } from './core/context.ts';
 
@@ -20,6 +21,7 @@ Commands
   list                 List registry items (--type, --tier)
   search <query>       Search registry items
   update               Show items with a newer version (merging is not built yet)
+  mcp                  Run the read-only MCP server on stdio (for Claude Code, Cursor, VS Code)
 
 Options
   --cwd <dir>          Project folder (default: the current folder)
@@ -120,6 +122,9 @@ export async function main(argv: readonly string[], base: CliContext): Promise<n
         return 0;
       case 'update':
         await runUpdate(ctx, shared);
+        return 0;
+      case 'mcp':
+        await runMcp(ctx, shared);
         return 0;
       default:
         base.warn(`error: unknown command "${command}"\n\nRun \`rectio --help\` for usage.`);
