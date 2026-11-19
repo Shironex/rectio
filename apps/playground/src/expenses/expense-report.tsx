@@ -189,12 +189,13 @@ function Report() {
   }, [lastAdded]);
 
   const add = (expense: Expense) => {
+    const totalNow = sum(claimed([...expenses, expense].filter((e) => inPeriod(e.date, period))));
     setExpenses((list) => [...list, expense]);
     setLastAdded(expense.id);
     const id = toast.add({
       type: 'success',
       title: 'Expense added',
-      description: `${expense.merchant}, ${money(expense.amount)}`,
+      description: `${expense.merchant}, ${money(expense.amount)}. Total claimed is now ${money(totalNow)}.`,
       actionProps: {
         children: 'Undo',
         onClick: () => {
@@ -264,8 +265,10 @@ function Report() {
             <div className="flex items-center gap-3">
               <p className="text-sm text-fg-muted">
                 {selected.length} selected,{' '}
-                <Money amount={sum(claimed(selected))} currency={CURRENCY} locale={LOCALE} /> of the
-                total
+                <Money amount={sum(claimed(selected))} currency={CURRENCY} locale={LOCALE} />{' '}
+                counted
+                {selected.length > claimed(selected).length &&
+                  `, ${String(selected.length - claimed(selected).length)} rejected not counted`}
               </p>
               <Button variant="danger" size="sm" onClick={remove}>
                 <TrashIcon aria-hidden weight="bold" className="size-3.5" />

@@ -168,6 +168,7 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
                   }}
                   disabledDays={{ after: new Date(2026, 2, 31) }}
                 />
+                <FieldDescription>Up to 31 Mar, the report's last day.</FieldDescription>
                 {errors.date !== undefined && <FieldError>{errors.date}</FieldError>}
               </Field>
               <Field invalid={errors.amount !== undefined}>
