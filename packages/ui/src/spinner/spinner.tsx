@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
   type ComponentProps,
@@ -38,21 +39,29 @@ const phase = (share: number): CSSProperties => ({
 const STILL = 'motion-reduce:animate-breathe';
 
 function Ring() {
+  // The arc fades from its head back along its tail, so it reads as a sweep, not a stamped dash.
+  const gradient = useId();
   return (
     <svg viewBox="0 0 24 24" fill="none" className={cn('size-full animate-spin', STILL)}>
+      <defs>
+        <linearGradient id={gradient} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="currentColor" stopOpacity="0.35" />
+          <stop offset="1" stopColor="currentColor" />
+        </linearGradient>
+      </defs>
       <circle
         cx="12"
         cy="12"
         r="9.5"
         stroke="currentColor"
         strokeWidth="2.5"
-        className="opacity-20"
+        className="opacity-15"
       />
       <circle
         cx="12"
         cy="12"
         r="9.5"
-        stroke="currentColor"
+        stroke={`url(#${gradient})`}
         strokeWidth="2.5"
         strokeLinecap="round"
         pathLength={100}
@@ -234,7 +243,7 @@ export function LoadingOverlay({
     <div
       data-slot="loading-overlay"
       className={cn(
-        'inset-0 z-40 flex items-center justify-center bg-surface/70',
+        'inset-0 z-40 flex items-center justify-center bg-surface/85',
         fullPage ? 'fixed bg-surface-canvas/80' : 'absolute',
         'transition-opacity duration-slow ease-enter delay-(--rx-motion-duration-slow) starting:opacity-0',
         className,

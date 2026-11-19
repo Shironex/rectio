@@ -364,7 +364,7 @@ export function SkeletonChart({
             <path
               d={curve}
               fill="none"
-              strokeWidth={3}
+              strokeWidth={2}
               strokeLinecap="round"
               vectorEffect="non-scaling-stroke"
               className="stroke-line-strong"
