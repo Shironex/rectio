@@ -114,9 +114,10 @@ export default tseslint.config(
     files: ['apps/**/*.{ts,tsx}'],
     rules: {
       // `@rectio/blocks/motion` is a declared entry: each block's motioned twin, picked by import path.
+      // `@rectio/blocks/marketing` (and its `/motion`) is the declared entry of the marketing group.
       'noctcore-monorepo/no-deep-package-imports': [
         'error',
-        { scopes: ['@rectio'], allowedSubpaths: ['motion'] },
+        { scopes: ['@rectio'], allowedSubpaths: ['motion', 'marketing', 'marketing/motion'] },
       ],
     },
   },

@@ -13,7 +13,8 @@ export function readView(search: string) {
   const theme = THEMES.find((t) => t.id === params.get('theme'))?.id ?? 'default';
   const mode = MODES.find((m) => m === params.get('mode')) ?? 'light';
   const view =
-    (['app', 'motion', 'blocks'] as const).find((v) => v === params.get('view')) ?? 'matrix';
+    (['app', 'motion', 'blocks', 'marketing'] as const).find((v) => v === params.get('view')) ??
+    'matrix';
   const motion = params.get('motion') === 'on';
   return { theme, mode, view, motion } as const;
 }
