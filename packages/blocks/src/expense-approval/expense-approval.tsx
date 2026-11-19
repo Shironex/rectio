@@ -373,14 +373,10 @@ function Decide({
   const name = `${request.merchant}, ${request.employee}`;
   return (
     <span className="flex items-center justify-end gap-2 pointer-coarse:gap-3">
-      <Button
-        variant="secondary"
-        size="sm"
-        iconOnly
-        aria-label={`Reject ${name}`}
-        onClick={onReject}
-      >
+      {/* Named in words: a bare cross reads as dismiss, and rejecting asks for a reason. */}
+      <Button variant="ghost" size="sm" aria-label={`Reject ${name}`} onClick={onReject}>
         <XIcon aria-hidden weight="bold" className="size-3.5" />
+        Reject
       </Button>
       <Button variant="secondary" size="sm" aria-label={`Approve ${name}`} onClick={onApprove}>
         <CheckIcon aria-hidden weight="bold" className="size-3.5" />
