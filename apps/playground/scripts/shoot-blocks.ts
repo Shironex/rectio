@@ -42,7 +42,26 @@ const BLOCKS = [
 ] as const;
 
 /** The SaaS blocks, shot as `saas-<block>-...`; `shoot:blocks <n> saas` takes only these. */
-const SAAS_BLOCKS = ['sign-in', 'team-members'] as const;
+const SAAS_BLOCKS = [
+  'sign-in',
+  'sign-up',
+  'two-factor',
+  'reset-password',
+  'profile-settings',
+  'team-members',
+  'billing',
+  'api-keys',
+  'notification-preferences',
+  'pricing-table',
+  'onboarding-checklist',
+  'activity-feed',
+  'notifications-center',
+  'changelog',
+  'users-table',
+  'kanban-board',
+  'comment-thread',
+  'file-manager',
+] as const;
 
 const wanted = (name: string) => only === undefined || name.includes(only);
 
