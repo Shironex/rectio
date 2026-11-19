@@ -9,6 +9,7 @@ import {
   DialogTrigger,
   SelectContent,
   SelectItem,
+  ToastProvider,
 } from '@rectio/motion';
 import {
   Badge,
@@ -27,7 +28,6 @@ import {
   Money,
   Select,
   SelectTrigger,
-  ToastProvider,
   cn,
   useToast,
   type DateRange,
