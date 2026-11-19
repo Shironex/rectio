@@ -5,8 +5,11 @@ import { CaretDownIcon, SidebarSimpleIcon } from '@phosphor-icons/react';
 import {
   createContext,
   use,
+  useCallback,
   useId,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
   type ComponentProps,
@@ -94,24 +97,25 @@ export function SidebarProvider({
   const mobile = useIsMobileLayout();
   const collapsed = collapsedProp ?? collapsedState;
 
-  const value = useMemo<SidebarState>(() => {
-    const setCollapsed = (next: boolean) => {
-      if (collapsedProp === undefined) setCollapsedState(next);
-      onCollapsedChange?.(next);
-    };
-    return {
-      collapsed,
-      setCollapsed,
-      mobile,
-      mobileOpen,
-      setMobileOpen,
-      toggle: () => {
-        if (mobile) setMobileOpen((open) => !open);
-        else setCollapsed(!collapsed);
-      },
-      shortcut,
-    };
-  }, [collapsed, collapsedProp, mobile, mobileOpen, onCollapsedChange, shortcut]);
+  // The latest callback and state, read when called: the context keeps one identity, so items do
+  // not render again each time the parent passes a new inline handler.
+  const latest = useRef({ collapsed, collapsedProp, mobile, onCollapsedChange });
+  useLayoutEffect(() => {
+    latest.current = { collapsed, collapsedProp, mobile, onCollapsedChange };
+  });
+  const setCollapsed = useCallback((next: boolean) => {
+    if (latest.current.collapsedProp === undefined) setCollapsedState(next);
+    latest.current.onCollapsedChange?.(next);
+  }, []);
+  const toggle = useCallback(() => {
+    if (latest.current.mobile) setMobileOpen((open) => !open);
+    else setCollapsed(!latest.current.collapsed);
+  }, [setCollapsed]);
+
+  const value = useMemo<SidebarState>(
+    () => ({ collapsed, setCollapsed, mobile, mobileOpen, setMobileOpen, toggle, shortcut }),
+    [collapsed, setCollapsed, mobile, mobileOpen, toggle, shortcut],
+  );
 
   useShortcut(
     shortcut,
@@ -473,7 +477,7 @@ export function SidebarSubmenu({
           <CaretDownIcon
             aria-hidden
             weight="bold"
-            className="size-3 shrink-0 text-fg-subtle transition-transform duration-fast ease-standard group-data-panel-open/item:rotate-180"
+            className="size-3 shrink-0 text-fg-subtle transition-transform duration-fast ease-standard group-data-panel-open/item:rotate-180 motion-reduce:transition-none"
           />
         </Collapsible.Trigger>
         <Collapsible.Panel>
