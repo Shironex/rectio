@@ -407,6 +407,18 @@
         "unit": "ms"
       }
     },
+    "40000": {
+      "$value": {
+        "value": 40000,
+        "unit": "ms"
+      }
+    },
+    "48000": {
+      "$value": {
+        "value": 48000,
+        "unit": "ms"
+      }
+    },
     "$type": "duration"
   },
   "easing": {

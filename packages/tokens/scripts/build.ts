@@ -197,6 +197,7 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   add('--spacing', '--rx-space-unit');
 
   map.push('--animate-spin: rx-spin var(--rx-motion-duration-loop) linear infinite;');
+  map.push('--animate-marquee: rx-marquee var(--rx-motion-duration-marquee) linear infinite;');
 
   const durations = ['fast', 'base', 'slow', 'reveal'].map(
     (d) => `@utility duration-${d} {\n  transition-duration: var(--rx-motion-duration-${d});\n}`,
@@ -228,6 +229,13 @@ ${resets.map((r) => `  ${r}`).join('\n')}
   @keyframes rx-spin {
     to {
       transform: rotate(360deg);
+    }
+  }
+
+  /* A strip drawn twice end to end: half its width is one full pass. */
+  @keyframes rx-marquee {
+    to {
+      transform: translateX(-50%);
     }
   }
 }
