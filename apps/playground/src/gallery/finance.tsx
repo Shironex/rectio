@@ -247,7 +247,7 @@ export function DataTableSection() {
         </div>
       </Row>
       <Row label="Loading">
-        <Invoices loading />
+        <Invoices data={[]} loading />
       </Row>
       <Row label="Empty">
         <Invoices data={[]} />

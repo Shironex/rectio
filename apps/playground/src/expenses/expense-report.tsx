@@ -269,8 +269,7 @@ function Report() {
               <p className="text-sm text-fg-muted">
                 {selected.length} selected,{' '}
                 <Money amount={sum(claimed(selected))} currency={CURRENCY} locale={LOCALE} />
-                {/* Phones keep the short form, so the bar stays one line beside Remove. */}
-                <span className="hidden sm:inline">
+                <span>
                   {' '}
                   counted
                   {selected.length > claimed(selected).length &&
