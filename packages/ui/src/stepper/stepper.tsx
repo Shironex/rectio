@@ -37,6 +37,8 @@ export interface StepperProps extends Omit<ComponentProps<'ol'>, 'onSelect'> {
    * Makes completed steps buttons that go back to that step. Upcoming steps stay plain text, so
    * the order of the flow holds.
    */
+  /** The visible "Step 3 of 4" line on a narrow row; translate it here. */
+  summary?: ((step: number, total: number) => ReactNode) | undefined;
   onStepSelect?: ((index: number) => void) | undefined;
 }
 
@@ -56,6 +58,7 @@ export function Stepper({
   orientation = 'horizontal',
   label = 'Progress',
   onStepSelect,
+  summary = (step, total) => `Step ${String(step)} of ${String(total)}`,
   className,
   ...props
 }: StepperProps) {
@@ -188,6 +191,15 @@ export function Stepper({
           );
         })}
       </ol>
+      {!vertical && (
+        // On a narrow row the other titles hide, so say where this step sits in words that show.
+        <p
+          aria-hidden
+          className="mt-3 hidden text-center text-xs text-fg-muted numeric @max-lg:block"
+        >
+          {summary(Math.min(current + 1, steps.length), steps.length)}
+        </p>
+      )}
     </div>
   );
 }

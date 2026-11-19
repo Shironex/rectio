@@ -7,12 +7,12 @@ export type EmptyStateSize = 'sm' | 'md' | 'lg';
 const SIZES: Record<EmptyStateSize, { box: string; title: string; icon: string }> = {
   sm: { box: 'gap-1 px-4 py-8', title: 'text-sm', icon: 'size-8 [&_svg]:size-4' },
   md: {
-    box: 'gap-2 px-6 py-12',
+    box: 'gap-2 px-6 py-10',
     title: 'text-lg font-display tracking-tight',
     icon: 'size-11 [&_svg]:size-5',
   },
   lg: {
-    box: 'gap-3 px-8 py-16',
+    box: 'gap-3 px-8 py-12',
     title: 'text-xl font-display tracking-tight',
     icon: 'size-14 [&_svg]:size-6',
   },

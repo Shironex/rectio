@@ -130,7 +130,7 @@ export function Meter({
                 pathLength={100}
                 strokeWidth={8}
                 strokeLinecap="round"
-                className="stroke-surface-sunken"
+                className="stroke-surface-placeholder"
               />
               <path
                 d={ARC}
@@ -144,8 +144,9 @@ export function Meter({
                 className={cn(RING_TONE[resolved], ringMotion)}
               />
               {ticks.map((t) => {
-                const inner = arcPoint(t, 34);
-                const outer = arcPoint(t, 50);
+                // A notch just outside the track, like the marks on a dial.
+                const inner = arcPoint(t, 48.5);
+                const outer = arcPoint(t, 53);
                 return (
                   <line
                     key={t}
@@ -154,6 +155,7 @@ export function Meter({
                     x2={outer.x}
                     y2={outer.y}
                     strokeWidth={1.5}
+                    strokeLinecap="round"
                     className="stroke-fg-subtle"
                   />
                 );
@@ -167,7 +169,7 @@ export function Meter({
             </span>
           </span>
           {words !== undefined && (
-            <span aria-hidden className={cn('text-xs font-medium', LEVEL_TEXT[level])}>
+            <span aria-hidden className={cn('text-sm font-medium', LEVEL_TEXT[level])}>
               {words}
             </span>
           )}
@@ -186,7 +188,7 @@ export function Meter({
               <BaseMeter.Value className="text-fg-muted numeric" />
             </span>
           </div>
-          <BaseMeter.Track className="relative h-2 w-full rounded-full bg-surface-sunken">
+          <BaseMeter.Track className="relative h-2 w-full rounded-full bg-surface-placeholder">
             <span className="absolute inset-0 overflow-hidden rounded-full">
               <span
                 data-part="fill"
@@ -202,7 +204,7 @@ export function Meter({
               <span
                 key={t}
                 aria-hidden
-                className="absolute -inset-y-1 w-px bg-fg-subtle"
+                className="absolute -inset-y-1 w-0.5 -translate-x-1/2 rounded-full bg-fg-subtle"
                 style={{ insetInlineStart: `${String(t * 100)}%` }}
               />
             ))}

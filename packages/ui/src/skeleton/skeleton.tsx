@@ -40,7 +40,7 @@ export function Skeleton({
       data-slot="skeleton"
       data-animation={animation}
       className={cn(
-        'relative block overflow-hidden rounded-control bg-surface-sunken',
+        'relative block overflow-hidden rounded-control bg-surface-placeholder',
         animation === 'pulse' && 'animate-breathe motion-reduce:animate-none',
         className,
       )}
@@ -51,7 +51,7 @@ export function Skeleton({
         <span
           className={cn(
             'absolute inset-0 -translate-x-full animate-shimmer motion-reduce:hidden',
-            'bg-linear-to-r from-transparent via-surface-raised to-transparent opacity-70',
+            'bg-linear-to-r from-transparent from-10% via-surface-placeholder-shine via-50% to-transparent to-90% opacity-80',
           )}
           style={wave(index)}
         />
@@ -339,10 +339,16 @@ export function SkeletonChart({
             viewBox={`0 0 ${String((points - 1) * 10)} 100`}
             preserveAspectRatio="none"
             className={cn(
-              'absolute inset-0 size-full overflow-visible text-surface-sunken',
+              'absolute inset-0 size-full overflow-visible text-surface-placeholder',
               animation !== 'none' && 'animate-breathe motion-reduce:animate-none',
             )}
           >
+            {/* A faint area under the line gives the placeholder the weight of a filled chart. */}
+            <polygon
+              points={`0,100 ${values.map((v, i) => `${String(i * 10)},${String(100 - v)}`).join(' ')} ${String((points - 1) * 10)},100`}
+              fill="currentColor"
+              fillOpacity={0.4}
+            />
             <polyline
               points={values.map((v, i) => `${String(i * 10)},${String(100 - v)}`).join(' ')}
               fill="none"

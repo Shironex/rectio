@@ -11,10 +11,15 @@ import {
 import { cn } from '../lib/cn';
 
 export type SpinnerVariant = 'ring' | 'dots' | 'bars' | 'pulse' | 'orbit';
-export type SpinnerSize = 'sm' | 'md' | 'lg';
+export type SpinnerSize = 'sm' | 'md' | 'lg' | 'xl';
 export type SpinnerTone = 'accent' | 'current' | 'muted';
 
-const SIZES: Record<SpinnerSize, string> = { sm: 'size-4', md: 'size-6', lg: 'size-10' };
+const SIZES: Record<SpinnerSize, string> = {
+  sm: 'size-4',
+  md: 'size-6',
+  lg: 'size-10',
+  xl: 'size-16',
+};
 const TONES: Record<SpinnerTone, string> = {
   accent: 'text-accent-strong',
   current: 'text-current',
@@ -101,13 +106,29 @@ function Pulse() {
   );
 }
 
+/** The comet's tail: dots trailing the head, each smaller and fainter. */
+const TAIL = [
+  { turn: '-rotate-24', dot: 'size-1/5 opacity-55' },
+  { turn: '-rotate-48', dot: 'size-1/7 opacity-30' },
+  { turn: '-rotate-72', dot: 'size-1/10 opacity-15' },
+];
+
 function Orbit() {
   return (
     <span className="relative flex size-full">
-      <span className="absolute inset-1/8 rounded-full border border-current opacity-25" />
+      <span className="absolute inset-1/8 rounded-full border border-current opacity-30" />
       <span className={cn('absolute inset-0 animate-orbit', STILL)}>
         <span className="absolute top-0 left-1/2 size-1/4 -translate-x-1/2 rounded-full bg-current" />
-        <span className="absolute bottom-1/16 left-1/2 size-1/6 -translate-x-1/2 rounded-full bg-current opacity-60" />
+        {TAIL.map(({ turn, dot }) => (
+          <span key={turn} className={cn('absolute inset-0', turn)}>
+            <span
+              className={cn(
+                'absolute top-1/32 left-1/2 -translate-x-1/2 rounded-full bg-current',
+                dot,
+              )}
+            />
+          </span>
+        ))}
       </span>
     </span>
   );
@@ -202,15 +223,22 @@ export function LoadingOverlay({
     <div
       data-slot="loading-overlay"
       className={cn(
-        'inset-0 z-40 flex items-center justify-center bg-surface/75',
+        'inset-0 z-40 flex items-center justify-center bg-surface/90',
         fullPage ? 'fixed bg-surface-canvas/80' : 'absolute',
         'transition-opacity duration-slow ease-enter delay-(--rx-motion-duration-slow) starting:opacity-0',
         className,
       )}
       {...props}
     >
-      <div className="flex flex-col items-center gap-3 rounded-panel border border-line bg-surface-overlay px-6 py-5 shadow-overlay">
-        <Spinner variant={variant} size="lg" label={label} />
+      {/* A section keeps its own frame under a scrim; only the page gets a panel to hold the eye. */}
+      <div
+        className={cn(
+          'flex flex-col items-center gap-3',
+          fullPage &&
+            'rounded-panel border border-line bg-surface-overlay px-6 py-5 shadow-overlay',
+        )}
+      >
+        <Spinner variant={variant} size={fullPage ? 'lg' : 'md'} label={label} />
         <span aria-hidden className="text-sm font-medium text-fg">
           {label}
         </span>

@@ -87,7 +87,7 @@ export function Progress({
       {count === null ? (
         <BaseProgress.Track
           className={cn(
-            'relative w-full overflow-hidden rounded-full bg-surface-sunken',
+            'relative w-full overflow-hidden rounded-full bg-surface-placeholder',
             HEIGHTS[size],
           )}
         >
@@ -123,7 +123,7 @@ export function Progress({
                 key={i}
                 data-slot="progress-segment"
                 data-filled={part === 1 || undefined}
-                className="relative flex-1 overflow-hidden rounded-full bg-surface-sunken"
+                className="relative flex-1 overflow-hidden rounded-full bg-surface-placeholder"
               >
                 <span
                   data-part="fill"

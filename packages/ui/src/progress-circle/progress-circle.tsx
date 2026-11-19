@@ -91,7 +91,13 @@ export function ProgressCircle({
             share === null && 'animate-spin motion-reduce:animate-breathe',
           )}
         >
-          <circle cx="20" cy="20" r={r} strokeWidth={stroke} className="stroke-surface-sunken" />
+          <circle
+            cx="20"
+            cy="20"
+            r={r}
+            strokeWidth={stroke}
+            className="stroke-surface-placeholder"
+          />
           <circle
             cx="20"
             cy="20"
