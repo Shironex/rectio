@@ -1,0 +1,70 @@
+---
+title: Sign in
+description: 'Email and password, an emailed link, your provider buttons and errors tied to their fields.'
+pro: true
+---
+
+import SignInDemo from '@/demos/sign-in';
+import SignInMotionDemo from '@/demos/sign-in.motion';
+
+<Preview
+  name="sign-in"
+  plain={<SignInDemo />}
+  motion={<SignInMotionDemo />}
+  importLine="import { SignIn } from '@rectio/blocks/motion';"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add sign-in
+```
+
+The motion variant is `motion-sign-in`. It installs the plain block too and changes only how the
+block enters.
+
+## Usage
+
+The block holds only what is typed. It checks the fields on submit and calls `onSubmit` with valid
+values; your app signs in, sets `pending` while it waits and passes the refusal back as `error`.
+With `onMagicLink`, a second button switches the form to a passwordless link, and
+`magicLinkSentTo` turns the form into a check-your-inbox note.
+
+Provider buttons go in the `social` slot. `SocialButton` draws one at the form's width; pass your
+provider's own mark as its `icon`.
+
+## Props
+
+<TypeTable
+  type={{
+    onSubmit: { type: '(values: SignInValues) => void', description: 'email, password, remember.' },
+    onMagicLink: { type: '(email: string) => void' },
+    social: { type: 'ReactNode', description: 'Provider buttons above the email form.' },
+    pending: { type: 'boolean', default: 'false' },
+    error: { type: 'ReactNode', description: 'Why the server refused, above the form.' },
+    magicLinkSentTo: { type: 'string' },
+    forgotPassword: { type: 'string | (() => void)', description: 'A URL or a handler.' },
+    signUp: { type: 'string | (() => void)' },
+    defaultEmail: { type: 'string' },
+    brand: { type: 'ReactNode', description: 'Your mark, above the heading.' },
+    title: { type: 'ReactNode', default: "'Sign in'" },
+    description: { type: 'ReactNode' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`signInErrors` returns the message per field, so a server can answer with the same words. It
+checks the password for presence only: its rules belong to sign up.
+
+## Accessibility
+
+- Errors appear after the first submit, under their field and tied to it; a server refusal is announced at once.
+- The email and password fields carry `autocomplete` purposes, so password managers fill and save them.
+- The show password button says what it will do and is reachable after the field.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

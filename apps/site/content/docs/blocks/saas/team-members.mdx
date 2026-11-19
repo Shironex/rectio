@@ -1,0 +1,74 @@
+---
+title: Team members
+description: 'Members and their roles, pending invites with resend and revoke, and an invite form.'
+pro: true
+---
+
+import TeamMembersDemo from '@/demos/team-members';
+import TeamMembersMotionDemo from '@/demos/team-members.motion';
+
+<Preview
+  name="team-members"
+  plain={<TeamMembersDemo />}
+  motion={<TeamMembersMotionDemo />}
+  importLine="import { TeamMembers } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add team-members
+```
+
+The motion variant is `motion-team-members`. It installs the plain block too; members and invites
+arrive and leave in place.
+
+## Usage
+
+Pass the members, the pending invites and the role of the person looking. The block offers only
+what that role may do: owners hand out any role, admins up to admin, members and viewers see the
+list. Nobody can change themselves or remove the last owner. Removing someone asks first, in a
+dialog that names them.
+
+The invite form takes pasted addresses separated by commas, spaces or new lines, sets aside the
+ones already on the team, and refuses more invites than the plan has seats.
+
+## Props
+
+<TypeTable
+  type={{
+    members: {
+      type: 'readonly TeamMember[]',
+      description: 'id, name, email, role, optional avatarUrl, lastActive and you.',
+    },
+    invites: { type: 'readonly PendingInvite[]', default: '[]' },
+    currentRole: { type: "'owner' | 'admin' | 'member' | 'viewer'" },
+    seats: { type: 'number', description: 'Seats on the plan; omit for no limit.' },
+    onInvite: { type: '(emails: string[], role: TeamRole) => void' },
+    onChangeRole: { type: '(memberId: string, role: TeamRole) => void' },
+    onRemove: { type: '(memberId: string) => void', description: 'Asked to confirm first.' },
+    onResendInvite: { type: '(inviteId: string) => void' },
+    onRevokeInvite: { type: '(inviteId: string) => void' },
+    now: { type: 'Date', description: 'The moment "last active" is measured from.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: "'Team members'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+The role rules are exported and tested on their own, so a server can enforce the same ones:
+`canManage`, `assignableRoles`, `parseInviteEmails`, `inviteError`, `seatUsage` and `sortMembers`.
+
+## Accessibility
+
+- Every role select, menu and button names the person or the address it acts on.
+- The row menu works with arrow keys, Enter and Escape, and returns focus to its button.
+- Invite errors are tied to the field and say which addresses to check.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity and renders the plain block under reduced motion.

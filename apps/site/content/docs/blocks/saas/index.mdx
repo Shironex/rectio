@@ -1,0 +1,27 @@
+---
+title: SaaS blocks
+description: 'Account, team, billing and workspace screens composed from rectio components.'
+pro: true
+---
+
+The SaaS blocks are the screens every app account area ends up writing by hand: signing in,
+inviting a team, paying for a plan, managing keys and keeping people informed. They are built the
+same way as the finance blocks: data-agnostic (typed props in, callbacks out, no fetching), their
+rules exported and tested on their own, and a motion variant with the same props, picked by import
+path:
+
+```tsx
+import { TeamMembers } from '@rectio/blocks'; // plain
+import { TeamMembers } from '@rectio/blocks/motion'; // enters once, items arrive and leave in place
+```
+
+They install under `@blocks/saas/`, beside the shared `saas-core` (the account form frame, the
+email and password rules, relative time and sizes).
+
+| Block                                          | What it answers                       |
+| ---------------------------------------------- | ------------------------------------- |
+| [Sign in](/docs/blocks/saas/sign-in)           | How do I get back into my account?    |
+| [Team members](/docs/blocks/saas/team-members) | Who is on the team, and in what role? |
+
+Every block follows the theme, mode and density of its scope, and installs the free components it
+renders.
