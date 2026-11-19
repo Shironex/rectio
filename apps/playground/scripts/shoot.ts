@@ -1,7 +1,8 @@
 /**
  * Headless screenshots of the playground for a design round: `pnpm shoot <round>`.
  * Writes to .rounds/round-<n>/ at the repo root (gitignored). Starts its own Vite server, never
- * touches the screen, and prints browser checks (tabular figures, dialog focus trap).
+ * touches the screen, and prints browser checks (tabular figures, dialog focus trap, sort
+ * announcement, calendar focus, reduced motion, phone overflow).
  */
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -54,7 +55,7 @@ async function tabularCheck(page: Page) {
 }
 
 async function focusTrapCheck(page: Page) {
-  const dialog = page.getByRole('dialog');
+  const dialog = page.getByRole('dialog', { name: 'Add expense' });
   for (let i = 0; i < 8; i += 1) {
     await page.keyboard.press('Tab');
     // Base UI wraps focus through guard elements; let the redirect land before sampling.
@@ -96,8 +97,27 @@ try {
       await settle(app);
       await app.screenshot({ path: join(out, `app-${name}.png`) });
 
+      // Table: sort by amount from the keyboard, select two rows, open the period picker.
+      await app.getByRole('button', { name: /^Amount/ }).focus();
+      await app.keyboard.press('Enter');
+      await settle(app);
+      if (theme === 'default' && mode === 'light')
+        console.log('sort announcement', await app.getByRole('status').first().textContent());
+      await app.getByRole('checkbox', { name: /^Select Linear/ }).click();
+      await app.getByRole('checkbox', { name: /^Select Hotel Bristol, 4 Mar/ }).click();
+      await settle(app);
+      await app.screenshot({ path: join(out, `table-selected-${name}.png`) });
+      await app.getByRole('checkbox', { name: 'Select all expenses' }).click();
+      await app.getByRole('checkbox', { name: 'Select all expenses' }).click();
+      await app.getByRole('button', { name: /^Period/ }).click();
+      await app.getByRole('grid').first().waitFor();
+      await settle(app);
+      await app.screenshot({ path: join(out, `period-${name}.png`) });
+      await app.keyboard.press('Escape');
+      await app.getByRole('grid').first().waitFor({ state: 'detached' });
+
       await app.getByRole('button', { name: 'Add expense' }).click();
-      await app.getByRole('dialog').waitFor();
+      await app.getByRole('dialog', { name: 'Add expense' }).waitFor();
       await settle(app);
       await app.screenshot({ path: join(out, `dialog-${name}.png`) });
       if (theme === 'default' && mode === 'light')
@@ -106,6 +126,20 @@ try {
       await app.getByRole('button', { name: 'Save expense' }).click();
       await settle(app);
       await app.screenshot({ path: join(out, `dialog-errors-${name}.png`) });
+
+      // Date field: open the calendar from its button; focus lands on the chosen day.
+      await app.getByRole('button', { name: /^Choose date/ }).click();
+      await app.getByRole('grid').waitFor();
+      await settle(app);
+      await app.screenshot({ path: join(out, `datepicker-${name}.png`) });
+      if (theme === 'default' && mode === 'light')
+        console.log(
+          'calendar focus',
+          await app.evaluate(() => document.activeElement?.getAttribute('aria-label')),
+        );
+      await app.keyboard.press('ArrowLeft');
+      await app.keyboard.press('Enter');
+      await app.getByRole('grid').waitFor({ state: 'detached' });
 
       await app.getByRole('textbox', { name: 'Merchant' }).fill('Deutsche Bahn');
       await app.getByRole('textbox', { name: 'Amount, EUR' }).fill('129.40');
@@ -127,12 +161,31 @@ try {
       await app.getByRole('combobox', { name: 'Category' }).click();
       await app.getByRole('option', { name: 'Rail' }).click();
       await app.getByRole('textbox', { name: 'Merchant' }).press('ControlOrMeta+Enter');
-      await app.getByRole('dialog').waitFor({ state: 'detached' });
+      await app.getByRole('dialog', { name: 'Add expense' }).waitFor({ state: 'detached' });
+      await app.getByText('Expense added').waitFor();
       await settle(app);
       await app.screenshot({ path: join(out, `saved-${name}.png`) });
       await app.close();
     }
   }
+  // Reduced motion: popups and toasts keep their fade but do not travel.
+  const calm = await browser.newPage({
+    viewport: { width: 1280, height: 860 },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  });
+  await calm.goto(`${base}?view=app`);
+  await settle(calm);
+  console.log(
+    'reduced motion shift',
+    await calm.evaluate(() =>
+      getComputedStyle(document.querySelector('[data-theme]') ?? document.body).getPropertyValue(
+        '--rx-motion-distance-shift',
+      ),
+    ),
+  );
+  await calm.close();
+
   // Phone width: no sideways scroll, and the dialog still fits.
   const phone = await browser.newPage({
     viewport: { width: 390, height: 844 },
@@ -146,9 +199,13 @@ try {
   console.log('phone horizontal overflow px', overflow);
   await phone.screenshot({ path: join(out, 'phone-app.png'), fullPage: true });
   await phone.getByRole('button', { name: 'Add expense' }).click();
-  await phone.getByRole('dialog').waitFor();
+  await phone.getByRole('dialog', { name: 'Add expense' }).waitFor();
   await settle(phone);
   await phone.screenshot({ path: join(out, 'phone-dialog.png') });
+  await phone.getByRole('button', { name: /^Choose date/ }).click();
+  await phone.getByRole('grid').waitFor();
+  await settle(phone);
+  await phone.screenshot({ path: join(out, 'phone-datepicker.png') });
   await phone.close();
 
   console.log(`screenshots in ${out}`);
