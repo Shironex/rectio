@@ -14,6 +14,12 @@
           "value": 0,
           "unit": "px"
         }
+      },
+      "origin": {
+        "$value": {
+          "value": 0,
+          "unit": "px"
+        }
       }
     },
     "scale": {
@@ -22,6 +28,9 @@
         "$value": 1
       },
       "press": {
+        "$value": 1
+      },
+      "origin": {
         "$value": 1
       }
     }

@@ -166,7 +166,7 @@
         "$description": "One turn of a looping indicator such as a spinner."
       },
       "count": {
-        "$value": "{duration.640}",
+        "$value": "{duration.480}",
         "$description": "A figure counting to its new value, such as a total. The one long movement: it is the signature moment."
       }
     },
@@ -182,8 +182,8 @@
         "$value": "{easing.in-cubic}"
       },
       "settle": {
-        "$value": "{easing.out-expo}",
-        "$description": "Decelerates hard at the end, so a counting figure settles instead of stopping."
+        "$value": "{easing.out-quart}",
+        "$description": "Eases out evenly to a soft stop, so a counting figure settles without crawling through its last cents."
       }
     },
     "distance": {
@@ -195,6 +195,10 @@
       "tick": {
         "$value": "{size.2}",
         "$description": "How far an amount nudges in the direction of a change. Zero under reduced motion."
+      },
+      "origin": {
+        "$value": "{size.32}",
+        "$description": "How far a dialog leans in from its trigger as it opens. Zero under reduced motion."
       }
     },
     "scale": {
@@ -206,6 +210,10 @@
       "press": {
         "$value": 0.98,
         "$description": "Scale of a pressed button. One under reduced motion."
+      },
+      "origin": {
+        "$value": 0.92,
+        "$description": "Scale a dialog grows from as it leaves its trigger. One under reduced motion."
       }
     },
     "spring": {
@@ -225,15 +233,15 @@
       },
       "overlay": {
         "stiffness": {
-          "$value": 420
+          "$value": 680
         },
         "damping": {
-          "$value": 41
+          "$value": 52
         },
         "mass": {
           "$value": 1
         },
-        "$description": "A dialog travelling from its trigger, and back on close."
+        "$description": "A dialog leaning out of its trigger, and back on close."
       }
     }
   }
