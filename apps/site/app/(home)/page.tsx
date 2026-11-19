@@ -48,7 +48,10 @@ export default function Home() {
                   'Integrity checked',
                   'Every item is hashed; add stops before writing if anything is off.',
                 ],
-                ['Edits respected', 'A file you changed is never overwritten without --overwrite.'],
+                [
+                  'Edits respected',
+                  'A file you changed is never overwritten unless you pass the overwrite flag.',
+                ],
                 ['Agents included', 'rectio mcp lets a coding agent read items, tokens and docs.'],
               ].map(([term, text], i) => (
                 <div

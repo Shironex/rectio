@@ -42,7 +42,10 @@ function Panel({ kind }: { kind: keyof typeof KITS }) {
     <div className="flex flex-col overflow-hidden rounded-panel border border-line bg-surface">
       <div className="flex items-center justify-between gap-3 border-b border-line bg-surface-sunken px-5 py-3">
         <code className="truncate font-mono text-sm text-fg">
-          {'import { Button, Money } from '}
+          {'import '}
+          <span className="hidden sm:inline">{'{ Button, Money } '}</span>
+          <span className="sm:hidden">{'{ … } '}</span>
+          {'from '}
           <span className="text-accent-strong">{`'${source}'`}</span>
         </code>
         {kind === 'motion' && <ProBadge />}

@@ -56,7 +56,7 @@ export function ThemeShowcase({ values }: { values: Readout }) {
               key={item.token}
               className="flex items-center justify-between gap-4 border-b border-line py-3 last:border-b-0"
             >
-              <dt className="flex flex-col">
+              <dt className="flex min-w-0 flex-col">
                 <span className="text-sm text-fg">{item.label}</span>
                 <span className="font-mono text-xs text-fg-subtle">{item.token}</span>
               </dt>
@@ -67,7 +67,7 @@ export function ThemeShowcase({ values }: { values: Readout }) {
                     className={`size-4 shrink-0 rounded-badge border border-line-strong ${item.swatch}`}
                   />
                 )}
-                <span className="text-pretty break-words">{shown?.[item.token] ?? ''}</span>
+                <span className="whitespace-nowrap">{shown?.[item.token] ?? ''}</span>
               </dd>
             </div>
           ))}

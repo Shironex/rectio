@@ -8,7 +8,6 @@ const TIERS = [
     who: 'One developer',
     terms: '12 months of updates',
     features: ['Motion add-on', 'Theme packs as they ship', 'Pro finance blocks as they ship'],
-    cta: 'Start with the free tier',
   },
   {
     name: 'Lifetime',
@@ -16,7 +15,6 @@ const TIERS = [
     who: 'One developer',
     terms: 'Updates for as long as rectio ships them',
     features: ['Everything in Solo', 'Every future Pro release', 'One payment, no renewal'],
-    cta: 'Start with the free tier',
     recommended: true,
   },
   {
@@ -25,7 +23,6 @@ const TIERS = [
     who: 'Five developers',
     terms: 'One license for the team',
     features: ['Everything in Solo', 'Five developer seats', 'One invoice'],
-    cta: 'Start with the free tier',
   },
 ] as const;
 
@@ -57,7 +54,7 @@ export function Pricing() {
             <article
               key={tier.name}
               aria-labelledby={`tier-${tier.name}`}
-              className={`site-reveal ${i === 0 ? '' : i === 1 ? 'site-step-1' : 'site-step-2'} flex flex-col gap-6 rounded-panel border bg-surface p-6 sm:p-7 ${recommended ? 'border-accent shadow-overlay' : 'border-line'}`}
+              className={`site-reveal ${i === 0 ? '' : i === 1 ? 'site-step-1' : 'site-step-2'} flex flex-col gap-6 rounded-panel border bg-surface p-6 sm:p-7 ${recommended ? 'border-accent shadow-overlay max-md:order-first' : 'border-line'}`}
             >
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between gap-3">
@@ -93,16 +90,15 @@ export function Pricing() {
                 href="/docs/installation"
                 className={`${ACTION} mt-auto ${recommended ? 'bg-accent text-accent-contrast shadow-raised pointer-fine:hover:bg-accent-hover' : 'border border-line bg-surface-raised text-fg shadow-raised pointer-fine:hover:bg-surface-hover'}`}
               >
-                {tier.cta}
-                <span className="sr-only">, {tier.name} at launch</span>
+                Get {tier.name}
               </Link>
             </article>
           );
         })}
       </div>
       <p className="site-reveal text-sm text-fg-muted">
-        One-time prices in US dollars, per developer. Checkout opens at launch; until then every
-        tier starts from the free install.
+        One-time prices in US dollars, per developer. Checkout opens at launch; until then the
+        buttons lead to the free install.
       </p>
     </div>
   );

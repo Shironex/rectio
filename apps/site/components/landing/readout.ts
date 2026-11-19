@@ -4,7 +4,7 @@ export const READOUT = [
   { token: '--rx-radius-control', label: 'Control corner', format: 'raw' },
   { token: '--rx-accent', label: 'Accent', format: 'colour', swatch: 'bg-accent' },
   { token: '--rx-surface-canvas', label: 'Canvas', format: 'colour', swatch: 'bg-surface-canvas' },
-  { token: '--rx-motion-duration-count', label: 'Total count', format: 'raw' },
+  { token: '--rx-motion-duration-count', label: 'Count-up duration', format: 'raw' },
 ] as const;
 
 export type ReadoutToken = (typeof READOUT)[number]['token'];

@@ -257,7 +257,7 @@ export function Bento() {
         <Cell
           title="Currency is never implied"
           note="Every figure carries its currency, a true minus sign and tabular digits."
-          className="bg-accent-subtle lg:col-span-5"
+          className="bg-surface-sunken lg:col-span-5"
           step="site-step-1"
         >
           <MoneyFormats />
@@ -272,7 +272,7 @@ export function Bento() {
         <Cell
           title="States in words"
           note="Colour reinforces, never carries: every status reads without it."
-          className="bg-surface-sunken lg:col-span-3"
+          className="bg-surface lg:col-span-3"
           step="site-step-1"
         >
           <Statuses />
