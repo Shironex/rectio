@@ -132,8 +132,9 @@ export function LegalPage({
 
   return (
     <article aria-labelledby={titleId} className={cn('py-12 text-fg sm:py-16', className)}>
-      <Container width="wide">
-        <header className="flex max-w-3xl flex-col gap-4 border-b border-line pb-10">
+      {/* One grid for the page: the header and the text share a left edge, the contents sit beside them. */}
+      <Container width="wide" className="grid gap-x-16 gap-y-10 lg:grid-cols-12">
+        <header className="flex max-w-prose flex-col gap-4 border-b border-line pb-10 lg:col-span-8 lg:col-start-5 xl:col-span-9 xl:col-start-4">
           <h1
             id={titleId}
             className="font-display text-4xl font-regular tracking-tight text-balance text-fg sm:text-5xl"
@@ -157,7 +158,7 @@ export function LegalPage({
             <p className="max-w-prose text-lg text-pretty text-fg-muted">{intro}</p>
           )}
         </header>
-        <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="grid gap-10 lg:col-span-12 lg:grid-cols-subgrid lg:gap-x-16">
           <nav aria-labelledby={tocId} className="lg:col-span-4 xl:col-span-3">
             <details className="group/toc rounded-panel border border-line bg-surface lg:hidden">
               <summary

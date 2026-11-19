@@ -87,7 +87,7 @@ function QuoteCard({ testimonial, className }: { testimonial: Testimonial; class
   return (
     <figure
       className={cn(
-        'flex flex-col gap-6 rounded-panel border border-line bg-surface p-6 text-fg',
+        'flex flex-col justify-between gap-6 rounded-panel border border-line bg-surface p-6 text-fg',
         className,
       )}
     >
@@ -100,8 +100,9 @@ function QuoteCard({ testimonial, className }: { testimonial: Testimonial; class
 }
 
 /**
- * Quotes in columns of uneven height, read top to bottom, so short and long quotes sit together
- * without gaps. The first quote is set larger as the lead.
+ * Quotes in an even grid, every card in a row the same height with its author on the bottom line.
+ * The first quote is set larger as the lead, and with an odd count it spans two rows so the grid
+ * closes without a gap: five quotes (one lead and four) is the classic shape.
  */
 export function TestimonialGrid({
   testimonials,
@@ -129,14 +130,21 @@ export function TestimonialGrid({
           className="mb-12"
         />
       )}
-      <Reveal as="ul" stagger className="columns-1 gap-4 @2xl:columns-2 @5xl:columns-3">
+      <Reveal as="ul" stagger className="grid gap-4 @2xl:grid-cols-2 @5xl:grid-cols-3">
         {testimonials.map((testimonial, index) => (
-          <li key={testimonial.id} className="mb-4 break-inside-avoid">
+          <li
+            key={testimonial.id}
+            className={cn(
+              'flex *:flex-1',
+              // With an odd count the lead quote spans two rows, so the grid closes without a gap.
+              index === 0 && testimonials.length % 2 === 1 && '@2xl:row-span-2',
+            )}
+          >
             <QuoteCard
               testimonial={testimonial}
               className={cn(
                 index === 0 &&
-                  'border-transparent bg-linear-to-b from-accent-subtle to-surface [&_blockquote]:font-display [&_blockquote]:text-xl [&_blockquote]:tracking-tight',
+                  'border-transparent bg-linear-to-b from-accent-subtle to-surface [&_blockquote]:font-display [&_blockquote]:text-2xl [&_blockquote]:tracking-tight',
               )}
             />
           </li>

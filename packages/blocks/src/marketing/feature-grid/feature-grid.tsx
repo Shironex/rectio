@@ -252,11 +252,8 @@ export function FeatureBento({
             </div>
             {item.visual !== undefined && (
               <div
-                className={cn(
-                  'min-w-0 px-6 pb-6 sm:px-7 sm:pb-7',
-                  // A tall tile centres its visual in the spare height instead of leaving a hole under the copy.
-                  item.size === 'tall' ? 'my-auto' : 'mt-auto',
-                )}
+                // The visual fills the rest of the tile, so tiles in a row end level with no hole under the copy.
+                className="flex min-w-0 flex-1 flex-col px-6 pb-6 *:flex-1 sm:px-7 sm:pb-7"
               >
                 {item.visual}
               </div>

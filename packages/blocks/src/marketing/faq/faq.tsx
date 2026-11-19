@@ -23,6 +23,8 @@ export interface FaqProps {
   variant?: 'accordion' | 'numbered';
   /** Something under the heading, such as a link to support or a small card of live UI. */
   aside?: ReactNode;
+  /** Ids of the answers open at first in the accordion, such as the most asked question. */
+  defaultOpen?: string[];
   tone?: SectionTone;
   className?: string;
 }
@@ -38,6 +40,7 @@ export function Faq({
   eyebrow,
   variant = 'accordion',
   aside,
+  defaultOpen,
   tone,
   className,
 }: FaqProps) {
@@ -84,6 +87,7 @@ export function Faq({
               title: item.question,
               content: item.answer,
             }))}
+            {...(defaultOpen === undefined ? {} : { defaultOpen })}
           />
         </Reveal>
       </div>

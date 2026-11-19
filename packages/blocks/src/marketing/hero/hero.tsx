@@ -211,7 +211,7 @@ export function HeroFloating({ visual, cards, className, ...copy }: HeroFloating
       aria-labelledby={titleId}
       data-slot="hero"
       className={cn(
-        'overflow-hidden bg-linear-to-b from-accent-subtle to-surface-canvas to-60% py-16 text-fg sm:py-24',
+        'overflow-hidden bg-linear-to-b from-accent-subtle to-surface-canvas to-60% pt-10 pb-12 text-fg sm:pt-12 sm:pb-16',
         className,
       )}
     >
