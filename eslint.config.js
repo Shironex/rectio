@@ -115,9 +115,13 @@ export default tseslint.config(
     rules: {
       // `@rectio/blocks/motion` is a declared entry: each block's motioned twin, picked by import path.
       // `@rectio/blocks/marketing` (and its `/motion`) is the declared entry of the marketing group.
+      // `@rectio/motion/navigation` is the motioned navigation, split to stay inside its bundle budget.
       'noctcore-monorepo/no-deep-package-imports': [
         'error',
-        { scopes: ['@rectio'], allowedSubpaths: ['motion', 'marketing', 'marketing/motion'] },
+        {
+          scopes: ['@rectio'],
+          allowedSubpaths: ['motion', 'marketing', 'marketing/motion', 'navigation'],
+        },
       ],
     },
   },
