@@ -179,8 +179,8 @@ function DetailLoading() {
   return (
     <LoadingRegion label="Loading the invoice">
       <div className="flex flex-col gap-2">
-        <SkeletonLine size="2xl" width="16rem" />
-        <SkeletonLine size="sm" width="10rem" />
+        <SkeletonLine size="2xl" width="w-64" />
+        <SkeletonLine size="sm" width="w-40" />
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-3">
         <LoadingPanel kind="table" rows={5} className="lg:col-span-2" />
@@ -301,6 +301,8 @@ export function InvoiceDetailPage({ id }: { id: string }) {
             currency={CURRENCY}
             locale={LOCALE}
             today={TODAY}
+            // The page heading already carries the number, so the card names what it holds.
+            messages={{ heading: () => 'Lines and payments' }}
             className="lg:col-span-2"
             onRecordPayment={() => {
               setPaying(true);
