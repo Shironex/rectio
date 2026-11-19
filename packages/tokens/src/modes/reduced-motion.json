@@ -20,6 +20,12 @@
           "value": 0,
           "unit": "px"
         }
+      },
+      "reveal": {
+        "$value": {
+          "value": 0,
+          "unit": "px"
+        }
       }
     },
     "scale": {

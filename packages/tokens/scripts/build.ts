@@ -180,7 +180,7 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   }
   for (const role of ['sans', 'display', 'mono', 'numeric'])
     add(`--font-${role}`, `--rx-font-family-${role}`);
-  for (const size of ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl']) {
+  for (const size of ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl']) {
     add(`--text-${size}`, `--rx-font-size-${size}`);
     add(`--text-${size}--line-height`, `--rx-font-line-height-${size}`);
   }
@@ -198,7 +198,7 @@ function tailwindCss(contract: string[], types: TokenMap): string {
 
   map.push('--animate-spin: rx-spin var(--rx-motion-duration-loop) linear infinite;');
 
-  const durations = ['fast', 'base', 'slow'].map(
+  const durations = ['fast', 'base', 'slow', 'reveal'].map(
     (d) => `@utility duration-${d} {\n  transition-duration: var(--rx-motion-duration-${d});\n}`,
   );
   const numeric = `/* Money and quantities: the numeric family with tabular, lining figures. */

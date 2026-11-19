@@ -39,6 +39,14 @@
       },
       "3xl": {
         "$value": "{font-size.36}"
+      },
+      "4xl": {
+        "$value": "{font-size.48}",
+        "$description": "Display: page and section headlines on marketing and docs surfaces."
+      },
+      "5xl": {
+        "$value": "{font-size.64}",
+        "$description": "Display: the one headline of a landing page."
       }
     },
     "line-height": {
@@ -63,6 +71,12 @@
       },
       "3xl": {
         "$value": 1.111
+      },
+      "4xl": {
+        "$value": 1.06
+      },
+      "5xl": {
+        "$value": 1.02
       }
     },
     "weight": {
@@ -172,6 +186,10 @@
       "count": {
         "$value": "{duration.560}",
         "$description": "A figure counting to its new value, such as a total. The one long movement: it is the signature moment."
+      },
+      "reveal": {
+        "$value": "{duration.720}",
+        "$description": "Content arriving as a page scrolls into it. Longer than any control transition; never on a control."
       }
     },
     "easing": {
@@ -203,6 +221,10 @@
       "origin": {
         "$value": "{size.32}",
         "$description": "How far a dialog leans in from its trigger as it opens. Zero under reduced motion."
+      },
+      "reveal": {
+        "$value": "{size.24}",
+        "$description": "How far content rises as it is revealed on scroll. Zero under reduced motion."
       }
     },
     "scale": {
