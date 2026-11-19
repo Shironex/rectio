@@ -59,7 +59,7 @@ export const invoiceListPl: InvoiceListMessages = {
   },
   totalRow: (count) => `Razem, ${String(count)} ${invoices(count)}`,
   totalNote: (voided) =>
-    `Suma pokazanych kwot${voided > 0 ? `, ${String(voided)} anulowane nie wliczono` : ''}`,
+    voided > 0 ? `Bez anulowanych (${String(voided)})` : 'Suma pokazanych kwot',
   paidOf: (paid, total) => (
     <>
       {paid} zapłacono z {total}

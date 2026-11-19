@@ -155,7 +155,7 @@ export const INVOICE_LIST_MESSAGES: InvoiceListMessages = {
   dueText: englishDue,
   totalRow: (count) => `Total, ${String(count)} ${count === 1 ? 'invoice' : 'invoices'}`,
   totalNote: (voided) =>
-    `Sum of the amounts shown${voided > 0 ? `, ${String(voided)} void not counted` : ''}`,
+    voided > 0 ? `${String(voided)} void left out` : 'Sum of the amounts shown',
   paidOf: (paid, total) => (
     <>
       {paid} paid of {total}
@@ -271,7 +271,7 @@ export function InvoiceList({
               <span className="block @xl:hidden">
                 <InvoiceNumber invoice={invoice} onOpen={onOpenInvoice} />
               </span>
-              <span className="block">{invoice.customer}</span>
+              <span className="block min-w-36">{invoice.customer}</span>
               <span className="block text-sm text-fg-muted @4xl:hidden">
                 {m.issuedOn(
                   <span className="numeric">{formatShortDate(invoice.issued, locale)}</span>,

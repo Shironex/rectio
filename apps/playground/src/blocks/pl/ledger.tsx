@@ -13,7 +13,7 @@ export const ledgerPl: LedgerMessages = {
       .filter(Boolean)
       .join(', '),
   accountDescription: (period, normal) =>
-    `Księga konta${period === undefined ? '' : `, ${period}`}, saldo ${normal === 'debit' ? 'Wn' : 'Ma'}`,
+    `Księga konta${period === undefined ? '' : `, ${period}`}, saldo ${normal === 'debit' ? 'Winien' : 'Ma'}`,
   accountLabel: 'Konto',
   allAccounts: 'Wszystkie konta',
   emptyTitle: 'Brak zapisów w tym okresie',
@@ -38,13 +38,13 @@ export const ledgerPl: LedgerMessages = {
   totals: 'Obroty',
   closingBalance: 'Saldo końcowe',
   balanced: 'Zbilansowany',
-  balancedNote: 'W każdym zapisie strona Wn równa się stronie Ma.',
+  balancedNote: 'W każdym zapisie strona Winien równa się stronie Ma.',
   outOfBalance: 'Niezbilansowany',
   exceeds: (excess, difference, references) => (
     <>
       {excess === 'debits'
-        ? 'Obroty Wn przewyższają obroty Ma'
-        : 'Obroty Ma przewyższają obroty Wn'}{' '}
+        ? 'Obroty Winien przewyższają obroty Ma'
+        : 'Obroty Ma przewyższają obroty Winien'}{' '}
       o {difference}
       {references.length > 0 && `, w zapisach ${references.join(', ')}`}.
     </>
