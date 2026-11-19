@@ -1,0 +1,119 @@
+---
+title: TagInput
+description: Free text tags in a field, such as labels on a record or email domains.
+---
+
+import TagInputDemo from '@/demos/tag-input';
+
+<Preview name="tag-input" plain={<TagInputDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add tag-input
+```
+
+`field` installs with it.
+
+## Usage
+
+```tsx
+import { Field, FieldLabel } from '@/components/ui/field';
+import { TagInput } from '@/components/ui/tag-input';
+
+<Field>
+  <FieldLabel>Vendor labels</FieldLabel>
+  <TagInput
+    value={labels}
+    onValueChange={setLabels}
+    max={6}
+    validate={(tag) => (/^[a-z0-9-]+$/.test(tag) ? null : 'Use lower case letters and dashes.')}
+  />
+</Field>;
+```
+
+Enter or a comma turns the typed text into a tag; set `delimiters` for others, such as a semicolon
+for email lists. Pasted text splits on the delimiters and on new lines, so a column copied from a
+spreadsheet becomes one tag per row. Duplicates are turned away regardless of case unless you set
+`caseSensitive`.
+
+A rejected tag (a duplicate, one over `max`, or one your `validate` refuses) stays in the input for
+the user to fix, and its message shows as the field's error, linked to the input and announced. A
+`<Field invalid>` set by the app shows its own `FieldError` as with any input.
+
+For a chip outside an input, such as the applied filters above a table, use `Tag` on its own. Give
+it `onRemove` for a remove button named after its text.
+
+TagInput has no motion variant. Tags are added from the keyboard, often many in a row, and an
+animation on each would only slow typing down.
+
+## Props
+
+### TagInput
+
+<TypeTable
+  type={{
+    value: { type: 'string[]', description: 'The tags. Use with onValueChange when controlled.' },
+    defaultValue: { type: 'string[]', description: 'The starting tags when uncontrolled.' },
+    onValueChange: {
+      type: '(tags: string[]) => void',
+      description: 'Called with the whole new list when a tag is added or removed.',
+    },
+    delimiters: {
+      type: 'string[]',
+      default: "[',']",
+      description: 'Characters that end a tag as it is typed or pasted, besides Enter.',
+    },
+    caseSensitive: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Treat "Design" and "design" as different tags.',
+    },
+    max: { type: 'number', description: 'The most tags the field takes.' },
+    validate: {
+      type: '(tag: string) => string | null | undefined',
+      description: 'Return a message to reject a tag. The message shows as the field error.',
+    },
+    messages: {
+      type: '{ duplicate?: (tag: string) => string; max?: (max: number) => string }',
+      description: 'Wording for the built-in rejections.',
+    },
+    name: { type: 'string', description: 'Submits one form value per tag under this name.' },
+    placeholder: { type: 'string', description: 'Shown while there are no tags.' },
+    disabled: {
+      type: 'boolean',
+      default: 'false',
+      description: 'A disabled Field disables it too.',
+    },
+    'aria-label': { type: 'string', description: 'Only when no FieldLabel names the input.' },
+  }}
+/>
+
+### Tag
+
+Every prop of a `span` is accepted as well.
+
+<TypeTable
+  type={{
+    onRemove: { type: '() => void', description: 'Shows a remove button that calls this.' },
+    removeLabel: {
+      type: 'string',
+      description: 'The remove button name. Defaults to "Remove" and the tag text.',
+    },
+    disabled: { type: 'boolean', default: 'false', description: 'Hides the remove button.' },
+  }}
+/>
+
+## Accessibility
+
+- The input is named by its `FieldLabel` and linked to its description and error.
+- Backspace in the empty input selects the last tag; a second Backspace removes it.
+- Arrow Left from the start of the input moves into the tags, Arrow Right moves back out, and
+  Delete or Backspace removes the tag in focus. Escape returns to the input.
+- Each remove button is named after its tag ("Remove design"), so a list of them never reads as
+  "Remove, Remove, Remove".
+- A tag selected for removal fills with the accent, a change in lightness as well as colour, and
+  the field keeps its focus ring.
+- On touch screens the field is 44px tall and each remove button has a 44px target.
+
+<ComponentSource path="tag-input/tag-input.tsx" />

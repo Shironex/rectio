@@ -1,0 +1,147 @@
+---
+title: MultiSelect
+description: Several choices from a list, shown as chips, such as approvers or cost centres.
+---
+
+import MultiSelectDemo from '@/demos/multi-select';
+import MultiSelectMotionDemo from '@/demos/multi-select.motion';
+
+<Preview
+  name="multi-select"
+  plain={<MultiSelectDemo />}
+  motion={<MultiSelectMotionDemo />}
+  importLine="import { MultiSelect, MultiSelectContent, MultiSelectInput, MultiSelectItem } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add multi-select
+```
+
+`field`, `select`, `combobox`, `tag-input` and `theme-scope` install with it.
+
+## Usage
+
+```tsx
+import { Field, FieldLabel } from '@/components/ui/field';
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectInput,
+  MultiSelectItem,
+} from '@/components/ui/multi-select';
+
+<Field>
+  <FieldLabel>Approvers</FieldLabel>
+  <MultiSelect items={people} value={approvers} onValueChange={setApprovers} selectAll>
+    <MultiSelectInput placeholder="Add approvers" maxChips={3} />
+    <MultiSelectContent>
+      {(item) => (
+        <MultiSelectItem key={item.value} value={item}>
+          {item.label}
+        </MultiSelectItem>
+      )}
+    </MultiSelectContent>
+  </MultiSelect>
+</Field>;
+```
+
+Each choice shows as a chip in the field, with the search input after the chips. The list stays
+open after a pick, keeping the typed filter, so several matches can be picked in a row; set
+`closeOnSelect` to close it each time.
+
+`selectAll` adds a "Select all" option at the top while nothing is typed. Once everything is
+chosen it reads "Clear all". The clear button at the end of the field also empties the selection.
+
+`maxChips` keeps the field on one line at rest: the first chips show, then a "+3" chip for the
+rest. Every chip shows while the field has focus, so each can be reached and removed.
+
+The motion variant opens the list like Select and lets a chip added with the pointer arrive with a
+short fade and scale. Keyboard picks and removals change the chips at once.
+
+## Props
+
+### MultiSelect
+
+Every prop of Base UI's `Combobox.Root` in multiple mode is accepted as well.
+
+<TypeTable
+  type={{
+    selectAll: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Adds Select all, which becomes Clear all.',
+    },
+    selectAllLabel: {
+      type: 'string',
+      default: "'Select all'",
+      description: 'Wording of the option.',
+    },
+    clearAllLabel: {
+      type: 'string',
+      default: "'Clear all'",
+      description: 'Wording once all are chosen.',
+    },
+    closeOnSelect: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Close the list after each pick.',
+    },
+  }}
+/>
+
+### MultiSelectInput
+
+Every prop of Base UI's `Combobox.Input` is accepted as well.
+
+<TypeTable
+  type={{
+    maxChips: { type: 'number', description: 'Chips shown at rest before the +N chip.' },
+    overflowLabel: {
+      type: '(count: number) => string',
+      description: 'Name of the +N chip. Defaults to "3 more selected".',
+    },
+    showClear: {
+      type: 'boolean',
+      default: 'true',
+      description: 'A button that clears every choice.',
+    },
+    clearLabel: {
+      type: 'string',
+      default: "'Clear all'",
+      description: 'Name of the clear button.',
+    },
+    triggerLabel: {
+      type: 'string',
+      default: "'Show options'",
+      description: 'Name of the open button.',
+    },
+  }}
+/>
+
+### MultiSelectContent
+
+Takes the same props as `ComboboxContent`: `emptyMessage`, `loading` and `loadingMessage`.
+
+### MultiSelectItem
+
+Every prop of Base UI's `Combobox.Item` is accepted as well.
+
+<TypeTable
+  type={{
+    hint: { type: 'ReactNode', description: 'Secondary text on the right, in tabular figures.' },
+  }}
+/>
+
+## Accessibility
+
+- The input is named by its `FieldLabel` and linked to its description and error.
+- Arrow Left from the start of the input moves into the chips; Backspace or Delete removes the
+  chip in focus, and Backspace in the empty input removes the last chip.
+- Each chip's remove button is named after it ("Remove Anna Kowalska"); the overflow chip is named
+  "3 more selected".
+- Options carry a checkbox that fills with a check when chosen; Select all shows a bar when some
+  are chosen. State never rests on colour alone.
+
+<ComponentSource path="multi-select/multi-select.tsx" />

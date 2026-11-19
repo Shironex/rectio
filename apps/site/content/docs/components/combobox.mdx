@@ -1,0 +1,170 @@
+---
+title: Combobox
+description: One choice from a long list, found by typing, such as a customer or a vendor.
+---
+
+import ComboboxDemo from '@/demos/combobox';
+import ComboboxMotionDemo from '@/demos/combobox.motion';
+
+<Preview
+  name="combobox"
+  plain={<ComboboxDemo />}
+  motion={<ComboboxMotionDemo />}
+  importLine="import { ComboboxContent, ComboboxItem } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add combobox
+```
+
+`field`, `select` and `theme-scope` install with it.
+
+## Usage
+
+```tsx
+import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem } from '@/components/ui/combobox';
+import { Field, FieldLabel } from '@/components/ui/field';
+
+<Field>
+  <FieldLabel>Customer</FieldLabel>
+  <Combobox items={customers} value={customer} onValueChange={setCustomer}>
+    <ComboboxInput placeholder="Search customers" />
+    <ComboboxContent>
+      {(item) => (
+        <ComboboxItem key={item.value} value={item} hint={item.city}>
+          {item.label}
+        </ComboboxItem>
+      )}
+    </ComboboxContent>
+  </Combobox>
+</Field>;
+```
+
+Reach for Combobox over Select when the list is long enough that people would rather type than
+scroll. Items shaped `{ value, label }` need no more setup; for other shapes pass
+`itemToStringLabel`. When nothing matches, the list says "No results"; set `emptyMessage` for other
+wording.
+
+### Groups
+
+Pass groups as `items` (`{ label, items }`) and render each with `ComboboxGroup`, whose function
+child renders the group's items. A group with no match hides.
+
+### Results from a server
+
+Fetch in `onInputValueChange`, swap `items` when the answer arrives, and set `filter={null}` so the
+client does not filter the server's matches again. While the request runs, `loading` on
+`ComboboxContent` shows "Searching…" in the list, announced politely, and marks the list busy. Keep
+the chosen item in `items` so it still shows while new results load.
+
+### Creating an item
+
+Pass `onCreate` and, when the typed text matches no item exactly, the list ends with
+`Create "acme"`. Choosing it calls `onCreate("acme")` and closes the list; add the item and select
+it. The value must be controlled for the new item to show. Creating works with a flat list of
+items.
+
+The motion variant opens the list with a spring from the input and glides the highlight between
+options, as Select does. Typing never animates: the list filters in place.
+
+## Props
+
+### Combobox
+
+Every prop of Base UI's `Combobox.Root` is accepted as well: `items`, `value`, `defaultValue`,
+`onValueChange`, `inputValue`, `onInputValueChange`, `filter`, `itemToStringLabel`, `disabled`,
+`name` and the rest.
+
+<TypeTable
+  type={{
+    onCreate: {
+      type: '(query: string) => void',
+      description: 'Adds a Create option for text that matches no item, and receives the text.',
+    },
+    createLabel: {
+      type: '(query: string) => string',
+      description: 'Wording of the create option. Defaults to Create "acme".',
+    },
+  }}
+/>
+
+### ComboboxInput
+
+Every prop of Base UI's `Combobox.Input` is accepted as well.
+
+<TypeTable
+  type={{
+    showClear: {
+      type: 'boolean',
+      default: 'true',
+      description: 'A clear button while a value is chosen.',
+    },
+    clearLabel: {
+      type: 'string',
+      default: "'Clear selection'",
+      description: 'Name of the clear button.',
+    },
+    triggerLabel: {
+      type: 'string',
+      default: "'Show options'",
+      description: 'Name of the open button.',
+    },
+  }}
+/>
+
+### ComboboxContent
+
+Every prop of Base UI's `Combobox.Popup` is accepted as well.
+
+<TypeTable
+  type={{
+    emptyMessage: {
+      type: 'ReactNode',
+      default: "'No results'",
+      description: 'Shown when nothing matches.',
+    },
+    loading: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Shows the loading status and marks the list busy.',
+    },
+    loadingMessage: {
+      type: 'ReactNode',
+      default: "'Searching…'",
+      description: 'The loading status text.',
+    },
+    status: { type: 'ReactNode', description: 'A line above the results, such as a search hint.' },
+  }}
+/>
+
+### ComboboxItem
+
+Every prop of Base UI's `Combobox.Item` is accepted as well, including `value` and `disabled`.
+
+<TypeTable
+  type={{
+    hint: { type: 'ReactNode', description: 'Secondary text on the right, in tabular figures.' },
+  }}
+/>
+
+### ComboboxGroup
+
+<TypeTable
+  type={{
+    label: { type: 'ReactNode', required: true, description: 'The group heading.' },
+    items: { type: 'any[]', description: 'The items in this group.' },
+  }}
+/>
+
+## Accessibility
+
+- The input is named by its `FieldLabel`; Arrow Down opens the list, the arrows move and Enter
+  picks. Escape closes the list.
+- Loading, empty and status lines are announced politely as they change.
+- The chosen item carries a check mark as well as a heavier weight; the create option carries a
+  plus sign.
+- The clear and open buttons are named, and 44px wide on touch screens.
+
+<ComponentSource path="combobox/combobox.tsx" />
