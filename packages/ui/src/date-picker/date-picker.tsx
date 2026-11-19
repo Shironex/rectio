@@ -1,7 +1,7 @@
 import type { DateRange, DayPickerLocale } from '@daypicker/react';
 import { Field as BaseField } from '@base-ui/react/field';
 import { Popover } from '@base-ui/react/popover';
-import { CalendarBlankIcon } from '@phosphor-icons/react';
+import { CalendarBlankIcon, XIcon } from '@phosphor-icons/react';
 import { format, isSameDay, isValid, parse } from 'date-fns';
 import {
   useRef,
@@ -87,11 +87,17 @@ function CalendarPopup({
           data-slot="date-picker-popup"
           className={cn(
             'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow)',
-            'max-sm:flex max-sm:justify-center max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 max-sm:pb-4',
+            'max-sm:flex max-sm:flex-col max-sm:items-center max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 max-sm:pb-6',
             'outline-none',
             popupMotion,
           )}
         >
+          {/* The sheet's own way out: touch screens have no Escape key. */}
+          <div className="flex w-full justify-end px-2 pt-2 sm:hidden">
+            <Popover.Close aria-label="Close calendar" className={cn(triggerButton, 'size-11')}>
+              <XIcon aria-hidden weight="bold" className="size-4" />
+            </Popover.Close>
+          </div>
           {children}
         </Popover.Popup>
       </Popover.Positioner>
