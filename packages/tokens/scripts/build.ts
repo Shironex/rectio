@@ -202,6 +202,14 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   const durations = ['fast', 'base', 'slow', 'reveal'].map(
     (d) => `@utility duration-${d} {\n  transition-duration: var(--rx-motion-duration-${d});\n}`,
   );
+  const playback = `/* Playback of a looping animation, such as a marquee that stops on hover or runs backwards. */
+@utility playback-paused {
+  animation-play-state: paused;
+}
+
+@utility playback-reverse {
+  animation-direction: reverse;
+}`;
   const numeric = `/* Money and quantities: the numeric family with tabular, lining figures. */
 @utility numeric {
   font-family: var(--rx-font-family-numeric);
@@ -245,6 +253,8 @@ ${map.map((m) => `  ${m}`).join('\n')}
 }
 
 ${durations.join('\n\n')}
+
+${playback}
 
 ${numeric}
 
