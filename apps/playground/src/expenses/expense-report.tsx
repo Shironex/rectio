@@ -246,7 +246,11 @@ function Report({ back }: { back: string | null }) {
     );
     const id = toast.add({
       type: 'success',
-      title: count === 1 ? 'Expense removed' : `${String(count)} expenses removed`,
+      // One line is named, so two toasts in a row say which Undo brings back which expense.
+      title:
+        count === 1 && selected[0] !== undefined
+          ? `${selected[0].merchant} removed`
+          : `${String(count)} expenses removed`,
       description: `Total now ${money(totalNow)}.`,
       actionProps: {
         children: 'Undo',
