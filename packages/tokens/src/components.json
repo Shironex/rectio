@@ -181,6 +181,92 @@
         "$value": "normal",
         "$description": "normal or italic. A theme whose display face carries no heavier weight stresses with italic instead."
       }
+    },
+    "sidebar": {
+      "width": {
+        "$type": "dimension",
+        "$value": "{size.240}",
+        "$description": "Expanded width of the app sidebar."
+      },
+      "width-collapsed": {
+        "$type": "dimension",
+        "$value": "{size.52}",
+        "$description": "Width of the icon rail when the sidebar is collapsed."
+      },
+      "item-height": {
+        "$type": "dimension",
+        "$value": "{control.height.md}",
+        "$description": "Height of a navigation item. Follows density."
+      },
+      "background": {
+        "$type": "color",
+        "$value": "{surface.canvas}",
+        "$description": "Behind the sidebar. Match it to the page canvas for a quiet rail, or set surface.sunken to set it apart."
+      },
+      "item-active": {
+        "$type": "color",
+        "$value": "{surface.selected}",
+        "$description": "Behind the item of the current page."
+      }
+    },
+    "app-shell": {
+      "header-height": {
+        "$type": "dimension",
+        "$value": "{size.56}",
+        "$description": "Height of the top bar beside the sidebar."
+      }
+    },
+    "sheet": {
+      "width": {
+        "$type": "dimension",
+        "$value": "{size.400}",
+        "$description": "Width of a sheet that slides in from the start or end edge."
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{radius.panel}"
+      },
+      "shadow": {
+        "$type": "shadow",
+        "$value": "{shadow.overlay}"
+      }
+    },
+    "command": {
+      "width": {
+        "$type": "dimension",
+        "$value": "{size.560}"
+      },
+      "list-height": {
+        "$type": "dimension",
+        "$value": "{size.360}",
+        "$description": "Largest height of the result list before it scrolls."
+      }
+    },
+    "tooltip": {
+      "radius": {
+        "$type": "dimension",
+        "$value": "{radius.control}"
+      }
+    },
+    "hover-card": {
+      "width": {
+        "$type": "dimension",
+        "$value": "{size.320}"
+      }
+    },
+    "navigation-menu": {
+      "panel-width": {
+        "$type": "dimension",
+        "$value": "{size.480}",
+        "$description": "Width of a dropdown panel in the top navigation."
+      }
+    },
+    "tabs": {
+      "height": {
+        "$type": "dimension",
+        "$value": "{control.height.md}",
+        "$description": "Height of a tab. Follows density."
+      }
     }
   }
 }
