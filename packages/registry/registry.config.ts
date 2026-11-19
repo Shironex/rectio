@@ -662,7 +662,7 @@ export default defineRegistry({
             'lib/tokens.ts',
           ],
           'lib',
-          '0.2.0',
+          '0.3.0',
         ),
         motionItem(
           'button',
