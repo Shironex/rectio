@@ -123,7 +123,7 @@ export function Terminal() {
       </pre>
       <div
         aria-hidden
-        className="min-h-112 overflow-x-auto px-4 py-4 font-mono text-sm leading-6 text-fg sm:px-5"
+        className="min-h-160 overflow-x-auto px-4 py-4 sm:min-h-112 font-mono text-sm leading-6 text-fg sm:px-5"
       >
         {frame === 0 && (
           <p className="whitespace-pre">
@@ -137,7 +137,7 @@ export function Terminal() {
           if ('command' in step) {
             const shown = done || s < at.step ? step.command.length : at.chars;
             return (
-              <p key={step.command} className="whitespace-pre">
+              <p key={step.command} className="whitespace-pre-wrap sm:whitespace-pre">
                 <span className="text-accent-strong">$ </span>
                 {step.command.slice(0, shown)}
                 {s === typingStep && (
@@ -154,8 +154,8 @@ export function Terminal() {
                   key={l}
                   className={
                     line.startsWith('  +')
-                      ? 'whitespace-pre text-positive-strong'
-                      : 'whitespace-pre'
+                      ? 'whitespace-pre-wrap text-positive-strong sm:whitespace-pre'
+                      : 'whitespace-pre-wrap sm:whitespace-pre'
                   }
                 >
                   {line === '' ? ' ' : line}

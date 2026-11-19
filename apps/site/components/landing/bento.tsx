@@ -126,23 +126,28 @@ const FORMATS = [
 
 function MoneyFormats() {
   return (
-    <dl className="flex flex-col divide-y divide-line">
-      {FORMATS.map((f) => (
-        <div key={f.label} className="flex items-baseline justify-between gap-4 py-2.5">
-          <dt className="text-sm text-fg-muted">{f.label}</dt>
-          <dd>
-            <Money
-              amount={f.amount}
-              currency={f.currency}
-              locale={f.locale}
-              tone={f.amount < 0 ? 'auto' : 'neutral'}
-              accounting={'accounting' in f}
-              className="text-lg"
-            />
-          </dd>
-        </div>
-      ))}
-    </dl>
+    <div className="flex flex-1 flex-col justify-between gap-5">
+      <dl className="flex flex-col divide-y divide-line">
+        {FORMATS.map((f) => (
+          <div key={f.label} className="flex items-baseline justify-between gap-4 py-2.5">
+            <dt className="text-sm text-fg-muted">{f.label}</dt>
+            <dd>
+              <Money
+                amount={f.amount}
+                currency={f.currency}
+                locale={f.locale}
+                tone={f.amount < 0 ? 'auto' : 'neutral'}
+                accounting={'accounting' in f}
+                className="text-lg"
+              />
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <p className="text-sm text-fg-subtle">
+        Formats come from the locale; no separator or symbol is placed by hand.
+      </p>
+    </div>
   );
 }
 
@@ -184,12 +189,19 @@ function Period() {
   );
 }
 
+/** What submitting sets in motion, so the cell says where the report goes after the toast. */
+const APPROVAL_PATH = [
+  'You submit the report',
+  'Marta Nowak approves it',
+  'Paid with the next run',
+];
+
 function SubmitFlow() {
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [sending, setSending] = useState(false);
   return (
-    <div className="flex flex-col items-start gap-4">
+    <div className="flex flex-1 flex-col items-start gap-4">
       <div className="flex w-full items-baseline justify-between gap-4 rounded-control border border-line bg-surface px-4 py-3">
         <span className="text-sm text-fg-muted">Report 2041, 6 lines</span>
         <Money amount={1269.2} currency="EUR" locale="en-IE" className="text-lg font-strong" />
@@ -239,6 +251,14 @@ function SubmitFlow() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ol className="mt-auto flex w-full flex-col divide-y divide-line border-t border-line text-sm">
+        {APPROVAL_PATH.map((step, i) => (
+          <li key={step} className="flex items-baseline gap-3 py-2">
+            <span className="numeric text-fg-subtle">{i + 1}</span>
+            <span className="text-fg-muted">{step}</span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

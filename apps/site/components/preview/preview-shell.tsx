@@ -87,7 +87,7 @@ export function PreviewShell({
           theme={shownTheme}
           mode={shownMode}
           className={cn(
-            'flex min-h-56 flex-wrap gap-4 overflow-x-auto bg-surface-canvas p-4 text-fg *:max-w-full *:min-w-0 sm:p-10',
+            'flex min-h-44 flex-wrap gap-4 overflow-x-auto bg-surface-canvas p-4 text-fg *:max-w-full *:min-w-0 sm:p-8',
             align === 'center' ? 'items-center justify-center' : 'items-start',
           )}
         >

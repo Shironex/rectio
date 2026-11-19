@@ -54,13 +54,13 @@ export function ThemeShowcase({ values }: { values: Readout }) {
           {READOUT.map((item) => (
             <div
               key={item.token}
-              className="flex items-center justify-between gap-4 border-b border-line py-3 last:border-b-0"
+              className="flex flex-col gap-1.5 border-b border-line py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
               <dt className="flex min-w-0 flex-col">
                 <span className="text-sm text-fg">{item.label}</span>
                 <span className="font-mono text-xs text-fg-subtle">{item.token}</span>
               </dt>
-              <dd className="flex min-w-0 items-center gap-2 text-end font-mono text-sm text-fg">
+              <dd className="flex min-w-0 items-center gap-2 font-mono text-sm text-fg sm:text-end">
                 {'swatch' in item && (
                   <span
                     aria-hidden

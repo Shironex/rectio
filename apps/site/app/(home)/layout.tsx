@@ -13,7 +13,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         ...(base.links ?? []),
         {
           type: 'custom',
-          on: 'nav',
+          on: 'all',
           secondary: true,
           children: (
             // The secondary nav is a list: its custom item must be a list item.
