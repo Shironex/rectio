@@ -1,4 +1,4 @@
-import { Checkbox, Field, FieldError, FieldLabel, Input } from '@rectio/ui';
+import { Checkbox, Field, FieldDescription, FieldError, FieldLabel, Input } from '@rectio/ui';
 import { useId, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
@@ -99,7 +99,10 @@ export function SignUp({
     >
       {social !== undefined && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">{social}</div>
+          {/* Two providers sit side by side on a roomy form; one or three take the full width. */}
+          <div className="grid gap-2 @sm:grid-cols-2 @sm:[&>*:last-child:nth-child(odd)]:col-span-2">
+            {social}
+          </div>
           <OrDivider>or with email</OrDivider>
         </div>
       )}
@@ -169,8 +172,13 @@ export function SignUp({
             }}
           />
           {errors.password !== undefined && <FieldError>{errors.password}</FieldError>}
-          {showRules && (
+          {showRules ? (
             <PasswordRules id={rulesId} password={values.password} minLength={minPasswordLength} />
+          ) : (
+            // The one-line rule stays in view, so an error elsewhere never hides what is asked.
+            <FieldDescription>
+              At least {minPasswordLength} characters, mixed case, a number and a symbol.
+            </FieldDescription>
           )}
         </Field>
 

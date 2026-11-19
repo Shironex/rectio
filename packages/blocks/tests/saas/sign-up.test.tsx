@@ -59,9 +59,9 @@ describe('SignUp', () => {
 
   it('shows the rules only once the password is in use', async () => {
     render(<SignUp onSubmit={vi.fn()} />);
-    expect(screen.queryByText(/At least 12 characters/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Upper and lower case letters/)).not.toBeInTheDocument();
     await userEvent.click(screen.getByLabelText('Password'));
-    expect(screen.getByText(/At least 12 characters/)).toBeInTheDocument();
+    expect(screen.getByText(/Upper and lower case letters/)).toBeInTheDocument();
   });
 
   it('says a taken email under the field with a way to sign in, until it changes', async () => {
@@ -79,5 +79,10 @@ describe('SignUp', () => {
     expect(signIn).toHaveBeenCalled();
     await userEvent.type(email, 'x');
     expect(screen.queryByText(/already exists/)).not.toBeInTheDocument();
+  });
+
+  it('keeps the length rule in one line while the checklist is closed', () => {
+    render(<SignUp onSubmit={vi.fn()} emailTaken defaultEmail="margot@fernhill.io" />);
+    expect(screen.getByText(/At least 12 characters, mixed case/)).toBeInTheDocument();
   });
 });
