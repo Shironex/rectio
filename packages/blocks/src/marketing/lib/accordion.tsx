@@ -50,8 +50,8 @@ export function Accordion({
                 aria-hidden
                 className={cn(
                   'mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-line text-fg-muted',
-                  'transition-[rotate,background-color,color] duration-base ease-standard',
-                  'group-data-panel-open/trigger:rotate-45 group-data-panel-open/trigger:bg-fg group-data-panel-open/trigger:text-surface',
+                  'transition-[rotate,border-color,color] duration-base ease-standard',
+                  'group-data-panel-open/trigger:rotate-45 group-data-panel-open/trigger:border-line-strong group-data-panel-open/trigger:text-fg',
                   'pointer-fine:group-hover/trigger:text-fg',
                 )}
               >
@@ -66,7 +66,7 @@ export function Accordion({
               'data-ending-style:opacity-0 data-ending-style:duration-fast',
             )}
           >
-            <div className="max-w-prose pe-12 pb-6 text-base text-pretty text-fg-muted">
+            <div className="-mt-1 max-w-prose pe-12 pb-6 text-base text-pretty text-fg-muted">
               {item.content}
             </div>
           </BaseAccordion.Panel>

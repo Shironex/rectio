@@ -220,7 +220,7 @@ export function HeroFloating({ visual, cards, className, ...copy }: HeroFloating
           <Copy {...copy} align="start" titleId={titleId} />
         </div>
         {/* The padding leaves room for the cards to hang off the frame without covering its header. */}
-        <div className="relative md:px-12 md:pt-28 md:pb-20 lg:col-span-7 lg:px-0">
+        <div className="relative md:px-12 md:pt-24 md:pb-16 lg:col-span-7 lg:px-0">
           <Reveal>
             <HeroFrame>{visual}</HeroFrame>
           </Reveal>
