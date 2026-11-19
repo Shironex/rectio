@@ -175,7 +175,7 @@ export function FileItem({ ref, file, ...props }: FileItemProps) {
     if (icon == null || tokens === null) return;
     springTo(
       icon,
-      { transform: [`scale(${String(tokens.scale.origin)})`, 'scale(1)'] },
+      { transform: [`scale(${String(tokens.scale.from)})`, 'scale(1)'] },
       tokens.spring.press,
     );
     tweenTo(icon, { opacity: [0, 1] }, tokens.duration.fast, tokens.easing.enter);

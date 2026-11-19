@@ -15,8 +15,8 @@ const TOKENS: MotionTokens = {
     exit: [0.4, 0, 1, 1],
     settle: [0.16, 1, 0.3, 1],
   },
-  distance: { shift: '0.25rem', tick: '0.125rem', origin: '2rem' },
-  scale: { from: 0.98, press: 0.97, origin: 0.92 },
+  distance: { shift: '0.25rem', tick: '0.125rem' },
+  scale: { from: 0.98, press: 0.97, dialog: 0.96 },
   spring: {
     press: { stiffness: 720, damping: 52, mass: 1 },
     overlay: { stiffness: 420, damping: 41, mass: 1 },
