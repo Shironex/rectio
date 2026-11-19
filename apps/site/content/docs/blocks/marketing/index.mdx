@@ -1,0 +1,70 @@
+---
+title: Marketing blocks
+description: 'The sections of a product site: header, heroes, features, proof, forms, footer and legal pages.'
+pro: true
+---
+
+The marketing blocks are the sections of a product site, built only from rectio components and
+tokens: the header and footer, heroes, features, logos, figures, testimonials, FAQ, a closing
+call to action, a newsletter signup, a team page, a contact form, a blog, legal pages and a cookie
+banner.
+
+## Plain and motion twins
+
+Every block that has something to animate has a motion twin with the same name and props. Pick per
+block by import path:
+
+```tsx
+import { HeroCentered } from '@rectio/blocks/marketing'; // plain
+import { HeroCentered } from '@rectio/blocks/marketing/motion'; // enters once, on first view
+```
+
+In the motion variants sections fade up once on first view, stats count to their figure and a
+cycling headline slides its words. Reduced motion renders the plain block. The header, footer,
+legal page and announcement bar have nothing to animate, so they have no twin; the motion path
+exports them unchanged, so a page can import every block from one place.
+
+## Content is data
+
+Every headline, link, list and quote is a prop. Blocks never fetch, never send and hold no list:
+a form takes an `onSubmit` or `onSubscribe` callback and you decide where the message goes. Links
+are plain `{ label, href }` records, and a call to action is a link drawn as a button.
+
+## One place for links
+
+Every link in every block renders through `Anchor`. To use your router's link component, swap the
+`<a>` in that one component and every block follows.
+
+## Small internal pieces
+
+The blocks carry their own small Accordion, Avatar, Switch and Textarea, so installing a marketing
+block does not pull extra components into your project. A shared `marketing-core` item (sections,
+headings, links drawn as buttons, the marquee and prose styles) comes with the first block you add.
+
+## Legal text and consent
+
+The legal page ships templates for a privacy policy, terms of service and cookie policy. They are
+placeholders: replace with your own legal text. This is not legal advice. The cookie banner records
+a visitor's decision and gives you the data to act on; making your site compliant, and keeping the
+cookie list true, is your job.
+
+## The blocks
+
+| Block                                                       | What it is                                      |
+| ----------------------------------------------------------- | ----------------------------------------------- |
+| [Site header](/docs/blocks/marketing/site-header)           | Brand, links and the main action                |
+| [Hero](/docs/blocks/marketing/hero)                         | The first screen, in four layouts               |
+| [Logo strip](/docs/blocks/marketing/logo-strip)             | The customers who trust you                     |
+| [Feature grid](/docs/blocks/marketing/feature-grid)         | Icon grid, rows or a bento of live tiles        |
+| [Stat row](/docs/blocks/marketing/stat-row)                 | Big figures with what they count                |
+| [Testimonials](/docs/blocks/marketing/testimonials)         | One quote, a grid or a wall                     |
+| [FAQ](/docs/blocks/marketing/faq)                           | Questions as an accordion or a numbered list    |
+| [CTA band](/docs/blocks/marketing/cta-band)                 | The closing ask                                 |
+| [Newsletter](/docs/blocks/marketing/newsletter)             | An email signup                                 |
+| [Team](/docs/blocks/marketing/team)                         | Values and the people                           |
+| [Contact](/docs/blocks/marketing/contact)                   | Ways to reach you and a form                    |
+| [Blog](/docs/blocks/marketing/blog)                         | An article list and an article layout           |
+| [Site footer](/docs/blocks/marketing/site-footer)           | Link columns, social links and the small print  |
+| [Legal page](/docs/blocks/marketing/legal)                  | Privacy, terms and cookie policy from templates |
+| [Cookie consent](/docs/blocks/marketing/cookie-consent)     | A consent banner and preferences                |
+| [Announcement bar](/docs/blocks/marketing/announcement-bar) | One piece of news above the header              |

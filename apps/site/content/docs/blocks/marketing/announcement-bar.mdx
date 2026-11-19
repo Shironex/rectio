@@ -1,0 +1,63 @@
+---
+title: Announcement bar
+description: 'A thin bar above the header for one piece of news.'
+pro: true
+---
+
+import AnnouncementBarDemo from '@/demos/marketing-announcement-bar';
+
+## Preview
+
+<Preview
+  name="marketing-announcement-bar"
+  plain={<AnnouncementBarDemo />}
+  importLine="import { AnnouncementBar } from '@rectio/blocks/marketing';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add announcement-bar
+```
+
+This block has no motion variant: nothing on it moves.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+A thin bar above the header for one piece of news: a release, an event, a changelog entry.
+
+## Usage
+
+Pass `onDismiss` to show a close button, and remember the dismissal yourself, by announcement id.
+`accent` fills the bar with the accent colour; `subtle` tints it softly.
+
+## Props
+
+<TypeTable
+  type={{
+    message: { type: 'ReactNode', description: 'One short line.' },
+    tag: {
+      type: 'string',
+      description: 'A short tag before the message, such as "New" or a version.',
+    },
+    action: {
+      type: 'MarketingAction',
+      description: 'Where to read more, such as the changelog entry.',
+    },
+    onDismiss: {
+      type: '() => void',
+      description: 'Shows a close button. Remember the dismissal yourself.',
+    },
+    tone: { type: "'accent' | 'subtle'", default: "'subtle'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- On narrow screens the whole line is the link; the close button sits apart from it.
+- The close button is separate from the link, so each does one thing.

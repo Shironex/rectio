@@ -1,0 +1,148 @@
+---
+title: Hero
+description: 'The first screen of a page: a headline, one sentence and the product, in four layouts.'
+pro: true
+---
+
+import HeroCenteredDemo from '@/demos/marketing-hero-centered';
+import HeroCenteredMotionDemo from '@/demos/marketing-hero-centered.motion';
+import HeroSplitDemo from '@/demos/marketing-hero-split';
+import HeroSplitMotionDemo from '@/demos/marketing-hero-split.motion';
+import HeroFloatingDemo from '@/demos/marketing-hero-floating';
+import HeroFloatingMotionDemo from '@/demos/marketing-hero-floating.motion';
+import HeroWordCycleDemo from '@/demos/marketing-hero-word-cycle';
+import HeroWordCycleMotionDemo from '@/demos/marketing-hero-word-cycle.motion';
+
+## Centered
+
+<Preview
+  name="marketing-hero-centered"
+  plain={<HeroCenteredDemo />}
+  motion={<HeroCenteredMotionDemo />}
+  importLine="import { HeroCentered } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Split
+
+<Preview
+  name="marketing-hero-split"
+  plain={<HeroSplitDemo />}
+  motion={<HeroSplitMotionDemo />}
+  importLine="import { HeroSplit } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Floating cards
+
+<Preview
+  name="marketing-hero-floating"
+  plain={<HeroFloatingDemo />}
+  motion={<HeroFloatingMotionDemo />}
+  importLine="import { HeroFloating } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Word cycle
+
+<Preview
+  name="marketing-hero-word-cycle"
+  plain={<HeroWordCycleDemo />}
+  motion={<HeroWordCycleMotionDemo />}
+  importLine="import { HeroWordCycle } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add hero
+```
+
+The motion variant is `motion-hero`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+The first screen of a page: a headline, one sentence, one or two actions and your product rendered
+live. Four layouts share the same copy props.
+
+## Usage
+
+Pick the layout by component: `HeroCentered`, `HeroSplit`, `HeroFloating` or `HeroWordCycle`. Wrap
+words in `Em` to stress them. The `visual` is any node, ideally a real block in its real state.
+
+## Props
+
+All four take the shared copy props:
+
+<TypeTable
+  type={{
+    title: {
+      type: 'ReactNode',
+      description: 'The headline. Not on HeroWordCycle, which takes before, words and after.',
+    },
+    description: {
+      type: 'ReactNode',
+      description: 'One sentence under the headline; twenty words at most reads in a glance.',
+    },
+    eyebrow: {
+      type: 'ReactNode',
+      description: 'A rule-and-label line above the headline, or a short announcement.',
+    },
+    primary: { type: 'MarketingAction' },
+    secondary: { type: 'MarketingAction' },
+    visual: {
+      type: 'ReactNode',
+      description: 'Your product, rendered live. Required for HeroSplit and HeroFloating.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+And each layout adds its own:
+
+<TypeTable
+  type={{
+    reverse: {
+      type: 'boolean',
+      default: 'false',
+      description: 'HeroSplit: put the visual on the left.',
+    },
+    cards: {
+      type: 'readonly FloatingCard[]',
+      description:
+        'HeroFloating: up to four small cards (id, content, position) that float over the visual.',
+    },
+    before: { type: 'ReactNode', description: 'HeroWordCycle: the words before the cycling one.' },
+    words: { type: 'readonly string[]', description: 'HeroWordCycle: the words that take turns.' },
+    after: {
+      type: 'ReactNode',
+      description: 'HeroWordCycle: the words after the cycling one, if any.',
+    },
+    srTitle: {
+      type: 'string',
+      description: 'HeroWordCycle: what assistive technology reads. Defaults to the words joined.',
+    },
+    interval: {
+      type: 'number',
+      default: '2200',
+      description: 'HeroWordCycle: milliseconds each word stays.',
+    },
+    loops: {
+      type: 'number',
+      default: '2',
+      description: 'HeroWordCycle: rounds before it settles on the first word.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Each hero is a section named by its headline.
+- The cycling headline reserves the widest word's width so nothing moves, holds while hovered, settles after a few rounds and reads as one stable sentence to assistive technology.
+- Under reduced motion the cycle holds still and the motion variants render the plain block.
+- On narrow screens the floating cards line up under the visual instead of covering it, and a phone shows two.

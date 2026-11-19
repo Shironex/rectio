@@ -169,6 +169,18 @@
         "$type": "shadow",
         "$value": "{shadow.overlay}"
       }
+    },
+    "emphasis": {
+      "weight": {
+        "$type": "fontWeight",
+        "$value": "{font.weight.heading}",
+        "$description": "The stressed phrase in a marketing headline, beside regular display text."
+      },
+      "style": {
+        "$type": "other",
+        "$value": "normal",
+        "$description": "normal or italic. A theme whose display face carries no heavier weight stresses with italic instead."
+      }
     }
   }
 }

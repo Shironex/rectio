@@ -1,0 +1,63 @@
+---
+title: CTA band
+description: 'The closing ask: one line, one sentence, one primary action.'
+pro: true
+---
+
+import CtaBandDemo from '@/demos/marketing-cta-band';
+import CtaBandMotionDemo from '@/demos/marketing-cta-band.motion';
+
+## Preview
+
+<Preview
+  name="marketing-cta-band"
+  plain={<CtaBandDemo />}
+  motion={<CtaBandMotionDemo />}
+  importLine="import { CtaBand } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add cta-band
+```
+
+The motion variant is `motion-cta-band`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+The closing ask: one line, one sentence, one primary action.
+
+## Usage
+
+`accent` fills the band with the accent colour, the loudest moment on the page; use `tinted` on a
+page that already has one loud section. `centered` stacks everything and `split` puts the actions
+beside the copy on wide screens.
+
+## Props
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode' },
+    description: { type: 'ReactNode' },
+    primary: { type: 'MarketingAction', description: 'The one action to take.' },
+    secondary: { type: 'MarketingAction' },
+    tone: { type: "'accent' | 'tinted'", default: "'accent'" },
+    layout: { type: "'centered' | 'split'", default: "'centered'" },
+    visual: {
+      type: 'ReactNode',
+      description: 'Something beside or under the copy, such as a small piece of live UI.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The band is a section named by its headline.
+- Actions are links: they go somewhere, with a visible focus ring.

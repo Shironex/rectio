@@ -1,0 +1,96 @@
+---
+title: Testimonials
+description: 'What customers say: one large quote, an even grid or a drifting wall.'
+pro: true
+---
+
+import TestimonialsQuoteDemo from '@/demos/marketing-testimonials-quote';
+import TestimonialsQuoteMotionDemo from '@/demos/marketing-testimonials-quote.motion';
+import TestimonialsGridDemo from '@/demos/marketing-testimonials-grid';
+import TestimonialsGridMotionDemo from '@/demos/marketing-testimonials-grid.motion';
+import TestimonialsMarqueeDemo from '@/demos/marketing-testimonials-marquee';
+import TestimonialsMarqueeMotionDemo from '@/demos/marketing-testimonials-marquee.motion';
+
+## Single quote
+
+<Preview
+  name="marketing-testimonials-quote"
+  plain={<TestimonialsQuoteDemo />}
+  motion={<TestimonialsQuoteMotionDemo />}
+  importLine="import { TestimonialQuote } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Grid
+
+<Preview
+  name="marketing-testimonials-grid"
+  plain={<TestimonialsGridDemo />}
+  motion={<TestimonialsGridMotionDemo />}
+  importLine="import { TestimonialGrid } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Marquee
+
+<Preview
+  name="marketing-testimonials-marquee"
+  plain={<TestimonialsMarqueeDemo />}
+  motion={<TestimonialsMarqueeMotionDemo />}
+  importLine="import { TestimonialMarquee } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add testimonials
+```
+
+The motion variant is `motion-testimonials`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+What customers say, in three shapes: one large quote with an optional result beside it, an even
+grid, or a wall of quotes drifting in two rows.
+
+## Usage
+
+Write the quote without quotation marks: the block adds them. Three lines at most reads best. With
+no `avatar`, the person's initials show. In the grid the first quote is set larger as the lead, and
+with an odd count it spans two rows so the grid closes without a gap. Pair the marquee with a
+static logo strip: one moving strip per page.
+
+## Props
+
+<TypeTable
+  type={{
+    testimonial: {
+      type: 'Testimonial',
+      description: 'TestimonialQuote: id, quote, name, role, and optionally company and avatar.',
+    },
+    metric: {
+      type: '{ value: string; label: string }',
+      description: 'TestimonialQuote: a result beside the quote, such as "3 days".',
+    },
+    testimonials: {
+      type: 'readonly Testimonial[]',
+      description: 'TestimonialGrid and TestimonialMarquee: the quotes.',
+    },
+    title: { type: 'ReactNode', description: 'Grid and marquee: the section heading.' },
+    description: { type: 'ReactNode' },
+    eyebrow: { type: 'ReactNode' },
+    tone: { type: "'plain' | 'tinted' | 'panel'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- Each quote is a figure with its author named beside it.
+- The marquee stops on hover and focus, has a pause button, and under reduced motion the quotes simply wrap.
+- A photo is named with the person's name; initials are hidden from assistive technology because the name is beside them.

@@ -4,11 +4,13 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
-  "description": "rectio pro finance blocks: invoices, ledger, cash flow, KPIs, approvals, aging, budget and reconciliation, composed from @rectio/ui, with motion variants on @rectio/motion.",
+  "description": "rectio pro blocks composed from @rectio/ui, with motion variants on @rectio/motion: finance (invoices, ledger, cash flow, KPIs, approvals, aging, budget) and marketing (header, heroes, features, stats, testimonials, FAQ, CTA, newsletter, team, contact, blog, footer, legal pages, cookie consent, announcements).",
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./motion": "./src/motion.ts"
+    "./motion": "./src/motion.ts",
+    "./marketing": "./src/marketing/index.ts",
+    "./marketing/motion": "./src/marketing/motion.ts"
   },
   "files": [
     "src"

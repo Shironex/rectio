@@ -213,10 +213,25 @@ function tailwindCss(contract: string[], types: TokenMap): string {
     ['indeterminate', `rx-indeterminate calc(${loop} * 1.8) ${standard} infinite`],
   ])
     map.push(`--animate-${name}: ${value};`);
+  map.push('--animate-marquee: rx-marquee var(--rx-motion-duration-marquee) linear infinite;');
 
   const durations = ['fast', 'base', 'slow', 'reveal'].map(
     (d) => `@utility duration-${d} {\n  transition-duration: var(--rx-motion-duration-${d});\n}`,
   );
+  const playback = `/* Playback of a looping animation, such as a marquee that stops on hover or runs backwards. */
+@utility playback-paused {
+  animation-play-state: paused;
+}
+
+@utility playback-reverse {
+  animation-direction: reverse;
+}
+
+/* The stressed phrase in a headline: a heavier weight, or italic where the theme's display face has no weight to spare. */
+@utility emphasis {
+  font-weight: var(--rx-emphasis-weight);
+  font-style: var(--rx-emphasis-style);
+}`;
   const numeric = `/* Money and quantities: the numeric family with tabular, lining figures. */
 @utility numeric {
   font-family: var(--rx-font-family-numeric);
@@ -332,6 +347,13 @@ ${resets.map((r) => `  ${r}`).join('\n')}
       transform: translateX(250%) scaleX(0.4);
     }
   }
+
+  /* A strip drawn twice end to end: half its width is one full pass. */
+  @keyframes rx-marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
 }
 
 @theme inline {
@@ -339,6 +361,8 @@ ${map.map((m) => `  ${m}`).join('\n')}
 }
 
 ${durations.join('\n\n')}
+
+${playback}
 
 ${numeric}
 

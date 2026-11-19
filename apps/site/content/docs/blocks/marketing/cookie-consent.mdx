@@ -1,0 +1,113 @@
+---
+title: Cookie consent
+description: 'A cookie banner that asks before anything optional runs, with preferences per category.'
+pro: true
+---
+
+import CookieConsentBannerDemo from '@/demos/marketing-cookie-consent-banner';
+import CookieConsentBannerMotionDemo from '@/demos/marketing-cookie-consent-banner.motion';
+import CookieConsentPreferencesDemo from '@/demos/marketing-cookie-consent-preferences';
+import CookieConsentPreferencesMotionDemo from '@/demos/marketing-cookie-consent-preferences.motion';
+
+## Banner
+
+<Preview
+  name="marketing-cookie-consent-banner"
+  plain={<CookieConsentBannerDemo />}
+  motion={<CookieConsentBannerMotionDemo />}
+  importLine="import { CookieConsent } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Preferences
+
+<Preview
+  name="marketing-cookie-consent-preferences"
+  plain={<CookieConsentPreferencesDemo />}
+  motion={<CookieConsentPreferencesMotionDemo />}
+  importLine="import { CookiePreferences } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add cookie-consent
+```
+
+The motion variant is `motion-cookie-consent`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+A cookie banner that asks before anything optional runs: accept all and reject all at the same
+weight, one press each, and a way to choose per category.
+
+## Consent is your responsibility
+
+The block records a decision; it does not make your site compliant. List every category you really
+use, load optional scripts only when `isAllowed` says so, keep the saved record as proof, and bump
+`version` when your cookie list changes so visitors are asked again. Your cookie policy text is
+yours to write: the legal page templates are a starting point and are not legal advice.
+
+## Usage
+
+Keep the saved decision in your own storage (`loadConsent` and `saveConsent` read and write
+`localStorage` safely) and pass it back as `consent`. While it covers `version`, the banner stays
+away. Open `CookiePreferences` from a "Cookie settings" link in the footer so visitors can change
+their mind.
+
+## Props
+
+`CookieConsent`:
+
+<TypeTable
+  type={{
+    categories: {
+      type: 'readonly CookieCategory[]',
+      description: 'Each category: id, title, description and required (always on).',
+    },
+    version: {
+      type: 'string',
+      description: 'The version of your cookie list. A decision for another version asks again.',
+    },
+    consent: {
+      type: 'ConsentRecord | null | undefined',
+      description: 'The saved decision. The banner stays away while it covers the version.',
+    },
+    onSave: {
+      type: '(consent: ConsentRecord) => void',
+      description: 'Called with the decision. Store it and load your scripts.',
+    },
+    policyHref: { type: 'string', description: 'Your cookie policy, linked from the banner.' },
+    policyLabel: { type: 'string', default: "'Cookie policy'" },
+    title: { type: 'string', default: "'We use cookies'" },
+    description: { type: 'ReactNode' },
+    className: { type: 'string' },
+  }}
+/>
+
+`CookiePreferences` takes the same `categories`, `version`, `consent`, `onSave`, `policyHref` and
+`policyLabel`, plus:
+
+<TypeTable
+  type={{
+    open: { type: 'boolean' },
+    onOpenChange: { type: '(open: boolean) => void' },
+  }}
+/>
+
+## Logic
+
+Decisions are plain data, so a server can read them: `acceptAll`, `rejectAll`, `chooseConsent`,
+`initialChoices`, `hasDecided`, `isAllowed`, `loadConsent` and `saveConsent`.
+
+## Accessibility
+
+- The banner is a labelled region, not a modal: the page stays usable while it waits.
+- Accept all and reject all have the same weight and take one press each.
+- Preferences use real switches with labels; required categories show as always on.
+- Focus moves into the preferences dialog and returns to what opened it.

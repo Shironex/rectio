@@ -1,0 +1,80 @@
+---
+title: FAQ
+description: 'Frequently asked questions as an accordion or a numbered list.'
+pro: true
+---
+
+import FaqAccordionDemo from '@/demos/marketing-faq-accordion';
+import FaqAccordionMotionDemo from '@/demos/marketing-faq-accordion.motion';
+import FaqNumberedDemo from '@/demos/marketing-faq-numbered';
+import FaqNumberedMotionDemo from '@/demos/marketing-faq-numbered.motion';
+
+## Accordion
+
+<Preview
+  name="marketing-faq-accordion"
+  plain={<FaqAccordionDemo />}
+  motion={<FaqAccordionMotionDemo />}
+  importLine="import { Faq } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Numbered
+
+<Preview
+  name="marketing-faq-numbered"
+  plain={<FaqNumberedDemo />}
+  motion={<FaqNumberedMotionDemo />}
+  importLine="import { Faq } from '@rectio/blocks/marketing/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add faq
+```
+
+The motion variant is `motion-faq`. It installs the plain block too and changes only how the
+block enters.
+
+The marketing blocks share a small core (`marketing-core`) that `add` installs for you.
+
+Frequently asked questions. The accordion opens one answer at a time beside the heading; the
+numbered list shows every answer at once in two columns, for five or six questions everyone should
+read.
+
+## Usage
+
+Answers are nodes, so they can hold links. Set `defaultOpen` to the ids of the answers open at first,
+such as the most asked question. Use `aside` for a link to support under the heading.
+
+## Props
+
+<TypeTable
+  type={{
+    items: { type: 'readonly FaqItem[]', description: 'Each question: id, question and answer.' },
+    title: { type: 'ReactNode' },
+    description: { type: 'ReactNode' },
+    eyebrow: { type: 'ReactNode' },
+    variant: { type: "'accordion' | 'numbered'", default: "'accordion'" },
+    aside: {
+      type: 'ReactNode',
+      description: 'Something under the heading, such as a link to support.',
+    },
+    defaultOpen: {
+      type: 'string[]',
+      description: 'Ids of the answers open at first, in the accordion.',
+    },
+    tone: { type: "'plain' | 'tinted' | 'panel'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- Closed answers stay findable with find in page.
+- The numbered list shows every answer at once, so nothing is hidden from a reader who skips the toggles.

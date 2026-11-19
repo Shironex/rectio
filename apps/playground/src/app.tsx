@@ -13,6 +13,9 @@ const BlocksPage = lazy(() =>
 const DisplayPage = lazy(() =>
   import('./display/display-page').then((m) => ({ default: m.DisplayPage })),
 );
+const MarketingPage = lazy(() =>
+  import('./marketing/marketing-page').then((m) => ({ default: m.MarketingPage })),
+);
 const MotionPage = lazy(() =>
   import('./motion/motion-page').then((m) => ({ default: m.MotionPage })),
 );
@@ -27,6 +30,8 @@ export function App() {
         <BlocksPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'display' ? (
         <DisplayPage theme={theme} mode={mode} motion={motion} />
+      ) : view === 'marketing' ? (
+        <MarketingPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'motion' ? (
         <MotionPage theme={theme} mode={mode} />
       ) : (
