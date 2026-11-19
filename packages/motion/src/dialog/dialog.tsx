@@ -120,7 +120,8 @@ function MotionPopup({ state, ref, ...props }: ComponentProps<'div'> & { state: 
       ? [
           // Opens: leans out of the trigger's side on the overlay spring, opaque early.
           springTo(element, { transform: [away, 'none'] }, tokens.spring.overlay),
-          tweenTo(element, { opacity: [0, 1] }, tokens.duration.base, tokens.easing.enter),
+          // Opaque within the fast duration, so page text never shows through the card for long.
+          tweenTo(element, { opacity: [0, 1] }, tokens.duration.fast, tokens.easing.enter),
         ]
       : [
           // Closes: leans back toward the trigger on the same spring, gone within the fast duration.
