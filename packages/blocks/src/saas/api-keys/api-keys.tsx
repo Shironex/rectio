@@ -1,4 +1,5 @@
 import {
+  CaretRightIcon,
   CheckIcon,
   CopyIcon,
   KeyIcon,
@@ -32,8 +33,8 @@ import { formatShortDate, resolveLocale } from '../../lib/finance';
 import { StateBadge } from '../../lib/state-badge';
 import { FormMessage } from '../lib/auth';
 import { focusFirstInvalid, useNow } from '../lib/focus';
-import { relativeTime } from '../lib/saas';
-import { inlineLink } from '../lib/styles';
+import { plural, relativeTime } from '../lib/saas';
+import { focusRing, inlineLink } from '../lib/styles';
 import { useSaasParts } from '../lib/saas-parts';
 import {
   API_KEY_EXPIRY_LABELS,
@@ -166,6 +167,36 @@ export function ApiKeys({
   const live = keys.filter((key) => key.revokedAt === undefined);
   const showForm = onCreate !== undefined && creating && createdKey === undefined;
 
+  const sorted = sortApiKeys(keys);
+  const liveKeys = sorted.filter((key) => key.revokedAt === undefined);
+  const revokedKeys = sorted.filter((key) => key.revokedAt !== undefined);
+  const renderKeys = (list: readonly ApiKey[], label: string) => (
+    <ul aria-label={label} className="flex flex-col">
+      <Items>
+        {list.map((key) => (
+          <Item
+            key={key.id}
+            className="flex flex-col gap-2 py-3.5 not-last:border-b not-last:border-line @lg:flex-row @lg:items-center @lg:gap-3"
+          >
+            <KeyRow
+              apiKey={key}
+              scope={scopes.find((s) => s.value === key.scope)}
+              now={now}
+              locale={locale}
+              onRevoke={
+                onRevoke === undefined
+                  ? undefined
+                  : () => {
+                      setRevoking(key);
+                    }
+              }
+            />
+          </Item>
+        ))}
+      </Items>
+    </ul>
+  );
+
   return (
     <BlockPanel
       title={title}
@@ -255,30 +286,30 @@ export function ApiKeys({
           </div>
         )
       ) : (
-        <ul aria-label="API keys" className="flex flex-col">
-          <Items>
-            {sortApiKeys(keys).map((key) => (
-              <Item
-                key={key.id}
-                className="flex flex-col gap-2 py-3.5 not-last:border-b not-last:border-line @lg:flex-row @lg:items-center @lg:gap-3"
+        <>
+          {liveKeys.length > 0 && renderKeys(liveKeys, 'API keys')}
+          {/* Revoked keys stay on record but out of the way, one click from view. */}
+          {revokedKeys.length > 0 && (
+            <details className="group border-t border-line">
+              <summary
+                className={cn(
+                  'flex min-h-(--rx-control-height-touch) cursor-pointer list-none items-center gap-2 rounded-control text-sm font-medium text-fg-muted hover:text-fg',
+                  focusRing,
+                )}
               >
-                <KeyRow
-                  apiKey={key}
-                  scope={scopes.find((s) => s.value === key.scope)}
-                  now={now}
-                  locale={locale}
-                  onRevoke={
-                    onRevoke === undefined
-                      ? undefined
-                      : () => {
-                          setRevoking(key);
-                        }
-                  }
+                <CaretRightIcon
+                  aria-hidden
+                  weight="bold"
+                  className="size-3.5 transition-transform duration-fast ease-standard group-open:rotate-90"
                 />
-              </Item>
-            ))}
-          </Items>
-        </ul>
+                <span className="group-open:hidden">Show</span>
+                <span className="hidden group-open:inline">Hide</span>
+                <span>{plural(revokedKeys.length, 'revoked key')}</span>
+              </summary>
+              {renderKeys(revokedKeys, 'Revoked API keys')}
+            </details>
+          )}
+        </>
       )}
 
       <RevokeDialog
@@ -337,7 +368,9 @@ function KeyRow({
           <span
             className={cn(
               'inline-flex items-center gap-1 rounded-badge border px-1.5 py-px text-xs',
-              elevated ? 'border-line-strong font-medium text-fg' : 'border-line text-fg-muted',
+              elevated
+                ? 'border-warning-strong/30 bg-warning-subtle font-medium text-warning-strong'
+                : 'border-line text-fg-muted',
             )}
           >
             {elevated && <ShieldWarningIcon aria-hidden weight="bold" className="size-3" />}

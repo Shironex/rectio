@@ -153,6 +153,12 @@ describe('ApiKeys', () => {
     });
   });
 
+  it('keeps revoked keys behind a disclosure', () => {
+    render(<ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} />);
+    expect(screen.getByRole('list', { name: 'API keys' })).not.toHaveTextContent('Old');
+    expect(screen.getByText('1 revoked key')).toBeInTheDocument();
+  });
+
   it('confirms before revoking', async () => {
     const onRevoke = vi.fn();
     render(<ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} onRevoke={onRevoke} />);
