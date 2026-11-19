@@ -1,0 +1,42 @@
+{
+  "name": "@rectio/registry",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "description": "The rectio registry: item schema, the build that turns @rectio/ui and @rectio/tokens into static registry JSON, and a local dev server.",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./build": {
+      "types": "./src/build/index.ts",
+      "default": "./dist/build/index.js"
+    },
+    "./serve": {
+      "types": "./src/serve.ts",
+      "default": "./dist/serve.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node scripts/build.ts",
+    "serve": "node scripts/serve.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "typescript": "~6.0.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@rectio/tokens": "workspace:*",
+    "@rectio/ui": "workspace:*",
+    "@types/node": "^22.20.5",
+    "vitest": "^5.1.0"
+  }
+}

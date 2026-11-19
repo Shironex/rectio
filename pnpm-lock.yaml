@@ -118,6 +118,28 @@ importers:
         specifier: ^8.3.8
         version: 8.3.8(@types/node@22.20.5)(jiti@2.7.0)(yaml@2.9.1)
 
+  packages/registry:
+    dependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@rectio/tokens':
+        specifier: workspace:*
+        version: link:../tokens
+      '@rectio/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
+      vitest:
+        specifier: ^5.1.0
+        version: 5.1.0(@types/node@22.20.5)(jsdom@31.0.0)(vite@8.3.8(@types/node@22.20.5)(jiti@2.7.0)(yaml@2.9.1))
+
   packages/tokens:
     dependencies:
       '@fontsource-variable/ibm-plex-sans':
