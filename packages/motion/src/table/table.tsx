@@ -1,71 +1,98 @@
 import {
   DataTableBody as PlainDataTableBody,
   TableBody,
-  TableCell as PlainTableCell,
+  TableCell,
   TableRow as PlainTableRow,
   type DataTableBodyProps,
   type DataTableColumnMeta,
-  type TableCellProps,
 } from '@rectio/ui';
 import type { RowData } from '@tanstack/react-table';
 import { AnimatePresence, PresenceContext, usePresence } from 'motion/react';
 import { use, useLayoutEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 
-import { tweenTo } from '../lib/animate';
 import { usePlainMotion } from '../lib/mode';
 import { assignRef } from '../lib/ref';
-import { readMotionTokens } from '../lib/tokens';
+import { readMotionTokens, type MotionTokens } from '../lib/tokens';
+
+/** The cell needs nothing of its own: rows move by transform, so a cell never clips or resizes. */
+export { TableCell };
 
 /**
- * Table rows that arrive and leave in place: a new row opens its height and fades in, a deleted
- * row fades out first and then closes the gap, so the rows below slide up instead of jumping.
+ * Table rows that arrive and leave in place, moving only transform and opacity: the layout changes
+ * once, in a single frame, and every row that it moved slides from where it was drawn to where it
+ * now is (FLIP). A new row fades in as the rows below it slide down out of its way; a deleted row
+ * fades out to the side, faster than an entry, and then the rows below slide up into the gap.
  * Rows present on the first render never animate.
- *
- * Height cannot animate on a table row, so each cell opens and closes itself (its height and
- * vertical padding) while a block inside it clips the content.
  */
 export function TableRows({ children }: { children?: ReactNode }) {
   return <AnimatePresence initial={false}>{children}</AnimatePresence>;
 }
 
-interface CellParts {
-  cell: HTMLElement;
-  content: HTMLElement;
-  height: string;
-  paddingTop: string;
-  paddingBottom: string;
-  contentHeight: string;
+/** A Web Animations easing from the token, as the stylesheet writes it. */
+function cssEasing(element: Element, name: keyof MotionTokens['easing']): string {
+  return (
+    getComputedStyle(element).getPropertyValue(`--rx-motion-easing-${name}`).trim() || 'linear'
+  );
 }
 
-function cellParts(row: HTMLTableRowElement): CellParts[] {
-  return [...row.cells].flatMap((cell) => {
-    const content = cell.firstElementChild;
-    if (!(content instanceof HTMLElement) || content.dataset.part !== 'cell') return [];
-    const style = getComputedStyle(cell);
-    return [
-      {
-        cell,
-        content,
-        height: `${String(cell.getBoundingClientRect().height)}px`,
-        paddingTop: style.paddingTop,
-        paddingBottom: style.paddingBottom,
-        contentHeight: `${String(content.offsetHeight)}px`,
-      },
-    ];
+/** Slides a row from `delta` pixels away (drawn where it was) to its place. */
+function slide(row: HTMLTableRowElement, delta: number, tokens: MotionTokens) {
+  if (delta === 0) return;
+  row.animate([{ transform: `translateY(${String(delta)}px)` }, { transform: 'none' }], {
+    duration: tokens.duration.base * 1000,
+    easing: cssEasing(row, 'standard'),
   });
 }
 
-const CLOSED = { height: '0px', paddingTop: '0px', paddingBottom: '0px' };
-
-/** Clips the contents while they open or close; focus rings must not be clipped at rest. */
-function clip(parts: CellParts[], on: boolean) {
-  for (const { content } of parts) content.style.overflow = on ? 'hidden' : '';
+interface Leaving {
+  row: HTMLTableRowElement;
+  done: () => void;
 }
 
 /**
- * Height is a layout property: each frame lays the table out again. That is cheap for the row in
- * view and pointless for one nobody can see, so a row outside the viewport changes at once.
+ * Rows that arrive or finish leaving in the same frame move the others together, once: a batch is
+ * collected per table body and settled in a microtask, still before the frame is painted.
  */
+const arriving = new Map<HTMLTableSectionElement, HTMLTableRowElement[]>();
+const leaving = new Map<HTMLTableSectionElement, Leaving[]>();
+
+/** The rows after the new ones were drawn higher by the new rows' heights: slide them down. */
+function openGaps(body: HTMLTableSectionElement, tokens: MotionTokens) {
+  const added = new Set(arriving.get(body));
+  arriving.delete(body);
+  let above = 0;
+  for (const row of body.rows) {
+    if (added.has(row)) above += row.offsetHeight;
+    else slide(row, -above, tokens);
+  }
+}
+
+/** Measures the others, takes the leavers out of the layout, measures again, slides the moved. */
+function closeGaps(body: HTMLTableSectionElement, tokens: MotionTokens) {
+  const queue = leaving.get(body) ?? [];
+  leaving.delete(body);
+  const gone = new Set(queue.map((entry) => entry.row));
+  const rest = [...body.rows].filter((row) => !gone.has(row));
+  const before = rest.map((row) => row.offsetTop);
+  for (const row of gone) row.style.display = 'none';
+  rest.forEach((row, index) => {
+    slide(row, (before[index] ?? 0) - row.offsetTop, tokens);
+  });
+  for (const entry of queue) entry.done();
+}
+
+function enqueue<T>(
+  queues: Map<HTMLTableSectionElement, T[]>,
+  body: HTMLTableSectionElement,
+  entry: T,
+  settle: () => void,
+) {
+  const queue = queues.get(body) ?? [];
+  if (queue.length === 0) queueMicrotask(settle);
+  queues.set(body, [...queue, entry]);
+}
+
+/** A row nobody can see changes at once: there is nothing to follow. */
 function inView(row: HTMLElement) {
   const box = row.getBoundingClientRect();
   return box.bottom > 0 && box.top < window.innerHeight;
@@ -82,71 +109,50 @@ export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
 
   useLayoutEffect(() => {
     const row = node.current;
+    const body = row?.parentElement;
     const tokens = row === null || plain || !inView(row) ? null : readMotionTokens(row);
-    if (row === null || tokens === null) {
+    if (row === null || tokens === null || !(body instanceof HTMLTableSectionElement)) {
       settled.current = true;
       if (!isPresent) safeToRemove();
       return;
     }
-    const parts = cellParts(row);
-    const { duration, easing } = tokens;
+    const { duration } = tokens;
 
     if (isPresent) {
       if (settled.current) return;
       settled.current = true;
-      clip(parts, true);
-      const opening = parts.flatMap((p) => [
-        tweenTo(
-          p.cell,
-          {
-            height: ['0px', p.height],
-            paddingTop: ['0px', p.paddingTop],
-            paddingBottom: ['0px', p.paddingBottom],
-          },
-          duration.base,
-          easing.enter,
-        ),
-        tweenTo(p.content, { height: ['0px', p.contentHeight] }, duration.base, easing.enter),
-      ]);
-      tweenTo(row, { opacity: [0, 1] }, duration.base, easing.enter, duration.fast);
-      void Promise.all(opening).then(() => {
-        clip(parts, false);
+      // Fades in once the rows below have mostly cleared its place, from a short drop above it.
+      row.animate(
+        [
+          { opacity: 0, transform: `translateY(calc(-1 * ${tokens.distance.shift}))` },
+          { opacity: 1, transform: 'none' },
+        ],
+        {
+          duration: duration.base * 1000,
+          delay: duration.fast * 500,
+          easing: cssEasing(row, 'enter'),
+          fill: 'backwards',
+        },
+      );
+      enqueue(arriving, body, row, () => {
+        openGaps(body, tokens);
       });
       return;
     }
 
-    // Leaving: out of the tab order at once, then fade, then close the gap.
+    // Leaving: out of the tab order at once, then a quick fade to the side, faster than an entry.
     row.inert = true;
-    clip(parts, true);
-    // The end state, under the animations: no full-height frame between their end and removal.
-    row.style.opacity = '0';
-    for (const p of parts) {
-      Object.assign(p.cell.style, CLOSED);
-      p.content.style.height = '0px';
-    }
-    const fade = tweenTo(row, { opacity: [1, 0] }, duration.fast, easing.exit);
-    const closing = parts.flatMap((p) => [
-      tweenTo(
-        p.cell,
-        {
-          height: [p.height, '0px'],
-          paddingTop: [p.paddingTop, '0px'],
-          paddingBottom: [p.paddingBottom, '0px'],
-        },
-        duration.base,
-        easing.standard,
-        duration.fast,
-      ),
-      tweenTo(
-        p.content,
-        { height: [p.contentHeight, '0px'] },
-        duration.base,
-        easing.standard,
-        duration.fast,
-      ),
-    ]);
-    void Promise.all([fade, ...closing]).then(() => {
-      safeToRemove();
+    const exit = row.animate(
+      [
+        { opacity: 1, transform: 'none' },
+        { opacity: 0, transform: `translateX(${tokens.distance.shift})` },
+      ],
+      { duration: duration.fast * 1000, easing: cssEasing(row, 'exit'), fill: 'forwards' },
+    );
+    void exit.finished.then(() => {
+      enqueue(leaving, body, { row, done: safeToRemove }, () => {
+        closeGaps(body, tokens);
+      });
     });
   }, [isPresent, plain, safeToRemove]);
 
@@ -162,22 +168,13 @@ export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
   );
 }
 
-/** Same as the plain table cell, with the block inside that opens and closes with its row. */
-export function TableCell({ children, ...props }: TableCellProps) {
-  return (
-    <PlainTableCell {...props}>
-      <div data-part="cell">{children}</div>
-    </PlainTableCell>
-  );
-}
-
 const metaOf = (column: { columnDef: { meta?: unknown } }) =>
   (column.columnDef.meta ?? {}) as DataTableColumnMeta;
 
 /**
- * Same props as the plain DataTableBody. Rows added after the first render open in place and
- * removed rows fade and close the gap; loading and empty states are the plain ones. Under reduced
- * motion it is the plain body.
+ * Same props as the plain DataTableBody. Rows added after the first render fade in as the rows
+ * below make way, and removed rows fade out before the gap closes; loading and empty states are
+ * the plain ones. Under reduced motion it is the plain body.
  */
 export function DataTableBody<TData extends RowData>(props: DataTableBodyProps<TData>) {
   const plain = usePlainMotion();
