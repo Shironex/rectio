@@ -111,8 +111,8 @@ const SEQUENCE = [1, 2, 3, 4, 5].map((step) => `chart-sequence-${String(step)}`)
 const VISIONS: (ColorVision | undefined)[] = [undefined, 'protan', 'deutan', 'tritan'];
 /** Marks that sit side by side: well past a just noticeable difference (about 0.02). */
 const SERIES_APART = 0.09;
-/** Neighbouring aging steps; each also carries its label, so a smaller gap is enough. */
-const SEQUENCE_APART = 0.05;
+/** Neighbouring aging steps: clearly apart for every colour vision type, not just noticeable. */
+const SEQUENCE_APART = 0.09;
 
 describe('chart colours', () => {
   it.each(themeModes)('$key marks hold 3:1 against the surfaces they sit on', ({ tokens }) => {

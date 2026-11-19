@@ -1368,6 +1368,65 @@
         }
       },
       "$description": "Information."
+    },
+    "heat": {
+      "on-light-1": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.625, 0.13, 78],
+          "alpha": 1
+        }
+      },
+      "on-light-2": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.5, 0.145, 44],
+          "alpha": 1
+        }
+      },
+      "on-light-3": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.39, 0.145, 20],
+          "alpha": 1
+        }
+      },
+      "on-light-4": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.27, 0.095, 345],
+          "alpha": 1
+        }
+      },
+      "on-dark-1": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.9, 0.105, 88],
+          "alpha": 1
+        }
+      },
+      "on-dark-2": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.77, 0.145, 58],
+          "alpha": 1
+        }
+      },
+      "on-dark-3": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.655, 0.175, 30],
+          "alpha": 1
+        }
+      },
+      "on-dark-4": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.56, 0.19, 358],
+          "alpha": 1
+        }
+      },
+      "$description": "Severity ramp for ordered marks such as aging buckets: amber through red to plum. Each step moves in lightness and hue, so neighbours stay apart under protan, deutan and tritan vision. The on-light steps hold 3:1 on light surfaces, the on-dark steps on dark ones."
     }
   }
 }
