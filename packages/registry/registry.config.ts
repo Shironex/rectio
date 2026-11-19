@@ -44,7 +44,7 @@ export default defineRegistry({
   tokens: {
     dir: tokens,
     item: {
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'Tokens',
       description:
         'The Tailwind v4 theme mapped to rectio tokens, density and reduced motion. Installed by init.',
@@ -53,14 +53,14 @@ export default defineRegistry({
       {
         id: 'default',
         tier: 'free',
-        version: '0.2.0',
+        version: '0.2.1',
         title: 'Default theme',
         description: 'Warm stone neutrals, cobalt accent, 4px controls, IBM Plex. Light and dark.',
       },
       {
         id: 'ledger',
         tier: 'free',
-        version: '0.2.0',
+        version: '0.2.1',
         title: 'Ledger theme',
         description:
           'Green-black ink, citron accent, 2px corners, slower motion, Source Serif 4 headings.',
