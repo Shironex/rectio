@@ -69,8 +69,3 @@ export function Popover({
     </BasePopover.Root>
   );
 }
-
-/** Closes the popover it sits in; renders your element, such as a link-styled button. */
-export function PopoverClose({ render }: { render: ReactElement<Record<string, unknown>> }) {
-  return <BasePopover.Close render={render} />;
-}
