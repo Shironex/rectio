@@ -250,7 +250,7 @@ export function InvoiceList({
                 className={cn(state === 'void' && 'text-fg-muted line-through')}
               />
               {partial && (
-                <span className="text-sm whitespace-nowrap text-fg-muted">
+                <span className="text-end text-sm text-fg-muted @xl:whitespace-nowrap">
                   <Money amount={invoice.total - balance} currency={currency} locale={locale} />{' '}
                   paid of <Money amount={invoice.total} currency={currency} locale={locale} />
                 </span>
