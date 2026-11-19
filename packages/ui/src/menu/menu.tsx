@@ -29,6 +29,8 @@ export const menuItem = cn(
   'rounded-(--rx-field-radius) py-1.5 ps-2 pe-2 text-base text-fg outline-none select-none',
   'pointer-coarse:min-h-(--rx-field-height-touch)',
   'data-highlighted:bg-accent-subtle data-disabled:text-fg-disabled',
+  // Under a popup with one gliding highlight of its own (the motion add-on), rows let it show.
+  'in-data-glide:data-highlighted:bg-transparent',
   '[&_svg]:shrink-0',
 );
 
