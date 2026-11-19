@@ -20,6 +20,10 @@ export function App() {
     const root = document.documentElement;
     root.dataset.theme = theme;
     root.dataset.mode = mode;
+    return () => {
+      delete root.dataset.theme;
+      delete root.dataset.mode;
+    };
   }, [theme, mode, view]);
   return (
     <Suspense>

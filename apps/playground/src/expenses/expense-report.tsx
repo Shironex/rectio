@@ -285,6 +285,7 @@ function Report({ back }: { back: string | null }) {
             value={period}
             onValueChange={setPeriod}
             presets={PRESETS}
+            className="w-full sm:w-auto"
           />
           {/* Phones fold Date, Category and Status away from the header; this sorts by any of them. */}
           <DataTableSort table={table} className="w-full sm:hidden" />
