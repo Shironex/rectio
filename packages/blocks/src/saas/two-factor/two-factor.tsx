@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, useState, type ReactNode, type SyntheticEv
 
 import { useBlockParts } from '../../lib/block-parts';
 import { AuthFrame, AuthLink, type LinkTarget } from '../lib/auth';
+import { focusFirstInvalid } from '../lib/focus';
 import { inlineLink } from '../lib/styles';
 import {
   backupCodeError,
@@ -38,12 +39,19 @@ export interface TwoFactorProps {
   /** "Sign in as someone else" or a way back. */
   back?: LinkTarget;
   brand?: ReactNode;
+  /** A brand panel beside the form on wide containers; it folds away on narrow ones. */
+  aside?: ReactNode;
   title?: ReactNode;
+  /**
+   * Focus the first slot on mount. Off by default, so an embedded block never takes focus from
+   * the page; turn it on when the step is the whole page.
+   */
+  autoFocus?: boolean;
   className?: string;
 }
 
 /** Ticks once a second while a countdown runs, so the resend button can wake up. */
-function useNow(running: boolean): Date {
+function useTicker(running: boolean): Date {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     if (!running) return;
@@ -76,16 +84,20 @@ export function TwoFactor({
   error,
   back,
   brand,
+  aside,
   title,
+  autoFocus = false,
   className,
 }: TwoFactorProps) {
   const { Button } = useBlockParts();
   const [mode, setMode] = useState<'code' | 'backup'>('code');
+  // Set once the person has switched views: the view that replaces another takes focus.
+  const [switched, setSwitched] = useState(false);
   const [code, setCode] = useState('');
   const [remember, setRemember] = useState(false);
   const [tried, setTried] = useState(false);
   const canResend = onResend !== undefined && method !== 'app';
-  const now = useNow(canResend && sentAt !== undefined);
+  const now = useTicker(canResend && sentAt !== undefined);
   const wait = canResend ? twoFactorResendWait(sentAt, now, resendCooldown) : 0;
   const hasError = error !== undefined && error !== null && error !== false;
   const firstSlot = useRef<HTMLInputElement>(null);
@@ -98,15 +110,20 @@ export function TwoFactor({
     if (pending || !twoFactorCodeComplete(value, length)) return;
     onVerify(value, { remember });
   };
-  const submit = (event: SyntheticEvent) => {
+  const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTried(true);
+    if (!twoFactorCodeComplete(code, length)) {
+      focusFirstInvalid(event.currentTarget);
+      return;
+    }
     verify(code);
   };
   const incomplete = tried && !twoFactorCodeComplete(code, length);
 
   const frame = {
     brand,
+    aside,
     footer:
       back === undefined ? undefined : (
         <>
@@ -125,6 +142,7 @@ export function TwoFactor({
         onSubmit={onUseBackupCode}
         onBack={() => {
           setMode('code');
+          setSwitched(true);
         }}
       />
     );
@@ -134,6 +152,7 @@ export function TwoFactor({
   return (
     <AuthFrame
       {...frame}
+      focusHeading={switched}
       title={title ?? 'Enter your verification code'}
       description={`${twoFactorInstruction(method, length, destination)} We check it as soon as you enter the last digit.`}
     >
@@ -159,8 +178,8 @@ export function TwoFactor({
                   <OTPField.Separator className="mx-0.5 h-0.5 w-3 shrink-0 rounded-full bg-fg-subtle @sm:mx-1" />
                 )}
                 <OTPField.Input
-                  // The code is the only thing to do on this step, so the first slot takes focus.
-                  autoFocus={index === 0}
+                  // Opt in: an embedded block must not take focus from the page.
+                  autoFocus={autoFocus && index === 0}
                   ref={index === 0 ? firstSlot : undefined}
                   aria-label={
                     index === 0 ? undefined : `Digit ${String(index + 1)} of ${String(length)}`
@@ -169,9 +188,11 @@ export function TwoFactor({
                     'aspect-7/8 max-h-14 w-full min-w-0 flex-1 rounded-(--rx-field-radius) border border-(--rx-field-border) bg-(--rx-field-background)',
                     'text-center font-numeric text-2xl font-medium text-fg tabular-nums caret-accent',
                     'transition-[border-color,outline-color] duration-fast ease-standard hover:border-fg-subtle',
-                    // The focus ring stands off the slot, so it reads apart from the error border.
+                    // The focus ring stands off the slot, so it reads apart from the border.
                     'outline-0 outline-transparent focus:border-accent focus:outline-2 focus:outline-offset-3 focus:outline-focus',
-                    'group-data-invalid/otp:not-focus:border-negative group-data-readonly/otp:text-fg-muted',
+                    // A refused code marks every slot, the focused one included: no slot reads as valid.
+                    'group-data-invalid/otp:border-negative group-data-invalid/otp:focus:border-negative group-data-invalid/otp:focus:outline-negative',
+                    'group-data-readonly/otp:text-fg-muted',
                   )}
                 />
               </Fragment>
@@ -194,37 +215,39 @@ export function TwoFactor({
           </label>
         )}
 
-        <Button type="submit" loading={pending} className="w-full">
+        {/* The code is checked on the last digit; this button is for paste and assistive use. */}
+        <Button type="submit" variant="secondary" loading={pending} className="w-full">
           Verify
         </Button>
 
         {(canResend || onUseBackupCode !== undefined) && (
           <div className="flex items-center justify-between gap-3 border-t border-line pt-4 text-sm">
             {canResend && (
-              <span className="flex items-baseline gap-1.5">
-                <button
-                  type="button"
-                  disabled={wait > 0}
-                  onClick={onResend}
-                  className={cn(
-                    inlineLink,
-                    'pointer-coarse:py-2',
-                    'disabled:cursor-not-allowed disabled:text-fg-muted disabled:no-underline',
-                  )}
-                >
-                  Send a new code
-                </button>
-                {wait > 0 && (
-                  <span className="text-fg-muted">
-                    in <span className="numeric">{formatTwoFactorWait(wait)}</span>
-                  </span>
+              <button
+                type="button"
+                disabled={wait > 0}
+                onClick={onResend}
+                className={cn(
+                  inlineLink,
+                  'pointer-coarse:py-2',
+                  // The countdown stays readable: muted text, only the link's underline goes.
+                  'disabled:cursor-not-allowed disabled:font-regular disabled:text-fg-muted disabled:no-underline',
                 )}
-              </span>
+              >
+                {wait > 0 ? (
+                  <>
+                    New code in <span className="numeric">{formatTwoFactorWait(wait)}</span>
+                  </>
+                ) : (
+                  'Send a new code'
+                )}
+              </button>
             )}
             {onUseBackupCode !== undefined && (
               <AuthLink
                 to={() => {
                   setMode('backup');
+                  setSwitched(true);
                 }}
                 className="ms-auto"
               >
@@ -246,6 +269,7 @@ function BackupCode({
   ...frame
 }: {
   brand: ReactNode;
+  aside: ReactNode;
   footer: ReactNode;
   className: string | undefined;
   pending: boolean;
@@ -259,16 +283,22 @@ function BackupCode({
   const problem = tried ? backupCodeError(value) : null;
   const shown = error ?? problem;
 
-  const submit = (event: SyntheticEvent) => {
+  const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTried(true);
-    if (pending || backupCodeError(value) !== null) return;
+    if (backupCodeError(value) !== null) {
+      focusFirstInvalid(event.currentTarget);
+      return;
+    }
+    if (pending) return;
     onSubmit(normalizeBackupCode(value));
   };
 
   return (
     <AuthFrame
       {...frame}
+      // This view replaces the code step, so focus moves to its heading.
+      focusHeading
       title="Use a backup code"
       description="Each of the codes you saved when you turned on two-step sign in works once."
     >
@@ -276,7 +306,6 @@ function BackupCode({
         <Field invalid={shown !== null}>
           <FieldLabel>Backup code</FieldLabel>
           <Input
-            autoFocus
             autoComplete="one-time-code"
             spellCheck={false}
             value={value}

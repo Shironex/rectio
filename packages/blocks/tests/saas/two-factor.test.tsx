@@ -67,8 +67,8 @@ describe('TwoFactor', () => {
 
   it('holds the resend until the cooldown ends', () => {
     render(<TwoFactor onVerify={vi.fn()} method="sms" onResend={vi.fn()} sentAt={new Date()} />);
-    expect(screen.getByRole('button', { name: 'Send a new code' })).toBeDisabled();
-    expect(document.body).toHaveTextContent(/in 0:\d\d/);
+    expect(screen.getByRole('button', { name: /New code in 0:\d\d/ })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Send a new code' })).not.toBeInTheDocument();
   });
 
   it('offers the resend once the cooldown has passed', async () => {
@@ -106,6 +106,14 @@ describe('TwoFactor', () => {
   it('says it checks on the last digit and puts focus back on a refusal', () => {
     render(<TwoFactor onVerify={vi.fn()} error="That code has expired." />);
     expect(screen.getByText(/as soon as you enter the last digit/)).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Verification code' })).toHaveFocus();
+  });
+
+  it('leaves focus alone on mount unless asked', () => {
+    const { unmount } = render(<TwoFactor onVerify={vi.fn()} />);
+    expect(screen.getByRole('textbox', { name: 'Verification code' })).not.toHaveFocus();
+    unmount();
+    render(<TwoFactor onVerify={vi.fn()} autoFocus />);
     expect(screen.getByRole('textbox', { name: 'Verification code' })).toHaveFocus();
   });
 });
