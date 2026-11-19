@@ -99,6 +99,7 @@ export function ProgressCircle({
             strokeWidth={stroke}
             stroke="currentColor"
             strokeLinecap="round"
+            data-part="arc"
             pathLength={100}
             strokeDasharray={share === null ? '28 100' : `${String(share * 100)} 100`}
             // A zero value draws nothing rather than a round dot of the line cap.
@@ -109,6 +110,7 @@ export function ProgressCircle({
         {share !== null && (
           <span
             aria-hidden
+            data-part="figure"
             className={cn(
               'absolute inset-0 flex items-center justify-center font-medium tracking-tight text-fg numeric',
               FIGURE[size],

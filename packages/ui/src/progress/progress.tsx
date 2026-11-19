@@ -103,6 +103,7 @@ export function Progress({
           ) : (
             <span
               data-slot="progress-fill"
+              data-part="fill"
               className={cn(
                 'absolute inset-0 rounded-full ltr:origin-left rtl:origin-right',
                 progressFillMotion,
@@ -125,6 +126,7 @@ export function Progress({
                 className="relative flex-1 overflow-hidden rounded-full bg-surface-sunken"
               >
                 <span
+                  data-part="fill"
                   className={cn(
                     'absolute inset-0 rounded-full ltr:origin-left rtl:origin-right',
                     progressFillMotion,

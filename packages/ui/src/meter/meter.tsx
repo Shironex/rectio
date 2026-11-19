@@ -138,6 +138,7 @@ export function Meter({
                 strokeWidth={8}
                 strokeLinecap="round"
                 stroke="currentColor"
+                data-part="arc"
                 strokeDasharray={`${String(share * 100)} 100`}
                 strokeOpacity={share === 0 ? 0 : 1}
                 className={cn(RING_TONE[resolved], ringMotion)}
@@ -159,7 +160,10 @@ export function Meter({
               })}
             </svg>
             <span className="absolute inset-x-0 bottom-0 flex flex-col items-center">
-              <BaseMeter.Value className="text-2xl font-strong tracking-tight text-fg numeric" />
+              <BaseMeter.Value
+                data-part="figure"
+                className="text-2xl font-strong tracking-tight text-fg numeric"
+              />
             </span>
           </span>
           {words !== undefined && (
@@ -185,6 +189,7 @@ export function Meter({
           <BaseMeter.Track className="relative h-2 w-full rounded-full bg-surface-sunken">
             <span className="absolute inset-0 overflow-hidden rounded-full">
               <span
+                data-part="fill"
                 className={cn(
                   'absolute inset-0 rounded-full ltr:origin-left rtl:origin-right',
                   progressFillMotion,
