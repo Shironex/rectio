@@ -67,7 +67,22 @@ describe('TwoFactor', () => {
 
   it('holds the resend until the cooldown ends', () => {
     render(<TwoFactor onVerify={vi.fn()} method="sms" onResend={vi.fn()} sentAt={new Date()} />);
-    expect(screen.getByRole('button', { name: /Send a new code in 0:/ })).toBeDisabled();
+    expect(document.body).toHaveTextContent(/New code in 0:\d\d/);
+    expect(screen.queryByRole('button', { name: 'Send a new code' })).not.toBeInTheDocument();
+  });
+
+  it('offers the resend once the cooldown has passed', async () => {
+    const onResend = vi.fn();
+    render(
+      <TwoFactor
+        onVerify={vi.fn()}
+        method="sms"
+        onResend={onResend}
+        sentAt={new Date(Date.now() - 60_000)}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Send a new code' }));
+    expect(onResend).toHaveBeenCalled();
   });
 
   it('takes a backup code instead', async () => {

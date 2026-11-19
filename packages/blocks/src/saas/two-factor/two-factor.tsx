@@ -1,5 +1,4 @@
 import { OTPField } from '@base-ui/react/otp-field';
-import { ArrowClockwiseIcon, LifebuoyIcon, ShieldCheckIcon } from '@phosphor-icons/react';
 import { Checkbox, Field, FieldDescription, FieldError, FieldLabel, Input, cn } from '@rectio/ui';
 import { Fragment, useEffect, useState, type ReactNode, type SyntheticEvent } from 'react';
 
@@ -101,11 +100,7 @@ export function TwoFactor({
   const incomplete = tried && !twoFactorCodeComplete(code, length);
 
   const frame = {
-    brand: brand ?? (
-      <span className="inline-flex size-11 items-center justify-center rounded-full bg-accent-subtle text-accent-strong">
-        <ShieldCheckIcon aria-hidden weight="bold" className="size-5" />
-      </span>
-    ),
+    brand,
     footer:
       back === undefined ? undefined : (
         <>
@@ -153,15 +148,17 @@ export function TwoFactor({
             {Array.from({ length }, (_, index) => (
               <Fragment key={index}>
                 {index === half && (
-                  <OTPField.Separator className="mx-0.5 h-px w-2.5 shrink-0 bg-line-strong @sm:w-3" />
+                  <OTPField.Separator className="mx-0.5 h-0.5 w-3 shrink-0 rounded-full bg-fg-subtle @sm:mx-1" />
                 )}
                 <OTPField.Input
+                  // The code is the only thing to do on this step, so the first slot takes focus.
+                  autoFocus={index === 0}
                   aria-label={
                     index === 0 ? undefined : `Digit ${String(index + 1)} of ${String(length)}`
                   }
                   className={cn(
-                    'h-12 w-full min-w-0 flex-1 rounded-(--rx-field-radius) border border-(--rx-field-border) bg-(--rx-field-background)',
-                    'text-center font-numeric text-xl font-medium text-fg tabular-nums caret-accent',
+                    'h-14 w-full min-w-0 flex-1 rounded-(--rx-field-radius) border border-(--rx-field-border) bg-(--rx-field-background)',
+                    'text-center font-numeric text-2xl font-medium text-fg tabular-nums caret-accent',
                     'transition-[border-color,outline-color] duration-fast ease-standard hover:border-fg-subtle',
                     'outline-0 -outline-offset-1 outline-transparent focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
                     'group-data-invalid/otp:border-negative group-data-disabled/otp:bg-surface-sunken group-data-disabled/otp:text-fg-disabled',
@@ -170,14 +167,13 @@ export function TwoFactor({
               </Fragment>
             ))}
           </OTPField.Root>
+          <FieldDescription>
+            Paste the whole code into the first box if you copied it.
+          </FieldDescription>
           {hasError ? (
             <FieldError>{error}</FieldError>
-          ) : incomplete ? (
-            <FieldError>Enter all {length} digits.</FieldError>
           ) : (
-            <FieldDescription>
-              Paste the whole code into the first box if you copied it.
-            </FieldDescription>
+            incomplete && <FieldError>Enter all {length} digits.</FieldError>
           )}
         </Field>
 
@@ -193,37 +189,24 @@ export function TwoFactor({
         </Button>
 
         {(canResend || onUseBackupCode !== undefined) && (
-          <div className="flex flex-col items-center gap-1 border-t border-line pt-4 text-sm @sm:flex-row @sm:justify-between">
-            {canResend && (
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={wait > 0}
-                onClick={onResend}
-                className="text-fg-muted"
-              >
-                <ArrowClockwiseIcon aria-hidden weight="bold" className="size-3.5" />
-                {wait > 0 ? (
-                  <span>
-                    Send a new code in <span className="numeric">{formatTwoFactorWait(wait)}</span>
-                  </span>
-                ) : (
-                  'Send a new code'
-                )}
-              </Button>
-            )}
+          <div className="flex flex-col items-center gap-2 border-t border-line pt-4 text-sm @sm:flex-row @sm:justify-between">
+            {canResend &&
+              (wait > 0 ? (
+                <p className="text-fg-muted">
+                  New code in <span className="numeric">{formatTwoFactorWait(wait)}</span>
+                </p>
+              ) : (
+                <AuthLink to={onResend}>Send a new code</AuthLink>
+              ))}
             {onUseBackupCode !== undefined && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
+              <AuthLink
+                to={() => {
                   setMode('backup');
                 }}
-                className="text-fg-muted"
+                className="@sm:ms-auto"
               >
-                <LifebuoyIcon aria-hidden weight="bold" className="size-3.5" />
                 Use a backup code
-              </Button>
+              </AuthLink>
             )}
           </div>
         )}
@@ -280,21 +263,16 @@ function BackupCode({
               setValue(event.target.value);
             }}
           />
-          {shown !== null ? (
-            <FieldError>{shown}</FieldError>
-          ) : (
-            <FieldDescription>
-              Spaces and hyphens are fine. Using one marks it spent.
-            </FieldDescription>
-          )}
+          <FieldDescription>
+            Spaces and hyphens are fine. Using one marks it spent.
+          </FieldDescription>
+          {shown !== null && <FieldError>{shown}</FieldError>}
         </Field>
-        <div className="flex flex-col gap-2">
-          <Button type="submit" loading={pending} className="w-full">
-            Verify backup code
-          </Button>
-          <Button variant="ghost" className="w-full text-fg-muted" onClick={onBack}>
-            Use my verification code instead
-          </Button>
+        <Button type="submit" loading={pending} className="w-full">
+          Verify backup code
+        </Button>
+        <div className="flex justify-center border-t border-line pt-4 text-sm">
+          <AuthLink to={onBack}>Use my verification code instead</AuthLink>
         </div>
       </form>
     </AuthFrame>
