@@ -57,14 +57,17 @@ const CLASS_NAMES: DayPickerProps['classNames'] = {
     'transition-colors duration-fast ease-standard hover:bg-surface-hover',
     'outline-offset-2 focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-focus',
   ),
-  // Today: a hairline box drawn inside the day, in the muted text colour so it holds its contrast in
-  // dark themes too, and a stronger weight: never colour alone. An outline, not a shadow, so forced
-  // colours keep it. It differs from the selected fill and from the focus outline, which is thicker
+  // Today: a hairline box drawn inside the day and a stronger weight, never colour alone. Muted text
+  // colour on a plain day, so it holds its contrast in dark themes; the contrast colour inside a
+  // selected fill, so a selected today still reads as today. An outline, not a shadow, so forced
+  // colours keep it. It steps aside while the day has keyboard focus: the focus outline is thicker
   // and sits outside the day.
   today: cn(
     '[&>button]:font-strong',
-    'not-data-selected:[&>button]:outline-1 not-data-selected:[&>button]:-outline-offset-1',
-    'not-data-selected:[&>button]:outline-fg-muted',
+    '[&>button:not(:focus-visible)]:outline-1 [&>button:not(:focus-visible)]:-outline-offset-1',
+    'not-data-selected:[&>button:not(:focus-visible)]:outline-fg-muted',
+    'data-selected:[&>button:not(:focus-visible)]:-outline-offset-3',
+    'data-selected:[&>button:not(:focus-visible)]:outline-accent-contrast',
   ),
   selected: cn(
     '[&>button]:bg-accent [&>button]:font-medium [&>button]:text-accent-contrast',
