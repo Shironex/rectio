@@ -1,0 +1,29 @@
+{
+  "name": "product-launch",
+  "title": "Product launch",
+  "description": "A single long launch page for a research tool: a word-cycling hero over a live product board, a feature bento, how it works, a waitlist with validation and a place in line, and an FAQ. Starts in the ledger theme.",
+  "category": "marketing",
+  "tier": "pro",
+  "pages": ["/", "/404"],
+  "uses": [
+    "site-header",
+    "hero",
+    "logo-strip",
+    "feature-grid",
+    "testimonials",
+    "faq",
+    "site-footer",
+    "button",
+    "badge",
+    "avatar-group",
+    "field",
+    "select",
+    "checkbox",
+    "toggle"
+  ],
+  "screenshots": [
+    "screenshots/desktop-light.png",
+    "screenshots/desktop-dark.png",
+    "screenshots/phone.png"
+  ]
+}
