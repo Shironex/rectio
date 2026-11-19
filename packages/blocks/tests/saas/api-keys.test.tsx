@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -118,19 +118,58 @@ describe('ApiKeys', () => {
     expect(screen.getByLabelText('Secret key for Ops')).toHaveAttribute('readonly');
   });
 
+  it('says copying failed when there is no clipboard at all', async () => {
+    const user = userEvent.setup();
+    const clipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+    Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+    try {
+      render(<ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} />);
+      await user.click(screen.getByRole('button', { name: 'Copy ID, Sync' }));
+      expect(await screen.findByRole('button', { name: 'Copy failed, Sync' })).toBeInTheDocument();
+    } finally {
+      if (clipboard !== undefined) Object.defineProperty(navigator, 'clipboard', clipboard);
+    }
+  });
+
+  it('moves focus to a new key and back to Create key when done', async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} onCreate={vi.fn()} />,
+    );
+    rerender(
+      <ApiKeys
+        keys={KEYS}
+        scopes={SCOPES}
+        now={NOW}
+        onCreate={vi.fn()}
+        createdKey={{ name: 'Ops', value: 'fh_live_x_secret' }}
+      />,
+    );
+    expect(screen.getByRole('heading', { name: 'Copy the key for Ops now' })).toHaveFocus();
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+    rerender(<ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} onCreate={vi.fn()} />);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Create key' })).toHaveFocus();
+    });
+  });
+
   it('confirms before revoking', async () => {
     const onRevoke = vi.fn();
     render(<ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} onRevoke={onRevoke} />);
-    expect(screen.queryByRole('button', { name: 'Revoke Old' })).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Revoke Sync' }));
+    expect(screen.queryByRole('button', { name: 'Revoke, Old' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Revoke, Sync' }));
     const dialog = await screen.findByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Revoke key' }));
     expect(onRevoke).toHaveBeenCalledWith('b');
   });
 
   it('shows the empty note with no keys, linking the docs', () => {
-    render(<ApiKeys keys={[]} scopes={SCOPES} now={NOW} docsHref="/docs/api" />);
+    const onCreate = vi.fn();
+    render(
+      <ApiKeys keys={[]} scopes={SCOPES} now={NOW} docsHref="/docs/api" onCreate={onCreate} />,
+    );
     expect(screen.getByText('No API keys yet')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Create key' })).toHaveLength(1);
     expect(screen.getByRole('link', { name: 'Read the API docs' })).toHaveAttribute(
       'href',
       '/docs/api',
@@ -141,10 +180,8 @@ describe('ApiKeys', () => {
     const user = userEvent.setup();
     const writeText = vi.spyOn(navigator.clipboard, 'writeText');
     render(<ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} />);
-    expect(
-      screen.queryByRole('button', { name: /Copy the key ID of Old/ }),
-    ).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /Copy the key ID of Sync/ }));
+    expect(screen.queryByRole('button', { name: 'Copy ID, Old' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Copy ID, Sync' }));
     expect(writeText).toHaveBeenCalledWith('fh_live_b');
   });
 });

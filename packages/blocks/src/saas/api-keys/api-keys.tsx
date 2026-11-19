@@ -1,4 +1,11 @@
-import { CheckIcon, CopyIcon, KeyIcon, PlusIcon, ShieldWarningIcon } from '@phosphor-icons/react';
+import {
+  CheckIcon,
+  CopyIcon,
+  KeyIcon,
+  PlusIcon,
+  ShieldWarningIcon,
+  XCircleIcon,
+} from '@phosphor-icons/react';
 import {
   Dialog,
   DialogContent,
@@ -21,11 +28,12 @@ import { useEffect, useId, useRef, useState, type ReactNode, type SyntheticEvent
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
-import { EmptyNote } from '../../lib/empty-note';
 import { formatShortDate, resolveLocale } from '../../lib/finance';
 import { StateBadge } from '../../lib/state-badge';
 import { FormMessage } from '../lib/auth';
+import { focusFirstInvalid, useNow } from '../lib/focus';
 import { relativeTime } from '../lib/saas';
+import { inlineLink } from '../lib/styles';
 import { useSaasParts } from '../lib/saas-parts';
 import {
   API_KEY_EXPIRY_LABELS,
@@ -88,14 +96,25 @@ function useCopy() {
     };
   }, [state]);
   const copy = (text: string) => {
-    navigator.clipboard.writeText(text).then(
-      () => {
-        setState('copied');
-      },
-      () => {
-        setState('failed');
-      },
-    );
+    // No clipboard on an insecure page or an old browser, and writeText can throw before it
+    // returns a promise: every failure lands on the same "select it and copy" message.
+    const { clipboard } = navigator as { clipboard?: Clipboard };
+    if (clipboard === undefined) {
+      setState('failed');
+      return;
+    }
+    try {
+      clipboard.writeText(text).then(
+        () => {
+          setState('copied');
+        },
+        () => {
+          setState('failed');
+        },
+      );
+    } catch {
+      setState('failed');
+    }
   };
   return [state, copy] as const;
 }
@@ -114,15 +133,30 @@ export function ApiKeys({
   onCreatedKeyDismiss,
   pending = false,
   error,
-  now = new Date(),
+  now: requestedNow,
   locale: requestedLocale,
   docsHref,
   title = 'API keys',
   className,
 }: ApiKeysProps) {
   const locale = resolveLocale(requestedLocale);
+  const now = useNow(requestedNow);
   const { Button } = useBlockParts();
   const { Items, Item } = useSaasParts();
+  const createButtonRef = useRef<HTMLButtonElement>(null);
+  const refocusCreate = useRef(false);
+  /** Back to "Create key" once the form or the reveal closes, instead of dropping focus. */
+  const closeCreating = () => {
+    refocusCreate.current = true;
+    setCreating(false);
+  };
+  // The button comes back only after the app clears the revealed key, so wait for it to render.
+  useEffect(() => {
+    if (refocusCreate.current && createButtonRef.current !== null) {
+      refocusCreate.current = false;
+      createButtonRef.current.focus();
+    }
+  });
   const [creating, setCreating] = useState(false);
   const [revoking, setRevoking] = useState<ApiKey | null>(null);
   const live = keys.filter((key) => key.revokedAt === undefined);
@@ -137,8 +171,9 @@ export function ApiKeys({
           : `${String(live.length)} active ${live.length === 1 ? 'key' : 'keys'}`
       }
       actions={
-        onCreate !== undefined && !showForm && createdKey === undefined ? (
+        onCreate !== undefined && !showForm && createdKey === undefined && keys.length > 0 ? (
           <Button
+            ref={createButtonRef}
             onClick={() => {
               setCreating(true);
             }}
@@ -156,7 +191,7 @@ export function ApiKeys({
           name={createdKey.name}
           value={createdKey.value}
           onDone={() => {
-            setCreating(false);
+            closeCreating();
             onCreatedKeyDismiss?.();
           }}
         />
@@ -170,9 +205,7 @@ export function ApiKeys({
           locale={locale}
           pending={pending}
           error={error}
-          onCancel={() => {
-            setCreating(false);
-          }}
+          onCancel={closeCreating}
           onCreate={onCreate}
         />
       )}
@@ -180,21 +213,41 @@ export function ApiKeys({
       {keys.length === 0 ? (
         !showForm &&
         createdKey === undefined && (
-          <EmptyNote title="No API keys yet">
-            Create a key for each place that calls the API, so you can revoke one without the
-            others.
-            {docsHref !== undefined && (
-              <>
-                {' '}
-                <a
-                  href={docsHref}
-                  className="font-medium text-fg underline decoration-line-strong underline-offset-2 hover:decoration-fg"
+          <div
+            role="status"
+            className="flex flex-col items-center gap-3 rounded-control border border-dashed border-line px-4 py-10 text-center"
+          >
+            <span
+              aria-hidden
+              className="inline-flex size-10 items-center justify-center rounded-full bg-surface-sunken text-fg-muted ring-1 ring-line"
+            >
+              <KeyIcon weight="bold" className="size-5" />
+            </span>
+            <div className="flex max-w-md flex-col gap-1">
+              <p className="font-medium">No API keys yet</p>
+              <p className="text-sm text-pretty text-fg-muted">
+                Keys let your scripts and servers call the API as your workspace. Make one per place
+                that calls it, so you can revoke one without the others.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+              {onCreate !== undefined && (
+                <Button
+                  onClick={() => {
+                    setCreating(true);
+                  }}
                 >
+                  <PlusIcon aria-hidden weight="bold" className="size-4" />
+                  Create key
+                </Button>
+              )}
+              {docsHref !== undefined && (
+                <a href={docsHref} className={cn(inlineLink, 'text-sm')}>
                   Read the API docs
                 </a>
-              </>
-            )}
-          </EmptyNote>
+              )}
+            </div>
+          </div>
         )
       ) : (
         <ul aria-label="API keys" className="flex flex-col">
@@ -202,7 +255,7 @@ export function ApiKeys({
             {sortApiKeys(keys).map((key) => (
               <Item
                 key={key.id}
-                className="flex items-start gap-3 py-3 not-last:border-b not-last:border-line"
+                className="flex items-center gap-3 py-3.5 not-last:border-b not-last:border-line"
               >
                 <KeyRow
                   apiKey={key}
@@ -257,20 +310,23 @@ function KeyRow({
   const badge = status === 'active' ? null : STATUS[status];
   const dead = status === 'revoked' || status === 'expired';
   const elevated = scope?.elevated === true;
+  const copyLabel =
+    copyState === 'copied' ? 'Copied' : copyState === 'failed' ? 'Copy failed' : 'Copy ID';
   return (
     <>
       <span
         aria-hidden
         className={cn(
-          'mt-0.5 hidden size-8 shrink-0 items-center justify-center rounded-full border border-line-strong bg-surface-sunken text-fg-muted @md:inline-flex',
-          dead && 'border-dashed text-fg-subtle',
+          'hidden size-9 shrink-0 items-center justify-center rounded-full border border-line-strong bg-surface-sunken text-fg-muted @md:inline-flex',
+          dead && 'border-dashed',
         )}
       >
         <KeyIcon weight="bold" className="size-4" />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <span className="font-medium text-pretty">{key.name}</span>
-        <span className="flex flex-wrap items-center gap-1.5">
+        {/* Line 1: what it is called, what it may do and whether it still works. */}
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="font-medium text-pretty">{key.name}</span>
           <span
             className={cn(
               'inline-flex items-center gap-1 rounded-badge border px-1.5 py-px text-xs',
@@ -282,8 +338,9 @@ function KeyRow({
           </span>
           {badge !== null && <StateBadge state={badge.state} label={badge.label} />}
         </span>
-        <span className="-my-1 flex items-center gap-1">
-          <code className="font-mono text-sm text-fg">
+        {/* Line 2: the visible part of the key, in a sunken chip, with a labelled copy. */}
+        <span className="flex min-h-(--rx-button-height-sm) flex-wrap items-center gap-2">
+          <code className="rounded-badge border border-line bg-surface-sunken px-1.5 py-0.5 font-mono text-sm text-fg">
             <span className="sr-only">Key starting </span>
             {maskApiKey(key.prefix)}
           </code>
@@ -291,15 +348,11 @@ function KeyRow({
             <Button
               variant="ghost"
               size="sm"
-              iconOnly
-              className="size-7 pointer-coarse:size-(--rx-control-height-touch)"
-              aria-label={
-                copyState === 'copied'
-                  ? `Key ID of ${key.name} copied`
-                  : copyState === 'failed'
-                    ? `Copy failed, select the key ID of ${key.name} and copy it`
-                    : `Copy the key ID of ${key.name}, ${key.prefix}`
-              }
+              className={cn(
+                'px-2 text-xs text-fg-muted hover:text-fg',
+                copyState === 'failed' && 'text-negative-strong',
+              )}
+              aria-label={`${copyLabel}, ${key.name}`}
               onClick={() => {
                 copy(key.prefix);
               }}
@@ -309,9 +362,11 @@ function KeyRow({
               ) : (
                 <CopyIcon aria-hidden weight="bold" className="size-3.5" />
               )}
+              {copyLabel}
             </Button>
           )}
         </span>
+        {/* Line 3: its dates. */}
         <span className="text-sm text-fg-muted">
           Created <span className="numeric">{formatShortDate(key.createdAt, locale)}</span>
           {', '}
@@ -337,10 +392,11 @@ function KeyRow({
         <Button
           variant="ghost"
           size="sm"
-          className="shrink-0 text-fg-muted hover:text-fg"
-          aria-label={`Revoke ${key.name}`}
+          className="shrink-0 text-fg-muted hover:bg-negative-subtle hover:text-negative-strong"
+          aria-label={`Revoke, ${key.name}`}
           onClick={onRevoke}
         >
+          <XCircleIcon aria-hidden weight="bold" className="size-4" />
           Revoke
         </Button>
       )}
@@ -371,6 +427,7 @@ function CreateForm({
 }) {
   const { Button } = useBlockParts();
   const headingId = useId();
+  const formRef = useRef<HTMLFormElement>(null);
   const [name, setName] = useState('');
   const [scope, setScope] = useState(scopes[0]?.value ?? '');
   const [expiry, setExpiry] = useState<ApiKeyExpiry>('90');
@@ -381,12 +438,17 @@ function CreateForm({
   const submit = (event: SyntheticEvent) => {
     event.preventDefault();
     setTried(true);
-    if (nameError !== null || pending) return;
+    if (nameError !== null) {
+      focusFirstInvalid(formRef.current);
+      return;
+    }
+    if (pending) return;
     onCreate({ name: name.trim(), scope, ...(expiresAt === undefined ? {} : { expiresAt }) });
   };
 
   return (
     <form
+      ref={formRef}
       onSubmit={submit}
       noValidate
       aria-labelledby={headingId}
@@ -487,6 +549,12 @@ function KeyReveal({ name, value, onDone }: { name: string; value: string; onDon
   const headingId = useId();
   const [copyState, copy] = useCopy();
   const inputRef = useRef<HTMLInputElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // The form that made the key has gone; focus lands on the reveal so it is read out at once.
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
 
   // A failed copy selects the key, so a keyboard copy is one shortcut away.
   useEffect(() => {
@@ -498,7 +566,12 @@ function KeyReveal({ name, value, onDone }: { name: string; value: string; onDon
       aria-labelledby={headingId}
       className="flex flex-col gap-3 rounded-control border border-warning-strong/30 bg-warning-subtle p-4"
     >
-      <h3 id={headingId} className="flex items-center gap-2 font-medium text-fg">
+      <h3
+        ref={headingRef}
+        id={headingId}
+        tabIndex={-1}
+        className="flex items-center gap-2 font-medium text-fg outline-none"
+      >
         <ShieldWarningIcon aria-hidden weight="bold" className="size-4 text-warning-strong" />
         Copy the key for {name} now
       </h3>
