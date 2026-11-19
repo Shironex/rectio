@@ -29,6 +29,9 @@ export function NavigationMenu({ className, children, ...props }: NavigationMenu
       {children}
       <BaseNavigationMenu.Portal container={container}>
         <BaseNavigationMenu.Positioner
+          // Panels hang from their trigger's start edge, inside the bar, rather than centred.
+          align="start"
+          alignOffset={-4}
           sideOffset={8}
           collisionPadding={8}
           collisionAvoidance={{ side: 'none' }}
@@ -241,7 +244,12 @@ export function NavigationBar({
         </Sheet>
       )}
       <div className="flex shrink-0 items-center">{brand}</div>
-      {children !== undefined && <div className="hidden min-w-0 flex-1 md:flex">{children}</div>}
+      {/* The links leave the bar on a phone only when the sheet has them; never lost. */}
+      {children !== undefined && (
+        <div className={cn('min-w-0 flex-1', mobileMenu === undefined ? 'flex' : 'hidden md:flex')}>
+          {children}
+        </div>
+      )}
       {actions !== undefined && (
         <div className="ms-auto flex shrink-0 items-center gap-2">{actions}</div>
       )}
