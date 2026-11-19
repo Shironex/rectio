@@ -162,10 +162,10 @@ export function PricingTable({
                         </span>
                       </span>
                     )}
-                    {/* Every card says one line here, so no card keeps an empty slot. */}
-                    <span className="text-sm text-balance text-fg-muted">
+                    {/* One short line on every card, never wrapping, so the price blocks match in height. */}
+                    <span className="text-sm whitespace-nowrap text-fg-muted">
                       {price === null ? (
-                        'Priced for your volume, billed yearly'
+                        'Priced for your volume'
                       ) : price === 0 ? (
                         'No card needed'
                       ) : cycle === 'yearly' && plan.yearly !== undefined ? (
@@ -173,7 +173,7 @@ export function PricingTable({
                           <span className="numeric">
                             {pricingPriceText(plan.yearly, currency, locale)}
                           </span>{' '}
-                          billed yearly
+                          a year
                           {planSaving > 0 && (
                             <>
                               {' '}
@@ -187,7 +187,7 @@ export function PricingTable({
                           )}
                         </>
                       ) : (
-                        'Billed monthly, cancel any time'
+                        'Billed monthly'
                       )}
                     </span>
                   </div>
@@ -340,7 +340,7 @@ function Comparison({
                   className={cn(
                     'w-1/6 rounded-t-control px-2 py-2 text-center font-medium',
                     plan.recommended === true &&
-                      'border-t-2 border-accent bg-accent-subtle/40 text-accent-strong',
+                      'border-t-2 border-accent bg-accent-subtle/20 text-accent-strong',
                   )}
                 >
                   {plan.name}
@@ -375,7 +375,7 @@ function Comparison({
                         key={plan.id}
                         className={cn(
                           'px-2 py-2.5 text-center text-fg-muted',
-                          plan.recommended === true && 'bg-accent-subtle/40',
+                          plan.recommended === true && 'bg-accent-subtle/20',
                         )}
                       >
                         <FeatureValue value={feature.values[plan.id]} />
