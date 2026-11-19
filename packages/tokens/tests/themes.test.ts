@@ -41,6 +41,8 @@ const PAIRS: [string, string, number][] = [
   ['accent-strong', 'surface', 4.5],
   ['accent-strong', 'accent-subtle', 4.5],
   ['text', 'surface-selected', 4.5],
+  // The highlighted option in a Select list.
+  ['text', 'accent-subtle', 4.5],
   ['positive-contrast', 'positive', 4.5],
   ['positive-strong', 'surface', 4.5],
   ['positive-strong', 'positive-subtle', 4.5],
