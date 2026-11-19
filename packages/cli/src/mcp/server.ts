@@ -158,7 +158,10 @@ export function createMcpServer(deps: McpDeps, version: string): McpServer {
   return server;
 }
 
-/** Serves the tools over stdio until the client disconnects. stdout carries the protocol only. */
+/**
+ * Starts serving the tools over stdio and returns once connected. stdout carries the protocol
+ * only. The process ends by itself when the client closes the pipes and nothing is pending.
+ */
 export async function serveStdio(server: McpServer): Promise<void> {
   await server.connect(new StdioServerTransport());
 }

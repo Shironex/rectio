@@ -59,12 +59,32 @@ function line(entry: IndexEntry, withDescription: boolean): string {
   return withDescription ? `${head}\n  ${entry.description}` : head;
 }
 
+/** Levenshtein distance, for "did you mean" on a mistyped item name. */
+function editDistance(a: string, b: string): number {
+  let previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i];
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      row.push(
+        Math.min((previous[j] ?? 0) + 1, (row[j - 1] ?? 0) + 1, (previous[j - 1] ?? 0) + cost),
+      );
+    }
+    previous = row;
+  }
+  return previous[b.length] ?? 0;
+}
+
 function findEntry(index: RegistryIndex, name: string): IndexEntry {
   const entry = index.items.find((e) => e.name === name);
   if (entry !== undefined) return entry;
-  const close = rankMatches(index.items, name)
-    .slice(0, 3)
-    .map((e) => e.name);
+  const close = [
+    ...rankMatches(index.items, name),
+    ...index.items.filter((e) => editDistance(e.name, name) <= 2),
+  ]
+    .map((e) => e.name)
+    .filter((n, i, all) => all.indexOf(n) === i)
+    .slice(0, 3);
   throw new CliError(
     `no item named "${name}"`,
     close.length > 0
