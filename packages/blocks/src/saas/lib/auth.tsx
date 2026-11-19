@@ -59,7 +59,7 @@ export function AuthFrame({
           'flex flex-col gap-6',
           !bare && 'px-6 pt-7 pb-6 @sm:px-8 @sm:pt-9',
           // Beside a brand panel the form keeps its own measure, centred in its half.
-          aside !== undefined && 'mx-auto w-full max-w-md',
+          aside !== undefined && 'mx-auto w-full max-w-md flex-1 justify-center',
         )}
       >
         <header className="flex flex-col gap-1.5">
