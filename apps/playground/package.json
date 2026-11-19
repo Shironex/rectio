@@ -33,6 +33,7 @@
     "shoot:blocks": "node scripts/shoot-blocks.ts",
     "shoot:display": "node scripts/shoot-display.ts",
     "shoot:marketing": "node scripts/shoot-marketing.ts",
+    "shoot:docs": "node scripts/shoot-docs.ts",
     "shoot:forms": "node scripts/shoot-forms.ts",
     "shoot:nav": "node scripts/shoot-nav.ts"
   }

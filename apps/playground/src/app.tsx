@@ -16,6 +16,7 @@ const DisplayPage = lazy(() =>
 const MarketingPage = lazy(() =>
   import('./marketing/marketing-page').then((m) => ({ default: m.MarketingPage })),
 );
+const DocsPage = lazy(() => import('./docs/docs-page').then((m) => ({ default: m.DocsPage })));
 const FormsPage = lazy(() => import('./forms/forms-page').then((m) => ({ default: m.FormsPage })));
 const ShellPage = lazy(() => import('./shell/shell-page').then((m) => ({ default: m.ShellPage })));
 const NavPage = lazy(() => import('./shell/nav-page').then((m) => ({ default: m.NavPage })));
@@ -35,6 +36,8 @@ export function App() {
         <DisplayPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'marketing' ? (
         <MarketingPage theme={theme} mode={mode} motion={motion} />
+      ) : view === 'docs' ? (
+        <DocsPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'forms' ? (
         <FormsPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'shell' ? (
