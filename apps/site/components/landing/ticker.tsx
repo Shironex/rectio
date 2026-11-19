@@ -53,7 +53,7 @@ export function Ticker({ items, label }: { items: readonly ReactNode[]; label: s
       ref={ref}
       role="region"
       aria-label={label}
-      className="site-ticker overflow-hidden font-mono text-sm text-fg-muted"
+      className="site-ticker overflow-hidden font-mono text-sm text-fg"
     >
       <div className="site-ticker-track flex w-max">
         {list(0)}

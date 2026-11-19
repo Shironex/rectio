@@ -29,14 +29,14 @@ function Statement({ look, values }: { look: Look; values: Readout }) {
             {theme}, {mode}
           </code>
         </div>
-        <p className="font-display text-4xl font-heading tracking-tight text-fg md:text-5xl">
+        <p className="font-display text-xl font-heading tracking-tight text-fg sm:text-3xl">
           Net position
         </p>
         <Money
           amount={182406.35}
           currency="EUR"
           locale="en-IE"
-          className="text-3xl font-strong text-fg md:text-4xl"
+          className="text-xl font-strong text-fg tabular-nums sm:text-4xl"
         />
       </div>
       <dl className="flex flex-1 flex-col px-6 py-2 sm:px-8">
@@ -45,7 +45,7 @@ function Statement({ look, values }: { look: Look; values: Readout }) {
             key={item.token}
             className="flex items-center justify-between gap-4 border-b border-line py-3 last:border-b-0"
           >
-            <dt className="text-sm text-fg">{item.label}</dt>
+            <dt className="truncate text-sm text-fg">{item.label}</dt>
             <dd className="flex min-w-0 items-center gap-2 font-mono text-sm text-fg">
               {'swatch' in item && (
                 <span
@@ -72,7 +72,7 @@ const STEP = 5;
 function CompareSlider({ values }: { values: Readout }) {
   const frame = useRef<HTMLDivElement>(null);
   const handle = useRef<HTMLDivElement>(null);
-  const split = useRef(35);
+  const split = useRef(50);
 
   const set = (percent: number) => {
     const next = Math.min(100, Math.max(0, percent));
@@ -132,12 +132,12 @@ function CompareSlider({ values }: { values: Readout }) {
         aria-label="Split between the calm and ledger themes"
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={35}
-        aria-valuetext="65% ledger, 35% calm"
+        aria-valuenow={50}
+        aria-valuetext="50% ledger, 50% calm"
         onKeyDown={onKey}
         // Physical left, like the clip it follows.
-        style={{ left: 'var(--site-split, 35%)' }}
-        className="group absolute inset-y-0 z-10 flex w-11 -translate-x-1/2 cursor-ew-resize items-center justify-center focus-visible:outline-none"
+        style={{ left: 'var(--site-split, 50%)' }}
+        className="group absolute inset-y-0 z-10 flex w-11 -translate-x-1/2 cursor-ew-resize items-center justify-center focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
       >
         <span aria-hidden className="absolute inset-y-0 w-px bg-accent" />
         <span
@@ -166,7 +166,9 @@ export function ThemeCurtain({ values }: { values: Readout }) {
       <div className="flex flex-col gap-8 lg:col-span-5">
         <div className="flex flex-col gap-4">
           <Eyebrow>Themes</Eyebrow>
-          <h2 className="site-reveal site-headline text-fg">Calm by day. Ledger at close.</h2>
+          <h2 className="site-reveal site-headline text-fg">
+            <span className="font-regular">Calm by day.</span> Ledger at close.
+          </h2>
           <p className="site-reveal site-step-1 max-w-md text-lg text-pretty text-fg-muted">
             A theme is a token file. Switch this page between the two that ship: type, corners,
             colour and the pace of motion follow, and no component changes.
@@ -194,8 +196,11 @@ export function ThemeCurtain({ values }: { values: Readout }) {
           </code>
         </div>
       </div>
-      <div className="site-reveal site-step-1 min-w-0 lg:col-span-7">
+      <div className="site-reveal site-step-1 flex min-w-0 flex-col gap-3 lg:col-span-7">
         <CompareSlider values={values} />
+        <p className="text-sm text-fg-muted">
+          Drag the split, or focus the handle and use the arrow keys.
+        </p>
       </div>
     </div>
   );

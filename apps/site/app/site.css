@@ -227,7 +227,7 @@
 
 /* Compare slider: the top copy is clipped from the left at --site-split. */
 .site-split {
-  clip-path: inset(0 0 0 var(--site-split, 35%));
+  clip-path: inset(0 0 0 var(--site-split, 50%));
 }
 
 /* The reconciled stamp lands once: a press into the paper, no bounce. */
@@ -293,4 +293,12 @@
   .site-corner {
     transition: none;
   }
+}
+
+/* A soft panel that sets a section apart: a step below the canvas in light, a step above in dark. */
+.site-panel {
+  background: var(--rx-surface-sunken);
+}
+html[data-mode='dark'] .site-panel {
+  background: var(--rx-surface-raised);
 }

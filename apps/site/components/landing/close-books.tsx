@@ -68,7 +68,7 @@ const STEPS = [
 const MATCH_FROM = 1;
 const TOTAL_STEP = MATCH_FROM + LINES.length;
 const LAST = TOTAL_STEP + 1;
-const SECTION_VH = 420;
+const SECTION_VH = 340;
 /** Each step's share of the pinned stretch (the section less one screen), in vh. */
 const BAND_VH = (SECTION_VH - 100) / (LAST + 1);
 
@@ -173,9 +173,15 @@ export function CloseBooks() {
     <section
       aria-labelledby="close-books-title"
       className="relative"
-      // Tall enough for a step every 50vh or so; the panel inside stays pinned meanwhile.
+      // Tall enough for a step every 35vh or so; the panel inside stays pinned meanwhile.
       style={still ? undefined : { height: `${String(SECTION_VH)}vh` }}
     >
+      <a
+        href="#kit"
+        className="pointer-events-none absolute start-4 top-4 z-20 rounded-control opacity-0 focus-visible:pointer-events-auto focus-visible:opacity-100 bg-accent px-4 py-2 text-base font-medium text-accent-contrast focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:start-8"
+      >
+        Skip the sequence
+      </a>
       {!still &&
         Array.from({ length: LAST + 1 }, (_, i) => (
           <div
@@ -191,12 +197,14 @@ export function CloseBooks() {
       <div
         className={cn(
           'flex flex-col justify-center',
-          still ? 'py-16' : 'sticky top-0 min-h-dvh py-8',
+          still ? 'py-16' : 'sticky top-0 min-h-dvh pt-16 pb-4 sm:py-8',
         )}
       >
-        <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 sm:px-8 lg:grid-cols-12 lg:gap-12">
-          <div className="flex flex-col gap-5 lg:col-span-4 lg:justify-center">
-            <Eyebrow>Month end</Eyebrow>
+        <div className="mx-auto grid w-full max-w-7xl gap-4 px-4 sm:gap-6 sm:px-8 lg:grid-cols-12 lg:gap-12">
+          <div className="flex flex-col gap-3 sm:gap-5 lg:col-span-4 lg:justify-center">
+            <span className="hidden sm:block">
+              <Eyebrow>Month end</Eyebrow>
+            </span>
             <h2 id="close-books-title" className="site-headline text-fg">
               Close the books while you scroll.
             </h2>
@@ -241,7 +249,10 @@ export function CloseBooks() {
                 </li>
               ))}
             </ol>
-            <p className="text-base text-fg-muted lg:hidden" aria-live="polite">
+            <p className="text-sm text-fg-muted sm:text-base lg:hidden" aria-live="polite">
+              <span className="font-mono text-xs text-fg-subtle tabular-nums">
+                {caption + 1}/{STEPS.length}
+              </span>{' '}
               <span className="font-strong text-fg">{STEPS[caption].title}.</span>{' '}
               {STEPS[caption].text}
             </p>
@@ -322,7 +333,7 @@ export function CloseBooks() {
                           />
                           <span className="flex min-w-0 flex-col">
                             <span className="text-fg">{line.merchant}</span>
-                            <span className="text-fg-subtle">{line.note}</span>
+                            <span className="hidden text-fg-subtle sm:block">{line.note}</span>
                           </span>
                         </span>
                         <Money

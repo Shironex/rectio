@@ -4,12 +4,17 @@ import { Tabs } from '@base-ui/react/tabs';
 import { cn } from '@rectio/ui';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
+import dynamic from 'next/dynamic';
+
 import ExpenseApprovalDemo from '@/demos/expense-approval';
 import InvoiceListDemo from '@/demos/invoice-list';
-import LedgerDemo from '@/demos/ledger';
 
 import { ExpenseReport } from './expense-report';
 import { readDuration, useReducedMotion } from './motion-tokens';
+
+// The ledger is the one block here not already on the page (the hero shows the invoice list and
+// the approvals), so it loads when its tab first opens.
+const LedgerDemo = dynamic(() => import('@/demos/ledger'));
 
 const TABS: { value: string; label: string; note: string; panel: () => ReactNode }[] = [
   {

@@ -92,7 +92,7 @@ export function CurrencyGrid({ codes, names }: { codes: string[]; names: Record<
         {folded && (
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-surface-sunken"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-accent-subtle"
           />
         )}
       </div>

@@ -59,7 +59,7 @@ export function Pricing({ blocks }: { blocks: number }) {
             <article
               key={tier.name}
               aria-labelledby={`tier-${tier.name}`}
-              className={`site-reveal ${i === 0 ? '' : i === 1 ? 'site-step-1' : 'site-step-2'} flex flex-col gap-6 rounded-panel border bg-surface p-6 sm:p-7 ${recommended ? 'border-accent shadow-overlay max-md:order-first' : 'border-line'}`}
+              className={`site-reveal ${i === 0 ? '' : i === 1 ? 'site-step-1' : 'site-step-2'} flex flex-col gap-6 rounded-panel border p-6 sm:p-7 ${recommended ? 'border-accent bg-accent-subtle shadow-overlay max-md:order-first' : 'border-line bg-surface'}`}
             >
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between gap-3">
@@ -95,7 +95,7 @@ export function Pricing({ blocks }: { blocks: number }) {
                 href="/docs/installation"
                 className={`${ACTION} mt-auto ${recommended ? 'bg-accent text-accent-contrast shadow-raised pointer-fine:hover:bg-accent-hover' : 'border border-line bg-surface-raised text-fg shadow-raised pointer-fine:hover:bg-surface-hover'}`}
               >
-                Get {tier.name}
+                Join {tier.name} at launch
               </Link>
             </article>
           );
@@ -103,7 +103,8 @@ export function Pricing({ blocks }: { blocks: number }) {
       </div>
       <p className="site-reveal text-sm text-fg-muted">
         One-time prices in US dollars. Theme packs come with every Pro license and are also sold on
-        their own. Checkout opens at launch; until then the buttons lead to the free install.
+        their own. Checkout opens at launch; until then each button leads to the free install, so
+        you can start today.
       </p>
     </div>
   );
