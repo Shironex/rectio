@@ -15,7 +15,7 @@ Private and unlicensed. Nothing here is published.
 | `@rectio/playground`   | Vite app: every component in every state, both themes, both modes, plus an expense report composition                                             |
 | `@rectio/design-rules` | The check that keeps hardcoded design values out of `packages/ui/src` and `packages/motion/src` (in `tooling/`)                                   |
 | `@rectio/registry`     | Registry item schema, the build that turns ui and tokens into static registry JSON, a local dev server                                            |
-| `@rectio/cli`          | The `rectio` command: `init`, `add`, `diff`, `list`, `search`, `update` (report only for now)                                                     |
+| `@rectio/cli`          | The `rectio` command: `init`, `add`, `diff`, `list`, `search`, `update` (report only for now), `mcp` (read-only MCP server)                       |
 
 ## Tokens
 
@@ -159,6 +159,7 @@ rectio diff dialog
 rectio list [--type theme] [--tier pro]
 rectio search money
 rectio update
+rectio mcp [--registry <url|folder>]
 ```
 
 - **init** detects TanStack Start, Next.js or Vite (in that order), requires Tailwind v4 (it stops
@@ -190,6 +191,76 @@ command tests against a built registry; an HTTP test against the dev server; and
 test (`tests/vite-app.e2e.test.ts`) that creates a Vite + React + Tailwind v4 app in a temp
 folder, runs `init` and `add button dialog money` with the built CLI, then the app's `tsc` and
 `vite build`. It installs real packages with pnpm, so it needs the network on a cold store.
+
+### MCP server
+
+`rectio mcp` runs a read-only [MCP](https://modelcontextprotocol.io) server on stdio, so a coding
+agent can look up rectio items, tokens and source instead of guessing. It lives in the CLI package
+(`src/mcp`, built on `@modelcontextprotocol/sdk` 1.x) and reuses the registry client, the
+`rectio.json` and `--registry` lookup and the license key lookup (`RECTIO_LICENSE_KEY`, then
+`auth.json`). One install covers both. It never writes files: `get_add_command` returns the command.
+
+| Tool              | Use it to                                                                                    |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| `list_items`      | See what exists, filtered by `type` and `tier`                                               |
+| `search_items`    | Find items by words in name, title, categories and description                               |
+| `get_item`        | Read one item: description, versions, what installs with it, npm packages, files             |
+| `get_item_source` | Read the source of an item (or one file); imports use your aliases when `rectio.json` exists |
+| `get_tokens`      | Get token names and values of a theme and mode, with the Tailwind utility for each           |
+| `get_docs`        | Get an item's usage notes and exports, or the general rules without an item                  |
+| `get_add_command` | Get the exact `rectio add ...` command, with what else it installs and the key it needs      |
+
+Pro items: `get_item` shows metadata only, and `get_item_source`, `get_docs` and `get_tokens` for a
+pro item return a message that says how to get a key and no source, until a key is configured. The
+key is never printed. Give the server its key in the `env` of its config (below) or in `auth.json`.
+
+Add it to a project (use `cmd /c rectio mcp` as the command on native Windows if the editor cannot
+start `.cmd` shims):
+
+```sh
+# Claude Code: writes .mcp.json for the project (drop --scope project for just you)
+claude mcp add rectio --scope project -- rectio mcp
+claude mcp add rectio --scope project -e RECTIO_LICENSE_KEY=<key> -- rectio mcp   # with a pro key
+```
+
+```jsonc
+// Claude Code: .mcp.json   Cursor: .cursor/mcp.json
+{
+  "mcpServers": {
+    "rectio": {
+      "command": "rectio",
+      "args": ["mcp"],
+      "env": { "RECTIO_LICENSE_KEY": "<key>" }, // optional, pro items only
+    },
+  },
+}
+```
+
+```jsonc
+// VS Code: .vscode/mcp.json (the key is asked once and kept out of the file)
+{
+  "inputs": [
+    {
+      "id": "rectio-key",
+      "type": "promptString",
+      "description": "rectio license key",
+      "password": true,
+    },
+  ],
+  "servers": {
+    "rectio": {
+      "type": "stdio",
+      "command": "rectio",
+      "args": ["mcp"],
+      "env": { "RECTIO_LICENSE_KEY": "${input:rectio-key}" },
+    },
+  },
+}
+```
+
+Do not commit a real key: keep the `env` block out of shared config, or use `auth.json`. The server
+runs in the project folder the editor opens, which is where it finds `rectio.json`. Point it at a
+local registry with `"args": ["mcp", "--registry", "../rectio/packages/registry/dist/registry"]`.
 
 ### update: the plan
 
