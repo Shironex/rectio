@@ -3,13 +3,10 @@ title: Spinner and loaders
 description: Spinners, a loading overlay and a loading state for actions.
 ---
 
-import SpinnerDemo from '@/demos/spinner';
-import SpinnerMotionDemo from '@/demos/spinner.motion';
-
 <Preview
   name="spinner"
-  plain={<SpinnerDemo />}
-  motion={<SpinnerMotionDemo />}
+  plain={<Demo name="spinner" />}
+  motion={<Demo name="spinner.motion" />}
   importLine="import { LoadingOverlay } from '@rectio/motion';"
 />
 
@@ -72,7 +69,11 @@ Every prop of a `span` is accepted as well.
       default: "'ring'",
       description: 'The kind of loader.',
     },
-    size: { type: "'sm' | 'md' | 'lg' | 'xl'", default: "'md'", description: '16, 24, 40 or 64 pixels.' },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'xl'",
+      default: "'md'",
+      description: '16, 24, 40 or 64 pixels.',
+    },
     tone: {
       type: "'accent' | 'current' | 'muted'",
       default: "'accent'",
