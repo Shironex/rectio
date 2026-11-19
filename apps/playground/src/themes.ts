@@ -12,6 +12,7 @@ export function readView(search: string) {
   const params = new URLSearchParams(search);
   const theme = THEMES.find((t) => t.id === params.get('theme'))?.id ?? 'default';
   const mode = MODES.find((m) => m === params.get('mode')) ?? 'light';
-  const view = params.get('view') === 'app' ? 'app' : 'matrix';
-  return { theme, mode, view } as const;
+  const view = (['app', 'motion'] as const).find((v) => v === params.get('view')) ?? 'matrix';
+  const motion = params.get('motion') === 'on';
+  return { theme, mode, view, motion } as const;
 }
