@@ -266,6 +266,8 @@ const row = cn(
   '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
   'data-current:bg-(--rx-sidebar-item-active) data-current:text-fg',
   'data-active:bg-(--rx-sidebar-item-active) data-active:text-fg',
+  // An open section holding the current page: its name stays strong, without a second tint.
+  'data-trail:text-fg',
 );
 
 const railRow =
@@ -277,7 +279,7 @@ function ItemIcon({ children }: { children: ReactNode }) {
       aria-hidden
       className={cn(
         'flex size-4 shrink-0 items-center justify-center text-fg-subtle transition-colors duration-fast ease-standard',
-        'group-hover/item:text-fg-muted group-data-current/item:text-accent-strong group-data-active/item:text-accent-strong',
+        'group-hover/item:text-fg-muted group-data-current/item:text-accent-strong group-data-active/item:text-accent-strong group-data-trail/item:text-accent-strong',
       )}
     >
       {children}
@@ -375,7 +377,7 @@ export function SidebarItem({
           <TooltipTrigger render={element} />
           <TooltipContent side="right">
             {children}
-            {badge !== undefined && <span className="ms-2 numeric opacity-70">{badge}</span>}
+            {badge !== undefined && <span className="ms-2 numeric">{badge}</span>}
           </TooltipContent>
         </Tooltip>
       ) : (
@@ -434,10 +436,11 @@ export function SidebarSubmenu({
             </TooltipTrigger>
             <TooltipContent side="right">
               {label}
-              {badge !== undefined && <span className="ms-2 numeric opacity-70">{badge}</span>}
+              {badge !== undefined && <span className="ms-2 numeric">{badge}</span>}
             </TooltipContent>
           </Tooltip>
-          <MenuContent side="right" align="start" sideOffset={8}>
+          {/* Clears the rail's padding and edge, so the flyout sits beside the rail, not on it. */}
+          <MenuContent side="right" align="start" sideOffset={14}>
             <MenuGroup label={label}>
               <FlyoutContext value>{children}</FlyoutContext>
             </MenuGroup>
@@ -452,6 +455,7 @@ export function SidebarSubmenu({
       <Collapsible.Root open={open} onOpenChange={setOpen}>
         <Collapsible.Trigger
           data-active={active && !open ? '' : undefined}
+          data-trail={active && open ? '' : undefined}
           className={cn(row, className)}
         >
           {icon !== undefined && <ItemIcon>{icon}</ItemIcon>}
@@ -526,7 +530,9 @@ export function SidebarSubItem({
         render={render}
         onClick={onClick}
         aria-current={active ? 'page' : undefined}
-        className="aria-[current=page]:font-medium"
+        data-current={active ? '' : undefined}
+        hint={badge}
+        className="data-current:bg-(--rx-sidebar-item-active) data-current:font-medium"
       >
         {children}
       </MenuLinkItem>

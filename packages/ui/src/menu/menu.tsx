@@ -121,6 +121,7 @@ export function MenuItem({ className, icon, shortcut, tone, children, ...props }
   return (
     <BaseMenu.Item
       data-slot="menu-item"
+      data-tone={tone === 'danger' ? 'danger' : undefined}
       aria-keyshortcuts={useAriaShortcut(shortcut)}
       className={cn(
         menuItem,
@@ -143,10 +144,12 @@ export function MenuItem({ className, icon, shortcut, tone, children, ...props }
 
 export type MenuLinkItemProps = WithClassName<ComponentProps<typeof BaseMenu.LinkItem>> & {
   icon?: ReactNode;
+  /** A count or note at the end of the row, such as items waiting. */
+  hint?: ReactNode;
 };
 
 /** A row that navigates. Renders an anchor; pass `render` for a router's link. */
-export function MenuLinkItem({ className, icon, children, ...props }: MenuLinkItemProps) {
+export function MenuLinkItem({ className, icon, hint, children, ...props }: MenuLinkItemProps) {
   return (
     <BaseMenu.LinkItem
       data-slot="menu-item"
@@ -159,6 +162,9 @@ export function MenuLinkItem({ className, icon, children, ...props }: MenuLinkIt
         </span>
       )}
       <span className="min-w-0 flex-1 truncate">{children}</span>
+      {hint !== undefined && (
+        <span className="ms-auto ps-4 text-sm text-fg-subtle numeric">{hint}</span>
+      )}
     </BaseMenu.LinkItem>
   );
 }
