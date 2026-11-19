@@ -195,7 +195,7 @@ function Report() {
     const id = toast.add({
       type: 'success',
       title: 'Expense added',
-      description: `${expense.merchant}, ${money(expense.amount)}. Total claimed is now ${money(totalNow)}.`,
+      description: `${expense.merchant}, ${money(expense.amount)}. Total now ${money(totalNow)}.`,
       actionProps: {
         children: 'Undo',
         onClick: () => {
@@ -220,7 +220,7 @@ function Report() {
     const id = toast.add({
       type: 'success',
       title: count === 1 ? 'Expense removed' : `${String(count)} expenses removed`,
-      description: `Total claimed is now ${money(totalNow)}.`,
+      description: `Total now ${money(totalNow)}.`,
       actionProps: {
         children: 'Undo',
         onClick: () => {
