@@ -209,6 +209,12 @@ function tailwindCss(contract: string[], types: TokenMap): string {
 
 @utility playback-reverse {
   animation-direction: reverse;
+}
+
+/* The stressed phrase in a headline: a heavier weight, or italic where the theme's display face has no weight to spare. */
+@utility emphasis {
+  font-weight: var(--rx-emphasis-weight);
+  font-style: var(--rx-emphasis-style);
 }`;
   const numeric = `/* Money and quantities: the numeric family with tabular, lining figures. */
 @utility numeric {

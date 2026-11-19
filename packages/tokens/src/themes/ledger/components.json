@@ -1,10 +1,22 @@
 {
   "component": {
     "button": {
-      "weight": { "$type": "fontWeight", "$value": "{font.weight.strong}" }
+      "weight": {
+        "$type": "fontWeight",
+        "$value": "{font.weight.strong}"
+      }
     },
     "dialog": {
-      "width": { "$type": "dimension", "$value": "{size.560}" }
+      "width": {
+        "$type": "dimension",
+        "$value": "{size.560}"
+      }
+    },
+    "emphasis": {
+      "style": {
+        "$type": "other",
+        "$value": "italic"
+      }
     }
   }
 }
