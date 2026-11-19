@@ -187,7 +187,7 @@ function ReleaseList({
         <div className="flex items-center gap-3">
           <GroupHeading label="New since your last visit" accent />
           {onMarkSeen !== undefined && (
-            <Button variant="secondary" size="sm" onClick={onMarkSeen}>
+            <Button variant="ghost" size="sm" onClick={onMarkSeen} className="shrink-0">
               Mark as read
             </Button>
           )}
