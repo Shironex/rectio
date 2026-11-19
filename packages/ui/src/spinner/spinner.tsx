@@ -97,7 +97,7 @@ function Pulse() {
       {[0, 1].map((i) => (
         <span
           key={i}
-          className="absolute inset-0 rounded-full border-2 border-current animate-ripple motion-reduce:hidden"
+          className="absolute inset-0 rounded-full border-2 border-current bg-current/10 animate-ripple motion-reduce:hidden"
           style={phase(i)}
         />
       ))}
@@ -106,29 +106,40 @@ function Pulse() {
   );
 }
 
-/** The comet's tail: dots trailing the head, each smaller and fainter. */
+/**
+ * The comet's tail: arcs of the orbit trailing the head, each fainter and thinner, so the head
+ * draws a tapered streak instead of a row of dots.
+ */
 const TAIL = [
-  { turn: '-rotate-24', dot: 'size-1/5 opacity-55' },
-  { turn: '-rotate-48', dot: 'size-1/7 opacity-30' },
-  { turn: '-rotate-72', dot: 'size-1/10 opacity-15' },
+  { length: 10, width: 3, opacity: 0.6 },
+  { length: 20, width: 2.25, opacity: 0.3 },
+  { length: 30, width: 1.5, opacity: 0.12 },
 ];
 
 function Orbit() {
   return (
     <span className="relative flex size-full">
-      <span className="absolute inset-1/8 rounded-full border border-current opacity-30" />
+      <span className="absolute inset-1/8 rounded-full border border-current bg-current/5 opacity-30" />
       <span className={cn('absolute inset-0 animate-orbit', STILL)}>
-        <span className="absolute top-0 left-1/2 size-1/4 -translate-x-1/2 rounded-full bg-current" />
-        {TAIL.map(({ turn, dot }) => (
-          <span key={turn} className={cn('absolute inset-0', turn)}>
-            <span
-              className={cn(
-                'absolute top-1/32 left-1/2 -translate-x-1/2 rounded-full bg-current',
-                dot,
-              )}
+        {/* Turned a quarter back so the arcs end at twelve o'clock, under the head. */}
+        <svg viewBox="0 0 24 24" fill="none" className="absolute inset-0 size-full -rotate-90">
+          {TAIL.map(({ length, width, opacity }) => (
+            <circle
+              key={length}
+              cx="12"
+              cy="12"
+              r="9"
+              stroke="currentColor"
+              strokeWidth={width}
+              strokeLinecap="round"
+              strokeOpacity={opacity}
+              pathLength={100}
+              strokeDasharray={`${String(length)} ${String(100 - length)}`}
+              strokeDashoffset={length}
             />
-          </span>
-        ))}
+          ))}
+        </svg>
+        <span className="absolute top-0 left-1/2 size-1/4 -translate-x-1/2 rounded-full bg-current" />
       </span>
     </span>
   );

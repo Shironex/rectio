@@ -347,7 +347,7 @@ export function SkeletonChart({
             <polygon
               points={`0,100 ${values.map((v, i) => `${String(i * 10)},${String(100 - v)}`).join(' ')} ${String((points - 1) * 10)},100`}
               fill="currentColor"
-              fillOpacity={0.4}
+              fillOpacity={0.6}
             />
             <polyline
               points={values.map((v, i) => `${String(i * 10)},${String(100 - v)}`).join(' ')}

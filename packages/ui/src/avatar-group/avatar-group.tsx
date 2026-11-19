@@ -108,7 +108,8 @@ export function AvatarGroup({
         {visible.map((item, i) => (
           <li
             key={`${item.name}-${String(i)}`}
-            style={stacked ? spread(i) : undefined}
+            // Earlier avatars sit on top, so each status dot stays clear of its neighbour.
+            style={stacked ? { ...spread(i), zIndex: visible.length - i } : undefined}
             className={cn('relative flex', stacked && i > 0 && OVERLAP[size], stacked && FAN)}
           >
             <Avatar
