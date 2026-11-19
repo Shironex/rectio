@@ -89,4 +89,13 @@ describe('ResetPassword', () => {
       unmount();
     }
   });
+
+  it('says live whether the two passwords match', async () => {
+    render(<ResetPassword step="reset" onRequest={noop} onReset={noop} />);
+    await userEvent.type(screen.getByLabelText('New password'), 'Ledger-Lines-42');
+    await userEvent.type(screen.getByLabelText('Confirm new password'), 'Ledger');
+    expect(screen.getByText('Passwords do not match yet')).toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText('Confirm new password'), '-Lines-42');
+    expect(screen.getByText('Passwords match')).toBeInTheDocument();
+  });
 });

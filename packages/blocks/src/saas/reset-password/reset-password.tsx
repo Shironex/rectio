@@ -1,5 +1,5 @@
-import { SignOutIcon } from '@phosphor-icons/react';
-import { Field, FieldDescription, FieldError, FieldLabel, Input } from '@rectio/ui';
+import { CheckIcon, SignOutIcon, XIcon } from '@phosphor-icons/react';
+import { Field, FieldDescription, FieldError, FieldLabel, Input, cn } from '@rectio/ui';
 import { useId, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
@@ -95,7 +95,7 @@ export function ResetPassword({
             </Button>
           )}
         </div>
-        <p className="text-sm text-fg-subtle">
+        <p className="text-sm text-fg-muted">
           Nothing after a few minutes? Check spam, or ask your workspace admin which email your
           account uses.
         </p>
@@ -235,8 +235,7 @@ function NewPassword({
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [tried, setTried] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const showRules = focused || password !== '';
+  const matches = confirm !== '' && confirm === password;
   const errors: NewPasswordErrors = tried ? newPasswordErrors(password, confirm, minLength) : {};
 
   const submit = (event: SyntheticEvent) => {
@@ -267,20 +266,15 @@ function NewPassword({
           <PasswordInput
             name="new-password"
             autoComplete="new-password"
-            aria-describedby={showRules ? rulesId : undefined}
+            aria-describedby={rulesId}
             value={password}
             onChange={(event) => {
               setPassword(event.target.value);
             }}
-            onFocus={() => {
-              setFocused(true);
-            }}
-            onBlur={() => {
-              setFocused(false);
-            }}
           />
           {errors.password !== undefined && <FieldError>{errors.password}</FieldError>}
-          {showRules && <PasswordRules id={rulesId} password={password} minLength={minLength} />}
+          {/* Choosing the password is the whole step, so its rules stay in view from the start. */}
+          <PasswordRules id={rulesId} password={password} minLength={minLength} />
         </Field>
         <Field invalid={errors.confirm !== undefined}>
           <FieldLabel>Confirm new password</FieldLabel>
@@ -292,10 +286,29 @@ function NewPassword({
               setConfirm(event.target.value);
             }}
           />
-          {errors.confirm !== undefined && <FieldError>{errors.confirm}</FieldError>}
+          {errors.confirm !== undefined ? (
+            <FieldError>{errors.confirm}</FieldError>
+          ) : (
+            confirm !== '' && (
+              <FieldDescription
+                aria-live="polite"
+                className={cn(
+                  'flex items-center gap-1.5',
+                  matches ? 'text-positive-strong' : 'text-fg-muted',
+                )}
+              >
+                {matches ? (
+                  <CheckIcon aria-hidden weight="bold" className="size-3.5 shrink-0" />
+                ) : (
+                  <XIcon aria-hidden weight="bold" className="size-3.5 shrink-0" />
+                )}
+                {matches ? 'Passwords match' : 'Passwords do not match yet'}
+              </FieldDescription>
+            )
+          )}
         </Field>
-        <p className="mt-2 flex items-start gap-2.5 text-base text-fg">
-          <SignOutIcon aria-hidden weight="bold" className="mt-1 size-4 shrink-0 text-fg-muted" />
+        <p className="flex items-start gap-2.5 rounded-control bg-surface-sunken px-3 py-2.5 text-sm text-fg">
+          <SignOutIcon aria-hidden weight="bold" className="mt-0.5 size-4 shrink-0 text-fg-muted" />
           Saving signs you out on every other device, so anyone using your old password loses
           access.
         </p>
