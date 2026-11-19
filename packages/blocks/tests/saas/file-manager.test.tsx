@@ -74,6 +74,25 @@ describe('FileManager', () => {
     expect(onRename).toHaveBeenCalledWith('d', 'Minutes');
   });
 
+  it('offers an upgrade under the meter and starts with the given selection', async () => {
+    const onUpgrade = vi.fn();
+    render(
+      <FileManager
+        path={PATH}
+        entries={ENTRIES}
+        now={NOW}
+        storage={{ used: 8.4e9, total: 1e10 }}
+        onUpgrade={onUpgrade}
+        onDelete={vi.fn()}
+        defaultSelectedIds={['d']}
+      />,
+    );
+    expect(screen.getByText('1.6 GB left')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Upgrade' }));
+    expect(onUpgrade).toHaveBeenCalledOnce();
+    expect(screen.getByRole('checkbox', { name: 'Select notes' })).toBeChecked();
+  });
+
   it('returns focus to the row menu when a rename is cancelled', async () => {
     render(<FileManager path={PATH} entries={ENTRIES} now={NOW} onRename={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Actions for notes' }));
@@ -117,6 +136,7 @@ describe('FileManager', () => {
     );
     expect(screen.getByRole('meter')).toBeInTheDocument();
     expect(screen.queryByText(/Nearly full/)).not.toBeInTheDocument();
+    expect(screen.getByText('5 GB left')).toBeInTheDocument();
     rerender(
       <FileManager
         path={PATH}

@@ -89,6 +89,10 @@ export interface FileManagerProps {
   onDownload?: (entryIds: string[]) => void;
   /** Asked to confirm first. */
   onDelete?: (entryIds: string[]) => void;
+  /** Shows an Upgrade link under the storage meter. */
+  onUpgrade?: () => void;
+  /** Entries selected on first render, such as the files a previous step picked. */
+  defaultSelectedIds?: readonly string[];
   /** The moment "modified" is measured from. */
   now?: Date;
   locale?: string;
@@ -111,19 +115,21 @@ const KIND_ICONS: Record<FileKind, Icon> = {
   other: FileIcon,
 };
 
-// Each kind gets its own tint as well as its own shape, from the subtle and strong token pairs.
-const KIND_TINT: Record<FileKind, string> = {
-  folder: 'bg-surface text-accent-strong',
-  document: 'bg-info-subtle text-info-strong',
-  spreadsheet: 'bg-positive-subtle text-positive-strong',
-  presentation: 'bg-warning-subtle text-warning-strong',
-  pdf: 'bg-negative-subtle text-negative-strong',
-  image: 'bg-accent-subtle text-accent-strong',
-  video: 'bg-info-subtle text-info-strong',
-  audio: 'bg-warning-subtle text-warning-strong',
-  archive: 'bg-surface-sunken text-fg-muted',
-  code: 'bg-surface-sunken text-fg-muted',
-  other: 'bg-surface-sunken text-fg-muted',
+// One tonal system in every theme: each tile is the same neutral sunken square with a hairline,
+// and only the glyph takes a colour, from the strong tokens. Shape tells kinds apart; the tint
+// only helps the eye group them.
+const KIND_GLYPH: Record<FileKind, string> = {
+  folder: 'text-accent-strong',
+  document: 'text-info-strong',
+  spreadsheet: 'text-positive-strong',
+  presentation: 'text-warning-strong',
+  pdf: 'text-negative-strong',
+  image: 'text-accent-strong',
+  video: 'text-info-strong',
+  audio: 'text-warning-strong',
+  archive: 'text-fg-muted',
+  code: 'text-fg-muted',
+  other: 'text-fg-muted',
 };
 
 const KIND_WORDS: Record<FileKind, string> = {
@@ -166,6 +172,8 @@ export function FileManager({
   onRename,
   onDownload,
   onDelete,
+  onUpgrade,
+  defaultSelectedIds,
   now: requestedNow,
   locale: requestedLocale,
   title,
@@ -178,7 +186,7 @@ export function FileManager({
     key: 'name',
     ascending: true,
   });
-  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+  const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set(defaultSelectedIds));
   const [renaming, setRenaming] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string[] | null>(null);
   const [dropping, setDropping] = useState(false);
@@ -504,11 +512,14 @@ export function FileManager({
                 {current?.name ?? 'Files'}, folders first, sorted by{' '}
                 {SORTS.find((s) => s.value === sort.key)?.label.toLowerCase()}
               </TableCaption>
-              <TableHeader className="hidden @xl:table-header-group">
+              {/* Narrow rows fold every column under the name, so the header row is read by screen
+                  readers only, as plain names: sorting and select all live in the toolbar there. */}
+              <TableHeader className="@max-xl:sr-only">
                 <TableRow>
                   {selectable && (
                     <TableHead className="w-0 pe-0">
-                      <span className="flex items-center">
+                      <span className="sr-only @xl:hidden">Selected</span>
+                      <span className="hidden items-center @xl:flex">
                         <Checkbox
                           aria-label="Select everything in this folder"
                           checked={all}
@@ -558,9 +569,8 @@ export function FileManager({
                           <span className="flex min-w-0 items-center gap-3">
                             <span
                               className={cn(
-                                'inline-flex size-8 shrink-0 items-center justify-center rounded-control',
-                                kind === 'folder' && 'border border-line',
-                                KIND_TINT[kind],
+                                'inline-flex size-8 shrink-0 items-center justify-center rounded-control border border-line bg-surface-sunken',
+                                KIND_GLYPH[kind],
                               )}
                             >
                               <KindIcon
@@ -670,14 +680,23 @@ export function FileManager({
               max={storage.total}
               valueText={`${formatBytes(storage.used, locale)} of ${formatBytes(storage.total, locale)}`}
               level={storageLevel(storage)}
-              {...(storageNeedsAttention(storage)
-                ? {
-                    note:
-                      storageLevel(storage) === 'over'
-                        ? 'Storage is full. Delete files or upgrade to upload more.'
-                        : 'Nearly full. Delete files you no longer need to keep uploading.',
-                  }
-                : {})}
+              note={
+                <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <span>{storageNote(storage, locale)}</span>
+                  {onUpgrade !== undefined && (
+                    <button
+                      type="button"
+                      onClick={onUpgrade}
+                      className={cn(
+                        'cursor-pointer rounded-badge font-medium text-accent-strong underline-offset-4 hover:underline',
+                        focusRing,
+                      )}
+                    >
+                      Upgrade
+                    </button>
+                  )}
+                </span>
+              }
             />
           )}
         </>
@@ -825,6 +844,17 @@ function DeleteEntriesDialog({
 const SORT_WORDS = { true: 'ascending', false: 'descending' } as const;
 
 /** A sortable column header: the title is a button, `aria-sort` says the current order. */
+/** What the storage meter says under the bar: what is left, and what to do when it runs short. */
+function storageNote(storage: StorageUsage, locale: string): string {
+  if (storageLevel(storage) === 'over') {
+    return 'Storage is full. Delete files or upgrade to upload more.';
+  }
+  const left = `${formatBytes(storage.total - storage.used, locale)} left`;
+  return storageNeedsAttention(storage)
+    ? `${left}. Nearly full: delete files you no longer need to keep uploading.`
+    : left;
+}
+
 function FileSortHead({
   column,
   sort,
@@ -846,6 +876,7 @@ function FileSortHead({
       aria-sort={active ? SORT_WORDS[String(sort.ascending) as 'true' | 'false'] : 'none'}
       className="p-0"
     >
+      <span className="sr-only @xl:hidden">{children}</span>
       <button
         type="button"
         data-sorted={active || undefined}
@@ -853,7 +884,7 @@ function FileSortHead({
           onSort(column);
         }}
         className={cn(
-          'group/sort inline-flex h-full w-full cursor-pointer items-center gap-1.5 px-(--rx-table-cell-padding-x)',
+          'group/sort hidden h-full w-full cursor-pointer @xl:inline-flex items-center gap-1.5 px-(--rx-table-cell-padding-x)',
           'font-medium whitespace-nowrap text-fg-muted hover:text-fg data-sorted:text-fg',
           'transition-colors duration-fast ease-standard',
           '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
