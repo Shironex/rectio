@@ -55,6 +55,8 @@ export function Callout({ type = 'note', title, children, className }: CalloutPr
   const Glyph = style.icon;
   return (
     <aside
+      // A note within the page's flow, not a landmark: pages hold many callouts.
+      role="note"
       data-slot="callout"
       data-type={type}
       aria-label={typeof title === 'string' ? title : style.label}

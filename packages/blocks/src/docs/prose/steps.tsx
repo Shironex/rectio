@@ -47,8 +47,7 @@ export function Step({ title, level = 3, number = 1, children }: StepProps) {
           id={slugify(title)}
           className="scroll-mt-24 text-lg font-strong text-balance text-fg"
         >
-          <span className="sr-only">Step {number}: </span>
-          {title}
+          <span className="sr-only">Step {number}:</span> {title}
         </Heading>
         {children !== undefined && (
           <div className="flex min-w-0 flex-col gap-3 text-fg-muted [&_p]:text-pretty">
