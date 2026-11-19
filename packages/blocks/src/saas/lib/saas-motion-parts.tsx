@@ -1,6 +1,13 @@
 import { readMotionTokens, usePlainMotion, type MotionTokens } from '@rectio/motion';
 import { AnimatePresence, PresenceContext, usePresence } from 'motion/react';
-import { use, useLayoutEffect, useRef, type ComponentProps, type ReactNode } from 'react';
+import {
+  use,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 
 import { MotionParts } from '../../lib/motion-parts';
 import { SaasPartsProvider, type SaasParts } from './saas-parts';
@@ -112,16 +119,17 @@ function Item({ ref, ...props }: ComponentProps<'li'>) {
     exit.finished.then(done, done);
   }, [isPresent, plain, safeToRemove]);
 
-  return (
-    <li
-      ref={(value: HTMLLIElement | null) => {
-        node.current = value;
-        if (typeof ref === 'function') ref(value);
-        else if (ref !== null && ref !== undefined) ref.current = value;
-      }}
-      {...props}
-    />
+  // A stable callback ref, so React does not detach and reattach it on every render.
+  const attach = useCallback(
+    (value: HTMLLIElement | null) => {
+      node.current = value;
+      if (typeof ref === 'function') ref(value);
+      else if (ref !== null && ref !== undefined) ref.current = value;
+    },
+    [ref],
   );
+
+  return <li ref={attach} {...props} />;
 }
 
 export const SAAS_MOTION_PARTS: SaasParts = { Items, Item };
