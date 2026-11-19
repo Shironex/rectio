@@ -88,8 +88,8 @@ export function SheetContent({
       <Drawer.Backdrop
         className={cn(
           'fixed inset-0 z-50 bg-scrim',
-          'transition-opacity duration-slow ease-enter data-swiping:transition-none',
-          'data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-base data-ending-style:ease-exit',
+          'transition-opacity duration-base ease-enter data-swiping:transition-none',
+          'data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-fast data-ending-style:ease-exit',
         )}
       />
       <Drawer.Viewport className="fixed inset-0 z-50">
@@ -98,12 +98,12 @@ export function SheetContent({
           data-side={side}
           className={cn(
             'fixed flex flex-col overflow-hidden border-line bg-surface-overlay text-fg shadow-(--rx-sheet-shadow) outline-none',
-            'transition-[translate,opacity] duration-slow ease-enter will-change-transform',
+            'transition-[translate,opacity] duration-base ease-enter will-change-transform',
             // Under reduced motion the sheet fades in place instead of travelling across the screen.
             'motion-reduce:data-starting-style:translate-0 motion-reduce:data-ending-style:translate-0',
             'motion-reduce:data-starting-style:opacity-0 motion-reduce:data-ending-style:opacity-0',
             'data-swiping:transition-none data-swiping:select-none',
-            'data-ending-style:duration-base data-ending-style:ease-exit',
+            'data-ending-style:duration-fast data-ending-style:ease-exit',
             popupBySide[side],
             className,
           )}
