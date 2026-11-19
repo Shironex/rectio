@@ -178,17 +178,22 @@ export function Pagination({
           )}
         {showCompact && (
           <li
-            aria-current="page"
             className={cn(
               'px-2 text-sm whitespace-nowrap text-fg-muted numeric',
               variant === 'responsive' && 'sm:hidden',
             )}
           >
-            {formatStatus(current, total)}
+            <span role="status">{formatStatus(current, total)}</span>
           </li>
         )}
         <li>{next}</li>
       </ul>
+      {/* Paging keeps focus on the control: say where it landed. The visible compact status speaks for itself. */}
+      {variant !== 'compact' && (
+        <p role="status" className={cn('sr-only', variant === 'responsive' && 'max-sm:hidden')}>
+          {formatStatus(current, total)}
+        </p>
+      )}
     </nav>
   );
 }

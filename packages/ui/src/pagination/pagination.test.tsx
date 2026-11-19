@@ -34,6 +34,7 @@ describe('Pagination', () => {
       'aria-current',
       'page',
     );
+    expect(within(nav).getByRole('status')).toHaveTextContent(/3\D+12/);
     await userEvent.click(within(nav).getByRole('button', { name: 'Next' }));
     expect(onPageChange).toHaveBeenLastCalledWith(4);
     await userEvent.click(within(nav).getByRole('button', { name: 'Page 12' }));
