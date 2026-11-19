@@ -279,7 +279,7 @@ export const EXPENSES: ApprovalState = {
       date: d(3, 14),
       amount: 689,
       status: 'pending',
-      flags: ['Over the 450 nightly limit'],
+      flags: ['Over the nightly hotel limit'],
     },
     {
       id: 'x3',
