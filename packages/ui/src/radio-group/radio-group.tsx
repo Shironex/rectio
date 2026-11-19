@@ -169,8 +169,16 @@ export function RadioCard({ title, description, meta, className, ...props }: Rad
     >
       <RadioControl className="mt-0.5" />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span id={titleId} className="font-medium">
-          {title}
+        {/* The meta shares the title's line, so the description gets the card's full width. */}
+        <span className="flex items-baseline justify-between gap-3">
+          <span id={titleId} className="font-medium">
+            {title}
+          </span>
+          {meta !== undefined && (
+            <span id={`${id}-meta`} className="shrink-0 font-medium numeric">
+              {meta}
+            </span>
+          )}
         </span>
         {description !== undefined && (
           <span
@@ -181,11 +189,6 @@ export function RadioCard({ title, description, meta, className, ...props }: Rad
           </span>
         )}
       </span>
-      {meta !== undefined && (
-        <span id={`${id}-meta`} className="shrink-0 font-medium numeric">
-          {meta}
-        </span>
-      )}
     </BaseRadio.Root>
   );
 }
