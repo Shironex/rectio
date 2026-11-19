@@ -42,7 +42,7 @@ import { resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
 import { useNow } from '../lib/focus';
-import { isoDateTime, plural, relativeTime } from '../lib/saas';
+import { isoDateTime, countLabel, relativeTime } from '../lib/saas';
 import {
   EMPTY_USER_FILTERS,
   USER_ROLES,
@@ -415,7 +415,7 @@ export function UsersTable({
   // Narrow: the count alone, so the Invite button keeps its place on the title's row.
   const description = (
     <>
-      {plural(users.length, 'user')}
+      {countLabel(users.length, 'user')}
       {extra.length > 0 && <span className="@max-md:hidden">, {extra.join(', ')}</span>}
     </>
   );
@@ -537,7 +537,7 @@ export function UsersTable({
                 <span className="font-medium numeric">{selectedIds.length}</span> selected
                 {targets.skippedOwners > 0 && (
                   <span className="text-fg-muted">
-                    , {plural(targets.skippedOwners, 'owner')} left out of bulk changes
+                    , {countLabel(targets.skippedOwners, 'owner')} left out of bulk changes
                   </span>
                 )}
               </p>
@@ -601,7 +601,7 @@ export function UsersTable({
           />
           {/* Always mounted, so a change in the count is read out as filters change. */}
           <p role="status" className="sr-only">
-            {plural(rows.length, 'result')}
+            {countLabel(rows.length, 'result')}
             {selectedIds.length > 0 && `, ${String(selectedIds.length)} selected`}
           </p>
 
@@ -610,7 +610,7 @@ export function UsersTable({
             tabIndex={-1}
             className="rounded-control focus-visible:outline-2 focus-visible:outline-focus"
           >
-            <DataTable caption={`${title}, ${plural(rows.length, 'result')}`} hideCaption>
+            <DataTable caption={`${title}, ${countLabel(rows.length, 'result')}`} hideCaption>
               {/* Narrow rows describe themselves and DataTableSort sorts, so the header row goes
                   away instead of leaving sort buttons focusable but unseen. */}
               <DataTableHeader table={table} className="@max-xl:hidden" />
@@ -650,7 +650,7 @@ export function UsersTable({
               table={table}
               locale={locale}
               formatRange={(first, last, total) =>
-                `${String(first)} to ${String(last)} of ${plural(total, 'user')}`
+                `${String(first)} to ${String(last)} of ${countLabel(total, 'user')}`
               }
             />
           )}
@@ -740,7 +740,7 @@ function ConfirmUsersDialog({
         <DialogHeader>
           <DialogTitle>
             {one === undefined
-              ? `${copy.verb} ${plural(shown.users.length, 'user')}?`
+              ? `${copy.verb} ${countLabel(shown.users.length, 'user')}?`
               : `${copy.verb} ${one.name}?`}
           </DialogTitle>
           <DialogDescription>{one === undefined ? copy.many : copy.one(one)}</DialogDescription>
@@ -759,7 +759,9 @@ function ConfirmUsersDialog({
               );
             }}
           >
-            {one === undefined ? `${copy.verb} ${plural(shown.users.length, 'user')}` : copy.button}
+            {one === undefined
+              ? `${copy.verb} ${countLabel(shown.users.length, 'user')}`
+              : copy.button}
           </Button>
         </DialogFooter>
       </DialogContent>

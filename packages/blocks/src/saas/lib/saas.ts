@@ -184,6 +184,6 @@ export function formatCount(count: number, locale: string): string {
 }
 
 /** "1 member", "3 members". */
-export function plural(count: number, one: string, many = `${one}s`): string {
+export function countLabel(count: number, one: string, many = `${one}s`): string {
   return `${String(count)} ${count === 1 ? one : many}`;
 }

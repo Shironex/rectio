@@ -23,7 +23,7 @@ export interface BillingUsage {
   used: number;
   /** The allowance on the plan. */
   limit: number;
-  /** The unit in plural, such as "runs" or "GB". */
+  /** The unit in countLabel, such as "runs" or "GB". */
   unit: string;
   resetsOn?: Date;
 }

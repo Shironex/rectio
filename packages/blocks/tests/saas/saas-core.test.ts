@@ -11,7 +11,7 @@ import {
   passwordAccepted,
   passwordChecks,
   passwordStrength,
-  plural,
+  countLabel,
   relativeTime,
 } from '../../src/index';
 
@@ -57,8 +57,8 @@ describe('saas core', () => {
     expect(formatBytes(512, 'en-GB')).toBe('512 bytes');
     expect(formatBytes(1_400_000, 'en-GB')).toBe('1.4 MB');
     expect(formatBytes(24_300_000_000, 'en-GB')).toBe('24 GB');
-    expect(plural(1, 'member')).toBe('1 member');
-    expect(plural(3, 'member')).toBe('3 members');
+    expect(countLabel(1, 'member')).toBe('1 member');
+    expect(countLabel(3, 'member')).toBe('3 members');
     expect(hasErrors({})).toBe(false);
     expect(hasErrors({ email: undefined })).toBe(false);
     expect(hasErrors({ email: 'Enter your email address.' })).toBe(true);

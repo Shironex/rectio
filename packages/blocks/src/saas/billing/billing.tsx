@@ -14,7 +14,7 @@ import { formatLongDate, formatShortDate, resolveLocale } from '../../lib/financ
 import { StateBadge } from '../../lib/state-badge';
 import { useNow } from '../lib/focus';
 import { UsageMeter } from '../lib/meter';
-import { numberFormat, plural } from '../lib/saas';
+import { numberFormat, countLabel } from '../lib/saas';
 import {
   billingCardState,
   billingDaysLeft,
@@ -100,8 +100,8 @@ export function Billing({
     plan.status === 'canceled'
       ? `Access ends on ${renewal}`
       : plan.status === 'trialing'
-        ? `Trial ends on ${renewal}, in ${plural(days, 'day')}`
-        : `Renews on ${renewal}, in ${plural(days, 'day')}`;
+        ? `Trial ends on ${renewal}, in ${countLabel(days, 'day')}`
+        : `Renews on ${renewal}, in ${countLabel(days, 'day')}`;
 
   return (
     <BlockPanel
@@ -151,7 +151,7 @@ export function Billing({
               />
               <span className="text-sm text-fg-muted">
                 per {INTERVAL_WORDS[plan.interval]}
-                {plan.seats !== undefined && `, ${plural(plan.seats, 'seat')} included`}
+                {plan.seats !== undefined && `, ${countLabel(plan.seats, 'seat')} included`}
               </span>
             </p>
             <p className="text-sm text-fg-muted">{renewalText}</p>
@@ -183,7 +183,7 @@ export function Billing({
             plan.status === 'trialing' ? (
               <div className="flex flex-col gap-1">
                 <p className="font-display text-xl font-heading tracking-tight">
-                  {plural(days, 'day')} left in your trial
+                  {countLabel(days, 'day')} left in your trial
                 </p>
                 <p className="text-sm text-fg-muted">
                   Everything in {plan.name} is open until then. The first charge,{' '}

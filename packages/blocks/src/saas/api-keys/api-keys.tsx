@@ -33,7 +33,7 @@ import { formatShortDate, resolveLocale } from '../../lib/finance';
 import { StateBadge } from '../../lib/state-badge';
 import { FormMessage } from '../lib/auth';
 import { focusFirstInvalid, useNow } from '../lib/focus';
-import { plural, relativeTime } from '../lib/saas';
+import { countLabel, relativeTime } from '../lib/saas';
 import { focusRing, inlineLink } from '../lib/styles';
 import { useSaasParts } from '../lib/saas-parts';
 import {
@@ -304,7 +304,7 @@ export function ApiKeys({
                 />
                 <span className="group-open:hidden">Show</span>
                 <span className="hidden group-open:inline">Hide</span>
-                <span>{plural(revokedKeys.length, 'revoked key')}</span>
+                <span>{countLabel(revokedKeys.length, 'revoked key')}</span>
               </summary>
               {renderKeys(revokedKeys, 'Revoked API keys')}
             </details>

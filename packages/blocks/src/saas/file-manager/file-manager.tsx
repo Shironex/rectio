@@ -54,7 +54,7 @@ import { resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
 import { UsageMeter } from '../lib/meter';
 import { useNow } from '../lib/focus';
-import { formatBytes, formatDateTime, isoDateTime, plural, relativeTime } from '../lib/saas';
+import { formatBytes, formatDateTime, isoDateTime, countLabel, relativeTime } from '../lib/saas';
 import { focusRing } from '../lib/styles';
 import {
   fileEntriesSize,
@@ -287,8 +287,8 @@ export function FileManager({
   ];
 
   const summary = [
-    plural(entries.length, 'item'),
-    folders > 0 ? plural(folders, 'folder') : null,
+    countLabel(entries.length, 'item'),
+    folders > 0 ? countLabel(folders, 'folder') : null,
     fileEntriesSize(entries) > 0 ? formatBytes(fileEntriesSize(entries), locale) : null,
   ]
     .filter(Boolean)
@@ -622,7 +622,7 @@ export function FileManager({
                                       ? formatBytes(entry.size ?? 0, locale)
                                       : entry.itemCount === undefined
                                         ? null
-                                        : plural(entry.itemCount, 'item'),
+                                        : countLabel(entry.itemCount, 'item'),
                                     relativeTime(entry.modified, now, locale),
                                   ]
                                     .filter(Boolean)
@@ -651,7 +651,7 @@ export function FileManager({
                           {entry.type === 'folder' ? (
                             entry.itemCount === undefined ? null : (
                               <span className="text-fg-subtle">
-                                {plural(entry.itemCount, 'item')}
+                                {countLabel(entry.itemCount, 'item')}
                               </span>
                             )
                           ) : (
@@ -820,7 +820,9 @@ function DeleteEntriesDialog({
       >
         <DialogHeader>
           <DialogTitle>
-            {one === undefined ? `Delete ${plural(shown.length, 'item')}?` : `Delete ${one.name}?`}
+            {one === undefined
+              ? `Delete ${countLabel(shown.length, 'item')}?`
+              : `Delete ${one.name}?`}
           </DialogTitle>
           <DialogDescription>
             {folders > 0
@@ -839,7 +841,7 @@ function DeleteEntriesDialog({
               onConfirm(shown.map((e) => e.id));
             }}
           >
-            {one === undefined ? `Delete ${plural(shown.length, 'item')}` : 'Delete'}
+            {one === undefined ? `Delete ${countLabel(shown.length, 'item')}` : 'Delete'}
           </Button>
         </DialogFooter>
       </DialogContent>

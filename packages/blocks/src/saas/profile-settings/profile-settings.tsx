@@ -40,7 +40,7 @@ import { resolveLocale } from '../../lib/finance';
 import { FormMessage } from '../lib/auth';
 import { Avatar } from '../lib/avatar';
 import { focusFirstInvalid, useNow } from '../lib/focus';
-import { dateFormat, hasErrors, plural } from '../lib/saas';
+import { dateFormat, hasErrors, countLabel } from '../lib/saas';
 import {
   profileChanges,
   profileDeleteConfirmed,
@@ -388,7 +388,7 @@ export function ProfileSettings({
           >
             {dirty ? (
               <span className="font-medium text-fg">
-                {plural(changed.length, 'unsaved change')}
+                {countLabel(changed.length, 'unsaved change')}
               </span>
             ) : (
               <>

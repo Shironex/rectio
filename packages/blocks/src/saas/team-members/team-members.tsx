@@ -34,7 +34,7 @@ import { resolveLocale } from '../../lib/finance';
 import { ActionMenu } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
 import { focusFirstInvalid, useNow, useReturnFocus } from '../lib/focus';
-import { plural, relativeTime } from '../lib/saas';
+import { countLabel, relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import {
   ROLE_HINTS,
@@ -111,9 +111,9 @@ export function TeamMembers({
   const alone = members.length <= 1 && invites.length === 0;
 
   const description = [
-    plural(members.length, 'member'),
+    countLabel(members.length, 'member'),
     invites.length > 0 ? `${String(invites.length)} invited` : null,
-    usage.left === null ? null : `${plural(usage.left, 'seat')} left`,
+    usage.left === null ? null : `${countLabel(usage.left, 'seat')} left`,
   ]
     .filter(Boolean)
     .join(', ');
@@ -502,7 +502,7 @@ function InviteForm({
           ) : (
             <FieldDescription>
               {parse.valid.length > 0
-                ? `${plural(parse.valid.length, 'invite')} ready to send`
+                ? `${countLabel(parse.valid.length, 'invite')} ready to send`
                 : 'Separate several with commas or spaces.'}
             </FieldDescription>
           )}

@@ -30,7 +30,7 @@ import { EmptyNote } from '../../lib/empty-note';
 import { formatShortDate, resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
-import { isoDateTime, plural } from '../lib/saas';
+import { isoDateTime, countLabel } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import { useNow } from '../lib/focus';
 import { focusRing } from '../lib/styles';
@@ -234,7 +234,8 @@ export function KanbanBoard({
     <BlockPanel
       title={title}
       description={
-        description ?? `${plural(cards.length, 'card')} in ${plural(columns.length, 'column')}`
+        description ??
+        `${countLabel(cards.length, 'card')} in ${countLabel(columns.length, 'column')}`
       }
       className={className}
       bodyClassName="gap-3"

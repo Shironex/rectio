@@ -43,7 +43,7 @@ import { resolveLocale } from '../../lib/finance';
 import { ActionMenu } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
 import { focusFirstInvalid, useNow } from '../lib/focus';
-import { formatDateTime, isoDateTime, plural, relativeTime } from '../lib/saas';
+import { formatDateTime, isoDateTime, countLabel, relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import {
   commentBodyError,
@@ -296,7 +296,7 @@ export function CommentThread({
       description={
         comments.length === 0
           ? 'No comments yet'
-          : `${plural(comments.length, 'comment')} from ${plural(people.length, 'person', 'people')}`
+          : `${countLabel(comments.length, 'comment')} from ${countLabel(people.length, 'person', 'people')}`
       }
       actions={
         resolved === undefined && onResolve !== undefined && comments.length > 0 ? (
@@ -320,7 +320,7 @@ export function CommentThread({
               <span className="font-medium">Resolved</span> by {resolved.by},{' '}
               {relativeTime(resolved.at, now, locale)}
               {comments.length > 0 && (
-                <span className="text-fg-muted">, {plural(comments.length, 'comment')}</span>
+                <span className="text-fg-muted">, {countLabel(comments.length, 'comment')}</span>
               )}
             </span>
           </span>
