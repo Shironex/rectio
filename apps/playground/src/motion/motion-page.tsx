@@ -400,7 +400,7 @@ function Page({
   onOffChange: (off: boolean) => void;
 }) {
   const still = usePlainMotion();
-  const canvas = usePageCanvas(mode);
+  const canvas = usePageCanvas(theme, mode);
   return (
     <ThemeScope ref={canvas} theme={theme} mode={mode} className="min-h-dvh">
       <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8">

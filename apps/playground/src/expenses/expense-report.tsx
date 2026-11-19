@@ -176,7 +176,7 @@ export function ExpenseReport({
 }) {
   // The motion kit's toasts arrive calmly and the stack glides; the plain ones fade in place.
   const { ToastProvider } = motion ? MOTION_KIT : PLAIN_KIT;
-  const canvas = usePageCanvas(mode);
+  const canvas = usePageCanvas(theme, mode);
   return (
     <ThemeScope ref={canvas} theme={theme} mode={mode} className="min-h-dvh">
       <KitProvider motion={motion}>

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import type { Mode } from './themes';
+import type { Mode, ThemeId } from './themes';
 
 /**
  * A ref for a view's ThemeScope that paints the page behind it in the scope's canvas colour and
@@ -8,7 +8,7 @@ import type { Mode } from './themes';
  * dark theme. Only those two values reach the page: the tokens stay inside the scope, so a popup
  * that escaped it would still show up unthemed.
  */
-export function usePageCanvas(mode: Mode) {
+export function usePageCanvas(theme: ThemeId, mode: Mode) {
   return useCallback(
     (scope: HTMLDivElement | null) => {
       if (scope === null) return;
@@ -20,6 +20,7 @@ export function usePageCanvas(mode: Mode) {
         root.style.removeProperty('color-scheme');
       };
     },
-    [mode],
+    // The theme sets the colour read above, the mode the scheme.
+    [theme, mode],
   );
 }
