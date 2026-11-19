@@ -91,13 +91,25 @@ export function ariaKeyShortcut(shortcut: string, mac: boolean): string {
   return parts.join('+');
 }
 
-type KeyEventLike = Pick<KeyboardEvent, 'key' | 'metaKey' | 'ctrlKey' | 'shiftKey' | 'altKey'>;
+type KeyEventLike = Pick<KeyboardEvent, 'key' | 'metaKey' | 'ctrlKey' | 'shiftKey' | 'altKey'> &
+  Partial<Pick<KeyboardEvent, 'code'>>;
+
+/**
+ * The key as a Latin letter or digit. On a layout that types other letters (Cyrillic, Greek)
+ * `key` is that letter, so the physical key in `code` (`KeyK`, `Digit1`) stands in.
+ */
+function latinKey(event: KeyEventLike): string {
+  const key = event.key.toLowerCase();
+  if (key.length !== 1 || key <= '~' || event.code === undefined) return key;
+  const physical = /^(?:Key([A-Z])|Digit([0-9]))$/.exec(event.code);
+  return physical === null ? key : (physical[1] ?? physical[2] ?? key).toLowerCase();
+}
 
 export function matchesShortcut(event: KeyEventLike, shortcut: string, mac: boolean): boolean {
   const s = parseShortcut(shortcut);
   const wantMeta = s.mod && mac;
   const wantCtrl = s.ctrl || (s.mod && !mac);
-  const key = event.key.toLowerCase();
+  const key = latinKey(event);
   const target = s.key === 'space' ? ' ' : s.key;
   return (
     key === target &&

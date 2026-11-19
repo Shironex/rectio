@@ -86,3 +86,14 @@ describe('KbdShortcut', () => {
     expect(screen.getByText('Ctrl')).toHaveAttribute('aria-hidden', 'true');
   });
 });
+
+describe('shortcuts on other layouts', () => {
+  it('match by the physical key when the layout types another letter', () => {
+    expect(matchesShortcut(press({ key: 'л', code: 'KeyK', ctrlKey: true }), 'mod+k', false)).toBe(
+      true,
+    );
+    expect(matchesShortcut(press({ key: 'л', code: 'KeyK', ctrlKey: true }), 'mod+b', false)).toBe(
+      false,
+    );
+  });
+});
