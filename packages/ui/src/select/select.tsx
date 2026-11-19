@@ -8,7 +8,7 @@ import { usePortalContainer } from '../theme-scope/theme-scope';
 
 type WithClassName<P> = Omit<P, 'className'> & { className?: string };
 
-/** Shared by Select popups and future menus: enters from the trigger, leaves as a fade. */
+/** Shared by Select popups and menus, popovers and hover cards: enters from the trigger, leaves as a fade. */
 export const popupMotion = cn(
   'origin-(--transform-origin) transition-[opacity,scale,translate] ease-enter duration-base',
   'data-starting-style:scale-(--rx-motion-scale-from) data-starting-style:opacity-0',
@@ -19,6 +19,8 @@ export const popupMotion = cn(
   'data-[side=left]:data-starting-style:translate-y-0 data-[side=left]:data-starting-style:translate-x-(--rx-motion-distance-shift)',
   'data-[side=inline-end]:data-starting-style:translate-y-0 data-[side=inline-end]:data-starting-style:-translate-x-(--rx-motion-distance-shift)',
   'data-[side=inline-start]:data-starting-style:translate-y-0 data-[side=inline-start]:data-starting-style:translate-x-(--rx-motion-distance-shift)',
+  'rtl:data-[side=inline-end]:data-starting-style:translate-x-(--rx-motion-distance-shift)',
+  'rtl:data-[side=inline-start]:data-starting-style:-translate-x-(--rx-motion-distance-shift)',
   'data-ending-style:opacity-0 data-ending-style:ease-exit data-ending-style:duration-fast',
 );
 
