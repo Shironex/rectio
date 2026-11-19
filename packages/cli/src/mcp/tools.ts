@@ -37,7 +37,7 @@ export const TIERS = tierSchema.options;
  * The most rows a list or search returns. A list row is one short line, so listing defaults to the
  * maximum: the whole registry fits, and an agent never has to guess that items were cut off.
  */
-export const MAX_LIMIT = 200;
+export const MAX_LIMIT = 500;
 const DEFAULT_LIMIT = MAX_LIMIT;
 const TOKENS_ITEM = 'tokens';
 const THEME_PREFIX = 'theme-';

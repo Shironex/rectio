@@ -1,0 +1,82 @@
+---
+title: Code tabs
+description: 'One example in several forms, and install commands for every package manager.'
+pro: true
+---
+
+import DocsCodeTabsDemo from '@/demos/docs-code-tabs';
+import DocsCodeTabsMotionDemo from '@/demos/docs-code-tabs.motion';
+
+## Code tabs
+
+<Preview
+  name="docs-code-tabs"
+  plain={<DocsCodeTabsDemo />}
+  motion={<DocsCodeTabsMotionDemo />}
+  importLine="import { CodeTabs, InstallTabs } from '@rectio/blocks/docs/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-code-tabs
+```
+
+The motion variant is `motion-docs-code-tabs`. It installs the plain block too and changes only how the block moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+One example in several forms (two languages, two files) and an install block for npm, pnpm, yarn and bun. Both remember the reader's pick, and every set with the same key moves together. In the motion variant the indicator glides between tabs.
+
+## Usage
+
+Give `CodeTabs` a list of tabs, each with a `label` and its `code` or `tokens`. A shared `storageKey` such as `"language"` keeps every TypeScript and JavaScript pair on the site on the same tab. `InstallTabs` takes the command in npm's words, such as `npm install @halyard/core` or `npx halyard init`, and writes the other managers' commands from it.
+
+## Props
+
+### CodeTabs
+
+<TypeTable
+  type={{
+    items: {
+      type: 'readonly CodeTab[]',
+      description: 'Each tab: label, value, code, tokens, lang, highlight, lineNumbers and icon.',
+    },
+    storageKey: {
+      type: 'string',
+      description: 'Remembers the pick across pages and syncs tab sets with the same key.',
+    },
+    defaultValue: {
+      type: 'string',
+      description: 'The tab shown before the reader picks one. Default the first.',
+    },
+    label: { type: 'string', description: 'Accessible name of the tab list.' },
+    aside: { type: 'ReactNode', description: 'Something at the end of the tab row.' },
+    className: { type: 'string' },
+  }}
+/>
+
+### InstallTabs
+
+<TypeTable
+  type={{
+    command: { type: 'string', description: "The command in npm's words." },
+    managers: {
+      type: 'readonly PackageManager[]',
+      description: 'Which managers to offer, in order.',
+      default: "['npm', 'pnpm', 'yarn', 'bun']",
+    },
+    storageKey: { type: 'string', description: 'Shared by every install block.' },
+    label: { type: 'string' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The tabs are a real tab list: arrow keys move between them and the panel is labelled by its tab.
+- The remembered choice is read after the first render, so the page never mismatches its server HTML.

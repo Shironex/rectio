@@ -1,0 +1,62 @@
+---
+title: Docs blocks
+description: 'The pieces of a documentation site: layout, navigation, prose, code, API reference, search, feedback, home and changelog.'
+pro: true
+---
+
+The docs blocks are the pieces of a documentation site, built only from rectio components and
+tokens, and independent of your framework and your MDX setup: the layout and navigation, prose and
+MDX components, code blocks and tabs, an API reference, search, page navigation, switchers, a
+feedback widget, a home page and a changelog.
+
+## Plain and motion twins
+
+Blocks that have something to animate have a motion twin with the same name and props. Pick per
+block by import path:
+
+```tsx
+import { DocsToc } from '@rectio/blocks/docs'; // plain
+import { DocsToc } from '@rectio/blocks/docs/motion'; // the marker glides
+```
+
+In the motion variants the table of contents glides its marker, code tabs glide their indicator,
+the home page and releases fade up once on first view and feedback fades its thanks in. Reduced
+motion renders the plain block. Blocks with nothing to animate are exported from the motion path
+unchanged, so a page can import every block from one place.
+
+## Content is data
+
+Navigation, headings, releases and search results are props. Nothing here fetches: feedback takes
+an `onSubmit`, search takes a provider, and you decide where each goes.
+
+## Syntax highlighting is token driven
+
+The code block does not bundle a highlighter. It takes `tokens` from any build-time highlighter
+and colours them through the theme's `--rx-code-token-*` variables, so light and dark themes
+follow with no extra work. With shiki, for example, use
+`createCssVariablesTheme({ variablePrefix: '--rx-code-' })`. Without tokens, pass plain `code`
+and it shows in the foreground colour.
+
+## One place for links
+
+Every link in every block goes through `DocsLink`. Wrap your app in `DocsLinkProvider` with your
+router's link component and every block follows; external links stay plain anchors that open in a
+new tab.
+
+## The blocks
+
+| Block                                                 | What it is                                             |
+| ----------------------------------------------------- | ------------------------------------------------------ |
+| [Docs layout](/docs/blocks/docs/docs-layout)          | Header, navigation, the page and the table of contents |
+| [Docs sidebar](/docs/blocks/docs/docs-sidebar)        | Sections and nested pages                              |
+| [Table of contents](/docs/blocks/docs/docs-toc)       | On this page, with scroll spy                          |
+| [Docs prose](/docs/blocks/docs/docs-prose)            | Callouts, steps, file tree, tables and the MDX map     |
+| [Code block](/docs/blocks/docs/docs-code-block)       | Token driven highlighting, marks and copy              |
+| [Code tabs](/docs/blocks/docs/docs-code-tabs)         | Tabs for forms of an example and for package managers  |
+| [API reference](/docs/blocks/docs/docs-api-reference) | Props, signatures and endpoints                        |
+| [Docs search](/docs/blocks/docs/docs-search)          | A dialog over any provider                             |
+| [Page navigation](/docs/blocks/docs/docs-page-nav)    | Breadcrumb, edit link, date, previous and next         |
+| [Switchers](/docs/blocks/docs/docs-switchers)         | Versions and languages                                 |
+| [Feedback widget](/docs/blocks/docs/docs-feedback)    | Was this page helpful                                  |
+| [Docs home](/docs/blocks/docs/docs-home)              | A hero and link cards                                  |
+| [Changelog](/docs/blocks/docs/docs-changelog)         | Release notes, newest first                            |

@@ -1,0 +1,86 @@
+---
+title: Configuration
+description: Every option of halyard.config.ts, its default, and when to change it.
+updated: 2026-11-02
+---
+
+Halyard reads `halyard.config.ts` from the project root. Every option has a default, so the smallest config is an empty object.
+
+```ts title="halyard.config.ts"
+import { defineConfig, redis } from '@halyard/core';
+
+export default defineConfig({
+  store: redis(process.env.HALYARD_URL),
+  concurrency: 10,
+  retries: { attempts: 3, backoff: 'exponential' },
+  dashboard: { path: '/admin/jobs' },
+});
+```
+
+## Options
+
+<PropsTable
+  label="defineConfig options"
+  rows={[
+    {
+      name: 'store',
+      type: 'Store',
+      default: 'redis(HALYARD_URL)',
+      description: 'Where jobs are kept. redis(url) or postgres(url).',
+    },
+    {
+      name: 'concurrency',
+      type: 'number',
+      default: '5',
+      description: 'Jobs one worker runs at the same time, across all its queues.',
+    },
+    {
+      name: 'retries',
+      type: 'RetryPolicy',
+      default: '{ attempts: 3 }',
+      description: 'The default retry policy. A queue can override it.',
+    },
+    {
+      name: 'timeout',
+      type: 'Duration',
+      default: "'5m'",
+      description: 'How long a job may run before it is failed and retried.',
+    },
+    {
+      name: 'dashboard',
+      type: 'DashboardOptions | false',
+      default: 'false',
+      description: 'Serve the dashboard at a path of your server.',
+    },
+    {
+      name: 'prefix',
+      type: 'string',
+      default: "'halyard'",
+      description: 'Prefix of every key or table, to share one store between apps.',
+      deprecated: false,
+    },
+  ]}
+/>
+
+## Environments
+
+The config is code, so read what changes between environments from the environment. Keep the store URL out of the repository.
+
+```ts title="halyard.config.ts" {4-6}
+import { defineConfig, postgres } from '@halyard/core';
+
+export default defineConfig({
+  store: postgres(process.env.DATABASE_URL, {
+    schema: process.env.NODE_ENV === 'test' ? 'halyard_test' : 'halyard',
+  }),
+});
+```
+
+<Callout type="note">
+  Tests can use `memory()` as the store. It keeps jobs in the process and runs them as soon as they
+  are added, so a test can assert on the result without a worker.
+</Callout>
+
+## Durations
+
+Options that take a time accept milliseconds or a string: `'30s'`, `'5m'`, `'2h'`, `'1d'`. Strings are easier to read in a config and are checked by the type.

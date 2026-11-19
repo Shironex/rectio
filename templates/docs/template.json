@@ -1,0 +1,53 @@
+{
+  "name": "docs",
+  "title": "Docs",
+  "description": "A static documentation site from MDX files: navigation from the folders, local search, code highlighted at build time, API reference pages, a changelog and a home page.",
+  "category": "marketing",
+  "tier": "pro",
+  "pages": [
+    "/",
+    "/docs",
+    "/docs/installation",
+    "/docs/configuration",
+    "/docs/retries",
+    "/docs/schedules",
+    "/docs/deploy",
+    "/docs/deploy/containers",
+    "/docs/deploy/serverless",
+    "/docs/api",
+    "/docs/http-api",
+    "/docs/cli",
+    "/changelog"
+  ],
+  "uses": [
+    "button",
+    "cn",
+    "kbd",
+    "menu",
+    "docs-core",
+    "motion-docs-core",
+    "docs-layout",
+    "docs-sidebar",
+    "docs-toc",
+    "motion-docs-toc",
+    "docs-prose",
+    "docs-code-block",
+    "docs-code-tabs",
+    "motion-docs-code-tabs",
+    "docs-api-reference",
+    "docs-search",
+    "docs-page-nav",
+    "docs-switchers",
+    "docs-feedback",
+    "motion-docs-feedback",
+    "docs-home",
+    "motion-docs-home",
+    "docs-changelog",
+    "motion-docs-changelog"
+  ],
+  "screenshots": [
+    "screenshots/desktop-light.webp",
+    "screenshots/desktop-dark.webp",
+    "screenshots/phone.webp"
+  ]
+}

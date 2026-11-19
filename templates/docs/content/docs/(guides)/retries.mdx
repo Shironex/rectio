@@ -1,0 +1,70 @@
+---
+title: Retries and backoff
+description: Decide what a failure costs, how many times to try again and how long to wait in between.
+updated: 2026-11-04
+---
+
+Every job can fail: the network drops, a rate limit answers 429, a deploy stops the worker halfway. Halyard retries failed jobs for you. What you decide is how many times, and how long to wait.
+
+## The default policy
+
+Without a policy a job is tried three times, waiting 1, 2 and then 4 seconds with up to 20% jitter. Jitter spreads the retries out, so a hundred jobs that failed together do not all come back in the same second.
+
+## Set a policy per queue
+
+```ts title="src/queues/webhooks.ts" {4-8}
+import { defineQueue } from '@halyard/core';
+
+export const webhooks = defineQueue('webhooks', {
+  retries: {
+    attempts: 8,
+    backoff: 'exponential',
+    maxDelay: '1h',
+  },
+  async run(job: { url: string; body: unknown }) {
+    const response = await fetch(job.url, { method: 'POST', body: JSON.stringify(job.body) });
+    if (!response.ok) throw new Error(`Webhook answered ${response.status}`);
+  },
+});
+```
+
+<CodeTabs
+  label="Backoff strategies"
+  items={[
+    { label: 'Exponential', code: "backoff: 'exponential' // 1s, 2s, 4s, 8s...", lang: 'ts' },
+    { label: 'Fixed', code: "backoff: { fixed: '30s' } // 30s every time", lang: 'ts' },
+    {
+      label: 'Custom',
+      code: 'backoff: (attempt) => attempt * 10_000 // 10s, 20s, 30s...',
+      lang: 'ts',
+    },
+  ]}
+/>
+
+## Stop retrying what cannot succeed
+
+Some failures will fail the same way every time: a deleted customer, a payload that does not validate. Throw a `PermanentError` and the job fails at once, without using its attempts.
+
+```ts title="src/queues/receipts.ts" diff
+ async run(job: { orderId: string }) {
+   const order = await db.order.find(job.orderId);
+-  if (!order) throw new Error('Order not found');
++  if (!order) throw new PermanentError('Order not found');
+   await sendReceipt(order);
+ }
+```
+
+<Callout type="warning" title="Make jobs safe to run twice">
+  A job can run more than once: a worker may finish the work and crash before it records the result.
+  Use an idempotency key, or check before you charge a card or send an email.
+</Callout>
+
+### Watch the retries
+
+Every retry emits a `retrying` event with the attempt and the error. Count them per queue: a queue that retries more than it completes has a problem a policy will not fix.
+
+```ts
+webhooks.on('retrying', ({ job, attempt, error }) => {
+  metrics.increment('webhooks.retry', { attempt, reason: error.name });
+});
+```

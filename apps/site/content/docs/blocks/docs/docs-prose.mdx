@@ -1,0 +1,125 @@
+---
+title: Docs prose and MDX components
+description: 'Prose styles, callouts, steps, a file tree, tables, figures and the MDX component map.'
+pro: true
+---
+
+import DocsProseDemo from '@/demos/docs-prose';
+
+## Prose
+
+<Preview
+  name="docs-prose"
+  plain={<DocsProseDemo />}
+  importLine="import { DocsProse, Callout, Steps, Step, FileTree } from '@rectio/blocks/docs';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-prose
+```
+
+This block has no motion variant: nothing on it moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+Long-form text in the theme's type and the components a page needs beyond Markdown: headings with a link to themselves, callouts, numbered steps, a file tree, tables that scroll inside their own frame and figures with a caption.
+
+## Usage
+
+Wrap a rendered page in `DocsProse`. `docsMdxComponents` maps Markdown headings, tables, links and fences to these blocks and adds the components a page can write directly, so it works with any MDX setup:
+
+```tsx
+import { DocsProse, docsMdxComponents } from '@rectio/blocks/docs';
+
+<DocsProse>
+  <Content components={docsMdxComponents} />
+</DocsProse>;
+```
+
+The map covers `Callout`, `Steps`, `Step`, `FileTree`, `Figure`, `Badge`, `Kbd`, `CodeBlock`, `CodeTabs`, `InstallTabs`, `PropsTable`, `SignatureCard`, `Endpoint` and `LinkCards`. A plain Markdown fence is drawn as a `CodeBlock` without highlighting; pass your own `pre` that supplies tokens to colour it.
+
+## Props
+
+### Callout
+
+<TypeTable
+  type={{
+    type: {
+      type: "'note' | 'tip' | 'warning' | 'danger'",
+      description:
+        'Note adds context, tip a better way, warning a pitfall, danger data loss or security.',
+      default: "'note'",
+    },
+    title: {
+      type: 'ReactNode',
+      description: "A short title. Without one the type's word is the title.",
+    },
+    children: { type: 'ReactNode' },
+  }}
+/>
+
+### Step
+
+<TypeTable
+  type={{
+    title: { type: 'string', description: "The step's heading and anchor." },
+    level: { type: '3 | 4', description: 'Heading level of the title.', default: '3' },
+    children: { type: 'ReactNode', description: 'Text, code or a callout.' },
+  }}
+/>
+
+### FileTree
+
+<TypeTable
+  type={{
+    entries: {
+      type: 'readonly FileTreeEntry[]',
+      description: 'Each entry: name, children (a folder), highlight, note and defaultOpen.',
+    },
+    label: { type: 'string', description: 'Accessible name of the tree.', default: "'Files'" },
+  }}
+/>
+
+### Figure
+
+<TypeTable
+  type={{
+    src: { type: 'string' },
+    alt: { type: 'string' },
+    caption: { type: 'ReactNode' },
+    width: { type: 'number' },
+    height: { type: 'number' },
+    framed: { type: 'boolean', description: 'Draw a frame around the image.', default: 'true' },
+  }}
+/>
+
+### DocsHeading and DocsTable
+
+<TypeTable
+  type={{
+    level: { type: '2 | 3 | 4', description: 'Heading level.', default: '2' },
+    id: {
+      type: 'string',
+      description: 'Defaults to a slug of the text, so links and the table of contents agree.',
+    },
+    badge: { type: 'ReactNode', description: 'Something after the text, such as a Beta badge.' },
+    label: {
+      type: 'string',
+      description: 'DocsTable only: the accessible name of the scroll region.',
+      default: "'Table'",
+    },
+  }}
+/>
+
+## Accessibility
+
+- A callout is a note landmark and names its kind in words, so the tint is never the only signal.
+- Steps are an ordered list and each title says its number for screen readers.
+- A wide table scrolls inside a focusable, named region, so it scrolls with the keyboard and the page does not.
+- Folders in a file tree are buttons that say whether they are expanded.

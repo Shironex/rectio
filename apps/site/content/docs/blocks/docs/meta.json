@@ -1,0 +1,19 @@
+{
+  "title": "Docs",
+  "pages": [
+    "index",
+    "docs-layout",
+    "docs-sidebar",
+    "docs-toc",
+    "docs-prose",
+    "docs-code-block",
+    "docs-code-tabs",
+    "docs-api-reference",
+    "docs-search",
+    "docs-page-nav",
+    "docs-switchers",
+    "docs-feedback",
+    "docs-home",
+    "docs-changelog"
+  ]
+}

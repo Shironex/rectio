@@ -1,0 +1,22 @@
+---
+title: Serverless
+badge: Beta
+description: Run jobs from functions that start on demand, with the HTTP trigger.
+updated: 2026-11-01
+---
+
+Functions do not run all the time, so they cannot poll for jobs. The HTTP trigger turns it around: Halyard calls your function when a job is ready.
+
+<Callout type="warning" title="Beta">
+  The HTTP trigger may change in a minor release while it is in beta. Pin the version and read the
+  changelog before upgrading.
+</Callout>
+
+```ts title="api/jobs.ts"
+import { httpTrigger } from '@halyard/core/http';
+import { emails } from '../queues/emails';
+
+export const POST = httpTrigger({ queues: [emails], secret: process.env.HALYARD_SECRET });
+```
+
+The trigger checks the signature of each call, runs one job and answers within the platform's time limit. Long jobs belong on a container worker.

@@ -42,6 +42,10 @@ const PAIRS: [string, string, number][] = [
   ['accent-strong', 'surface-overlay', 4.5],
   ['positive-strong', 'surface-overlay', 3],
   ['negative-strong', 'surface-overlay', 3],
+  // The docs sidebar's current page and a highlighted search result sit on the hover fill.
+  ['accent-strong', 'surface-hover', 4.5],
+  ['text', 'surface-hover', 4.5],
+  ['text-muted', 'surface-hover', 4.5],
   // A selected table row keeps its secondary text readable.
   ['text-muted', 'surface-selected', 4.5],
   ['accent-contrast', 'accent', 4.5],
@@ -159,5 +163,44 @@ describe('chart colours', () => {
       const ratio = contrast(parse(tokens[`--rx-${fg}`]), parse(tokens['--rx-chart-tooltip']));
       expect(ratio, fg).toBeGreaterThanOrEqual(4.5);
     }
+  });
+});
+
+const CODE_TOKENS = [
+  'keyword',
+  'string',
+  'function',
+  'constant',
+  'parameter',
+  'comment',
+  'punctuation',
+  'string-expression',
+  'link',
+].map((name) => `code-token-${name}`);
+
+describe('code colours', () => {
+  it.each(themeModes)('$key token colours are readable on every code line', ({ tokens }) => {
+    const text = ['code-foreground', ...CODE_TOKENS];
+    const lines = ['code-background', 'code-highlight', 'code-inserted', 'code-deleted'];
+    const failures = text.flatMap((fg) =>
+      lines.flatMap((bg) => {
+        const ratio = contrast(parse(tokens[`--rx-${fg}`]), parse(tokens[`--rx-${bg}`]));
+        return ratio >= 4.5 ? [] : [`${fg} on ${bg}: ${ratio.toFixed(2)}`];
+      }),
+    );
+    expect(failures).toEqual([]);
+  });
+
+  it.each(themeModes)('$key gutter and diff marks are readable', ({ tokens }) => {
+    const pairs: [string, string][] = [
+      ['code-line-number', 'code-background'],
+      ['code-inserted-mark', 'code-inserted'],
+      ['code-deleted-mark', 'code-deleted'],
+    ];
+    const failures = pairs.flatMap(([fg, bg]) => {
+      const ratio = contrast(parse(tokens[`--rx-${fg}`]), parse(tokens[`--rx-${bg}`]));
+      return ratio >= 4.5 ? [] : [`${fg} on ${bg}: ${ratio.toFixed(2)}`];
+    });
+    expect(failures).toEqual([]);
   });
 });

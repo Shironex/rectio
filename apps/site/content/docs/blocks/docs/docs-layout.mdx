@@ -1,0 +1,93 @@
+---
+title: Docs layout
+description: 'The frame of a docs site: header, navigation, the page and the table of contents.'
+pro: true
+---
+
+import DocsLayoutDemo from '@/demos/docs-layout';
+
+## Layout
+
+<Preview
+  name="docs-layout"
+  plain={<DocsLayoutDemo />}
+  importLine="import { DocsHeader, DocsLayout } from '@rectio/blocks/docs';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-layout
+```
+
+This block has no motion variant: nothing on it moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+The frame of a docs site: the header across the top, the navigation down the start edge, the page at a reading measure and the table of contents down the end edge. Each column stays in view while the page scrolls, and a skip link jumps straight to the content. The preview is a full page frame in a short, scrolling box.
+
+## Usage
+
+Pass the header, sidebar and table of contents as nodes, usually `DocsHeader`, `DocsSidebar` and `DocsToc`. Below the large breakpoint the sidebar is hidden; give `DocsHeader` a `mobileNav` and a menu button opens it in a sheet. Use `top` for a breadcrumb, `bottom` for the edit link, feedback and pager, and `footer` for a full width footer. Set `wide` for a home page or a changelog that has no table of contents.
+
+## Props
+
+### DocsLayout
+
+<TypeTable
+  type={{
+    header: { type: 'ReactNode', description: 'The bar at the top, usually a DocsHeader.' },
+    sidebar: {
+      type: 'ReactNode',
+      description: 'The navigation on the start side. Hidden below the large breakpoint.',
+    },
+    toc: {
+      type: 'ReactNode',
+      description:
+        'On this page. A column on extra large screens, a disclosure above the content on smaller ones.',
+    },
+    tocLabel: {
+      type: 'string',
+      description: 'Label of the small-screen disclosure.',
+      default: "'On this page'",
+    },
+    top: { type: 'ReactNode', description: 'Above the page, such as a breadcrumb.' },
+    bottom: {
+      type: 'ReactNode',
+      description: 'Under the page: edit link, feedback, previous and next.',
+    },
+    footer: { type: 'ReactNode', description: 'Under everything, full width.' },
+    wide: { type: 'boolean', description: 'Lets the content run wider.', default: 'false' },
+    className: { type: 'string' },
+  }}
+/>
+
+### DocsHeader
+
+<TypeTable
+  type={{
+    brand: { type: 'ReactNode', description: 'Your logo and the name of the product.' },
+    brandLabel: { type: 'string', description: 'Accessible name of the home link.' },
+    brandHref: { type: 'string', default: "'/'" },
+    links: { type: 'readonly DocsHeaderLink[]', description: 'A few top-level destinations.' },
+    currentHref: { type: 'string', description: 'Marks the matching top link as current.' },
+    search: { type: 'ReactNode', description: 'The search trigger, usually a DocsSearch.' },
+    actions: {
+      type: 'ReactNode',
+      description: 'The end of the bar: switchers, theme switch, a repository link.',
+    },
+    mobileNav: { type: 'ReactNode', description: 'The navigation for phones, opened in a sheet.' },
+    menuLabel: { type: 'string', default: "'Navigation'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- A skip link is the first thing a keyboard reader reaches and it jumps to the content.
+- The header, navigation, main content and table of contents are separate landmarks.
+- The phone menu opens in a sheet and closes after a link press.

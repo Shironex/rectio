@@ -1,0 +1,93 @@
+---
+title: Docs search
+description: 'A search dialog over any provider, with grouped results and a local index provider.'
+pro: true
+---
+
+import DocsSearchDemo from '@/demos/docs-search';
+
+## Search
+
+<Preview
+  name="docs-search"
+  plain={<DocsSearchDemo />}
+  importLine="import { DocsSearch, createLocalSearch } from '@rectio/blocks/docs';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-search
+```
+
+This block has no motion variant: nothing on it moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+A search dialog with a trigger, grouped results with the query marked, recent searches and suggestions. It is not tied to an index: it takes a provider, a function from a query to results. `createLocalSearch` builds one over documents you hand it, in the browser, with no service. The preview searches three pages of the Halyard docs: press the trigger and type "retry".
+
+## Usage
+
+For a small site, build the provider from documents you generate at build time:
+
+```tsx
+import { DocsSearch, createLocalSearch } from '@rectio/blocks/docs';
+
+const search = createLocalSearch(documents, { limit: 12 });
+
+<DocsSearch search={search} onNavigate={router.push} />;
+```
+
+A document has an `id`, `title`, `href`, optional `group`, `description` and `headings`, and the page's text as `content`. Matches in a heading come back as their own result under the page. For a hosted index (Algolia, Orama, your own route), pass any function with the provider shape instead: it receives the query and an `AbortSignal` and returns results or a promise of them, so a newer keystroke cancels an older request. The `mod+k` shortcut opens the dialog from anywhere.
+
+## Props
+
+<TypeTable
+  type={{
+    search: { type: 'DocsSearchProvider', description: 'Finds results for a query.' },
+    onNavigate: {
+      type: '(href: string) => void',
+      description: 'Goes to a result. Default a full page load.',
+    },
+    open: { type: 'boolean', description: 'Controlled open state.' },
+    onOpenChange: { type: '(open: boolean) => void' },
+    shortcut: {
+      type: 'string | null',
+      description: 'Opens the search from anywhere. Null binds nothing.',
+      default: "'mod+k'",
+    },
+    recentKey: {
+      type: 'string | null',
+      description: 'Remembers the last results opened. Null keeps none.',
+      default: "'rectio-docs-recent-searches'",
+    },
+    suggestions: {
+      type: 'readonly DocsSearchResult[]',
+      description: 'Shown before the reader types and when nothing is recent.',
+    },
+    debounce: {
+      type: 'number',
+      description: 'Wait before searching, in milliseconds.',
+      default: '120',
+    },
+    label: { type: 'string', default: "'Search the docs'" },
+    placeholder: { type: 'string', default: "'Search the docs'" },
+    triggerLabel: { type: 'string', default: "'Search docs'" },
+    trigger: {
+      type: 'boolean',
+      description: 'Draw the trigger. Pass false to open it only with the shortcut or open.',
+      default: 'true',
+    },
+    triggerClassName: { type: 'string' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The search opens as a modal dialog and the keyboard works throughout: arrow keys move through results and Enter opens one.
+- Focus returns to the trigger when the dialog closes.

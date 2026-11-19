@@ -1,0 +1,74 @@
+---
+title: Docs home
+description: 'A home hero with two ways in and a command to copy, and link cards for the main routes.'
+pro: true
+---
+
+import DocsHomeDemo from '@/demos/docs-home';
+import DocsHomeMotionDemo from '@/demos/docs-home.motion';
+
+## Home
+
+<Preview
+  name="docs-home"
+  plain={<DocsHomeDemo />}
+  motion={<DocsHomeMotionDemo />}
+  importLine="import { DocsHero, LinkCards } from '@rectio/blocks/docs/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add docs-home
+```
+
+The motion variant is `motion-docs-home`. It installs the plain block too and changes only how the block moves.
+
+The docs blocks share a small core (`docs-core`) that `add` installs for you.
+
+The front page of the docs: a hero with a title, a line of description, two ways in and a one-line command to copy, then link cards for the main routes or a compact list for many smaller ones. In the motion variant both fade up once on first view.
+
+## Usage
+
+Use `primary` and `secondary` for the two ways in, and `install` for a command with a copy button. `aside` is the right column: a code sample, install tabs or a screenshot. `LinkCards` takes `{ title, description, href, icon, badge }` records; use `variant="list"` for many secondary links in less space, and `columns` to choose two or three. Set `wide` on `DocsLayout` for this page.
+
+## Props
+
+### DocsHero
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode' },
+    description: { type: 'ReactNode' },
+    eyebrow: { type: 'ReactNode', description: 'A small line above the title.' },
+    primary: { type: 'DocsAction', description: 'The main way in: label, href and external.' },
+    secondary: { type: 'DocsAction' },
+    install: { type: 'string', description: 'A one-line command to copy.' },
+    aside: { type: 'ReactNode', description: 'The right column.' },
+    className: { type: 'string' },
+  }}
+/>
+
+### LinkCards
+
+<TypeTable
+  type={{
+    items: {
+      type: 'readonly LinkCard[]',
+      description: 'Each card: title, description, href, icon, badge and external.',
+    },
+    title: { type: 'ReactNode', description: 'A heading over the cards.' },
+    variant: { type: "'cards' | 'list'", default: "'cards'" },
+    columns: { type: '2 | 3', default: '3' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The hero's actions are real links.
+- The copy button announces that it copied.

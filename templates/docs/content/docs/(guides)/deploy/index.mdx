@@ -1,0 +1,39 @@
+---
+title: Deploying
+description: Run workers next to your app or on their own, and shut them down without losing jobs.
+updated: 2026-10-20
+---
+
+A worker is a long-running process. Deploy it the way you deploy any service, and give it time to finish its jobs when it stops.
+
+## Shut down gracefully
+
+On `SIGTERM` a worker stops taking new jobs and waits for the running ones, up to `shutdownTimeout`. Jobs still running after that are released and retried by another worker.
+
+```ts title="src/worker.ts" {5}
+import { startWorker } from '@halyard/core';
+
+const worker = await startWorker({
+  queues: [emails, reports],
+  shutdownTimeout: '30s',
+});
+```
+
+Pick the platform guide that matches where your app runs:
+
+<LinkCards
+  variant="list"
+  items={[
+    {
+      title: 'Containers',
+      description: 'A worker image beside your app, scaled on queue depth.',
+      href: '/docs/deploy/containers',
+    },
+    {
+      title: 'Serverless',
+      description: 'Run jobs from functions with the HTTP trigger.',
+      href: '/docs/deploy/serverless',
+      badge: 'Beta',
+    },
+  ]}
+/>
