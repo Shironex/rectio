@@ -111,8 +111,10 @@ function ToastItem({ toast, closeLabel }: { toast: Toast.Root.ToastObject; close
         {toast.actionProps !== undefined && (
           <Toast.Action
             className={cn(
+              // A bordered small button in every theme: the action must read as a control, never as
+              // more text in the message.
               'inline-flex h-(--rx-button-height-sm) cursor-pointer items-center px-(--rx-button-padding-x-sm)',
-              'rounded-(--rx-button-radius) text-sm font-medium text-accent-strong hover:bg-surface-hover',
+              'rounded-(--rx-button-radius) border border-line-strong text-sm font-medium text-fg hover:bg-surface-hover',
               'transition-colors duration-fast ease-standard',
               'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
             )}
