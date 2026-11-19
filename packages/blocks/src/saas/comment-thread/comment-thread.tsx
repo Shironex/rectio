@@ -19,7 +19,7 @@ import {
   Input,
   cn,
 } from '@rectio/ui';
-import { useState, type KeyboardEvent, type SyntheticEvent } from 'react';
+import { useState, useSyncExternalStore, type KeyboardEvent, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -31,6 +31,7 @@ import { formatDateTime, plural, relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import {
   commentBodyError,
+  commentSendModifier,
   commentParticipants,
   commentParts,
   commentTree,
@@ -124,16 +125,20 @@ export function CommentThread({
         <Avatar name={comment.author.name} src={comment.author.avatarUrl} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <header className="flex items-start justify-between gap-2">
-            <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+            <p className="flex flex-wrap items-baseline gap-x-2 text-base">
               <span className="font-medium text-fg">{comment.author.name}</span>
-              <time
-                dateTime={comment.createdAt.toISOString()}
-                title={formatDateTime(comment.createdAt, locale)}
-                className="text-fg-subtle"
-              >
-                {relativeTime(comment.createdAt, now, locale)}
-              </time>
-              {comment.editedAt !== undefined && <span className="text-fg-subtle">(edited)</span>}
+              {/* Time and the edited mark stay together on one line. */}
+              <span className="whitespace-nowrap text-fg-muted">
+                <time
+                  dateTime={comment.createdAt.toISOString()}
+                  title={formatDateTime(comment.createdAt, locale)}
+                >
+                  {relativeTime(comment.createdAt, now, locale)}
+                </time>
+                {comment.editedAt !== undefined && (
+                  <span className="text-fg-subtle"> (edited)</span>
+                )}
+              </span>
             </p>
             {actions.length > 0 && editing !== comment.id && (
               <span className="-mt-1 -me-1">
@@ -238,8 +243,17 @@ export function CommentThread({
       )}
 
       {comments.length === 0 ? (
-        <EmptyNote title="No comments yet">
-          Ask a question or leave a note for the team below.
+        <EmptyNote
+          title={
+            <span className="flex flex-col items-center gap-3">
+              <ChatsCircleIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
+              Start the conversation
+            </span>
+          }
+        >
+          {resolved === undefined
+            ? 'Ask a question or leave a note below; replies thread under it.'
+            : 'This discussion was closed before anyone wrote.'}
         </EmptyNote>
       ) : (
         <ol
@@ -253,7 +267,7 @@ export function CommentThread({
                 {(replies.length > 0 || replyingTo === comment.id) && (
                   <ol
                     aria-label={`Replies to ${comment.author.name}`}
-                    className="ms-4 flex flex-col gap-4 border-s border-line ps-6"
+                    className="ms-4 flex flex-col gap-4 border-s-2 border-line-strong ps-6"
                   >
                     <Items>
                       {replies.map((reply) => (
@@ -339,6 +353,7 @@ function Composer({
   onCancel?: () => void;
 }) {
   const { Button } = useBlockParts();
+  const modifier = useSendModifier();
   const [body, setBody] = useState(initial);
   const [tried, setTried] = useState(false);
   const error = tried ? commentBodyError(body) : null;
@@ -378,7 +393,8 @@ function Composer({
       </Field>
       <div className="flex flex-wrap items-center justify-end gap-2">
         <span className="me-auto hidden text-sm text-fg-subtle pointer-fine:inline">
-          <kbd className="font-sans">Ctrl</kbd> and <kbd className="font-sans">Enter</kbd> to send
+          <kbd className="font-sans">{modifier}</kbd> and <kbd className="font-sans">Enter</kbd> to
+          send
         </span>
         {onCancel !== undefined && (
           <Button variant="ghost" size="sm" onClick={onCancel}>
@@ -439,5 +455,19 @@ function DeleteCommentDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+const noSubscription = () => () => undefined;
+
+/** Cmd on Apple devices, Ctrl elsewhere and while rendering on the server or in tests. */
+function useSendModifier() {
+  return useSyncExternalStore(
+    noSubscription,
+    () => {
+      const nav = navigator as Navigator & { userAgentData?: { platform?: string } };
+      return commentSendModifier(nav.userAgentData?.platform ?? nav.platform);
+    },
+    () => 'Ctrl' as const,
   );
 }

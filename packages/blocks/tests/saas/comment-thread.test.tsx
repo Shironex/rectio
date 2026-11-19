@@ -7,6 +7,7 @@ import {
   commentBodyError,
   commentParticipants,
   commentParts,
+  commentSendModifier,
   commentTree,
   type CommentAuthor,
   type ThreadComment,
@@ -40,6 +41,10 @@ describe('comment thread logic', () => {
     expect(commentBodyError('   ')).toBe('Write something first.');
     expect(commentBodyError('abcdef', 4)).toBe('Keep it under 4 characters; this is 2 over.');
     expect(commentBodyError('Fine')).toBeNull();
+    expect(commentSendModifier('macOS')).toBe('Cmd');
+    expect(commentSendModifier('MacIntel')).toBe('Cmd');
+    expect(commentSendModifier('Win32')).toBe('Ctrl');
+    expect(commentSendModifier(undefined)).toBe('Ctrl');
     expect(commentParts('Ask @Tomasz.W and mail a@b.io')).toEqual([
       { kind: 'text', text: 'Ask ' },
       { kind: 'mention', text: '@Tomasz.W' },

@@ -99,3 +99,8 @@ export interface CommentThreadResolution {
   by: string;
   at: Date;
 }
+
+/** The key that sends with Enter: Cmd on Apple platforms, Ctrl everywhere else. */
+export function commentSendModifier(platform: string | undefined): 'Cmd' | 'Ctrl' {
+  return /mac|iphone|ipad|ipod/i.test(platform ?? '') ? 'Cmd' : 'Ctrl';
+}
