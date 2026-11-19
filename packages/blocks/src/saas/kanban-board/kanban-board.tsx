@@ -5,6 +5,7 @@ import {
   ArrowsOutCardinalIcon,
   CalendarBlankIcon,
   FlagIcon,
+  KanbanIcon,
   PlusIcon,
   WarningIcon,
 } from '@phosphor-icons/react';
@@ -96,6 +97,13 @@ export function KanbanBoard({
   const pending = useRef<({ cardId: string } & KanbanPosition) | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [dropColumn, setDropColumn] = useState<string | null>(null);
+  // Narrow widths show one column at a time; this is the one in view.
+  const [shown, setShown] = useState(0);
+
+  const showColumn = (index: number) => {
+    setShown(index);
+    board.current?.children[index]?.scrollIntoView({ block: 'nearest', inline: 'start' });
+  };
 
   useEffect(() => {
     const target = pending.current;
@@ -193,21 +201,79 @@ export function KanbanBoard({
       className={className}
       bodyClassName="gap-3"
     >
-      {columns.length === 0 ? (
-        <EmptyNote title="No columns yet">
-          Add columns for the stages your work moves through, such as To do, Doing and Done.
+      {columns.length === 0 || cards.length === 0 ? (
+        <EmptyNote
+          title={
+            <span className="flex flex-col items-center gap-3">
+              <KanbanIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
+              {columns.length === 0 ? 'Set up your stages' : 'The board is clear'}
+            </span>
+          }
+        >
+          {columns.length === 0
+            ? 'Add columns for the stages work moves through, such as To do, Doing and Done.'
+            : `Add the first card to ${columns[0]?.title ?? 'a column'} and move it along as work gets done.`}
+          {columns[0] !== undefined && onAddCard !== undefined && (
+            <span className="mt-4 flex justify-center">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  if (columns[0] !== undefined) onAddCard(columns[0].id);
+                }}
+              >
+                <PlusIcon aria-hidden weight="bold" className="size-4" />
+                Add a card
+              </Button>
+            </span>
+          )}
         </EmptyNote>
       ) : (
         <>
+          <div
+            role="group"
+            aria-label="Columns"
+            className="-mx-1 flex gap-1 overflow-x-auto px-1 @xl:hidden"
+          >
+            {columns.map((column, index) => (
+              <button
+                key={column.id}
+                type="button"
+                aria-pressed={shown === index}
+                onClick={() => {
+                  showColumn(index);
+                }}
+                className={cn(
+                  'inline-flex h-(--rx-control-height-sm) shrink-0 cursor-pointer items-center gap-1.5 rounded-control px-3 text-sm whitespace-nowrap text-fg-muted pointer-coarse:h-11',
+                  'aria-pressed:bg-surface-sunken aria-pressed:font-medium aria-pressed:text-fg',
+                  focusRing,
+                )}
+              >
+                {column.title}
+                <span className="text-fg-subtle numeric">
+                  {kanbanColumnCards(cards, column.id).length}
+                </span>
+              </button>
+            ))}
+          </div>
           {onMoveCard !== undefined && (
-            <p id={hintId} className="flex items-center gap-1.5 text-sm text-fg-subtle">
+            <p
+              id={hintId}
+              className="flex items-center gap-1.5 text-sm text-fg-subtle pointer-coarse:hidden"
+            >
               <ArrowsOutCardinalIcon aria-hidden weight="bold" className="size-4" />
               Drag a card, or focus it and press Alt with an arrow key to move it.
             </p>
           )}
           <div
             ref={board}
-            className="-mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-2"
+            onScroll={(event) => {
+              const el = event.currentTarget;
+              const first = el.children[0] as HTMLElement | undefined;
+              const step = (first?.offsetWidth ?? el.clientWidth) + 12;
+              const index = Math.min(columns.length - 1, Math.round(el.scrollLeft / step));
+              if (index !== shown) setShown(index);
+            }}
+            className="-mx-5 flex snap-x snap-mandatory scroll-px-5 items-start gap-3 overflow-x-auto px-5 pb-2 @4xl:items-stretch"
           >
             {columns.map((column) => {
               const columnCards = kanbanColumnCards(cards, column.id);
@@ -232,7 +298,7 @@ export function KanbanBoard({
                     onDrop(event, column.id);
                   }}
                   className={cn(
-                    'flex w-72 shrink-0 snap-start flex-col gap-2 rounded-control border border-line bg-surface-sunken p-2 @4xl:w-auto @4xl:min-w-52 @4xl:flex-1',
+                    'flex w-full shrink-0 snap-start flex-col gap-2 rounded-control border border-line bg-surface-sunken p-2 @xl:w-72 @4xl:w-auto @4xl:min-w-52 @4xl:flex-1',
                     'transition-[border-color,background-color] duration-fast ease-standard',
                     'data-drop:border-accent data-drop:bg-accent-subtle',
                     over && 'border-warning-strong/40',
@@ -297,7 +363,7 @@ export function KanbanBoard({
                     </Items>
                     {columnCards.length === 0 && (
                       <li className="flex min-h-16 items-center justify-center rounded-control border border-dashed border-line-strong px-3 text-center text-sm text-fg-subtle">
-                        Nothing here yet
+                        No cards
                       </li>
                     )}
                   </ol>
@@ -360,7 +426,7 @@ function CardView({
     'aria-describedby': hintId,
     onKeyDown,
     className: cn(
-      'block w-full cursor-pointer rounded-badge text-start font-medium text-pretty',
+      'block w-full cursor-pointer rounded-badge text-start font-medium',
       'hover:underline hover:decoration-line-strong hover:underline-offset-4',
       focusRing,
     ),
@@ -376,32 +442,29 @@ function CardView({
         draggable && 'cursor-grab active:cursor-grabbing',
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          {card.reference !== undefined && (
-            <span className="text-xs text-fg-subtle numeric">{card.reference}</span>
-          )}
-          {onOpen === undefined ? (
-            <div
-              tabIndex={0}
-              {...focusProps}
-              className={cn(focusProps.className, 'cursor-default hover:no-underline')}
-            >
-              {card.title}
-            </div>
-          ) : (
-            <button
-              type="button"
-              {...focusProps}
-              onClick={() => {
-                onOpen(card);
-              }}
-            >
-              {card.title}
-            </button>
-          )}
-        </div>
-        <span className="-me-1 -mt-1 shrink-0">{moveMenu}</span>
+      <div className="flex min-w-0 flex-col gap-0.5">
+        {card.reference !== undefined && (
+          <span className="text-xs text-fg-subtle numeric">{card.reference}</span>
+        )}
+        {onOpen === undefined ? (
+          <div
+            tabIndex={0}
+            {...focusProps}
+            className={cn(focusProps.className, 'cursor-default hover:no-underline')}
+          >
+            {card.title}
+          </div>
+        ) : (
+          <button
+            type="button"
+            {...focusProps}
+            onClick={() => {
+              onOpen(card);
+            }}
+          >
+            {card.title}
+          </button>
+        )}
       </div>
       {(card.tags?.length ?? 0) > 0 && (
         <ul aria-label="Tags" className="flex flex-wrap gap-1">
@@ -412,8 +475,8 @@ function CardView({
           ))}
         </ul>
       )}
-      {(due !== null || card.assignee !== undefined || urgent) && (
-        <div className="flex items-end justify-between gap-2 text-sm text-fg-muted">
+      {(due !== null || card.assignee !== undefined || urgent || moveMenu !== null) && (
+        <div className="flex items-center justify-between gap-2 text-sm text-fg-muted">
           <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
             {card.due !== undefined && due !== null && (
               <span
@@ -437,7 +500,10 @@ function CardView({
               <span
                 className={cn(
                   'inline-flex items-center gap-1',
-                  card.priority === 'urgent' && 'font-medium text-negative-strong',
+                  // One alarm per card: an overdue date already says it in red.
+                  card.priority === 'urgent' &&
+                    due !== 'overdue' &&
+                    'font-medium text-negative-strong',
                 )}
               >
                 <FlagIcon aria-hidden weight="fill" className="size-3.5" />
@@ -445,16 +511,19 @@ function CardView({
               </span>
             )}
           </span>
-          {card.assignee !== undefined && (
-            <span className="flex items-center" title={card.assignee.name}>
-              <Avatar
-                name={card.assignee.name}
-                src={card.assignee.avatarUrl}
-                size="sm"
-                decorative={false}
-              />
-            </span>
-          )}
+          <span className="-me-1.5 flex shrink-0 items-center gap-1">
+            {card.assignee !== undefined && (
+              <span className="flex items-center" title={card.assignee.name}>
+                <Avatar
+                  name={card.assignee.name}
+                  src={card.assignee.avatarUrl}
+                  size="sm"
+                  decorative={false}
+                />
+              </span>
+            )}
+            {moveMenu}
+          </span>
         </div>
       )}
     </article>

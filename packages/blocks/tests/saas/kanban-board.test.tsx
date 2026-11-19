@@ -123,6 +123,6 @@ describe('KanbanBoard', () => {
 
   it('shows an empty state without columns', () => {
     render(<KanbanBoard columns={[]} cards={[]} />);
-    expect(screen.getByText('No columns yet')).toBeInTheDocument();
+    expect(screen.getByText('Set up your stages')).toBeInTheDocument();
   });
 });
