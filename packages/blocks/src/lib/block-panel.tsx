@@ -39,7 +39,7 @@ export function BlockPanel({
       aria-labelledby={headingId}
       data-slot="block"
       className={cn(
-        'flex min-w-0 flex-col text-fg',
+        '@container flex min-w-0 flex-col text-fg',
         !bare && 'rounded-panel border border-line bg-surface',
         className,
       )}

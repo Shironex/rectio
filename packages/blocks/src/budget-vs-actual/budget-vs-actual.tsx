@@ -147,10 +147,10 @@ export function BudgetVsActual({
         <TableHeader>
           <TableRow>
             <TableHead>Category</TableHead>
-            <TableHead className="hidden w-2/5 md:table-cell">
+            <TableHead className="hidden w-2/5 @2xl:table-cell">
               <span className="sr-only">Actual against budget</span>
             </TableHead>
-            <TableHead align="end" className="hidden sm:table-cell">
+            <TableHead align="end" className="hidden @xl:table-cell">
               Budget
             </TableHead>
             <TableHead align="end">Actual</TableHead>
@@ -162,14 +162,14 @@ export function BudgetVsActual({
             <TableRow key={line.id}>
               <TableCell>
                 <span className="block">{line.category}</span>
-                <span className="block text-sm text-fg-muted sm:hidden">
+                <span className="block text-sm text-fg-muted @xl:hidden">
                   of <Money amount={line.budget} currency={currency} locale={locale} />
                 </span>
               </TableCell>
-              <TableCell className="hidden md:table-cell">
+              <TableCell className="hidden @2xl:table-cell">
                 <Meter budget={line.budget} actual={line.actual} scale={scale} />
               </TableCell>
-              <TableCell align="end" className="hidden text-fg-muted sm:table-cell">
+              <TableCell align="end" className="hidden text-fg-muted @xl:table-cell">
                 <Money amount={line.budget} currency={currency} locale={locale} />
               </TableCell>
               <TableCell align="end">
@@ -190,8 +190,8 @@ export function BudgetVsActual({
             <TableHead scope="row" className="text-fg">
               Total
             </TableHead>
-            <TableCell className="hidden md:table-cell" />
-            <TableCell align="end" className="hidden sm:table-cell">
+            <TableCell className="hidden @2xl:table-cell" />
+            <TableCell align="end" className="hidden @xl:table-cell">
               <Money amount={summary.budget} currency={currency} locale={locale} />
             </TableCell>
             <TableCell align="end">

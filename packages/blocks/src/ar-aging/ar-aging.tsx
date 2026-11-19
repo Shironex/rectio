@@ -207,7 +207,7 @@ export function ArAging({
           <TableRow>
             <TableHead>Customer</TableHead>
             {AGING_BUCKETS.map((bucket) => (
-              <TableHead key={bucket} align="end" className="hidden lg:table-cell">
+              <TableHead key={bucket} align="end" className="hidden @4xl:table-cell">
                 <span className="sr-only">{BUCKET_LABEL[bucket]}</span>
                 <span aria-hidden>{BUCKET_SHORT[bucket]}</span>
               </TableHead>
@@ -232,7 +232,7 @@ export function ArAging({
                 </span>
               </TableCell>
               {AGING_BUCKETS.map((bucket) => (
-                <TableCell key={bucket} align="end" className="hidden lg:table-cell">
+                <TableCell key={bucket} align="end" className="hidden @4xl:table-cell">
                   {row.buckets[bucket] === 0 ? (
                     <span className="text-fg-subtle">
                       <span aria-hidden>0</span>
@@ -260,7 +260,7 @@ export function ArAging({
               Total{others > 0 && `, with ${String(others)} more`}
             </TableHead>
             {AGING_BUCKETS.map((bucket) => (
-              <TableCell key={bucket} align="end" className="hidden lg:table-cell">
+              <TableCell key={bucket} align="end" className="hidden @4xl:table-cell">
                 <Money amount={report.buckets[bucket]} currency={currency} locale={locale} />
               </TableCell>
             ))}

@@ -112,8 +112,8 @@ export function Ledger({
         </TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="hidden w-20 sm:table-cell">Date</TableHead>
-            <TableHead className="hidden w-28 md:table-cell">Reference</TableHead>
+            <TableHead className="hidden w-20 @xl:table-cell">Date</TableHead>
+            <TableHead className="hidden w-28 @2xl:table-cell">Reference</TableHead>
             <TableHead>{account === undefined ? 'Entry and account' : 'Description'}</TableHead>
             <TableHead align="end">Debit</TableHead>
             <TableHead align="end">Credit</TableHead>
@@ -123,8 +123,8 @@ export function Ledger({
         <TableBody>
           {account !== undefined && (
             <TableRow>
-              <TableCell className="hidden sm:table-cell" />
-              <TableCell className="hidden md:table-cell" />
+              <TableCell className="hidden @xl:table-cell" />
+              <TableCell className="hidden @2xl:table-cell" />
               <TableCell className="text-fg-muted">Opening balance</TableCell>
               <TableCell />
               <TableCell />
@@ -150,14 +150,14 @@ export function Ledger({
             const rule = lastOfEntry ? '' : 'border-b-0';
             return (
               <TableRow key={line.id} data-entry={line.entryId}>
-                <TableCell className={cn('hidden align-top sm:table-cell', rule)}>
+                <TableCell className={cn('hidden align-top @xl:table-cell', rule)}>
                   {firstOfEntry && (
                     <span className="text-fg-muted numeric">
                       {formatShortDate(line.date, locale)}
                     </span>
                   )}
                 </TableCell>
-                <TableCell className={cn('hidden align-top md:table-cell', rule)}>
+                <TableCell className={cn('hidden align-top @2xl:table-cell', rule)}>
                   {firstOfEntry && <span className="text-fg-muted numeric">{line.reference}</span>}
                 </TableCell>
                 <TableCell className={cn('align-top', rule)}>
@@ -166,7 +166,7 @@ export function Ledger({
                       {firstOfEntry && (
                         <span className="mb-1 flex flex-wrap items-baseline gap-x-2">
                           <span className="font-medium">{line.description}</span>
-                          <span className="text-sm text-fg-muted numeric sm:hidden">
+                          <span className="text-sm text-fg-muted numeric @xl:hidden">
                             {formatShortDate(line.date, locale)}
                           </span>
                           {unbalanced && (
@@ -191,7 +191,7 @@ export function Ledger({
                   ) : (
                     <>
                       <span className="block">{line.description}</span>
-                      <span className="block text-sm text-fg-muted md:hidden">
+                      <span className="block text-sm text-fg-muted @2xl:hidden">
                         <span className="numeric">{formatShortDate(line.date, locale)}</span>,{' '}
                         <span className="numeric">{line.reference}</span>
                       </span>
@@ -221,8 +221,8 @@ export function Ledger({
         {ordered.length > 0 && (
           <TableFooter>
             <TableRow>
-              <TableHead scope="row" className="hidden sm:table-cell" />
-              <TableHead scope="row" className="hidden md:table-cell" />
+              <TableHead scope="row" className="hidden @xl:table-cell" />
+              <TableHead scope="row" className="hidden @2xl:table-cell" />
               <TableHead scope="row" className="text-fg">
                 {account === undefined ? 'Totals' : 'Closing balance'}
               </TableHead>

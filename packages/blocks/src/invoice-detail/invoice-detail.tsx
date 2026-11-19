@@ -139,10 +139,10 @@ export function InvoiceDetail({
       className={className}
       bodyClassName="gap-6"
     >
-      <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+      <dl className="grid grid-cols-1 gap-x-8 gap-y-4 @xl:grid-cols-2 @4xl:grid-cols-3">
         <Party label="Billed to" party={invoice.buyer} />
         <Party label="From" party={invoice.seller} />
-        <div className="grid grid-cols-2 gap-x-8 gap-y-3 sm:col-span-2 lg:col-span-1 lg:grid-cols-1">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-3 @xl:col-span-2 @4xl:col-span-1 @4xl:grid-cols-1">
           <Meta label="Issued">
             <span className="numeric">{formatLongDate(invoice.issued, locale)}</span>
           </Meta>
@@ -164,13 +164,13 @@ export function InvoiceDetail({
         <TableHeader>
           <TableRow>
             <TableHead>Description</TableHead>
-            <TableHead align="end" className="hidden sm:table-cell">
+            <TableHead align="end" className="hidden @xl:table-cell">
               Qty
             </TableHead>
-            <TableHead align="end" className="hidden sm:table-cell">
+            <TableHead align="end" className="hidden @xl:table-cell">
               Unit price
             </TableHead>
-            <TableHead align="end" className="hidden md:table-cell">
+            <TableHead align="end" className="hidden @2xl:table-cell">
               VAT
             </TableHead>
             <TableHead align="end">Net, {currency}</TableHead>
@@ -185,7 +185,7 @@ export function InvoiceDetail({
                   <span className="block text-sm text-fg-muted">{line.detail}</span>
                 )}
                 {/* Phones fold quantity, price and rate under the description. */}
-                <span className="block text-sm text-fg-muted sm:hidden">
+                <span className="block text-sm text-fg-muted @xl:hidden">
                   <span className="numeric">
                     {line.quantity}
                     {line.unit !== undefined && ` ${line.unit}`}
@@ -194,16 +194,16 @@ export function InvoiceDetail({
                   {formatPercent(line.taxRate, locale, { digits: 0 })}
                 </span>
               </TableCell>
-              <TableCell align="end" className="hidden whitespace-nowrap sm:table-cell">
+              <TableCell align="end" className="hidden whitespace-nowrap @xl:table-cell">
                 <span className="numeric">
                   {line.quantity}
                   {line.unit !== undefined && <span className="text-fg-muted"> {line.unit}</span>}
                 </span>
               </TableCell>
-              <TableCell align="end" className="hidden sm:table-cell">
+              <TableCell align="end" className="hidden @xl:table-cell">
                 {money(line.unitPrice)}
               </TableCell>
-              <TableCell align="end" className="hidden text-fg-muted md:table-cell">
+              <TableCell align="end" className="hidden text-fg-muted @2xl:table-cell">
                 <span className="numeric">
                   {formatPercent(line.taxRate, locale, { digits: 0 })}
                 </span>
@@ -214,7 +214,7 @@ export function InvoiceDetail({
         </TableBody>
       </Table>
 
-      <div className="flex flex-col-reverse gap-6 md:flex-row md:items-start md:justify-between">
+      <div className="flex flex-col-reverse gap-6 @2xl:flex-row @2xl:items-start @2xl:justify-between">
         <div className="flex max-w-prose flex-col gap-4">
           {payments.length > 0 && (
             <div className="flex flex-col gap-2">
@@ -238,7 +238,7 @@ export function InvoiceDetail({
           {invoice.notes !== undefined && <p className="text-sm text-fg-muted">{invoice.notes}</p>}
         </div>
 
-        <dl className="grid min-w-72 grid-cols-2 gap-x-8 gap-y-1.5 text-sm md:max-w-sm">
+        <dl className="grid min-w-72 grid-cols-2 gap-x-8 gap-y-1.5 text-sm @2xl:max-w-sm">
           <dt className="text-fg-muted">Subtotal</dt>
           <dd className="text-end">{money(totals.subtotal)}</dd>
           {totals.vat.map((group) => (

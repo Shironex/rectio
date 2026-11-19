@@ -33,7 +33,7 @@ export function Figures({
   return (
     <dl
       className={cn(
-        'grid grid-cols-2 gap-px overflow-hidden rounded-control border border-line bg-line sm:grid-flow-col sm:auto-cols-fr sm:grid-cols-none',
+        'grid grid-cols-2 gap-px overflow-hidden rounded-control border border-line bg-line @xl:grid-flow-col @xl:auto-cols-fr @xl:grid-cols-none',
         className,
       )}
     >

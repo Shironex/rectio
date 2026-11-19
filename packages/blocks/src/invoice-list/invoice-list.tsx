@@ -73,7 +73,7 @@ interface Row {
 }
 
 /** On phones Issued and Due fold under the customer, so the amount never leaves the screen. */
-const WIDE = 'hidden md:table-cell';
+const WIDE = 'hidden @2xl:table-cell';
 
 /**
  * Receivables at a glance: what is outstanding and overdue, then every invoice with its state,
@@ -147,7 +147,7 @@ export function InvoiceList({
           return (
             <>
               <span className="block">{invoice.customer}</span>
-              <span className="block text-sm text-fg-muted md:hidden">
+              <span className="block text-sm text-fg-muted @2xl:hidden">
                 <span className="numeric">{formatShortDate(invoice.issued, locale)}</span>
                 {due !== null && (
                   <span className={cn(state === 'overdue' && 'text-negative-strong')}>, {due}</span>
@@ -213,7 +213,7 @@ export function InvoiceList({
         accessorFn: (row) => row.state,
         header: 'Status',
         sortFn: 'text',
-        meta: { className: 'hidden sm:table-cell' },
+        meta: { className: 'hidden @xl:table-cell' },
         cell: ({ row }) => {
           const { invoice, state } = row.original;
           const partial =
@@ -243,7 +243,7 @@ export function InvoiceList({
                   of <Money amount={invoice.total} currency={currency} locale={locale} />
                 </span>
               )}
-              <span className="mt-1 sm:hidden">
+              <span className="mt-1 @xl:hidden">
                 <StateBadge state={state} />
               </span>
             </span>
@@ -332,7 +332,7 @@ export function InvoiceList({
             hint: totals.counts[value],
           }))}
         />
-        <DataTableSort table={table} className="w-full sm:hidden" />
+        <DataTableSort table={table} className="w-full @xl:hidden" />
       </div>
 
       <DataTable caption={`${title}, ${FILTER_LABELS[filter].toLowerCase()}`} hideCaption>

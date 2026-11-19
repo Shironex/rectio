@@ -184,7 +184,7 @@ export function ExpenseApproval({
               <span className="sr-only">Select</span>
             </TableHead>
             <TableHead>Expense</TableHead>
-            <TableHead className="hidden md:table-cell">Category</TableHead>
+            <TableHead className="hidden @2xl:table-cell">Category</TableHead>
             <TableHead align="end">Amount</TableHead>
             <TableHead align="end" className="w-0">
               <span className="sr-only">Decision</span>
@@ -211,7 +211,7 @@ export function ExpenseApproval({
                   <span className="block text-sm text-fg-muted">
                     {request.employee},{' '}
                     <span className="numeric">{formatShortDate(request.date, locale)}</span>
-                    <span className="md:hidden">, {request.category}</span>
+                    <span className="@2xl:hidden">, {request.category}</span>
                   </span>
                   {request.flags !== undefined && request.flags.length > 0 && (
                     <span className="mt-1 flex flex-wrap gap-1">
@@ -224,7 +224,7 @@ export function ExpenseApproval({
                     </span>
                   )}
                 </TableCell>
-                <TableCell className="hidden text-fg-muted md:table-cell">
+                <TableCell className="hidden text-fg-muted @2xl:table-cell">
                   {request.category}
                 </TableCell>
                 <TableCell align="end">
@@ -252,7 +252,7 @@ export function ExpenseApproval({
                       }}
                     >
                       <CheckIcon aria-hidden weight="bold" className="size-3.5" />
-                      <span className="hidden sm:inline">Approve</span>
+                      <span className="hidden @xl:inline">Approve</span>
                     </Button>
                   </span>
                 </TableCell>

@@ -81,12 +81,12 @@ export function KpiRow({
   const locale = resolveLocale(requestedLocale);
   const { Money, Reveal } = useBlockParts();
   return (
-    <section aria-label={label} data-slot="block" className={className}>
+    <section aria-label={label} data-slot="block" className={cn('@container', className)}>
       <Reveal>
         <dl
           className={cn(
             'grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-line bg-line',
-            'sm:grid-cols-2 xl:grid-flow-col xl:auto-cols-fr xl:grid-cols-none',
+            '@xl:grid-cols-2 @5xl:grid-flow-col @5xl:auto-cols-fr @5xl:grid-cols-none',
           )}
         >
           {kpis.map((kpi) => {
