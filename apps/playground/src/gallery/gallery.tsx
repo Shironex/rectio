@@ -33,6 +33,7 @@ import {
   TextareaSection,
 } from './forms-text';
 import { FileUploadSection } from './forms-upload';
+import { NavigationGallery } from './navigation';
 import { Row, Section } from './specimen';
 
 const items = CATEGORIES.map((c) => ({ value: c.value, label: c.label }));
@@ -250,6 +251,7 @@ export function Gallery() {
       <DataTableSection />
       <DateSection />
       <ToastSection />
+      <NavigationGallery />
     </div>
   );
 }
