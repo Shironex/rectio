@@ -11,6 +11,8 @@
     "registry",
     "mcp",
     "---Components---",
-    "...components"
+    "...components",
+    "---Blocks---",
+    "...blocks"
   ]
 }
