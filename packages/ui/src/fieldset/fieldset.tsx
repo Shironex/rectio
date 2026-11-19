@@ -111,7 +111,10 @@ export function FormSection({
     >
       <div className="grid gap-x-8 gap-y-4 @2xl:grid-cols-3">
         <div className="flex flex-col gap-1">
-          <Heading id={`${id}-title`} className="text-base font-medium text-fg">
+          <Heading
+            id={`${id}-title`}
+            className="font-display text-lg font-heading tracking-tight text-fg"
+          >
             {title}
           </Heading>
           {description !== undefined && (
