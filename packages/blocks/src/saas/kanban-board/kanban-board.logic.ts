@@ -3,6 +3,8 @@ export interface KanbanColumn {
   title: string;
   /** Work-in-progress limit: the column warns, in words, once it holds more. */
   limit?: number;
+  /** A finishing column: its cards show a check and a quieter title. */
+  done?: boolean;
 }
 
 export interface KanbanAssignee {

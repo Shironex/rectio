@@ -4,6 +4,7 @@ import {
   ArrowUpIcon,
   ArrowsOutCardinalIcon,
   CalendarBlankIcon,
+  CheckCircleIcon,
   FlagIcon,
   KanbanIcon,
   PlusIcon,
@@ -13,6 +14,7 @@ import { Badge, cn } from '@rectio/ui';
 import {
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type DragEvent,
@@ -26,8 +28,9 @@ import { EmptyNote } from '../../lib/empty-note';
 import { formatShortDate, resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
-import { plural } from '../lib/saas';
+import { isoDateTime, plural } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
+import { useNow } from '../lib/focus';
 import { focusRing } from '../lib/styles';
 import {
   kanbanColumnCards,
@@ -81,13 +84,14 @@ export function KanbanBoard({
   onMoveCard,
   onOpenCard,
   onAddCard,
-  today = new Date(),
+  today: requestedToday,
   locale: requestedLocale,
   title = 'Board',
   description,
   className,
 }: KanbanBoardProps) {
   const locale = resolveLocale(requestedLocale);
+  const today = useNow(requestedToday);
   const { Button } = useBlockParts();
   const { Items, Item } = useSaasParts();
   const hintId = useId();
@@ -146,10 +150,26 @@ export function KanbanBoard({
     move(card, to, true);
   };
 
+  // Each card's place and each column's size, counted once per render. The menus read these, and
+  // a move's target is worked out only when it is chosen, so menus stay linear in the card count.
+  const layout = useMemo(() => {
+    const sizes = new Map<string, number>();
+    const places = new Map<string, number>();
+    for (const card of cards) {
+      const place = sizes.get(card.columnId) ?? 0;
+      places.set(card.id, place);
+      sizes.set(card.columnId, place + 1);
+    }
+    return { sizes, places };
+  }, [cards]);
+
   const moveActions = (card: KanbanCard): MenuAction[] => {
-    const step = (direction: KanbanDirection) => kanbanStep(cards, columns, card.id, direction);
-    const up = step('up');
-    const down = step('down');
+    const place = layout.places.get(card.id) ?? 0;
+    const size = layout.sizes.get(card.columnId) ?? 0;
+    const step = (direction: KanbanDirection) => {
+      const to = kanbanStep(cards, columns, card.id, direction);
+      if (to !== null) move(card, to, true);
+    };
     return [
       ...columns
         .filter((column) => column.id !== card.columnId)
@@ -158,29 +178,25 @@ export function KanbanBoard({
           label: `Move to ${column.title}`,
           icon: ArrowRightIcon,
           onSelect: () => {
-            move(
-              card,
-              { columnId: column.id, index: kanbanColumnCards(cards, column.id).length },
-              true,
-            );
+            move(card, { columnId: column.id, index: layout.sizes.get(column.id) ?? 0 }, true);
           },
         })),
       {
         id: 'up',
         label: 'Move up',
         icon: ArrowUpIcon,
-        disabled: up === null,
+        disabled: place === 0,
         onSelect: () => {
-          if (up !== null) move(card, up, true);
+          step('up');
         },
       },
       {
         id: 'down',
         label: 'Move down',
         icon: ArrowDownIcon,
-        disabled: down === null,
+        disabled: place >= size - 1,
         onSelect: () => {
-          if (down !== null) move(card, down, true);
+          step('down');
         },
       },
     ];
@@ -223,7 +239,7 @@ export function KanbanBoard({
           <div
             role="group"
             aria-label="Columns"
-            className="grid grid-flow-col auto-cols-fr gap-1 @xl:hidden"
+            className="-mx-5 flex gap-1 overflow-x-auto mask-r-from-85% px-5 pe-12 @xl:hidden"
           >
             {columns.map((column, index) => (
               <button
@@ -234,12 +250,12 @@ export function KanbanBoard({
                   showColumn(index);
                 }}
                 className={cn(
-                  'flex h-(--rx-control-height-sm) min-w-0 cursor-pointer items-center justify-center gap-1 rounded-control px-1.5 text-sm text-fg-muted pointer-coarse:h-11',
+                  'flex h-(--rx-control-height-sm) shrink-0 cursor-pointer items-center gap-1.5 rounded-control px-3 text-sm whitespace-nowrap text-fg-muted pointer-coarse:h-(--rx-control-height-touch)',
                   'aria-pressed:bg-surface-sunken aria-pressed:font-medium aria-pressed:text-fg',
                   focusRing,
                 )}
               >
-                <span className="truncate">{column.title}</span>
+                <span>{column.title}</span>
                 <span className="shrink-0 text-fg-subtle numeric">
                   {kanbanColumnCards(cards, column.id).length}
                 </span>
@@ -260,7 +276,8 @@ export function KanbanBoard({
             onScroll={(event) => {
               const el = event.currentTarget;
               const first = el.children[0] as HTMLElement | undefined;
-              const step = (first?.offsetWidth ?? el.clientWidth) + 12;
+              const gap = Number.parseFloat(getComputedStyle(el).columnGap) || 0;
+              const step = (first?.offsetWidth ?? el.clientWidth) + gap;
               const index = Math.min(columns.length - 1, Math.round(el.scrollLeft / step));
               if (index !== shown) setShown(index);
             }}
@@ -307,9 +324,13 @@ export function KanbanBoard({
                       )}
                     >
                       {over && <WarningIcon aria-hidden weight="bold" className="size-3.5" />}
-                      {column.limit === undefined
-                        ? columnCards.length
-                        : `${String(columnCards.length)} of ${String(column.limit)}`}
+                      {columnCards.length}
+                      {column.limit !== undefined && (
+                        <span className={cn('font-regular', !over && 'text-fg-subtle')}>
+                          {' '}
+                          / {column.limit} limit
+                        </span>
+                      )}
                       {over && <span className="sr-only">, over the limit</span>}
                     </span>
                   </header>
@@ -324,6 +345,7 @@ export function KanbanBoard({
                         <Item key={card.id} className={cn(dragging === card.id && 'opacity-50')}>
                           <CardView
                             card={card}
+                            done={column.done === true}
                             today={today}
                             locale={locale}
                             hintId={onMoveCard === undefined ? undefined : hintId}
@@ -391,7 +413,7 @@ export function KanbanBoard({
                       variant="ghost"
                       size="sm"
                       className="justify-start text-fg-muted"
-                      aria-label={`Add a card to ${column.title}`}
+                      aria-label={`Add card, ${column.title}`}
                       onClick={() => {
                         onAddCard(column.id);
                       }}
@@ -413,10 +435,11 @@ export function KanbanBoard({
   );
 }
 
-const DUE_WORDS = { overdue: 'Overdue', today: 'Due today', soon: 'Due', later: 'Due' } as const;
+const DUE_WORDS = { overdue: 'Overdue', today: 'Today' } as const;
 
 function CardView({
   card,
+  done,
   today,
   locale,
   hintId,
@@ -428,6 +451,7 @@ function CardView({
   moveMenu,
 }: {
   card: KanbanCard;
+  done: boolean;
   today: Date;
   locale: string;
   hintId: string | undefined;
@@ -441,10 +465,12 @@ function CardView({
   const due = card.due === undefined ? null : kanbanDueState(card.due, today);
   const urgent = card.priority === 'urgent' || card.priority === 'high';
   const hasMeta = due !== null || urgent || card.assignee !== undefined;
+  const metaId = useId();
   // The card's one focus stop: its title button when it opens, else the card itself.
   const target = {
     'data-kanban-card': card.id,
-    'aria-describedby': hintId,
+    // The meta row is read after the title, so the card is not just its name.
+    'aria-describedby': [hasMeta ? metaId : null, hintId].filter(Boolean).join(' ') || undefined,
     onKeyDown,
   };
   return (
@@ -461,11 +487,23 @@ function CardView({
       )}
     >
       <div className={cn('flex min-w-0 flex-col gap-0.5', !hasMeta && moveMenu !== null && 'pe-8')}>
-        {card.reference !== undefined && (
-          <span className="text-xs text-fg-muted numeric">{card.reference}</span>
+        {(card.reference !== undefined || done) && (
+          <span className="inline-flex items-center gap-1 text-xs text-fg-muted numeric">
+            {done && (
+              <>
+                <CheckCircleIcon
+                  aria-hidden
+                  weight="fill"
+                  className="size-3.5 text-positive-strong"
+                />
+                <span className="sr-only">Done. </span>
+              </>
+            )}
+            {card.reference}
+          </span>
         )}
         {onOpen === undefined ? (
-          <span className="font-medium">{card.title}</span>
+          <span className={cn('font-medium', done && 'text-fg-muted')}>{card.title}</span>
         ) : (
           <button
             type="button"
@@ -475,6 +513,7 @@ function CardView({
             }}
             className={cn(
               'block w-full cursor-pointer rounded-badge text-start font-medium',
+              done && 'text-fg-muted',
               'hover:underline hover:decoration-line-strong hover:underline-offset-4',
               focusRing,
             )}
@@ -494,7 +533,10 @@ function CardView({
       )}
       {hasMeta ? (
         // The footer wraps as a whole: dates and flags on the left, people and the menu on the right.
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-fg-muted">
+        <div
+          id={metaId}
+          className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-fg-muted"
+        >
           {card.due !== undefined && due !== null && (
             <span
               className={cn(
@@ -504,12 +546,23 @@ function CardView({
               )}
             >
               <CalendarBlankIcon aria-hidden weight="bold" className="size-3.5" />
-              <span className="sr-only">{DUE_WORDS[due]} </span>
-              {due === 'overdue' || due === 'today' ? (
-                <span aria-hidden>{DUE_WORDS[due]}, </span>
-              ) : null}
-              <time dateTime={card.due.toISOString()} className="numeric">
-                {formatShortDate(card.due, locale)}
+              {/* Overdue and today say so in a word, short enough to share the row; the date stays on the time. */}
+              <time
+                dateTime={isoDateTime(card.due)}
+                title={formatShortDate(card.due, locale)}
+                className="numeric"
+              >
+                {due === 'overdue' || due === 'today' ? (
+                  <>
+                    {DUE_WORDS[due]}
+                    <span className="sr-only">, {formatShortDate(card.due, locale)}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="sr-only">Due </span>
+                    {formatShortDate(card.due, locale)}
+                  </>
+                )}
               </time>
             </span>
           )}
