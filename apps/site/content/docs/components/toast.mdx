@@ -1,0 +1,124 @@
+---
+title: Toast
+description: A short message after an action, with an Undo when the action can be reversed.
+---
+
+import ToastDemo from '@/demos/toast';
+
+<Preview name="toast" plain={<ToastDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add toast
+```
+
+`theme-scope` installs with it.
+
+## Usage
+
+Put `ToastProvider` once near the root, inside your `ThemeScope`, then add toasts from any component
+below it.
+
+```tsx
+import { ToastProvider, useToast } from '@/components/ui/toast';
+
+<ThemeScope>
+  <ToastProvider timeout={8000}>
+    <App />
+  </ToastProvider>
+</ThemeScope>;
+
+function RemoveLine({ expense }: { expense: Expense }) {
+  const toast = useToast();
+  return (
+    <Button
+      variant="danger"
+      onClick={() => {
+        remove(expense);
+        const id = toast.add({
+          type: 'success',
+          title: 'Expense removed',
+          description: 'Total now €1,179.30.',
+          actionProps: {
+            children: 'Undo',
+            onClick: () => {
+              restore(expense);
+              toast.close(id);
+            },
+          },
+        });
+      }}
+    >
+      Remove
+    </Button>
+  );
+}
+```
+
+`type` is `success`, `error` or `info`; each carries its own icon. Write the outcome in the title, so
+the kind is clear without the icon's colour. Close the toast yourself in the action's `onClick`.
+
+Toasts stack in the corner of the nearest `ThemeScope`, newest nearest the corner. They close after
+`timeout`; hovering or focusing the stack pauses it. A toast with an action needs more time, about
+8000 ms, so the action can still be reached from the keyboard. They can be swiped away right or down.
+
+## Props
+
+### ToastProvider
+
+<TypeTable
+  type={{
+    children: { type: 'ReactNode', required: true },
+    timeout: {
+      type: 'number',
+      default: '6000',
+      description: 'Milliseconds before a toast closes by itself.',
+    },
+    limit: {
+      type: 'number',
+      default: '3',
+      description: 'Toasts shown at once; older ones wait, hidden.',
+    },
+    closeLabel: {
+      type: 'string',
+      default: "'Dismiss'",
+      description: "Accessible name of each toast's close button.",
+    },
+  }}
+/>
+
+### useToast
+
+`useToast` is Base UI's `Toast.useToastManager`. `add(options)` returns the toast's id; `update(id,
+options)` and `close(id)` change or close it, and `promise` follows a promise through loading,
+success and error.
+
+<TypeTable
+  type={{
+    type: { type: "'success' | 'error' | 'info'" },
+    title: { type: 'ReactNode' },
+    description: { type: 'ReactNode' },
+    actionProps: {
+      type: "ComponentProps<'button'>",
+      description: "Props of the toast's action button, such as { children: 'Undo', onClick }.",
+    },
+    timeout: { type: 'number', description: 'Overrides the provider timeout for this toast.' },
+    priority: {
+      type: "'low' | 'high'",
+      default: "'low'",
+      description: 'low is announced politely, high urgently.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Toasts are announced to screen readers: politely by default, urgently with `priority: 'high'`.
+- F6 moves focus into the stack and back.
+- Each toast has a named close button, and the action is drawn as a bordered button so it reads as
+  a control.
+- Every kind carries an icon and words, never colour alone.
+- Under reduced motion a toast fades in place instead of rising.
+
+<ComponentSource path="toast/toast.tsx" />

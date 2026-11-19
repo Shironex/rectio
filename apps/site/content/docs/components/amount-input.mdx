@@ -1,0 +1,83 @@
+---
+title: AmountInput
+description: Money entry in the user's locale, with the currency in place.
+---
+
+import AmountInputDemo from '@/demos/amount-input';
+import AmountInputMotionDemo from '@/demos/amount-input.motion';
+
+<Preview
+  name="amount-input"
+  plain={<AmountInputDemo />}
+  motion={<AmountInputMotionDemo />}
+  importLine="import { AmountInput } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add amount-input
+```
+
+`field` installs with it.
+
+## Usage
+
+```tsx
+import { AmountInput } from '@/components/ui/amount-input';
+import { Field, FieldLabel } from '@/components/ui/field';
+
+<Field>
+  <FieldLabel>Amount, EUR</FieldLabel>
+  <AmountInput currency="EUR" locale="en-IE" value={amount} onValueChange={setAmount} />
+</Field>;
+```
+
+The currency sets the symbol and the number of decimals: two for EUR, none for JPY. The locale sets
+grouping, the decimal separator and which side the symbol sits on. Typed text is parsed in that
+locale and formatted to the currency's precision on blur. The empty field shows a format hint, such
+as `0.00` or `0,00`.
+
+Figures are right-aligned and tabular, like the column the amount feeds. `min` defaults to `0` and
+`step` to `0.01`; pass a lower `min` for an amount that can be negative, such as a refund.
+
+The motion variant nudges the figures in the direction of a stepped change (arrow keys, the wheel,
+or a value set by the app) and settles. Typed changes never move.
+
+## Props
+
+Every prop of Base UI's `NumberField.Root` is accepted as well, except `format`, which the currency
+sets: `value`, `defaultValue`, `onValueChange`, `max`, `largeStep`, `disabled`, `name` and more.
+
+<TypeTable
+  type={{
+    currency: {
+      type: 'string',
+      required: true,
+      description: 'ISO 4217 code. Sets the symbol and the number of decimals.',
+    },
+    locale: {
+      type: 'string',
+      description: 'BCP 47 locale for grouping, decimals and the symbol position.',
+    },
+    min: { type: 'number', default: '0' },
+    step: { type: 'number', default: '0.01' },
+    placeholder: {
+      type: 'string',
+      description: 'Defaults to zero in the currency format, such as 0.00.',
+    },
+    'aria-label': {
+      type: 'string',
+      description: 'Only when no FieldLabel names the input.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Named by its `FieldLabel`. Arrow Up and Arrow Down step the value.
+- The currency symbol is decorative and hidden from screen readers, because it sits outside the
+  input. Name the currency in the label or the description ("Amount, EUR").
+- Uses the same invalid and focus styles as `Input`, so it works with `FieldError`.
+
+<ComponentSource path="amount-input/amount-input.tsx" />

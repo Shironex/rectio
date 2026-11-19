@@ -1,0 +1,74 @@
+---
+title: Calendar
+description: A month grid for picking a day, several days or a period.
+---
+
+import CalendarDemo from '@/demos/calendar';
+
+<Preview name="calendar" plain={<CalendarDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add calendar
+```
+
+`@daypicker/react` is added to your `package.json`.
+
+## Usage
+
+```tsx
+import { Calendar } from '@/components/ui/calendar';
+
+<Calendar mode="single" locale="en-IE" selected={day} onSelect={setDay} />;
+```
+
+The calendar is DayPicker (`@daypicker/react`) styled only with tokens. `mode` picks one day
+(`single`), several (`multiple`) or a period (`range`). Month and day names, the first day of the
+week and the screen reader labels follow `locale`.
+
+`locale` knows `en-GB`, `en-IE`, `en-US`, `pl-PL` and `de-DE` by tag, and `en`, `pl` and `de` by
+language. Any other tag falls back to its language, then to `en-US`. For another language, import
+its DayPicker locale and pass it as `dateLocale`; `resolveDateLocale(tag)` returns the locale a tag
+maps to.
+
+Closed days come from `disabled`, in DayPicker's matcher form: `{ dayOfWeek: [0, 6] }` for weekends,
+`{ after: date }` for the future. Say beside the calendar why days are closed.
+
+For a field the user can type into, use [DatePicker](/docs/components/date-picker).
+
+## Props
+
+Every DayPicker prop is accepted except `locale`, which takes a tag here: `mode`, `selected`,
+`onSelect`, `required`, `disabled`, `defaultMonth`, `month`, `numberOfMonths`, `startMonth`,
+`endMonth`, `classNames` and the rest.
+
+<TypeTable
+  type={{
+    locale: {
+      type: 'string',
+      description: 'BCP 47 tag such as en-GB or pl-PL. Defaults to the runtime locale.',
+    },
+    dateLocale: {
+      type: 'DayPickerLocale',
+      description: 'Any DayPicker locale, for tags the calendar does not know. Wins over locale.',
+    },
+    showOutsideDays: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show the days of the months before and after.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- The arrow keys move by day, Page Up and Page Down by month, Home and End to the ends of the week.
+- The week starts on Monday for `en-GB`, `en-IE`, `pl-PL` and `de-DE`, and on Sunday for `en-US`.
+- Today is marked by weight and an underline, not colour alone.
+- A closed day is dimmed and struck through, so it never differs from an outside day by colour
+  alone.
+- On touch screens every day grows to the larger touch size.
+
+<ComponentSource path="calendar/calendar.tsx" />
+<ComponentSource path="calendar/locales.ts" />

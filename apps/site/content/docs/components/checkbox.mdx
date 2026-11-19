@@ -1,0 +1,48 @@
+---
+title: Checkbox
+description: A yes or no choice, with a partial state for a select all.
+---
+
+import CheckboxDemo from '@/demos/checkbox';
+
+<Preview name="checkbox" plain={<CheckboxDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add checkbox
+```
+
+## Usage
+
+```tsx
+import { Checkbox } from '@/components/ui/checkbox';
+
+<label className="flex items-center gap-2">
+  <Checkbox checked={attach} onCheckedChange={setAttach} />
+  Attach receipt
+</label>;
+```
+
+Name the checkbox with a wrapping `label`, a `FieldLabel`, or `aria-label` when it stands alone in
+a table cell. `indeterminate` shows a bar, for a select all that covers only some rows.
+
+## Props
+
+Every prop of Base UI's `Checkbox.Root` is accepted: `checked`, `defaultChecked`,
+`onCheckedChange`, `indeterminate`, `disabled`, `name`, `value` and the rest.
+
+<TypeTable
+  type={{
+    className: { type: 'string', description: 'Classes for the box.' },
+  }}
+/>
+
+## Accessibility
+
+- Space toggles it, and it is in the tab order.
+- The pressable area is larger than the drawn box: 32px with a mouse, 44px on touch screens, so a
+  dense table row stays easy to tick.
+- Checked and indeterminate differ by shape (a check or a bar), not only by colour.
+
+<ComponentSource path="checkbox/checkbox.tsx" />

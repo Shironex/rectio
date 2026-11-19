@@ -1,4 +1,18 @@
 {
   "title": "Components",
-  "pages": ["button"]
+  "pages": [
+    "button",
+    "field",
+    "amount-input",
+    "select",
+    "checkbox",
+    "date-picker",
+    "calendar",
+    "money",
+    "badge",
+    "data-table",
+    "dialog",
+    "toast",
+    "theme-scope"
+  ]
 }

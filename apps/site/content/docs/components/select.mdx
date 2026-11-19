@@ -1,0 +1,129 @@
+---
+title: Select
+description: One choice from a short list, such as a category or a cost centre.
+---
+
+import SelectDemo from '@/demos/select';
+import SelectMotionDemo from '@/demos/select.motion';
+
+<Preview
+  name="select"
+  plain={<SelectDemo />}
+  motion={<SelectMotionDemo />}
+  importLine="import { SelectContent, SelectItem } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add select
+```
+
+`field` and `theme-scope` install with it.
+
+## Usage
+
+```tsx
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+
+const items = [
+  { value: 'flights', label: 'Flights' },
+  { value: 'rail', label: 'Rail' },
+];
+
+<Field>
+  <FieldLabel>Category</FieldLabel>
+  <Select items={items} value={category} onValueChange={setCategory}>
+    <SelectTrigger placeholder="Choose a category" />
+    <SelectContent>
+      <SelectItem value="flights" hint="6110">
+        Flights
+      </SelectItem>
+      <SelectItem value="rail" hint="6120">
+        Rail
+      </SelectItem>
+    </SelectContent>
+  </Select>
+</Field>;
+```
+
+Pass `items` to `Select` so the trigger can show the label of the chosen value before the list has
+opened. Group long lists with `SelectGroup`. The list opens below the trigger; set
+`alignItemWithTrigger` to open it over the selected item instead.
+
+The popup portals into the nearest `ThemeScope`, so it keeps that scope's theme and mode.
+
+The motion variant opens the list with a spring from the trigger and glides the highlight between
+items. Use its `SelectItem` with its `SelectContent`.
+
+## Props
+
+### Select
+
+`Select` is Base UI's `Select.Root`: `items`, `value`, `defaultValue`, `onValueChange`, `multiple`,
+`disabled`, `name` and the rest.
+
+### SelectTrigger
+
+Every prop of Base UI's `Select.Trigger` is accepted as well.
+
+<TypeTable
+  type={{
+    placeholder: {
+      type: 'ReactNode',
+      description: 'Shown while no value is chosen.',
+    },
+    children: {
+      type: 'ReactNode',
+      description: 'Replaces the default value and placeholder display.',
+    },
+  }}
+/>
+
+### SelectContent
+
+Every prop of Base UI's `Select.Popup` is accepted as well.
+
+<TypeTable
+  type={{
+    alignItemWithTrigger: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Open the list over the selected item instead of below the trigger.',
+    },
+  }}
+/>
+
+### SelectItem
+
+Every prop of Base UI's `Select.Item` is accepted as well, including `value` and `disabled`.
+
+<TypeTable
+  type={{
+    hint: {
+      type: 'ReactNode',
+      description:
+        'Secondary text on the right, such as a code or a count. Set in tabular figures.',
+    },
+  }}
+/>
+
+### SelectGroup
+
+Every prop of Base UI's `Select.Group` is accepted as well.
+
+<TypeTable
+  type={{
+    label: { type: 'ReactNode', required: true, description: 'The group heading.' },
+  }}
+/>
+
+## Accessibility
+
+- The trigger is named by its `FieldLabel` and shows the placeholder until a value is chosen.
+- Arrow Down on the trigger opens the list; the arrows move through it and Enter picks.
+- Escape closes the list and returns focus to the trigger.
+- The chosen item carries a check mark as well as a heavier weight.
+
+<ComponentSource path="select/select.tsx" />

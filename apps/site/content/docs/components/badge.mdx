@@ -1,0 +1,47 @@
+---
+title: Badge
+description: The state of a record in words, such as Paid or Overdue.
+---
+
+import BadgeDemo from '@/demos/badge';
+
+<Preview name="badge" plain={<BadgeDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add badge
+```
+
+## Usage
+
+```tsx
+import { Badge } from '@/components/ui/badge';
+
+<Badge tone="negative">Overdue</Badge>;
+```
+
+Pick the tone by meaning, not by colour: `positive` for Paid or Approved, `negative` for Overdue or
+Rejected, `warning` for Due soon, `info` for Sent, `neutral` for Draft. The label always says the
+state in words; the tint only reinforces it. An icon inside is sized for you.
+
+## Props
+
+Every prop of a `span` is accepted as well.
+
+<TypeTable
+  type={{
+    tone: {
+      type: "'neutral' | 'positive' | 'negative' | 'warning' | 'info'",
+      default: "'neutral'",
+      description: 'The meaning of the state. Exposed as `data-tone` for themes.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- A plain `span`: the text is what assistive technology reads, so write the state in full.
+- Hide decorative icons with `aria-hidden`.
+
+<ComponentSource path="badge/badge.tsx" />

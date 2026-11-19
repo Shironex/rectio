@@ -1,0 +1,108 @@
+---
+title: Dialog
+description: A modal for a short task, such as adding a line or confirming a payout.
+---
+
+import DialogDemo from '@/demos/dialog';
+import DialogMotionDemo from '@/demos/dialog.motion';
+
+<Preview
+  name="dialog"
+  plain={<DialogDemo />}
+  motion={<DialogMotionDemo />}
+  importLine="import { Dialog, DialogContent, DialogTrigger } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add dialog
+```
+
+`theme-scope` installs with it.
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogBody,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+
+<Dialog>
+  <DialogTrigger render={<Button />}>Add expense</DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Add expense</DialogTitle>
+      <DialogDescription>Goes into the March report as a draft line.</DialogDescription>
+    </DialogHeader>
+    <DialogBody>{/* fields */}</DialogBody>
+    <DialogFooter>
+      <DialogClose render={<Button variant="ghost" />}>Cancel</DialogClose>
+      <Button type="submit">Save expense</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>;
+```
+
+`DialogContent` holds the backdrop, the viewport and the popup. The popup sits near the top of the
+screen, so it grows downward when errors appear instead of moving under the pointer. The footer
+puts actions at the end; the primary action goes last.
+
+The dialog portals into the nearest `ThemeScope`, so it keeps that scope's theme and mode.
+
+The motion variant grows the popup from the trigger that opened it and returns it there on close.
+Use the motion `Dialog`, `DialogTrigger` and `DialogContent` together; the other parts are the plain
+ones.
+
+## Props
+
+### Dialog, DialogTrigger, DialogClose
+
+These are Base UI's `Dialog.Root`, `Dialog.Trigger` and `Dialog.Close`. `Dialog` takes `open`,
+`defaultOpen`, `onOpenChange` and `modal`; the trigger and close take `render` to draw a `Button`.
+
+### DialogContent
+
+Every prop of Base UI's `Dialog.Popup` is accepted as well.
+
+<TypeTable
+  type={{
+    children: { type: 'ReactNode', required: true },
+    closeLabel: {
+      type: 'string',
+      default: "'Close'",
+      description: 'Accessible name of the close button in the corner.',
+    },
+    showClose: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Hide the corner close button when the footer has its own.',
+    },
+  }}
+/>
+
+### DialogTitle, DialogDescription
+
+Every prop of Base UI's `Dialog.Title` and `Dialog.Description`.
+
+### DialogHeader, DialogBody, DialogFooter
+
+Plain `div` elements with the dialog's spacing; every `div` prop is accepted.
+
+## Accessibility
+
+- Opens as a modal dialog named by `DialogTitle` and described by `DialogDescription`.
+- Focus moves into the dialog, stays there while it is open, and returns to the trigger on close.
+- The rest of the page is hidden from assistive technology while it is open.
+- Escape and a press on the backdrop close it. The corner close button is named by `closeLabel`.
+
+<ComponentSource path="dialog/dialog.tsx" />

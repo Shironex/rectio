@@ -1,0 +1,140 @@
+---
+title: DatePicker
+description: A date field you can type into, and a period picker for reports.
+---
+
+import DatePickerDemo from '@/demos/date-picker';
+
+<Preview name="date-picker" plain={<DatePickerDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add date-picker
+```
+
+`calendar`, `field`, `select` and `theme-scope` install with it, and `date-fns` is added to your
+`package.json`.
+
+## Usage
+
+### DatePicker
+
+```tsx
+import { DatePicker } from '@/components/ui/date-picker';
+import { Field, FieldLabel } from '@/components/ui/field';
+
+<Field>
+  <FieldLabel>Invoice date</FieldLabel>
+  <DatePicker locale="en-IE" value={date} onValueChange={setDate} />
+</Field>;
+```
+
+Type the date in the locale's short pattern (`dd/mm/yyyy` for `en-IE`), or open the calendar with
+the button or Alt and Arrow Down. A typed date is read on blur or Enter and rewritten in the locale
+format. Text that is not a date reports `null` and stays in the field to be fixed. Pressing the
+chosen day again keeps it; it never empties the field.
+
+`datePattern(dateLocale)` and `parseDate(text, dateLocale)` are exported for your own validation
+messages, such as "Enter the date as dd/mm/yyyy."
+
+### DateRangePicker
+
+```tsx
+import { DateRangePicker, type DateRange } from '@/components/ui/date-picker';
+
+<DateRangePicker
+  aria-label="Statement period"
+  locale="en-IE"
+  value={period}
+  onValueChange={setPeriod}
+  presets={[{ label: 'March', range: { from: new Date(2026, 2, 1), to: new Date(2026, 2, 31) } }]}
+/>;
+```
+
+A button that shows the period and opens two months. Each opening picks a fresh period: the first
+press sets the start, the second the end, then it closes. Closing early keeps the start. Presets sit
+beside the calendar with their dates written out; one press picks the whole period.
+
+Both popups portal into the nearest `ThemeScope`. On phones the calendar opens as a sheet along the
+bottom edge, with its own close button.
+
+## Props
+
+### DatePicker
+
+<TypeTable
+  type={{
+    value: { type: 'Date | null', required: true },
+    onValueChange: {
+      type: '(value: Date | null) => void',
+      required: true,
+      description:
+        'Called with a date when one is picked or typed, null when cleared or unreadable.',
+    },
+    locale: {
+      type: 'string',
+      description: 'BCP 47 tag: the typed pattern, month names and first weekday follow it.',
+    },
+    dateLocale: { type: 'DayPickerLocale', description: 'Wins over locale.' },
+    placeholder: {
+      type: 'string',
+      description: "Defaults to the locale's pattern, such as dd/mm/yyyy.",
+    },
+    disabled: { type: 'boolean', default: 'false' },
+    disabledDays: {
+      type: 'Matcher | Matcher[]',
+      description: 'Days that cannot be picked, in DayPicker matcher form.',
+    },
+    calendarLabel: {
+      type: 'string',
+      default: "'Choose date'",
+      description: 'Name of the calendar button. The chosen date is added to it.',
+    },
+    name: { type: 'string' },
+    autoFocus: { type: 'boolean' },
+    onBlur: { type: '() => void' },
+    className: { type: 'string' },
+    'aria-label': { type: 'string', description: 'Only when no FieldLabel names the input.' },
+  }}
+/>
+
+### DateRangePicker
+
+<TypeTable
+  type={{
+    value: { type: 'DateRange | undefined', required: true },
+    onValueChange: { type: '(value: DateRange | undefined) => void', required: true },
+    'aria-label': {
+      type: 'string',
+      required: true,
+      description: 'Names the button, such as "Statement period". It has no field label.',
+    },
+    locale: { type: 'string' },
+    dateLocale: { type: 'DayPickerLocale' },
+    placeholder: { type: 'string', default: "'Choose dates'" },
+    numberOfMonths: {
+      type: 'number',
+      default: '2',
+      description: 'Months side by side. They stack on narrow screens.',
+    },
+    presets: {
+      type: 'DateRangePreset[]',
+      description: 'Common periods, each a label and a { from, to } range.',
+    },
+    disabledDays: { type: 'Matcher | Matcher[]' },
+    disabled: { type: 'boolean', default: 'false' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The input is named by its `FieldLabel` and shows the locale pattern as its placeholder.
+- The calendar button is named "Choose date", plus the chosen date when there is one.
+- The calendar opens on the chosen day with focus on it, and picks from the keyboard like
+  [Calendar](/docs/components/calendar).
+- The range button's name includes the period it shows. The preset matching the current period is
+  marked pressed (`aria-pressed`), and each preset reads its dates.
+
+<ComponentSource path="date-picker/date-picker.tsx" />

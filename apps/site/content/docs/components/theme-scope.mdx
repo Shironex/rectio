@@ -1,0 +1,63 @@
+---
+title: ThemeScope
+description: A theme, a mode and a density for one part of the page.
+---
+
+import ThemeScopeDemo from '@/demos/theme-scope';
+
+<Preview name="theme-scope" plain={<ThemeScopeDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add theme-scope
+```
+
+## Usage
+
+```tsx
+import { ThemeScope } from '@/components/ui/theme-scope';
+
+<ThemeScope theme="ledger" mode="dark" density="compact">
+  <Ledger />
+</ThemeScope>;
+```
+
+`ThemeScope` sets `data-theme`, `data-mode` and `data-density` on a `div`, with the canvas
+background, the theme's sans face and its text colour. Every token below it follows.
+
+Popups opened inside it (select lists, dialogs, date picker popups, toasts) portal into the scope
+instead of the document body, so they keep its tokens. One page can show several themes side by
+side, or one theme per tenant.
+
+Without `mode`, the scope follows the system colour scheme. See [Theming](/docs/theming) for the
+attributes and what each theme changes.
+
+## Props
+
+Every prop of a `div` is accepted as well.
+
+<TypeTable
+  type={{
+    theme: {
+      type: 'string',
+      default: "'default'",
+      description: 'A theme id, such as default or ledger.',
+    },
+    mode: {
+      type: "'light' | 'dark'",
+      description: 'Leave unset to follow the system colour scheme.',
+    },
+    density: {
+      type: "'comfortable' | 'compact'",
+      description: 'compact sets data-density="compact"; comfortable is the default spacing.',
+    },
+  }}
+/>
+
+### usePortalContainer
+
+`usePortalContainer()` returns the element where popups of the nearest scope render, or `undefined`
+outside a scope. Pass it as the `container` of a Base UI portal when you build your own popup.
+
+<ComponentSource path="theme-scope/theme-scope.tsx" />

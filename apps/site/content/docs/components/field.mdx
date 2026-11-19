@@ -1,0 +1,93 @@
+---
+title: Field
+description: A label, a control, its description and its error, wired together.
+---
+
+import FieldDemo from '@/demos/field';
+
+<Preview name="field" plain={<FieldDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add field
+```
+
+## Usage
+
+```tsx
+import { Field, FieldDescription, FieldError, FieldLabel, Input } from '@/components/ui/field';
+
+<Field invalid={errors.merchant !== undefined}>
+  <FieldLabel>Merchant</FieldLabel>
+  <Input value={merchant} onValueChange={setMerchant} />
+  <FieldDescription>As printed on the receipt.</FieldDescription>
+  {errors.merchant !== undefined && <FieldError>{errors.merchant}</FieldError>}
+</Field>;
+```
+
+`Field` links its parts: the label names the control, the description and the error describe it.
+It holds any rectio control, so `AmountInput`, `Select` and `DatePicker` take a `FieldLabel` the
+same way `Input` does.
+
+Errors show in two cases. Base UI shows `FieldError` when a native check or a `validate` function
+fails. When the app sets `<Field invalid>` itself, for a server message or a form library, the error
+shows too, so an invalid field is never only a red border.
+
+Mark the minority. When most fields of a form are required, give the optional ones
+`<FieldLabel optional>` and leave the rest unmarked.
+
+## Props
+
+### Field
+
+Every prop of Base UI's `Field.Root` is accepted, including `invalid`, `disabled`, `name` and
+`validate`.
+
+### FieldLabel
+
+Every prop of Base UI's `Field.Label` is accepted as well.
+
+<TypeTable
+  type={{
+    optional: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Adds the word Optional after the label, as part of its accessible name.',
+    },
+  }}
+/>
+
+### FieldDescription
+
+Every prop of Base UI's `Field.Description`.
+
+### FieldError
+
+Every prop of Base UI's `Field.Error`, including `match` to show it for one validity state only.
+
+<TypeTable
+  type={{
+    children: {
+      type: 'ReactNode',
+      required: true,
+      description: 'The message. Say what to enter, not only that it is wrong.',
+    },
+  }}
+/>
+
+### Input
+
+Every prop of Base UI's `Field.Control`: `value`, `defaultValue`, `onValueChange`, `type`,
+`required` and the other attributes of a native input.
+
+## Accessibility
+
+- The label names the input, and the description is linked to it with `aria-describedby`.
+- After a failed check the input gets `aria-invalid` and the error is linked to it.
+- The error carries a warning icon and text, so colour is never the only signal.
+- `optional` adds the word to the accessible name ("Note Optional"), not only a visual mark.
+- The focus ring sits outside the border, so an invalid field shows its red edge and the focus ring
+  together.
+
+<ComponentSource path="field/field.tsx" />

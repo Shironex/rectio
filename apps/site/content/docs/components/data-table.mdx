@@ -1,0 +1,292 @@
+---
+title: DataTable
+description: Rows of records with sorting, selection and a totals footer, on TanStack Table.
+---
+
+import DataTableDemo from '@/demos/data-table';
+import DataTableMotionDemo from '@/demos/data-table.motion';
+
+<Preview
+  name="data-table"
+  plain={<DataTableDemo />}
+  motion={<DataTableMotionDemo />}
+  importLine="import { DataTableBody, Money } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add data-table
+```
+
+`checkbox` and `button` install with it, and `@tanstack/react-table` is added to your
+`package.json`.
+
+## Usage
+
+```tsx
+import {
+  DataTable,
+  DataTableBody,
+  DataTableFooter,
+  DataTableHeader,
+  selectionColumn,
+  useDataTable,
+  type DataTableColumnDef,
+} from '@/components/ui/data-table';
+import { Money } from '@/components/ui/money';
+
+const sumOf = (rows: { original: Expense }[]) =>
+  rows.reduce((sum, row) => sum + row.original.amount, 0);
+
+const columns: DataTableColumnDef<Expense>[] = [
+  selectionColumn<Expense>({ rowLabel: (row) => `Select ${row.original.merchant}` }),
+  { accessorKey: 'merchant', header: 'Merchant', sortFn: 'text' },
+  {
+    accessorKey: 'amount',
+    header: 'Amount, EUR',
+    meta: { align: 'end', label: 'Amount' },
+    cell: ({ row }) => <Money amount={row.original.amount} currency="EUR" />,
+    footer: ({ table }) => <Money amount={sumOf(table.getRowModel().rows)} currency="EUR" />,
+  },
+];
+
+function Expenses({ expenses }: { expenses: Expense[] }) {
+  const table = useDataTable({ data: expenses, columns, getRowId: (e) => e.id });
+  return (
+    <DataTable caption="Expenses in this report">
+      <DataTableHeader table={table} sticky />
+      <DataTableBody table={table} empty="No expenses in this period." />
+      <DataTableFooter table={table} />
+    </DataTable>
+  );
+}
+```
+
+`useDataTable` is TanStack Table's `useTable` with sorting, row selection and pagination registered.
+Everything `useTable` takes still works: controlled `state` with its `on*Change` handlers,
+`initialState`, `getRowId`, `enableRowSelection`. A third click on a sorted header returns the rows
+to their original order.
+
+`DataTable` is the frame: the caption, an optional scroll box and a live region. The header, body
+and footer each take the table instance. Columns describe themselves through `meta`: `align: 'end'`
+for amounts, a `label` for announcements, and a `className` for every cell of the column (such as
+`hidden sm:table-cell`).
+
+The body has a `loading` state with skeleton rows in the shape of the table, and an `empty`
+message; say why there are no rows and what to do next. The footer renders each column's `footer`
+and leaves an empty cell where a column has none, so totals stay under their headers.
+
+The motion variant opens new rows in place and fades removed rows before closing the gap, so the
+rows below slide instead of jumping. With the motion `Money` in the footer, the total counts to its
+new figure. Rows present on the first render never animate.
+
+### Pagination
+
+Page the rows client side with `useDataTable({ paginate: true })` and put `DataTablePagination`
+under the table. It is off by default: a report shows every line.
+
+```tsx
+import { DataTablePagination } from '@/components/ui/pagination';
+
+const table = useDataTable({
+  data,
+  columns,
+  paginate: true,
+  initialState: { pagination: { pageIndex: 0, pageSize: 20 } },
+});
+
+<DataTablePagination table={table} locale="en-IE" />;
+```
+
+### Table parts
+
+For a static table, use the parts the DataTable builds on: `Table`, `TableCaption`, `TableHeader`,
+`TableBody`, `TableFooter`, `TableRow`, `TableHead` and `TableCell`. They carry the same hairline
+rows and density-aware row height. In the footer, give the label of a totals row
+`<TableHead scope="row">`.
+
+```tsx
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Merchant</TableHead>
+      <TableHead align="end">Amount, EUR</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>Lufthansa</TableCell>
+      <TableCell align="end">
+        <Money amount={412.8} currency="EUR" locale="en-IE" />
+      </TableCell>
+    </TableRow>
+  </TableBody>
+</Table>;
+```
+
+## Props
+
+### useDataTable
+
+Takes every option of TanStack Table's `useTable` except `features`, which it sets.
+
+<TypeTable
+  type={{
+    paginate: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Page the rows client side. Pair it with DataTablePagination.',
+    },
+  }}
+/>
+
+### DataTable
+
+Every prop of a `table` is accepted as well, except `children`, which is required.
+
+<TypeTable
+  type={{
+    caption: {
+      type: 'ReactNode',
+      required: true,
+      description: 'Names the table for screen readers, and on screen unless hideCaption.',
+    },
+    hideCaption: { type: 'boolean', default: 'false' },
+    scrollable: {
+      type: 'boolean',
+      default: 'false',
+      description:
+        'Scroll inside a box of the height you give with containerClassName (for example max-h-96). The box becomes a focusable region.',
+    },
+    containerClassName: { type: 'string' },
+  }}
+/>
+
+### DataTableHeader
+
+<TypeTable
+  type={{
+    table: { type: 'DataTableInstance<TData>', required: true },
+    sticky: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Keep the header in view while rows scroll under it.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+### DataTableBody
+
+<TypeTable
+  type={{
+    table: { type: 'DataTableInstance<TData>', required: true },
+    empty: {
+      type: 'ReactNode',
+      default: "'No rows.'",
+      description: 'Shown in place of rows when there are none.',
+    },
+    loading: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Skeleton rows in the shape of the table.',
+    },
+    loadingRows: { type: 'number', default: '5' },
+    rowProps: {
+      type: '(row) => ComponentProps<"tr">',
+      description: 'Extra props per row, such as data-new to highlight a row just added.',
+    },
+  }}
+/>
+
+### DataTableFooter
+
+<TypeTable
+  type={{
+    table: { type: 'DataTableInstance<TData>', required: true },
+    className: { type: 'string' },
+  }}
+/>
+
+### selectionColumn
+
+Returns a leading checkbox column.
+
+<TypeTable
+  type={{
+    rowLabel: {
+      type: '(row) => string',
+      required: true,
+      description: 'Names a row checkbox, such as "Select Lufthansa, 3 Mar".',
+    },
+    allLabel: { type: 'string', default: "'Select all rows'" },
+  }}
+/>
+
+### DataTableColumnMeta
+
+<TypeTable
+  type={{
+    align: {
+      type: "'start' | 'center' | 'end'",
+      description: '`end` for amounts and quantities.',
+    },
+    label: {
+      type: 'string',
+      description:
+        'Read out when the column is sorted. Defaults to the header when it is a string.',
+    },
+    className: {
+      type: 'string',
+      description: 'Classes for every cell of the column: header, body and footer.',
+    },
+  }}
+/>
+
+### DataTablePagination
+
+<TypeTable
+  type={{
+    table: { type: 'DataTableInstance<TData>', required: true },
+    locale: { type: 'string', description: 'BCP 47 locale for the row counts.' },
+    formatRange: {
+      type: '(first: number, last: number, total: number) => string',
+      description: 'Text for the range, for translation. Defaults to "1 to 20 of 64".',
+    },
+    previousLabel: { type: 'string', default: "'Previous page'" },
+    nextLabel: { type: 'string', default: "'Next page'" },
+    className: { type: 'string' },
+  }}
+/>
+
+### Table parts
+
+Each part takes every prop of its HTML element. `TableHeader` adds `sticky`; `TableHead` and
+`TableCell` add `align` (`'start' | 'center' | 'end'`, default `'start'`), and `TableHead` sets
+`scope="col"` unless you pass another.
+
+## Accessibility
+
+- A real `table` with a `caption` and column headers.
+- A sortable header is a button. `aria-sort` on the header cell says the current order, and a polite
+  live region says what changed ("Sorted by Amount, descending").
+- Every row checkbox is named by `rowLabel`. The select all box shows a bar when only some rows are
+  selected, and Shift selects a range in display order.
+- Selected rows carry `data-selected` and a tint, alongside the ticked box.
+- While loading, the body is marked `aria-busy` and says "Loading rows" to screen readers.
+- The pagination range is a live region, and the page buttons stay focusable at the first and last
+  page so focus is not dropped.
+
+<ComponentSource path="data-table/data-table.tsx" />
+<ComponentSource path="data-table/table.tsx" />
+<ComponentSource path="data-table/pagination.tsx" />

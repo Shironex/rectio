@@ -1,0 +1,86 @@
+---
+title: Money
+description: An amount, formatted for its locale, with figures that line up.
+---
+
+import MoneyDemo from '@/demos/money';
+import MoneyMotionDemo from '@/demos/money.motion';
+
+<Preview
+  name="money"
+  plain={<MoneyDemo />}
+  motion={<MoneyMotionDemo />}
+  importLine="import { Money } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add money
+```
+
+## Usage
+
+```tsx
+import { Money } from '@/components/ui/money';
+
+<Money amount={-61} currency="EUR" locale="en-IE" tone="auto" />;
+```
+
+`Money` formats with `Intl.NumberFormat` and replaces the hyphen Intl returns with the true minus
+sign (U+2212), which is as wide as a plus, so signed figures stay aligned. Figures are tabular and
+lining, so a column of amounts lines up digit by digit.
+
+It is neutral by default. `tone="auto"` colours a credit positive and a debit negative; the sign is
+printed either way, so colour is never the only signal. `accounting` writes a debit in parentheses,
+as ledgers do. `quietCurrency` dims the symbol so the figures lead.
+
+For text such as a toast message, `formatMoney(amount, currency, options)` returns the same string,
+and `formatMoneyParts` returns the parts.
+
+The motion variant counts from the shown figure to the new one when the amount changes, waiting for
+the change that caused it to land first. It is meant for totals. Screen readers read only the final
+figure, and the count never overshoots.
+
+## Props
+
+Every prop of a `span` is accepted as well, except `children`.
+
+<TypeTable
+  type={{
+    amount: { type: 'number', required: true },
+    currency: { type: 'string', required: true, description: 'ISO 4217 code.' },
+    locale: {
+      type: 'string',
+      description: 'BCP 47 locale. Defaults to the runtime locale.',
+    },
+    tone: {
+      type: "'auto' | 'neutral'",
+      default: "'neutral'",
+      description: '`auto` colours credits positive and debits negative.',
+    },
+    signDisplay: {
+      type: "'auto' | 'exceptZero' | 'never'",
+      default: "'auto'",
+      description: '`exceptZero` prints a plus on credits, for movement columns.',
+    },
+    accounting: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Wrap debits in parentheses instead of a minus sign.',
+    },
+    quietCurrency: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Dim the currency symbol so the figures lead.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- The sign is always in the text, and `data-direction` (`credit`, `debit` or `zero`) is set for
+  styling, so meaning never rests on colour.
+- The figures use the theme's numeric face through the `--rx-money-family` token.
+
+<ComponentSource path="money/money.tsx" />
