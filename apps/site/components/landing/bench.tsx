@@ -1,6 +1,7 @@
 'use client';
 
 import { Tabs } from '@base-ui/react/tabs';
+import { PauseIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
@@ -98,6 +99,16 @@ export function Bench() {
         }}
         className="flex flex-col gap-6"
       >
+        {auto && (
+          <button
+            type="button"
+            onClick={stop}
+            className="inline-flex items-center gap-2 self-end rounded-control px-2 py-1 text-sm text-fg-muted transition-colors duration-fast ease-standard pointer-fine:hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          >
+            <PauseIcon aria-hidden weight="fill" className="size-3.5" />
+            Stop the tour
+          </button>
+        )}
         <Tabs.List
           aria-label="Live blocks"
           className="grid grid-cols-2 gap-x-6 gap-y-2 border-b border-line sm:grid-cols-4"

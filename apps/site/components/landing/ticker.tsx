@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { PauseIcon, PlayIcon } from '@phosphor-icons/react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 /**
  * A strip of short facts moving sideways on a CSS loop, the track drawn twice so it never ends.
- * It pauses under the pointer, while the tab is hidden and off screen; with reduced motion it
- * stands still. The second copy is hidden from assistive technology.
+ * It pauses under the pointer, while the tab is hidden and off screen, and for good from its pause
+ * button; with reduced motion it stands still. The second copy is hidden from assistive technology.
  */
 export function Ticker({ items, label }: { items: readonly ReactNode[]; label: string }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [stopped, setStopped] = useState(false);
 
   useEffect(() => {
     const element = ref.current;
@@ -49,16 +51,34 @@ export function Ticker({ items, label }: { items: readonly ReactNode[]; label: s
   );
 
   return (
-    <div
-      ref={ref}
-      role="region"
-      aria-label={label}
-      className="site-ticker overflow-hidden font-mono text-sm text-fg"
-    >
-      <div className="site-ticker-track flex w-max">
-        {list(0)}
-        {list(1)}
+    <div className="flex items-center gap-2">
+      <div
+        ref={ref}
+        role="region"
+        aria-label={label}
+        data-stopped={stopped ? '' : undefined}
+        className="site-ticker min-w-0 flex-1 overflow-hidden font-mono text-sm text-fg"
+      >
+        <div className="site-ticker-track flex w-max">
+          {list(0)}
+          {list(1)}
+        </div>
       </div>
+      <button
+        type="button"
+        aria-pressed={stopped}
+        aria-label="Pause the facts strip"
+        onClick={() => {
+          setStopped((value) => !value);
+        }}
+        className="site-ticker-toggle flex size-8 shrink-0 items-center justify-center rounded-control text-fg-muted transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+      >
+        {stopped ? (
+          <PlayIcon aria-hidden weight="fill" className="size-3.5" />
+        ) : (
+          <PauseIcon aria-hidden weight="fill" className="size-3.5" />
+        )}
+      </button>
     </div>
   );
 }
