@@ -201,6 +201,28 @@ describe('add', () => {
     expect(snapshot(cwd)).toEqual(before);
   });
 
+  it('refuses a motion item without a key and writes nothing', async () => {
+    const cwd = await initialised();
+    const before = snapshot(cwd);
+    await expect(runAdd(capture(cwd).ctx, ['motion-dialog'], noInstall)).rejects.toThrow(
+      'motion-core, motion-dialog are pro items and no license key was found',
+    );
+    expect(snapshot(cwd)).toEqual(before);
+  });
+
+  it('installs a motion item with a key beside the plain component it builds on', async () => {
+    const cwd = await initialised();
+    await runAdd(capture(cwd, { RECTIO_LICENSE_KEY: 'any-key' }).ctx, ['motion-dialog'], noInstall);
+    const dialog = read(cwd, 'src/components/ui/motion/dialog.tsx');
+    expect(dialog).toContain("from '@/components/ui/dialog'");
+    expect(dialog).toContain("from '@/lib/motion/animate'");
+    expect(read(cwd, 'src/components/ui/dialog.tsx')).toContain('export function DialogContent');
+    expect(read(cwd, 'src/lib/motion/animate.ts')).toContain("from 'motion/mini'");
+    const pkg = JSON.parse(read(cwd, 'package.json')) as { dependencies: Record<string, string> };
+    expect(pkg.dependencies.motion).toBe('^14.12.0');
+    expect(readLock(cwd).items['motion-dialog']?.tier).toBe('pro');
+  });
+
   it('installs a pro item with a key, its free dependencies and its token additions', async () => {
     const cwd = await initialised();
     await runAdd(
@@ -284,15 +306,17 @@ describe('diff, list, search and update', () => {
     const themes = await runList(ctx, { type: 'theme' });
     expect(themes.map((t) => t.name)).toEqual(['theme-default', 'theme-ledger']);
     expect(out[0]).toMatch(/^\* theme-default/);
-    expect((await runList(capture(cwd).ctx, { tier: 'pro' })).map((t) => t.name)).toEqual([
-      'ledger-summary',
-    ]);
+    const pro = (await runList(capture(cwd).ctx, { tier: 'pro' })).map((t) => t.name);
+    expect(pro).toContain('ledger-summary');
+    expect(pro).toContain('motion-dialog');
+    expect(pro.every((name) => name === 'ledger-summary' || name.startsWith('motion-'))).toBe(true);
   });
 
   it('searches names first, then titles, categories and descriptions', async () => {
     const cwd = await initialised();
     const hits = await runSearch(capture(cwd).ctx, 'money');
-    expect(hits.map((h) => h.name)).toEqual(['money', 'amount-input']);
+    // Names first (the plain item, then the motion one), then descriptions.
+    expect(hits.map((h) => h.name)).toEqual(['money', 'motion-money', 'amount-input']);
     expect((await runSearch(capture(cwd).ctx, 'finance')).map((h) => h.name)).toContain(
       'ledger-summary',
     );
