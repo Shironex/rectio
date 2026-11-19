@@ -42,6 +42,14 @@ import { PageHeader } from '../page-header';
 import { EmptyPanel, ErrorPanel, LoadingPanel, LoadingRegion } from '../states/state-views';
 import { usePageState } from '../use-page-state';
 
+/**
+ * Reports read closed quarters only, so the partial ones at either end of the twelve months on
+ * the overview (December 2025, and October to date) stay out of the quarterly view.
+ */
+const CLOSED_QUARTERS = CASH_FLOW.filter(
+  (p) => p.month.getFullYear() === 2026 && p.month.getMonth() < 9,
+);
+
 const money = (amount: number, className?: string) => (
   <Money
     amount={amount}
@@ -356,11 +364,11 @@ export function ReportsPage() {
             />
           </div>
           <CashFlowChart
-            points={CASH_FLOW}
+            points={CLOSED_QUARTERS}
             currency={CURRENCY}
             locale={LOCALE}
             defaultGranularity="quarter"
-            title="Cash flow by quarter"
+            title="Cash flow by closed quarter"
           />
         </>
       )}
