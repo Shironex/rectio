@@ -1,0 +1,41 @@
+{
+  "name": "@rectio/template-docs",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "description": "Docs template: a static documentation site from MDX files, with navigation from the folders, local search, API reference pages and a changelog.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "typecheck": "next typegen && tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "shoot": "node scripts/shoot.ts"
+  },
+  "dependencies": {
+    "@mdx-js/mdx": "^3.1.1",
+    "@phosphor-icons/react": "^2.1.10",
+    "@rectio/blocks": "workspace:*",
+    "@rectio/motion": "workspace:*",
+    "@rectio/tokens": "workspace:*",
+    "@rectio/ui": "workspace:*",
+    "next": "16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remark-gfm": "^4.0.1",
+    "shiki": "^4.6.0",
+    "unist-util-visit": "^5.2.0",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "playwright": "^1.65.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.3.5",
+    "typescript": "~6.0.3"
+  }
+}
