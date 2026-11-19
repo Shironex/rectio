@@ -568,7 +568,11 @@ function Decide({
         className={cn(
           share,
           // Outlined in the accent: still the row's main action, without six fills in a column.
-          !lead && 'border-accent text-accent-strong hover:bg-accent-subtle',
+          // The filled one keeps a clear border of the same width, so the row never shifts as the
+          // lead moves from row to row.
+          lead
+            ? 'border border-transparent'
+            : 'border-accent text-accent-strong hover:bg-accent-subtle',
         )}
         onClick={onApprove}
       >
