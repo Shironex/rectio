@@ -63,7 +63,7 @@
       "$value": "{palette.cobalt.800}"
     },
     "subtle": {
-      "$value": "{palette.cobalt.900}"
+      "$value": "{palette.cobalt.850}"
     },
     "strong": {
       "$value": "{palette.cobalt.300}"
