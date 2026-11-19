@@ -1,11 +1,4 @@
-import {
-  CheckIcon,
-  CopyIcon,
-  KeyIcon,
-  PlusIcon,
-  ProhibitIcon,
-  ShieldWarningIcon,
-} from '@phosphor-icons/react';
+import { CheckIcon, CopyIcon, KeyIcon, PlusIcon, ShieldWarningIcon } from '@phosphor-icons/react';
 import {
   Dialog,
   DialogContent,
@@ -24,7 +17,7 @@ import {
   SelectTrigger,
   cn,
 } from '@rectio/ui';
-import { useEffect, useId, useState, type ReactNode, type SyntheticEvent } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -80,24 +73,31 @@ const STATUS = {
   revoked: { state: 'void', label: 'Revoked' },
 } as const;
 
-/** True for a moment after a copy, for the button's label and the live region. */
-function useCopied() {
-  const [copied, setCopied] = useState(false);
+export type CopyState = 'idle' | 'copied' | 'failed';
+
+/** What the last copy did, for the button's label and the live region; settles back after a while. */
+function useCopy() {
+  const [state, setState] = useState<CopyState>('idle');
   useEffect(() => {
-    if (!copied) return;
+    if (state !== 'copied') return;
     const timer = setTimeout(() => {
-      setCopied(false);
+      setState('idle');
     }, 2400);
     return () => {
       clearTimeout(timer);
     };
-  }, [copied]);
+  }, [state]);
   const copy = (text: string) => {
-    void navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-    });
+    navigator.clipboard.writeText(text).then(
+      () => {
+        setState('copied');
+      },
+      () => {
+        setState('failed');
+      },
+    );
   };
-  return [copied, copy] as const;
+  return [state, copy] as const;
 }
 
 /**
@@ -197,12 +197,12 @@ export function ApiKeys({
           </EmptyNote>
         )
       ) : (
-        <ul aria-label="API keys" className="-mx-2 flex flex-col">
+        <ul aria-label="API keys" className="flex flex-col">
           <Items>
             {sortApiKeys(keys).map((key) => (
               <Item
                 key={key.id}
-                className="flex items-start gap-3 rounded-control px-2 py-3 not-last:border-b not-last:border-line"
+                className="flex items-start gap-3 py-3 not-last:border-b not-last:border-line"
               >
                 <KeyRow
                   apiKey={key}
@@ -252,7 +252,7 @@ function KeyRow({
   onRevoke: (() => void) | undefined;
 }) {
   const { Button } = useBlockParts();
-  const [copied, copy] = useCopied();
+  const [copyState, copy] = useCopy();
   const status = apiKeyStatus(key, now);
   const badge = status === 'active' ? null : STATUS[status];
   const dead = status === 'revoked' || status === 'expired';
@@ -269,7 +269,7 @@ function KeyRow({
         <KeyIcon weight="bold" className="size-4" />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <span className={cn('font-medium text-pretty', dead && 'text-fg-muted')}>{key.name}</span>
+        <span className="font-medium text-pretty">{key.name}</span>
         <span className="flex flex-wrap items-center gap-1.5">
           <span
             className={cn(
@@ -283,7 +283,7 @@ function KeyRow({
           {badge !== null && <StateBadge state={badge.state} label={badge.label} />}
         </span>
         <span className="-my-1 flex items-center gap-1">
-          <code className={cn('font-mono text-sm', dead ? 'text-fg-subtle' : 'text-fg')}>
+          <code className="font-mono text-sm text-fg">
             <span className="sr-only">Key starting </span>
             {maskApiKey(key.prefix)}
           </code>
@@ -292,12 +292,19 @@ function KeyRow({
               variant="ghost"
               size="sm"
               iconOnly
-              aria-label={copied ? 'Prefix copied' : `Copy the prefix of ${key.name}`}
+              className="size-7 pointer-coarse:size-(--rx-control-height-touch)"
+              aria-label={
+                copyState === 'copied'
+                  ? `Key ID of ${key.name} copied`
+                  : copyState === 'failed'
+                    ? `Copy failed, select the key ID of ${key.name} and copy it`
+                    : `Copy the key ID of ${key.name}, ${key.prefix}`
+              }
               onClick={() => {
                 copy(key.prefix);
               }}
             >
-              {copied ? (
+              {copyState === 'copied' ? (
                 <CheckIcon aria-hidden weight="bold" className="size-3.5" />
               ) : (
                 <CopyIcon aria-hidden weight="bold" className="size-3.5" />
@@ -330,11 +337,10 @@ function KeyRow({
         <Button
           variant="ghost"
           size="sm"
-          className="shrink-0 text-negative-strong hover:bg-negative-subtle"
+          className="shrink-0 text-fg-muted hover:text-fg"
           aria-label={`Revoke ${key.name}`}
           onClick={onRevoke}
         >
-          <ProhibitIcon aria-hidden weight="bold" className="size-4" />
           Revoke
         </Button>
       )}
@@ -479,7 +485,13 @@ function CreateForm({
 function KeyReveal({ name, value, onDone }: { name: string; value: string; onDone: () => void }) {
   const { Button } = useBlockParts();
   const headingId = useId();
-  const [copied, copy] = useCopied();
+  const [copyState, copy] = useCopy();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // A failed copy selects the key, so a keyboard copy is one shortcut away.
+  useEffect(() => {
+    if (copyState === 'failed') inputRef.current?.select();
+  }, [copyState]);
 
   return (
     <section
@@ -494,33 +506,42 @@ function KeyReveal({ name, value, onDone }: { name: string; value: string; onDon
         This is the only time you will see it. Store it in your secrets manager; if you lose it,
         revoke it and create a new one.
       </p>
-      <div className="flex flex-col gap-2 @xl:flex-row @xl:items-center">
-        <code
-          tabIndex={0}
-          aria-label={`Secret key for ${name}`}
-          className="min-w-0 flex-1 overflow-x-auto rounded-control border border-line bg-surface px-3 py-2 font-mono text-sm whitespace-nowrap text-fg outline-offset-2 select-all focus-visible:outline-2 focus-visible:outline-focus"
-        >
-          {value}
-        </code>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={() => {
-              copy(value);
+      <Field invalid={copyState === 'failed'}>
+        <FieldLabel>Secret key for {name}</FieldLabel>
+        <div className="flex flex-col gap-2 @xl:flex-row @xl:items-center">
+          <Input
+            ref={inputRef}
+            readOnly
+            value={value}
+            spellCheck={false}
+            className="min-w-0 flex-1 font-mono"
+            onFocus={(event) => {
+              event.currentTarget.select();
             }}
-          >
-            {copied ? (
-              <CheckIcon aria-hidden weight="bold" className="size-4" />
-            ) : (
-              <CopyIcon aria-hidden weight="bold" className="size-4" />
-            )}
-            {copied ? 'Copied' : 'Copy key'}
-          </Button>
-          <Button onClick={onDone}>Done</Button>
+          />
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                copy(value);
+              }}
+            >
+              {copyState === 'copied' ? (
+                <CheckIcon aria-hidden weight="bold" className="size-4" />
+              ) : (
+                <CopyIcon aria-hidden weight="bold" className="size-4" />
+              )}
+              {copyState === 'copied' ? 'Copied' : 'Copy key'}
+            </Button>
+            <Button onClick={onDone}>Done</Button>
+          </div>
         </div>
-      </div>
+        {copyState === 'failed' && (
+          <FieldError>Copy failed. Select the key and copy it.</FieldError>
+        )}
+      </Field>
       <p aria-live="polite" className="sr-only">
-        {copied ? 'Key copied to the clipboard' : ''}
+        {copyState === 'copied' ? 'Key copied to the clipboard' : ''}
       </p>
     </section>
   );

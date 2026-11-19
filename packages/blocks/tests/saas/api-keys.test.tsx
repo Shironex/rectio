@@ -93,13 +93,29 @@ describe('ApiKeys', () => {
         onCreatedKeyDismiss={onCreatedKeyDismiss}
       />,
     );
-    expect(screen.getByText('fh_live_x_secret')).toBeInTheDocument();
+    expect(screen.getByLabelText('Secret key for Ops')).toHaveValue('fh_live_x_secret');
     expect(screen.getByText(/only time you will see it/)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Copy key' }));
     expect(writeText).toHaveBeenCalledWith('fh_live_x_secret');
     expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Done' }));
     expect(onCreatedKeyDismiss).toHaveBeenCalled();
+  });
+
+  it('says when copying fails and keeps the key selectable', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValueOnce(new Error('denied'));
+    render(
+      <ApiKeys
+        keys={KEYS}
+        scopes={SCOPES}
+        now={NOW}
+        createdKey={{ name: 'Ops', value: 'fh_live_x_secret' }}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Copy key' }));
+    expect(await screen.findByText('Copy failed. Select the key and copy it.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Secret key for Ops')).toHaveAttribute('readonly');
   });
 
   it('confirms before revoking', async () => {
@@ -126,9 +142,9 @@ describe('ApiKeys', () => {
     const writeText = vi.spyOn(navigator.clipboard, 'writeText');
     render(<ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} />);
     expect(
-      screen.queryByRole('button', { name: 'Copy the prefix of Old' }),
+      screen.queryByRole('button', { name: /Copy the key ID of Old/ }),
     ).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Copy the prefix of Sync' }));
+    await user.click(screen.getByRole('button', { name: /Copy the key ID of Sync/ }));
     expect(writeText).toHaveBeenCalledWith('fh_live_b');
   });
 });
