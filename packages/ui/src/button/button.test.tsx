@@ -50,6 +50,20 @@ describe('Button', () => {
     expect(screen.getByRole('button', { name: 'Next' })).toHaveFocus();
   });
 
+  it('lets renderContent draw the label while keeping the busy semantics', () => {
+    render(
+      <Button
+        loading
+        renderContent={({ children, loading }) => <b>{loading ? 'busy' : children}</b>}
+      >
+        Save
+      </Button>,
+    );
+    const button = screen.getByRole('button', { name: 'busy' });
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button).toHaveAttribute('data-loading');
+  });
+
   it('exposes variant and size for styling hooks', () => {
     render(
       <Button variant="danger" size="sm">

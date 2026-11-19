@@ -50,6 +50,11 @@ export interface ButtonProps extends Omit<ComponentProps<typeof BaseButton>, 'cl
   loading?: boolean;
   /** A square button holding only an icon. Give it an `aria-label`. */
   iconOnly?: boolean;
+  /**
+   * Draws the label and the loading indicator in place of the default spinner swap, for example
+   * the motion add-on's morph. Busy semantics stay here: `aria-busy`, blocked presses, kept focus.
+   */
+  renderContent?: (content: { children: ReactNode; loading: boolean }) => ReactNode;
   children?: ReactNode;
 }
 
@@ -61,6 +66,7 @@ export function Button({
   disabled = false,
   type = 'button',
   className,
+  renderContent,
   children,
   ...props
 }: ButtonProps) {
@@ -90,7 +96,9 @@ export function Button({
       )}
       {...props}
     >
-      {loading ? (
+      {renderContent ? (
+        renderContent({ children, loading })
+      ) : loading ? (
         <>
           {/* Transparent, not hidden: the label keeps its width and stays the accessible name. */}
           <span className="contents text-transparent">{children}</span>
