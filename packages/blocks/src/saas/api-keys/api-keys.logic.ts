@@ -18,6 +18,8 @@ export interface ApiKeyScopeOption {
   label: string;
   /** What the key can do, shown in the scope picker. */
   description?: string;
+  /** The riskiest scope, such as full access: its chip is drawn stronger with a shield. */
+  elevated?: boolean;
 }
 
 export type ApiKeyExpiry = 'never' | '30' | '90' | '365';

@@ -1,6 +1,12 @@
-import { CheckIcon, CopyIcon, KeyIcon, PlusIcon, ShieldWarningIcon } from '@phosphor-icons/react';
 import {
-  Badge,
+  CheckIcon,
+  CopyIcon,
+  KeyIcon,
+  PlusIcon,
+  ProhibitIcon,
+  ShieldWarningIcon,
+} from '@phosphor-icons/react';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -24,6 +30,7 @@ import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
 import { EmptyNote } from '../../lib/empty-note';
 import { formatShortDate, resolveLocale } from '../../lib/finance';
+import { StateBadge } from '../../lib/state-badge';
 import { FormMessage } from '../lib/auth';
 import { relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
@@ -61,15 +68,37 @@ export interface ApiKeysProps {
   /** The moment "last used" and expiry are measured from. */
   now?: Date;
   locale?: string;
+  /** Where your API docs live, linked from the empty state. */
+  docsHref?: string;
   title?: string;
   className?: string;
 }
 
 const STATUS = {
-  expiring: { label: 'Expires soon', tone: 'warning' },
-  expired: { label: 'Expired', tone: 'negative' },
-  revoked: { label: 'Revoked', tone: 'neutral' },
+  expiring: { state: 'pending', label: 'Expires soon' },
+  expired: { state: 'overdue', label: 'Expired' },
+  revoked: { state: 'void', label: 'Revoked' },
 } as const;
+
+/** True for a moment after a copy, for the button's label and the live region. */
+function useCopied() {
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => {
+      setCopied(false);
+    }, 2400);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [copied]);
+  const copy = (text: string) => {
+    void navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+    });
+  };
+  return [copied, copy] as const;
+}
 
 /**
  * The keys your users' code signs in with: each with its scope, when it was made and last used,
@@ -87,6 +116,7 @@ export function ApiKeys({
   error,
   now = new Date(),
   locale: requestedLocale,
+  docsHref,
   title = 'API keys',
   className,
 }: ApiKeysProps) {
@@ -96,7 +126,6 @@ export function ApiKeys({
   const [creating, setCreating] = useState(false);
   const [revoking, setRevoking] = useState<ApiKey | null>(null);
   const live = keys.filter((key) => key.revokedAt === undefined);
-  const scopeLabel = (value: string) => scopes.find((s) => s.value === value)?.label ?? value;
   const showForm = onCreate !== undefined && creating && createdKey === undefined;
 
   return (
@@ -154,84 +183,42 @@ export function ApiKeys({
           <EmptyNote title="No API keys yet">
             Create a key for each place that calls the API, so you can revoke one without the
             others.
+            {docsHref !== undefined && (
+              <>
+                {' '}
+                <a
+                  href={docsHref}
+                  className="font-medium text-fg underline decoration-line-strong underline-offset-2 hover:decoration-fg"
+                >
+                  Read the API docs
+                </a>
+              </>
+            )}
           </EmptyNote>
         )
       ) : (
         <ul aria-label="API keys" className="-mx-2 flex flex-col">
           <Items>
-            {sortApiKeys(keys).map((key) => {
-              const status = apiKeyStatus(key, now);
-              const badge = status === 'active' ? null : STATUS[status];
-              const dead = status === 'revoked' || status === 'expired';
-              return (
-                <Item
-                  key={key.id}
-                  className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-control px-2 py-3 not-last:border-b not-last:border-line"
-                >
-                  <span
-                    aria-hidden
-                    className={cn(
-                      'inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-line-strong bg-surface-sunken text-fg-muted',
-                      dead && 'border-dashed text-fg-subtle',
-                    )}
-                  >
-                    <KeyIcon weight="bold" className="size-4" />
-                  </span>
-                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="flex flex-wrap items-center gap-2">
-                      <span className={cn('truncate font-medium', dead && 'text-fg-muted')}>
-                        {key.name}
-                      </span>
-                      <Badge>{scopeLabel(key.scope)}</Badge>
-                      {badge !== null && <Badge tone={badge.tone}>{badge.label}</Badge>}
-                    </span>
-                    <span className="flex flex-wrap gap-x-3 text-sm text-fg-muted">
-                      <code className="font-mono text-fg-muted">
-                        <span className="sr-only">Key starting </span>
-                        {maskApiKey(key.prefix)}
-                      </code>
-                      <span>
-                        Created{' '}
-                        <span className="numeric">{formatShortDate(key.createdAt, locale)}</span>
-                        {', '}
-                        {key.lastUsedAt === undefined
-                          ? 'never used'
-                          : `last used ${relativeTime(key.lastUsedAt, now, locale)}`}
-                        {key.revokedAt === undefined && key.expiresAt !== undefined && (
-                          <>
-                            {', '}
-                            {status === 'expired' ? 'expired' : 'expires'}{' '}
-                            <span className="numeric">
-                              {formatShortDate(key.expiresAt, locale)}
-                            </span>
-                          </>
-                        )}
-                        {key.revokedAt !== undefined && (
-                          <>
-                            {', revoked '}
-                            <span className="numeric">
-                              {formatShortDate(key.revokedAt, locale)}
-                            </span>
-                          </>
-                        )}
-                      </span>
-                    </span>
-                  </div>
-                  {onRevoke !== undefined && status !== 'revoked' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-label={`Revoke ${key.name}`}
-                      onClick={() => {
-                        setRevoking(key);
-                      }}
-                    >
-                      Revoke
-                    </Button>
-                  )}
-                </Item>
-              );
-            })}
+            {sortApiKeys(keys).map((key) => (
+              <Item
+                key={key.id}
+                className="flex items-start gap-3 rounded-control px-2 py-3 not-last:border-b not-last:border-line"
+              >
+                <KeyRow
+                  apiKey={key}
+                  scope={scopes.find((s) => s.value === key.scope)}
+                  now={now}
+                  locale={locale}
+                  onRevoke={
+                    onRevoke === undefined
+                      ? undefined
+                      : () => {
+                          setRevoking(key);
+                        }
+                  }
+                />
+              </Item>
+            ))}
           </Items>
         </ul>
       )}
@@ -247,6 +234,111 @@ export function ApiKeys({
         }}
       />
     </BlockPanel>
+  );
+}
+
+/** One key: name, then its scope and state, then the visible prefix, then its dates. */
+function KeyRow({
+  apiKey: key,
+  scope,
+  now,
+  locale,
+  onRevoke,
+}: {
+  apiKey: ApiKey;
+  scope: ApiKeyScopeOption | undefined;
+  now: Date;
+  locale: string;
+  onRevoke: (() => void) | undefined;
+}) {
+  const { Button } = useBlockParts();
+  const [copied, copy] = useCopied();
+  const status = apiKeyStatus(key, now);
+  const badge = status === 'active' ? null : STATUS[status];
+  const dead = status === 'revoked' || status === 'expired';
+  const elevated = scope?.elevated === true;
+  return (
+    <>
+      <span
+        aria-hidden
+        className={cn(
+          'mt-0.5 hidden size-8 shrink-0 items-center justify-center rounded-full border border-line-strong bg-surface-sunken text-fg-muted @md:inline-flex',
+          dead && 'border-dashed text-fg-subtle',
+        )}
+      >
+        <KeyIcon weight="bold" className="size-4" />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <span className={cn('font-medium text-pretty', dead && 'text-fg-muted')}>{key.name}</span>
+        <span className="flex flex-wrap items-center gap-1.5">
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 rounded-badge border px-1.5 py-px text-xs',
+              elevated ? 'border-line-strong font-medium text-fg' : 'border-line text-fg-muted',
+            )}
+          >
+            {elevated && <ShieldWarningIcon aria-hidden weight="bold" className="size-3" />}
+            {scope?.label ?? key.scope}
+          </span>
+          {badge !== null && <StateBadge state={badge.state} label={badge.label} />}
+        </span>
+        <span className="-my-1 flex items-center gap-1">
+          <code className={cn('font-mono text-sm', dead ? 'text-fg-subtle' : 'text-fg')}>
+            <span className="sr-only">Key starting </span>
+            {maskApiKey(key.prefix)}
+          </code>
+          {!dead && (
+            <Button
+              variant="ghost"
+              size="sm"
+              iconOnly
+              aria-label={copied ? 'Prefix copied' : `Copy the prefix of ${key.name}`}
+              onClick={() => {
+                copy(key.prefix);
+              }}
+            >
+              {copied ? (
+                <CheckIcon aria-hidden weight="bold" className="size-3.5" />
+              ) : (
+                <CopyIcon aria-hidden weight="bold" className="size-3.5" />
+              )}
+            </Button>
+          )}
+        </span>
+        <span className="text-sm text-fg-muted">
+          Created <span className="numeric">{formatShortDate(key.createdAt, locale)}</span>
+          {', '}
+          {key.lastUsedAt === undefined
+            ? 'never used'
+            : `last used ${relativeTime(key.lastUsedAt, now, locale)}`}
+          {key.revokedAt === undefined && key.expiresAt !== undefined && (
+            <>
+              {', '}
+              {status === 'expired' ? 'expired' : 'expires'}{' '}
+              <span className="numeric">{formatShortDate(key.expiresAt, locale)}</span>
+            </>
+          )}
+          {key.revokedAt !== undefined && (
+            <>
+              {', revoked '}
+              <span className="numeric">{formatShortDate(key.revokedAt, locale)}</span>
+            </>
+          )}
+        </span>
+      </div>
+      {onRevoke !== undefined && status !== 'revoked' && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="shrink-0 text-negative-strong hover:bg-negative-subtle"
+          aria-label={`Revoke ${key.name}`}
+          onClick={onRevoke}
+        >
+          <ProhibitIcon aria-hidden weight="bold" className="size-4" />
+          Revoke
+        </Button>
+      )}
+    </>
   );
 }
 
@@ -387,17 +479,7 @@ function CreateForm({
 function KeyReveal({ name, value, onDone }: { name: string; value: string; onDone: () => void }) {
   const { Button } = useBlockParts();
   const headingId = useId();
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (!copied) return;
-    const timer = setTimeout(() => {
-      setCopied(false);
-    }, 2400);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [copied]);
+  const [copied, copy] = useCopied();
 
   return (
     <section
@@ -424,9 +506,7 @@ function KeyReveal({ name, value, onDone }: { name: string; value: string; onDon
           <Button
             variant="secondary"
             onClick={() => {
-              void navigator.clipboard.writeText(value).then(() => {
-                setCopied(true);
-              });
+              copy(value);
             }}
           >
             {copied ? (

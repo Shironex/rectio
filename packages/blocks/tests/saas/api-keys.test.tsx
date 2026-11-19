@@ -112,8 +112,23 @@ describe('ApiKeys', () => {
     expect(onRevoke).toHaveBeenCalledWith('b');
   });
 
-  it('shows the empty note with no keys', () => {
-    render(<ApiKeys keys={[]} scopes={SCOPES} now={NOW} />);
+  it('shows the empty note with no keys, linking the docs', () => {
+    render(<ApiKeys keys={[]} scopes={SCOPES} now={NOW} docsHref="/docs/api" />);
     expect(screen.getByText('No API keys yet')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Read the API docs' })).toHaveAttribute(
+      'href',
+      '/docs/api',
+    );
+  });
+
+  it('copies the visible prefix of a live key', async () => {
+    const user = userEvent.setup();
+    const writeText = vi.spyOn(navigator.clipboard, 'writeText');
+    render(<ApiKeys keys={KEYS} scopes={SCOPES} now={NOW} />);
+    expect(
+      screen.queryByRole('button', { name: 'Copy the prefix of Old' }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Copy the prefix of Sync' }));
+    expect(writeText).toHaveBeenCalledWith('fh_live_b');
   });
 });
