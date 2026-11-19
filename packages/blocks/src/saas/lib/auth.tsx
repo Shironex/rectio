@@ -146,11 +146,12 @@ export function FormMessage({
   return (
     <div
       role={tone === 'error' ? 'alert' : 'status'}
+      // A toned hairline on the sunken surface: a full status fill shouts in the dark themes.
       className={cn(
         'flex items-start gap-2.5 rounded-control border px-3 py-2.5 text-sm',
         tone === 'error'
-          ? 'border-negative-strong/25 bg-negative-subtle text-negative-strong'
-          : 'border-positive-strong/25 bg-positive-subtle text-positive-strong',
+          ? 'border-negative-strong/40 bg-surface-sunken text-negative-strong'
+          : 'border-positive-strong/40 bg-surface-sunken text-positive-strong',
       )}
     >
       <Icon aria-hidden weight="bold" className="mt-0.5 size-4 shrink-0" />

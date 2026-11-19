@@ -29,7 +29,7 @@ export function PasswordRules({
   const strength = passwordStrength(password, minLength);
   const grade = GRADES[strength];
   return (
-    <div id={id} className="flex flex-col gap-2.5">
+    <div id={id} className="flex flex-col gap-2">
       <div className="flex items-center gap-3">
         <div aria-hidden className="grid flex-1 grid-cols-4 gap-1">
           {[1, 2, 3, 4].map((step) => (
@@ -44,7 +44,7 @@ export function PasswordRules({
         </div>
         <span
           className={cn(
-            'w-14 text-end text-sm font-medium text-fg-muted',
+            'w-12 text-end text-xs font-medium text-fg-muted',
             strength === 'empty' && 'hidden',
           )}
         >
@@ -52,7 +52,7 @@ export function PasswordRules({
           {grade.label}
         </span>
       </div>
-      <ul className="grid gap-1 text-sm">
+      <ul className="grid gap-0.5 text-sm">
         {passwordChecks(password, minLength).map((check) => (
           <li
             key={check.id}
