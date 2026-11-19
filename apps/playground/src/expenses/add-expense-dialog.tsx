@@ -2,6 +2,7 @@ import { PlusIcon } from '@phosphor-icons/react';
 import {
   AmountInput,
   Button,
+  DatePicker,
   Dialog,
   DialogBody,
   DialogClose,
@@ -29,25 +30,28 @@ import { CATEGORIES, type Expense } from './data';
 const GROUPS = ['Travel', 'Meals', 'Tools'] as const;
 const ITEMS = CATEGORIES.map((c) => ({ value: c.value, label: c.label }));
 const SAVE_DELAY_MS = 700;
-/** The demo has no date field; the date is fixed and shown in the dialog so nothing is hidden. */
-const EXPENSE_DATE = '19 Mar';
+const LOCALE = 'en-IE';
+/** New lines default to the last day the report covers so far; the field changes it. */
+const DEFAULT_DATE = new Date(2026, 2, 19);
 const IS_APPLE = /Mac|iPhone|iPad/.test(navigator.userAgent);
 const KBD =
   'rounded-badge border border-line bg-surface px-1.5 py-0.5 font-sans text-xs text-fg-muted';
 
 interface Draft {
+  date: Date | null;
   merchant: string;
   amount: number | null;
   category: string | null;
   note: string;
 }
 
-type Errors = Partial<Record<'merchant' | 'amount' | 'category', string>>;
+type Errors = Partial<Record<'date' | 'merchant' | 'amount' | 'category', string>>;
 
-const EMPTY: Draft = { merchant: '', amount: null, category: null, note: '' };
+const EMPTY: Draft = { date: DEFAULT_DATE, merchant: '', amount: null, category: null, note: '' };
 
 function validate(draft: Draft): Errors {
   const errors: Errors = {};
+  if (draft.date === null) errors.date = 'Enter the date as dd/mm/yyyy.';
   if (draft.merchant.trim() === '') errors.merchant = 'Enter the merchant name.';
   if (draft.amount === null || draft.amount <= 0) errors.amount = 'Enter an amount above 0.00.';
   if (draft.category === null) errors.category = 'Choose a category.';
@@ -106,11 +110,12 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
     window.setTimeout(() => {
       onAdd({
         id: crypto.randomUUID(),
-        date: EXPENSE_DATE,
+        date: draft.date ?? DEFAULT_DATE,
         merchant: draft.merchant.trim(),
         category: draft.category ?? 'office',
         note: draft.note.trim() === '' ? undefined : draft.note.trim(),
         amount: draft.amount ?? 0,
+        status: 'draft',
       });
       setSaving(false);
       setOpen(false);
@@ -136,9 +141,7 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
         <form ref={formRef} noValidate onSubmit={onSubmit} onKeyDown={onKeyDown}>
           <DialogHeader>
             <DialogTitle>Add expense</DialogTitle>
-            <DialogDescription>
-              Dated {EXPENSE_DATE}, goes into the March report for review.
-            </DialogDescription>
+            <DialogDescription>Goes into the March report as a draft line.</DialogDescription>
           </DialogHeader>
           <DialogBody>
             <Field invalid={errors.merchant !== undefined}>
@@ -155,6 +158,18 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
               {errors.merchant !== undefined && <FieldError>{errors.merchant}</FieldError>}
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
+              <Field invalid={errors.date !== undefined}>
+                <FieldLabel>Date</FieldLabel>
+                <DatePicker
+                  locale={LOCALE}
+                  value={draft.date}
+                  onValueChange={(value) => {
+                    update('date', value);
+                  }}
+                  disabledDays={{ after: new Date(2026, 2, 31) }}
+                />
+                {errors.date !== undefined && <FieldError>{errors.date}</FieldError>}
+              </Field>
               <Field invalid={errors.amount !== undefined}>
                 <FieldLabel>Amount, EUR</FieldLabel>
                 <AmountInput
@@ -168,7 +183,7 @@ export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void 
                 />
                 {errors.amount !== undefined && <FieldError>{errors.amount}</FieldError>}
               </Field>
-              <Field invalid={errors.category !== undefined}>
+              <Field invalid={errors.category !== undefined} className="sm:col-span-2">
                 <FieldLabel>Category</FieldLabel>
                 <Select
                   items={ITEMS}
