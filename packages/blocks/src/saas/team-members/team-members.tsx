@@ -159,7 +159,7 @@ export function TeamMembers({
       )}
 
       {/* Column names over the wide layout; the rows carry their own labels for assistive tech. */}
-      {!alone && (
+      {members.length > 0 && (
         <div
           aria-hidden
           className="-mb-3 hidden items-center gap-3 border-b border-line pb-2 text-xs font-medium tracking-caps text-fg-muted uppercase @xl:flex"
@@ -189,10 +189,11 @@ export function TeamMembers({
                     {/* Narrow: the role column folds into a tag beside the name. */}
                     <Badge className="@xl:hidden">{ROLE_LABELS[member.role]}</Badge>
                   </span>
-                  <span className="truncate text-sm text-fg-muted">
-                    {member.email}
+                  {/* The email may truncate; the folded activity wraps to its own line instead. */}
+                  <span className="text-sm text-fg-muted">
+                    <span className="block truncate @2xl:inline">{member.email}</span>
                     {/* Narrow: the activity column folds into the email line. */}
-                    <span className="@2xl:hidden"> · {activity(member)}</span>
+                    <span className="block @2xl:hidden">{activity(member)}</span>
                   </span>
                 </div>
                 <span className="hidden w-36 text-sm whitespace-nowrap text-fg-muted @2xl:block">
