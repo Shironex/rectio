@@ -135,7 +135,11 @@ export function Slider({
       </BaseSlider.Control>
       {markValues.length > 0 && (
         // Decorative: every value is also announced by the thumbs themselves.
-        <div aria-hidden className="relative h-4 text-xs text-fg-subtle numeric select-none">
+        // A container, so a narrow slider keeps only the end labels instead of crowding them.
+        <div
+          aria-hidden
+          className="@container relative h-4 text-xs text-fg-subtle numeric select-none"
+        >
           {markValues.map((mark) => {
             const at = percent(mark, min, max);
             // The ends align to the edges so their labels never overflow the slider.
@@ -148,7 +152,11 @@ export function Slider({
             return (
               <span
                 key={mark}
-                className={cn('absolute top-0 whitespace-nowrap', align)}
+                className={cn(
+                  'absolute top-0 whitespace-nowrap',
+                  align,
+                  at > 0 && at < 100 && '@max-md:hidden',
+                )}
                 style={{ insetInlineStart: `${String(at)}%` }}
               >
                 {formatter.format(mark)}
