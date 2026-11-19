@@ -142,6 +142,8 @@ try {
           'calendar focus',
           await app.evaluate(() => document.activeElement?.getAttribute('aria-label')),
         );
+      // Over and back from the keyboard, so the picked date stays the 19th in every shot.
+      await app.keyboard.press('ArrowRight');
       await app.keyboard.press('ArrowLeft');
       await app.keyboard.press('Enter');
       await app.getByRole('grid').waitFor({ state: 'detached' });
@@ -210,6 +212,12 @@ try {
   );
   console.log('phone horizontal overflow px', overflow);
   await phone.screenshot({ path: join(out, 'phone-app.png'), fullPage: true });
+  await phone.getByRole('checkbox', { name: /^Select Linear/ }).tap();
+  await phone.getByRole('checkbox', { name: /^Select Figma/ }).tap();
+  await settle(phone);
+  await phone.screenshot({ path: join(out, 'phone-selected.png') });
+  await phone.getByRole('checkbox', { name: 'Select all expenses' }).tap();
+  await phone.getByRole('checkbox', { name: 'Select all expenses' }).tap();
   await phone.getByRole('button', { name: 'Add expense' }).click();
   await phone.getByRole('dialog', { name: 'Add expense' }).waitFor();
   await settle(phone);
