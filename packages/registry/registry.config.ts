@@ -58,6 +58,30 @@ const blockItems = (
   },
 ];
 
+/** A SaaS or app block: pro, installed under `@blocks/saas/`, with its motioned twin beside it. */
+const saasItems = (name: string, title: string, description: string) => [
+  {
+    name,
+    type: 'block' as const,
+    tier: 'pro' as const,
+    version: '0.1.0',
+    title,
+    description,
+    categories: ['saas', 'blocks'],
+    files: [`${name}/${name}.tsx`, `${name}/${name}.logic.ts`],
+  },
+  {
+    name: `motion-${name}`,
+    type: 'block' as const,
+    tier: 'pro' as const,
+    version: '0.1.0',
+    title: `Motion ${title}`,
+    description: `${title} with entrances that play once and list items that arrive and leave in place.`,
+    categories: ['saas', 'blocks', 'motion'],
+    files: [`${name}/${name}.motion.tsx`],
+  },
+];
+
 /**
  * A marketing block: pro, installed under `@blocks/marketing/`. `logic` adds its logic file; `motion`
  * adds a `motion-<name>` twin for blocks with something to animate.
@@ -1219,6 +1243,55 @@ export default defineRegistry({
           'A banner with accept and reject at equal weight, per-category preferences and a consent record.',
           'cookie-consent',
           { logic: true },
+        ),
+      ],
+    },
+    {
+      sourceDir: join(blocks, 'src', 'saas'),
+      targetFolder: 'saas',
+      requireEveryFolder: true,
+      items: [
+        {
+          name: 'saas-core',
+          type: 'lib',
+          tier: 'pro',
+          version: '0.1.0',
+          title: 'SaaS blocks core',
+          description:
+            'Account form frame, password and email rules, relative time and sizes, and the switch, avatar, menu, popover and meter the SaaS blocks share.',
+          categories: ['saas', 'blocks'],
+          files: [
+            'lib/saas.ts',
+            'lib/saas-parts.tsx',
+            'lib/styles.ts',
+            'lib/auth.tsx',
+            'lib/avatar.tsx',
+            'lib/switch.tsx',
+            'lib/action-menu.tsx',
+            'lib/popover.tsx',
+            'lib/meter.tsx',
+          ],
+        },
+        {
+          name: 'motion-saas-core',
+          type: 'lib',
+          tier: 'pro',
+          version: '0.1.0',
+          title: 'Motion SaaS blocks core',
+          description: 'List items that arrive with a short rise and leave without a jump.',
+          categories: ['saas', 'blocks', 'motion'],
+          files: ['lib/saas-motion-parts.tsx'],
+        },
+        // SAAS-BLOCKS
+        ...saasItems(
+          'sign-in',
+          'Sign in',
+          'Email and password, an emailed link, your provider buttons and errors tied to fields.',
+        ),
+        ...saasItems(
+          'team-members',
+          'Team members',
+          'Members and roles, pending invites with resend and revoke, and an invite form.',
         ),
       ],
     },
