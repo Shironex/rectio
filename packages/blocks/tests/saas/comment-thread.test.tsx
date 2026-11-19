@@ -110,6 +110,23 @@ describe('CommentThread', () => {
     expect(onDelete).toHaveBeenCalledWith('c2');
   });
 
+  it('returns focus to the comment menu after cancelling an edit', async () => {
+    render(
+      <CommentThread
+        comments={COMMENTS.slice(1, 3)}
+        writer={ME}
+        now={NOW}
+        onAdd={vi.fn()}
+        onEdit={vi.fn()}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /Actions for your comment/ }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Edit' }));
+    expect(screen.getByLabelText('Edit comment')).toHaveFocus();
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByRole('button', { name: /Actions for your comment/ })).toHaveFocus();
+  });
+
   it('shows a resolved thread without a composer and offers to reopen', async () => {
     const onReopen = vi.fn();
     render(

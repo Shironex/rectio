@@ -17,9 +17,15 @@ import {
   FieldError,
   FieldLabel,
   Input,
-  cn,
 } from '@rectio/ui';
-import { useState, useSyncExternalStore, type KeyboardEvent, type SyntheticEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type KeyboardEvent,
+  type SyntheticEvent,
+} from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -84,6 +90,22 @@ export function CommentThread({
   const { Items, Item } = useSaasParts();
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
+  const list = useRef<HTMLOListElement>(null);
+  // After editing, focus goes back to the menu the edit started from.
+  const returnFocus = useRef<string | null>(null);
+  const stopEditing = () => {
+    returnFocus.current = editing;
+    setEditing(null);
+  };
+
+  useEffect(() => {
+    const id = returnFocus.current;
+    if (editing !== null || id === null) return;
+    returnFocus.current = null;
+    list.current
+      ?.querySelector<HTMLElement>(`[data-comment-menu="${CSS.escape(id)}"] button`)
+      ?.focus();
+  }, [editing]);
   const [deleting, setDeleting] = useState<ThreadComment | null>(null);
   const tree = commentTree(comments);
   const people = commentParticipants(comments);
@@ -136,12 +158,18 @@ export function CommentThread({
                   {relativeTime(comment.createdAt, now, locale)}
                 </time>
                 {comment.editedAt !== undefined && (
-                  <span className="text-fg-subtle"> (edited)</span>
+                  <span
+                    className="ms-1.5 inline-flex align-middle text-fg-subtle"
+                    title={`Edited ${relativeTime(comment.editedAt, now, locale)}`}
+                  >
+                    <PencilSimpleIcon aria-hidden weight="bold" className="size-3.5" />
+                    <span className="sr-only">(edited)</span>
+                  </span>
                 )}
               </span>
             </p>
             {actions.length > 0 && editing !== comment.id && (
-              <span className="-mt-1 -me-1">
+              <span className="-mt-1 -me-1" data-comment-menu={comment.id}>
                 <ActionMenu
                   label={`Actions for your comment, ${relativeTime(comment.createdAt, now, locale)}`}
                   actions={actions}
@@ -154,21 +182,20 @@ export function CommentThread({
               label="Edit comment"
               initial={comment.body}
               submitLabel="Save"
-              onCancel={() => {
-                setEditing(null);
-              }}
+              autoFocus
+              onCancel={stopEditing}
               onSubmit={(body) => {
                 onEdit?.(comment.id, body);
-                setEditing(null);
+                stopEditing();
               }}
             />
           ) : (
-            <p className="text-base text-pretty whitespace-pre-line text-fg">
+            <p className="max-w-prose text-base text-pretty whitespace-pre-line text-fg">
               {commentParts(comment.body).map((part, index) =>
                 part.kind === 'mention' ? (
                   <span
                     key={index}
-                    className="rounded-badge bg-accent-subtle px-0.5 font-medium text-accent-strong"
+                    className="font-medium text-accent-strong underline decoration-accent/40 underline-offset-2"
                   >
                     {part.text}
                   </span>
@@ -256,10 +283,7 @@ export function CommentThread({
             : 'This discussion was closed before anyone wrote.'}
         </EmptyNote>
       ) : (
-        <ol
-          aria-label="Comments"
-          className={cn('flex flex-col gap-6', resolved !== undefined && 'opacity-80')}
-        >
+        <ol aria-label="Comments" ref={list} className="flex flex-col gap-6">
           <Items>
             {tree.map(({ comment, replies }) => (
               <Item key={comment.id} className="flex flex-col gap-4">
@@ -267,7 +291,7 @@ export function CommentThread({
                 {(replies.length > 0 || replyingTo === comment.id) && (
                   <ol
                     aria-label={`Replies to ${comment.author.name}`}
-                    className="ms-4 flex flex-col gap-4 border-s-2 border-line-strong ps-6"
+                    className="ms-4 flex flex-col gap-4 border-s border-line ps-6"
                   >
                     <Items>
                       {replies.map((reply) => (
