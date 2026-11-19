@@ -41,7 +41,7 @@ export function Segmented<Value extends string>({
       data-slot="segmented"
       className={cn(
         // Scrolls sideways on a phone rather than wrapping into a second ragged row.
-        'flex max-w-full gap-0.5 overflow-x-auto rounded-control border border-line bg-surface-sunken p-0.5',
+        'flex max-w-full flex-wrap gap-0.5 rounded-control border border-line bg-surface-sunken p-0.5',
         className,
       )}
     >

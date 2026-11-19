@@ -98,10 +98,12 @@ export function KpiRow({
                 : kpi.format === 'percent'
                   ? formatPoints(delta.change, locale)
                   : formatPercent(delta.change, locale, { signed: true });
-            const verdict =
-              delta.favourable === null ? 'no change' : delta.favourable ? 'better' : 'worse';
+            const verdict = delta.favourable === true ? 'better' : 'worse';
             return (
-              <div key={kpi.id} className="flex min-w-0 flex-col gap-2 bg-surface px-5 py-4">
+              <div
+                key={kpi.id}
+                className="flex min-w-0 flex-col gap-2 bg-surface px-5 py-4 @xl:last:odd:col-span-2 @5xl:last:odd:col-span-1"
+              >
                 <dt className="text-sm text-fg-muted">{kpi.label}</dt>
                 <dd className="flex items-end justify-between gap-3">
                   <span className="flex min-w-0 flex-col gap-1">
@@ -129,7 +131,13 @@ export function KpiRow({
                       >
                         <Arrow aria-hidden weight="bold" className="size-3.5" />
                         <span className="numeric">{change}</span>
-                        <span className="sr-only">, {verdict}</span>
+                        {delta.favourable === null && <span className="sr-only">, no change</span>}
+                        {/* Good or bad news in words too, never in colour alone. */}
+                        {delta.favourable !== null && (
+                          <span className="font-regular">
+                            <span className="sr-only">,</span> {verdict}
+                          </span>
+                        )}
                       </span>
                       <span className="text-fg-muted">{comparison}</span>
                     </span>

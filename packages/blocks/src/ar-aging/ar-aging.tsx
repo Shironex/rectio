@@ -236,14 +236,12 @@ export function ArAging({
               </TableCell>
               {AGING_BUCKETS.map((bucket) => (
                 <TableCell key={bucket} align="end" className="hidden @4xl:table-cell">
-                  {row.buckets[bucket] === 0 ? (
-                    <span className="text-fg-subtle">
-                      <span aria-hidden>0</span>
-                      <span className="sr-only">None</span>
-                    </span>
-                  ) : (
-                    <Money amount={row.buckets[bucket]} currency={currency} locale={locale} />
-                  )}
+                  <Money
+                    amount={row.buckets[bucket]}
+                    currency={currency}
+                    locale={locale}
+                    className={cn(row.buckets[bucket] === 0 && 'text-fg-subtle')}
+                  />
                 </TableCell>
               ))}
               <TableCell align="end">

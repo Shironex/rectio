@@ -149,7 +149,7 @@ export function BudgetVsActual({
         </li>
         <li className="inline-flex items-center gap-1.5">
           <Swatch color="series-2" />
-          Past budget
+          Over budget
         </li>
       </ul>
       <Table>

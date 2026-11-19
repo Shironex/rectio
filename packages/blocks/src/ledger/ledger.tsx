@@ -164,14 +164,18 @@ export function Ledger({
             );
             return (
               <TableRow key={line.id} data-entry={line.entryId}>
-                <TableCell className={cn('hidden align-top @xl:table-cell', rule)}>
+                <TableCell
+                  className={cn('hidden align-top whitespace-nowrap @xl:table-cell', rule)}
+                >
                   {firstOfEntry && (
                     <span className="text-fg-muted numeric">
                       {formatShortDate(line.date, locale)}
                     </span>
                   )}
                 </TableCell>
-                <TableCell className={cn('hidden align-top @2xl:table-cell', rule)}>
+                <TableCell
+                  className={cn('hidden align-top whitespace-nowrap @2xl:table-cell', rule)}
+                >
                   {firstOfEntry && <span className="text-fg-muted numeric">{line.reference}</span>}
                 </TableCell>
                 <TableCell className={cn('align-top', rule)}>

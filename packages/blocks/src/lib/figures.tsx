@@ -33,14 +33,14 @@ export function Figures({
   return (
     <dl
       className={cn(
-        'grid grid-cols-2 gap-px overflow-hidden rounded-control border border-line bg-line @xl:grid-flow-col @xl:auto-cols-fr @xl:grid-cols-none',
+        'grid grid-cols-1 gap-px overflow-hidden rounded-control border border-line bg-line @sm:grid-cols-2 @xl:grid-flow-col @xl:auto-cols-fr @xl:grid-cols-none',
         className,
       )}
     >
       {items.map((item, index) => (
         <div
           key={index}
-          className="flex min-w-0 flex-col gap-0.5 bg-surface px-3.5 py-2.5 last:odd:col-span-2 @xl:last:odd:col-span-1"
+          className="flex min-w-0 flex-col gap-0.5 bg-surface px-3.5 py-2.5 @sm:last:odd:col-span-2 @xl:last:odd:col-span-1"
         >
           <dt className="truncate text-sm text-fg-muted">{item.label}</dt>
           <dd className="flex flex-col">

@@ -296,18 +296,30 @@ const ENTRIES: {
 ];
 
 export function journal(rate: number): JournalLine[] {
-  return ENTRIES.flatMap((entry) =>
-    entry.lines.map(([accountCode, debit, credit], index) => ({
+  return ENTRIES.flatMap((entry) => {
+    const lines = entry.lines.map(([accountCode, debit, credit]) => ({
+      accountCode,
+      debit: scale(debit, rate),
+      credit: scale(credit, rate),
+    }));
+    // Converting each posting rounds it on its own; the last line takes the cent, so every
+    // converted entry still balances, as the booked one does.
+    const cents = (n: number) => Math.round(n * 100);
+    const gap = lines.reduce((sum, l) => sum + cents(l.debit) - cents(l.credit), 0);
+    const last = lines.at(-1);
+    if (last !== undefined && gap !== 0) {
+      if (last.credit > 0) last.credit = (cents(last.credit) + gap) / 100;
+      else last.debit = (cents(last.debit) - gap) / 100;
+    }
+    return lines.map((line, index) => ({
       id: `${entry.id}-${String(index)}`,
       entryId: entry.id,
       date: entry.date,
       reference: entry.reference,
       description: entry.description,
-      accountCode,
-      debit: scale(debit, rate),
-      credit: scale(credit, rate),
-    })),
-  );
+      ...line,
+    }));
+  });
 }
 
 export function openingBalances(rate: number): Record<string, number> {
