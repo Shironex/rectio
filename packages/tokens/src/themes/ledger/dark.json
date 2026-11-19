@@ -25,6 +25,14 @@
     "inset": {
       "$value": "{palette.ink.900}",
       "$description": "A band inside an overlay, such as a dialog footer. Sits above the overlay in dark mode, below it in light."
+    },
+    "placeholder": {
+      "$value": "{palette.ink.850}",
+      "$description": "A skeleton shape or the empty track of a bar, ring or gauge: one step off the surface it sits on, lighter in dark mode, darker in light."
+    },
+    "placeholder-shine": {
+      "$value": "{palette.ink.700}",
+      "$description": "The light that sweeps across a skeleton shape."
     }
   },
   "text": {
