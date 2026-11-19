@@ -193,7 +193,7 @@ export default defineRegistry({
       name: 'select',
       type: 'component',
       tier: 'free',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Select',
       description: 'A select with a styled popup that follows the theme scope.',
       categories: ['forms'],
@@ -601,7 +601,39 @@ export default defineRegistry({
         'file-upload/use-file-upload.ts',
       ],
     },
-    // forms-lane: more items
+    {
+      name: 'tag-input',
+      type: 'component',
+      tier: 'free',
+      version: '0.1.0',
+      title: 'TagInput',
+      description:
+        'Free text tags in a field, with paste splitting, duplicate and max checks, and a reusable Tag chip.',
+      categories: ['forms'],
+      files: ['tag-input/tag-input.tsx'],
+    },
+    {
+      name: 'combobox',
+      type: 'component',
+      tier: 'free',
+      version: '0.1.0',
+      title: 'Combobox',
+      description:
+        'A filterable single choice with groups, an empty state, async loading and a Create option.',
+      categories: ['forms'],
+      files: ['combobox/combobox.tsx'],
+    },
+    {
+      name: 'multi-select',
+      type: 'component',
+      tier: 'free',
+      version: '0.1.0',
+      title: 'MultiSelect',
+      description:
+        'Several choices as removable chips, with search, Select all and a +N overflow chip.',
+      categories: ['forms'],
+      files: ['multi-select/multi-select.tsx'],
+    },
   ],
   // Add-ons: imports of @rectio/ui and @rectio/motion become registry dependencies on their items.
   workspacePackages: {
@@ -622,6 +654,7 @@ export default defineRegistry({
             'lib/animate.ts',
             'lib/first-view.ts',
             'lib/mode.tsx',
+            'lib/popup.tsx',
             'lib/presence.ts',
             'lib/ref.ts',
             'lib/sweep.ts',
@@ -651,9 +684,14 @@ export default defineRegistry({
         motionItem('dialog', 'Motion Dialog', 'Dialog that springs out of its trigger and back.', [
           'dialog/dialog.tsx',
         ]),
-        motionItem('select', 'Motion Select', 'Select popup with a gliding highlight.', [
-          'select/select.tsx',
-        ]),
+        motionItem(
+          'select',
+          'Motion Select',
+          'Select popup with a gliding highlight.',
+          ['select/select.tsx'],
+          'component',
+          '0.2.0',
+        ),
         motionItem(
           'data-table',
           'Motion DataTable rows',
@@ -724,6 +762,18 @@ export default defineRegistry({
           'Motion File upload',
           'Rows that fade in, leave faster and close the gap with a glide; a check that settles; a dropzone that answers a drag.',
           ['file-upload/file-upload.tsx'],
+        ),
+        motionItem(
+          'combobox',
+          'Motion Combobox',
+          'Combobox list with a spring entrance and a gliding highlight.',
+          ['combobox/combobox.tsx'],
+        ),
+        motionItem(
+          'multi-select',
+          'Motion MultiSelect',
+          'MultiSelect list motion, and chips that fade in when picked with the pointer.',
+          ['multi-select/multi-select.tsx'],
         ),
       ],
     },
