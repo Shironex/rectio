@@ -13,6 +13,7 @@ import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
 import { EmptyNote } from '../../lib/empty-note';
 import { formatLongDate, resolveLocale } from '../../lib/finance';
+import { isoDateTime } from '../lib/saas';
 import { Segmented } from '../../lib/segmented';
 import {
   CHANGE_KIND_LABELS,
@@ -251,13 +252,13 @@ function Release({
         <Heading className="font-display text-2xl font-heading tracking-tight numeric">
           {release.version}
         </Heading>
-        <time dateTime={release.date.toISOString()} className="text-sm text-fg-muted numeric">
+        <time dateTime={isoDateTime(release.date)} className="text-sm text-fg-muted numeric">
           {formatLongDate(release.date, locale)}
         </time>
       </div>
       <article className="flex min-w-0 flex-col gap-4 @2xl:col-span-4">
         {(release.title !== undefined || release.summary !== undefined) && (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5">
             {release.title !== undefined && (
               <p className="font-medium text-balance">{release.title}</p>
             )}
@@ -269,7 +270,7 @@ function Release({
         {groups.map(({ kind, changes }) => (
           <section key={kind} className="flex flex-col gap-2">
             <KindTag kind={kind} />
-            <ul className="flex list-disc flex-col gap-1.5 ps-5 text-sm marker:text-fg-subtle">
+            <ul className="flex list-disc flex-col gap-1.5 ps-5 marker:text-fg-subtle">
               {changes.map((change, index) => (
                 <li key={index} className="text-pretty">
                   {change.text}
@@ -283,16 +284,14 @@ function Release({
   );
 }
 
-/** A kind's subhead: a small capitals label with its icon, and only New on a filled tint. */
+/** A kind's subhead: one pill shape for all three, New in the accent tint and the rest neutral. */
 function KindTag({ kind }: { kind: ChangeKind }) {
   const KindIcon = KIND_ICONS[kind];
   return (
     <p
       className={cn(
-        'inline-flex items-center gap-1.5 self-start text-xs font-semibold tracking-wide uppercase',
-        kind === 'new'
-          ? 'rounded-full bg-accent-subtle px-2 py-0.5 text-accent-strong'
-          : 'text-fg-muted',
+        'inline-flex items-center gap-1.5 self-start rounded-full px-2 py-0.5 text-xs font-strong tracking-caps uppercase',
+        kind === 'new' ? 'bg-accent-subtle text-accent-strong' : 'bg-surface-sunken text-fg-muted',
       )}
     >
       <KindIcon aria-hidden weight="bold" className="size-3.5" />
