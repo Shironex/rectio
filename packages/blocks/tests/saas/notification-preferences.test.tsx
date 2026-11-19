@@ -77,7 +77,7 @@ describe('NotificationPreferences', () => {
         onChange={onChange}
       />,
     );
-    const column = screen.getByRole('checkbox', { name: 'Every event by Push' });
+    const column = screen.getByRole('checkbox', { name: 'All events by Push' });
     expect(column).toHaveAttribute('aria-checked', 'mixed');
     await userEvent.click(column);
     expect(onChange).toHaveBeenCalledWith({

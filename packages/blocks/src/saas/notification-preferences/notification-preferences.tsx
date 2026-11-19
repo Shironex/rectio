@@ -15,6 +15,7 @@ import {
   setNotificationColumn,
   type NotificationChannel,
   type NotificationEvent,
+  type NotificationGroup,
   type NotificationMatrix,
 } from './notification-preferences.logic';
 
@@ -30,7 +31,10 @@ export interface NotificationPreferencesProps {
    * your suggested matrix through `onChange` or your own state.
    */
   onUseRecommended?: () => void;
-  /** Turns every control off while you save, so changes never race. */
+  /**
+   * While you save: every control reads as unavailable and changes are ignored, but nothing is
+   * disabled, so keyboard focus stays where it was.
+   */
   disabled?: boolean;
   title?: string;
   description?: string;
@@ -46,7 +50,7 @@ export function NotificationPreferences({
   channels,
   events,
   value,
-  onChange,
+  onChange: onChangeProp,
   onUseRecommended,
   disabled = false,
   title = 'Notifications',
@@ -54,6 +58,9 @@ export function NotificationPreferences({
   className,
 }: NotificationPreferencesProps) {
   const groups = groupNotificationEvents(events);
+  const onChange = (next: NotificationMatrix) => {
+    if (!disabled) onChangeProp(next);
+  };
   const on = notificationCount(value, events, channels);
   const { Button } = useBlockParts();
   const lockedCount = events.reduce((sum, event) => sum + (event.required?.length ?? 0), 0);
@@ -90,7 +97,14 @@ export function NotificationPreferences({
                   use and adjust from there.
                 </span>
               </p>
-              <Button variant="secondary" size="sm" disabled={disabled} onClick={onUseRecommended}>
+              <Button
+                variant="secondary"
+                size="sm"
+                aria-disabled={disabled || undefined}
+                onClick={() => {
+                  if (!disabled) onUseRecommended();
+                }}
+              >
                 Use recommended
               </Button>
             </div>
@@ -129,17 +143,19 @@ export function NotificationPreferences({
                   const state = notificationColumnState(value, events, channel.id);
                   return (
                     <td key={channel.id} className="px-2 pb-2.5 text-center">
-                      <span className="inline-flex justify-center">
+                      {/* A visible "All" under the box, so the column toggle is never bare. */}
+                      <label className="inline-flex cursor-pointer flex-col items-center gap-1 text-xs text-fg-muted">
                         <Checkbox
-                          aria-label={`Every event by ${channel.label}`}
+                          aria-label={`All events by ${channel.label}`}
                           checked={state === 'all'}
                           indeterminate={state === 'some'}
-                          disabled={disabled}
+                          aria-disabled={disabled || undefined}
                           onCheckedChange={(checked) => {
                             onChange(setNotificationColumn(value, events, channel.id, checked));
                           }}
                         />
-                      </span>
+                        All
+                      </label>
                     </td>
                   );
                 })}
@@ -153,6 +169,7 @@ export function NotificationPreferences({
                       className="pt-5 pb-1.5 text-start text-xs font-medium tracking-caps text-fg-muted uppercase"
                     >
                       {group.name}
+                      <GroupLockNote group={group} channels={channels} />
                     </th>
                   </tr>
                   {group.events.map((event) => (
@@ -191,11 +208,12 @@ export function NotificationPreferences({
 
           {/* Narrow: each event, then its channels as labelled boxes. */}
           <div className="flex flex-col @xl:hidden">
-            <div className="flex justify-end pb-2">
+            <div className="flex items-center justify-between gap-3 border-b border-line pb-3 mb-4">
+              <span className="text-sm font-medium">All notifications</span>
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="sm"
-                disabled={disabled}
+                aria-disabled={disabled || undefined}
                 onClick={() => {
                   onChange(
                     channels.reduce(
@@ -217,6 +235,7 @@ export function NotificationPreferences({
                 <h3 className="pb-1 text-xs font-medium tracking-caps text-fg-muted uppercase">
                   {group.name}
                 </h3>
+                <GroupLockNote group={group} channels={channels} />
                 <ul className="flex flex-col">
                   {group.events.map((event) => (
                     <li
@@ -300,7 +319,8 @@ function Cell({
             'data-disabled:border-fg-muted data-disabled:bg-fg-muted data-disabled:text-surface',
         )}
         checked={notificationOn(value, event, channel.id)}
-        disabled={disabled || locked}
+        disabled={locked}
+        aria-disabled={disabled || locked || undefined}
         onCheckedChange={(checked) => {
           onChange(setNotification(value, event, channel.id, checked));
         }}
@@ -328,10 +348,29 @@ function EventLabel({
           id={lockLabelId}
           className="inline-flex items-center gap-1 text-xs font-regular text-fg-muted"
         >
-          <LockSimpleIcon aria-hidden weight="bold" className="size-3" />
+          <LockSimpleIcon aria-hidden weight="fill" className="size-3.5" />
           {required.map((channel) => channel.label).join(' and ')} always on
         </span>
       )}
+    </span>
+  );
+}
+
+/** Under a group with required events: which channels cannot be turned off, said once. */
+function GroupLockNote({
+  group,
+  channels,
+}: {
+  group: NotificationGroup;
+  channels: readonly NotificationChannel[];
+}) {
+  const locked = channels.filter((channel) =>
+    group.events.some((event) => notificationLocked(event, channel.id)),
+  );
+  if (locked.length === 0) return null;
+  return (
+    <span className="mt-1 block text-sm font-regular tracking-normal text-fg-muted normal-case">
+      {locked.map((channel) => channel.label).join(' and ')} for these cannot be turned off.
     </span>
   );
 }
