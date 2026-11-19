@@ -34,3 +34,18 @@ export async function joinWaitlist({ email }: WaitlistSignup): Promise<WaitlistE
   if (email.endsWith('@example.invalid')) throw new Error('That address bounced. Try another.');
   return { email, position: placeFor(email) };
 }
+
+/** A stored entry, or null when the value is missing or not one this page wrote. */
+export function parseEntry(raw: string | null | undefined): WaitlistEntry | null {
+  if (raw == null) return null;
+  try {
+    const value: unknown = JSON.parse(raw);
+    if (typeof value !== 'object' || value === null) return null;
+    const entry = value as Partial<WaitlistEntry>;
+    return typeof entry.email === 'string' && typeof entry.position === 'number'
+      ? { email: entry.email, position: entry.position }
+      : null;
+  } catch {
+    return null;
+  }
+}

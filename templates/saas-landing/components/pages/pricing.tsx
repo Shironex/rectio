@@ -81,7 +81,7 @@ function PlanCard({ plan, billing }: { plan: Plan; billing: Billing }) {
           <h3 className="font-display text-2xl font-strong tracking-tight text-fg">{plan.name}</h3>
           {plan.featured === true && <Badge tone="info">Most teams pick this</Badge>}
         </div>
-        <p className="min-h-12 text-base text-fg-muted">{plan.summary}</p>
+        <p className="text-base text-fg-muted">{plan.summary}</p>
       </div>
       <div className="flex flex-col gap-1">
         <p className="font-display text-5xl font-strong tracking-tight text-fg">

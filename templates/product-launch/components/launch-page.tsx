@@ -19,6 +19,7 @@ import { AvatarGroup } from '@rectio/ui';
 import { BETA_QUOTE, BETA_TEAMS, FAQ, HERO_WORDS, STEPS } from '@/data/launch';
 import { JOIN, NAV, SITE, STORAGE } from '@/data/site';
 import { useStored } from '@/lib/stored';
+import { parseEntry } from '@/lib/waitlist';
 
 import { Brand } from './brand';
 import { Panel } from './panel';
@@ -60,7 +61,7 @@ function ReadersCard() {
 
 /** The whole launch page: one long scroll from the promise to the waitlist. */
 export function LaunchPage() {
-  const joined = typeof useStored(STORAGE.waitlist) === 'string';
+  const joined = parseEntry(useStored(STORAGE.waitlist)) !== null;
   return (
     <>
       <a
@@ -70,7 +71,7 @@ export function LaunchPage() {
         Skip to content
       </a>
       <SiteHeader brand={<Brand />} brandLabel={`${SITE.name} home`} links={NAV} primary={JOIN} />
-      <main id="main" className="flex-1">
+      <main id="main" tabIndex={-1} className="flex-1 outline-none">
         <HeroWordCycle
           className="from-accent-subtle/40"
           eyebrow={SITE.launch}

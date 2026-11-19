@@ -33,10 +33,9 @@ export function InterviewBoard({ className }: { className?: string }) {
               return (
                 <li
                   key={line.id}
-                  aria-hidden={dim}
                   className={cn(
                     'flex gap-3 transition-opacity duration-fast ease-standard motion-reduce:transition-none',
-                    dim && 'opacity-70',
+                    dim && 'opacity-85',
                   )}
                 >
                   <span className="numeric w-10 shrink-0 pt-0.5 text-xs text-fg-muted">

@@ -11,7 +11,7 @@ import { useSyncExternalStore } from 'react';
 
 const EVENT = 'rostra-storage';
 
-/** Writes made on this page, read first: the fallback when storage is blocked. */
+/** Writes that storage refused, kept for this page view. */
 const memory = new Map<string, string | null>();
 
 function subscribe(onChange: () => void) {
@@ -24,22 +24,23 @@ function subscribe(onChange: () => void) {
 }
 
 export function readStored(key: string): string | null {
-  if (memory.has(key)) return memory.get(key) ?? null;
   try {
-    return localStorage.getItem(key);
+    if (!memory.has(key)) return localStorage.getItem(key);
   } catch {
-    return null;
+    // Storage blocked: fall back to what this page wrote.
   }
+  return memory.get(key) ?? null;
 }
 
 /** Writes a value, or removes the key when given null, and tells every reader. */
 export function writeStored(key: string, value: string | null) {
-  memory.set(key, value);
   try {
     if (value === null) localStorage.removeItem(key);
     else localStorage.setItem(key, value);
+    memory.delete(key);
   } catch {
     // Storage blocked: the in-memory copy keeps the choice for this page view.
+    memory.set(key, value);
   }
   window.dispatchEvent(new Event(EVENT));
 }

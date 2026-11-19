@@ -19,22 +19,8 @@ import { useEffect, useId, useRef, useState, type SyntheticEvent } from 'react';
 
 import { ROLES } from '@/data/launch';
 import { SITE, STORAGE } from '@/data/site';
-import { joinWaitlist, type WaitlistEntry } from '@/lib/waitlist';
+import { joinWaitlist, parseEntry, type WaitlistEntry } from '@/lib/waitlist';
 import { useStored, writeStored } from '@/lib/stored';
-
-function parseEntry(raw: string | null | undefined): WaitlistEntry | null {
-  if (raw == null) return null;
-  try {
-    const value: unknown = JSON.parse(raw);
-    if (typeof value !== 'object' || value === null) return null;
-    const entry = value as Partial<WaitlistEntry>;
-    return typeof entry.email === 'string' && typeof entry.position === 'number'
-      ? { email: entry.email, position: entry.position }
-      : null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * The waitlist signup: email, role and an opt-in, checked before sending, with a busy state, an
@@ -138,6 +124,7 @@ export function WaitlistForm() {
 
   const submit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (busy) return;
     setFailure(null);
     if (!isEmail(email)) {
       setError('Enter a work email, such as you@company.com.');
@@ -190,6 +177,8 @@ export function WaitlistForm() {
             <FieldLabel>Work email</FieldLabel>
             <Input
               ref={emailInput}
+              required
+              aria-required
               type="email"
               autoComplete="email"
               placeholder="you@company.com"
@@ -225,7 +214,7 @@ export function WaitlistForm() {
             Invite me to a beta session with the team
           </label>
           {failure !== null && (
-            <p id={statusId} className="text-sm text-negative-strong">
+            <p id={statusId} role="alert" className="text-sm text-negative-strong">
               {failure}
             </p>
           )}

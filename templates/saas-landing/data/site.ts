@@ -32,7 +32,7 @@ export const NAV: readonly MarketingLink[] = [
 ];
 
 /** One label per intent, used everywhere on the site. */
-export const START: MarketingAction = { label: 'Start free', href: '/pricing' };
+export const START: MarketingAction = { label: 'Start free', href: `${SITE.appUrl}/sign-up` };
 export const DEMO: MarketingAction = { label: 'Book a demo', href: '/contact' };
 export const SIGN_IN: MarketingAction = { label: 'Sign in', href: `${SITE.appUrl}/sign-in` };
 
