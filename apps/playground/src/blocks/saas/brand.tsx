@@ -44,12 +44,12 @@ export function AuthAside() {
           </li>
         ))}
       </ol>
-      <figure className="mt-auto flex flex-col gap-2">
-        <blockquote className="text-pretty text-fg">
+      <figure className="mt-auto flex flex-col gap-3 border-t border-line pt-6">
+        <blockquote className="font-display text-xl font-heading tracking-tight text-pretty text-fg">
           “We closed March four days early, and nobody opened a spreadsheet.”
         </blockquote>
         <figcaption className="text-sm text-fg-muted">
-          Ines Duarte, Head of finance operations
+          Marta Kowalczyk, Controller at Nordwind Logistik
         </figcaption>
       </figure>
     </div>

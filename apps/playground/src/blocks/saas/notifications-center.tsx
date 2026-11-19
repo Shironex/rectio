@@ -76,8 +76,9 @@ export function NotificationsCenterDemo({ motion, empty, locale }: DemoProps) {
         <span className="font-display text-lg font-heading tracking-tight">Fernhill</span>
         <NotificationsCenter {...common} />
       </div>
-      {/* The page sits beside the panel, never under it; the panel's end edge lines up with the bell. */}
-      <div className="flex items-start gap-6 px-4 pt-2 pb-6">
+      {/* The page sits beside the panel, never under it; the panel's end edge lines up with the bell.
+          On a phone the panel fills the frame, so it drops its own border and shadow. */}
+      <div className="flex items-start gap-6 md:px-4 md:pt-2 md:pb-6">
         <div aria-hidden className="hidden min-w-0 flex-1 flex-col gap-3 pt-6 md:flex">
           <span className="h-4 w-40 rounded-full bg-line" />
           <span className="h-24 w-full rounded-control bg-surface" />
@@ -87,7 +88,7 @@ export function NotificationsCenterDemo({ motion, empty, locale }: DemoProps) {
         <NotificationsCenter
           {...common}
           inline
-          className="ms-auto w-full shrink-0 shadow-raised md:w-96"
+          className="ms-auto w-full shrink-0 rounded-none border-0 md:w-96 md:rounded-panel md:border md:shadow-raised"
         />
       </div>
     </div>

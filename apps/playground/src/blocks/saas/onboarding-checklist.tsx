@@ -13,6 +13,7 @@ const STEPS: OnboardingStep[] = [
     title: 'Name your workspace',
     description: 'It appears on invoices and in every invite you send.',
     done: true,
+    action: { label: 'Name it', onSelect: () => undefined },
   },
   {
     id: 'bank',
