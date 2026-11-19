@@ -198,7 +198,7 @@ export function TabsSection() {
             <TabsTab value="overdue" hint={3}>
               Overdue
             </TabsTab>
-            <TabsTab value="void" disabled>
+            <TabsTab value="void" hint={0} disabled>
               Void
             </TabsTab>
           </TabsList>
@@ -309,17 +309,22 @@ export function MenuSection() {
       </Row>
       <Row label="Context menu">
         <ContextMenu>
-          <ContextMenuTrigger className="flex h-24 w-full max-w-sm items-center justify-center rounded-card border border-dashed border-line-strong text-sm text-fg-muted">
-            Right-click or long-press INV-2026-0124
+          <ContextMenuTrigger
+            tabIndex={0}
+            className="flex h-24 w-full max-w-sm items-center justify-center rounded-card border border-dashed border-line-strong px-4 text-center text-sm text-fg-muted focus-visible:outline-2 focus-visible:outline-focus"
+          >
+            Right-click or long-press INV-2026-0124 (or focus it and press Shift F10)
           </ContextMenuTrigger>
           <ContextMenuContent>
-            <MenuItem icon={icon(FileTextIcon)}>Open</MenuItem>
+            <MenuItem icon={icon(PencilSimpleIcon)} shortcut="e">
+              Edit
+            </MenuItem>
             <MenuItem icon={icon(CopyIcon)} shortcut="mod+d">
               Duplicate
             </MenuItem>
             <MenuSeparator />
             <MenuItem icon={icon(TrashIcon)} tone="danger">
-              Void
+              Void invoice
             </MenuItem>
           </ContextMenuContent>
         </ContextMenu>

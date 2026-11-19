@@ -4,6 +4,12 @@ import {
   BellIcon,
   BookOpenTextIcon,
   ChartLineUpIcon,
+  ClockCounterClockwiseIcon,
+  CreditCardIcon,
+  FileTextIcon,
+  NoteIcon,
+  TreeStructureIcon,
+  UploadSimpleIcon,
   FilePlusIcon,
   GearSixIcon,
   HouseIcon,
@@ -26,6 +32,11 @@ import {
   CommandMenuTrigger,
   Menu,
   MenuContent as PlainMenuContent,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuSub,
+  MenuSubContent as PlainMenuSubContent,
+  MenuSubTrigger,
   MenuGroup,
   MenuItem,
   MenuSeparator,
@@ -79,17 +90,21 @@ function buildCommands(run: (message: string) => void): CommandGroup[] {
   });
   return [
     {
+      label: 'Recent',
+      items: [
+        go('inv-0124', 'INV-2026-0124, Borowik Meble', ClockCounterClockwiseIcon, ['invoice']),
+        go('bill-nordwind', 'Bill 4471, Nordwind Logistik', ClockCounterClockwiseIcon, ['bill']),
+      ],
+    },
+    {
       label: 'Actions',
       items: [
         {
           ...go('new-invoice', 'New invoice', FilePlusIcon, ['create', 'bill customer']),
           shortcut: 'mod+i',
         },
-        {
-          ...go('transfer', 'Record a transfer', ArrowsLeftRightIcon, ['move money']),
-          hint: 'Banking',
-        },
-        go('upload-receipt', 'Upload a receipt', ReceiptIcon, ['expense', 'scan']),
+        go('transfer', 'Record a transfer', ArrowsLeftRightIcon, ['move money', 'banking']),
+        go('upload-receipt', 'Upload a receipt', UploadSimpleIcon, ['expense', 'scan']),
         go('settings', 'Settings', GearSixIcon, ['preferences']),
       ],
     },
@@ -97,14 +112,14 @@ function buildCommands(run: (message: string) => void): CommandGroup[] {
       label: 'Go to',
       items: [
         go('overview', 'Overview', HouseIcon, ['dashboard', 'home']),
-        go('invoices', 'Invoices', ReceiptIcon, ['receivables', 'sales', 'AR']),
+        go('invoices', 'Invoices', FileTextIcon, ['receivables', 'sales', 'AR']),
         go('customers', 'Customers', UsersThreeIcon, ['clients', 'debtors']),
-        go('credit-notes', 'Credit notes', ReceiptIcon, ['refund', 'corrections']),
+        go('credit-notes', 'Credit notes', NoteIcon, ['refund', 'corrections']),
         go('banking', 'Banking', BankIcon, ['transactions', 'reconcile']),
         go('payables', 'Payables', WalletIcon, ['bills', 'suppliers', 'AP']),
-        go('expenses', 'Expenses', ArrowsLeftRightIcon, ['receipts', 'claims']),
+        go('expenses', 'Expenses', CreditCardIcon, ['receipts', 'claims']),
         go('journal', 'Journal', BookOpenTextIcon, ['ledger', 'entries']),
-        go('accounts', 'Chart of accounts', BookOpenTextIcon, ['ledger', 'accounts']),
+        go('accounts', 'Chart of accounts', TreeStructureIcon, ['ledger', 'accounts']),
         go('reports', 'Reports', ChartLineUpIcon, ['profit', 'loss', 'balance sheet']),
       ],
     },
@@ -131,6 +146,7 @@ export function ShellPage({
   const [log, setLog] = useState<string | null>(null);
   const blocks = motion ? movingBlocks : plainBlocks;
   const MenuContent = motion ? movingNav.MenuContent : PlainMenuContent;
+  const MenuSubContent = motion ? movingNav.MenuSubContent : PlainMenuSubContent;
   const PopoverContent = motion ? movingNav.PopoverContent : PlainPopoverContent;
   const TabsList = motion ? movingNav.TabsList : PlainTabsList;
   const TabsPanel = motion ? movingNav.TabsPanel : PlainTabsPanel;
@@ -176,7 +192,7 @@ export function ShellPage({
           <SidebarItem href="#payables" icon={icon(WalletIcon)} badge={4}>
             Payables
           </SidebarItem>
-          <SidebarItem href="#expenses" icon={icon(ArrowsLeftRightIcon)}>
+          <SidebarItem href="#expenses" icon={icon(CreditCardIcon)}>
             Expenses
           </SidebarItem>
         </SidebarGroup>
@@ -213,26 +229,7 @@ export function ShellPage({
         <>
           <CommandMenuTrigger />
           <Notifications PopoverContent={PopoverContent} />
-          <Menu>
-            <MenuTrigger
-              render={
-                <Button variant="ghost" iconOnly aria-label="Account, Niamh Walsh">
-                  {icon(UserCircleIcon)}
-                </Button>
-              }
-            />
-            <MenuContent align="end">
-              <MenuGroup label="Niamh Walsh">
-                <MenuItem icon={icon(UserCircleIcon)}>Profile</MenuItem>
-                <MenuItem icon={icon(GearSixIcon)}>Settings</MenuItem>
-                <MenuItem icon={icon(MoonIcon)}>Appearance</MenuItem>
-              </MenuGroup>
-              <MenuSeparator />
-              <MenuItem icon={icon(SignOutIcon)} tone="danger">
-                Sign out
-              </MenuItem>
-            </MenuContent>
-          </Menu>
+          <AccountMenu MenuContent={MenuContent} MenuSubContent={MenuSubContent} />
         </>
       }
     />
@@ -361,7 +358,7 @@ function Notifications({ PopoverContent }: { PopoverContent: typeof PlainPopover
             onClick={() => {
               setRead(true);
             }}
-            className="cursor-pointer rounded-control text-sm text-accent-strong hover:underline focus-visible:outline-2 focus-visible:outline-focus disabled:cursor-default disabled:text-fg-disabled disabled:no-underline"
+            className="cursor-pointer rounded-control text-sm text-accent-strong pointer-coarse:py-3 hover:underline focus-visible:outline-2 focus-visible:outline-focus disabled:cursor-default disabled:text-fg-disabled disabled:no-underline"
           >
             Mark all read
           </button>
@@ -392,12 +389,62 @@ function Notifications({ PopoverContent }: { PopoverContent: typeof PlainPopover
         <div className="border-t border-line px-4 py-2.5">
           <a
             href="#notifications"
-            className="text-sm font-medium text-accent-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            className="inline-block text-sm font-medium text-accent-strong pointer-coarse:py-3 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           >
             View all notifications
           </a>
         </div>
       </PopoverContent>
     </Popover>
+  );
+}
+
+/** The account: initials on the trigger, and the appearance choice shown where it is made. */
+function AccountMenu({
+  MenuContent,
+  MenuSubContent,
+}: {
+  MenuContent: typeof PlainMenuContent;
+  MenuSubContent: typeof PlainMenuSubContent;
+}) {
+  const [appearance, setAppearance] = useState('system');
+  return (
+    <Menu>
+      <MenuTrigger
+        render={
+          <Button variant="ghost" iconOnly aria-label="Account, Niamh Walsh">
+            <span
+              aria-hidden
+              className="flex size-7 items-center justify-center rounded-full bg-accent-subtle text-xs font-semibold text-accent-strong"
+            >
+              NW
+            </span>
+          </Button>
+        }
+      />
+      <MenuContent align="end" className="min-w-56">
+        <MenuGroup label="Niamh Walsh">
+          <MenuItem icon={icon(UserCircleIcon)}>Profile</MenuItem>
+          <MenuItem icon={icon(GearSixIcon)}>Settings</MenuItem>
+          <MenuSub>
+            <MenuSubTrigger icon={icon(MoonIcon)}>
+              Appearance
+              <span className="ms-2 text-sm text-fg-subtle capitalize">{appearance}</span>
+            </MenuSubTrigger>
+            <MenuSubContent>
+              <MenuRadioGroup value={appearance} onValueChange={setAppearance}>
+                <MenuRadioItem value="system">System</MenuRadioItem>
+                <MenuRadioItem value="light">Light</MenuRadioItem>
+                <MenuRadioItem value="dark">Dark</MenuRadioItem>
+              </MenuRadioGroup>
+            </MenuSubContent>
+          </MenuSub>
+        </MenuGroup>
+        <MenuSeparator />
+        <MenuItem icon={icon(SignOutIcon)} tone="danger">
+          Sign out
+        </MenuItem>
+      </MenuContent>
+    </Menu>
   );
 }
