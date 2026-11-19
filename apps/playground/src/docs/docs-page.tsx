@@ -84,7 +84,7 @@ const LOREM =
 function Brand() {
   return (
     <span className="inline-flex items-center gap-2">
-      <span className="inline-flex size-7 items-center justify-center rounded-control bg-accent text-fg-on-accent">
+      <span className="inline-flex size-7 items-center justify-center rounded-control bg-accent text-accent-contrast">
         <AnchorSimpleIcon aria-hidden weight="bold" className="size-4" />
       </span>
       <span className="font-display text-base font-strong text-fg">Halyard</span>
@@ -98,11 +98,11 @@ function Header({ blocks }: { blocks: Blocks }) {
       brand={<Brand />}
       brandLabel="Halyard docs home"
       links={[
-        { label: 'Docs', href: '#intro' },
-        { label: 'API', href: '#api' },
-        { label: 'Changelog', href: '#changelog' },
+        { label: 'Docs', href: '/docs' },
+        { label: 'API', href: '/docs/api' },
+        { label: 'Changelog', href: '/docs/changelog' },
       ]}
-      currentHref="#intro"
+      currentHref="/docs/retries"
       search={<blocks.DocsSearch search={search} onNavigate={() => undefined} />}
       mobileNav={<blocks.DocsSidebar sections={NAV} currentHref="/docs/retries" />}
       actions={
