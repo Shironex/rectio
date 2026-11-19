@@ -1,5 +1,11 @@
 import { ArrowLeftIcon, MinusIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
-import { MotionPreferenceProvider, usePlainMotion } from '@rectio/motion';
+import {
+  MotionPreferenceProvider,
+  readMotionTokens,
+  usePlainMotion,
+  type MotionTokens,
+  type SpringToken,
+} from '@rectio/motion';
 import {
   DialogBody,
   DialogClose,
@@ -50,6 +56,22 @@ const EXTRA = [
 const LINK =
   'inline-flex min-h-6 items-center text-sm text-accent-strong underline decoration-line-strong underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
 
+const ms = (seconds: number) => `${String(Math.round(seconds * 1000))} ms`;
+
+/** About when a spring is within 2 percent of rest, and whether it can overshoot. */
+function springSpec({ stiffness, damping, mass }: SpringToken) {
+  const omega = Math.sqrt(stiffness / mass);
+  const ratio = damping / (2 * Math.sqrt(stiffness * mass));
+  const settle = ratio >= 1 ? 5.8 / omega : 4 / (ratio * omega);
+  return `${ms(settle)}, ${ratio >= 0.95 ? 'no overshoot' : 'slight overshoot'}`;
+}
+
+/**
+ * The timing behind each motioned specimen, read from the theme's tokens on the page itself, so
+ * the numbers are the ones the components use in this theme.
+ */
+type Spec = (tokens: MotionTokens) => string;
+
 /** Which column a specimen is in, so it can say what moves there. */
 const InMotionColumn = createContext(false);
 
@@ -58,9 +80,12 @@ function Specimen({
   title,
   plain,
   motion,
+  spec,
   children,
 }: {
   title: string;
+  /** The motioned timing, from tokens. */
+  spec: Spec;
   /** What the plain base does. */
   plain: string;
   /** What the add-on changes. */
@@ -78,6 +103,15 @@ function Specimen({
         </h2>
         {/* Two lines kept for every note, so plain and motion specimens start level. */}
         <p className="min-h-[2lh] max-w-prose text-sm text-fg-muted">{note}</p>
+        <p
+          aria-hidden={!inMotion}
+          className={`font-mono text-xs text-fg-subtle ${inMotion ? '' : 'invisible'}`}
+          ref={(element) => {
+            if (element === null) return;
+            const tokens = readMotionTokens(element);
+            element.textContent = tokens === null ? 'Motion tokens missing.' : spec(tokens);
+          }}
+        />
       </div>
       <div className="flex min-h-11 flex-wrap items-center gap-3">{children}</div>
     </section>
@@ -90,6 +124,9 @@ function ButtonSpecimen() {
   return (
     <Specimen
       title="Button"
+      spec={(t) =>
+        `Press: ${springSpec(t.spring.press)}. Loading: label out in ${ms(t.duration.fast)}, spinner in from ${ms(t.duration.fast * 0.75)}.`
+      }
       plain="Press scales in CSS. Loading swaps the label for a spinner, same width."
       motion="Press returns to rest on a spring. Loading lifts the label out and the spinner in."
     >
@@ -118,6 +155,7 @@ function AmountSpecimen() {
   return (
     <Specimen
       title="Amount input"
+      spec={(t) => `Nudge: ${t.distance.tick} over ${ms(t.duration.base)}, ease out. Steps only.`}
       plain="A stepped change replaces the figures in place."
       motion="A stepped change nudges the figures a hair toward its direction. Typing never moves them."
     >
@@ -172,6 +210,9 @@ function RowsSpecimen() {
   return (
     <Specimen
       title="Rows and total"
+      spec={(t) =>
+        `Row: ${ms(t.duration.base)}. Total: waits ${ms(t.duration.base)}, counts ${ms(t.duration.count)}, ease out.`
+      }
       plain="Lines appear and disappear at once; the total changes in one step."
       motion="A new line opens in place, a removed one fades and closes the gap. The total counts to its new figure and settles: the one signature moment."
     >
@@ -244,8 +285,11 @@ function DialogSpecimen() {
   return (
     <Specimen
       title="Dialog"
+      spec={(t) =>
+        `Open: ${springSpec(t.spring.overlay)}, from ${String(t.scale.origin)} and ${t.distance.origin} toward the trigger. Close: ${ms(t.duration.fast)} fade.`
+      }
       plain="Rises a few pixels and fades in, in CSS."
-      motion="Springs out of the button that opened it and returns to it on close, with no overshoot."
+      motion="Grows from the side of the button that opened it and leans back toward it on close."
     >
       <Dialog>
         <DialogTrigger render={<Button variant="secondary" />}>Submit for approval</DialogTrigger>
@@ -274,8 +318,11 @@ function SelectSpecimen() {
   return (
     <Specimen
       title="Select"
+      spec={(t) =>
+        `List: ${springSpec(t.spring.overlay)}. Highlight: ${springSpec(t.spring.press)}.`
+      }
       plain="The list fades in from its trigger; each option highlights itself."
-      motion="The list springs from its trigger; one highlight glides to the option under the keyboard."
+      motion="The list springs from its trigger. On arrow keys, one highlight glides to the next option."
     >
       <Field className="w-56">
         <FieldLabel>Category</FieldLabel>
@@ -386,9 +433,9 @@ function Page({
               }}
               className="size-4 accent-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             />
-            Turn motion off, as{' '}
+            Turn motion off (what{' '}
             <code className="font-mono text-sm">{'<MotionPreferenceProvider value="off">'}</code>{' '}
-            does
+            does)
           </label>
           {still && (
             <p role="note" className="max-w-prose text-sm text-fg-muted">
