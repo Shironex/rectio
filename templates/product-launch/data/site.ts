@@ -8,6 +8,7 @@ import type { MarketingAction, MarketingLink } from '@rectio/blocks/marketing';
 export const SITE = {
   name: 'Quarry',
   legalName: 'Quarry Labs ApS',
+  url: 'https://quarry.example',
   tagline: 'The research notebook that turns customer interviews into evidence.',
   description:
     'Quarry turns customer interviews into tagged, searchable evidence your whole product team can cite. Join the waitlist for early access.',

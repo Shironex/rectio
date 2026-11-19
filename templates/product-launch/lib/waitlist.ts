@@ -28,6 +28,7 @@ export async function joinWaitlist({
   role: string;
 }): Promise<WaitlistEntry> {
   await pause(900);
+  // A sample failure, so the error state can be tried: any address at example.invalid bounces.
   if (email.endsWith('@example.invalid')) throw new Error('That address bounced. Try another.');
   return { email, position: placeFor(email) };
 }

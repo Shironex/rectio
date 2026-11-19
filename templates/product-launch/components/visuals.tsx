@@ -33,11 +33,11 @@ export function InterviewBoard({ className }: { className?: string }) {
                 <li
                   key={line.id}
                   className={cn(
-                    'flex gap-3 transition-opacity duration-fast ease-standard',
-                    dim && 'opacity-40',
+                    'flex gap-3 transition-opacity duration-fast ease-standard motion-reduce:transition-none',
+                    dim && 'opacity-55',
                   )}
                 >
-                  <span className="numeric w-10 shrink-0 pt-0.5 text-xs text-fg-subtle">
+                  <span className="numeric w-10 shrink-0 pt-0.5 text-xs text-fg-muted">
                     {line.time}
                   </span>
                   <p className="text-sm text-pretty text-fg">
@@ -53,7 +53,8 @@ export function InterviewBoard({ className }: { className?: string }) {
           </ol>
         </div>
         <div className="flex flex-col gap-3 border-t border-line bg-surface-sunken p-5 @2xl:col-span-2 @2xl:border-t-0">
-          <span className="text-sm font-medium text-fg-muted">Themes across 12 interviews</span>
+          <span className="text-sm font-medium text-fg">Themes across 12 interviews</span>
+          <span className="text-sm text-fg-muted">Pick one to see where it was said.</span>
           <ul className="flex flex-col gap-1">
             {THEMES_FOUND.map((theme) => {
               const on = active === theme.id;
@@ -67,7 +68,7 @@ export function InterviewBoard({ className }: { className?: string }) {
                     }}
                     className={cn(
                       'flex min-h-(--rx-button-height-md) w-full cursor-pointer items-center justify-between gap-3 rounded-control px-2.5 text-start text-sm',
-                      'transition-colors duration-fast ease-standard pointer-coarse:min-h-(--rx-button-height-touch)',
+                      'transition-colors duration-fast ease-standard motion-reduce:transition-none pointer-coarse:min-h-(--rx-button-height-touch)',
                       'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
                       on
                         ? 'bg-surface-selected text-fg'
@@ -100,13 +101,14 @@ export function EvidenceCard() {
         <Badge tone="positive">Strong</Badge>
       </div>
       <p className="font-medium text-pretty text-fg">Admins give up when invites need IT.</p>
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <AvatarGroup
           label="Teams quoted"
           size="sm"
+          spacing="spaced"
           items={[{ name: 'Sofie Lund' }, { name: 'Kwame Asante' }, { name: 'Ines Moreau' }]}
         />
-        <span className="text-sm text-fg-muted">9 quotes, 7 teams</span>
+        <span className="text-sm whitespace-nowrap text-fg-muted">9 quotes, 7 teams</span>
       </div>
     </div>
   );
@@ -114,7 +116,11 @@ export function EvidenceCard() {
 
 export function SearchCard() {
   return (
-    <div className="flex flex-col gap-3">
+    <div
+      role="img"
+      aria-label="A search for why did they switch, with two matching quotes"
+      className="flex flex-col gap-3"
+    >
       <div className="flex h-(--rx-button-height-md) items-center gap-2 rounded-control border border-line bg-surface px-3 text-sm text-fg-muted">
         <MagnifyingGlassIcon aria-hidden weight="bold" className="size-4" />
         <span className="text-fg">why did they switch</span>
@@ -122,11 +128,11 @@ export function SearchCard() {
       <ul className="flex flex-col gap-2 text-sm">
         <li className="flex justify-between gap-3">
           <span className="truncate text-fg">“The old tool lost our notes…”</span>
-          <span className="numeric shrink-0 text-fg-subtle">12:40</span>
+          <span className="numeric shrink-0 text-fg-muted">12:40</span>
         </li>
         <li className="flex justify-between gap-3">
           <span className="truncate text-fg">“Our PM could never find the call…”</span>
-          <span className="numeric shrink-0 text-fg-subtle">03:15</span>
+          <span className="numeric shrink-0 text-fg-muted">03:15</span>
         </li>
       </ul>
     </div>

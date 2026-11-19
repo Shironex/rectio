@@ -25,6 +25,7 @@ import { ThemeSwitch } from './theme-switch';
 import { EvidenceCard, InterviewBoard, SearchCard, TagCloud } from './visuals';
 import { WaitlistForm } from './waitlist';
 
+/** Placeholder profiles: point these at your own accounts. */
 const SOCIAL = [
   { label: 'Quarry on LinkedIn', href: 'https://www.linkedin.com', icon: <LinkedinLogoIcon /> },
   { label: 'Quarry on X', href: 'https://x.com', icon: <XLogoIcon /> },
@@ -39,10 +40,11 @@ const EARLY_ACCESS = [
 
 function ReadersCard() {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex flex-col items-start gap-3">
       <AvatarGroup
         label="Readers"
         size="md"
+        spacing="spaced"
         max={4}
         items={['Ines Moreau', 'Jun Park', 'Ada Novak', 'Tomas Berg', 'Lea Fischer'].map(
           (name) => ({
@@ -50,7 +52,7 @@ function ReadersCard() {
           }),
         )}
       />
-      <span className="text-sm text-fg-muted">23 readers, 4 editors</span>
+      <span className="text-sm whitespace-nowrap text-fg-muted">23 readers, 4 editors</span>
     </div>
   );
 }
@@ -75,7 +77,7 @@ export function LaunchPage() {
           description="Quarry transcribes your calls, finds the themes and lets anyone on the team cite the exact moment a customer said it."
           primary={JOIN}
           secondary={{ label: 'See how it works', href: '#how' }}
-          visual={<InterviewBoard />}
+          visual={<InterviewBoard className="pb-16" />}
         />
         <LogoStrip
           title="Product teams testing Quarry in private beta"
@@ -140,8 +142,11 @@ export function LaunchPage() {
             How it works
           </h2>
           <ol className="grid gap-12 md:grid-cols-3 md:gap-8">
-            {STEPS.map((step) => (
+            {STEPS.map((step, index) => (
               <li key={step.id} className="flex flex-col gap-4 border-t border-line-strong pt-6">
+                <span className="numeric text-sm text-fg-muted">
+                  Step {String(index + 1).padStart(2, '0')}
+                </span>
                 <h3 className="font-display text-5xl font-strong tracking-tight text-fg">
                   {step.verb}.
                 </h3>
@@ -182,7 +187,7 @@ export function LaunchPage() {
           </div>
         </Section>
         <div id="faq">
-          <Faq variant="numbered" title="Before you join" items={FAQ} />
+          <Faq title="Before you join" items={FAQ} defaultOpen={['q1']} />
         </div>
       </main>
       <SiteFooter
@@ -193,10 +198,14 @@ export function LaunchPage() {
         legal={[{ label: SITE.email, href: `mailto:${SITE.email}` }]}
         copyright={`© 2026 ${SITE.legalName}`}
       />
-      <Container width="wide" className="flex flex-wrap items-center gap-4 pb-10">
-        <span className="text-sm text-fg-muted">Appearance</span>
-        <ThemeSwitch />
-      </Container>
+      <section aria-labelledby="appearance-title">
+        <Container width="wide" className="flex flex-wrap items-center gap-4 pb-10">
+          <h2 id="appearance-title" className="text-sm text-fg-muted">
+            Appearance
+          </h2>
+          <ThemeSwitch />
+        </Container>
+      </section>
     </>
   );
 }
