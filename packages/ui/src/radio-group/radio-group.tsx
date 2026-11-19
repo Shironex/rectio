@@ -90,6 +90,8 @@ export function Radio({ className, children, description, ...props }: RadioProps
       data-slot="radio"
       className={cn(
         'flex w-fit items-start gap-2.5 text-base text-fg',
+        // On touch screens the whole row is a 44px target, so stacked options never share a tap.
+        'pointer-coarse:min-h-(--rx-button-height-touch) pointer-coarse:py-2.5',
         'has-data-disabled:cursor-not-allowed has-data-disabled:text-fg-disabled',
         className,
       )}
@@ -158,7 +160,7 @@ export function RadioCard({ title, description, meta, className, ...props }: Rad
         'transition-[background-color,border-color,box-shadow] duration-fast ease-standard',
         'hover:border-line-strong',
         // Border and an inset ring together: a 2px edge without shifting the content.
-        'data-checked:border-accent data-checked:bg-accent-subtle data-checked:ring-1 data-checked:ring-accent data-checked:ring-inset',
+        'data-checked:border-accent data-checked:bg-surface-selected data-checked:ring-1 data-checked:ring-accent data-checked:ring-inset',
         'data-invalid:border-negative',
         controlFocus,
         'data-disabled:cursor-not-allowed data-disabled:border-line data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
