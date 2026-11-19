@@ -17,6 +17,7 @@ export default {
         'ci',
         'docs',
         'site',
+        'templates',
       ],
     ],
     'scope-empty': [2, 'never'],

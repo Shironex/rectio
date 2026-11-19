@@ -14,7 +14,7 @@ function lineAndColumn(text: string, index: number): { line: number; column: num
 
 /**
  * The CI-critical twin of the ESLint rule `rectio/no-hardcoded-design-values`. It reads every
- * file under packages/ui/src, packages/motion/src, packages/blocks/src and the site's source straight from disk, so an inline eslint-disable cannot hide a value,
+ * file under packages/ui/src, packages/motion/src, packages/blocks/src, the site's source and every template's source straight from disk, so an inline eslint-disable cannot hide a value,
  * and it covers CSS files ESLint never sees.
  */
 export const uiNoHardcodedDesignValues: IMetaRule = {
@@ -30,6 +30,7 @@ export const uiNoHardcodedDesignValues: IMetaRule = {
       ...ctx.glob('packages/motion/src/**/*'),
       ...ctx.glob('packages/blocks/src/**/*'),
       ...ctx.glob('apps/site/{app,components,demos,lib}/**/*'),
+      ...ctx.glob('templates/*/{app,components,data,lib}/**/*'),
     ].filter(
       (file) =>
         /\.(tsx?|css)$/.test(file) && !/\.test\.tsx?$/.test(file) && !SITE_BRIDGE.test(file),
