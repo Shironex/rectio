@@ -80,6 +80,9 @@ importers:
       '@phosphor-icons/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@rectio/motion':
+        specifier: workspace:*
+        version: link:../../packages/motion
       '@rectio/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
@@ -148,6 +151,9 @@ importers:
       '@rectio/ui':
         specifier: workspace:*
         version: link:../ui
+      '@tanstack/react-table':
+        specifier: ^9.3.1
+        version: 9.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       motion:
         specifier: ^14.12.0
         version: 14.12.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)

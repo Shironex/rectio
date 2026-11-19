@@ -18,6 +18,12 @@ import {
   FieldLabel,
   Select,
   SelectTrigger,
+  Table,
+  TableBody,
+  TableCell as PlainTableCell,
+  TableFooter,
+  TableHead,
+  TableRow as PlainTableRow,
   ThemeScope,
   formatMoney,
 } from '@rectio/ui';
@@ -226,17 +232,17 @@ function RowsSpecimen() {
       motion="A new line opens in place, a removed one fades and closes the gap. The total counts to its new figure and settles: the one signature moment."
     >
       <div ref={tableRef} className="flex w-full flex-col gap-3">
-        <table className="w-full border-collapse text-base">
+        <Table>
           <caption className="sr-only">Lines</caption>
-          <tbody>
+          <TableBody>
             <TableRows>
               {lines.map((line) => (
-                <TableRow key={line.id} className="border-b border-line">
-                  <TableCell contentClassName="py-2 pe-4">{line.merchant}</TableCell>
-                  <TableCell className="text-end" contentClassName="py-2">
+                <TableRow key={line.id}>
+                  <TableCell>{line.merchant}</TableCell>
+                  <TableCell align="end">
                     <Money amount={line.amount} currency={CURRENCY} locale={LOCALE} />
                   </TableCell>
-                  <TableCell className="w-10 text-end" contentClassName="py-1 ps-2">
+                  <TableCell align="end" className="w-12">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -256,23 +262,19 @@ function RowsSpecimen() {
                 </TableRow>
               ))}
             </TableRows>
-          </tbody>
-          <tfoot>
-            <tr className="border-t-2 border-line-strong">
-              <th
-                ref={countRef}
-                scope="row"
-                className="pt-3 pe-4 text-start text-sm font-medium text-fg-muted"
-              >
+          </TableBody>
+          <TableFooter>
+            <PlainTableRow>
+              <TableHead ref={countRef} scope="row">
                 Total, {count} lines
-              </th>
-              <td className="pt-3 text-end text-xl font-strong">
+              </TableHead>
+              <PlainTableCell align="end" className="text-xl font-strong">
                 <Money amount={total} currency={CURRENCY} locale={LOCALE} />
-              </td>
-              <td />
-            </tr>
-          </tfoot>
-        </table>
+              </PlainTableCell>
+              <PlainTableCell />
+            </PlainTableRow>
+          </TableFooter>
+        </Table>
         {next !== undefined && (
           <Button
             variant="secondary"

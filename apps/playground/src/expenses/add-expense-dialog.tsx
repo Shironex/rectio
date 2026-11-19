@@ -1,31 +1,25 @@
 import { PlusIcon } from '@phosphor-icons/react';
 import {
-  AmountInput,
-  Button,
   DatePicker,
-  Dialog,
   DialogBody,
   DialogClose,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   Field,
   FieldDescription,
   FieldError,
   FieldLabel,
   Input,
   Select,
-  SelectContent,
   SelectGroup,
-  SelectItem,
   SelectTrigger,
 } from '@rectio/ui';
 import { useRef, useState, type KeyboardEvent, type SyntheticEvent } from 'react';
 
 import { CATEGORIES, type Expense } from './data';
+import { useKit } from './kit';
 
 const GROUPS = ['Travel', 'Meals', 'Tools'] as const;
 const ITEMS = CATEGORIES.map((c) => ({ value: c.value, label: c.label }));
@@ -59,6 +53,8 @@ function validate(draft: Draft): Errors {
 }
 
 export function AddExpenseDialog({ onAdd }: { onAdd: (expense: Expense) => void }) {
+  const { AmountInput, Button, Dialog, DialogContent, DialogTrigger, SelectContent, SelectItem } =
+    useKit();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});

@@ -1,5 +1,4 @@
 import * as motion from '@rectio/motion';
-import type { TableCellProps } from '@rectio/motion';
 import * as ui from '@rectio/ui';
 import {
   createContext,
@@ -25,18 +24,11 @@ export interface Kit {
   DialogContent: typeof ui.DialogContent;
   SelectContent: typeof ui.SelectContent;
   SelectItem: typeof ui.SelectItem;
+  /** Only the motion add-on has it: rows that arrive and leave in place. Plain is a fragment. */
   TableRows: (props: { children?: ReactNode }) => ReactNode;
   TableRow: (props: ComponentProps<'tr'>) => ReactNode;
-  TableCell: (props: TableCellProps) => ReactNode;
-}
-
-/** Plain table parts with the motion parts' markup, so both kits render the same table. */
-function PlainTableCell({ contentClassName, children, ...props }: TableCellProps) {
-  return (
-    <td {...props}>
-      <div className={contentClassName}>{children}</div>
-    </td>
-  );
+  TableCell: typeof ui.TableCell;
+  DataTableBody: typeof ui.DataTableBody;
 }
 
 export const PLAIN_KIT: Kit = {
@@ -49,8 +41,9 @@ export const PLAIN_KIT: Kit = {
   SelectContent: ui.SelectContent,
   SelectItem: ui.SelectItem,
   TableRows: ({ children }) => children,
-  TableRow: (props) => <tr {...props} />,
-  TableCell: PlainTableCell,
+  TableRow: ui.TableRow,
+  TableCell: ui.TableCell,
+  DataTableBody: ui.DataTableBody,
 };
 
 export const MOTION_KIT: Kit = {
@@ -65,6 +58,7 @@ export const MOTION_KIT: Kit = {
   TableRows: motion.TableRows,
   TableRow: motion.TableRow,
   TableCell: motion.TableCell,
+  DataTableBody: motion.DataTableBody,
 };
 
 const KitContext = createContext<Kit>(PLAIN_KIT);

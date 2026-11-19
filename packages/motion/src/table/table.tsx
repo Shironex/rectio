@@ -1,4 +1,13 @@
-import { cn } from '@rectio/ui';
+import {
+  DataTableBody as PlainDataTableBody,
+  TableBody,
+  TableCell as PlainTableCell,
+  TableRow as PlainTableRow,
+  type DataTableBodyProps,
+  type DataTableColumnMeta,
+  type TableCellProps,
+} from '@rectio/ui';
+import type { RowData } from '@tanstack/react-table';
 import { AnimatePresence, PresenceContext, usePresence } from 'motion/react';
 import { use, useLayoutEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 
@@ -12,17 +21,46 @@ import { readMotionTokens } from '../lib/tokens';
  * row fades out first and then closes the gap, so the rows below slide up instead of jumping.
  * Rows present on the first render never animate.
  *
- * Height cannot animate on a table row, so each cell holds its content in a block that does:
- * put a cell's padding on `contentClassName`, not on `className`.
+ * Height cannot animate on a table row, so each cell opens and closes itself (its height and
+ * vertical padding) while a block inside it clips the content.
  */
 export function TableRows({ children }: { children?: ReactNode }) {
   return <AnimatePresence initial={false}>{children}</AnimatePresence>;
 }
 
-const cellContents = (row: HTMLTableRowElement) =>
-  [...row.cells]
-    .map((cell) => cell.firstElementChild)
-    .filter((el): el is HTMLElement => el instanceof HTMLElement && el.dataset.part === 'cell');
+interface CellParts {
+  cell: HTMLElement;
+  content: HTMLElement;
+  height: string;
+  paddingTop: string;
+  paddingBottom: string;
+  contentHeight: string;
+}
+
+function cellParts(row: HTMLTableRowElement): CellParts[] {
+  return [...row.cells].flatMap((cell) => {
+    const content = cell.firstElementChild;
+    if (!(content instanceof HTMLElement) || content.dataset.part !== 'cell') return [];
+    const style = getComputedStyle(cell);
+    return [
+      {
+        cell,
+        content,
+        height: `${String(cell.getBoundingClientRect().height)}px`,
+        paddingTop: style.paddingTop,
+        paddingBottom: style.paddingBottom,
+        contentHeight: `${String(content.offsetHeight)}px`,
+      },
+    ];
+  });
+}
+
+const CLOSED = { height: '0px', paddingTop: '0px', paddingBottom: '0px' };
+
+/** Clips the contents while they open or close; focus rings must not be clipped at rest. */
+function clip(parts: CellParts[], on: boolean) {
+  for (const { content } of parts) content.style.overflow = on ? 'hidden' : '';
+}
 
 /**
  * Height is a layout property: each frame lays the table out again. That is cheap for the row in
@@ -33,11 +71,7 @@ function inView(row: HTMLElement) {
   return box.bottom > 0 && box.top < window.innerHeight;
 }
 
-/** Clips the contents while they open or close; focus rings must not be clipped at rest. */
-function clip(cells: HTMLElement[], on: boolean) {
-  for (const cell of cells) cell.style.overflow = on ? 'hidden' : '';
-}
-
+/** Same as the plain table row; enters and leaves in place inside `TableRows`. */
 export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
   const plain = usePlainMotion();
   const [isPresent, safeToRemove] = usePresence();
@@ -54,53 +88,71 @@ export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
       if (!isPresent) safeToRemove();
       return;
     }
-    const cells = cellContents(row);
+    const parts = cellParts(row);
     const { duration, easing } = tokens;
 
     if (isPresent) {
       if (settled.current) return;
       settled.current = true;
-      clip(cells, true);
-      const opening = cells.map((cell) =>
+      clip(parts, true);
+      const opening = parts.flatMap((p) => [
         tweenTo(
-          cell,
-          { height: ['0px', `${String(cell.offsetHeight)}px`] },
+          p.cell,
+          {
+            height: ['0px', p.height],
+            paddingTop: ['0px', p.paddingTop],
+            paddingBottom: ['0px', p.paddingBottom],
+          },
           duration.base,
           easing.enter,
         ),
-      );
+        tweenTo(p.content, { height: ['0px', p.contentHeight] }, duration.base, easing.enter),
+      ]);
       tweenTo(row, { opacity: [0, 1] }, duration.base, easing.enter, duration.fast);
       void Promise.all(opening).then(() => {
-        clip(cells, false);
+        clip(parts, false);
       });
       return;
     }
 
     // Leaving: out of the tab order at once, then fade, then close the gap.
     row.inert = true;
-    clip(cells, true);
-    const heights = cells.map((cell) => `${String(cell.offsetHeight)}px`);
+    clip(parts, true);
     // The end state, under the animations: no full-height frame between their end and removal.
     row.style.opacity = '0';
-    for (const cell of cells) cell.style.height = '0px';
+    for (const p of parts) {
+      Object.assign(p.cell.style, CLOSED);
+      p.content.style.height = '0px';
+    }
     const fade = tweenTo(row, { opacity: [1, 0] }, duration.fast, easing.exit);
-    const closing = cells.map((cell, index) =>
+    const closing = parts.flatMap((p) => [
       tweenTo(
-        cell,
-        { height: [heights[index] ?? '0px', '0px'] },
+        p.cell,
+        {
+          height: [p.height, '0px'],
+          paddingTop: [p.paddingTop, '0px'],
+          paddingBottom: [p.paddingBottom, '0px'],
+        },
         duration.base,
         easing.standard,
         duration.fast,
       ),
-    );
+      tweenTo(
+        p.content,
+        { height: [p.contentHeight, '0px'] },
+        duration.base,
+        easing.standard,
+        duration.fast,
+      ),
+    ]);
     void Promise.all([fade, ...closing]).then(() => {
       safeToRemove();
     });
   }, [isPresent, plain, safeToRemove]);
 
   return (
-    <tr
-      ref={(value) => {
+    <PlainTableRow
+      ref={(value: HTMLTableRowElement | null) => {
         node.current = value;
         assignRef(ref, value);
       }}
@@ -110,17 +162,48 @@ export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
   );
 }
 
-export interface TableCellProps extends ComponentProps<'td'> {
-  /** Classes for the block inside the cell, which opens and closes: padding goes here. */
-  contentClassName?: string;
+/** Same as the plain table cell, with the block inside that opens and closes with its row. */
+export function TableCell({ children, ...props }: TableCellProps) {
+  return (
+    <PlainTableCell {...props}>
+      <div data-part="cell">{children}</div>
+    </PlainTableCell>
+  );
 }
 
-export function TableCell({ contentClassName, children, ...props }: TableCellProps) {
+const metaOf = (column: { columnDef: { meta?: unknown } }) =>
+  (column.columnDef.meta ?? {}) as DataTableColumnMeta;
+
+/**
+ * Same props as the plain DataTableBody. Rows added after the first render open in place and
+ * removed rows fade and close the gap; loading and empty states are the plain ones. Under reduced
+ * motion it is the plain body.
+ */
+export function DataTableBody<TData extends RowData>(props: DataTableBodyProps<TData>) {
+  const plain = usePlainMotion();
+  const { table, loading = false, rowProps } = props;
+  const rows = table.getRowModel().rows;
+  if (plain || loading || rows.length === 0) return <PlainDataTableBody {...props} />;
   return (
-    <td {...props}>
-      <div data-part="cell" className={cn(contentClassName)}>
-        {children}
-      </div>
-    </td>
+    <TableBody>
+      <TableRows>
+        {rows.map((row) => (
+          <TableRow
+            key={row.id}
+            data-selected={row.getIsSelected() || undefined}
+            {...rowProps?.(row)}
+          >
+            {row.getAllCells().map((cell) => {
+              const meta = metaOf(cell.column);
+              return (
+                <TableCell key={cell.id} align={meta.align} className={meta.className}>
+                  <table.FlexRender cell={cell} />
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        ))}
+      </TableRows>
+    </TableBody>
   );
 }

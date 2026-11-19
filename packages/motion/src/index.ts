@@ -24,4 +24,4 @@ export {
   type SelectContentProps,
   type SelectItemProps,
 } from './select/select';
-export { TableCell, TableRow, TableRows, type TableCellProps } from './table/table';
+export { DataTableBody, TableCell, TableRow, TableRows } from './table/table';

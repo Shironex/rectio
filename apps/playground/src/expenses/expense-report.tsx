@@ -3,7 +3,6 @@ import {
   Badge,
   Button,
   DataTable,
-  DataTableBody,
   DataTableFooter,
   DataTableHeader,
   DateRangePicker,
@@ -18,11 +17,12 @@ import {
   type DateRange,
   type DateRangePreset,
 } from '@rectio/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { Mode, ThemeId } from '../themes';
 import { AddExpenseDialog } from './add-expense-dialog';
 import { EXPENSES, STATUSES, categoryLabel, type Expense } from './data';
+import { KitProvider, useKit, type Kit } from './kit';
 
 const CURRENCY = 'EUR';
 const LOCALE = 'en-IE';
@@ -59,115 +59,135 @@ function StatusBadge({ status }: { status: Expense['status'] }) {
 /** On phones Date, Category and Status fold under the merchant, so the amount never leaves the screen. */
 const WIDE = 'hidden sm:table-cell';
 
-const columns: DataTableColumnDef<Expense>[] = [
-  selectionColumn<Expense>({
-    rowLabel: (row) => `Select ${row.original.merchant}, ${shortDate.format(row.original.date)}`,
-    allLabel: 'Select all expenses',
-  }),
-  {
-    accessorKey: 'date',
-    header: 'Date',
-    sortFn: 'datetime',
-    meta: { className: `${WIDE} w-20 whitespace-nowrap` },
-    cell: ({ row }) => (
-      <span className="text-fg-muted numeric">{shortDate.format(row.original.date)}</span>
-    ),
-  },
-  {
-    accessorKey: 'merchant',
-    header: 'Merchant',
-    sortFn: 'text',
-    cell: ({ row }) => {
-      const e = row.original;
-      return (
-        <>
-          <span className="block">{e.merchant}</span>
-          <span className="block text-sm text-fg-muted sm:hidden">
-            <span className="numeric">{shortDate.format(e.date)}</span>, {categoryLabel(e.category)}
-          </span>
-          {e.note !== undefined && <span className="block text-sm text-fg-subtle">{e.note}</span>}
-        </>
-      );
+/** The columns, with the total drawn by the kit's Money: it counts to a new figure with motion on. */
+function columnsWith(TotalMoney: Kit['Money']): DataTableColumnDef<Expense>[] {
+  return [
+    selectionColumn<Expense>({
+      rowLabel: (row) => `Select ${row.original.merchant}, ${shortDate.format(row.original.date)}`,
+      allLabel: 'Select all expenses',
+    }),
+    {
+      accessorKey: 'date',
+      header: 'Date',
+      sortFn: 'datetime',
+      meta: { className: `${WIDE} w-20 whitespace-nowrap` },
+      cell: ({ row }) => (
+        <span className="text-fg-muted numeric">{shortDate.format(row.original.date)}</span>
+      ),
     },
-    footer: ({ table }) => {
-      const all = footRows(table.getRowModel().rows);
-      const counted = claimed(all);
-      const rejected = all.length - counted.length;
-      return (
-        <span className="flex flex-col text-sm">
-          <span className="font-medium whitespace-nowrap text-fg">
-            Total claimed, {counted.length} expenses
-          </span>
-          {rejected > 0 && (
-            <span className="text-fg-muted">
-              {rejected} rejected,{' '}
-              <Money amount={sum(all) - sum(counted)} currency={CURRENCY} locale={LOCALE} /> not
-              counted
+    {
+      accessorKey: 'merchant',
+      header: 'Merchant',
+      sortFn: 'text',
+      cell: ({ row }) => {
+        const e = row.original;
+        return (
+          <>
+            <span className="block">{e.merchant}</span>
+            <span className="block text-sm text-fg-muted sm:hidden">
+              <span className="numeric">{shortDate.format(e.date)}</span>,{' '}
+              {categoryLabel(e.category)}
             </span>
-          )}
-        </span>
-      );
+            {e.note !== undefined && <span className="block text-sm text-fg-subtle">{e.note}</span>}
+          </>
+        );
+      },
+      footer: ({ table }) => {
+        const all = footRows(table.getRowModel().rows);
+        const counted = claimed(all);
+        const rejected = all.length - counted.length;
+        return (
+          <span className="flex flex-col text-sm">
+            <span className="font-medium whitespace-nowrap text-fg">
+              Total claimed, {counted.length} expenses
+            </span>
+            {rejected > 0 && (
+              <span className="text-fg-muted">
+                {rejected} rejected,{' '}
+                <Money amount={sum(all) - sum(counted)} currency={CURRENCY} locale={LOCALE} /> not
+                counted
+              </span>
+            )}
+          </span>
+        );
+      },
     },
-  },
-  {
-    id: 'category',
-    accessorFn: (e) => categoryLabel(e.category),
-    header: 'Category',
-    sortFn: 'text',
-    meta: { className: WIDE },
-    cell: ({ getValue }) => <span className="text-fg-muted">{String(getValue())}</span>,
-  },
-  {
-    id: 'status',
-    accessorFn: (e) => STATUSES[e.status].label,
-    header: 'Status',
-    sortFn: 'text',
-    meta: { className: WIDE },
-    cell: ({ row }) => <StatusBadge status={row.original.status} />,
-  },
-  {
-    accessorKey: 'amount',
-    header: `Amount, ${CURRENCY}`,
-    meta: { align: 'end', label: 'Amount' },
-    cell: ({ row }) => (
-      <>
-        <Money
-          amount={row.original.amount}
+    {
+      id: 'category',
+      accessorFn: (e) => categoryLabel(e.category),
+      header: 'Category',
+      sortFn: 'text',
+      meta: { className: WIDE },
+      cell: ({ getValue }) => <span className="text-fg-muted">{String(getValue())}</span>,
+    },
+    {
+      id: 'status',
+      accessorFn: (e) => STATUSES[e.status].label,
+      header: 'Status',
+      sortFn: 'text',
+      meta: { className: WIDE },
+      cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    },
+    {
+      accessorKey: 'amount',
+      header: `Amount, ${CURRENCY}`,
+      meta: { align: 'end', label: 'Amount' },
+      cell: ({ row }) => (
+        <>
+          <Money
+            amount={row.original.amount}
+            currency={CURRENCY}
+            locale={LOCALE}
+            tone={row.original.amount < 0 ? 'auto' : 'neutral'}
+            // Rejected lines stay for the record, struck and muted because the total leaves them out.
+            className={
+              row.original.status === 'rejected' ? 'text-fg-muted line-through' : undefined
+            }
+          />
+          {/* On phones the state sits under its amount, so a row stays three lines at most. */}
+          <span className="mt-1 block sm:hidden">
+            <StatusBadge status={row.original.status} />
+          </span>
+        </>
+      ),
+      footer: ({ table }) => (
+        <TotalMoney
+          amount={sum(claimed(footRows(table.getRowModel().rows)))}
           currency={CURRENCY}
           locale={LOCALE}
-          tone={row.original.amount < 0 ? 'auto' : 'neutral'}
-          // Rejected lines stay for the record, struck and muted because the total leaves them out.
-          className={row.original.status === 'rejected' ? 'text-fg-muted line-through' : undefined}
+          className="text-xl font-strong"
         />
-        {/* On phones the state sits under its amount, so a row stays three lines at most. */}
-        <span className="mt-1 block sm:hidden">
-          <StatusBadge status={row.original.status} />
-        </span>
-      </>
-    ),
-    footer: ({ table }) => (
-      <Money
-        amount={sum(claimed(footRows(table.getRowModel().rows)))}
-        currency={CURRENCY}
-        locale={LOCALE}
-        className="text-xl font-strong"
-      />
-    ),
-  },
-];
+      ),
+    },
+  ];
+}
 
 /** The finance composition: an expense report with the add expense dialog. */
-export function ExpenseReport({ theme, mode }: { theme: ThemeId; mode: Mode }) {
+export function ExpenseReport({
+  theme,
+  mode,
+  motion = false,
+}: {
+  theme: ThemeId;
+  mode: Mode;
+  /** Swap in the motion add-on's components: rows that arrive and leave, a total that counts. */
+  motion?: boolean;
+}) {
   return (
     <ThemeScope theme={theme} mode={mode} className="min-h-dvh">
-      <ToastProvider timeout={UNDO_MS}>
-        <Report />
-      </ToastProvider>
+      <KitProvider motion={motion}>
+        <ToastProvider timeout={UNDO_MS}>
+          <Report back={motion ? `?view=motion&theme=${theme}&mode=${mode}` : null} />
+        </ToastProvider>
+      </KitProvider>
     </ThemeScope>
   );
 }
 
-function Report() {
+function Report({ back }: { back: string | null }) {
+  const kit = useKit();
+  const { DataTableBody } = kit;
+  const columns = useMemo(() => columnsWith(kit.Money), [kit]);
   const toast = useToast();
   const [expenses, setExpenses] = useState<Expense[]>(EXPENSES);
   const [period, setPeriod] = useState<DateRange | undefined>(MARCH);
@@ -238,11 +258,11 @@ function Report() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10 sm:px-8">
       <a
-        href="?"
-        className="inline-flex w-fit items-center gap-1.5 text-sm text-fg-muted underline decoration-line-strong underline-offset-4 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        href={back ?? '?'}
+        className="inline-flex min-h-6 w-fit items-center gap-1.5 text-sm text-fg-muted underline decoration-line-strong underline-offset-4 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
         <ArrowLeftIcon aria-hidden weight="bold" className="size-3.5" />
-        All components
+        {back === null ? 'All components' : 'Motion add-on'}
       </a>
       <header className="flex flex-wrap items-end justify-between gap-6">
         <div className="flex flex-col gap-2">
