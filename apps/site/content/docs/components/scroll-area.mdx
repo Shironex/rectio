@@ -1,0 +1,56 @@
+---
+title: ScrollArea
+description: A region with its own scroll and a quiet, themed scrollbar.
+---
+
+import ScrollAreaDemo from '@/demos/scroll-area';
+
+<Preview name="scroll-area" plain={<ScrollAreaDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add scroll-area
+```
+
+## Usage
+
+```tsx
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+<ScrollArea label="Recent receipts" className="h-56">
+  {/* a long list */}
+</ScrollArea>;
+```
+
+Native scrolling underneath: wheel, touch, keyboard and find in page all work. The scrollbar is thin
+and appears while scrolling or under the pointer. Edges fade where more content waits, so it is clear
+the area scrolls; turn that off with `fade={false}`. Give the area a height.
+
+## Props
+
+Every prop of Base UI's `ScrollArea.Root` is accepted as well.
+
+<TypeTable
+  type={{
+    orientation: {
+      type: "'vertical' | 'horizontal' | 'both'",
+      default: "'vertical'",
+      description: 'Which way it scrolls.',
+    },
+    fade: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Fade the edges where content continues.',
+    },
+    label: { type: 'string', description: 'Names the scrolling region.' },
+    viewportClassName: { type: 'string', description: 'Classes for the scrolling viewport.' },
+  }}
+/>
+
+## Accessibility
+
+- The viewport takes keyboard focus with a visible ring, so it scrolls from the keyboard.
+- With `label` it is a named region.
+
+<ComponentSource path="scroll-area/scroll-area.tsx" />

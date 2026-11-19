@@ -1,0 +1,70 @@
+---
+title: ProgressCircle
+description: Progress as a ring, for a card corner, a row or a step.
+---
+
+import ProgressCircleDemo from '@/demos/progress-circle';
+import ProgressCircleMotionDemo from '@/demos/progress-circle.motion';
+
+<Preview
+  name="progress-circle"
+  plain={<ProgressCircleDemo />}
+  motion={<ProgressCircleMotionDemo />}
+  importLine="import { ProgressCircle } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add progress-circle
+```
+
+## Usage
+
+```tsx
+import { ProgressCircle } from '@/components/ui/progress-circle';
+
+<ProgressCircle value={72} size="lg" label="Profile complete" />;
+<ProgressCircle value={3} max={5} label="Steps done">
+  3/5
+</ProgressCircle>;
+```
+
+The arc's length follows the value and settles from wherever it is. The figure in the middle is the
+formatted value, or your own children such as `3/5`; the small ring has no room for one.
+`value={null}` spins a short arc.
+
+The motion variant sweeps the ring from empty to its value the first time it is seen, the figure fading up as the arc lands.
+
+## Props
+
+Every prop of Base UI's `Progress.Root` is accepted as well.
+
+<TypeTable
+  type={{
+    value: {
+      type: 'number | null',
+      description: 'The amount done; `null` while unknown. Required.',
+    },
+    label: { type: 'string', description: 'Names the ring. Required.' },
+    showLabel: { type: 'boolean', default: 'false', description: 'Show the label under the ring.' },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'xl'",
+      default: "'md'",
+      description: '24, 48, 80 or 112 pixels.',
+    },
+    tone: {
+      type: "'accent' | 'positive' | 'warning' | 'negative'",
+      default: "'accent'",
+      description: 'The arc colour.',
+    },
+    children: { type: 'ReactNode', description: 'Replaces the percentage in the middle.' },
+  }}
+/>
+
+## Accessibility
+
+- A progressbar named by `label`; the drawing and the figure are hidden, the value is read once.
+- Under reduced motion the arc does not glide and the indeterminate ring breathes instead of spinning.
+
+<ComponentSource path="progress-circle/progress-circle.tsx" />

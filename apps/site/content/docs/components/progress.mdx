@@ -1,0 +1,75 @@
+---
+title: Progress
+description: How far a task has got: determinate, indeterminate or in steps.
+---
+
+import ProgressDemo from '@/demos/progress';
+import ProgressMotionDemo from '@/demos/progress.motion';
+
+<Preview
+  name="progress"
+  plain={<ProgressDemo />}
+  motion={<ProgressMotionDemo />}
+  importLine="import { Progress } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add progress
+```
+
+## Usage
+
+```tsx
+import { Progress } from '@/components/ui/progress';
+
+<Progress value={64} label="Uploading statements" showValue description="12 of 19 files" />;
+<Progress value={null} label="Preparing export" />;
+<Progress value={2} max={4} segments={4} label="Account setup" />;
+```
+
+The fill scales instead of changing its width, so a moving value never lays the page out again, and
+it settles from wherever it is when the value changes. `value={null}` is a task whose length is not
+known yet: a short band travels along the track, and breathes in place under reduced motion.
+
+`segments` splits the track for the steps of a flow or a quota in units; a value between steps
+part-fills the segment in progress.
+
+The motion variant grows the fill from empty to its value the first time it is seen, segments one after another.
+
+## Props
+
+Every prop of Base UI's `Progress.Root` is accepted as well, including `format` and `locale`.
+
+<TypeTable
+  type={{
+    value: {
+      type: 'number | null',
+      description: 'The amount done; `null` while unknown. Required.',
+    },
+    'min, max': { type: 'number', default: '0, 100', description: 'The range.' },
+    label: { type: 'ReactNode', description: 'What is progressing. Names the bar.' },
+    showValue: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Show the formatted value at the end of the label row.',
+    },
+    description: { type: 'ReactNode', description: 'Small print under the bar.' },
+    size: { type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Track thickness.' },
+    tone: {
+      type: "'accent' | 'positive' | 'warning' | 'negative'",
+      default: "'accent'",
+      description: 'The fill colour.',
+    },
+    segments: { type: 'number', description: 'Split the track into this many segments.' },
+  }}
+/>
+
+## Accessibility
+
+- A progressbar named by its label, with `aria-valuenow` and a formatted value text.
+- While indeterminate it has no value, which is how assistive technology knows the length is unknown.
+- Under reduced motion the indeterminate band fades in place and value changes do not glide.
+
+<ComponentSource path="progress/progress.tsx" />

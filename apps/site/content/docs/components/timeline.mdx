@@ -1,0 +1,85 @@
+---
+title: Timeline
+description: Events in order: an audit trail, the history of a record, an activity feed.
+---
+
+import TimelineDemo from '@/demos/timeline';
+import TimelineMotionDemo from '@/demos/timeline.motion';
+
+<Preview
+  name="timeline"
+  plain={<TimelineDemo />}
+  motion={<TimelineMotionDemo />}
+  importLine="import { Timeline, TimelineItem } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add timeline
+```
+
+## Usage
+
+```tsx
+import { Timeline, TimelineItem } from '@/components/ui/timeline';
+
+<Timeline>
+  <TimelineItem title="Invoice sent" time={{ dateTime: '2026-03-02', label: '2 Mar' }} />
+  <TimelineItem title="Paid in full" tone="positive" icon={<ReceiptIcon weight="bold" />}>
+    Bank transfer, reference 4471.
+  </TimelineItem>
+</Timeline>;
+```
+
+Each event has a marker on a rail: a dot by default, an icon in a tile tinted by `tone`, or your own
+`marker` such as an Avatar for an activity feed. `density="compact"` tightens the rhythm for a side
+panel.
+
+The motion variant brings the events in one after another, top first, the first time the timeline is seen.
+
+## Props
+
+### Timeline
+
+Every prop of an `ol` is accepted as well.
+
+<TypeTable
+  type={{
+    density: {
+      type: "'comfortable' | 'compact'",
+      default: "'comfortable'",
+      description: 'Space between events.',
+    },
+  }}
+/>
+
+### TimelineItem
+
+Every prop of an `li` is accepted as well.
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode', description: 'What happened. Required.' },
+    time: {
+      type: '{ dateTime: string; label: ReactNode }',
+      description: 'When, for a `time` element.',
+    },
+    icon: { type: 'ReactNode', description: 'An icon in a tile tinted by `tone`.' },
+    marker: { type: 'ReactNode', description: 'Any marker in place of the dot or icon.' },
+    tone: {
+      type: "'neutral' | 'accent' | 'positive' | 'warning' | 'negative'",
+      default: "'neutral'",
+      description: 'The marker colour.',
+    },
+    children: { type: 'ReactNode', description: 'Detail under the title.' },
+  }}
+/>
+
+## Accessibility
+
+- An ordered list: assistive technology says how many events there are and where each sits.
+- Times are `time` elements with a machine-readable `dateTime`.
+- Markers are decorative; the title says what happened.
+
+<ComponentSource path="timeline/timeline.tsx" />

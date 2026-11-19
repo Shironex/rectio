@@ -1,0 +1,142 @@
+---
+title: Spinner and loaders
+description: Spinners, a loading overlay and a loading state for actions.
+---
+
+import SpinnerDemo from '@/demos/spinner';
+import SpinnerMotionDemo from '@/demos/spinner.motion';
+
+<Preview
+  name="spinner"
+  plain={<SpinnerDemo />}
+  motion={<SpinnerMotionDemo />}
+  importLine="import { LoadingOverlay } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add spinner
+```
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { LoadingOverlay, Spinner, useLoadingAction } from '@/components/ui/spinner';
+
+<Spinner variant="dots" label="Loading invoices" />;
+
+const save = useLoadingAction(() => api.save(draft));
+<Button loading={save.loading} onClick={() => void save.run()}>
+  Save
+</Button>;
+
+<section className="relative" aria-busy={refreshing}>
+  {/* content */}
+  <LoadingOverlay visible={refreshing} label="Refreshing rates" />
+</section>;
+```
+
+A spinner says work is under way and its length is unknown. Prefer a skeleton when the shape of the
+result is known, and a progress bar when the amount done is. Pick the kind by what is waiting:
+
+- `ring` for most waits.
+- `dots` inline in text and in feeds.
+- `bars` for streams and uploads.
+- `pulse` for something live, such as a sync.
+- `orbit` for longer background work.
+
+Every cycle is a multiple of the `loop` token, so a theme with slower motion slows every loader
+together. Under reduced motion nothing turns or travels: each one breathes in place.
+
+`useLoadingAction` wraps an async action for a button. A fast action finishes without a spinner; a
+slow one shows it for at least `minimum`, so it never blinks; a second press while it runs is
+ignored.
+
+`LoadingOverlay` covers its section, or the page with `fullPage`, while it reloads. It fades in after
+a short delay, so a fast reload never flashes it.
+
+The motion variant of `LoadingOverlay` fades away when the section is ready instead of cutting out.
+
+## Props
+
+### Spinner
+
+Every prop of a `span` is accepted as well.
+
+<TypeTable
+  type={{
+    variant: {
+      type: "'ring' | 'dots' | 'bars' | 'pulse' | 'orbit'",
+      default: "'ring'",
+      description: 'The kind of loader.',
+    },
+    size: { type: "'sm' | 'md' | 'lg'", default: "'md'", description: '16, 24 or 40 pixels.' },
+    tone: {
+      type: "'accent' | 'current' | 'muted'",
+      default: "'accent'",
+      description: '`current` takes the text colour around it.',
+    },
+    label: {
+      type: 'string',
+      default: "'Loading'",
+      description: 'What is happening, announced once.',
+    },
+    showLabel: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Show the label beside the spinner.',
+    },
+    decorative: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Hidden from assistive technology, inside something already busy.',
+    },
+  }}
+/>
+
+### LoadingOverlay
+
+Every prop of a `div` is accepted as well.
+
+<TypeTable
+  type={{
+    visible: { type: 'boolean', description: 'Covers the section while true. Required.' },
+    label: {
+      type: 'string',
+      default: "'Loading'",
+      description: 'Shown under the spinner and announced.',
+    },
+    fullPage: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Cover the viewport instead of the nearest positioned ancestor.',
+    },
+    variant: { type: 'SpinnerVariant', default: "'ring'", description: 'The spinner it shows.' },
+  }}
+/>
+
+### useLoadingAction
+
+`useLoadingAction(action, { delay, minimum })` returns `{ loading, run }`.
+
+<TypeTable
+  type={{
+    delay: { type: 'number', default: '150', description: 'Milliseconds before loading shows.' },
+    minimum: {
+      type: 'number',
+      default: '500',
+      description: 'Once shown, loading stays at least this long (ms).',
+    },
+  }}
+/>
+
+## Accessibility
+
+- A spinner is a status with its label; a decorative one is hidden.
+- The overlay's label is announced once; mark the covered section `aria-busy`.
+- With `useLoadingAction`, the button keeps focus and its name while loading.
+- Under reduced motion every loader fades in place.
+
+<ComponentSource path="spinner/spinner.tsx" />

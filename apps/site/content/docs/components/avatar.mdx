@@ -1,0 +1,71 @@
+---
+title: Avatar
+description: A person or a team as a photo or initials, with an optional status.
+---
+
+import AvatarDemo from '@/demos/avatar';
+
+<Preview name="avatar" plain={<AvatarDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add avatar
+```
+
+## Usage
+
+```tsx
+import { Avatar } from '@/components/ui/avatar';
+
+<Avatar name="Ana Ruiz" src="/people/ana.jpg" status="online" />;
+<Avatar name="Treasury" square size="lg" />;
+```
+
+Without a photo, or while it loads, the avatar shows the initials on one of six identity tints. The
+tint comes from the name, so a person keeps the same colour in every list and on every screen. The
+tints are tokens (`identity-1` to `identity-6`, a subtle fill and a strong text each), checked for
+contrast in every theme and mode.
+
+Status differs in shape as well as colour: online is solid, away has a hollow centre, busy carries a
+bar, offline is an outline. Use `square` for teams, companies and anything that is not a person.
+
+## Props
+
+Every prop of Base UI's `Avatar.Root` is accepted as well.
+
+<TypeTable
+  type={{
+    name: {
+      type: 'string',
+      description: 'The person or team. Names the avatar and gives the initials. Required.',
+    },
+    src: {
+      type: 'string',
+      description: 'A photo. The initials show until it loads, and if it fails.',
+    },
+    size: {
+      type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'",
+      default: "'md'",
+      description: '20, 24, 32, 40 or 56 pixels. `xs` shows one initial.',
+    },
+    square: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Square corners, for teams and organisations.',
+    },
+    status: {
+      type: "'online' | 'away' | 'busy' | 'offline'",
+      description: 'A dot at the corner, also said in the accessible name.',
+    },
+    statusLabel: { type: 'string', description: 'Words for the status, such as `back at 14:00`.' },
+  }}
+/>
+
+## Accessibility
+
+- One image named by the person and the status: "Lena Fischer, busy".
+- The photo has empty alt text and the initials are hidden, so nothing is read twice.
+- The status is never colour alone: the dot changes shape and the words are in the name.
+
+<ComponentSource path="avatar/avatar.tsx" />

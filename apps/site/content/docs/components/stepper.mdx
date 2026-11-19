@@ -1,0 +1,71 @@
+---
+title: Stepper
+description: Where the user is in a flow of a few steps.
+---
+
+import StepperDemo from '@/demos/stepper';
+
+<Preview name="stepper" plain={<StepperDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add stepper
+```
+
+## Usage
+
+```tsx
+import { Stepper } from '@/components/ui/stepper';
+
+<Stepper
+  label="Account setup"
+  current={2}
+  steps={[
+    { title: 'Company' },
+    { title: 'Bank account' },
+    { title: 'Tax settings', description: 'VAT number and rates' },
+    { title: 'Invite team' },
+  ]}
+  onStepSelect={goToStep}
+/>;
+```
+
+Steps before `current` are complete, after it upcoming. A step can override its status, such as
+`error` for a step that needs attention. With `onStepSelect`, completed steps become buttons that go
+back; upcoming steps stay text, so the order of the flow holds.
+
+On a narrow row the horizontal stepper keeps only the current step's title; vertical steps carry
+descriptions comfortably.
+
+## Props
+
+Every prop of an `ol` is accepted as well.
+
+<TypeTable
+  type={{
+    steps: {
+      type: '{ title: ReactNode; description?: ReactNode; status?: StepStatus }[]',
+      description: 'The steps. Required.',
+    },
+    current: { type: 'number', description: 'Index of the step in progress. Required.' },
+    orientation: {
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'The layout.',
+    },
+    label: { type: 'string', default: "'Progress'", description: 'Names the list.' },
+    onStepSelect: {
+      type: '(index: number) => void',
+      description: 'Lets completed steps be revisited.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- An ordered list; the current step has `aria-current="step"`.
+- Each step says its status in words: completed, current step, not started, needs attention.
+- Titles hidden on a narrow row stay readable to assistive technology.
+
+<ComponentSource path="stepper/stepper.tsx" />

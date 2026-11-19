@@ -1,0 +1,49 @@
+---
+title: Separator
+description: A hairline between groups of content, with an optional label.
+---
+
+import SeparatorDemo from '@/demos/separator';
+
+<Preview name="separator" plain={<SeparatorDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add separator
+```
+
+## Usage
+
+```tsx
+import { Separator } from '@/components/ui/separator';
+
+<Separator />;
+<Separator label="or" />;
+<Separator orientation="vertical" />;
+```
+
+Horizontal by default. A vertical separator stretches to the height of its row. `label` puts words
+in the middle of a horizontal rule; `tone="strong"` holds its own against busy content.
+
+## Props
+
+Every prop of Base UI's `Separator` is accepted as well.
+
+<TypeTable
+  type={{
+    orientation: {
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'The direction of the rule.',
+    },
+    label: { type: 'ReactNode', description: 'Words in the middle of a horizontal rule.' },
+    tone: { type: "'default' | 'strong'", default: "'default'", description: 'The line colour.' },
+  }}
+/>
+
+## Accessibility
+
+- A separator with its orientation. With a label, the label is read and the two rules stay separators.
+
+<ComponentSource path="separator/separator.tsx" />

@@ -1,0 +1,56 @@
+---
+title: Collapsible
+description: One section that shows and hides, such as advanced options.
+---
+
+import CollapsibleDemo from '@/demos/collapsible';
+
+<Preview name="collapsible" plain={<CollapsibleDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add collapsible
+```
+
+## Usage
+
+```tsx
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+<Collapsible>
+  <CollapsibleTrigger>Advanced options</CollapsibleTrigger>
+  <CollapsiblePanel>{/* fields */}</CollapsiblePanel>
+</Collapsible>;
+```
+
+The trigger is a quiet row with a caret that turns. Draw it as a button with
+`render={<Button variant="ghost" />}` and `caret={false}`. The panel fades in without animating its
+height, like the accordion.
+
+## Props
+
+### Collapsible
+
+Base UI's `Collapsible.Root`: `open`, `defaultOpen`, `onOpenChange`, `disabled`.
+
+### CollapsibleTrigger
+
+Every prop of Base UI's `Collapsible.Trigger`.
+
+<TypeTable
+  type={{
+    caret: { type: 'boolean', default: 'true', description: 'Show the turning caret.' },
+  }}
+/>
+
+### CollapsiblePanel
+
+Base UI's `Collapsible.Panel`.
+
+## Accessibility
+
+- The trigger is a button with `aria-expanded` that controls the panel.
+- The caret turns in place and stops animating under reduced motion.
+
+<ComponentSource path="collapsible/collapsible.tsx" />

@@ -1,0 +1,81 @@
+---
+title: Alert
+description: A message about the page or the task in hand, with actions.
+---
+
+import AlertDemo from '@/demos/alert';
+import AlertMotionDemo from '@/demos/alert.motion';
+
+<Preview
+  name="alert"
+  plain={<AlertDemo />}
+  motion={<AlertMotionDemo />}
+  importLine="import { Alert } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add alert
+```
+
+## Usage
+
+```tsx
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+
+<Alert tone="warning" title="Bank feed paused" actions={<Button size="sm">Reconnect</Button>}>
+  Transactions after 12 March are not imported.
+</Alert>;
+```
+
+Pick the tone by meaning: `danger` for a failure that blocks, `warning` for a risk, `success` when
+something is done, `info` for news, `neutral` for a quiet callout. The icon and the title say the
+tone, so the alert reads without colour; the whole box carries the tint, never a stripe down one side.
+`variant="outline"` sets the alert on the surface with only the icon tinted, for a callout inside a
+panel.
+
+An alert that is part of the page from the start stays silent. One that appears after something
+happened should announce itself: `live="assertive"` for an error, `live="polite"` for news.
+
+The motion variant lifts away when dismissed instead of vanishing, and rises in when it arrives live.
+
+## Props
+
+Every prop of a `div` is accepted as well.
+
+<TypeTable
+  type={{
+    tone: {
+      type: "'neutral' | 'info' | 'success' | 'warning' | 'danger'",
+      default: "'info'",
+      description: 'The meaning.',
+    },
+    variant: {
+      type: "'subtle' | 'outline'",
+      default: "'subtle'",
+      description: 'Tinted box, or surface with a tinted icon.',
+    },
+    title: { type: 'ReactNode', description: 'One short line that says what happened.' },
+    icon: { type: 'ReactNode | null', description: "Replaces the tone's icon; `null` drops it." },
+    actions: { type: 'ReactNode', description: 'Buttons or links under the text.' },
+    dismissible: { type: 'boolean', default: 'false', description: 'Adds a dismiss button.' },
+    open: { type: 'boolean', description: 'Controls whether it shows.' },
+    onDismiss: { type: '() => void', description: 'Called by the dismiss button.' },
+    dismissLabel: {
+      type: 'string',
+      default: "'Dismiss'",
+      description: 'Name of the dismiss button.',
+    },
+    live: { type: "'polite' | 'assertive'", description: 'Announce the alert when it appears.' },
+  }}
+/>
+
+## Accessibility
+
+- Silent by default; `live` makes it a status or an alert that is announced on arrival.
+- The tone icon is decorative; the title carries the meaning.
+- The dismiss button is named and reachable from the keyboard, with a 44 pixel target on touch screens.
+
+<ComponentSource path="alert/alert.tsx" />

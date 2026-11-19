@@ -1,0 +1,61 @@
+---
+title: EmptyState
+description: What a screen or a panel shows with nothing in it, and the next step.
+---
+
+import EmptyStateDemo from '@/demos/empty-state';
+
+<Preview name="empty-state" plain={<EmptyStateDemo />} />
+
+## Install
+
+```sh
+pnpm dlx rectio add empty-state
+```
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+
+<EmptyState
+  icon={<UsersThreeIcon weight="duotone" />}
+  title="Invite your team"
+  description="Approvers and accountants see the reports you share with them."
+  actions={<Button>Invite people</Button>}
+/>;
+```
+
+Say what is missing in a few words, then the next step. One primary action is usually enough.
+`size` scales it from a slot in a panel (`sm`) to a whole page (`lg`); `variant="dashed"` frames the
+area, for an empty slot or a drop zone. `media` takes a larger picture in place of the icon tile.
+
+The pro blocks build their empty notes on this component.
+
+## Props
+
+Every prop of a `div` is accepted as well, including `role`.
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode', description: 'What is missing. Required.' },
+    description: { type: 'ReactNode', description: 'The next step, or why it is empty.' },
+    icon: { type: 'ReactNode', description: 'An icon, drawn in a soft tile.' },
+    media: { type: 'ReactNode', description: 'A larger picture in place of the icon tile.' },
+    actions: { type: 'ReactNode', description: 'The way out.' },
+    size: { type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Spacing and type scale.' },
+    variant: {
+      type: "'plain' | 'dashed'",
+      default: "'plain'",
+      description: 'Frame the area it fills.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- The icon is decorative; the title says what is missing.
+- Give it `role="status"` when it replaces content that was loading, so the result is announced.
+
+<ComponentSource path="empty-state/empty-state.tsx" />
