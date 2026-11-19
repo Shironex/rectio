@@ -14,7 +14,8 @@ export type CalendarProps = DistributiveOmit<DayPickerProps, 'locale'> & {
   dateLocale?: DayPickerLocale;
 };
 
-const day = 'size-(--rx-calendar-day-size)';
+/** Day size from tokens; touch screens get the larger size so every day is a full target. */
+const day = 'size-(--rx-calendar-day-size) pointer-coarse:size-(--rx-calendar-day-size-touch)';
 
 /**
  * State lives on the day cell (`selected`, `today`, `range_start`...) and paints its button. The
@@ -24,7 +25,9 @@ const CLASS_NAMES: DayPickerProps['classNames'] = {
   root: 'relative w-fit p-3',
   months: 'relative flex flex-col gap-6 sm:flex-row',
   month: 'flex flex-col gap-2',
-  month_caption: cn('flex h-(--rx-calendar-day-size) items-center ps-2'),
+  month_caption: cn(
+    'flex h-(--rx-calendar-day-size) items-center ps-2 pointer-coarse:h-(--rx-calendar-day-size-touch)',
+  ),
   caption_label: 'text-base font-medium text-fg',
   // The nav sits inside the months box, on the first caption's line.
   nav: 'absolute end-0 top-0 z-10 flex items-center gap-1',
