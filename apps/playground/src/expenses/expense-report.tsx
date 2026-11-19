@@ -245,7 +245,8 @@ function Report({ back }: { back: string | null }) {
       claimed(before.filter((e) => !removed.has(e.id) && inPeriod(e.date, period))),
     );
     const id = toast.add({
-      type: 'success',
+      // A removal is news with an undo, not a success: the green check stays for saves.
+      type: 'info',
       // One line is named, so two toasts in a row say which Undo brings back which expense.
       title:
         count === 1 && selected[0] !== undefined
