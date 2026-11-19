@@ -145,7 +145,9 @@ export function Ledger({
           {ordered.length === 0 && (
             <TableRow>
               <TableCell colSpan={columns} className="h-auto py-10 text-center text-fg-muted">
-                No postings to this account in the period.
+                {account === undefined
+                  ? 'No entries in the period.'
+                  : 'No postings to this account in the period.'}
               </TableCell>
             </TableRow>
           )}
@@ -301,7 +303,7 @@ export function Ledger({
         )}
       </Table>
 
-      {account === undefined && (
+      {account === undefined && ordered.length > 0 && (
         <p role="status" className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
           {totals.balanced ? (
             <>

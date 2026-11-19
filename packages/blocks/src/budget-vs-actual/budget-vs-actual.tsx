@@ -13,6 +13,7 @@ import {
 
 import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
+import { EmptyNote } from '../lib/empty-note';
 import { Swatch } from '../lib/chart';
 import { formatPercent, resolveLocale } from '../lib/finance';
 import {
@@ -135,99 +136,107 @@ export function BudgetVsActual({
       className={className}
       bodyClassName="gap-3"
     >
-      <ul className="hidden flex-wrap items-center gap-x-4 gap-y-1 text-sm text-fg-muted @2xl:flex">
-        <li className="inline-flex items-center gap-1.5">
-          <span
-            aria-hidden
-            className="inline-block h-2.5 w-3.5 rounded-badge border border-chart-reference"
-          />
-          Budget
-        </li>
-        <li className="inline-flex items-center gap-1.5">
-          <Swatch color="series-1" />
-          Actual
-        </li>
-        <li className="inline-flex items-center gap-1.5">
-          <Swatch color="series-2" />
-          Over budget
-        </li>
-      </ul>
-      <Table>
-        <TableCaption className="sr-only">
-          Budget against actual by category, in {currency}
-        </TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Category</TableHead>
-            <TableHead className="hidden w-2/5 @2xl:table-cell">
-              <span className="sr-only">Actual against budget</span>
-              <span aria-hidden>Share of budget</span>
-            </TableHead>
-            <TableHead align="end" className="hidden @xl:table-cell">
-              Budget
-            </TableHead>
-            <TableHead align="end" className="hidden @xl:table-cell">
-              Actual
-            </TableHead>
-            <TableHead align="end">Variance</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {lines.map((line) => (
-            <TableRow key={line.id}>
-              <TableCell>
-                <span className="block">{line.category}</span>
-                <span className="block text-sm text-fg-muted @xl:hidden">
-                  <Money amount={line.actual} currency={currency} locale={locale} /> of{' '}
-                  <Money amount={line.budget} currency={currency} locale={locale} />
-                </span>
-              </TableCell>
-              <TableCell className="hidden @2xl:table-cell">
-                <Meter budget={line.budget} actual={line.actual} track={track} />
-              </TableCell>
-              <TableCell align="end" className="hidden text-fg-muted @xl:table-cell">
-                <Money amount={line.budget} currency={currency} locale={locale} />
-              </TableCell>
-              <TableCell align="end" className="hidden @xl:table-cell">
-                <Money amount={line.actual} currency={currency} locale={locale} />
-              </TableCell>
-              <TableCell align="end">
-                <VarianceCell
-                  v={variance(line, kind, currency)}
-                  currency={currency}
-                  locale={locale}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TableHead scope="row" className="text-fg">
-              Total
-              <span className="block text-sm font-regular whitespace-normal text-fg-muted @xl:hidden">
-                <Money amount={summary.actual} currency={currency} locale={locale} /> of{' '}
-                <Money amount={summary.budget} currency={currency} locale={locale} />
-              </span>
-            </TableHead>
-            <TableCell className="hidden @2xl:table-cell" />
-            <TableCell align="end" className="hidden @xl:table-cell">
-              <Money amount={summary.budget} currency={currency} locale={locale} />
-            </TableCell>
-            <TableCell align="end" className="hidden @xl:table-cell">
-              <Money
-                amount={summary.actual}
-                currency={currency}
-                locale={locale}
-                className="font-strong"
+      {lines.length === 0 ? (
+        <EmptyNote title="No budget for this period">
+          Set a budget per category to compare spending against it.
+        </EmptyNote>
+      ) : (
+        <>
+          <ul className="hidden flex-wrap items-center gap-x-4 gap-y-1 text-sm text-fg-muted @2xl:flex">
+            <li className="inline-flex items-center gap-1.5">
+              <span
+                aria-hidden
+                className="inline-block h-2.5 w-3.5 rounded-badge border border-chart-reference"
               />
-            </TableCell>
-            <TableCell align="end">
-              <VarianceCell v={summary.variance} currency={currency} locale={locale} />
-            </TableCell>
-          </TableRow>
-        </TableFooter>
-      </Table>
+              Budget
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <Swatch color="series-1" />
+              Actual
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <Swatch color="series-2" />
+              Over budget
+            </li>
+          </ul>
+          <Table>
+            <TableCaption className="sr-only">
+              Budget against actual by category, in {currency}
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Category</TableHead>
+                <TableHead className="hidden w-2/5 @2xl:table-cell">
+                  <span className="sr-only">Actual against budget</span>
+                  <span aria-hidden>Share of budget</span>
+                </TableHead>
+                <TableHead align="end" className="hidden @xl:table-cell">
+                  Budget
+                </TableHead>
+                <TableHead align="end" className="hidden @xl:table-cell">
+                  Actual
+                </TableHead>
+                <TableHead align="end">Variance</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {lines.map((line) => (
+                <TableRow key={line.id}>
+                  <TableCell>
+                    <span className="block">{line.category}</span>
+                    <span className="block text-sm text-fg-muted @xl:hidden">
+                      <Money amount={line.actual} currency={currency} locale={locale} /> of{' '}
+                      <Money amount={line.budget} currency={currency} locale={locale} />
+                    </span>
+                  </TableCell>
+                  <TableCell className="hidden @2xl:table-cell">
+                    <Meter budget={line.budget} actual={line.actual} track={track} />
+                  </TableCell>
+                  <TableCell align="end" className="hidden text-fg-muted @xl:table-cell">
+                    <Money amount={line.budget} currency={currency} locale={locale} />
+                  </TableCell>
+                  <TableCell align="end" className="hidden @xl:table-cell">
+                    <Money amount={line.actual} currency={currency} locale={locale} />
+                  </TableCell>
+                  <TableCell align="end">
+                    <VarianceCell
+                      v={variance(line, kind, currency)}
+                      currency={currency}
+                      locale={locale}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableHead scope="row" className="text-fg">
+                  Total
+                  <span className="block text-sm font-regular whitespace-normal text-fg-muted @xl:hidden">
+                    <Money amount={summary.actual} currency={currency} locale={locale} /> of{' '}
+                    <Money amount={summary.budget} currency={currency} locale={locale} />
+                  </span>
+                </TableHead>
+                <TableCell className="hidden @2xl:table-cell" />
+                <TableCell align="end" className="hidden @xl:table-cell">
+                  <Money amount={summary.budget} currency={currency} locale={locale} />
+                </TableCell>
+                <TableCell align="end" className="hidden @xl:table-cell">
+                  <Money
+                    amount={summary.actual}
+                    currency={currency}
+                    locale={locale}
+                    className="font-strong"
+                  />
+                </TableCell>
+                <TableCell align="end">
+                  <VarianceCell v={summary.variance} currency={currency} locale={locale} />
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </>
+      )}
     </BlockPanel>
   );
 }

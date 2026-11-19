@@ -346,7 +346,8 @@ export function InvoiceList({
       </div>
 
       <DataTable caption={`${title}, ${FILTER_LABELS[filter].toLowerCase()}`} hideCaption>
-        <DataTableHeader table={table} />
+        {/* On a narrow block the Sort by control above sorts; the header stays for screen readers. */}
+        <DataTableHeader table={table} className="@max-xl:sr-only" />
         <DataTableBody
           table={table}
           empty={

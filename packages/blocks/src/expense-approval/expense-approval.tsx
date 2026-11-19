@@ -27,6 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  cn,
 } from '@rectio/ui';
 import { useState, type SyntheticEvent, type KeyboardEvent } from 'react';
 
@@ -121,7 +122,12 @@ export function ExpenseApproval({
       bodyClassName="gap-5"
     >
       {/* Bulk actions sit where the eye already is: on top of the list they act on. */}
-      <div className="flex min-h-(--rx-control-height-md) flex-wrap items-center justify-between gap-3 rounded-control bg-surface-sunken px-3 py-1.5">
+      <div
+        className={cn(
+          'flex min-h-(--rx-control-height-md) flex-wrap items-center justify-between gap-3 rounded-control bg-surface-sunken px-3 py-1.5',
+          pending.length === 0 && 'hidden',
+        )}
+      >
         <label className="flex cursor-pointer items-center gap-3 text-sm">
           <Checkbox
             aria-label="Select all pending expenses"

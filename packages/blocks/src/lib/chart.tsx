@@ -100,30 +100,48 @@ export interface ChartTooltipProps {
   rows: readonly TooltipRow[];
   currency: string;
   locale: string;
+  /**
+   * `row` lays the figures out on one line, short enough to sit over the legend row above the
+   * plot, so it never hides the marks or the summary figures above them. `stack` is a column.
+   */
+  layout?: 'stack' | 'row';
 }
 
 /**
  * Tooltip content in the theme: the period, then each figure by name with its legend key. Money
  * signs carry the direction, so the colour key is never the only cue.
  */
-export function ChartTooltip({ title, rows, currency, locale }: ChartTooltipProps) {
+export function ChartTooltip({
+  title,
+  rows,
+  currency,
+  locale,
+  layout = 'stack',
+}: ChartTooltipProps) {
+  const row = layout === 'row';
   return (
     <div
       className={cn(
-        'flex min-w-44 flex-col gap-1.5 rounded-control border border-chart-tooltip-border bg-chart-tooltip px-3 py-2',
+        'flex rounded-control border border-chart-tooltip-border bg-chart-tooltip px-3 py-2',
         'text-sm text-fg shadow-overlay',
+        row
+          ? 'flex-wrap items-center gap-x-4 gap-y-1 whitespace-nowrap'
+          : 'min-w-44 flex-col gap-1.5',
       )}
     >
       <p className="font-medium">{title}</p>
-      <dl className="flex flex-col gap-1">
-        {rows.map((row, index) => (
-          <div key={index} className="flex items-center justify-between gap-4">
+      <dl className={cn('flex', row ? 'flex-wrap items-center gap-x-4 gap-y-1' : 'flex-col gap-1')}>
+        {rows.map((item, index) => (
+          <div
+            key={index}
+            className={cn('flex items-center gap-4', row ? 'gap-1.5' : 'justify-between')}
+          >
             <dt className="inline-flex items-center gap-1.5 text-fg-muted">
-              {row.color !== undefined && <Swatch color={row.color} shape={row.shape} />}
-              {row.label}
+              {item.color !== undefined && <Swatch color={item.color} shape={item.shape} />}
+              {item.label}
             </dt>
-            <dd className={cn('text-end', row.strong === true && 'font-strong')}>
-              <Money amount={row.amount} currency={currency} locale={locale} />
+            <dd className={cn('text-end', item.strong === true && 'font-strong')}>
+              <Money amount={item.amount} currency={currency} locale={locale} />
             </dd>
           </div>
         ))}
@@ -132,8 +150,8 @@ export function ChartTooltip({ title, rows, currency, locale }: ChartTooltipProp
   );
 }
 
-/** How far above the plot a tooltip sits, in px: clear of the bars, over the legend row. */
-export const TOOLTIP_LIFT = 96;
+/** How far above the plot a one-line tooltip sits, in px: over the legend row, clear of the bars. */
+export const TOOLTIP_LIFT = 44;
 
 /** The hovered or focused datum: Recharts' active index, read back into the chart's own data. */
 export function activeDatum<T>(props: TooltipContentProps, data: readonly T[]): T | undefined {

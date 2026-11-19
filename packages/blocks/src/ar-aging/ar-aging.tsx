@@ -24,6 +24,7 @@ import {
 
 import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
+import { EmptyNote } from '../lib/empty-note';
 import {
   ChartFigure,
   ChartTooltip,
@@ -111,6 +112,7 @@ export function ArAging({
     if (datum === undefined) return null;
     return (
       <ChartTooltip
+        layout="row"
         title={`${BUCKET_LABEL[datum.bucket]}, ${formatPercent(datum.share, locale, { digits: 0 })} of the total`}
         currency={currency}
         locale={locale}
@@ -131,160 +133,170 @@ export function ArAging({
       className={className}
       bodyClassName="gap-4"
     >
-      <ChartFigure
-        summary={`Receivables by days past due. ${AGING_BUCKETS.map((b) => `${BUCKET_LABEL[b]}: ${formatPercent(report.shares[b], locale, { digits: 0 })}`).join('; ')}.`}
-        plotClassName="h-48"
-        table={
+      {receivables.length === 0 ? (
+        <EmptyNote title="Nothing outstanding">
+          Every invoice is paid. New invoices appear here by how late they are.
+        </EmptyNote>
+      ) : (
+        <>
+          <ChartFigure
+            summary={`Receivables by days past due. ${AGING_BUCKETS.map((b) => `${BUCKET_LABEL[b]}: ${formatPercent(report.shares[b], locale, { digits: 0 })}`).join('; ')}.`}
+            plotClassName="h-48"
+            table={
+              <Table>
+                <TableCaption className="sr-only">
+                  Receivables by bucket, in {currency}
+                </TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Bucket</TableHead>
+                    <TableHead align="end">Outstanding</TableHead>
+                    <TableHead align="end">Share</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.map((d) => (
+                    <TableRow key={d.bucket}>
+                      <TableCell>{BUCKET_LABEL[d.bucket]}</TableCell>
+                      <TableCell align="end">
+                        <Money amount={d.amount} currency={currency} locale={locale} />
+                      </TableCell>
+                      <TableCell align="end" className="numeric">
+                        {formatPercent(d.share, locale, { digits: 0 })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            }
+          >
+            <BarChart
+              responsive
+              data={data}
+              margin={{ top: 20, right: 4, bottom: 0, left: 4 }}
+              style={{ width: '100%', height: '100%' }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
+              <YAxis
+                width="auto"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={4}
+                tickFormatter={(value: number) => formatCompactMoney(value, currency, locale)}
+              />
+              <Tooltip
+                content={tooltip}
+                cursor={{ fill: 'var(--rx-surface-hover)' }}
+                // One line above the plot, over the legend, so the tooltip never covers the bars it describes.
+                position={{ y: -TOOLTIP_LIFT }}
+                allowEscapeViewBox={{ x: false, y: true }}
+                offset={16}
+                isAnimationActive={false}
+              />
+              <Bar
+                dataKey="amount"
+                name="Outstanding"
+                radius={[2, 2, 0, 0]}
+                maxBarSize={56}
+                isAnimationActive={false}
+                shape={(props: BarShapeProps) => (
+                  <Rectangle
+                    {...props}
+                    fill={chartColor(BUCKET_COLOR[data[props.index]?.bucket ?? 'current'])}
+                  />
+                )}
+              >
+                <LabelList
+                  dataKey="amount"
+                  position="top"
+                  offset={6}
+                  // On a narrow block the labels would collide; the table below carries the figures.
+                  className="hidden fill-fg font-medium @lg:inline"
+                  formatter={(value: unknown) =>
+                    typeof value === 'number' ? formatCompactMoney(value, currency, locale) : ''
+                  }
+                />
+              </Bar>
+            </BarChart>
+          </ChartFigure>
+
           <Table>
-            <TableCaption className="sr-only">Receivables by bucket, in {currency}</TableCaption>
+            <TableCaption className="sr-only">
+              Receivables by customer and bucket, in {currency}
+            </TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead>Bucket</TableHead>
-                <TableHead align="end">Outstanding</TableHead>
-                <TableHead align="end">Share</TableHead>
+                <TableHead>Customer</TableHead>
+                {AGING_BUCKETS.map((bucket) => (
+                  <TableHead key={bucket} align="end" className="hidden @4xl:table-cell">
+                    <span className="sr-only">{BUCKET_LABEL[bucket]}</span>
+                    <span aria-hidden>{BUCKET_SHORT[bucket]}</span>
+                  </TableHead>
+                ))}
+                <TableHead align="end">Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((d) => (
-                <TableRow key={d.bucket}>
-                  <TableCell>{BUCKET_LABEL[d.bucket]}</TableCell>
-                  <TableCell align="end">
-                    <Money amount={d.amount} currency={currency} locale={locale} />
+              {shown.map((row) => (
+                <TableRow key={row.customer}>
+                  <TableCell>
+                    <span className="block">{row.customer}</span>
+                    <span
+                      className={cn(
+                        'block text-sm',
+                        row.oldestDaysLate > 60 ? 'text-negative-strong' : 'text-fg-muted',
+                      )}
+                    >
+                      {row.oldestDaysLate > 0
+                        ? `Oldest ${String(row.oldestDaysLate)} days past due`
+                        : 'Nothing past due'}
+                    </span>
                   </TableCell>
-                  <TableCell align="end" className="numeric">
-                    {formatPercent(d.share, locale, { digits: 0 })}
+                  {AGING_BUCKETS.map((bucket) => (
+                    <TableCell key={bucket} align="end" className="hidden @4xl:table-cell">
+                      {row.buckets[bucket] === 0 ? (
+                        // Blank, so the amounts and their staircase read at a glance.
+                        <span className="sr-only">None</span>
+                      ) : (
+                        <Money amount={row.buckets[bucket]} currency={currency} locale={locale} />
+                      )}
+                    </TableCell>
+                  ))}
+                  <TableCell align="end">
+                    <Money
+                      amount={row.total}
+                      currency={currency}
+                      locale={locale}
+                      className="font-medium"
+                    />
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
-        }
-      >
-        <BarChart
-          responsive
-          data={data}
-          margin={{ top: 20, right: 4, bottom: 0, left: 4 }}
-          style={{ width: '100%', height: '100%' }}
-        >
-          <CartesianGrid vertical={false} />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
-          <YAxis
-            width="auto"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={4}
-            tickFormatter={(value: number) => formatCompactMoney(value, currency, locale)}
-          />
-          <Tooltip
-            content={tooltip}
-            cursor={{ fill: 'var(--rx-surface-hover)' }}
-            // Above the plot, over the legend, so the tooltip never covers the bars it describes.
-            position={{ y: -TOOLTIP_LIFT }}
-            allowEscapeViewBox={{ x: false, y: true }}
-            offset={16}
-            isAnimationActive={false}
-          />
-          <Bar
-            dataKey="amount"
-            name="Outstanding"
-            radius={[2, 2, 0, 0]}
-            maxBarSize={56}
-            isAnimationActive={false}
-            shape={(props: BarShapeProps) => (
-              <Rectangle
-                {...props}
-                fill={chartColor(BUCKET_COLOR[data[props.index]?.bucket ?? 'current'])}
-              />
-            )}
-          >
-            <LabelList
-              dataKey="amount"
-              position="top"
-              offset={6}
-              // On a narrow block the labels would collide; the table below carries the figures.
-              className="hidden fill-fg font-medium @lg:inline"
-              formatter={(value: unknown) =>
-                typeof value === 'number' ? formatCompactMoney(value, currency, locale) : ''
-              }
-            />
-          </Bar>
-        </BarChart>
-      </ChartFigure>
-
-      <Table>
-        <TableCaption className="sr-only">
-          Receivables by customer and bucket, in {currency}
-        </TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Customer</TableHead>
-            {AGING_BUCKETS.map((bucket) => (
-              <TableHead key={bucket} align="end" className="hidden @4xl:table-cell">
-                <span className="sr-only">{BUCKET_LABEL[bucket]}</span>
-                <span aria-hidden>{BUCKET_SHORT[bucket]}</span>
-              </TableHead>
-            ))}
-            <TableHead align="end">Total</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {shown.map((row) => (
-            <TableRow key={row.customer}>
-              <TableCell>
-                <span className="block">{row.customer}</span>
-                <span
-                  className={cn(
-                    'block text-sm',
-                    row.oldestDaysLate > 60 ? 'text-negative-strong' : 'text-fg-muted',
-                  )}
-                >
-                  {row.oldestDaysLate > 0
-                    ? `Oldest ${String(row.oldestDaysLate)} days past due`
-                    : 'Nothing past due'}
-                </span>
-              </TableCell>
-              {AGING_BUCKETS.map((bucket) => (
-                <TableCell key={bucket} align="end" className="hidden @4xl:table-cell">
-                  {row.buckets[bucket] === 0 ? (
-                    // Blank, so the amounts and their staircase read at a glance.
-                    <span className="sr-only">None</span>
-                  ) : (
-                    <Money amount={row.buckets[bucket]} currency={currency} locale={locale} />
-                  )}
+            <TableFooter>
+              <TableRow>
+                <TableHead scope="row" className="text-fg">
+                  Total{others > 0 && `, with ${String(others)} more`}
+                </TableHead>
+                {AGING_BUCKETS.map((bucket) => (
+                  <TableCell key={bucket} align="end" className="hidden @4xl:table-cell">
+                    <Money amount={report.buckets[bucket]} currency={currency} locale={locale} />
+                  </TableCell>
+                ))}
+                <TableCell align="end">
+                  <Money
+                    amount={report.total}
+                    currency={currency}
+                    locale={locale}
+                    className="font-strong"
+                  />
                 </TableCell>
-              ))}
-              <TableCell align="end">
-                <Money
-                  amount={row.total}
-                  currency={currency}
-                  locale={locale}
-                  className="font-medium"
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TableHead scope="row" className="text-fg">
-              Total{others > 0 && `, with ${String(others)} more`}
-            </TableHead>
-            {AGING_BUCKETS.map((bucket) => (
-              <TableCell key={bucket} align="end" className="hidden @4xl:table-cell">
-                <Money amount={report.buckets[bucket]} currency={currency} locale={locale} />
-              </TableCell>
-            ))}
-            <TableCell align="end">
-              <Money
-                amount={report.total}
-                currency={currency}
-                locale={locale}
-                className="font-strong"
-              />
-            </TableCell>
-          </TableRow>
-        </TableFooter>
-      </Table>
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </>
+      )}
     </BlockPanel>
   );
 }

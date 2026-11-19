@@ -40,8 +40,8 @@ export function Segmented<Value extends string>({
       }}
       data-slot="segmented"
       className={cn(
-        // Scrolls sideways on a phone rather than wrapping into a second ragged row.
-        'flex max-w-full flex-wrap gap-0.5 rounded-control border border-line bg-surface-sunken p-0.5',
+        // Wraps on a narrow block; options grow so every row fills the width instead of trailing off.
+        'flex w-fit max-w-full flex-wrap gap-0.5 rounded-control border border-line bg-surface-sunken p-0.5',
         className,
       )}
     >
@@ -50,7 +50,7 @@ export function Segmented<Value extends string>({
           key={option.value}
           value={option.value}
           className={cn(
-            'inline-flex h-(--rx-control-height-sm) shrink-0 cursor-pointer items-center gap-1.5 rounded-control px-2.5',
+            'inline-flex h-(--rx-control-height-sm) shrink-0 grow cursor-pointer items-center justify-center gap-1.5 rounded-control px-2.5',
             'pointer-coarse:h-(--rx-control-height-touch) pointer-coarse:px-3.5',
             'text-sm font-medium whitespace-nowrap text-fg-muted',
             'transition-[background-color,color,box-shadow] duration-fast ease-standard',
