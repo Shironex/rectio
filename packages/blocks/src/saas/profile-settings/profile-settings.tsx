@@ -18,7 +18,15 @@ import {
   SelectTrigger,
   cn,
 } from '@rectio/ui';
-import { useId, useMemo, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type SyntheticEvent,
+} from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -139,6 +147,18 @@ export function ProfileSettings({
   }
   const changed = profileChanges(profile, draft);
   const dirty = changed.length > 0;
+  const showActions = dirty || pending;
+  const statusRef = useRef<HTMLParagraphElement>(null);
+  // Discard and Save leave once the form is clean. If focus went with them, hand it to the
+  // status line instead of dropping it on the page.
+  const hadActions = useRef(showActions);
+  useEffect(() => {
+    const left = hadActions.current && !showActions;
+    hadActions.current = showActions;
+    if (left && (document.activeElement === null || document.activeElement === document.body)) {
+      statusRef.current?.focus();
+    }
+  }, [showActions]);
   const errors: ProfileErrors = tried ? profileErrors(draft) : {};
   const emailChanged = profileEmailChanged(profile, draft);
   const savedZone = profile.timeZone;
@@ -192,7 +212,12 @@ export function ProfileSettings({
         <div className="flex flex-col divide-y divide-line">
           <Row title="Picture" hint="Square images work best, at least 256 pixels wide.">
             <div className="flex flex-wrap items-center gap-4">
-              <Avatar name={profile.name} src={profile.avatarUrl} size="lg" />
+              <Avatar
+                name={profile.name}
+                src={profile.avatarUrl}
+                size="lg"
+                className="size-20 text-2xl"
+              />
               <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-5">
                 {onAvatarChange !== undefined && (
                   <>
@@ -332,14 +357,19 @@ export function ProfileSettings({
         </div>
 
         {/* -mx-5 and px-5 match BlockPanel's body padding, so the bar runs edge to edge. */}
-        {/* The save bar holds its height, so the danger zone below never jumps when it changes. */}
         <div
           className={cn(
-            'sticky bottom-0 z-10 -mx-5 mt-2 flex min-h-(--rx-control-height-lg) flex-wrap items-center gap-3 border-t border-line bg-surface px-5 py-3',
-            dirty || pending ? 'justify-between' : 'justify-end',
+            'sticky bottom-0 z-10 -mx-5 mt-2 flex flex-wrap items-center gap-3 border-t border-line bg-surface px-5 py-3',
+            showActions ? 'justify-between' : 'justify-end',
           )}
         >
-          <p className="flex items-center gap-1.5 text-sm text-fg-muted" aria-live="polite">
+          {/* Takes focus when Discard or Save goes away under the keyboard. */}
+          <p
+            ref={statusRef}
+            tabIndex={-1}
+            className="flex items-center gap-1.5 rounded-badge text-sm text-fg-muted outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus"
+            aria-live="polite"
+          >
             {dirty ? (
               <span className="font-medium text-fg">
                 {plural(changed.length, 'unsaved change')}
@@ -357,7 +387,7 @@ export function ProfileSettings({
               </>
             )}
           </p>
-          {(dirty || pending) && (
+          {showActions && (
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -382,7 +412,7 @@ export function ProfileSettings({
           danger
           title="Danger zone"
           hint="Removes your profile and signs you out everywhere. Work you shared stays with the team."
-          className="mt-6 border-t border-negative-strong/30 pt-6"
+          className="mt-6 rounded-panel border border-negative-strong/30 bg-negative-subtle/40 px-5"
         >
           <div>
             <Button
@@ -471,7 +501,13 @@ function DeleteDialog({
             </Field>
           </DialogBody>
           <DialogFooter>
-            <Button variant="secondary" onClick={onCancel}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                onCancel();
+                setTyped('');
+              }}
+            >
               Cancel
             </Button>
             <Button type="submit" variant="danger" disabled={!confirmed}>

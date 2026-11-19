@@ -154,4 +154,11 @@ describe('ProfileSettings', () => {
       expect(name).toHaveFocus();
     });
   });
+
+  it('hands focus to the status line when Discard goes away', async () => {
+    render(<ProfileSettings profile={PROFILE} onSave={vi.fn()} now={NOW} locale="en-GB" />);
+    await userEvent.type(screen.getByLabelText(/Job title/), 'x');
+    await userEvent.click(screen.getByRole('button', { name: 'Discard' }));
+    expect(screen.getByText('All changes saved').closest('p')).toHaveFocus();
+  });
 });
