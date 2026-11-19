@@ -328,7 +328,7 @@ function ProgressGroup({ ui }: { ui: Moving }) {
             size="lg"
             tone="warning"
             label="Seats used"
-            description="7 of 10 seats, 3 left on the Team plan"
+            description="7 of 10 seats used, nearing the Team plan limit"
           />
         </Tile>
         <Tile label="Ring">
@@ -351,7 +351,12 @@ function ProgressGroup({ ui }: { ui: Moving }) {
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Tile label="Gauge, normal" className="items-center">
-          <ui.Meter value={38} label="Budget spent" thresholds={{ warning: 75, critical: 90 }} />
+          <ui.Meter
+            value={38}
+            label="Budget spent"
+            thresholds={{ warning: 75, critical: 90 }}
+            levelLabels={{ normal: 'On track' }}
+          />
         </Tile>
         <Tile label="Gauge, critical" className="items-center">
           <ui.Meter
