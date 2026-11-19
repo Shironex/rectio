@@ -78,7 +78,7 @@ export function Ledger({
     amount === 0 ? null : (
       <Money amount={amount} currency={currency} locale={locale} className={className} />
     );
-  const columns = account === undefined ? 5 : 6;
+  const columns = account === undefined ? 6 : 7;
 
   return (
     <BlockPanel
@@ -115,8 +115,16 @@ export function Ledger({
             <TableHead className="hidden w-20 @xl:table-cell">Date</TableHead>
             <TableHead className="hidden w-28 @2xl:table-cell">Reference</TableHead>
             <TableHead>{account === undefined ? 'Entry and account' : 'Description'}</TableHead>
-            <TableHead align="end">Debit</TableHead>
-            <TableHead align="end">Credit</TableHead>
+            <TableHead align="end" className="hidden @xl:table-cell">
+              Debit
+            </TableHead>
+            <TableHead align="end" className="hidden @xl:table-cell">
+              Credit
+            </TableHead>
+            {/* Narrow: one amount column, each figure marked Dr or Cr. */}
+            <TableHead align="end" className="@xl:hidden">
+              Amount
+            </TableHead>
             {account !== undefined && <TableHead align="end">Balance</TableHead>}
           </TableRow>
         </TableHeader>
@@ -126,8 +134,9 @@ export function Ledger({
               <TableCell className="hidden @xl:table-cell" />
               <TableCell className="hidden @2xl:table-cell" />
               <TableCell className="text-fg-muted">Opening balance</TableCell>
-              <TableCell />
-              <TableCell />
+              <TableCell className="hidden @xl:table-cell" />
+              <TableCell className="hidden @xl:table-cell" />
+              <TableCell className="@xl:hidden" />
               <TableCell align="end">
                 <Money amount={opening} currency={currency} locale={locale} tone="auto" />
               </TableCell>
@@ -146,8 +155,13 @@ export function Ledger({
             const lastOfEntry =
               account !== undefined || ordered[index + 1]?.entryId !== line.entryId;
             const unbalanced = broken.some((b) => b.entryId === line.entryId);
-            // Hairlines between entries only, so the lines of one entry read as one record.
-            const rule = lastOfEntry ? '' : 'border-b-0';
+            // Hairlines between entries only, so the lines of one entry read as one record, and
+            // the lines inside an entry sit close, the rule's gap only between entries.
+            const rule = cn(
+              account === undefined && 'h-auto',
+              account === undefined && !firstOfEntry && 'pt-1',
+              !lastOfEntry && 'border-b-0 pb-1',
+            );
             return (
               <TableRow key={line.id} data-entry={line.entryId}>
                 <TableCell className={cn('hidden align-top @xl:table-cell', rule)}>
@@ -178,12 +192,7 @@ export function Ledger({
                         </span>
                       )}
                       {/* Credit lines indent under the debits, as a journal is written by hand. */}
-                      <span
-                        className={cn(
-                          'flex items-baseline gap-2 text-sm',
-                          line.credit > 0 && 'ps-6',
-                        )}
-                      >
+                      <span className={cn('flex items-baseline gap-2', line.credit > 0 && 'ps-6')}>
                         <span className="text-fg-muted numeric">{line.accountCode}</span>
                         <span>{nameOf(line.accountCode)}</span>
                       </span>
@@ -198,11 +207,20 @@ export function Ledger({
                     </>
                   )}
                 </TableCell>
-                <TableCell align="end" className={cn('align-bottom', rule)}>
+                <TableCell align="end" className={cn('hidden align-bottom @xl:table-cell', rule)}>
                   {money(line.debit)}
                 </TableCell>
-                <TableCell align="end" className={cn('align-bottom', rule)}>
+                <TableCell align="end" className={cn('hidden align-bottom @xl:table-cell', rule)}>
                   {money(line.credit)}
+                </TableCell>
+                <TableCell align="end" className={cn('align-bottom @xl:hidden', rule)}>
+                  <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+                    {money(line.debit > 0 ? line.debit : line.credit)}
+                    <span className="text-sm text-fg-muted">
+                      <span aria-hidden>{line.debit > 0 ? 'Dr' : 'Cr'}</span>
+                      <span className="sr-only">{line.debit > 0 ? 'debit' : 'credit'}</span>
+                    </span>
+                  </span>
                 </TableCell>
                 {account !== undefined && (
                   <TableCell align="end" className={cn('align-bottom', rule)}>
@@ -226,7 +244,7 @@ export function Ledger({
               <TableHead scope="row" className="text-fg">
                 {account === undefined ? 'Totals' : 'Closing balance'}
               </TableHead>
-              <TableCell align="end">
+              <TableCell align="end" className="hidden @xl:table-cell">
                 <Money
                   amount={totals.debit}
                   currency={currency}
@@ -234,13 +252,34 @@ export function Ledger({
                   className="font-strong"
                 />
               </TableCell>
-              <TableCell align="end">
+              <TableCell align="end" className="hidden @xl:table-cell">
                 <Money
                   amount={totals.credit}
                   currency={currency}
                   locale={locale}
                   className="font-strong"
                 />
+              </TableCell>
+              <TableCell align="end" className="@xl:hidden">
+                <span className="flex flex-col items-end">
+                  {(['debit', 'credit'] as const).map((side) => (
+                    <span
+                      key={side}
+                      className="inline-flex items-baseline gap-1.5 whitespace-nowrap"
+                    >
+                      <Money
+                        amount={totals[side]}
+                        currency={currency}
+                        locale={locale}
+                        className="font-strong"
+                      />
+                      <span className="text-sm text-fg-muted">
+                        <span aria-hidden>{side === 'debit' ? 'Dr' : 'Cr'}</span>
+                        <span className="sr-only">{side}</span>
+                      </span>
+                    </span>
+                  ))}
+                </span>
               </TableCell>
               {account !== undefined && (
                 <TableCell align="end">

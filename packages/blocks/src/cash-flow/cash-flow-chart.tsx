@@ -207,6 +207,9 @@ export function CashFlowChart({
           <Tooltip
             content={tooltip}
             cursor={{ fill: 'var(--rx-surface-hover)' }}
+            // Pinned to the top of the plot, so the tooltip never covers the bars it describes.
+            position={{ y: 0 }}
+            offset={16}
             isAnimationActive={false}
           />
           <Bar
@@ -233,7 +236,7 @@ export function CashFlowChart({
             tooltipType="none"
             legendType="none"
             stroke="var(--rx-chart-halo)"
-            strokeWidth={5}
+            strokeWidth={6}
             dot={false}
             activeDot={false}
             isAnimationActive={false}
@@ -242,7 +245,7 @@ export function CashFlowChart({
             dataKey="net"
             name="Net"
             stroke={chartColor('series-3')}
-            strokeWidth={2}
+            strokeWidth={2.5}
             dot={{
               r: 3,
               fill: chartColor('series-3'),

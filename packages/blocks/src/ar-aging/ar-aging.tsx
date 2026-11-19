@@ -171,6 +171,9 @@ export function ArAging({
           <Tooltip
             content={tooltip}
             cursor={{ fill: 'var(--rx-surface-hover)' }}
+            // Pinned to the top of the plot, so the tooltip never covers the bars it describes.
+            position={{ y: 0 }}
+            offset={16}
             isAnimationActive={false}
           />
           <Bar

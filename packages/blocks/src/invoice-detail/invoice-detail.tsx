@@ -261,19 +261,13 @@ export function InvoiceDetail({
             </>
           )}
           {state !== 'draft' && state !== 'void' && (
-            <>
-              <dt className="mt-1 rounded-s-control bg-surface-sunken py-2 ps-3 font-medium">
-                Balance due
-              </dt>
-              <dd
-                className={cn(
-                  'mt-1 rounded-e-control bg-surface-sunken py-2 pe-3 text-end',
-                  state === 'overdue' && 'text-negative-strong',
-                )}
-              >
+            // One tinted row for the figure the page exists to answer.
+            <div className="col-span-2 mt-1 grid grid-cols-2 items-baseline gap-x-8 rounded-control bg-surface-sunken px-3 py-2">
+              <dt className="font-medium">Balance due</dt>
+              <dd className={cn('text-end', state === 'overdue' && 'text-negative-strong')}>
                 {money(totals.balance, 'text-lg font-strong')}
               </dd>
-            </>
+            </div>
           )}
         </dl>
       </div>

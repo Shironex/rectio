@@ -186,7 +186,7 @@ export function ExpenseApproval({
             <TableHead>Expense</TableHead>
             <TableHead className="hidden @2xl:table-cell">Category</TableHead>
             <TableHead align="end">Amount</TableHead>
-            <TableHead align="end" className="w-0">
+            <TableHead align="end" className="hidden w-0 @xl:table-cell">
               <span className="sr-only">Decision</span>
             </TableHead>
           </TableRow>
@@ -223,6 +223,18 @@ export function ExpenseApproval({
                       ))}
                     </span>
                   )}
+                  {/* Narrow: the decision sits under the expense, where the thumb reaches it. */}
+                  <span className="mt-2 flex @xl:hidden">
+                    <Decide
+                      request={request}
+                      onApprove={() => {
+                        approve([request.id]);
+                      }}
+                      onReject={() => {
+                        setRejecting([request.id]);
+                      }}
+                    />
+                  </span>
                 </TableCell>
                 <TableCell className="hidden text-fg-muted @2xl:table-cell">
                   {request.category}
@@ -230,31 +242,16 @@ export function ExpenseApproval({
                 <TableCell align="end">
                   <Money amount={request.amount} currency={currency} locale={locale} />
                 </TableCell>
-                <TableCell align="end" className="w-0">
-                  <span className="flex items-center justify-end gap-2 pointer-coarse:gap-5">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      iconOnly
-                      aria-label={`Reject ${request.merchant}, ${request.employee}`}
-                      onClick={() => {
-                        setRejecting([request.id]);
-                      }}
-                    >
-                      <XIcon aria-hidden weight="bold" className="size-3.5" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      aria-label={`Approve ${request.merchant}, ${request.employee}`}
-                      onClick={() => {
-                        approve([request.id]);
-                      }}
-                    >
-                      <CheckIcon aria-hidden weight="bold" className="size-3.5" />
-                      <span className="hidden @xl:inline">Approve</span>
-                    </Button>
-                  </span>
+                <TableCell align="end" className="hidden w-0 @xl:table-cell">
+                  <Decide
+                    request={request}
+                    onApprove={() => {
+                      approve([request.id]);
+                    }}
+                    onReject={() => {
+                      setRejecting([request.id]);
+                    }}
+                  />
                 </TableCell>
               </Row>
             ))}
@@ -353,6 +350,37 @@ export function ExpenseApproval({
         }}
       />
     </BlockPanel>
+  );
+}
+
+/** Reject and approve for one request: icon-only reject beside a worded approve. */
+function Decide({
+  request,
+  onApprove,
+  onReject,
+}: {
+  request: ExpenseRequest;
+  onApprove: () => void;
+  onReject: () => void;
+}) {
+  const { Button } = useBlockParts();
+  const name = `${request.merchant}, ${request.employee}`;
+  return (
+    <span className="flex items-center justify-end gap-2 pointer-coarse:gap-3">
+      <Button
+        variant="secondary"
+        size="sm"
+        iconOnly
+        aria-label={`Reject ${name}`}
+        onClick={onReject}
+      >
+        <XIcon aria-hidden weight="bold" className="size-3.5" />
+      </Button>
+      <Button variant="secondary" size="sm" aria-label={`Approve ${name}`} onClick={onApprove}>
+        <CheckIcon aria-hidden weight="bold" className="size-3.5" />
+        Approve
+      </Button>
+    </span>
   );
 }
 

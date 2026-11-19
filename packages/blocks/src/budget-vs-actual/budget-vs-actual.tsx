@@ -37,7 +37,10 @@ export interface BudgetVsActualProps {
 
 const ICON = { under: ArrowDownIcon, over: ArrowUpIcon, on: EqualsIcon };
 
-/** Variance in three signals: a signed amount, an arrow with the words over or under, and colour. */
+/**
+ * Variance in three signals that agree: the amount signed as actual minus budget (plus is over),
+ * an arrow with the words over or under, and colour for good or bad news, which depends on `kind`.
+ */
 function VarianceCell({ v, currency, locale }: { v: Variance; currency: string; locale: string }) {
   const { Money } = useBlockParts();
   const Icon = ICON[v.position];
@@ -48,14 +51,19 @@ function VarianceCell({ v, currency, locale }: { v: Variance; currency: string; 
   return (
     <span
       className={cn(
-        'flex flex-col items-end',
+        'flex flex-col items-end whitespace-nowrap',
         v.favourable === true && 'text-positive-strong',
         v.favourable === false && 'text-negative-strong',
         v.favourable === null && 'text-fg-muted',
       )}
     >
-      <Money amount={v.amount} currency={currency} locale={locale} signDisplay="exceptZero" />
-      <span className="inline-flex items-center gap-1 text-sm">
+      <Money
+        amount={v.position === 'under' ? -Math.abs(v.amount) : Math.abs(v.amount)}
+        currency={currency}
+        locale={locale}
+        signDisplay="exceptZero"
+      />
+      <span className="inline-flex items-center gap-1 text-sm whitespace-nowrap">
         <Icon aria-hidden weight="bold" className="size-3" />
         {words}
       </span>
@@ -64,17 +72,20 @@ function VarianceCell({ v, currency, locale }: { v: Variance; currency: string; 
 }
 
 /**
- * A bullet bar: the budget as an outlined extent, the actual as a solid bar, and any spend past the
- * budget in the second series colour. Lengths share one scale across the table.
+ * A bullet bar against the line's own budget: the outline is 100% of budget, the solid bar what is
+ * spent within it, and spend past the budget continues in the second series colour beyond the
+ * outline. `track` is the largest actual-to-budget ratio in the table, so every row shares a scale
+ * of "share of its budget" and an overrun always fits.
  */
-function Meter({ budget, actual, scale }: { budget: number; actual: number; scale: number }) {
-  const within = Math.min(actual, budget) / scale;
-  const past = Math.max(actual - budget, 0) / scale;
+function Meter({ budget, actual, track }: { budget: number; actual: number; track: number }) {
+  const ratio = budget <= 0 ? 0 : actual / budget;
+  const within = Math.min(ratio, 1) / track;
+  const past = Math.max(ratio - 1, 0) / track;
   return (
     <span aria-hidden className="relative block h-3 w-full">
       <span
         className="absolute inset-y-0 start-0 rounded-badge border border-chart-reference"
-        style={{ width: `${String((budget / scale) * 100)}%` }}
+        style={{ width: `${String(100 / track)}%` }}
       />
       <span
         className="absolute inset-y-0.5 start-0 w-full origin-left rounded-badge bg-chart-series-1"
@@ -82,10 +93,8 @@ function Meter({ budget, actual, scale }: { budget: number; actual: number; scal
       />
       {past > 0 && (
         <span
-          className="absolute inset-y-0.5 start-0 w-full origin-left bg-chart-series-2"
-          style={{
-            transform: `translateX(${String(within * 100)}%) scaleX(${String(past)})`,
-          }}
+          className="absolute inset-y-0.5 start-0 w-full origin-left rounded-badge bg-chart-series-2"
+          style={{ transform: `translateX(${String(100 / track)}%) scaleX(${String(past)})` }}
         />
       )}
     </span>
@@ -108,7 +117,10 @@ export function BudgetVsActual({
   const locale = resolveLocale(requestedLocale);
   const { Money } = useBlockParts();
   const summary = budgetSummary(lines, kind, currency);
-  const scale = Math.max(1, ...lines.flatMap((line) => [line.budget, line.actual]));
+  const track = Math.max(
+    1,
+    ...lines.map((line) => (line.budget > 0 ? line.actual / line.budget : 1)),
+  );
   return (
     <BlockPanel
       title={title}
@@ -149,11 +161,14 @@ export function BudgetVsActual({
             <TableHead>Category</TableHead>
             <TableHead className="hidden w-2/5 @2xl:table-cell">
               <span className="sr-only">Actual against budget</span>
+              <span aria-hidden>Share of budget</span>
             </TableHead>
             <TableHead align="end" className="hidden @xl:table-cell">
               Budget
             </TableHead>
-            <TableHead align="end">Actual</TableHead>
+            <TableHead align="end" className="hidden @xl:table-cell">
+              Actual
+            </TableHead>
             <TableHead align="end">Variance</TableHead>
           </TableRow>
         </TableHeader>
@@ -163,16 +178,17 @@ export function BudgetVsActual({
               <TableCell>
                 <span className="block">{line.category}</span>
                 <span className="block text-sm text-fg-muted @xl:hidden">
-                  of <Money amount={line.budget} currency={currency} locale={locale} />
+                  <Money amount={line.actual} currency={currency} locale={locale} /> of{' '}
+                  <Money amount={line.budget} currency={currency} locale={locale} />
                 </span>
               </TableCell>
               <TableCell className="hidden @2xl:table-cell">
-                <Meter budget={line.budget} actual={line.actual} scale={scale} />
+                <Meter budget={line.budget} actual={line.actual} track={track} />
               </TableCell>
               <TableCell align="end" className="hidden text-fg-muted @xl:table-cell">
                 <Money amount={line.budget} currency={currency} locale={locale} />
               </TableCell>
-              <TableCell align="end">
+              <TableCell align="end" className="hidden @xl:table-cell">
                 <Money amount={line.actual} currency={currency} locale={locale} />
               </TableCell>
               <TableCell align="end">
@@ -189,12 +205,16 @@ export function BudgetVsActual({
           <TableRow>
             <TableHead scope="row" className="text-fg">
               Total
+              <span className="block text-sm font-regular text-fg-muted @xl:hidden">
+                <Money amount={summary.actual} currency={currency} locale={locale} /> of{' '}
+                <Money amount={summary.budget} currency={currency} locale={locale} />
+              </span>
             </TableHead>
             <TableCell className="hidden @2xl:table-cell" />
             <TableCell align="end" className="hidden @xl:table-cell">
               <Money amount={summary.budget} currency={currency} locale={locale} />
             </TableCell>
-            <TableCell align="end">
+            <TableCell align="end" className="hidden @xl:table-cell">
               <Money
                 amount={summary.actual}
                 currency={currency}

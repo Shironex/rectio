@@ -75,6 +75,31 @@ interface Row {
 /** On phones Issued and Due fold under the customer, so the amount never leaves the screen. */
 const WIDE = 'hidden @2xl:table-cell';
 
+function InvoiceNumber({
+  invoice,
+  onOpen,
+}: {
+  invoice: InvoiceSummary;
+  onOpen: ((invoice: InvoiceSummary) => void) | undefined;
+}) {
+  if (onOpen === undefined) return <span className="numeric">{invoice.number}</span>;
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        onOpen(invoice);
+      }}
+      className={cn(
+        'cursor-pointer rounded-badge text-start numeric text-fg underline decoration-line-strong underline-offset-4',
+        'hover:decoration-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+        'pointer-coarse:min-h-(--rx-control-height-touch)',
+      )}
+    >
+      {invoice.number}
+    </button>
+  );
+}
+
 /**
  * Receivables at a glance: what is outstanding and overdue, then every invoice with its state,
  * filtered by status and by the period it was issued in. Data-agnostic: pass your invoices, the
@@ -115,27 +140,8 @@ export function InvoiceList({
         accessorFn: (row) => row.invoice.number,
         header: 'Invoice',
         sortFn: 'alphanumeric',
-        meta: { className: 'whitespace-nowrap' },
-        cell: ({ row }) => {
-          const { invoice } = row.original;
-          return onOpenInvoice === undefined ? (
-            <span className="numeric">{invoice.number}</span>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                onOpenInvoice(invoice);
-              }}
-              className={cn(
-                'cursor-pointer rounded-badge text-start numeric text-fg underline decoration-line-strong underline-offset-4',
-                'hover:decoration-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-                'pointer-coarse:min-h-(--rx-control-height-touch)',
-              )}
-            >
-              {invoice.number}
-            </button>
-          );
-        },
+        meta: { className: 'hidden whitespace-nowrap @xl:table-cell' },
+        cell: ({ row }) => <InvoiceNumber invoice={row.original.invoice} onOpen={onOpenInvoice} />,
       },
       {
         id: 'customer',
@@ -146,6 +152,10 @@ export function InvoiceList({
           const { invoice, due, state } = row.original;
           return (
             <>
+              {/* Narrow: the number leads the row, since its own column is hidden. */}
+              <span className="block @xl:hidden">
+                <InvoiceNumber invoice={invoice} onOpen={onOpenInvoice} />
+              </span>
               <span className="block">{invoice.customer}</span>
               <span className="block text-sm text-fg-muted @2xl:hidden">
                 <span className="numeric">{formatShortDate(invoice.issued, locale)}</span>

@@ -38,7 +38,10 @@ export function Figures({
       )}
     >
       {items.map((item, index) => (
-        <div key={index} className="flex min-w-0 flex-col gap-0.5 bg-surface px-3.5 py-2.5">
+        <div
+          key={index}
+          className="flex min-w-0 flex-col gap-0.5 bg-surface px-3.5 py-2.5 last:odd:col-span-2 @xl:last:odd:col-span-1"
+        >
           <dt className="truncate text-sm text-fg-muted">{item.label}</dt>
           <dd className="flex flex-col">
             <Money
