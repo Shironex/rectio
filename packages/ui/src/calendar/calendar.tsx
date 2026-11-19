@@ -75,9 +75,12 @@ const CLASS_NAMES: DayPickerProps['classNames'] = {
     '[&>button]:hover:bg-surface-hover!',
   ),
   outside: 'not-data-selected:[&>button]:text-fg-subtle',
-  // Dimmed, not struck through: in finance a strike reads as a voided entry.
-  disabled:
-    '[&>button]:cursor-not-allowed [&>button]:text-fg-disabled [&>button]:hover:bg-transparent',
+  // Dimmed and struck, so a closed day never relies on colour alone to differ from the days of
+  // the next month. Explain why days are closed beside the calendar.
+  disabled: cn(
+    '[&>button]:cursor-not-allowed [&>button]:text-fg-disabled [&>button]:line-through',
+    '[&>button]:hover:bg-transparent',
+  ),
   hidden: 'invisible',
 };
 
