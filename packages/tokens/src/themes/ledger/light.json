@@ -294,5 +294,57 @@
       "$value": "{palette.paper.25}",
       "$description": "Outline under a line or label so it stays readable over marks; the surface colour."
     }
+  },
+  "identity": {
+    "$type": "color",
+    "$description": "Identity tints for avatars and initials: decorative, never a state. A name always picks the same tint. Each pair keeps strong text readable on its subtle fill.",
+    "1": {
+      "subtle": {
+        "$value": "{palette.cobalt.100}"
+      },
+      "strong": {
+        "$value": "{palette.cobalt.800}"
+      }
+    },
+    "2": {
+      "subtle": {
+        "$value": "{palette.green.100}"
+      },
+      "strong": {
+        "$value": "{palette.green.800}"
+      }
+    },
+    "3": {
+      "subtle": {
+        "$value": "{palette.amber.100}"
+      },
+      "strong": {
+        "$value": "{palette.amber.800}"
+      }
+    },
+    "4": {
+      "subtle": {
+        "$value": "{palette.sky.100}"
+      },
+      "strong": {
+        "$value": "{palette.sky.800}"
+      }
+    },
+    "5": {
+      "subtle": {
+        "$value": "{palette.orange.100}"
+      },
+      "strong": {
+        "$value": "{palette.orange.800}"
+      }
+    },
+    "6": {
+      "subtle": {
+        "$value": "{palette.citron.100}"
+      },
+      "strong": {
+        "$value": "{palette.citron.800}"
+      }
+    }
   }
 }
