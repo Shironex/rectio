@@ -175,6 +175,18 @@ try {
           .join(', '),
       ),
     );
+    console.log(
+      `phone ${block} table past its block px`,
+      await page.evaluate(() =>
+        Math.max(
+          0,
+          ...[...document.querySelectorAll('[data-slot="block"] table')].map((table) => {
+            const block = table.closest('[data-slot="block"]')?.getBoundingClientRect();
+            return block === undefined ? 0 : table.getBoundingClientRect().right - block.right;
+          }),
+        ),
+      ),
+    );
     const filters = page.locator('[data-slot="segmented"]').first();
     if ((await filters.count()) > 0) {
       await filters.locator('..').screenshot({ path: join(out, `phone-${block}-filters.png`) });
