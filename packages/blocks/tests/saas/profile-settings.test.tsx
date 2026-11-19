@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -121,5 +121,37 @@ describe('ProfileSettings', () => {
     );
     expect(screen.getByText('Saved at 14:32')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Save changes' })).not.toBeInTheDocument();
+  });
+
+  it('keeps edits when the parent passes the same values in a new object', async () => {
+    const { rerender } = render(
+      <ProfileSettings profile={{ ...PROFILE }} onSave={vi.fn()} now={NOW} locale="en-GB" />,
+    );
+    const title = screen.getByLabelText(/Job title/);
+    await userEvent.clear(title);
+    await userEvent.type(title, 'Finance lead');
+    rerender(
+      <ProfileSettings profile={{ ...PROFILE }} onSave={vi.fn()} now={NOW} locale="en-GB" />,
+    );
+    expect(title).toHaveValue('Finance lead');
+    rerender(
+      <ProfileSettings
+        profile={{ ...PROFILE, jobTitle: 'Controller' }}
+        onSave={vi.fn()}
+        now={NOW}
+        locale="en-GB"
+      />,
+    );
+    expect(title).toHaveValue('Controller');
+  });
+
+  it('moves focus to the first invalid field after a refused save', async () => {
+    render(<ProfileSettings profile={PROFILE} onSave={vi.fn()} now={NOW} locale="en-GB" />);
+    const name = screen.getByLabelText('Full name');
+    await userEvent.clear(name);
+    await userEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => {
+      expect(name).toHaveFocus();
+    });
   });
 });

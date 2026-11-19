@@ -18,14 +18,15 @@ import {
   SelectTrigger,
   cn,
 } from '@rectio/ui';
-import { useId, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
+import { useId, useMemo, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
 import { resolveLocale } from '../../lib/finance';
 import { FormMessage } from '../lib/auth';
 import { Avatar } from '../lib/avatar';
-import { hasErrors, plural } from '../lib/saas';
+import { focusFirstInvalid, useNow } from '../lib/focus';
+import { dateFormat, hasErrors, plural } from '../lib/saas';
 import {
   profileChanges,
   profileDeleteConfirmed,
@@ -90,12 +91,12 @@ function Row({
 }) {
   return (
     <div className={cn('flex flex-col gap-3 py-5 first:pt-6 @2xl:flex-row @2xl:gap-10', className)}>
-      <div className="flex flex-col gap-0.5 @2xl:w-60 @2xl:shrink-0">
+      <div className="flex flex-col gap-0.5 @2xl:w-52 @2xl:shrink-0">
         <h3 className={cn('text-base font-medium', danger && 'text-negative-strong')}>{title}</h3>
         {hint !== undefined && <p className="text-sm text-pretty text-fg-muted">{hint}</p>}
       </div>
       {/* A field column about a form's width: no long empty inputs on a wide panel. */}
-      <div className="flex w-full max-w-sm min-w-0 flex-col gap-4 @2xl:flex-1">{children}</div>
+      <div className="flex w-full max-w-lg min-w-0 flex-1 flex-col gap-4">{children}</div>
     </div>
   );
 }
@@ -116,20 +117,22 @@ export function ProfileSettings({
   savedAt,
   pending = false,
   error,
-  now = new Date(),
+  now: requestedNow,
   locale: requestedLocale,
   title = 'Profile',
   className,
 }: ProfileSettingsProps) {
   const locale = resolveLocale(requestedLocale);
+  const now = useNow(requestedNow);
   const { Button } = useBlockParts();
   const fileRef = useRef<HTMLInputElement>(null);
   const [saved, setSaved] = useState(profile);
   const [draft, setDraft] = useState<ProfileValues>(profile);
   const [tried, setTried] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  // A new saved profile from the app restarts the form from it.
-  if (profile !== saved) {
+  // A saved profile with new values restarts the form from it. Compared by value, so a parent
+  // passing a fresh object with the same values on every render keeps the edits in progress.
+  if (profileChanges(saved, profile).length > 0) {
     setSaved(profile);
     setDraft(profile);
     setTried(false);
@@ -138,16 +141,27 @@ export function ProfileSettings({
   const dirty = changed.length > 0;
   const errors: ProfileErrors = tried ? profileErrors(draft) : {};
   const emailChanged = profileEmailChanged(profile, draft);
-  const zones = [...new Set([profile.timeZone, ...(timeZones ?? DEFAULT_ZONES)])];
-  const zoneItems = zones.map((zone) => ({ value: zone, label: timeZoneLabel(zone, now, locale) }));
+  const savedZone = profile.timeZone;
+  const zoneItems = useMemo(
+    () =>
+      [...new Set([savedZone, ...(timeZones ?? DEFAULT_ZONES)])].map((zone) => ({
+        value: zone,
+        label: timeZoneLabel(zone, now, locale),
+      })),
+    [savedZone, timeZones, locale, now],
+  );
 
   const set = (field: keyof ProfileValues, value: string) => {
     setDraft({ ...draft, [field]: value });
   };
-  const submit = (event: SyntheticEvent) => {
+  const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTried(true);
-    if (pending || !dirty || hasErrors(profileErrors(draft))) return;
+    if (hasErrors(profileErrors(draft))) {
+      focusFirstInvalid(event.currentTarget);
+      return;
+    }
+    if (pending || !dirty) return;
     const trimmed: ProfileValues = {
       name: draft.name.trim(),
       email: draft.email.trim(),
@@ -265,25 +279,22 @@ export function ProfileSettings({
                   We will send a link to the new address. The old one stays until it is confirmed.
                 </FieldDescription>
               ) : profile.emailVerified === false ? (
-                <FieldDescription className="flex flex-wrap items-center gap-x-1.5 text-sm">
-                  <WarningCircleIcon
-                    aria-hidden
-                    weight="bold"
-                    className="size-4 shrink-0 text-warning"
-                  />
-                  <span className="font-medium text-warning-strong">Not verified.</span>
-                  {onResendVerification === undefined ? (
-                    'Confirm it from the link we sent.'
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={onResendVerification}
-                      className="cursor-pointer rounded-badge font-medium text-fg underline decoration-line-strong underline-offset-4 outline-offset-2 hover:decoration-fg focus-visible:outline-2 focus-visible:outline-focus pointer-coarse:py-2"
-                    >
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                  <FieldDescription className="flex items-center gap-1.5 text-sm">
+                    <WarningCircleIcon
+                      aria-hidden
+                      weight="bold"
+                      className="size-4 shrink-0 text-warning-strong"
+                    />
+                    <span className="font-medium text-warning-strong">Not verified.</span>
+                    Confirm it from the link we sent.
+                  </FieldDescription>
+                  {onResendVerification !== undefined && (
+                    <Button variant="secondary" size="sm" onClick={onResendVerification}>
                       Resend the link
-                    </button>
+                    </Button>
                   )}
-                </FieldDescription>
+                </div>
               ) : (
                 <FieldDescription className="flex items-center gap-1.5">
                   <CheckCircleIcon
@@ -320,6 +331,7 @@ export function ProfileSettings({
           </Row>
         </div>
 
+        {/* -mx-5 and px-5 match BlockPanel's body padding, so the bar runs edge to edge. */}
         {/* The save bar holds its height, so the danger zone below never jumps when it changes. */}
         <div
           className={cn(
@@ -341,7 +353,7 @@ export function ProfileSettings({
                 />
                 {savedAt === undefined
                   ? 'All changes saved'
-                  : `Saved at ${new Intl.DateTimeFormat(locale, { timeStyle: 'short' }).format(savedAt)}`}
+                  : `Saved at ${dateFormat(locale, { timeStyle: 'short' }).format(savedAt)}`}
               </>
             )}
           </p>
@@ -370,7 +382,7 @@ export function ProfileSettings({
           danger
           title="Danger zone"
           hint="Removes your profile and signs you out everywhere. Work you shared stays with the team."
-          className="mt-6 rounded-panel border border-line px-5"
+          className="mt-6 border-t border-negative-strong/30 pt-6"
         >
           <div>
             <Button

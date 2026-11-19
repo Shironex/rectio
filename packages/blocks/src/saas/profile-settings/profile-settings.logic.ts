@@ -1,4 +1,4 @@
-import { isEmail } from '../lib/saas';
+import { dateFormat, isEmail } from '../lib/saas';
 
 /** The editable part of a profile. */
 export interface ProfileValues {
@@ -49,7 +49,7 @@ export function timeZoneLabel(timeZone: string, at: Date, locale: string): strin
   const city = timeZone.split('/').at(-1)?.replaceAll('_', ' ') ?? timeZone;
   try {
     const offset =
-      new Intl.DateTimeFormat(locale, { timeZone, timeZoneName: 'shortOffset' })
+      dateFormat(locale, { timeZone, timeZoneName: 'shortOffset' })
         .formatToParts(at)
         .find((part) => part.type === 'timeZoneName')?.value ?? '';
     return offset === '' ? city : `${city} (${offset})`;
