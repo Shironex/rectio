@@ -317,7 +317,7 @@ export function OverviewPage() {
           {/*
             Two independent columns on a wide screen, so a short panel never stretches to match its
             neighbour. On a phone the columns dissolve into one list ordered by urgency, and the
-            secondary panels fold away behind one button.
+            deadlines and activity fold away behind one button.
           */}
           <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-start">
             <div className="flex flex-col gap-6 max-lg:contents lg:col-span-2">
@@ -334,7 +334,7 @@ export function OverviewPage() {
                 locale={LOCALE}
                 title="Spend against budget"
                 period={figures.label}
-                className={cn('max-lg:order-5', !more && 'max-lg:hidden')}
+                className="max-lg:order-4"
               />
               <RecentActivity className={cn('max-lg:order-7', !more && 'max-lg:hidden')} />
             </div>
@@ -352,7 +352,7 @@ export function OverviewPage() {
             <Button
               variant="secondary"
               aria-expanded={more}
-              className="max-lg:order-4 lg:hidden"
+              className="max-lg:order-5 lg:hidden"
               onClick={() => {
                 setMore((open) => !open);
               }}
@@ -362,7 +362,7 @@ export function OverviewPage() {
               ) : (
                 <CaretDownIcon aria-hidden weight="bold" className="size-4" />
               )}
-              {more ? 'Show less' : 'Budget, deadlines and activity'}
+              {more ? 'Show less' : 'Deadlines and activity'}
             </Button>
           </div>
         </>
