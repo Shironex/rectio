@@ -24,6 +24,15 @@ const cellContents = (row: HTMLTableRowElement) =>
     .map((cell) => cell.firstElementChild)
     .filter((el): el is HTMLElement => el instanceof HTMLElement && el.dataset.part === 'cell');
 
+/**
+ * Height is a layout property: each frame lays the table out again. That is cheap for the row in
+ * view and pointless for one nobody can see, so a row outside the viewport changes at once.
+ */
+function inView(row: HTMLElement) {
+  const box = row.getBoundingClientRect();
+  return box.bottom > 0 && box.top < window.innerHeight;
+}
+
 /** Clips the contents while they open or close; focus rings must not be clipped at rest. */
 function clip(cells: HTMLElement[], on: boolean) {
   for (const cell of cells) cell.style.overflow = on ? 'hidden' : '';
@@ -39,7 +48,7 @@ export function TableRow({ ref, ...props }: ComponentProps<'tr'>) {
 
   useLayoutEffect(() => {
     const row = node.current;
-    const tokens = row === null || plain ? null : readMotionTokens(row);
+    const tokens = row === null || plain || !inView(row) ? null : readMotionTokens(row);
     if (row === null || tokens === null) {
       settled.current = true;
       if (!isPresent) safeToRemove();
