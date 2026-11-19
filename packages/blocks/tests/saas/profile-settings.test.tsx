@@ -100,8 +100,8 @@ describe('ProfileSettings', () => {
         now={NOW}
       />,
     );
-    expect(screen.getByText('Not verified')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Resend link' }));
+    expect(screen.getByText('Not verified.')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Resend the link' }));
     expect(onResendVerification).toHaveBeenCalled();
   });
 });

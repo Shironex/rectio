@@ -1,6 +1,5 @@
 import { CheckCircleIcon, ImageIcon, TrashIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import {
-  Badge,
   Dialog,
   DialogBody,
   DialogContent,
@@ -77,15 +76,20 @@ function Row({
   title,
   hint,
   children,
+  danger = false,
+  className,
 }: {
   title: ReactNode;
   hint?: ReactNode;
   children: ReactNode;
+  /** Set on the danger zone: the title takes the negative tone. */
+  danger?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="grid gap-3 py-5 first:pt-0 @2xl:grid-cols-5 @2xl:gap-8">
+    <div className={cn('grid gap-3 py-5 first:pt-6 @2xl:grid-cols-5 @2xl:gap-8', className)}>
       <div className="flex flex-col gap-0.5 @2xl:col-span-2">
-        <h3 className="text-base font-medium">{title}</h3>
+        <h3 className={cn('text-base font-medium', danger && 'text-negative-strong')}>{title}</h3>
         {hint !== undefined && <p className="text-sm text-pretty text-fg-muted">{hint}</p>}
       </div>
       <div className="flex min-w-0 flex-col gap-4 @2xl:col-span-3">{children}</div>
@@ -232,21 +236,8 @@ export function ProfileSettings({
 
           <Row title="Email" hint="Where sign-in links, invites and notifications go.">
             <Field invalid={errors.email !== undefined}>
-              <span className="flex items-center justify-between gap-3">
-                <FieldLabel>Email address</FieldLabel>
-                {!emailChanged &&
-                  (profile.emailVerified === false ? (
-                    <Badge tone="warning">
-                      <WarningCircleIcon aria-hidden weight="bold" />
-                      Not verified
-                    </Badge>
-                  ) : (
-                    <Badge tone="positive">
-                      <CheckCircleIcon aria-hidden weight="bold" />
-                      Verified
-                    </Badge>
-                  ))}
-              </span>
+              {/* The row names the field; the label stays for screen readers. */}
+              <FieldLabel className="sr-only">Email address</FieldLabel>
               <Input
                 type="email"
                 name="email"
@@ -265,28 +256,41 @@ export function ProfileSettings({
                   We will send a link to the new address. The old one stays until it is confirmed.
                 </FieldDescription>
               ) : profile.emailVerified === false ? (
-                <FieldDescription>
-                  Confirm it from the link we sent.
-                  {onResendVerification !== undefined && (
-                    <>
-                      {' '}
-                      <button
-                        type="button"
-                        onClick={onResendVerification}
-                        className="cursor-pointer rounded-badge font-medium text-fg underline decoration-line-strong underline-offset-4 outline-offset-2 hover:decoration-fg focus-visible:outline-2 focus-visible:outline-focus pointer-coarse:py-2"
-                      >
-                        Resend link
-                      </button>
-                    </>
+                <FieldDescription className="flex flex-wrap items-center gap-x-1.5">
+                  <WarningCircleIcon
+                    aria-hidden
+                    weight="bold"
+                    className="size-3.5 shrink-0 text-warning-strong"
+                  />
+                  <span className="font-medium text-warning-strong">Not verified.</span>
+                  {onResendVerification === undefined ? (
+                    'Confirm it from the link we sent.'
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={onResendVerification}
+                      className="cursor-pointer rounded-badge font-medium text-fg underline decoration-line-strong underline-offset-4 outline-offset-2 hover:decoration-fg focus-visible:outline-2 focus-visible:outline-focus pointer-coarse:py-2"
+                    >
+                      Resend the link
+                    </button>
                   )}
                 </FieldDescription>
-              ) : null}
+              ) : (
+                <FieldDescription className="flex items-center gap-1.5">
+                  <CheckCircleIcon
+                    aria-hidden
+                    weight="bold"
+                    className="size-3.5 shrink-0 text-positive-strong"
+                  />
+                  Verified
+                </FieldDescription>
+              )}
             </Field>
           </Row>
 
           <Row title="Time zone" hint="Due dates, digests and quiet hours follow it.">
             <Field>
-              <FieldLabel>Time zone</FieldLabel>
+              <FieldLabel className="sr-only">Time zone</FieldLabel>
               <Select
                 items={zoneItems}
                 value={draft.timeZone}
@@ -343,24 +347,24 @@ export function ProfileSettings({
       </form>
 
       {onDeleteAccount !== undefined && (
-        <div className="mt-6 flex flex-col gap-3 rounded-control border border-negative-strong/25 p-4 @xl:flex-row @xl:items-center @xl:justify-between">
-          <div className="flex flex-col gap-0.5">
-            <h3 className="font-medium text-negative-strong">Delete account</h3>
-            <p className="text-sm text-fg-muted">
-              Removes your profile and signs you out everywhere. Work you shared stays with the
-              team.
-            </p>
+        <Row
+          danger
+          title="Danger zone"
+          hint="Removes your profile and signs you out everywhere. Work you shared stays with the team."
+          className="border-t border-line pt-6 pb-0"
+        >
+          <div>
+            <Button
+              variant="danger"
+              onClick={() => {
+                setDeleting(true);
+              }}
+            >
+              <TrashIcon aria-hidden weight="bold" className="size-4" />
+              Delete account
+            </Button>
           </div>
-          <Button
-            variant="danger"
-            onClick={() => {
-              setDeleting(true);
-            }}
-          >
-            <TrashIcon aria-hidden weight="bold" className="size-4" />
-            Delete account
-          </Button>
-        </div>
+        </Row>
       )}
 
       <DeleteDialog
