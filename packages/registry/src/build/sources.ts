@@ -76,23 +76,59 @@ export interface SourceRoot {
  * Registry path of a source file: alias key, the tree's folder if any, and the base name:
  * `button/button.tsx` -> `ui/button.tsx`, or `ui/motion/button.tsx` in the motion tree.
  */
-function registryPath(type: SourceItemType, file: string, folder?: string): string {
+export function registryPath(type: SourceItemType, file: string, folder?: string): string {
   return [ALIAS_FOR[type], folder, basename(file)].filter((part) => part !== undefined).join('/');
 }
 
-/** Which source file each name of a barrel (a package's index.ts) comes from. */
-function readBarrel(file: string): Map<string, string> {
+/** Names a module declares and exports itself: `export function X`, `export const Y`, ... */
+function ownExports(source: ts.SourceFile): string[] {
+  const names: string[] = [];
+  for (const statement of source.statements) {
+    const exported = ts.canHaveModifiers(statement)
+      ? ts.getModifiers(statement)?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword) === true
+      : false;
+    if (!exported) continue;
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (ts.isIdentifier(declaration.name)) names.push(declaration.name.text);
+      }
+    } else if (
+      (ts.isFunctionDeclaration(statement) ||
+        ts.isClassDeclaration(statement) ||
+        ts.isInterfaceDeclaration(statement) ||
+        ts.isTypeAliasDeclaration(statement) ||
+        ts.isEnumDeclaration(statement)) &&
+      statement.name !== undefined
+    ) {
+      names.push(statement.name.text);
+    }
+  }
+  return names;
+}
+
+/**
+ * Which source file each name of a barrel (a package's index.ts) comes from. Follows named
+ * re-exports and `export *`, through nested barrels, to the file that declares the name.
+ */
+export function readBarrel(file: string, seen = new Set<string>()): Map<string, string> {
   const names = new Map<string, string>();
+  if (seen.has(file)) return names;
+  seen.add(file);
   const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest);
+  for (const name of ownExports(source)) names.set(name, file);
   for (const statement of source.statements) {
     if (!ts.isExportDeclaration(statement)) continue;
     const specifier = statement.moduleSpecifier;
     const clause = statement.exportClause;
     if (specifier === undefined || !ts.isStringLiteral(specifier)) continue;
-    if (!isRelative(specifier.text) || clause === undefined || !ts.isNamedExports(clause)) continue;
+    if (!isRelative(specifier.text)) continue;
     const target = resolveRelative(file, specifier.text);
     if (target === undefined) continue;
-    for (const element of clause.elements) names.set(element.name.text, target);
+    if (clause === undefined) {
+      for (const [name, from] of readBarrel(target, seen)) names.set(name, from);
+    } else if (ts.isNamedExports(clause)) {
+      for (const element of clause.elements) names.set(element.name.text, target);
+    }
   }
   return names;
 }
@@ -102,7 +138,7 @@ function readBarrel(file: string): Map<string, string> {
  * `import { Dialog, cn } from '@rectio/ui'` becomes imports from `@registry/ui/dialog` and
  * `@registry/lib/cn`. Returns the new source and the items it now depends on.
  */
-function rewriteWorkspaceImports(
+export function rewriteWorkspaceImports(
   file: string,
   source: string,
   barrels: ReadonlyMap<string, ReadonlyMap<string, string>>,

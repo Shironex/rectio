@@ -848,7 +848,12 @@ export default defineRegistry({
     '@rectio/ui': join(ui, 'src', 'index.ts'),
     '@rectio/motion': join(motion, 'src', 'index.ts'),
     '@rectio/motion/navigation': join(motion, 'src', 'navigation.ts'),
+    '@rectio/blocks': join(blocks, 'src', 'index.ts'),
+    '@rectio/blocks/motion': join(blocks, 'src', 'motion.ts'),
+    '@rectio/blocks/marketing': join(blocks, 'src', 'marketing', 'index.ts'),
+    '@rectio/blocks/marketing/motion': join(blocks, 'src', 'marketing', 'motion.ts'),
   },
+  templates: { dir: join(packages, '..', 'templates') },
   addons: [
     {
       sourceDir: join(motion, 'src'),

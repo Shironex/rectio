@@ -12,6 +12,7 @@ import {
 } from '../schema.ts';
 import type { RegistryConfig } from './config.ts';
 import { buildSourceItems, readRanges, sortRecord, type BuiltFile } from './sources.ts';
+import { buildTemplate, findTemplates } from './templates.ts';
 import { splitTokens } from './themes.ts';
 
 export const ITEM_SCHEMA_URL = 'https://rectio.dev/r/schema/item.json';
@@ -70,6 +71,43 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
       targetFolder: addon.targetFolder,
     })),
   ];
+  const themeIds = config.tokens?.themes.map((theme) => `theme-${theme.id}`) ?? [];
+  for (const folder of findTemplates(config.templates?.dir ?? '')) {
+    const built = buildTemplate(folder, roots, config.workspacePackages ?? {});
+    const { manifest } = built;
+    items.push(
+      finish({
+        ...base(manifest.name, built.version),
+        type: 'template',
+        tier: manifest.tier,
+        title: manifest.title,
+        description: manifest.description,
+        categories: ['template', manifest.category],
+        // The template's own package.json carries its npm packages; the kit items bring theirs.
+        dependencies: {},
+        devDependencies: {},
+        // A template switches theme at runtime, so it installs the tokens and every theme.
+        registryDependencies: [
+          ...new Set([...(hasTokens ? [TOKENS_ITEM, ...themeIds] : []), ...built.uses]),
+        ].sort(),
+        requires: {
+          ...(built.reactRange === undefined ? {} : { react: built.reactRange }),
+          tailwindcss: TAILWIND_RANGE,
+          ...(hasTokens ? { tokenContract: TOKEN_CONTRACT_VERSION } : {}),
+        },
+        files: built.files,
+        template: {
+          category: manifest.category,
+          framework: 'next',
+          pages: manifest.pages,
+          uses: built.uses,
+          screenshots: manifest.screenshots,
+        },
+        docs: `Run the app with your package manager's dev script. Pages: ${manifest.pages.join(', ')}.`,
+      }),
+    );
+  }
+
   for (const built of buildSourceItems(roots, ranges, config.workspacePackages)) {
     const { config: item } = built;
     const styled = item.type === 'component' || item.type === 'block';
