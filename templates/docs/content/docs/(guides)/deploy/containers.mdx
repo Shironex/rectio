@@ -1,0 +1,41 @@
+---
+title: Containers
+description: Build a worker image, run it beside your app and scale it on the depth of the queue.
+updated: 2026-10-20
+---
+
+The worker can share your app's image: only the command differs.
+
+```dockerfile title="Dockerfile"
+FROM node:22-slim
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY dist ./dist
+CMD ["node", "dist/server.js"]
+```
+
+```yaml title="compose.yaml" {8-11}
+services:
+  app:
+    build: .
+    environment:
+      HALYARD_URL: redis://redis:6379
+  worker:
+    build: .
+    command: node dist/worker.js
+    environment:
+      HALYARD_URL: redis://redis:6379
+    stop_grace_period: 40s
+  redis:
+    image: redis:7
+```
+
+<Callout type="note">
+  Set the grace period a little longer than the worker's `shutdownTimeout`, so the platform does not
+  stop the process while jobs are finishing.
+</Callout>
+
+## Scale on queue depth
+
+`npx halyard stats --json` prints the waiting count of every queue. Feed it to your autoscaler and add workers when jobs wait longer than you want.

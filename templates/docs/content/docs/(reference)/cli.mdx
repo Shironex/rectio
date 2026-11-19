@@ -1,0 +1,23 @@
+---
+title: CLI
+description: The halyard command, to set up a project, run migrations, open the dashboard and read queue stats.
+updated: 2026-10-12
+---
+
+The CLI comes with `@halyard/core`. Run it with your package manager's runner, or add scripts to `package.json`.
+
+<InstallTabs command="npx halyard --help" />
+
+## Commands
+
+| Command                 | What it does                                                                       |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `halyard init`          | Writes `halyard.config.ts` and adds `HALYARD_URL` to `.env.example`.               |
+| `halyard migrate`       | Creates or upgrades the Postgres tables. `--dry-run` lists what it would run.      |
+| `halyard dashboard`     | Serves the dashboard on port 4400. `--port` changes it.                            |
+| `halyard stats`         | Prints waiting, active, delayed and failed counts per queue. `--json` for scripts. |
+| `halyard retry <queue>` | Retries every failed job of a queue. `--since 1h` limits it to recent failures.    |
+
+## In the dashboard
+
+Press <KbdShortcut shortcut="mod+k" /> in the dashboard to jump to a queue or a job by id, and <Kbd>R</Kbd> on a failed job to retry it.

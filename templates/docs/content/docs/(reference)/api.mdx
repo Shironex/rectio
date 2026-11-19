@@ -1,0 +1,126 @@
+---
+title: JavaScript API
+navTitle: JavaScript API
+description: The functions and types of @halyard/core, with their signatures, options and what they return.
+updated: 2026-11-04
+---
+
+Everything is exported from `@halyard/core`. Types are inferred from your queue definitions, so you rarely write them by hand.
+
+## Queues
+
+A queue holds one kind of job. Define it once and import it wherever jobs are added or run.
+
+<SignatureCard
+  name="defineQueue"
+  kind="function"
+  signature="defineQueue<Job, Result>(name: string, options: QueueOptions<Job, Result>): Queue<Job, Result>"
+  description="Creates a queue. The type of the job is taken from the run function's parameter."
+  params={[
+    {
+      name: 'name',
+      type: 'string',
+      description: 'Unique across the store. Used in keys, the dashboard and events.',
+    },
+    {
+      name: 'options',
+      type: 'QueueOptions<Job, Result>',
+      description: "The run function and the queue's own policies.",
+    },
+  ]}
+  returns={{ type: 'Queue<Job, Result>', description: 'The queue, to add jobs to and listen on.' }}
+  since="2.0.0"
+/>
+
+#### QueueOptions
+
+<PropsTable
+  label="QueueOptions"
+  rows={[
+    {
+      name: 'run',
+      type: '(job: Job, context: JobContext) => Promise<Result>',
+      required: true,
+      description: 'Does the work. Throw to fail the attempt.',
+    },
+    {
+      name: 'retries',
+      type: 'RetryPolicy',
+      default: 'config.retries',
+      description: 'Overrides the default retry policy for this queue.',
+    },
+    {
+      name: 'timeout',
+      type: 'Duration',
+      default: 'config.timeout',
+      description: 'Fails an attempt that runs longer than this.',
+    },
+    {
+      name: 'concurrency',
+      type: 'number',
+      description: "Caps this queue below the worker's concurrency.",
+    },
+    {
+      name: 'rateLimit',
+      type: '{ max: number; per: Duration }',
+      description: 'At most max jobs started per window, across all workers.',
+    },
+  ]}
+/>
+
+<SignatureCard
+  name="queue.add"
+  kind="method"
+  signature="add(job: Job, options?: AddOptions): Promise<JobHandle<Result>>"
+  description="Adds a job. Resolves once the store has it, not when it has run."
+  params={[
+    { name: 'job', type: 'Job', description: "The payload, checked against the queue's type." },
+    {
+      name: 'options.delay',
+      type: 'Duration',
+      description: 'Waits this long before the job can run.',
+    },
+    {
+      name: 'options.key',
+      type: 'string',
+      description: 'An idempotency key: a second add with the same key returns the first job.',
+    },
+  ]}
+  returns={{
+    type: 'Promise<JobHandle<Result>>',
+    description: 'A handle with the job id and a result() promise.',
+  }}
+/>
+
+<SignatureCard
+  name="job.progress"
+  kind="method"
+  signature="progress(value: number): Promise<void>"
+  description="Reports progress between 0 and 100. Use job.report({ progress }) instead: this method is removed in 3.0."
+  deprecated
+/>
+
+## Workers
+
+A worker takes jobs from its queues and runs them. Run it in its own process so a busy queue never slows your server.
+
+<SignatureCard
+  name="startWorker"
+  kind="function"
+  signature="startWorker(options: WorkerOptions): Promise<Worker>"
+  description="Connects to the store and runs jobs from the given queues until it is stopped."
+  params={[
+    { name: 'queues', type: 'Queue[]', description: 'The queues this worker takes jobs from.' },
+    {
+      name: 'concurrency',
+      type: 'number',
+      description: 'Jobs run at the same time. Defaults to config.concurrency.',
+    },
+    {
+      name: 'shutdownTimeout',
+      type: 'Duration',
+      description: 'How long to wait for running jobs on SIGTERM. Default 30s.',
+    },
+  ]}
+  returns={{ type: 'Promise<Worker>', description: 'The worker, with stop() and its own events.' }}
+/>

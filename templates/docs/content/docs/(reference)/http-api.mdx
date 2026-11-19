@@ -1,0 +1,108 @@
+---
+title: HTTP API
+description: Enqueue and inspect jobs from any language. Every endpoint takes and returns JSON.
+updated: 2026-10-30
+---
+
+The HTTP API is served by the dashboard at `/api/v1`. Authenticate with an API key in the `Authorization` header: `Bearer hy_live_...`. Keys are created in the dashboard under **Settings**.
+
+<Callout type="note">
+  Rate limits are per key: 600 requests a minute. A `429` answer carries `Retry-After` in seconds.
+</Callout>
+
+<Endpoint
+  method="POST"
+  path="/v1/queues/:queue/jobs"
+  title="Enqueue a job"
+  description="Adds a job to a queue. The body is checked against the queue's schema when it has one."
+  auth="An API key with the jobs:write scope."
+  pathParams={[
+    {
+      name: 'queue',
+      type: 'string',
+      required: true,
+      description: 'The queue name, as given to defineQueue.',
+    },
+  ]}
+  body={[
+    { name: 'data', type: 'object', required: true, description: 'The job payload.' },
+    { name: 'delay', type: 'string', description: "Waits before the job can run, such as '10m'." },
+    {
+      name: 'key',
+      type: 'string',
+      description: 'An idempotency key. A second request with the same key returns the first job.',
+    },
+  ]}
+  request={{
+    lang: 'bash',
+    code: `curl -X POST https://jobs.example.com/api/v1/queues/emails/jobs \\
+  -H "Authorization: Bearer $HALYARD_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{ "data": { "to": "ada@example.com", "template": "welcome" } }'`,
+  }}
+  responses={[
+    {
+      status: 201,
+      description: 'The job was added.',
+      example: `{
+  "id": "job_01HZX3K9",
+  "queue": "emails",
+  "state": "waiting",
+  "createdAt": "2026-11-04T09:12:44Z"
+}`,
+    },
+    {
+      status: 404,
+      description: 'There is no queue with this name.',
+      example: `{
+  "error": "queue_not_found",
+  "message": "No queue named emails2"
+}`,
+    },
+    {
+      status: 422,
+      description: 'The data does not match the queue.',
+      example: `{
+  "error": "invalid_data",
+  "issues": [{ "path": "template", "message": "Expected welcome or receipt" }]
+}`,
+    },
+  ]}
+/>
+
+<Endpoint
+  method="GET"
+  path="/v1/jobs/:id"
+  title="Get a job"
+  description="Returns a job with its state, attempts and, once it has run, its result or last error."
+  auth="An API key with the jobs:read scope."
+  pathParams={[
+    {
+      name: 'id',
+      type: 'string',
+      required: true,
+      description: 'The job id returned when it was added.',
+    },
+  ]}
+  responses={[
+    {
+      status: 200,
+      description: 'The job.',
+      example: `{
+  "id": "job_01HZX3K9",
+  "state": "completed",
+  "attempts": 1,
+  "result": { "messageId": "msg_7f2" }
+}`,
+    },
+  ]}
+/>
+
+<Endpoint
+  method="DELETE"
+  path="/v1/jobs/:id"
+  title="Cancel a job"
+  description="Removes a waiting or delayed job. A running job finishes its current attempt and is not retried."
+  auth="An API key with the jobs:write scope."
+  responses={[{ status: 204, description: 'The job was cancelled.' }]}
+/>

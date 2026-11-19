@@ -1,0 +1,62 @@
+---
+title: Introduction
+description: Halyard runs your background jobs with the types of your code, retries what fails and shows you what is happening.
+updated: 2026-11-04
+---
+
+Halyard is a job queue for TypeScript. You define a queue once, with the shape of its jobs, and every `add`, worker and event after that is typed by it. Jobs are kept in Redis or Postgres, so they survive deploys and restarts.
+
+```ts title="queues/emails.ts"
+import { defineQueue } from '@halyard/core';
+
+export const emails = defineQueue('emails', {
+  async run(job: { to: string; template: 'welcome' | 'receipt' }) {
+    await send(job.to, job.template);
+  },
+});
+```
+
+## What you get
+
+- **Typed queues.** The payload and the result of every job are inferred from its queue, so a typo in a job is a compile error, not a 3 a.m. page.
+- **Retries that wait.** Failed jobs retry with exponential backoff and jitter, up to the attempts you allow.
+- **Schedules.** Cron expressions with time zones, paused and resumed without losing their place.
+- **A dashboard.** Every queue, job and failure, with the stack trace and a button to retry.
+
+## How it fits together
+
+Your app adds jobs to a queue. One or more workers, usually separate processes, take jobs from the store and run them. The store is the only thing they share.
+
+<FileTree
+  label="A typical project"
+  entries={[
+    {
+      name: 'src',
+      defaultOpen: true,
+      children: [
+        {
+          name: 'queues',
+          defaultOpen: true,
+          children: [{ name: 'emails.ts', note: 'defineQueue' }, { name: 'reports.ts' }],
+        },
+        { name: 'worker.ts', highlight: true, note: 'runs the queues' },
+        { name: 'server.ts', note: 'adds jobs' },
+      ],
+    },
+    { name: 'halyard.config.ts' },
+    { name: 'package.json' },
+  ]}
+/>
+
+<Callout type="tip" title="New to job queues?">
+  Start with the [installation](/docs/installation), then read [retries and backoff](/docs/retries):
+  most of what makes a queue reliable is deciding what to do when a job fails.
+</Callout>
+
+## Requirements
+
+| Runtime | Version      | Store                  |
+| ------- | ------------ | ---------------------- |
+| Node.js | 20 or later  | Redis 7 or Postgres 15 |
+| Bun     | 1.2 or later | Redis 7 or Postgres 15 |
+| Deno    | 2.1 or later | Postgres 15            |

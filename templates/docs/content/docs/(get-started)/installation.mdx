@@ -1,0 +1,66 @@
+---
+title: Installation
+description: Add Halyard to a project, connect a store and run your first job in a few minutes.
+updated: 2026-10-28
+---
+
+<Steps>
+  <Step title="Install the package">
+    Halyard is one package. It includes the queue, the worker and the CLI.
+
+    <InstallTabs command="npm install @halyard/core" />
+
+  </Step>
+  <Step title="Create the config">
+    The CLI writes `halyard.config.ts` with a Redis connection read from your environment.
+
+    <InstallTabs command="npx halyard init" />
+
+  </Step>
+  <Step title="Define a queue">
+    A queue is a name and a `run` function. The type of `job` is the type of everything you add to it.
+
+    ```ts title="src/queues/emails.ts" {4}
+    import { defineQueue } from '@halyard/core';
+
+    export const emails = defineQueue('emails', {
+      async run(job: { to: string; template: 'welcome' | 'receipt' }) {
+        await send(job.to, job.template);
+      },
+    });
+    ```
+
+  </Step>
+  <Step title="Start a worker and add a job">
+    Run the worker in its own process, then add a job from anywhere in your app.
+
+    ```ts title="src/worker.ts"
+    import { startWorker } from '@halyard/core';
+    import { emails } from './queues/emails';
+
+    await startWorker({ queues: [emails], concurrency: 10 });
+    ```
+
+    ```ts title="src/server.ts"
+    await emails.add({ to: 'ada@example.com', template: 'welcome' });
+    ```
+
+  </Step>
+</Steps>
+
+## Connect a store
+
+Halyard reads `HALYARD_URL` by default. A `redis://` URL uses Redis, a `postgres://` URL uses Postgres.
+
+```bash title=".env"
+HALYARD_URL=redis://localhost:6379
+```
+
+<Callout type="warning">
+  Postgres needs the Halyard tables before the first job. Run `npx halyard migrate` once per
+  database, and again after each minor upgrade.
+</Callout>
+
+## Check it works
+
+Open the dashboard with `npx halyard dashboard` and add a job. It appears under **emails** as completed within a second. If it stays waiting, the worker is not connected to the same store as your app.
