@@ -100,6 +100,7 @@ export function SelectItem({ className, children, hint, ...props }: SelectItemPr
       className={cn(
         'flex cursor-default scroll-my-1 items-center gap-2',
         'rounded-(--rx-field-radius) py-1.5 ps-2 pe-3 text-base outline-none select-none',
+        'pointer-coarse:min-h-(--rx-field-height-touch)',
         'data-highlighted:bg-accent-subtle data-highlighted:text-fg data-selected:font-medium',
         'data-disabled:text-fg-disabled',
         className,

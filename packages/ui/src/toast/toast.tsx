@@ -138,7 +138,7 @@ function ToastItem({
         <Toast.Title className="text-sm font-medium text-fg" />
         <Toast.Description className="text-sm text-fg-muted" />
       </Toast.Content>
-      <div className="flex shrink-0 items-center gap-1 self-center">
+      <div className="flex shrink-0 items-center gap-1 self-center pointer-coarse:gap-4">
         {toast.actionProps !== undefined && (
           <Toast.Action
             className={cn(
