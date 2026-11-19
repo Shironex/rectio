@@ -63,12 +63,23 @@ function CalendarPopup({
   const container = usePortalContainer();
   return (
     <Popover.Portal container={container}>
+      {/* On phones the calendar becomes a sheet along the bottom edge, over a scrim, instead of a
+          popup that hides the fields and actions below the input. */}
+      <Popover.Backdrop
+        className={cn(
+          'fixed inset-0 z-50 hidden bg-scrim max-sm:block',
+          'transition-opacity duration-base ease-standard data-ending-style:opacity-0 data-starting-style:opacity-0',
+        )}
+      />
       <Popover.Positioner
         sideOffset={6}
         align="start"
         collisionPadding={8}
         {...(anchor === undefined ? {} : { anchor })}
-        className="z-50 outline-none"
+        className={cn(
+          'z-50 outline-none',
+          'max-sm:fixed! max-sm:inset-x-0! max-sm:top-auto! max-sm:bottom-0! max-sm:left-0! max-sm:transform-none!',
+        )}
       >
         <Popover.Popup
           ref={popupRef}
@@ -76,6 +87,7 @@ function CalendarPopup({
           data-slot="date-picker-popup"
           className={cn(
             'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow)',
+            'max-sm:flex max-sm:justify-center max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 max-sm:pb-4',
             'outline-none',
             popupMotion,
           )}
