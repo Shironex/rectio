@@ -30,7 +30,7 @@ import {
   cn,
   useToast,
 } from '@rectio/ui';
-import { useState, type SubmitEvent } from 'react';
+import { useEffect, useState, type SubmitEvent } from 'react';
 
 import { COMPANY, LOCALE } from '@/data/company';
 import { MODES, THEMES } from '../appearance-script';
@@ -68,6 +68,52 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MB = 1024 * 1024;
 
 const sectionClass = 'scroll-mt-24 p-5 sm:p-8';
+
+/**
+ * The section list beside the form. The section in view is marked current: a band across the
+ * upper part of the window decides which one that is, so a short last section still gets its turn.
+ */
+function SectionNav() {
+  const [current, setCurrent] = useState<string>(SECTIONS[0].id);
+  useEffect(() => {
+    const sections = SECTIONS.map((s) => document.getElementById(s.id)).filter(
+      (el): el is HTMLElement => el !== null,
+    );
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const seen = entries.filter((e) => e.isIntersecting);
+        const top = seen.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (top !== undefined) setCurrent(top.target.id);
+      },
+      { rootMargin: '-20% 0px -60% 0px' },
+    );
+    for (const section of sections) observer.observe(section);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <nav aria-label="Settings sections" className="lg:sticky lg:top-24 max-lg:hidden">
+      <ul className="flex flex-col gap-0.5">
+        {SECTIONS.map((s) => (
+          <li key={s.id}>
+            <a
+              href={`#${s.id}`}
+              aria-current={current === s.id ? 'location' : undefined}
+              onClick={() => {
+                setCurrent(s.id);
+              }}
+              className="block rounded-control px-3 py-2 text-sm text-fg-muted hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-focus aria-[current=location]:bg-surface-hover aria-[current=location]:font-medium aria-[current=location]:text-fg"
+            >
+              {s.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 /** Marks the fields the form cannot save without. */
 function RequiredMark() {
@@ -170,20 +216,7 @@ function SettingsForm({ forceInvalid }: { forceInvalid: boolean }) {
     <>
       <PageHeader title="Settings" description={`${COMPANY.legalName}, ${COMPANY.registration}`} />
       <div className="grid items-start gap-8 lg:grid-cols-4">
-        <nav aria-label="Settings sections" className="lg:sticky lg:top-24 max-lg:hidden">
-          <ul className="flex flex-col gap-0.5">
-            {SECTIONS.map((s) => (
-              <li key={s.id}>
-                <a
-                  href={`#${s.id}`}
-                  className="block rounded-control px-3 py-2 text-sm text-fg-muted hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
-                >
-                  {s.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <SectionNav />
         <form
           noValidate
           onSubmit={save}
@@ -403,9 +436,11 @@ function SettingsForm({ forceInvalid }: { forceInvalid: boolean }) {
               )}
             >
               {failing ? (
-                <button
+                <Button
                   type="button"
-                  className="inline-flex items-center gap-1.5 rounded-control font-medium underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus pointer-coarse:min-h-(--rx-control-height-touch)"
+                  variant="ghost"
+                  size="sm"
+                  className="-ms-2 text-negative-strong"
                   onClick={(event) => {
                     const form = event.currentTarget.closest('form');
                     if (form !== null) focusFirstInvalid(form);
@@ -413,8 +448,8 @@ function SettingsForm({ forceInvalid }: { forceInvalid: boolean }) {
                 >
                   <WarningCircleIcon aria-hidden weight="bold" className="size-4 shrink-0" />
                   {`${String(problems)} ${problems === 1 ? 'field needs' : 'fields need'} attention`}
-                  <span className="sr-only">, go to the first one</span>
-                </button>
+                  <span className="text-fg-muted">Go to the first</span>
+                </Button>
               ) : (
                 <>
                   {dirty ? (
