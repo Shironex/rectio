@@ -1,4 +1,10 @@
-import { DialogContent as PlainDialogContent, cn, type DialogContentProps } from '@rectio/ui';
+import {
+  Dialog,
+  DialogContent as PlainDialogContent,
+  DialogTrigger,
+  cn,
+  type DialogContentProps,
+} from '@rectio/ui';
 import { useLayoutEffect, useRef, type ComponentProps } from 'react';
 
 import { springTo, tweenTo, type Controls } from '../lib/animate';
@@ -12,7 +18,7 @@ export type { DialogContentProps };
  * The root and the trigger are the plain ones: a dialog is not anchored to its trigger, so it
  * opens where it will be read, in the centre, and nothing needs to know where the click came from.
  */
-export { Dialog, DialogTrigger } from '@rectio/ui';
+export { Dialog, DialogTrigger };
 
 type PopupState = Parameters<
   Extract<DialogContentProps['render'], (...args: never[]) => unknown>
