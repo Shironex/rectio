@@ -4,6 +4,8 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 
+import { Demo } from '@/demos';
+
 import { ComponentSource } from './preview/component-source';
 import { Preview } from './preview/preview';
 import { ProBadge } from './pro-badge';
@@ -12,6 +14,7 @@ export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
     Preview,
+    Demo,
     ComponentSource,
     TypeTable,
     Tabs,

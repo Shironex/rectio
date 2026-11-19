@@ -135,3 +135,13 @@
     color: var(--rx-fg-muted);
   }
 }
+
+/*
+ * The copy button floats over the top right of a code block. On a phone the first line runs under
+ * it, so there the code starts one button height lower and never sits beneath it.
+ */
+@media (width < 40rem) {
+  figure.shiki > div:first-child:has(> button) + [role='region'] {
+    padding-top: calc(var(--spacing) * 8);
+  }
+}

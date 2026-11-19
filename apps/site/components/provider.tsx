@@ -1,9 +1,11 @@
 'use client';
 
 import { RootProvider } from 'fumadocs-ui/provider/next';
+import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 
-import { SearchDialog } from './search';
+// The search index client loads when search first opens, not with every page.
+const SearchDialog = dynamic(() => import('./search').then((m) => m.SearchDialog), { ssr: false });
 
 export function Provider({ children }: { children: ReactNode }) {
   return (

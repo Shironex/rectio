@@ -32,21 +32,13 @@ export function useSiteTheme(): { theme: ThemeId; mode: Mode } {
 const prefersReducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * Switches the whole site to a theme. Where the browser has view transitions, the new theme opens
- * as a circle from `origin` (the switch that was pressed); with reduced motion it crossfades.
- * Without an origin, as from the keyboard, it switches without a transition.
+ * Runs `apply` (a change of theme or mode attributes) as a view transition. Where the browser has
+ * them, the new look opens as a circle from `origin` (the control that was pressed); with reduced
+ * motion it crossfades. Without an origin, as from the keyboard, or without view transitions, it
+ * switches at once.
  */
-export function setSiteTheme(theme: ThemeId, origin?: { x: number; y: number }) {
+function morph(apply: () => void, origin?: { x: number; y: number }) {
   const root = document.documentElement;
-  if (root.dataset.theme === theme) return;
-  const apply = () => {
-    root.dataset.theme = theme;
-  };
-  try {
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
-  } catch {
-    // Private windows may refuse storage; the switch still works for this visit.
-  }
   // Keyboard changes (no origin) switch at once: an animation on every arrow press would be noise.
   if (typeof document.startViewTransition !== 'function' || origin === undefined) {
     apply();
@@ -67,4 +59,45 @@ export function setSiteTheme(theme: ThemeId, origin?: { x: number; y: number }) 
   void transition.finished.finally(() => {
     delete root.dataset.morph;
   });
+}
+
+function rememberTheme(theme: ThemeId) {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch {
+    // Private windows may refuse storage; the switch still works for this visit.
+  }
+}
+
+/** Switches the whole site to a theme, keeping the visitor's light or dark mode. */
+export function setSiteTheme(theme: ThemeId, origin?: { x: number; y: number }) {
+  const root = document.documentElement;
+  if (root.dataset.theme === theme) return;
+  rememberTheme(theme);
+  morph(() => {
+    root.dataset.theme = theme;
+  }, origin);
+}
+
+/**
+ * Switches theme and mode together: a look. `setMode` persists the mode through the site's theme
+ * provider; the attributes are also set here, inside the transition, so the circle opens on the
+ * finished look rather than on a half-applied one.
+ */
+export function setSiteLook(
+  look: { theme: ThemeId; mode: Mode },
+  setMode: (mode: Mode) => void,
+  origin?: { x: number; y: number },
+) {
+  const root = document.documentElement;
+  if (root.dataset.theme === look.theme && root.dataset.mode === look.mode) return;
+  rememberTheme(look.theme);
+  morph(() => {
+    root.dataset.theme = look.theme;
+    root.dataset.mode = look.mode;
+    root.classList.toggle('dark', look.mode === 'dark');
+    root.classList.toggle('light', look.mode === 'light');
+    root.style.colorScheme = look.mode;
+    setMode(look.mode);
+  }, origin);
 }

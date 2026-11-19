@@ -10,16 +10,14 @@ import {
   useDataTable,
   type DataTableColumnDef,
 } from '@rectio/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { ARRIVING, CURRENCY, LINES, LOCALE, STATUS, sum, type Line } from './data';
 
 /** Rejected lines stay for the record but leave the total. */
 const claimed = (lines: Line[]) => lines.filter((l) => l.status !== 'rejected');
-const INITIAL = new Set(LINES.map((l) => l.id));
-const ROW_STEPS = ['site-step-2', 'site-step-3', 'site-step-4', 'site-step-5'];
-/** How long after load the first line arrives by itself, if the visitor has not added one. */
-const FIRST_ARRIVAL_MS = 2600;
+/** How long after the report is seen the first line arrives by itself, if nobody added one. */
+const FIRST_ARRIVAL_MS = 1600;
 
 const columns: DataTableColumnDef<Line>[] = [
   {
@@ -78,11 +76,11 @@ const columns: DataTableColumnDef<Line>[] = [
 ];
 
 /**
- * The hero's live expense report. Its first lines rise in on load (CSS, before any script); then a
- * new line arrives by itself and the total counts to its new figure. Add expense does the same on
- * demand. Built from the real components: plain table parts, motioned rows, total and button.
+ * A live expense report. Once it is on screen a new line arrives by itself and the total counts
+ * to its new figure; Add expense does the same on demand. Built from the real components: plain
+ * table parts, motioned rows, total and button.
  */
-export function HeroReport() {
+export function ExpenseReport() {
   const [lines, setLines] = useState<Line[]>(LINES);
   const added = lines.length - LINES.length;
   const next = ARRIVING[added];
@@ -93,27 +91,35 @@ export function HeroReport() {
     setLines((current) => [...current, next]);
   };
 
+  const panel = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const id = setTimeout(() => {
-      if (!touched.current) setLines((current) => [...current, ...ARRIVING.slice(0, 1)]);
-    }, FIRST_ARRIVAL_MS);
+    const element = panel.current;
+    if (element === null) return;
+    let id: ReturnType<typeof setTimeout> | undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting !== true) return;
+        observer.disconnect();
+        id = setTimeout(() => {
+          if (!touched.current) setLines((current) => [...current, ...ARRIVING.slice(0, 1)]);
+        }, FIRST_ARRIVAL_MS);
+      },
+      { threshold: 0.4 },
+    );
+    observer.observe(element);
     return () => {
+      observer.disconnect();
       clearTimeout(id);
     };
   }, []);
 
   const table = useDataTable({ data: lines, columns, getRowId: (l) => l.id });
-  const rowProps = useMemo(
-    () => (row: { id: string; index: number }) => ({
-      className: INITIAL.has(row.id)
-        ? `site-enter ${ROW_STEPS[row.index] ?? 'site-step-5'}`
-        : undefined,
-    }),
-    [],
-  );
 
   return (
-    <div className="site-enter site-step-1 flex flex-col overflow-hidden rounded-panel border border-line bg-surface shadow-overlay">
+    <div
+      ref={panel}
+      className="flex flex-col overflow-hidden rounded-panel border border-line bg-surface"
+    >
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line px-5 pt-5 pb-4">
         <div className="flex flex-col gap-1">
           <p className="text-sm text-fg-muted">Report 2041, Anna Kowalska</p>
@@ -136,7 +142,7 @@ export function HeroReport() {
       </div>
       <DataTable caption="Expenses in report 2041" hideCaption className="text-base">
         <DataTableHeader table={table} />
-        <DataTableBody table={table} rowProps={rowProps} />
+        <DataTableBody table={table} />
         <DataTableFooter table={table} />
       </DataTable>
     </div>

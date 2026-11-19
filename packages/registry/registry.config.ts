@@ -219,9 +219,10 @@ export default defineRegistry({
       name: 'calendar',
       type: 'component',
       tier: 'free',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'Calendar',
-      description: 'A token-styled month grid on react-day-picker with locale week starts.',
+      description:
+        'A token-styled month grid on DayPicker (@daypicker/react) with locale week starts.',
       categories: ['forms'],
       files: ['calendar/calendar.tsx', 'calendar/locales.ts'],
     },

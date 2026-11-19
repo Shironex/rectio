@@ -1,36 +1,41 @@
 import { CheckIcon } from '@phosphor-icons/react/dist/ssr';
 import Link from 'next/link';
 
-const TIERS = [
-  {
-    name: 'Solo',
-    price: 149,
-    who: 'One developer',
-    terms: '12 months of updates',
-    features: ['Motion add-on', 'Theme packs as they ship', 'Pro finance blocks as they ship'],
-  },
-  {
-    name: 'Lifetime',
-    price: 249,
-    who: 'One developer',
-    terms: 'Updates for as long as rectio ships them',
-    features: ['Everything in Solo', 'Every future Pro release', 'One payment, no renewal'],
-    recommended: true,
-  },
-  {
-    name: 'Team',
-    price: 499,
-    who: 'Five developers',
-    terms: 'One license for the team',
-    features: ['Everything in Solo', 'Five developer seats', 'One invoice'],
-  },
-] as const;
+const tiers = (blocks: number) =>
+  [
+    {
+      name: 'Solo',
+      price: 149,
+      who: 'One developer',
+      terms: '12 months of updates',
+      features: [
+        'Motion add-on',
+        `The ${String(blocks)} finance blocks and new ones`,
+        'Every theme pack',
+      ],
+    },
+    {
+      name: 'Lifetime',
+      price: 249,
+      who: 'One developer',
+      terms: 'Updates for as long as rectio ships them',
+      features: ['Everything in Solo', 'Every future Pro release', 'One payment, no renewal'],
+      recommended: true,
+    },
+    {
+      name: 'Team',
+      price: 499,
+      who: 'Five developers',
+      terms: 'One license for the team',
+      features: ['Everything in Solo', 'Five developer seats', 'One invoice'],
+    },
+  ] as const;
 
 const ACTION =
   'site-press inline-flex h-11 w-full items-center justify-center rounded-control px-5 text-base font-medium transition-colors duration-fast ease-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
 
 /** The free tier as a strip, then the three Pro tiers. Prices are one-time, in US dollars. */
-export function Pricing() {
+export function Pricing({ blocks }: { blocks: number }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="site-reveal flex flex-col justify-between gap-4 rounded-panel border border-line bg-surface-sunken px-6 py-5 sm:flex-row sm:items-center">
@@ -48,13 +53,13 @@ export function Pricing() {
         </Link>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        {TIERS.map((tier, i) => {
+        {tiers(blocks).map((tier, i) => {
           const recommended = 'recommended' in tier;
           return (
             <article
               key={tier.name}
               aria-labelledby={`tier-${tier.name}`}
-              className={`site-reveal ${i === 0 ? '' : i === 1 ? 'site-step-1' : 'site-step-2'} flex flex-col gap-6 rounded-panel border bg-surface p-6 sm:p-7 ${recommended ? 'border-accent shadow-overlay max-md:order-first' : 'border-line'}`}
+              className={`site-reveal ${i === 0 ? '' : i === 1 ? 'site-step-1' : 'site-step-2'} flex flex-col gap-6 rounded-panel border p-6 sm:p-7 ${recommended ? 'border-accent bg-surface-raised shadow-overlay max-md:order-first md:-translate-y-3' : 'border-line bg-surface'}`}
             >
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between gap-3">
@@ -90,15 +95,16 @@ export function Pricing() {
                 href="/docs/installation"
                 className={`${ACTION} mt-auto ${recommended ? 'bg-accent text-accent-contrast shadow-raised pointer-fine:hover:bg-accent-hover' : 'border border-line bg-surface-raised text-fg shadow-raised pointer-fine:hover:bg-surface-hover'}`}
               >
-                Get {tier.name}
+                Join {tier.name} at launch
               </Link>
             </article>
           );
         })}
       </div>
       <p className="site-reveal text-sm text-fg-muted">
-        One-time prices in US dollars, per developer. Checkout opens at launch; until then the
-        buttons lead to the free install.
+        One-time prices in US dollars. Theme packs come with every Pro license and are also sold on
+        their own. Checkout opens at launch; until then each button leads to the free install, so
+        you can start today.
       </p>
     </div>
   );

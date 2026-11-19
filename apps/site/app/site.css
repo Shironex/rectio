@@ -113,3 +113,215 @@
 .prose :not(pre) > code {
   white-space: nowrap;
 }
+
+/* ------------------------------------------------------------------------------------------------
+ * Landing. Every value derives from a rectio token; the page restyles with the theme.
+ * ---------------------------------------------------------------------------------------------- */
+
+/* Display type: past the component scale, still built from it, fluid between phone and desktop. */
+.site-display {
+  font-family: var(--rx-font-family-display);
+  font-size: clamp(
+    var(--rx-font-size-4xl),
+    calc(var(--rx-font-size-lg) + 5.2vw),
+    calc(var(--rx-font-size-5xl) * 1.55)
+  );
+  font-weight: var(--rx-font-weight-heading);
+  line-height: 0.98;
+  letter-spacing: calc(var(--rx-font-tracking-tight) * 1.6);
+}
+
+.site-headline {
+  font-family: var(--rx-font-family-display);
+  font-size: clamp(
+    var(--rx-font-size-3xl),
+    calc(var(--rx-font-size-lg) + 2.6vw),
+    var(--rx-font-size-5xl)
+  );
+  font-weight: var(--rx-font-weight-heading);
+  line-height: 1.04;
+  letter-spacing: var(--rx-font-tracking-tight);
+  text-wrap: balance;
+}
+
+/* The backdrop: a dot grid in the border colour, fading out downwards. */
+/* The hero's dots stay clear of the copy: they show to the right of it and below. */
+.site-dots.site-dots-hero {
+  mask-image: linear-gradient(to bottom, transparent 40%, var(--rx-text) 55%, transparent 95%);
+}
+.site-dots {
+  background-image: radial-gradient(
+    circle at center,
+    var(--rx-border-strong) calc(var(--rx-space-unit) * 0.25),
+    transparent calc(var(--rx-space-unit) * 0.3)
+  );
+  background-size: calc(var(--rx-space-unit) * 6) calc(var(--rx-space-unit) * 6);
+  mask-image: linear-gradient(to bottom, var(--rx-text) 10%, transparent 85%);
+}
+
+/* The one blurred accent. Its drift is a WAAPI loop that pauses off screen (glow.tsx). */
+.site-glow {
+  position: absolute;
+  width: calc(var(--rx-space-unit) * 160);
+  aspect-ratio: 1;
+  border-radius: var(--rx-radius-full);
+  background: var(--rx-accent);
+  opacity: 0.1;
+  filter: blur(calc(var(--rx-space-unit) * 32));
+  pointer-events: none;
+}
+
+/* Hero word cycle: every word sits in one grid cell, so the widest reserves the width. */
+.site-cycle {
+  display: inline-grid;
+}
+.site-cycle > span {
+  grid-area: 1 / 1;
+  transition:
+    translate var(--rx-motion-duration-reveal) var(--rx-motion-easing-enter),
+    opacity var(--rx-motion-duration-slow) var(--rx-motion-easing-standard);
+}
+.site-cycle > span[data-state='before'] {
+  opacity: 0;
+  translate: 0 0.5em;
+}
+.site-cycle > span[data-state='current'] {
+  transition-delay: var(--rx-motion-duration-fast);
+}
+/* The outgoing word clears before the next one fades in, so two never stack. */
+.site-cycle > span[data-state='after'] {
+  opacity: 0;
+  translate: 0 -0.5em;
+  transition-duration: var(--rx-motion-duration-fast);
+}
+
+/* The facts ticker: one duplicated track, moving its own width. */
+@keyframes site-ticker {
+  to {
+    translate: -50% 0;
+  }
+}
+.site-ticker {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    var(--rx-text) 8%,
+    var(--rx-text) 92%,
+    transparent
+  );
+}
+.site-ticker-track {
+  animation: site-ticker calc(var(--rx-motion-duration-loop) * 44) linear infinite;
+}
+.site-ticker:hover .site-ticker-track,
+.site-ticker[data-stopped] .site-ticker-track,
+.site-ticker[data-paused] .site-ticker-track {
+  animation-play-state: paused;
+}
+
+/* The hero window settles flat as the page scrolls its first stretch. */
+@keyframes site-window-settle {
+  from {
+    transform: perspective(calc(var(--rx-space-unit) * 600)) rotateX(9deg) scale(0.94);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .site-window {
+    transform-origin: 50% 0;
+    animation: site-window-settle linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 70vh;
+  }
+}
+
+/* Compare slider: the top copy is clipped from the left at --site-split. */
+.site-split {
+  clip-path: inset(0 0 0 var(--site-split, 50%));
+}
+
+/* The reconciled stamp lands once: a press into the paper, no bounce. */
+@keyframes site-stamp {
+  from {
+    opacity: 0;
+    scale: 1.18;
+  }
+  60% {
+    opacity: 1;
+  }
+}
+.site-stamp {
+  rotate: -6deg;
+  animation: site-stamp var(--rx-motion-duration-slow) var(--rx-motion-easing-enter) both;
+}
+
+/* Detection brackets: four corners that travel to the cell they snap onto. */
+.site-corner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--rx-space-unit) * 2.5);
+  height: calc(var(--rx-space-unit) * 2.5);
+  border-color: var(--rx-accent-strong);
+  border-style: solid;
+  border-width: 0;
+  transition: translate var(--rx-motion-duration-reveal) var(--rx-motion-easing-enter);
+}
+.site-corner[data-c='tl'] {
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+.site-corner[data-c='tr'] {
+  border-top-width: 2px;
+  border-right-width: 2px;
+}
+.site-corner[data-c='bl'] {
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+}
+.site-corner[data-c='br'] {
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+
+/* Reduced motion shows every end state: the last word, a still ticker, a flat window. */
+@media (prefers-reduced-motion: reduce) {
+  .site-ticker-toggle {
+    display: none;
+  }
+  .site-cycle > span:not([data-final]) {
+    visibility: hidden;
+  }
+  .site-cycle > span[data-final] {
+    opacity: 1;
+    translate: none;
+  }
+  .site-ticker-track {
+    animation: none;
+  }
+  .site-window,
+  .site-stamp {
+    animation: none;
+  }
+  .site-corner {
+    transition: none;
+  }
+}
+
+/* A soft panel that sets a section apart: a step below the canvas in light, a step above in dark. */
+.site-panel {
+  background: var(--rx-surface-sunken);
+}
+html[data-mode='dark'] .site-panel {
+  background: var(--rx-surface-raised);
+}
+
+/* The pinned sequence's runway: one band per step along it, shorter on phones. */
+.site-runway {
+  --site-runway: 280vh;
+  --site-band: calc((var(--site-runway) - 100vh) / 7);
+}
+@media (width >= 40rem) {
+  .site-runway {
+    --site-runway: 340vh;
+  }
+}

@@ -23,7 +23,7 @@ export function CopyCommand({ command, className }: { command: string; className
         className,
       )}
     >
-      <span aria-hidden className="text-fg-subtle select-none">
+      <span aria-hidden className="text-fg-muted select-none">
         $
       </span>
       <code className="ms-1.5 whitespace-nowrap">{command}</code>

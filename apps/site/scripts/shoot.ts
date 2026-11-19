@@ -2,7 +2,8 @@
  * Headless captures of the built site for a design round: `pnpm --filter @rectio/site shoot 3`.
  * Build first (`pnpm --filter @rectio/site build`). Writes to .rounds/site-round-<n>/ at the repo
  * root (gitignored): every page on desktop and phone, light and dark, both site themes for the
- * landing, a scroll video of the landing, and metrics.json (LCP, CLS, JS by page). It serves out/
+ * landing, frame strips of the landing's scroll-driven parts, a scroll video of the landing, and
+ * metrics.json (LCP, CLS, JS by page). `shoot 3 landing` captures the landing only. It serves out/
  * itself and never touches the screen.
  */
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
@@ -18,6 +19,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const site = join(here, '..');
 const round = process.argv[2] ?? '1';
 if (!/^\d+$/.test(round)) throw new Error(`round must be a number, got ${round}`);
+const only = process.argv[3];
 const out = join(site, '..', '..', '.rounds', `site-round-${round}`);
 mkdirSync(out, { recursive: true });
 
@@ -107,7 +109,7 @@ const shots: string[] = [];
 try {
   for (const view of VIEWPORTS) {
     for (const mode of MODES) {
-      for (const entry of PAGES) {
+      for (const entry of PAGES.filter((p) => only === undefined || p.name === only)) {
         const themes = entry.name === 'landing' ? ['default', 'ledger'] : ['default'];
         for (const theme of themes) {
           const { context, page } = await openPage(browser, base, entry.path, {
@@ -130,9 +132,83 @@ try {
     }
   }
 
+  // Frame strips: the landing at fixed scroll positions through its scroll-driven parts (the hero
+  // window settling, the pinned sequence, the theme curtain), one still each, then a contact sheet.
+  for (const view of VIEWPORTS) {
+    for (const mode of MODES) {
+      const { context, page } = await openPage(browser, base, '/', {
+        ...view,
+        mode,
+        theme: 'default',
+      });
+      await walk(page);
+      await settle(page);
+      const frames: string[] = [];
+      const shoot = async (name: string) => {
+        await page.waitForTimeout(900);
+        const file = `strip-${view.name}-${mode}-${name}.png`;
+        await page.screenshot({ path: join(out, file) });
+        frames.push(file);
+      };
+      await shoot('00-top');
+      for (const vh of [0.35, 0.7]) {
+        await page.evaluate((f) => {
+          scrollTo({ top: innerHeight * f, behavior: 'instant' });
+        }, vh);
+        await shoot(`01-window-${String(vh)}`);
+      }
+      const section = await page.evaluate(() => {
+        const el = document.getElementById('close-books-title')?.closest('section');
+        if (!el) return null;
+        const top = el.getBoundingClientRect().top + scrollY;
+        return { top, height: el.offsetHeight };
+      });
+      if (section !== null) {
+        const travel = Math.max(0, section.height - view.height);
+        for (let i = 0; i <= 8; i += 1) {
+          await page.evaluate(
+            (y) => {
+              scrollTo({ top: y, behavior: 'instant' });
+            },
+            section.top + (travel * i) / 8,
+          );
+          await shoot(`02-sequence-${String(i)}`);
+        }
+      }
+      // The curtain, then the registry once its terminal session has typed out and the block landed.
+      for (const [name, text, wait] of [
+        ['03-curtain', 'Calm by day.', 900],
+        ['04-registry', 'One command, and', 9000],
+      ] as const) {
+        const heading = page.getByText(text).first();
+        await heading.evaluate((el) => {
+          el.scrollIntoView({ block: 'start', behavior: 'instant' });
+          scrollBy({ top: -96, behavior: 'instant' });
+        });
+        await page.waitForTimeout(wait);
+        await shoot(name);
+      }
+      await context.close();
+      // The contact sheet: every frame of this viewport and mode in one image.
+      const sheet = await browser.newPage({ viewport: { width: 1800, height: 1200 } });
+      const cols = view.mobile ? 7 : 4;
+      const cells = frames
+        .map(
+          (f) =>
+            `<figure><img src="data:image/png;base64,${readFileSync(join(out, f)).toString('base64')}"><figcaption>${f}</figcaption></figure>`,
+        )
+        .join('');
+      await sheet.setContent(
+        `<style>body{margin:0;background:#888;font:12px monospace}main{display:grid;grid-template-columns:repeat(${String(cols)},1fr);gap:6px;padding:6px}img{width:100%;display:block}figure{margin:0}figcaption{padding:2px 0}</style><main>${cells}</main>`,
+      );
+      await sheet.screenshot({ path: join(out, `sheet-${view.name}-${mode}.png`), fullPage: true });
+      await sheet.close();
+    }
+  }
+
   // Metrics: LCP and CLS on a cold load of each page, and the JavaScript it downloads.
   const metrics: Record<string, unknown> = {};
-  for (const entry of PAGES) {
+  for (const entry of PAGES.filter((p) => only === undefined || p.name === only)) {
     for (const view of VIEWPORTS) {
       const context = await browser.newContext({
         viewport: { width: view.width, height: view.height },
@@ -219,17 +295,21 @@ try {
   await page.goto(base, { waitUntil: 'networkidle' });
   await page.waitForTimeout(3200);
   const total = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+  // The look switch of the theme curtain is pressed once it is well inside the viewport.
+  const ledger = page.getByRole('group', { name: 'Page look' }).getByRole('button', {
+    name: 'Ledger',
+  });
   let switched = false;
   for (let y = 0; y <= total; y += 14) {
     await page.mouse.wheel(0, 14);
     await page.waitForTimeout(16);
-    if (!switched && y > total * 0.3) {
-      const ledger = page.getByRole('button', { name: 'Ledger' }).first();
-      if (await ledger.isVisible()) {
+    if (!switched && (await ledger.count()) > 0) {
+      const box = await ledger.boundingBox();
+      if (box !== null && box.y > 200 && box.y < 600) {
         await ledger.click();
         await page.waitForTimeout(1400);
+        switched = true;
       }
-      switched = true;
     }
   }
   await page.waitForTimeout(600);
