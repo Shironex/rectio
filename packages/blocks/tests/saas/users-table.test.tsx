@@ -88,6 +88,9 @@ describe('UsersTable', () => {
     const bar = screen.getByRole('region', { name: 'Bulk actions' });
     expect(bar).toHaveTextContent('2 selected');
     await userEvent.click(within(bar).getByRole('button', { name: 'Suspend' }));
+    expect(onSuspend).not.toHaveBeenCalled();
+    const dialog = await screen.findByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Suspend 2 users' }));
     expect(onSuspend).toHaveBeenCalledWith(['a', 'g']);
     expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
   });
@@ -112,6 +115,14 @@ describe('UsersTable', () => {
     expect(
       screen.getByText('Niamh Walsh is an owner and is left out of bulk changes'),
     ).toBeInTheDocument();
+  });
+
+  it('reads out the result count as filters change', async () => {
+    render(<UsersTable users={USERS} now={NOW} />);
+    const status = screen.getAllByRole('status').find((n) => n.textContent.includes('result'));
+    expect(status).toHaveTextContent('4 results');
+    await userEvent.type(screen.getByRole('searchbox', { name: 'Search users' }), 'kenji');
+    expect(status).toHaveTextContent('1 result');
   });
 
   it('shows an empty state with no users', () => {

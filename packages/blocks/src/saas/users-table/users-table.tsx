@@ -1,7 +1,6 @@
 import {
   CheckCircleIcon,
   CrownSimpleIcon,
-  EnvelopeSimpleIcon,
   EyeIcon,
   LockSimpleIcon,
   MinusIcon,
@@ -90,9 +89,10 @@ const ROLE_STYLE: Record<Exclude<UserRole, 'member'>, { icon: Icon; tone: BadgeT
   guest: { icon: EyeIcon, tone: 'neutral' },
 };
 
-const STATUS_STYLE: Record<Exclude<UserStatus, 'active'>, { icon: Icon; tone: BadgeTone }> = {
-  invited: { icon: EnvelopeSimpleIcon, tone: 'warning' },
-  suspended: { icon: ProhibitIcon, tone: 'negative' },
+// Outlined chips with a coloured dot: the state reads in words, the colour only marks it.
+const STATUS_DOT: Record<Exclude<UserStatus, 'active'>, string> = {
+  invited: 'bg-warning',
+  suspended: 'bg-negative',
 };
 
 function RoleBadge({ role }: { role: UserRole }) {
@@ -113,10 +113,9 @@ function StatusBadge({ status }: { status: UserStatus }) {
   if (status === 'active') {
     return <span className="text-sm text-fg-muted">{USER_STATUS_LABELS[status]}</span>;
   }
-  const { icon: StatusIcon, tone } = STATUS_STYLE[status];
   return (
-    <Badge tone={tone}>
-      <StatusIcon aria-hidden weight="bold" />
+    <Badge>
+      <span aria-hidden className={cn('size-1.5 shrink-0 rounded-full', STATUS_DOT[status])} />
       {USER_STATUS_LABELS[status]}
     </Badge>
   );
@@ -147,7 +146,10 @@ export function UsersTable({
   const { Button } = useBlockParts();
   const [filters, setFilters] = useState<UserFilters>(EMPTY_USER_FILTERS);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [removing, setRemoving] = useState<string[] | null>(null);
+  const [confirming, setConfirming] = useState<{
+    action: UsersTableAction;
+    ids: string[];
+  } | null>(null);
 
   const counts = userCounts(users);
   const rows = filterUsers(users, filters);
@@ -190,7 +192,7 @@ export function UsersTable({
               label: 'Suspend access',
               icon: ProhibitIcon,
               onSelect: () => {
-                onSuspend(one);
+                setConfirming({ action: 'suspend', ids: one });
               },
             },
           ]
@@ -204,7 +206,7 @@ export function UsersTable({
               icon: UserMinusIcon,
               danger: true,
               onSelect: () => {
-                setRemoving(one);
+                setConfirming({ action: 'remove', ids: one });
               },
             },
           ]),
@@ -272,7 +274,7 @@ export function UsersTable({
                 )}
                 <span className="truncate text-sm text-fg-muted">{user.email}</span>
                 {/* Narrow: role and status fold under the person. */}
-                <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 @xl:hidden">
+                <span className="mt-1 flex min-w-0 items-center gap-x-2 overflow-hidden whitespace-nowrap @xl:hidden">
                   <RoleBadge role={user.role} />
                   <span aria-hidden className="text-fg-subtle">
                     ·
@@ -389,10 +391,9 @@ export function UsersTable({
       description={description}
       actions={
         onInvite === undefined || users.length === 0 ? undefined : (
-          <Button onClick={onInvite} aria-label="Invite users">
+          <Button onClick={onInvite}>
             <UserPlusIcon aria-hidden weight="bold" className="size-4" />
-            {/* Narrow: the icon alone, so the button stays on the title's row. */}
-            <span className="@max-md:sr-only">Invite users</span>
+            Invite users
           </Button>
         )
       }
@@ -466,7 +467,7 @@ export function UsersTable({
               aria-label="Bulk actions"
               className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-control border border-line bg-surface-sunken px-3 py-1.5"
             >
-              <p aria-live="polite" className="text-sm">
+              <p className="text-sm">
                 <span className="font-medium numeric">{selectedIds.length}</span> selected
                 {targets.skippedOwners > 0 && (
                   <span className="text-fg-muted">
@@ -495,8 +496,7 @@ export function UsersTable({
                     size="sm"
                     disabled={targets.ids.length === 0}
                     onClick={() => {
-                      onSuspend(targets.ids);
-                      clearSelection();
+                      setConfirming({ action: 'suspend', ids: targets.ids });
                     }}
                   >
                     <ProhibitIcon aria-hidden weight="bold" className="size-3.5" />
@@ -509,7 +509,7 @@ export function UsersTable({
                     size="sm"
                     disabled={targets.ids.length === 0}
                     onClick={() => {
-                      setRemoving(targets.ids);
+                      setConfirming({ action: 'remove', ids: targets.ids });
                     }}
                   >
                     <UserMinusIcon aria-hidden weight="bold" className="size-3.5" />
@@ -530,6 +530,11 @@ export function UsersTable({
           )}
 
           <DataTableSort table={table} className="w-full @xl:hidden" />
+          {/* Always mounted, so a change in the count is read out as filters change. */}
+          <p role="status" className="sr-only">
+            {plural(rows.length, 'result')}
+            {selectedIds.length > 0 && `, ${String(selectedIds.length)} selected`}
+          </p>
 
           <DataTable caption={`${title}, ${plural(rows.length, 'result')}`} hideCaption>
             <DataTableHeader table={table} className="@max-xl:sr-only" />
@@ -576,14 +581,16 @@ export function UsersTable({
         </>
       )}
 
-      <RemoveUsersDialog
-        users={removing === null ? [] : removing.flatMap((id) => byId.get(id) ?? [])}
+      <ConfirmUsersDialog
+        action={confirming?.action ?? 'remove'}
+        users={confirming === null ? [] : confirming.ids.flatMap((id) => byId.get(id) ?? [])}
         onCancel={() => {
-          setRemoving(null);
+          setConfirming(null);
         }}
-        onConfirm={(ids) => {
-          onRemove?.(ids);
-          setRemoving(null);
+        onConfirm={(action, ids) => {
+          if (action === 'remove') onRemove?.(ids);
+          else onSuspend?.(ids);
+          setConfirming(null);
           clearSelection();
         }}
       />
@@ -591,21 +598,49 @@ export function UsersTable({
   );
 }
 
-function RemoveUsersDialog({
+type UsersTableAction = 'remove' | 'suspend';
+
+const CONFIRM_COPY: Record<
+  UsersTableAction,
+  { verb: string; one: (user: UserRecord) => string; many: string; button: string }
+> = {
+  remove: {
+    verb: 'Remove',
+    one: (user) => `${user.email} loses access at once. Their work stays in the workspace.`,
+    many: 'They lose access at once. Their work stays in the workspace.',
+    button: 'Remove user',
+  },
+  suspend: {
+    verb: 'Suspend',
+    one: (user) => `${user.email} is signed out and cannot sign in until reactivated.`,
+    many: 'They are signed out and cannot sign in until reactivated.',
+    button: 'Suspend user',
+  },
+};
+
+function ConfirmUsersDialog({
+  action,
   users,
   onCancel,
   onConfirm,
 }: {
+  action: UsersTableAction;
   users: UserRecord[];
   onCancel: () => void;
-  onConfirm: (ids: string[]) => void;
+  onConfirm: (action: UsersTableAction, ids: string[]) => void;
 }) {
   const { Button } = useBlockParts();
-  // While the dialog closes it keeps naming who it was about.
-  const [shown, setShown] = useState(users);
+  // While the dialog closes it keeps naming who and what it was about.
+  const [shown, setShown] = useState({ action, users });
   const key = users.map((u) => u.id).join();
-  if (users.length > 0 && key !== shown.map((u) => u.id).join()) setShown(users);
-  const one = shown.length === 1 ? shown[0] : undefined;
+  if (
+    users.length > 0 &&
+    (key !== shown.users.map((u) => u.id).join() || action !== shown.action)
+  ) {
+    setShown({ action, users });
+  }
+  const copy = CONFIRM_COPY[shown.action];
+  const one = shown.users.length === 1 ? shown.users[0] : undefined;
   return (
     <Dialog
       open={users.length > 0}
@@ -616,13 +651,11 @@ function RemoveUsersDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {one === undefined ? `Remove ${plural(shown.length, 'user')}?` : `Remove ${one.name}?`}
-          </DialogTitle>
-          <DialogDescription>
             {one === undefined
-              ? 'They lose access at once. Their work stays in the workspace.'
-              : `${one.email} loses access at once. Their work stays in the workspace.`}
-          </DialogDescription>
+              ? `${copy.verb} ${plural(shown.users.length, 'user')}?`
+              : `${copy.verb} ${one.name}?`}
+          </DialogTitle>
+          <DialogDescription>{one === undefined ? copy.many : copy.one(one)}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="secondary" onClick={onCancel}>
@@ -631,10 +664,13 @@ function RemoveUsersDialog({
           <Button
             variant="danger"
             onClick={() => {
-              onConfirm(shown.map((u) => u.id));
+              onConfirm(
+                shown.action,
+                shown.users.map((u) => u.id),
+              );
             }}
           >
-            {one === undefined ? `Remove ${plural(shown.length, 'user')}` : 'Remove user'}
+            {one === undefined ? `${copy.verb} ${plural(shown.users.length, 'user')}` : copy.button}
           </Button>
         </DialogFooter>
       </DialogContent>
