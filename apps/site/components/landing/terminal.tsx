@@ -92,7 +92,8 @@ export function Terminal() {
           tick(1);
         }, stagger * 2);
       },
-      { threshold: 0.2 },
+      // Starts a little before the panel is on screen, so the session is under way when it arrives.
+      { threshold: 0, rootMargin: '0px 0px 25% 0px' },
     );
     observer.observe(element);
     return () => {
