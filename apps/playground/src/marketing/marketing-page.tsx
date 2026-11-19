@@ -236,7 +236,11 @@ function Landing({ blocks }: { blocks: Blocks }) {
         />
         <blocks.CtaBand
           layout="split"
-          title="Close your next month in days"
+          title={
+            <>
+              Close your next month <Em>in days</Em>
+            </>
+          }
           description="Start free with your own data. No card, and your export is always one click away."
           primary={copy.START}
           secondary={copy.DEMO}
