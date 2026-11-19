@@ -73,6 +73,7 @@ const topLevel = cn(
   'data-popup-open:bg-surface-hover data-popup-open:text-fg',
   'aria-[current=page]:text-fg',
   '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
+  'pointer-coarse:h-(--rx-button-height-touch)',
 );
 
 export type NavigationMenuTriggerProps = WithClassName<
