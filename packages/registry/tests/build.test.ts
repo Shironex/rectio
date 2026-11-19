@@ -250,43 +250,73 @@ describe('the rectio registry', () => {
   it('publishes every component, the tokens and one theme item per theme', () => {
     expect([...byName.keys()].sort()).toEqual([
       'amount-input',
+      'announcement-bar',
       'ar-aging',
       'badge',
       'blocks-core',
+      'blog',
       'budget-vs-actual',
       'button',
       'calendar',
       'cash-flow',
       'checkbox',
       'cn',
+      'contact',
+      'cookie-consent',
+      'cta-band',
       'data-table',
       'date-picker',
       'dialog',
       'expense-approval',
+      'faq',
+      'feature-grid',
       'field',
+      'hero',
       'invoice-detail',
       'invoice-list',
       'kpi-row',
       'ledger',
+      'legal',
+      'logo-strip',
+      'marketing-core',
       'money',
       'motion-amount-input',
       'motion-ar-aging',
       'motion-blocks-core',
+      'motion-blog',
       'motion-budget-vs-actual',
       'motion-button',
       'motion-cash-flow',
+      'motion-contact',
+      'motion-cookie-consent',
       'motion-core',
+      'motion-cta-band',
       'motion-data-table',
       'motion-dialog',
       'motion-expense-approval',
+      'motion-faq',
+      'motion-feature-grid',
+      'motion-hero',
       'motion-invoice-detail',
       'motion-invoice-list',
       'motion-kpi-row',
       'motion-ledger',
+      'motion-logo-strip',
+      'motion-marketing-core',
       'motion-money',
+      'motion-newsletter',
       'motion-select',
+      'motion-stat-row',
+      'motion-team',
+      'motion-testimonials',
       'motion-toast',
+      'newsletter',
       'select',
+      'site-footer',
+      'site-header',
+      'stat-row',
+      'team',
+      'testimonials',
       'theme-default',
       'theme-ledger',
       'theme-scope',
@@ -387,6 +417,44 @@ describe('the rectio registry', () => {
     expect(list?.target).toBe('@blocks/finance/invoice-list.tsx');
     expect(list?.content).toContain("from '@registry/lib/finance/finance'");
     expect(list?.content).not.toMatch(/@rectio\/(ui|motion)/);
+  });
+
+  it('publishes the marketing blocks under their own folder, built on the marketing core', () => {
+    const withMotion = [
+      'blog',
+      'contact',
+      'cookie-consent',
+      'cta-band',
+      'faq',
+      'feature-grid',
+      'hero',
+      'logo-strip',
+      'newsletter',
+      'stat-row',
+      'team',
+      'testimonials',
+    ];
+    const plainOnly = ['announcement-bar', 'legal', 'site-footer', 'site-header'];
+    for (const name of [...withMotion, ...plainOnly]) {
+      const item = byName.get(name);
+      expect(item, name).toBeDefined();
+      expect(item?.tier, name).toBe('pro');
+      expect(item?.type, name).toBe('block');
+      expect(item?.categories, name).toEqual(['marketing', 'blocks']);
+      expect(item?.registryDependencies, name).toContain('marketing-core');
+      for (const file of item?.files ?? []) expect(file.target).toMatch(/^@blocks\/marketing\//);
+    }
+    for (const name of withMotion) {
+      expect(byName.get(`motion-${name}`)?.registryDependencies).toEqual(
+        expect.arrayContaining([name, 'motion-marketing-core']),
+      );
+    }
+    for (const name of plainOnly) expect(byName.has(`motion-${name}`), name).toBe(false);
+    // The core's form and dialog pieces come from the free components, the motion core from motion.
+    expect(byName.get('cookie-consent')?.registryDependencies).toContain('dialog');
+    expect(byName.get('motion-marketing-core')?.registryDependencies).toContain('motion-button');
+    const legal = byName.get('legal')?.files.find((f) => f.path.endsWith('legal.logic.ts'));
+    expect(legal?.content).toContain('This is not legal advice.');
   });
 
   it('writes the pro motion items under pro/ only', () => {

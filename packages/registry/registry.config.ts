@@ -58,6 +58,45 @@ const blockItems = (
 ];
 
 /**
+ * A marketing block: pro, installed under `@blocks/marketing/`. `logic` adds its logic file; `motion`
+ * adds a `motion-<name>` twin for blocks with something to animate.
+ */
+const marketingItems = (
+  name: string,
+  title: string,
+  description: string,
+  folder: string,
+  { logic = false, motion = true }: { logic?: boolean; motion?: boolean } = {},
+) => [
+  {
+    name,
+    type: 'block' as const,
+    tier: 'pro' as const,
+    version: '0.1.0',
+    title,
+    description,
+    categories: ['marketing', 'blocks'],
+    files: [`${folder}/${folder}.tsx`, ...(logic ? [`${folder}/${folder}.logic.ts`] : [])],
+  },
+  ...(motion
+    ? [
+        {
+          name: `motion-${name}`,
+          type: 'block' as const,
+          tier: 'pro' as const,
+          version: '0.1.0',
+          title: `Motion ${title}`,
+          description: `${title} with entrances that play once, on first view.`,
+          categories: ['marketing', 'blocks', 'motion'],
+          files: [`${folder}/${folder}.motion.tsx`],
+          // It calls the motion core at module level, so Next must treat it as a client module.
+          client: true,
+        },
+      ]
+    : []),
+];
+
+/**
  * What the registry publishes. Every folder in packages/ui/src must belong to an item, so a new
  * component fails the build until it is listed here with its tier and version. Bump an item's
  * version whenever its published content changes: versioned copies are immutable.
@@ -76,7 +115,7 @@ export default defineRegistry({
   tokens: {
     dir: tokens,
     item: {
-      version: '0.2.1',
+      version: '0.2.2',
       title: 'Tokens',
       description:
         'The Tailwind v4 theme mapped to rectio tokens, density and reduced motion. Installed by init.',
@@ -85,14 +124,14 @@ export default defineRegistry({
       {
         id: 'default',
         tier: 'free',
-        version: '0.2.1',
+        version: '0.2.2',
         title: 'Default theme',
         description: 'Warm stone neutrals, cobalt accent, 4px controls, IBM Plex. Light and dark.',
       },
       {
         id: 'ledger',
         tier: 'free',
-        version: '0.2.1',
+        version: '0.2.2',
         title: 'Ledger theme',
         description:
           'Green-black ink, citron accent, 2px corners, slower motion, Source Serif 4 headings.',
@@ -393,6 +432,149 @@ export default defineRegistry({
           'Budget against actual per category, variance in sign, arrow and words.',
           'budget-vs-actual',
           'budget-vs-actual',
+        ),
+      ],
+    },
+    {
+      sourceDir: join(blocks, 'src', 'marketing'),
+      targetFolder: 'marketing',
+      requireEveryFolder: true,
+      items: [
+        {
+          name: 'marketing-core',
+          type: 'lib',
+          tier: 'pro',
+          version: '0.1.0',
+          title: 'Marketing core',
+          description:
+            'Sections, headings, links drawn as buttons, the marquee, prose styles and the small pieces every marketing block shares.',
+          categories: ['marketing', 'blocks'],
+          files: [
+            'lib/parts.tsx',
+            'lib/section.tsx',
+            'lib/action.tsx',
+            'lib/marquee.tsx',
+            'lib/prose.tsx',
+            'lib/marketing.ts',
+            'lib/accordion.tsx',
+            'lib/avatar.tsx',
+            'lib/switch.tsx',
+            'lib/textarea.tsx',
+          ],
+        },
+        {
+          name: 'motion-marketing-core',
+          type: 'lib',
+          tier: 'pro',
+          version: '0.1.0',
+          title: 'Motion marketing core',
+          description:
+            'First-view section entrances with a varied stagger, stats that count to their figure and a word that slides into a headline.',
+          categories: ['marketing', 'blocks', 'motion'],
+          files: ['lib/motion-parts.tsx'],
+        },
+        ...marketingItems(
+          'announcement-bar',
+          'Announcement bar',
+          'A thin bar above the header for a release or changelog entry, with an optional close.',
+          'announcement-bar',
+          { motion: false },
+        ),
+        ...marketingItems(
+          'site-header',
+          'Site header',
+          'Brand, one line of links and the main action, with a focus-trapped menu on phones.',
+          'site-header',
+          { motion: false },
+        ),
+        ...marketingItems(
+          'hero',
+          'Heroes',
+          'Centred, split, floating UI cards and a cycling headline, each framing your live product.',
+          'hero',
+        ),
+        ...marketingItems(
+          'logo-strip',
+          'Logo strip',
+          'Customer logos in a static row or a marquee that pauses on hover, focus and reduced motion.',
+          'logo-strip',
+        ),
+        ...marketingItems(
+          'feature-grid',
+          'Feature grids',
+          'A ruled icon grid, alternating feature rows on tinted panels and a bento of live UI tiles.',
+          'feature-grid',
+        ),
+        ...marketingItems(
+          'stat-row',
+          'Stat row',
+          'Big figures with what they count, optionally beside a lead sentence; the motion twin counts up.',
+          'stat-row',
+          { logic: true },
+        ),
+        ...marketingItems(
+          'testimonials',
+          'Testimonials',
+          'A single large quote with a result, a masonry grid and a two-row marquee wall.',
+          'testimonials',
+        ),
+        ...marketingItems(
+          'faq',
+          'FAQ',
+          'Questions as an accordion beside the heading, or a numbered list read in full.',
+          'faq',
+        ),
+        ...marketingItems(
+          'cta-band',
+          'CTA band',
+          'The closing ask on an accent or tinted panel, centred or split.',
+          'cta-band',
+        ),
+        ...marketingItems(
+          'newsletter',
+          'Newsletter signup',
+          'An email signup with checking, a sending state, errors in words and a confirmation.',
+          'newsletter',
+        ),
+        ...marketingItems(
+          'team',
+          'Team',
+          'An about section: values in a ruled list and the people with their roles.',
+          'team',
+        ),
+        ...marketingItems(
+          'contact',
+          'Contact section',
+          'Ways to reach you beside a checked contact form with topics and consent.',
+          'contact',
+          { logic: true },
+        ),
+        ...marketingItems(
+          'blog',
+          'Blog',
+          'An article list (lead and grid, or dated rows) and an article layout with prose styles.',
+          'blog',
+        ),
+        ...marketingItems(
+          'site-footer',
+          'Site footer',
+          'Link columns, social links and the small print, or one minimal row.',
+          'site-footer',
+          { motion: false },
+        ),
+        ...marketingItems(
+          'legal',
+          'Legal pages',
+          'Privacy, terms and cookie policy layouts with a following table of contents, and placeholder templates.',
+          'legal',
+          { logic: true, motion: false },
+        ),
+        ...marketingItems(
+          'cookie-consent',
+          'Cookie consent',
+          'A banner with accept and reject at equal weight, per-category preferences and a consent record.',
+          'cookie-consent',
+          { logic: true },
         ),
       ],
     },
