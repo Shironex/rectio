@@ -1,11 +1,14 @@
 'use client';
 
-import { InvoiceList } from '@rectio/blocks/motion';
+import dynamic from 'next/dynamic';
 import { useCallback, useState, type ReactNode } from 'react';
 
 import { INVOICES, TODAY } from '@/demos/finance-data';
 
 import { Terminal } from './terminal';
+
+// The block mounts only once the session has typed out, so its code loads then, not with the page.
+const InvoiceList = dynamic(() => import('@rectio/blocks/motion').then((m) => m.InvoiceList));
 
 /**
  * The CLI adds a block, and the block appears: once the terminal session has finished, the invoice
