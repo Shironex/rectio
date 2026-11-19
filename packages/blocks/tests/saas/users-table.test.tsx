@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -123,6 +123,23 @@ describe('UsersTable', () => {
     expect(status).toHaveTextContent('4 results');
     await userEvent.type(screen.getByRole('searchbox', { name: 'Search users' }), 'kenji');
     expect(status).toHaveTextContent('1 result');
+  });
+
+  it('lands focus on select all when the bulk bar goes away', async () => {
+    render(<UsersTable users={USERS} now={NOW} onSuspend={vi.fn()} />);
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Select Kenji Arakawa' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Clear selection' }));
+    await waitFor(() => {
+      expect(screen.getByRole('checkbox', { name: 'Select all rows' })).toHaveFocus();
+    });
+  });
+
+  it('folds filters and sort behind one disclosure', async () => {
+    render(<UsersTable users={USERS} now={NOW} />);
+    const toggle = screen.getByRole('button', { name: /Filter and sort/ });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('shows an empty state with no users', () => {

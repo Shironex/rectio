@@ -1,17 +1,15 @@
 import {
   CheckCircleIcon,
-  CrownSimpleIcon,
-  EyeIcon,
+  CaretDownIcon,
   LockSimpleIcon,
   MinusIcon,
+  FunnelSimpleIcon,
   MagnifyingGlassIcon,
   ProhibitIcon,
-  ShieldCheckIcon,
   UserMinusIcon,
   UserPlusIcon,
   UsersThreeIcon,
   XIcon,
-  type Icon,
 } from '@phosphor-icons/react';
 import type { RowSelectionState } from '@tanstack/react-table';
 import {
@@ -32,10 +30,9 @@ import {
   cn,
   selectionColumn,
   useDataTable,
-  type BadgeTone,
   type DataTableColumnDef,
 } from '@rectio/ui';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -44,7 +41,8 @@ import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
-import { plural, relativeTime } from '../lib/saas';
+import { useNow } from '../lib/focus';
+import { isoDateTime, plural, relativeTime } from '../lib/saas';
 import {
   EMPTY_USER_FILTERS,
   USER_ROLES,
@@ -83,36 +81,19 @@ export interface UsersTableProps {
 }
 
 // Member is the normal case and stays plain text; the roles that change what someone can do get a badge.
-const ROLE_STYLE: Record<Exclude<UserRole, 'member'>, { icon: Icon; tone: BadgeTone }> = {
-  owner: { icon: CrownSimpleIcon, tone: 'info' },
-  admin: { icon: ShieldCheckIcon, tone: 'neutral' },
-  guest: { icon: EyeIcon, tone: 'neutral' },
-};
-
-// Outlined chips with a coloured dot: the state reads in words, the colour only marks it.
-const STATUS_DOT: Record<Exclude<UserStatus, 'active'>, string> = {
+// One chip system: every role is the same quiet outlined badge, every status a badge with a
+// coloured dot. The words carry the meaning; the dot only marks it.
+const STATUS_DOT: Record<UserStatus, string> = {
+  active: 'bg-positive',
   invited: 'bg-warning',
   suspended: 'bg-negative',
 };
 
 function RoleBadge({ role }: { role: UserRole }) {
-  if (role === 'member') {
-    return <span className="text-sm text-fg-muted">{USER_ROLE_LABELS[role]}</span>;
-  }
-  const { icon: RoleIcon, tone } = ROLE_STYLE[role];
-  return (
-    <Badge tone={tone}>
-      <RoleIcon aria-hidden weight="bold" />
-      {USER_ROLE_LABELS[role]}
-    </Badge>
-  );
+  return <Badge>{USER_ROLE_LABELS[role]}</Badge>;
 }
 
-/** Active is the normal case and stays quiet; only states that need attention get a badge. */
 function StatusBadge({ status }: { status: UserStatus }) {
-  if (status === 'active') {
-    return <span className="text-sm text-fg-muted">{USER_STATUS_LABELS[status]}</span>;
-  }
   return (
     <Badge>
       <span aria-hidden className={cn('size-1.5 shrink-0 rounded-full', STATUS_DOT[status])} />
@@ -130,7 +111,7 @@ const WIDE = 'hidden @2xl:table-cell';
  */
 export function UsersTable({
   users,
-  now = new Date(),
+  now: requestedNow,
   locale: requestedLocale,
   pageSize = 10,
   onInvite,
@@ -143,6 +124,8 @@ export function UsersTable({
   className,
 }: UsersTableProps) {
   const locale = resolveLocale(requestedLocale);
+  // Held still across renders, so the columns memo below keeps.
+  const now = useNow(requestedNow);
   const { Button } = useBlockParts();
   const [filters, setFilters] = useState<UserFilters>(EMPTY_USER_FILTERS);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -154,6 +137,8 @@ export function UsersTable({
   const counts = userCounts(users);
   const rows = filterUsers(users, filters);
   const filtering = userFiltersActive(filters);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersId = useId();
   const bulk = onChangeRole !== undefined || onSuspend !== undefined || onRemove !== undefined;
   // Only rows still on hand count as selected, so a selection never outlives its users.
   const selectedIds = users.filter((user) => rowSelection[user.id]).map((user) => user.id);
@@ -257,10 +242,13 @@ export function UsersTable({
               <Avatar name={user.name} src={user.avatarUrl} />
               <span className="flex min-w-0 flex-col">
                 {onOpenUser === undefined ? (
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium" title={user.name}>
+                    {user.name}
+                  </span>
                 ) : (
                   <button
                     type="button"
+                    title={user.name}
                     onClick={() => {
                       onOpenUser(user);
                     }}
@@ -272,13 +260,12 @@ export function UsersTable({
                     {user.name}
                   </button>
                 )}
-                <span className="truncate text-sm text-fg-muted">{user.email}</span>
+                <span className="truncate text-sm text-fg-muted" title={user.email}>
+                  {user.email}
+                </span>
                 {/* Narrow: role and status fold under the person. */}
                 <span className="mt-1 flex min-w-0 items-center gap-x-2 overflow-hidden whitespace-nowrap @xl:hidden">
                   <RoleBadge role={user.role} />
-                  <span aria-hidden className="text-fg-subtle">
-                    ·
-                  </span>
                   <StatusBadge status={user.status} />
                 </span>
               </span>
@@ -324,7 +311,7 @@ export function UsersTable({
               <span className="sr-only">Never signed in</span>
             </span>
           ) : (
-            <time dateTime={seen.toISOString()} className="text-fg-muted">
+            <time dateTime={isoDateTime(seen)} className="text-fg-muted">
               {relativeTime(seen, now, locale)}
             </time>
           );
@@ -367,6 +354,17 @@ export function UsersTable({
   const clearSelection = () => {
     setRowSelection({});
   };
+  // When the bulk bar goes away, focus lands on the select-all checkbox (or the table), not the page.
+  const tableArea = useRef<HTMLDivElement>(null);
+  const bulkLanding = () =>
+    tableArea.current?.querySelector<HTMLElement>('[aria-label="Select all rows"]') ??
+    tableArea.current;
+  const endBulk = () => {
+    clearSelection();
+    requestAnimationFrame(() => {
+      bulkLanding()?.focus();
+    });
+  };
 
   const roleChoices: Choice<UserRole | 'all'>[] = [
     { value: 'all', label: 'All' },
@@ -377,13 +375,18 @@ export function UsersTable({
     ...USER_STATUSES.map((status) => ({ value: status, label: USER_STATUS_LABELS[status] })),
   ];
 
-  const description = [
-    plural(users.length, 'user'),
+  const extra = [
     counts.statuses.invited > 0 ? `${String(counts.statuses.invited)} invited` : null,
     counts.statuses.suspended > 0 ? `${String(counts.statuses.suspended)} suspended` : null,
-  ]
-    .filter(Boolean)
-    .join(', ');
+  ].filter(Boolean);
+  // Narrow: the count alone, so the Invite button keeps its place on the title's row.
+  const description = (
+    <>
+      {plural(users.length, 'user')}
+      {extra.length > 0 && <span className="@max-md:hidden">, {extra.join(', ')}</span>}
+    </>
+  );
+  const filtersOn = (filters.role === 'all' ? 0 : 1) + (filters.status === 'all' ? 0 : 1);
 
   return (
     <BlockPanel
@@ -393,7 +396,7 @@ export function UsersTable({
         onInvite === undefined || users.length === 0 ? undefined : (
           <Button onClick={onInvite}>
             <UserPlusIcon aria-hidden weight="bold" className="size-4" />
-            Invite users
+            Invite<span className="@max-md:hidden"> users</span>
           </Button>
         )
       }
@@ -439,7 +442,34 @@ export function UsersTable({
                 className="ps-9"
               />
             </div>
-            <div className="flex flex-wrap gap-2">
+            {/* Narrow: filters and sort fold behind one row, so the first user shows sooner. */}
+            <Button
+              variant="ghost"
+              className="justify-between text-fg-muted @2xl:hidden"
+              aria-expanded={filtersOpen}
+              aria-controls={filtersId}
+              onClick={() => {
+                setFiltersOpen(!filtersOpen);
+              }}
+            >
+              <span className="inline-flex items-center gap-2">
+                <FunnelSimpleIcon aria-hidden weight="bold" className="size-4" />
+                Filter and sort
+                {filtersOn > 0 && <span className="text-fg-subtle">, {String(filtersOn)} on</span>}
+              </span>
+              <CaretDownIcon
+                aria-hidden
+                weight="bold"
+                className={cn(
+                  'size-3.5 transition-transform duration-fast ease-standard',
+                  filtersOpen && 'rotate-180',
+                )}
+              />
+            </Button>
+            <div
+              id={filtersId}
+              className={cn('flex flex-wrap gap-2', !filtersOpen && '@max-2xl:hidden')}
+            >
               <ChoiceSelect
                 label="Role"
                 value={filters.role}
@@ -521,7 +551,7 @@ export function UsersTable({
                   size="sm"
                   iconOnly
                   aria-label="Clear selection"
-                  onClick={clearSelection}
+                  onClick={endBulk}
                 >
                   <XIcon aria-hidden weight="bold" className="size-3.5" />
                 </Button>
@@ -529,46 +559,54 @@ export function UsersTable({
             </div>
           )}
 
-          <DataTableSort table={table} className="w-full @xl:hidden" />
+          <DataTableSort
+            table={table}
+            className={cn('w-full @xl:hidden', !filtersOpen && 'hidden')}
+          />
           {/* Always mounted, so a change in the count is read out as filters change. */}
           <p role="status" className="sr-only">
             {plural(rows.length, 'result')}
             {selectedIds.length > 0 && `, ${String(selectedIds.length)} selected`}
           </p>
 
-          <DataTable caption={`${title}, ${plural(rows.length, 'result')}`} hideCaption>
-            <DataTableHeader table={table} className="@max-xl:sr-only" />
-            <DataTableBody
-              table={table}
-              rowProps={(row) => ({
-                'data-suspended': row.original.status === 'suspended' || undefined,
-                className: 'data-suspended:text-fg-muted',
-              })}
-              empty={
-                <span className="flex flex-col items-center gap-3">
-                  <span className="flex flex-col items-center gap-1">
-                    <span className="font-medium text-fg">No users match</span>
-                    <span>
-                      {filters.query.trim() === ''
-                        ? 'Try another role or status.'
-                        : `Nothing for "${filters.query.trim()}". Check the spelling or search by email.`}
+          <div
+            ref={tableArea}
+            tabIndex={-1}
+            className="rounded-control focus-visible:outline-2 focus-visible:outline-focus"
+          >
+            <DataTable caption={`${title}, ${plural(rows.length, 'result')}`} hideCaption>
+              <DataTableHeader table={table} className="@max-xl:sr-only" />
+              <DataTableBody
+                table={table}
+                rowProps={(row) => ({
+                  'data-suspended': row.original.status === 'suspended' || undefined,
+                })}
+                empty={
+                  <span className="flex flex-col items-center gap-3">
+                    <span className="flex flex-col items-center gap-1">
+                      <span className="font-medium text-fg">No users match</span>
+                      <span>
+                        {filters.query.trim() === ''
+                          ? 'Try another role or status.'
+                          : `Nothing for "${filters.query.trim()}". Check the spelling or search by email.`}
+                      </span>
                     </span>
+                    {filtering && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          setFilters(EMPTY_USER_FILTERS);
+                        }}
+                      >
+                        Clear filters
+                      </Button>
+                    )}
                   </span>
-                  {filtering && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        setFilters(EMPTY_USER_FILTERS);
-                      }}
-                    >
-                      Clear filters
-                    </Button>
-                  )}
-                </span>
-              }
-            />
-          </DataTable>
+                }
+              />
+            </DataTable>
+          </div>
           {rows.length > pageSize && (
             <DataTablePagination
               table={table}
@@ -587,6 +625,7 @@ export function UsersTable({
         onCancel={() => {
           setConfirming(null);
         }}
+        finalFocus={() => bulkLanding() ?? true}
         onConfirm={(action, ids) => {
           if (action === 'remove') onRemove?.(ids);
           else onSuspend?.(ids);
@@ -621,15 +660,20 @@ const CONFIRM_COPY: Record<
 function ConfirmUsersDialog({
   action,
   users,
+  finalFocus,
   onCancel,
   onConfirm,
 }: {
   action: UsersTableAction;
   users: UserRecord[];
+  /** Where focus goes once the dialog closes after a confirm; the trigger may be gone by then. */
+  finalFocus: () => HTMLElement | true;
   onCancel: () => void;
   onConfirm: (action: UsersTableAction, ids: string[]) => void;
 }) {
   const { Button } = useBlockParts();
+  // A confirm sends focus to `finalFocus`; Cancel and Escape return it to the trigger as usual.
+  const confirmed = useRef(false);
   // While the dialog closes it keeps naming who and what it was about.
   const [shown, setShown] = useState({ action, users });
   const key = users.map((u) => u.id).join();
@@ -648,7 +692,13 @@ function ConfirmUsersDialog({
         if (!open) onCancel();
       }}
     >
-      <DialogContent>
+      <DialogContent
+        finalFocus={() => {
+          const after = confirmed.current;
+          confirmed.current = false;
+          return after ? finalFocus() : true;
+        }}
+      >
         <DialogHeader>
           <DialogTitle>
             {one === undefined
@@ -664,6 +714,7 @@ function ConfirmUsersDialog({
           <Button
             variant="danger"
             onClick={() => {
+              confirmed.current = true;
               onConfirm(
                 shown.action,
                 shown.users.map((u) => u.id),
