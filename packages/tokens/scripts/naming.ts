@@ -28,6 +28,7 @@ export const COLOR_GROUPS = new Set([
   'info',
   'focus',
   'scrim',
+  'chart',
 ]);
 
 /**

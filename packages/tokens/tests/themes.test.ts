@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { contrast, type Oklch } from '../scripts/color.ts';
+import { contrast, difference, type ColorVision, type Oklch } from '../scripts/color.ts';
 
 interface Built {
   contract: { name: string; type: string }[];
@@ -97,5 +97,61 @@ describe('contrast', () => {
       return ratio >= min ? [] : [`${fg} on ${bg}: ${ratio.toFixed(2)} < ${min}`];
     });
     expect(failures).toEqual([]);
+  });
+});
+
+const SERIES = ['chart-series-1', 'chart-series-2', 'chart-series-3'];
+const SEQUENCE = [1, 2, 3, 4, 5].map((step) => `chart-sequence-${String(step)}`);
+const VISIONS: (ColorVision | undefined)[] = [undefined, 'protan', 'deutan', 'tritan'];
+/** Marks that sit side by side: well past a just noticeable difference (about 0.02). */
+const SERIES_APART = 0.09;
+/** Neighbouring aging steps; each also carries its label, so a smaller gap is enough. */
+const SEQUENCE_APART = 0.05;
+
+describe('chart colours', () => {
+  it.each(themeModes)('$key marks hold 3:1 against the surfaces they sit on', ({ tokens }) => {
+    const marks = [...SERIES, ...SEQUENCE, 'chart-baseline', 'chart-axis'];
+    const failures = marks.flatMap((mark) =>
+      ['surface', 'surface-canvas', 'surface-raised'].flatMap((bg) => {
+        const ratio = contrast(parse(tokens[`--rx-${mark}`]), parse(tokens[`--rx-${bg}`]));
+        return ratio >= 3 ? [] : [`${mark} on ${bg}: ${ratio.toFixed(2)}`];
+      }),
+    );
+    expect(failures).toEqual([]);
+  });
+
+  it.each(themeModes)('$key axis labels are readable text', ({ tokens }) => {
+    const ratio = contrast(parse(tokens['--rx-chart-axis']), parse(tokens['--rx-surface']));
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each(themeModes)('$key series stay apart for every colour vision type', ({ tokens }) => {
+    const failures = SERIES.flatMap((a, i) =>
+      SERIES.slice(i + 1).flatMap((b) =>
+        VISIONS.flatMap((vision) => {
+          const gap = difference(parse(tokens[`--rx-${a}`]), parse(tokens[`--rx-${b}`]), vision);
+          return gap >= SERIES_APART ? [] : [`${a}/${b} ${vision ?? 'typical'}: ${gap.toFixed(3)}`];
+        }),
+      ),
+    );
+    expect(failures).toEqual([]);
+  });
+
+  it.each(themeModes)('$key neighbouring sequence steps stay apart', ({ tokens }) => {
+    const failures = SEQUENCE.slice(1).flatMap((b, i) => {
+      const a = SEQUENCE[i] ?? '';
+      return VISIONS.flatMap((vision) => {
+        const gap = difference(parse(tokens[`--rx-${a}`]), parse(tokens[`--rx-${b}`]), vision);
+        return gap >= SEQUENCE_APART ? [] : [`${a}/${b} ${vision ?? 'typical'}: ${gap.toFixed(3)}`];
+      });
+    });
+    expect(failures).toEqual([]);
+  });
+
+  it.each(themeModes)('$key tooltip text is readable', ({ tokens }) => {
+    for (const fg of ['text', 'text-muted']) {
+      const ratio = contrast(parse(tokens[`--rx-${fg}`]), parse(tokens['--rx-chart-tooltip']));
+      expect(ratio, fg).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });

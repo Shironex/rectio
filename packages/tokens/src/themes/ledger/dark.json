@@ -207,5 +207,68 @@
         }
       ]
     }
+  },
+  "chart": {
+    "$type": "color",
+    "$description": "Data visualisation. Series and sequence marks hold 3:1 against the surface and stay apart under protan, deutan and tritan vision; a legend, label or table always names them too.",
+    "series": {
+      "1": {
+        "$value": "{palette.citron.300}",
+        "$description": "First series, such as inflow or actual."
+      },
+      "2": {
+        "$value": "{palette.orange.400}",
+        "$description": "Second series, such as outflow. Blue against orange stays apart for every common colour vision type."
+      },
+      "3": {
+        "$value": "{palette.ink.100}",
+        "$description": "A line over bars, such as net cash flow. Drawn with a halo so it reads over either series."
+      }
+    },
+    "sequence": {
+      "1": {
+        "$value": "{palette.ink.300}",
+        "$description": "Ordered steps, such as aging buckets from current to 90+ days. Step 1 is the calm state."
+      },
+      "2": {
+        "$value": "{palette.amber.200}"
+      },
+      "3": {
+        "$value": "{palette.orange.300}"
+      },
+      "4": {
+        "$value": "{palette.red.500}"
+      },
+      "5": {
+        "$value": "{palette.red.600}"
+      }
+    },
+    "grid": {
+      "$value": "{palette.ink.900}",
+      "$description": "Gridlines: quiet, behind the data."
+    },
+    "axis": {
+      "$value": "{palette.ink.400}",
+      "$description": "Axis labels and ticks."
+    },
+    "baseline": {
+      "$value": "{palette.ink.600}",
+      "$description": "The zero line."
+    },
+    "reference": {
+      "$value": "{palette.ink.500}",
+      "$description": "A target or budget mark that the data is measured against."
+    },
+    "tooltip": {
+      "$value": "{palette.ink.925}",
+      "$description": "Tooltip background."
+    },
+    "tooltip-border": {
+      "$value": "{palette.ink.800}"
+    },
+    "halo": {
+      "$value": "{palette.ink.975}",
+      "$description": "Outline under a line or label so it stays readable over marks; the surface colour."
+    }
   }
 }
