@@ -209,15 +209,15 @@ export function NotificationPreferences({
                 {allOn ? 'Turn all off' : 'Turn all on'}
               </Button>
             </div>
-            {groups.map((group) => (
+            {groups.map((group, groupIndex) => (
               <div
                 key={group.name}
                 role="group"
-                aria-labelledby={`${uid}-group-${group.name}`}
+                aria-labelledby={`${uid}-group-${groupIndex}`}
                 className="flex flex-col pt-6 first:pt-0"
               >
                 <h3
-                  id={`${uid}-group-${group.name}`}
+                  id={`${uid}-group-${groupIndex}`}
                   className="pb-1 text-xs font-medium tracking-caps text-fg-muted uppercase"
                 >
                   {group.name}
