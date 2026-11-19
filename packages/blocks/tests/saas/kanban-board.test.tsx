@@ -76,18 +76,17 @@ describe('KanbanBoard', () => {
   it('moves a focused card with Alt and an arrow key, keeps focus and reads it out', async () => {
     const onMove = vi.fn();
     render(<Board onMove={onMove} />);
-    const bravo = screen.getByText('Bravo');
-    bravo.focus();
+    screen.getByRole('article', { name: 'Bravo' }).focus();
     await userEvent.keyboard('{Alt>}{ArrowRight}{/Alt}');
     expect(onMove).toHaveBeenCalledWith('b', 'doing', 1);
     expect(screen.getByRole('status')).toHaveTextContent('Bravo moved to Doing, position 2 of 2.');
-    expect(screen.getByText('Bravo')).toHaveFocus();
+    expect(screen.getByRole('article', { name: 'Bravo' })).toHaveFocus();
   });
 
   it('says when a card cannot move further', async () => {
     const onMove = vi.fn();
     render(<Board onMove={onMove} />);
-    screen.getByText('Alpha').focus();
+    screen.getByRole('article', { name: 'Alpha' }).focus();
     await userEvent.keyboard('{Alt>}{ArrowUp}{/Alt}');
     expect(onMove).not.toHaveBeenCalled();
     expect(screen.getByRole('status')).toHaveTextContent('Alpha cannot move further up.');
@@ -103,7 +102,7 @@ describe('KanbanBoard', () => {
 
   it('warns in words when a column is over its limit', async () => {
     render(<Board />);
-    screen.getByText('Alpha').focus();
+    screen.getByRole('article', { name: 'Alpha' }).focus();
     await userEvent.keyboard('{Alt>}{ArrowRight}{/Alt}');
     expect(screen.getByText(/Over the limit of 1/)).toBeInTheDocument();
   });
@@ -119,6 +118,23 @@ describe('KanbanBoard', () => {
     fireEvent.dragOver(done, { dataTransfer });
     fireEvent.drop(done, { dataTransfer });
     expect(onMove).toHaveBeenCalledWith('a', 'done', 1);
+  });
+
+  it('reads the same words out again on a repeated move', async () => {
+    render(<Board />);
+    screen.getByRole('article', { name: 'Alpha' }).focus();
+    await userEvent.keyboard('{Alt>}{ArrowUp}{/Alt}');
+    const first = screen.getByRole('status').textContent;
+    await userEvent.keyboard('{Alt>}{ArrowUp}{/Alt}');
+    expect(screen.getByRole('status').textContent).not.toBe(first);
+  });
+
+  it('shows ghost columns with one way in on an empty board', async () => {
+    const onAddCard = vi.fn();
+    render(<KanbanBoard columns={COLUMNS} cards={[]} onAddCard={onAddCard} />);
+    expect(screen.getByText('The board is clear')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Add a card' }));
+    expect(onAddCard).toHaveBeenCalledWith('todo');
   });
 
   it('shows an empty state without columns', () => {
