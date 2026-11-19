@@ -76,12 +76,12 @@ const CLASS_NAMES: DayPickerProps['classNames'] = {
     '[&>button]:hover:bg-surface-hover!',
   ),
   // Days of the months around are muted, never struck: they are not closed, only elsewhere.
-  outside: 'not-data-selected:[&>button]:text-fg-subtle',
-  // A closed day of this month is dimmed and struck, so it never relies on colour alone. The strike
-  // is reserved for it; explain why days are closed beside the calendar.
+  outside: 'not-data-selected:not-data-disabled:[&>button]:text-fg-subtle',
+  // A closed day is dimmed and struck, wherever it falls, so it never relies on colour alone. The
+  // strike is reserved for it; explain why days are closed beside the calendar.
   disabled: cn(
-    '[&>button]:cursor-not-allowed [&>button]:text-fg-disabled [&>button]:hover:bg-transparent',
-    'not-data-outside:[&>button]:line-through',
+    '[&>button]:cursor-not-allowed [&>button]:text-fg-disabled [&>button]:line-through',
+    '[&>button]:hover:bg-transparent',
   ),
   hidden: 'invisible',
 };
