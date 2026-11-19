@@ -55,6 +55,11 @@ Every prop of an `ol` is accepted as well.
       description: 'The layout.',
     },
     label: { type: 'string', default: "'Progress'", description: 'Names the list.' },
+    summary: {
+      type: '(step: number, total: number) => ReactNode',
+      default: "'Step n of m'",
+      description: 'The line shown under a narrow horizontal stepper; translate it here.',
+    },
     onStepSelect: {
       type: '(index: number) => void',
       description: 'Lets completed steps be revisited.',
