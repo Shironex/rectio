@@ -110,7 +110,7 @@ export function Slider({
             <span
               key={mark}
               aria-hidden
-              className="absolute top-1/2 size-1 -translate-1/2 rounded-full bg-surface"
+              className="absolute top-1/2 size-1 -translate-1/2 rounded-full bg-fg-subtle"
               style={{ insetInlineStart: `${String(percent(mark, min, max))}%` }}
             />
           ))}
