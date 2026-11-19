@@ -41,7 +41,10 @@ function CategorySelect(props: { defaultValue?: string; disabled?: boolean; labe
 export function Gallery() {
   return (
     <div className="flex flex-col gap-6">
-      <Section title="Button">
+      <Section
+        title="Button"
+        note="One primary per view. Danger is outlined and fills only on press; loading keeps the label as the accessible name."
+      >
         <Row label="Variants" center>
           <Button>Approve</Button>
           <Button variant="secondary">Export</Button>
@@ -80,7 +83,10 @@ export function Gallery() {
         </Row>
       </Section>
 
-      <Section title="Field and input">
+      <Section
+        title="Field and input"
+        note="Errors carry an icon and text. Setting invalid on the field shows its error, for server checks too."
+      >
         <Row label="Rest">
           <Field className="w-56">
             <FieldLabel>Merchant</FieldLabel>
@@ -105,7 +111,10 @@ export function Gallery() {
         </Row>
       </Section>
 
-      <Section title="Amount">
+      <Section
+        title="Amount"
+        note="Figures are always right-aligned and tabular. The symbol sits on the side the locale puts it; name the currency in the label."
+      >
         <Row label="Locales">
           <Field className="w-56">
             <FieldLabel>Amount, EUR</FieldLabel>
@@ -129,7 +138,10 @@ export function Gallery() {
         </Row>
       </Section>
 
-      <Section title="Select">
+      <Section
+        title="Select"
+        note="For short fixed lists. The list opens below the trigger and stays inside the theme scope."
+      >
         <Row label="States">
           <CategorySelect label="Category" />
           <CategorySelect label="Category" defaultValue="travel" />
@@ -137,7 +149,10 @@ export function Gallery() {
         </Row>
       </Section>
 
-      <Section title="Money">
+      <Section
+        title="Money"
+        note="Locale rules decide grouping and the symbol side (pl-PL groups from five digits). Debits use the true minus; parentheses are opt-in."
+      >
         <Row label="Statement">
           <dl className="grid w-80 grid-cols-2 gap-y-1.5 text-base">
             <dt className="text-fg-muted">Opening balance</dt>
@@ -158,21 +173,43 @@ export function Gallery() {
             <dd className="text-end">
               <Money amount={-1080} currency="EUR" locale="en-IE" tone="auto" />
             </dd>
-            <dt className="text-fg-muted">Fees, accounting</dt>
+            <dt className="text-fg-muted">Bank fees</dt>
             <dd className="text-end">
-              <Money amount={-42.9} currency="EUR" locale="en-IE" accounting />
+              <Money amount={-42.9} currency="EUR" locale="en-IE" tone="auto" />
             </dd>
             <dt className="mt-1 border-t border-line-strong pt-2 font-medium">Closing</dt>
             <dd className="mt-1 border-t border-line-strong pt-2 text-end font-medium">
               <Money amount={17228.71} currency="EUR" locale="en-IE" />
             </dd>
           </dl>
-          <div className="flex flex-col items-end gap-1.5 text-base">
-            <span className="text-sm text-fg-muted">Other currencies</span>
-            <Money amount={1500} currency="JPY" locale="ja-JP" />
-            <Money amount={98765.4} currency="CHF" locale="de-CH" quietCurrency />
-            <Money amount={-2500} currency="PLN" locale="pl-PL" tone="auto" />
-          </div>
+        </Row>
+        <Row label="Accounting">
+          <dl className="grid w-80 grid-cols-2 gap-y-1.5 text-base">
+            <dt className="text-fg-muted">Bank fees</dt>
+            <dd className="text-end">
+              <Money amount={-42.9} currency="EUR" locale="en-IE" accounting />
+            </dd>
+            <dt className="text-fg-muted">Software</dt>
+            <dd className="text-end">
+              <Money amount={-1080} currency="EUR" locale="en-IE" accounting />
+            </dd>
+          </dl>
+        </Row>
+        <Row label="Locales">
+          <dl className="grid w-80 grid-cols-2 gap-y-1.5 text-base">
+            <dt className="text-fg-muted">ja-JP, no decimals</dt>
+            <dd className="text-end">
+              <Money amount={1500} currency="JPY" locale="ja-JP" />
+            </dd>
+            <dt className="text-fg-muted">de-CH, quiet symbol</dt>
+            <dd className="text-end">
+              <Money amount={98765.4} currency="CHF" locale="de-CH" quietCurrency />
+            </dd>
+            <dt className="text-fg-muted">pl-PL</dt>
+            <dd className="text-end">
+              <Money amount={-2500} currency="PLN" locale="pl-PL" tone="auto" />
+            </dd>
+          </dl>
         </Row>
       </Section>
     </div>

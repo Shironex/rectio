@@ -133,6 +133,24 @@ try {
       await app.close();
     }
   }
+  // Phone width: no sideways scroll, and the dialog still fits.
+  const phone = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 2,
+  });
+  await phone.goto(`${base}?view=app&theme=ledger&mode=dark`);
+  await settle(phone);
+  const overflow = await phone.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  );
+  console.log('phone horizontal overflow px', overflow);
+  await phone.screenshot({ path: join(out, 'phone-app.png'), fullPage: true });
+  await phone.getByRole('button', { name: 'Add expense' }).click();
+  await phone.getByRole('dialog').waitFor();
+  await settle(phone);
+  await phone.screenshot({ path: join(out, 'phone-dialog.png') });
+  await phone.close();
+
   console.log(`screenshots in ${out}`);
 } finally {
   await browser.close();

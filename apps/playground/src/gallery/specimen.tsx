@@ -1,10 +1,22 @@
 import type { ReactNode } from 'react';
 
 /** One group of specimens: a heading, then labelled rows. */
-export function Section({ title, children }: { title: string; children: ReactNode }) {
+export function Section({
+  title,
+  note,
+  children,
+}: {
+  title: string;
+  /** One line of usage guidance: when to reach for which variant. */
+  note?: string;
+  children: ReactNode;
+}) {
   return (
     <section className="flex flex-col gap-4 border-t border-line pt-5">
-      <h3 className="text-xs font-medium tracking-caps text-fg-subtle uppercase">{title}</h3>
+      <div className="flex flex-col gap-1">
+        <h3 className="text-xs font-medium tracking-caps text-fg-subtle uppercase">{title}</h3>
+        {note !== undefined && <p className="max-w-prose text-sm text-fg-muted">{note}</p>}
+      </div>
       <div className="flex flex-col gap-4">{children}</div>
     </section>
   );
