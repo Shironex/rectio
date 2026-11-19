@@ -60,16 +60,17 @@ describe('Changelog', () => {
       />,
     );
     expect(screen.getByText('1 release since your last visit')).toBeInTheDocument();
-    expect(screen.getAllByText('New since your last visit')).toHaveLength(1);
+    expect(screen.getAllByRole('separator', { name: 'New since your last visit' })).toHaveLength(1);
+    expect(screen.getByRole('separator', { name: 'Earlier' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Mark as read' }));
     expect(onMarkSeen).toHaveBeenCalled();
   });
 
   it('filters to one kind of change', async () => {
     render(<Changelog releases={RELEASES} locale="en-GB" />);
-    expect(screen.getByRole('heading', { name: 'Version 2.12' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^2\.12/ })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /^New/ }));
-    expect(screen.queryByRole('heading', { name: 'Version 2.12' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /^2\.12/ })).not.toBeInTheDocument();
     expect(screen.queryByText('Bulk approvals keep the last row.')).not.toBeInTheDocument();
   });
 
