@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -74,7 +74,7 @@ describe('CommentThread', () => {
   it('replies to a top-level comment', async () => {
     const onAdd = vi.fn();
     render(<CommentThread comments={COMMENTS} writer={ME} now={NOW} onAdd={onAdd} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Reply to Ines Duarte' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Reply, Ines Duarte' }));
     await userEvent.type(screen.getByLabelText('Reply to Ines Duarte'), 'Done');
     await userEvent.click(screen.getByRole('button', { name: 'Reply' }));
     expect(onAdd).toHaveBeenCalledWith('Done', 'c1');
@@ -110,6 +110,24 @@ describe('CommentThread', () => {
     expect(onDelete).toHaveBeenCalledWith('c2');
   });
 
+  it('gives every comment the same menu when links can be copied', async () => {
+    const onCopyLink = vi.fn();
+    render(
+      <CommentThread
+        comments={COMMENTS.slice(1, 3)}
+        writer={ME}
+        now={NOW}
+        onAdd={vi.fn()}
+        onCopyLink={onCopyLink}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /Actions for the comment by Ines Duarte/ }),
+    );
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Copy link' }));
+    expect(onCopyLink).toHaveBeenCalledWith('c1');
+  });
+
   it('returns focus to the comment menu after cancelling an edit', async () => {
     render(
       <CommentThread
@@ -127,6 +145,21 @@ describe('CommentThread', () => {
     expect(screen.getByRole('button', { name: /Actions for your comment/ })).toHaveFocus();
   });
 
+  it('returns focus to Reply after cancelling a reply', async () => {
+    render(<CommentThread comments={COMMENTS} writer={ME} now={NOW} onAdd={vi.fn()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Reply, Ines Duarte' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByRole('button', { name: 'Reply, Ines Duarte' })).toHaveFocus();
+  });
+
+  it('moves focus to the field after a refused comment', async () => {
+    render(<CommentThread comments={[]} writer={ME} now={NOW} onAdd={vi.fn()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Comment' }));
+    await waitFor(() => {
+      expect(screen.getByLabelText('Add a comment')).toHaveFocus();
+    });
+  });
+
   it('shows a resolved thread without a composer and offers to reopen', async () => {
     const onReopen = vi.fn();
     render(
@@ -141,6 +174,9 @@ describe('CommentThread', () => {
     );
     expect(screen.getByRole('status')).toHaveTextContent('Resolved by Ines Duarte');
     expect(screen.queryByLabelText('Add a comment')).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Comments' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Show discussion' }));
+    expect(screen.getByRole('list', { name: 'Comments' })).toBeVisible();
     await userEvent.click(screen.getByRole('button', { name: 'Reopen' }));
     expect(onReopen).toHaveBeenCalled();
   });

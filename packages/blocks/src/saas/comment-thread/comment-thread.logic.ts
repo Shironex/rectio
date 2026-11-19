@@ -2,6 +2,8 @@ export interface CommentAuthor {
   id: string;
   name: string;
   avatarUrl?: string;
+  /** A short chip beside the name, such as "Owner" or "Finance". */
+  role?: string;
 }
 
 export interface ThreadComment {

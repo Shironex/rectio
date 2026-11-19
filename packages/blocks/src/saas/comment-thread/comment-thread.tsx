@@ -2,11 +2,15 @@ import {
   ArrowBendUpLeftIcon,
   ArrowCounterClockwiseIcon,
   ChatsCircleIcon,
+  CaretDownIcon,
   CheckCircleIcon,
+  LinkSimpleIcon,
   PencilSimpleIcon,
   TrashIcon,
+  type Icon,
 } from '@phosphor-icons/react';
 import {
+  Badge,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -17,9 +21,11 @@ import {
   FieldError,
   FieldLabel,
   Input,
+  cn,
 } from '@rectio/ui';
 import {
   useEffect,
+  useId,
   useRef,
   useState,
   useSyncExternalStore,
@@ -33,7 +39,8 @@ import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
-import { formatDateTime, plural, relativeTime } from '../lib/saas';
+import { focusFirstInvalid, useNow } from '../lib/focus';
+import { formatDateTime, isoDateTime, plural, relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import {
   commentBodyError,
@@ -55,6 +62,8 @@ export interface CommentThreadProps {
   onEdit?: (commentId: string, body: string) => void;
   /** Asked to confirm first. */
   onDelete?: (commentId: string) => void;
+  /** Adds Copy link to every comment's menu, so each comment has the same menu. */
+  onCopyLink?: (commentId: string) => void;
   /** Set when the discussion is resolved: the composer gives way to a Reopen button. */
   resolved?: CommentThreadResolution | undefined;
   onResolve?: () => void;
@@ -77,36 +86,48 @@ export function CommentThread({
   onAdd,
   onEdit,
   onDelete,
+  onCopyLink,
   resolved,
   onResolve,
   onReopen,
-  now = new Date(),
+  now: requestedNow,
   locale: requestedLocale,
   title = 'Discussion',
   className,
 }: CommentThreadProps) {
   const locale = resolveLocale(requestedLocale);
+  const now = useNow(requestedNow);
   const { Button } = useBlockParts();
   const { Items, Item } = useSaasParts();
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const list = useRef<HTMLOListElement>(null);
-  // After editing, focus goes back to the menu the edit started from.
+  // When an in-place composer closes, focus goes back to what opened it: the comment's menu after
+  // an edit, its Reply button after a reply. The opener is found again once it has re-rendered.
   const returnFocus = useRef<string | null>(null);
   const stopEditing = () => {
-    returnFocus.current = editing;
+    if (editing !== null) {
+      returnFocus.current = `[data-comment-menu="${CSS.escape(editing)}"] button`;
+    }
     setEditing(null);
+  };
+  const stopReplying = () => {
+    if (replyingTo !== null) {
+      returnFocus.current = `[data-reply-for="${CSS.escape(replyingTo)}"]`;
+    }
+    setReplyingTo(null);
   };
 
   useEffect(() => {
-    const id = returnFocus.current;
-    if (editing !== null || id === null) return;
+    const selector = returnFocus.current;
+    if (selector === null) return;
     returnFocus.current = null;
-    list.current
-      ?.querySelector<HTMLElement>(`[data-comment-menu="${CSS.escape(id)}"] button`)
-      ?.focus();
-  }, [editing]);
+    list.current?.querySelector<HTMLElement>(selector)?.focus();
+  }, [editing, replyingTo]);
   const [deleting, setDeleting] = useState<ThreadComment | null>(null);
+  // A resolved discussion folds behind its banner until asked for.
+  const [showResolved, setShowResolved] = useState(false);
+  const listId = useId();
   const tree = commentTree(comments);
   const people = commentParticipants(comments);
 
@@ -138,10 +159,23 @@ export function CommentThread({
             },
           ]
         : []),
+      ...(onCopyLink === undefined
+        ? []
+        : [
+            {
+              id: 'link',
+              label: 'Copy link',
+              icon: LinkSimpleIcon,
+              onSelect: () => {
+                onCopyLink(comment.id);
+              },
+            },
+          ]),
     ];
+    const when = relativeTime(comment.createdAt, now, locale);
     return (
       <article
-        className="flex gap-3"
+        className="group/comment flex gap-3"
         aria-label={`${comment.author.name}, ${relativeTime(comment.createdAt, now, locale)}`}
       >
         <Avatar name={comment.author.name} src={comment.author.avatarUrl} />
@@ -149,29 +183,43 @@ export function CommentThread({
           <header className="flex items-start justify-between gap-2">
             <p className="flex flex-wrap items-baseline gap-x-2 text-base">
               <span className="font-medium text-fg">{comment.author.name}</span>
+              {comment.author.role !== undefined && (
+                <Badge className="self-center">{comment.author.role}</Badge>
+              )}
               {/* Time and the edited mark stay together on one line. */}
               <span className="whitespace-nowrap text-fg-muted">
                 <time
-                  dateTime={comment.createdAt.toISOString()}
+                  dateTime={isoDateTime(comment.createdAt)}
                   title={formatDateTime(comment.createdAt, locale)}
                 >
                   {relativeTime(comment.createdAt, now, locale)}
                 </time>
                 {comment.editedAt !== undefined && (
                   <span
-                    className="ms-1.5 inline-flex align-middle text-fg-subtle"
-                    title={`Edited ${relativeTime(comment.editedAt, now, locale)}`}
+                    className="text-sm text-fg-subtle"
+                    title={`Edited ${formatDateTime(comment.editedAt, locale)}`}
                   >
-                    <PencilSimpleIcon aria-hidden weight="bold" className="size-3.5" />
-                    <span className="sr-only">(edited)</span>
+                    {' '}
+                    · edited
                   </span>
                 )}
               </span>
             </p>
             {actions.length > 0 && editing !== comment.id && (
-              <span className="-mt-1 -me-1" data-comment-menu={comment.id}>
+              <span
+                className={cn(
+                  '-mt-1 -me-1 transition-opacity duration-fast ease-standard',
+                  // Fine pointers reveal the menu on hover or focus; touch keeps it in view.
+                  'pointer-fine:opacity-0 pointer-fine:group-focus-within/comment:opacity-100 pointer-fine:group-hover/comment:opacity-100 pointer-fine:has-data-popup-open:opacity-100',
+                )}
+                data-comment-menu={comment.id}
+              >
                 <ActionMenu
-                  label={`Actions for your comment, ${relativeTime(comment.createdAt, now, locale)}`}
+                  label={
+                    own
+                      ? `Actions for your comment, ${when}`
+                      : `Actions for the comment by ${comment.author.name}, ${when}`
+                  }
                   actions={actions}
                 />
               </span>
@@ -214,7 +262,8 @@ export function CommentThread({
                   variant="ghost"
                   size="sm"
                   className="-ms-2 text-fg-muted"
-                  aria-label={`Reply to ${comment.author.name}`}
+                  aria-label={`Reply, ${comment.author.name}`}
+                  data-reply-for={comment.id}
                   onClick={() => {
                     setReplyingTo(comment.id);
                   }}
@@ -258,14 +307,40 @@ export function CommentThread({
             <span>
               <span className="font-medium">Resolved</span> by {resolved.by},{' '}
               {relativeTime(resolved.at, now, locale)}
+              {comments.length > 0 && (
+                <span className="text-fg-muted">, {plural(comments.length, 'comment')}</span>
+              )}
             </span>
           </span>
-          {onReopen !== undefined && (
-            <Button variant="ghost" size="sm" onClick={onReopen}>
-              <ArrowCounterClockwiseIcon aria-hidden weight="bold" className="size-3.5" />
-              Reopen
-            </Button>
-          )}
+          <span className="flex flex-wrap items-center gap-2">
+            {comments.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-expanded={showResolved}
+                aria-controls={listId}
+                onClick={() => {
+                  setShowResolved(!showResolved);
+                }}
+              >
+                <CaretDownIcon
+                  aria-hidden
+                  weight="bold"
+                  className={cn(
+                    'size-3.5 transition-transform duration-fast ease-standard',
+                    showResolved && 'rotate-180',
+                  )}
+                />
+                {showResolved ? 'Hide discussion' : 'Show discussion'}
+              </Button>
+            )}
+            {onReopen !== undefined && (
+              <Button variant="ghost" size="sm" onClick={onReopen}>
+                <ArrowCounterClockwiseIcon aria-hidden weight="bold" className="size-3.5" />
+                Reopen
+              </Button>
+            )}
+          </span>
         </div>
       )}
 
@@ -283,7 +358,13 @@ export function CommentThread({
             : 'This discussion was closed before anyone wrote.'}
         </EmptyNote>
       ) : (
-        <ol aria-label="Comments" ref={list} className="flex flex-col gap-6">
+        <ol
+          id={listId}
+          aria-label="Comments"
+          ref={list}
+          hidden={resolved !== undefined && !showResolved}
+          className="flex flex-col gap-6"
+        >
           <Items>
             {tree.map(({ comment, replies }) => (
               <Item key={comment.id} className="flex flex-col gap-4">
@@ -306,12 +387,10 @@ export function CommentThread({
                             label={`Reply to ${comment.author.name}`}
                             submitLabel="Reply"
                             autoFocus
-                            onCancel={() => {
-                              setReplyingTo(null);
-                            }}
+                            onCancel={stopReplying}
                             onSubmit={(body) => {
                               onAdd(body, comment.id);
-                              setReplyingTo(null);
+                              stopReplying();
                             }}
                           />
                         </div>
@@ -332,6 +411,7 @@ export function CommentThread({
             <Composer
               label="Add a comment"
               submitLabel="Comment"
+              icon={ChatsCircleIcon}
               placeholder="Write a comment. Use @ to mention someone."
               onSubmit={(body) => {
                 onAdd(body);
@@ -365,11 +445,14 @@ function Composer({
   initial = '',
   placeholder,
   autoFocus = false,
+  icon: SubmitIcon,
   onSubmit,
   onCancel,
 }: {
   label: string;
   submitLabel: string;
+  /** Drawn before the submit label. */
+  icon?: Icon;
   initial?: string;
   placeholder?: string;
   autoFocus?: boolean;
@@ -380,12 +463,16 @@ function Composer({
   const modifier = useSendModifier();
   const [body, setBody] = useState(initial);
   const [tried, setTried] = useState(false);
+  const form = useRef<HTMLFormElement>(null);
   const error = tried ? commentBodyError(body) : null;
 
   const submit = (event?: SyntheticEvent) => {
     event?.preventDefault();
     setTried(true);
-    if (commentBodyError(body) !== null) return;
+    if (commentBodyError(body) !== null) {
+      focusFirstInvalid(form.current);
+      return;
+    }
     onSubmit(body.trim());
     setBody('');
     setTried(false);
@@ -399,7 +486,7 @@ function Composer({
   };
 
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-2">
+    <form ref={form} onSubmit={submit} noValidate className="flex flex-col gap-2">
       <Field invalid={error !== null}>
         <FieldLabel className="sr-only">{label}</FieldLabel>
         <Input
@@ -411,7 +498,7 @@ function Composer({
           onChange={(event) => {
             setBody(event.target.value);
           }}
-          className="h-auto min-h-16 resize-y py-2 leading-normal pointer-coarse:h-auto"
+          className="field-sizing-content h-auto max-h-64 min-h-16 resize-none overflow-y-auto py-2 leading-normal pointer-coarse:h-auto"
         />
         {error !== null && <FieldError>{error}</FieldError>}
       </Field>
@@ -426,8 +513,8 @@ function Composer({
           </Button>
         )}
         <Button type="submit" size="sm">
-          {submitLabel === 'Comment' && (
-            <ChatsCircleIcon aria-hidden weight="bold" className="size-3.5" />
+          {SubmitIcon !== undefined && (
+            <SubmitIcon aria-hidden weight="bold" className="size-3.5" />
           )}
           {submitLabel}
         </Button>
