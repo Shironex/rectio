@@ -215,7 +215,8 @@ export function SearchInput({
         </InputGroupAddon>
       ) : (
         hint !== null && (
-          <InputGroupAddon align="end">
+          // A keyboard shortcut means nothing to a finger: touch screens drop the hint.
+          <InputGroupAddon align="end" className="pointer-coarse:hidden">
             {/* Decorative: the shortcut is announced through aria-keyshortcuts when it is live. */}
             <kbd
               aria-hidden
