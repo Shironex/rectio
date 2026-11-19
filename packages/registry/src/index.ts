@@ -1,6 +1,8 @@
 export {
   ALIAS_KEYS,
+  PROJECT_PLACEHOLDER,
   REGISTRY_IMPORT_PREFIX,
+  TEMPLATE_CATEGORIES,
   SCHEMA_VERSION,
   TOKEN_CONTRACT_VERSION,
   fileTypeSchema,
@@ -10,6 +12,8 @@ export {
   itemTypeSchema,
   registryIndexSchema,
   registryItemSchema,
+  templateCategorySchema,
+  templateMetaSchema,
   tierSchema,
   versionSchema,
   type AliasKey,
@@ -21,8 +25,11 @@ export {
   type RegistryIndex,
   type RegistryItem,
   type RegistryItemInput,
+  type TemplateCategory,
+  type TemplateMeta,
   type Tier,
 } from './schema.ts';
+export { templateManifestSchema, type TemplateManifest } from './template-manifest.ts';
 export {
   canonicalJson,
   itemIntegrity,
