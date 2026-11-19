@@ -4,6 +4,7 @@
  */
 export { BlockPanel, type BlockPanelProps } from './lib/block-panel';
 export * from './lib/finance';
+export { COMMON_MESSAGES, plural, type CommonMessages, type PluralForms } from './lib/messages';
 export { InvoiceList, type InvoiceListProps } from './invoice-list/invoice-list';
 export * from './invoice-list/invoice-list.logic';
 export { InvoiceDetail, type InvoiceDetailProps } from './invoice-detail/invoice-detail';
@@ -14,9 +15,19 @@ export { CashFlowChart, type CashFlowChartProps } from './cash-flow/cash-flow-ch
 export * from './cash-flow/cash-flow.logic';
 export { KpiRow, type KpiRowProps } from './kpi-row/kpi-row';
 export * from './kpi-row/kpi-row.logic';
-export { ExpenseApproval, type ExpenseApprovalProps } from './expense-approval/expense-approval';
+export {
+  EXPENSE_APPROVAL_MESSAGES,
+  ExpenseApproval,
+  type ExpenseApprovalMessages,
+  type ExpenseApprovalProps,
+} from './expense-approval/expense-approval';
 export * from './expense-approval/expense-approval.logic';
-export { ArAging, type ArAgingProps } from './ar-aging/ar-aging';
+export {
+  AR_AGING_MESSAGES,
+  ArAging,
+  type ArAgingMessages,
+  type ArAgingProps,
+} from './ar-aging/ar-aging';
 export * from './ar-aging/ar-aging.logic';
 export { BudgetVsActual, type BudgetVsActualProps } from './budget-vs-actual/budget-vs-actual';
 export * from './budget-vs-actual/budget-vs-actual.logic';

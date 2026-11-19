@@ -29,14 +29,21 @@ import {
   TableRow,
   cn,
 } from '@rectio/ui';
-import { useState, type SyntheticEvent, type KeyboardEvent } from 'react';
+import { useState, type KeyboardEvent, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
 import { EmptyNote } from '../lib/empty-note';
 import { formatShortDate, resolveLocale, sumMoney } from '../lib/finance';
+import { COMMON_MESSAGES, mergeMessages, type CommonMessages } from '../lib/messages';
 import { StateBadge } from '../lib/state-badge';
-import { reasonError, type AuditEvent, type ExpenseRequest } from './expense-approval.logic';
+import {
+  MIN_REASON_LENGTH,
+  reasonProblem,
+  type AuditAction,
+  type AuditEvent,
+  type ExpenseRequest,
+} from './expense-approval.logic';
 
 export interface ExpenseApprovalProps {
   requests: readonly ExpenseRequest[];
@@ -51,14 +58,129 @@ export interface ExpenseApprovalProps {
   /** How many decisions the trail shows. */
   trailLength?: number;
   title?: string;
+  /** Shown in the empty state under its note, such as a link to the submitted expenses. */
+  emptyAction?: ReactNode;
+  /** The block's words; pass the keys you change. See `EXPENSE_APPROVAL_MESSAGES`. */
+  messages?: Partial<ExpenseApprovalMessages>;
   className?: string;
 }
 
-const ACTION_WORDS: Record<AuditEvent['action'], string> = {
+export interface ExpenseApprovalMessages extends CommonMessages {
+  title: string;
+  /** Under the title: "6 waiting, €2,140 in total". */
+  summary: (count: number, total: ReactNode) => ReactNode;
+  nothingWaiting: string;
+  selectAll: string;
+  selectHint: string;
+  selected: (count: number, total: ReactNode) => ReactNode;
+  rejectMany: (count: number) => string;
+  approveMany: (count: number) => string;
+  emptyTitle: string;
+  emptyNote: string;
+  tableCaption: (currency: string) => string;
+  select: string;
+  expense: string;
+  category: string;
+  amount: string;
+  decision: string;
+  selectOne: (merchant: string, employee: string) => string;
+  approve: string;
+  reject: string;
+  approveOne: (merchant: string, employee: string) => string;
+  rejectOne: (merchant: string, employee: string) => string;
+  recentDecisions: string;
+  /** The badge word of each audit action. */
+  actions: Record<AuditAction, string>;
+  /** One line of the trail: who did what to which expense; `amount` is absent if it is gone. */
+  trailLine: (
+    actor: ReactNode,
+    action: AuditAction,
+    merchant: string | undefined,
+    amount: ReactNode,
+  ) => ReactNode;
+  reasonLine: (reason: string) => string;
+  undo: string;
+  undoLabel: (merchant: string) => string;
+  rejectManyTitle: (count: number) => string;
+  rejectOneTitle: (merchant: string) => string;
+  rejectManyNote: (total: ReactNode) => ReactNode;
+  rejectOneNote: (employee: string, amount: ReactNode) => ReactNode;
+  reasonLabel: string;
+  reasonPlaceholder: string;
+  reasonHint: string;
+  reasonMissing: string;
+  reasonTooShort: (minimum: number) => string;
+  cancel: string;
+  confirmReject: string;
+  /** The dialog's close button. */
+  close: string;
+}
+
+const PAST: Record<AuditAction, string> = {
   submitted: 'submitted',
   approved: 'approved',
   rejected: 'rejected',
   reopened: 'reopened',
+};
+
+export const EXPENSE_APPROVAL_MESSAGES: ExpenseApprovalMessages = {
+  ...COMMON_MESSAGES,
+  title: 'Expense approvals',
+  summary: (count, total) => (
+    <>
+      {count} waiting, {total} in total
+    </>
+  ),
+  nothingWaiting: 'Nothing waiting for you',
+  selectAll: 'Select all pending expenses',
+  selectHint: 'Select to decide several at once',
+  selected: (count, total) => (
+    <>
+      {count} selected, {total}
+    </>
+  ),
+  rejectMany: (count) => `Reject ${String(count)}`,
+  approveMany: (count) => `Approve ${String(count)}`,
+  emptyTitle: 'You are all caught up',
+  emptyNote: 'New expenses appear here when they are submitted.',
+  tableCaption: (currency) => `Pending expenses, amounts in ${currency}`,
+  select: 'Select',
+  expense: 'Expense',
+  category: 'Category',
+  amount: 'Amount',
+  decision: 'Decision',
+  selectOne: (merchant, employee) => `Select ${merchant}, ${employee}`,
+  approve: 'Approve',
+  reject: 'Reject',
+  approveOne: (merchant, employee) => `Approve ${merchant}, ${employee}`,
+  rejectOne: (merchant, employee) => `Reject ${merchant}, ${employee}`,
+  recentDecisions: 'Recent decisions',
+  actions: PAST,
+  trailLine: (actor, action, merchant, amount) => (
+    <>
+      <span className="font-medium">{actor}</span> {PAST[action]} {merchant ?? 'an expense'}
+      {amount !== undefined && <>, {amount}</>}
+    </>
+  ),
+  reasonLine: (reason) => `Reason: ${reason}`,
+  undo: 'Undo',
+  undoLabel: (merchant) => `Undo, return ${merchant} to pending`,
+  rejectManyTitle: (count) => `Reject ${String(count)} expenses`,
+  rejectOneTitle: (merchant) => `Reject ${merchant}`,
+  rejectManyNote: (total) => <>{total} in total. Every employee gets the same reason.</>,
+  rejectOneNote: (employee, amount) => (
+    <>
+      {employee}, {amount}. The employee sees your reason.
+    </>
+  ),
+  reasonLabel: 'Reason',
+  reasonPlaceholder: 'For example: receipt missing, resubmit with it attached',
+  reasonHint: 'Saved in the audit trail with your name.',
+  reasonMissing: 'Say why, so the employee knows what to fix.',
+  reasonTooShort: (minimum) => `Write at least ${String(minimum)} characters.`,
+  cancel: 'Cancel',
+  confirmReject: 'Reject',
+  close: 'Close',
 };
 
 /**
@@ -75,14 +197,27 @@ export function ExpenseApproval({
   onReject,
   onReopen,
   trailLength = 5,
-  title = 'Expense approvals',
+  title,
+  emptyAction,
+  messages,
   className,
 }: ExpenseApprovalProps) {
   const locale = resolveLocale(requestedLocale);
+  const m = mergeMessages(EXPENSE_APPROVAL_MESSAGES, messages);
   const { Button, Money, Rows, Row } = useBlockParts();
   const pending = requests.filter((r) => r.status === 'pending');
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [rejecting, setRejecting] = useState<string[] | null>(null);
+  /**
+   * One Approve is filled at a time: on the row under the pointer or holding focus, else the first
+   * row. The rest stay outlined in the accent, still the main action of their row, so a queue of
+   * six reads as six decisions rather than six alarms.
+   */
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [focused, setFocused] = useState<string | null>(null);
+  const lead = [hovered, focused, pending[0]?.id].find(
+    (id) => id != null && pending.some((r) => r.id === id),
+  );
   // Selection never outlives the requests it points at.
   const chosen = pending.filter((r) => selected.has(r.id));
   const all = pending.length > 0 && chosen.length === pending.length;
@@ -108,16 +243,11 @@ export function ExpenseApproval({
 
   return (
     <BlockPanel
-      title={title}
+      title={title ?? m.title}
       description={
-        pending.length === 0 ? (
-          'Nothing waiting for you'
-        ) : (
-          <>
-            {pending.length} waiting, <Money amount={total} currency={currency} locale={locale} />{' '}
-            in total
-          </>
-        )
+        pending.length === 0
+          ? m.nothingWaiting
+          : m.summary(pending.length, <Money amount={total} currency={currency} locale={locale} />)
       }
       className={className}
       bodyClassName="gap-5"
@@ -131,7 +261,7 @@ export function ExpenseApproval({
       >
         <label className="flex cursor-pointer items-center gap-3 text-sm">
           <Checkbox
-            aria-label="Select all pending expenses"
+            aria-label={m.selectAll}
             checked={all}
             indeterminate={chosen.length > 0 && !all}
             disabled={pending.length === 0}
@@ -141,10 +271,10 @@ export function ExpenseApproval({
           />
           <span aria-live="polite">
             {chosen.length === 0 ? (
-              <span className="text-fg-muted">Select to decide several at once</span>
+              <span className="text-fg-muted">{m.selectHint}</span>
             ) : (
-              <>
-                {chosen.length} selected,{' '}
+              m.selected(
+                chosen.length,
                 <Money
                   amount={sumMoney(
                     chosen.map((r) => r.amount),
@@ -153,8 +283,8 @@ export function ExpenseApproval({
                   currency={currency}
                   locale={locale}
                   className="font-medium"
-                />
-              </>
+                />,
+              )
             )}
           </span>
         </label>
@@ -168,7 +298,7 @@ export function ExpenseApproval({
               }}
             >
               <XIcon aria-hidden weight="bold" className="size-3.5" />
-              Reject {chosen.length}
+              {m.rejectMany(chosen.length)}
             </Button>
             <Button
               size="sm"
@@ -177,42 +307,58 @@ export function ExpenseApproval({
               }}
             >
               <CheckIcon aria-hidden weight="bold" className="size-3.5" />
-              Approve {chosen.length}
+              {m.approveMany(chosen.length)}
             </Button>
           </div>
         )}
       </div>
 
       {pending.length === 0 ? (
-        <EmptyNote title="You are all caught up">
-          New expenses appear here when they are submitted.
+        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+          {m.emptyNote}
         </EmptyNote>
       ) : (
         <Table>
-          <TableCaption className="sr-only">Pending expenses, amounts in {currency}</TableCaption>
+          <TableCaption className="sr-only">{m.tableCaption(currency)}</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-0 pe-0">
-                <span className="sr-only">Select</span>
+                <span className="sr-only">{m.select}</span>
               </TableHead>
-              <TableHead>Expense</TableHead>
-              <TableHead className="hidden @2xl:table-cell">Category</TableHead>
+              <TableHead>{m.expense}</TableHead>
+              <TableHead className="hidden @2xl:table-cell">{m.category}</TableHead>
               <TableHead align="end" className="hidden @xl:table-cell">
-                Amount
+                {m.amount}
               </TableHead>
               <TableHead align="end" className="hidden w-0 @xl:table-cell">
-                <span className="sr-only">Decision</span>
+                <span className="sr-only">{m.decision}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <Rows>
               {pending.map((request) => (
-                <Row key={request.id} data-selected={selected.has(request.id) || undefined}>
+                <Row
+                  key={request.id}
+                  data-selected={selected.has(request.id) || undefined}
+                  onPointerEnter={() => {
+                    setHovered(request.id);
+                  }}
+                  onPointerLeave={() => {
+                    setHovered((id) => (id === request.id ? null : id));
+                  }}
+                  onFocus={() => {
+                    setFocused(request.id);
+                  }}
+                  onBlur={(event) => {
+                    if (event.currentTarget.contains(event.relatedTarget)) return;
+                    setFocused((id) => (id === request.id ? null : id));
+                  }}
+                >
                   <TableCell className="w-0 pe-0">
                     <span className="flex items-center">
                       <Checkbox
-                        aria-label={`Select ${request.merchant}, ${request.employee}`}
+                        aria-label={m.selectOne(request.merchant, request.employee)}
                         checked={selected.has(request.id)}
                         onCheckedChange={(checked) => {
                           toggle(request.id, checked);
@@ -250,6 +396,8 @@ export function ExpenseApproval({
                     <span className="mt-2 flex @xl:hidden">
                       <Decide
                         wide
+                        lead={request.id === lead}
+                        messages={m}
                         request={request}
                         onApprove={() => {
                           approve([request.id]);
@@ -268,6 +416,8 @@ export function ExpenseApproval({
                   </TableCell>
                   <TableCell align="end" className="hidden w-0 @xl:table-cell">
                     <Decide
+                      lead={request.id === lead}
+                      messages={m}
                       request={request}
                       onApprove={() => {
                         approve([request.id]);
@@ -288,7 +438,7 @@ export function ExpenseApproval({
         <div className="flex flex-col gap-2">
           <h3 className="flex items-center gap-1.5 text-sm font-medium">
             <ClockCounterClockwiseIcon aria-hidden weight="bold" className="size-4 text-fg-muted" />
-            Recent decisions
+            {m.recentDecisions}
           </h3>
           <ol className="flex flex-col">
             {trail.map((event) => {
@@ -303,22 +453,23 @@ export function ExpenseApproval({
                 >
                   <span className="flex min-w-0 items-start gap-2.5 text-sm">
                     {event.action === 'approved' || event.action === 'rejected' ? (
-                      <StateBadge state={event.action} />
+                      <StateBadge state={event.action} label={m.states[event.action]} />
                     ) : (
-                      <Badge>{ACTION_WORDS[event.action]}</Badge>
+                      <Badge>{m.actions[event.action]}</Badge>
                     )}
                     <span className="flex min-w-0 flex-col">
                       <span>
-                        <span className="font-medium">{event.actor}</span>{' '}
-                        {ACTION_WORDS[event.action]} {request?.merchant ?? 'an expense'}
-                        {request !== undefined && (
-                          <>
-                            , <Money amount={request.amount} currency={currency} locale={locale} />
-                          </>
+                        {m.trailLine(
+                          event.actor,
+                          event.action,
+                          request?.merchant,
+                          request === undefined ? undefined : (
+                            <Money amount={request.amount} currency={currency} locale={locale} />
+                          ),
                         )}
                       </span>
                       {event.reason !== undefined && (
-                        <span className="text-fg-muted">Reason: {event.reason}</span>
+                        <span className="text-fg-muted">{m.reasonLine(event.reason)}</span>
                       )}
                       <span className="text-fg-subtle">
                         <time dateTime={event.at.toISOString()}>
@@ -336,13 +487,13 @@ export function ExpenseApproval({
                     <Button
                       variant="ghost"
                       size="sm"
-                      aria-label={`Undo, return ${request.merchant} to pending`}
+                      aria-label={m.undoLabel(request.merchant)}
                       onClick={() => {
                         onReopen(event.requestId);
                       }}
                     >
                       <ArrowCounterClockwiseIcon aria-hidden weight="bold" className="size-3.5" />
-                      Undo
+                      {m.undo}
                     </Button>
                   )}
                 </li>
@@ -353,6 +504,7 @@ export function ExpenseApproval({
       )}
 
       <RejectDialog
+        messages={m}
         requests={rejecting === null ? [] : rejecting.flatMap((id) => byId.get(id) ?? [])}
         currency={currency}
         locale={locale}
@@ -378,16 +530,20 @@ function Decide({
   request,
   onApprove,
   onReject,
+  lead,
+  messages: m,
   wide = false,
 }: {
   request: ExpenseRequest;
   onApprove: () => void;
   onReject: () => void;
+  /** The row whose Approve is filled; every other row's is outlined in the accent. */
+  lead: boolean;
+  messages: ExpenseApprovalMessages;
   /** Narrow rows: the two buttons share the row's width, in reach of either thumb. */
   wide?: boolean;
 }) {
   const { Button } = useBlockParts();
-  const name = `${request.merchant}, ${request.employee}`;
   const share = wide ? 'flex-1' : '';
   return (
     <span
@@ -397,28 +553,41 @@ function Decide({
       <Button
         variant="secondary"
         size="sm"
-        aria-label={`Reject ${name}`}
+        aria-label={m.rejectOne(request.merchant, request.employee)}
         className={share}
         onClick={onReject}
       >
         <XIcon aria-hidden weight="bold" className="size-3.5" />
-        Reject
+        {m.reject}
       </Button>
-      <Button size="sm" aria-label={`Approve ${name}`} className={share} onClick={onApprove}>
+      <Button
+        variant={lead ? 'primary' : 'secondary'}
+        size="sm"
+        aria-label={m.approveOne(request.merchant, request.employee)}
+        data-lead={lead || undefined}
+        className={cn(
+          share,
+          // Outlined in the accent: still the row's main action, without six fills in a column.
+          !lead && 'border-accent text-accent-strong hover:bg-accent-subtle',
+        )}
+        onClick={onApprove}
+      >
         <CheckIcon aria-hidden weight="bold" className="size-3.5" />
-        Approve
+        {m.approve}
       </Button>
     </span>
   );
 }
 
 function RejectDialog({
+  messages: m,
   requests,
   currency,
   locale,
   onCancel,
   onConfirm,
 }: {
+  messages: ExpenseApprovalMessages;
   requests: ExpenseRequest[];
   currency: string;
   locale: string;
@@ -428,7 +597,13 @@ function RejectDialog({
   const { Button, Money } = useBlockParts();
   const [reason, setReason] = useState('');
   const [tried, setTried] = useState(false);
-  const error = reasonError(reason);
+  const problem = reasonProblem(reason);
+  const error =
+    problem === 'missing'
+      ? m.reasonMissing
+      : problem === 'short'
+        ? m.reasonTooShort(MIN_REASON_LENGTH)
+        : null;
   const open = requests.length > 0;
   // While the dialog closes, it keeps showing what it was about instead of an empty title.
   const [shown, setShown] = useState(requests);
@@ -463,59 +638,54 @@ function RejectDialog({
       }}
       onOpenChangeComplete={onOpenChangeComplete}
     >
-      <DialogContent>
+      <DialogContent closeLabel={m.close}>
         <form onSubmit={submit} onKeyDown={onKeyDown} noValidate>
           <DialogHeader>
             <DialogTitle>
-              {one === undefined
-                ? `Reject ${String(shown.length)} expenses`
-                : `Reject ${one.merchant}`}
+              {one === undefined ? m.rejectManyTitle(shown.length) : m.rejectOneTitle(one.merchant)}
             </DialogTitle>
             <DialogDescription>
-              {one === undefined ? (
-                <>
-                  <Money
-                    amount={sumMoney(
-                      shown.map((r) => r.amount),
-                      currency,
-                    )}
-                    currency={currency}
-                    locale={locale}
-                  />{' '}
-                  in total. Every employee gets the same reason.
-                </>
-              ) : (
-                <>
-                  {one.employee}, <Money amount={one.amount} currency={currency} locale={locale} />.
-                  The employee sees your reason.
-                </>
-              )}
+              {one === undefined
+                ? m.rejectManyNote(
+                    <Money
+                      amount={sumMoney(
+                        shown.map((r) => r.amount),
+                        currency,
+                      )}
+                      currency={currency}
+                      locale={locale}
+                    />,
+                  )
+                : m.rejectOneNote(
+                    one.employee,
+                    <Money amount={one.amount} currency={currency} locale={locale} />,
+                  )}
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
             <Field invalid={tried && error !== null}>
-              <FieldLabel>Reason</FieldLabel>
+              <FieldLabel>{m.reasonLabel}</FieldLabel>
               <Input
                 autoFocus
                 value={reason}
                 onChange={(event) => {
                   setReason(event.target.value);
                 }}
-                placeholder="For example: receipt missing, resubmit with it attached"
+                placeholder={m.reasonPlaceholder}
               />
               {tried && error !== null ? (
                 <FieldError>{error}</FieldError>
               ) : (
-                <FieldDescription>Saved in the audit trail with your name.</FieldDescription>
+                <FieldDescription>{m.reasonHint}</FieldDescription>
               )}
             </Field>
           </DialogBody>
           <DialogFooter>
             <Button variant="secondary" onClick={onCancel}>
-              Cancel
+              {m.cancel}
             </Button>
             <Button type="submit" variant="danger">
-              Reject
+              {m.confirmReject}
             </Button>
           </DialogFooter>
         </form>
