@@ -88,6 +88,18 @@ try {
   await page.goto(base);
   await settle(page);
   await page.screenshot({ path: join(out, 'matrix.png'), fullPage: true });
+  // Close-ups of the calendar with closed days, one per theme column: today boxed, outside days
+  // muted, closed days struck.
+  const closedDays = page
+    .locator('div.grid')
+    .filter({ has: page.getByText('Range, closed days', { exact: true }) })
+    .locator('[data-slot="calendar"]');
+  for (let i = 0; i < (await closedDays.count()); i += 1) {
+    await closedDays.nth(i).screenshot({
+      path: join(out, `calendar-closed-days-${String(i + 1)}.png`),
+      scale: 'device',
+    });
+  }
   console.log('tabular figures', await tabularCheck(page));
 
   for (const theme of THEMES) {
