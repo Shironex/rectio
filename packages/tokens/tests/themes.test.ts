@@ -36,6 +36,13 @@ const PAIRS: [string, string, number][] = [
   ['text-subtle', 'surface-overlay', 4.5],
   ['text-subtle', 'surface-inset', 4.5],
   ['text', 'surface-inset', 4.5],
+  // Popovers and toasts: the calendar's today marker, a toast's description and status icon.
+  ['text-muted', 'surface-overlay', 4.5],
+  ['accent-strong', 'surface-overlay', 4.5],
+  ['positive-strong', 'surface-overlay', 3],
+  ['negative-strong', 'surface-overlay', 3],
+  // A selected table row keeps its secondary text readable.
+  ['text-muted', 'surface-selected', 4.5],
   ['accent-contrast', 'accent', 4.5],
   ['accent-contrast', 'accent-hover', 4.5],
   ['accent-strong', 'surface', 4.5],

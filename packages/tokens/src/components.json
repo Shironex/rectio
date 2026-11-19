@@ -94,6 +94,61 @@
         "$type": "fontFamily",
         "$value": "{font.family.numeric}"
       }
+    },
+    "table": {
+      "row-height": {
+        "$type": "dimension",
+        "$value": "{control.height.lg}",
+        "$description": "Minimum height of a body row. Follows density."
+      },
+      "header-height": {
+        "$type": "dimension",
+        "$value": "{control.height.md}"
+      },
+      "cell-padding-x": {
+        "$type": "dimension",
+        "$value": "{control.padding-x.md}"
+      },
+      "header-background": {
+        "$type": "color",
+        "$value": "{surface.canvas}",
+        "$description": "Behind a sticky header, so rows scroll under an opaque band. Match it to the surface the table sits on."
+      },
+      "row-selected": {
+        "$type": "color",
+        "$value": "{surface.selected}"
+      }
+    },
+    "calendar": {
+      "day-size": {
+        "$type": "dimension",
+        "$value": "{control.height.md}",
+        "$description": "Width and height of a day button. Follows density."
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{radius.control}"
+      }
+    },
+    "badge": {
+      "radius": {
+        "$type": "dimension",
+        "$value": "{radius.badge}"
+      }
+    },
+    "toast": {
+      "width": {
+        "$type": "dimension",
+        "$value": "{size.360}"
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{radius.panel}"
+      },
+      "shadow": {
+        "$type": "shadow",
+        "$value": "{shadow.overlay}"
+      }
     }
   }
 }
