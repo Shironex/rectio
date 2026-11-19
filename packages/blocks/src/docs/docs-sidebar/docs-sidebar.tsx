@@ -87,7 +87,10 @@ function Section({
   return (
     <div className="flex flex-col gap-1">
       {section.title !== undefined && (
-        <h2 id={id} className="px-2.5 pb-1 text-sm font-strong text-fg">
+        <h2
+          id={id}
+          className="px-2.5 pb-1.5 text-xs font-strong tracking-caps text-fg-muted uppercase"
+        >
           {section.title}
         </h2>
       )}

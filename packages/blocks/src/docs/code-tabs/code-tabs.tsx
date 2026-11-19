@@ -82,7 +82,7 @@ export function CodeTabs({
           ))}
         </TabsList>
         {aside !== undefined && (
-          <div className="flex h-(--rx-tabs-height) shrink-0 items-center text-xs text-fg-subtle">
+          <div className="flex h-(--rx-tabs-height) shrink-0 items-center text-xs text-fg-muted">
             {aside}
           </div>
         )}

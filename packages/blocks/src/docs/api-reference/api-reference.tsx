@@ -126,7 +126,7 @@ function PropName({ row, required }: { row: PropRow; required: string }) {
       <code
         className={cn(
           'font-mono text-sm font-strong text-fg',
-          row.deprecated === true && 'text-fg-subtle line-through',
+          row.deprecated === true && 'font-regular text-fg-muted line-through',
         )}
       >
         {row.name}
@@ -204,7 +204,7 @@ export function SignatureCard({
             {name}
           </a>
         </Heading>
-        <span className="text-xs font-medium tracking-caps text-fg-subtle uppercase">{kind}</span>
+        <span className="text-xs font-medium tracking-caps text-fg-muted uppercase">{kind}</span>
         {since !== undefined && <DocsBadge tone="neutral">Since {since}</DocsBadge>}
         {deprecated && <DocsBadge tone="deprecated">Deprecated</DocsBadge>}
       </header>

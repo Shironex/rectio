@@ -16,6 +16,8 @@ export function DocsProse({ children, className }: { children: ReactNode; classN
       className={cn(
         'min-w-0 text-base text-fg',
         '[&>*+*]:mt-5 [&>h2]:mt-14 [&>h3]:mt-10 [&>h4]:mt-8',
+        // Sections after the first start under a hairline, so a long page has landmarks.
+        '[&>h2:not(:first-child)]:border-t [&>h2:not(:first-child)]:border-line [&>h2:not(:first-child)]:pt-10',
         '[&_p]:text-pretty [&_p]:text-fg-muted',
         '[&_strong]:font-strong [&_strong]:text-fg',
         '[&_p_a,&_li_a,&_td_a]:font-medium [&_p_a,&_li_a,&_td_a]:text-accent-strong [&_p_a,&_li_a,&_td_a]:underline [&_p_a,&_li_a,&_td_a]:decoration-accent-strong/40 [&_p_a,&_li_a,&_td_a]:underline-offset-4',
@@ -162,7 +164,7 @@ export function Figure({
         )}
       />
       {caption !== undefined && (
-        <figcaption className="text-sm text-pretty text-fg-subtle">{caption}</figcaption>
+        <figcaption className="text-sm text-pretty text-fg-muted">{caption}</figcaption>
       )}
     </figure>
   );

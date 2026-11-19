@@ -31,14 +31,14 @@ export function Step({ title, level = 3, number = 1, children }: StepProps) {
     <li
       data-slot="step"
       className={cn(
-        'relative flex gap-4 pb-9 last:pb-0',
+        'relative flex gap-3 pb-9 last:pb-0 sm:gap-4',
         // The rail between numbers; the last step has nothing below it to connect to.
-        'before:absolute before:start-3.5 before:top-9 before:bottom-2 before:w-px before:bg-line last:before:hidden',
+        'before:absolute before:start-3 before:top-8 sm:before:start-3.5 sm:before:top-9 before:bottom-2 before:w-px before:bg-line last:before:hidden',
       )}
     >
       <span
         aria-hidden
-        className="flex size-7 shrink-0 items-center justify-center rounded-full border border-line-strong bg-surface text-sm font-strong text-fg numeric"
+        className="flex size-6 shrink-0 sm:size-7 items-center justify-center rounded-full border border-line-strong bg-surface text-sm font-strong text-fg numeric"
       >
         {number}
       </span>

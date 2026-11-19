@@ -73,7 +73,7 @@ function Name({ entry }: { entry: FileTreeEntry }) {
       </span>
       {entry.highlight === true && <span className="sr-only">(highlighted)</span>}
       {entry.note !== undefined && (
-        <span className="font-sans text-xs text-fg-subtle">{entry.note}</span>
+        <span className="font-sans text-xs text-fg-muted">{entry.note}</span>
       )}
     </>
   );

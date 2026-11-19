@@ -108,7 +108,7 @@ export function Changelog({
                             <DocsLink
                               href={change.ref.href}
                               className={cn(
-                                'font-mono text-sm text-accent-strong underline-offset-4 hover:underline',
+                                'font-mono text-sm text-accent-strong underline decoration-accent-strong/40 underline-offset-4 hover:decoration-accent-strong',
                                 linkFocus,
                               )}
                             >
@@ -125,7 +125,7 @@ export function Changelog({
                 <DocsLink
                   href={release.href}
                   className={cn(
-                    'inline-flex w-fit items-center gap-1 text-sm font-medium text-accent-strong underline-offset-4 hover:underline',
+                    'inline-flex w-fit items-center gap-1 text-sm font-medium text-accent-strong underline decoration-accent-strong/40 underline-offset-4 hover:decoration-accent-strong',
                     linkFocus,
                   )}
                 >

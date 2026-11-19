@@ -3,7 +3,7 @@ import { CaretRightIcon, ListIcon } from '@phosphor-icons/react';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger, cn } from '@rectio/ui';
 import { useCallback, useState, type ReactNode } from 'react';
 
-import { isSamePage } from '../lib/docs';
+import { normalizePath } from '../lib/docs';
 import { DocsLink, linkFocus } from '../lib/link';
 import { CloseNavContext } from '../lib/nav-context';
 
@@ -53,6 +53,7 @@ export function DocsHeader({
   className,
 }: DocsHeaderProps) {
   const [open, setOpen] = useState(false);
+  const current = currentLink(links ?? [], currentHref);
   const closeNav = useCallback(() => {
     setOpen(false);
   }, []);
@@ -106,11 +107,7 @@ export function DocsHeader({
                   <DocsLink
                     href={link.href}
                     external={link.external}
-                    aria-current={
-                      currentHref !== undefined && isSamePage(link.href, currentHref)
-                        ? 'page'
-                        : undefined
-                    }
+                    aria-current={link.href === current ? 'page' : undefined}
                     className={cn(
                       'inline-flex h-9 items-center rounded-control px-2.5 text-sm text-fg-muted transition-colors duration-fast ease-standard',
                       'pointer-fine:hover:text-fg aria-[current=page]:font-medium aria-[current=page]:text-fg',
@@ -131,6 +128,23 @@ export function DocsHeader({
       </div>
     </header>
   );
+}
+
+/**
+ * The top link the current page belongs to: the longest link whose path starts the page's path,
+ * so `/docs/api/queues` marks API rather than Docs.
+ */
+function currentLink(links: readonly DocsHeaderLink[], href: string | undefined): string | null {
+  if (href === undefined) return null;
+  const page = normalizePath(href);
+  let best: string | null = null;
+  for (const link of links) {
+    if (link.external === true) continue;
+    const path = normalizePath(link.href);
+    const inside = page === path || page.startsWith(path === '/' ? '/' : `${path}/`);
+    if (inside && (best === null || path.length > normalizePath(best).length)) best = link.href;
+  }
+  return best;
 }
 
 export interface DocsLayoutProps {

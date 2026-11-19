@@ -58,7 +58,7 @@ function PagerLink({
         linkFocus,
       )}
     >
-      <span className="flex items-center gap-1.5 text-sm text-fg-subtle">
+      <span className="flex items-center gap-1.5 text-sm text-fg-muted">
         {direction === 'prev' && (
           <Arrow
             aria-hidden
@@ -76,7 +76,7 @@ function PagerLink({
         )}
       </span>
       <span className="text-base font-medium text-pretty text-fg">{page.title}</span>
-      {page.section !== undefined && <span className="text-sm text-fg-subtle">{page.section}</span>}
+      {page.section !== undefined && <span className="text-sm text-fg-muted">{page.section}</span>}
     </DocsLink>
   );
 }
@@ -151,7 +151,7 @@ export function DocsPageMeta({
         </DocsLink>
       )}
       {lastUpdated !== undefined && (
-        <p className="text-fg-subtle">
+        <p className="text-fg-muted">
           {lastUpdatedLabel}{' '}
           <time dateTime={isoDate(lastUpdated)} className="text-fg-muted">
             {formatDate(lastUpdated, locale)}

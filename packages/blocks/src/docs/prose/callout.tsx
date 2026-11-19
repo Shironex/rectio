@@ -13,25 +13,25 @@ export type CalloutType = 'note' | 'tip' | 'warning' | 'danger';
 const STYLE: Record<CalloutType, { icon: Icon; frame: string; icon_: string; label: string }> = {
   note: {
     icon: InfoIcon,
-    frame: 'border-info-strong/25 bg-info-subtle',
+    frame: 'border-info-strong/25 bg-info-subtle/60',
     icon_: 'text-info-strong',
     label: 'Note',
   },
   tip: {
     icon: LightbulbIcon,
-    frame: 'border-positive-strong/25 bg-positive-subtle',
+    frame: 'border-positive-strong/25 bg-positive-subtle/60',
     icon_: 'text-positive-strong',
     label: 'Tip',
   },
   warning: {
     icon: WarningIcon,
-    frame: 'border-warning-strong/30 bg-warning-subtle',
+    frame: 'border-warning-strong/30 bg-warning-subtle/60',
     icon_: 'text-warning-strong',
     label: 'Warning',
   },
   danger: {
     icon: WarningCircleIcon,
-    frame: 'border-negative-strong/25 bg-negative-subtle',
+    frame: 'border-negative-strong/25 bg-negative-subtle/60',
     icon_: 'text-negative-strong',
     label: 'Danger',
   },
@@ -69,7 +69,7 @@ export function Callout({ type = 'note', title, children, className }: CalloutPr
       <Glyph aria-hidden weight="fill" className={cn('mt-0.5 size-5 shrink-0', style.icon_)} />
       <div className="flex min-w-0 flex-col gap-1">
         <p className="font-strong text-fg">{title ?? style.label}</p>
-        <div className="text-pretty text-fg [&_a]:font-medium [&_a]:underline [&_a]:underline-offset-4 [&>*+*]:mt-2">
+        <div className="text-pretty text-fg-muted [&_a]:font-medium [&_a]:underline [&_a]:underline-offset-4 [&>*+*]:mt-2">
           {children}
         </div>
       </div>

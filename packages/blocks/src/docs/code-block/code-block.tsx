@@ -115,7 +115,7 @@ export function CodeBlock({
         <figcaption className="flex h-10 items-center gap-2 border-b border-line ps-4 pe-1.5 text-sm text-fg-muted">
           <Icon aria-hidden weight="bold" className="size-4 shrink-0 text-fg-subtle" />
           <span className="min-w-0 flex-1 truncate font-mono text-fg">{heading}</span>
-          {label !== null && <span className="text-xs text-fg-subtle">{label}</span>}
+          {label !== null && <span className="text-xs text-fg-muted max-sm:hidden">{label}</span>}
           {copyButton}
         </figcaption>
       )}
@@ -129,7 +129,15 @@ export function CodeBlock({
           heading === undefined && copy && 'pe-10',
         )}
       >
-        <code className={cn('grid', wrap ? 'whitespace-pre-wrap' : 'w-max min-w-full')}>
+        <code
+          className={cn(
+            'grid',
+            // Phones wrap long lines: a sideways scroll in a narrow column hides most of the line.
+            wrap
+              ? 'whitespace-pre-wrap'
+              : 'w-max min-w-full max-sm:w-auto max-sm:whitespace-pre-wrap',
+          )}
+        >
           {lines.map((line, index) => {
             const number = index + first;
             const mark = marks[index] ?? null;
