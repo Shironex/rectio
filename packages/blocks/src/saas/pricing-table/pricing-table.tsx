@@ -44,7 +44,7 @@ const COLUMNS: Record<number, string> = {
   1: '',
   2: '@2xl:grid-cols-2',
   3: '@3xl:grid-cols-3',
-  4: '@2xl:grid-cols-2 @5xl:grid-cols-4',
+  4: '@2xl:grid-cols-2 @4xl:grid-cols-4',
 };
 
 /**
@@ -122,7 +122,6 @@ export function PricingTable({
               return (
                 <li
                   key={plan.id}
-                  aria-label={recommended ? `${plan.name}, recommended` : plan.name}
                   className={cn(
                     // Four shared rows (name, price, highlights, button), so prices and buttons line
                     // up across the cards in a row whatever the descriptions and lists say.
@@ -140,11 +139,6 @@ export function PricingTable({
                       {recommended && (
                         <span className="rounded-badge bg-accent px-1.5 py-px text-xs font-medium text-accent-contrast">
                           Recommended
-                        </span>
-                      )}
-                      {!recommended && current && (
-                        <span className="rounded-badge border border-line-strong px-1.5 py-px text-xs font-medium text-fg-muted">
-                          Your plan
                         </span>
                       )}
                     </div>
@@ -168,27 +162,27 @@ export function PricingTable({
                         </span>
                       </span>
                     )}
-                    <span className="text-sm text-fg-muted">
-                      {price === null ? (
-                        'Priced for your volume, billed yearly'
-                      ) : price === 0 ? (
-                        'Free for as long as you like'
-                      ) : cycle === 'yearly' && plan.yearly !== undefined ? (
-                        <>
-                          <span className="numeric">
-                            {pricingPriceText(plan.yearly, currency, locale)}
-                          </span>{' '}
-                          billed yearly
-                          {planSaving > 0 && (
-                            <span className="text-positive-strong">
-                              , you save {formatPercent(planSaving, locale, { digits: 0 })}
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        'Billed monthly, cancel any time'
-                      )}
-                    </span>
+                    {price !== 0 && (
+                      <span className="text-sm text-fg-muted">
+                        {price === null ? (
+                          'Priced for your volume, billed yearly'
+                        ) : cycle === 'yearly' && plan.yearly !== undefined ? (
+                          <>
+                            <span className="numeric">
+                              {pricingPriceText(plan.yearly, currency, locale)}
+                            </span>{' '}
+                            billed yearly
+                            {planSaving > 0 && (
+                              <span className="text-positive-strong">
+                                , you save {formatPercent(planSaving, locale, { digits: 0 })}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          'Billed monthly, cancel any time'
+                        )}
+                      </span>
+                    )}
                   </div>
 
                   {plan.highlights !== undefined && plan.highlights.length > 0 ? (
@@ -337,8 +331,8 @@ function Comparison({
                   key={plan.id}
                   scope="col"
                   className={cn(
-                    'w-1/6 px-2 py-2 text-center font-medium',
-                    plan.recommended === true && 'text-accent-strong',
+                    'w-1/6 rounded-t-control px-2 py-2 text-center font-medium',
+                    plan.recommended === true && 'bg-surface-sunken text-accent-strong',
                   )}
                 >
                   {plan.name}
@@ -354,7 +348,7 @@ function Comparison({
                     <th
                       scope="colgroup"
                       colSpan={plans.length + 1}
-                      className="pt-5 pb-1.5 text-start text-xs font-medium tracking-caps text-fg-subtle uppercase"
+                      className="pt-5 pb-1.5 text-start text-xs font-medium tracking-caps text-fg-muted uppercase"
                     >
                       {group.name}
                     </th>
@@ -369,7 +363,13 @@ function Comparison({
                       {feature.label}
                     </th>
                     {plans.map((plan) => (
-                      <td key={plan.id} className="px-2 py-2.5 text-center text-fg-muted">
+                      <td
+                        key={plan.id}
+                        className={cn(
+                          'px-2 py-2.5 text-center text-fg-muted',
+                          plan.recommended === true && 'bg-surface-sunken',
+                        )}
+                      >
                         <FeatureValue value={feature.values[plan.id]} />
                       </td>
                     ))}

@@ -81,7 +81,7 @@ describe('PricingTable', () => {
     );
     expect(screen.getByText('Your current plan')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Starter plan/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('listitem', { name: 'Growth, recommended' })).toBeInTheDocument();
+    expect(screen.getByText('Recommended')).toBeInTheDocument();
     expect(screen.getByText('Free')).toBeInTheDocument();
     expect(screen.getByText('Custom')).toBeInTheDocument();
   });

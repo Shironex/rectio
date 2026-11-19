@@ -1,4 +1,5 @@
 import { roundMoney } from '../../lib/finance';
+import { numberFormat } from '../lib/saas';
 
 export type PricingCycle = 'monthly' | 'yearly';
 
@@ -48,7 +49,7 @@ export function pricingMonthlyPrice(
  */
 export function pricingPriceText(amount: number, currency: string, locale: string): string {
   const whole = Number.isInteger(amount);
-  return new Intl.NumberFormat(locale, {
+  return numberFormat(locale, {
     style: 'currency',
     currency,
     ...(whole ? { minimumFractionDigits: 0, maximumFractionDigits: 0 } : {}),
