@@ -1,0 +1,80 @@
+---
+title: API keys
+description: 'Keys with scope, last use and expiry, a create form that shows the new secret once, and revoke behind a confirm.'
+pro: true
+---
+
+import ApiKeysDemo from '@/demos/api-keys';
+import ApiKeysMotionDemo from '@/demos/api-keys.motion';
+
+<Preview
+  name="api-keys"
+  plain={<ApiKeysDemo />}
+  motion={<ApiKeysMotionDemo />}
+  importLine="import { ApiKeys } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add api-keys
+```
+
+The motion variant is `motion-api-keys`. It installs the plain block too; keys arrive and leave in place.
+
+## Usage
+
+Pass the keys (only their public prefix, never the secret) and the scopes your API offers.
+`onCreate` gets a name, a scope and an expiry date; create the key on your server, then pass its
+secret back as `createdKey`. The block shows it once with a copy button and a plain note that it
+will not be shown again, and forgets it when `onCreatedKeyDismiss` clears the prop. Revoking asks
+first, in a dialog that names the key.
+
+## Props
+
+<TypeTable
+  type={{
+    keys: {
+      type: 'readonly ApiKey[]',
+      description:
+        'id, name, prefix, scope, createdAt and optional lastUsedAt, expiresAt and revokedAt.',
+    },
+    scopes: {
+      type: 'readonly ApiKeyScopeOption[]',
+      description: 'value, label and optional description.',
+    },
+    onCreate: {
+      type: '(draft: ApiKeyDraft) => void',
+      description: 'Omit to hide the create form.',
+    },
+    onRevoke: { type: '(keyId: string) => void', description: 'Asked to confirm first.' },
+    createdKey: {
+      type: '{ name: string; value: string }',
+      description: 'The secret of the key just created, shown once.',
+    },
+    onCreatedKeyDismiss: { type: '() => void' },
+    pending: { type: 'boolean', description: 'While the key is being created.' },
+    error: { type: 'ReactNode', description: 'Why creating failed, shown above the form.' },
+    now: { type: 'Date', description: 'The moment last use and expiry are measured from.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: "'API keys'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`apiKeyStatus`, `maskApiKey`, `apiKeyExpiryDate`, `apiKeyNameError` and `sortApiKeys` are exported
+and tested on their own, so a server can check names the same way.
+
+## Accessibility
+
+- The new secret sits in a focusable element with a name, and copying is announced.
+- Every revoke button and dialog names the key it acts on.
+- Name errors are tied to the field and say what to write instead.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity and renders the plain block under reduced motion.

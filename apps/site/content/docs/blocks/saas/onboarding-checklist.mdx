@@ -1,0 +1,67 @@
+---
+title: Onboarding checklist
+description: 'Setup steps with their actions, the next one brought forward, and progress as a count and a bar.'
+pro: true
+---
+
+import OnboardingChecklistDemo from '@/demos/onboarding-checklist';
+import OnboardingChecklistMotionDemo from '@/demos/onboarding-checklist.motion';
+
+<Preview
+  name="onboarding-checklist"
+  plain={<OnboardingChecklistDemo />}
+  motion={<OnboardingChecklistMotionDemo />}
+  importLine="import { OnboardingChecklist } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add onboarding-checklist
+```
+
+The motion variant is `motion-onboarding-checklist`. It installs the plain block too; the block enters once, on first view.
+
+## Usage
+
+Pass the steps in the order they should be done, each with whether it is done. The first step not
+done becomes the current one: it is highlighted and its action is the primary button. Give a
+step an `action` with `onSelect` or `href` to do it from the list; pass `onToggleStep` to offer
+"Mark as done" for steps your app cannot detect by itself.
+
+Once every step is done the list gives way to a finished note, with Hide when you pass
+`onDismiss`. The block holds only whether it is folded; `defaultCollapsed` starts it folded to the
+progress bar.
+
+## Props
+
+<TypeTable
+  type={{
+    steps: {
+      type: 'readonly OnboardingStep[]',
+      description: 'id, title, done, optional description, action and optional.',
+    },
+    onToggleStep: { type: '(stepId: string, done: boolean) => void' },
+    onDismiss: { type: '() => void', description: 'Offers Hide once every step is done.' },
+    defaultCollapsed: { type: 'boolean', default: 'false' },
+    title: { type: 'string', default: "'Get set up'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`onboardingProgress` returns the count, the percent, the next step and whether the list is
+complete; `onboardingSummary` says it in words.
+
+## Accessibility
+
+- The current step carries `aria-current="step"`; every step says whether it is done in words, not only with a tick.
+- Progress is a labelled meter with its value in words, and the count is announced politely as it changes.
+- The fold button reports `aria-expanded` and names what it shows or hides.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

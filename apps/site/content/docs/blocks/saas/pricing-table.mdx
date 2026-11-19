@@ -1,0 +1,75 @@
+---
+title: Pricing table
+description: 'Plans with a monthly and yearly switch that shows the saving, a recommended plan, the current plan and a full comparison.'
+pro: true
+---
+
+import PricingTableDemo from '@/demos/pricing-table';
+import PricingTableMotionDemo from '@/demos/pricing-table.motion';
+
+<Preview
+  name="pricing-table"
+  plain={<PricingTableDemo />}
+  motion={<PricingTableMotionDemo />}
+  importLine="import { PricingTable } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add pricing-table
+```
+
+The motion variant is `motion-pricing-table`. It installs the plain block too.
+
+## Usage
+
+Pass two to four plans, cheapest first, with a monthly price and, where you offer one, a yearly
+price for the whole year. Prices show per month on both cycles, with the yearly total and the saving
+spelled out under them; the cycle switch names the best saving. One plan can be `recommended`; the
+plan someone is on, `currentPlanId`, shows a disabled "Current plan" button. Plans with a `null`
+price read Custom, and a price of 0 reads Free. Features below compare every plan, with a check or a
+dash and the words for each. Use `bare` on a landing page to drop the panel frame.
+
+## Props
+
+<TypeTable
+  type={{
+    plans: {
+      type: 'readonly PricingPlan[]',
+      description:
+        'id, name, monthly (null for custom) and optional yearly, description, unit, highlights, cta and recommended.',
+    },
+    features: {
+      type: 'readonly PricingFeature[]',
+      default: '[]',
+      description: 'id, label, optional group and a value per plan id: true, false or text.',
+    },
+    currency: { type: 'string', description: 'ISO 4217 code for every price.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    defaultCycle: { type: "'monthly' | 'yearly'", default: "'yearly'" },
+    currentPlanId: { type: 'string' },
+    onSelectPlan: { type: '(plan: PricingPlan, cycle: PricingCycle) => void' },
+    bare: { type: 'boolean', default: 'false' },
+    title: { type: 'string', default: "'Plans and pricing'" },
+    description: { type: 'string' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`pricingMonthlyPrice`, `pricingYearlySaving`, `pricingBestSaving` and `groupPricingFeatures` are
+exported and tested on their own; monthly equivalents round to the currency's minor unit.
+
+## Accessibility
+
+- The cycle switch is a labelled group of pressed buttons; each plan is a list item named for itself.
+- Every plan button names its plan; check and dash marks read Included and Not included.
+- The comparison is a real table that scrolls sideways on a narrow block with row names kept in view.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant renders the plain block under reduced motion.

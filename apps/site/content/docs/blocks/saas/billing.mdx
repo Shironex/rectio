@@ -1,0 +1,84 @@
+---
+title: Billing
+description: 'The current plan and its renewal, usage against allowances, the card on file and every invoice.'
+pro: true
+---
+
+import BillingDemo from '@/demos/billing';
+import BillingMotionDemo from '@/demos/billing.motion';
+
+<Preview
+  name="billing"
+  plain={<BillingDemo />}
+  motion={<BillingMotionDemo />}
+  importLine="import { Billing } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add billing
+```
+
+The motion variant is `motion-billing`. It installs the plain block too; invoice rows arrive in place.
+
+## Usage
+
+Pass the plan, the usage this period, the card on file and the invoices, all in one currency. The
+plan tile says what it costs and when it renews; meters say in words how much is left, warn from
+80 per cent and turn red past the allowance. A card that expires this month or next says so, and a
+past due plan opens with an alert naming the amount owed. Every action is a callback: the block
+never moves money itself.
+
+## Props
+
+<TypeTable
+  type={{
+    plan: {
+      type: 'BillingPlan',
+      description:
+        "id, name, price, interval ('month' | 'year'), status, renewsOn and optional seats.",
+    },
+    usage: {
+      type: 'readonly BillingUsage[]',
+      default: '[]',
+      description: 'id, label, used, limit, unit and optional resetsOn.',
+    },
+    paymentMethod: {
+      type: 'BillingPaymentMethod',
+      description: 'brand, last4 and optional expMonth and expYear.',
+    },
+    invoices: {
+      type: 'readonly BillingInvoice[]',
+      default: '[]',
+      description: "id, number, date, amount and status ('paid' | 'open' | 'failed' | 'void').",
+    },
+    currency: { type: 'string', description: 'ISO 4217 code for every amount.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    today: { type: 'Date', description: 'The day renewals and card expiry are measured from.' },
+    onChangePlan: { type: '() => void' },
+    onCancelPlan: { type: '() => void' },
+    onUpdatePaymentMethod: { type: '() => void' },
+    onDownloadInvoice: { type: '(invoice: BillingInvoice) => void' },
+    title: { type: 'string', default: "'Billing'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`billingUsageLevel`, `billingUsageNote`, `billingCardState`, `billingDaysLeft` and
+`billingInvoiceTotals` are exported and tested on their own. Totals add in minor units, so paid and
+owed never drift by a cent.
+
+## Accessibility
+
+- Usage meters carry their value and level in words, not only in colour.
+- Each download button names its invoice; void amounts are struck through and say Void.
+- A past due plan is announced as an alert.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity and renders the plain block under reduced motion.

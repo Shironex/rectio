@@ -1,4 +1,24 @@
 {
   "title": "SaaS blocks",
-  "pages": ["index", "sign-in", "team-members"]
+  "pages": [
+    "index",
+    "sign-in",
+    "sign-up",
+    "two-factor",
+    "reset-password",
+    "profile-settings",
+    "team-members",
+    "billing",
+    "api-keys",
+    "notification-preferences",
+    "pricing-table",
+    "onboarding-checklist",
+    "activity-feed",
+    "notifications-center",
+    "changelog",
+    "users-table",
+    "kanban-board",
+    "comment-thread",
+    "file-manager"
+  ]
 }

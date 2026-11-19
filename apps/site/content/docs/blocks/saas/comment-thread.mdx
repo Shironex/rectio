@@ -1,0 +1,73 @@
+---
+title: Comment thread
+description: 'A discussion with one level of replies, edit and delete for your own comments, and a resolved state.'
+pro: true
+---
+
+import CommentThreadDemo from '@/demos/comment-thread';
+import CommentThreadMotionDemo from '@/demos/comment-thread.motion';
+
+<Preview
+  name="comment-thread"
+  plain={<CommentThreadDemo />}
+  motion={<CommentThreadMotionDemo />}
+  importLine="import { CommentThread } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add comment-thread
+```
+
+The motion variant is `motion-comment-thread`. It installs the plain block too; comments arrive and
+leave in place.
+
+## Usage
+
+Pass the comments and the person writing. Comments show oldest first with their replies one level
+deep; a reply to a reply joins the same thread. The writer gets Edit and Delete on their own
+comments, and delete asks first. `@mentions` are picked out. The composer sends with Ctrl or Cmd and
+Enter, and refuses an empty comment with a reason.
+
+Pass `resolved` to close the discussion: a banner says who resolved it and when, the composer and
+Reply buttons give way, and `onReopen` adds a Reopen button.
+
+## Props
+
+<TypeTable
+  type={{
+    comments: {
+      type: 'readonly ThreadComment[]',
+      description: 'id, author, body, createdAt, optional editedAt and parentId.',
+    },
+    writer: { type: 'CommentAuthor', description: 'The person writing: id, name, avatarUrl.' },
+    onAdd: { type: '(body: string, parentId?: string) => void' },
+    onEdit: { type: '(commentId: string, body: string) => void' },
+    onDelete: { type: '(commentId: string) => void', description: 'Asked to confirm first.' },
+    resolved: { type: '{ by: string; at: Date }' },
+    onResolve: { type: '() => void' },
+    onReopen: { type: '() => void' },
+    now: { type: 'Date', description: 'The moment comment times are measured from.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: "'Discussion'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+Threading and checks are exported and tested on their own: `commentTree`, `commentParticipants`,
+`commentBodyError` and `commentParts`.
+
+## Accessibility
+
+- Each comment is an article named by its author and time; the full date is on the time's title.
+- Every composer has a label, and its error is tied to the field.
+- Reply, Edit and Delete name the comment they act on; the delete dialog quotes it.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity and renders the plain block under reduced motion.

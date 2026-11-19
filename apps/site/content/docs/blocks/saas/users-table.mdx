@@ -1,0 +1,74 @@
+---
+title: Users table
+description: 'Every user in a workspace with search, role and status filters, bulk role changes, suspend and remove.'
+pro: true
+---
+
+import UsersTableDemo from '@/demos/users-table';
+import UsersTableMotionDemo from '@/demos/users-table.motion';
+
+<Preview
+  name="users-table"
+  plain={<UsersTableDemo />}
+  motion={<UsersTableMotionDemo />}
+  importLine="import { UsersTable } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add users-table
+```
+
+The motion variant is `motion-users-table`. It installs the plain block too; rows arrive and leave
+in place.
+
+## Usage
+
+Pass the users. Search matches every word against name, email and team, ignoring case and accents;
+the role and status filters narrow further, and a no-results state offers to clear them. Each row
+has a menu to change the role, suspend or reactivate, and remove. Select rows for the bulk bar:
+change role, suspend, or remove after a confirmation that names how many. Owners are never part of
+a bulk action and have no row menu, so a workspace cannot lose its owner from here.
+
+On narrow widths the team column folds away, role and status move under the name, and a sort
+select replaces the column headers. Past `pageSize` rows, the table pages.
+
+## Props
+
+<TypeTable
+  type={{
+    users: {
+      type: 'readonly UserRecord[]',
+      description: 'id, name, email, role, status, optional avatarUrl, lastSeen and team.',
+    },
+    pageSize: { type: 'number', default: '10' },
+    onInvite: { type: '() => void', description: 'Shows an Invite users button.' },
+    onOpenUser: { type: '(user: UserRecord) => void', description: 'Names become buttons.' },
+    onChangeRole: { type: '(userIds: string[], role: UserRole) => void' },
+    onSuspend: { type: '(userIds: string[]) => void' },
+    onReactivate: { type: '(userIds: string[]) => void' },
+    onRemove: { type: '(userIds: string[]) => void', description: 'Asked to confirm first.' },
+    now: { type: 'Date', description: 'The moment "last seen" is measured from.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: "'Users'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+Filtering and the owner rule are exported and tested on their own: `filterUsers`,
+`matchesUserFilters`, `userFiltersActive`, `userCounts` and `bulkUserTargets`.
+
+## Accessibility
+
+- Search, filters, checkboxes and row menus all name what they act on.
+- The bulk bar is a labelled region; its count is read out as the selection changes.
+- Status is written in words with an icon, never by colour alone.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity and renders the plain block under reduced motion.

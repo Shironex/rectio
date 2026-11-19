@@ -1,0 +1,72 @@
+---
+title: Two-factor step
+description: 'A one-time code in slots that paste in one go, a resend that counts down, and backup codes.'
+pro: true
+---
+
+import TwoFactorDemo from '@/demos/two-factor';
+import TwoFactorMotionDemo from '@/demos/two-factor.motion';
+
+<Preview
+  name="two-factor"
+  plain={<TwoFactorDemo />}
+  motion={<TwoFactorMotionDemo />}
+  importLine="import { TwoFactor } from '@rectio/blocks/motion';"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add two-factor
+```
+
+The motion variant is `motion-two-factor`. It installs the plain block too and changes only how the
+block enters.
+
+## Usage
+
+Show the block after the password step. It calls `onVerify` as soon as the last digit lands (or on
+Verify), with `remember` when the person ticked your `rememberLabel`. Your server checks the code;
+pass `pending` while it does and a refusal as `error`, which is tied to the code field.
+
+For text and email codes, `onResend` adds a resend button that waits out `resendCooldown` seconds
+from `sentAt`. `onUseBackupCode` adds a second view for a saved backup code, cleaned of spaces and
+hyphens before it reaches you.
+
+## Props
+
+<TypeTable
+  type={{
+    onVerify: { type: '(code: string, options: { remember: boolean }) => void' },
+    method: { type: "'app' | 'sms' | 'email'", default: "'app'" },
+    destination: { type: 'string', description: 'Phone or email the code went to; shown masked.' },
+    length: { type: 'number', default: '6' },
+    onResend: { type: '() => void', description: 'Text and email codes only.' },
+    sentAt: { type: 'Date', description: 'When the last code was sent.' },
+    resendCooldown: { type: 'number', default: '30' },
+    onUseBackupCode: { type: '(code: string) => void' },
+    rememberLabel: { type: 'ReactNode', description: 'Shows a trust this device checkbox.' },
+    pending: { type: 'boolean', default: 'false' },
+    error: { type: 'ReactNode' },
+    back: { type: 'string | (() => void)', description: 'Sign in as someone else.' },
+    brand: { type: 'ReactNode' },
+    title: { type: 'ReactNode', default: "'Enter your verification code'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`twoFactorCodeComplete`, `twoFactorResendWait`, `formatTwoFactorWait`, `normalizeBackupCode`,
+`backupCodeError`, `maskTwoFactorDestination` and `twoFactorInstruction` are exported and tested.
+
+## Accessibility
+
+- The first slot carries the field label and `autocomplete="one-time-code"`, so a code from a text message fills every slot; the others name their position.
+- Pasting a whole code into any slot fills them all.
+- The resend button says how long is left in words, and wakes up by itself.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

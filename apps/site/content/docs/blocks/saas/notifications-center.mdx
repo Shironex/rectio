@@ -1,0 +1,68 @@
+---
+title: Notifications center
+description: 'A bell with the unread count, and the list behind it: All and Unread, mark one or all as read.'
+pro: true
+---
+
+import NotificationsCenterDemo from '@/demos/notifications-center';
+import NotificationsCenterMotionDemo from '@/demos/notifications-center.motion';
+
+<Preview
+  name="notifications-center"
+  plain={<NotificationsCenterDemo />}
+  motion={<NotificationsCenterMotionDemo />}
+  importLine="import { NotificationsCenter } from '@rectio/blocks/motion';"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add notifications-center
+```
+
+The motion variant is `motion-notifications-center`. It installs the plain block too; notifications leave the Unread list in place.
+
+## Usage
+
+Put the block in your app header: it draws the bell with the unread count, and opens the list in a
+popover anchored to it. Pressing a notification marks it read (`onMarkRead`) and calls `onOpen`, so
+you can navigate to it. Read state stays in your app; `markNotificationRead` and
+`markAllNotificationsRead` update a list kept in state.
+
+With `inline` the same list sits on the page as a panel, for a notifications page or a sidebar.
+
+## Props
+
+<TypeTable
+  type={{
+    notifications: {
+      type: 'readonly AppNotification[]',
+      description: 'id, title, at, read, kind, optional body and actor.',
+    },
+    onOpen: { type: '(notification: AppNotification) => void' },
+    onMarkRead: { type: '(id: string) => void' },
+    onMarkAllRead: { type: '() => void' },
+    settings: { type: 'string | (() => void)', description: 'A link to notification settings.' },
+    inline: { type: 'boolean', default: 'false' },
+    now: { type: 'Date' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: "'Notifications'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+`unreadNotificationCount`, `visibleNotifications`, `markNotificationRead`,
+`markAllNotificationsRead` and `unreadBadgeText` are exported and tested on their own.
+
+## Accessibility
+
+- The bell is named with the unread count; the badge on it is decoration.
+- Unread notifications say so in words as well as with the tint and the dot; the count is announced as it changes.
+- The popover moves focus inside on open, and Escape returns it to the bell.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.
