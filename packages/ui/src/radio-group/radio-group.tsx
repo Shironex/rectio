@@ -28,7 +28,12 @@ export function RadioGroup({ legend, disabled, className, children, ...props }: 
       data-slot="radio-group"
       disabled={disabled}
       render={<BaseRadioGroup disabled={disabled} {...props} />}
-      className={cn('flex flex-col gap-2.5', className)}
+      className={cn(
+        'flex flex-col gap-2.5',
+        // Touch-sized rows carry their own padding; the list needs no gap on top of it.
+        'pointer-coarse:has-data-[slot=radio]:gap-0',
+        className,
+      )}
     >
       {legend !== undefined && (
         <Fieldset.Legend
