@@ -59,6 +59,14 @@ const INVOICE_STATE = {
   void: { state: 'void', label: 'Void' },
 } as const;
 
+/** The narrow row's status word: quiet unless it needs paying. */
+const INVOICE_WORD_TONE = {
+  paid: '',
+  open: 'text-warning-strong',
+  failed: 'text-negative-strong',
+  void: '',
+} as const;
+
 /**
  * The account's money in one place: the plan and when it renews, how much of each allowance is
  * used, the card on file and every invoice. The block reads only; changing the plan, the card or
@@ -124,30 +132,31 @@ export function Billing({
 
       <div className="grid gap-6 @3xl:grid-cols-5">
         {/* The plan: the one figure that matters, then when it moves. */}
-        <div className="flex flex-col gap-4 rounded-control border border-line bg-surface-sunken p-4 @3xl:col-span-2">
+        <div className="flex flex-col gap-3 self-start rounded-control border border-line bg-surface-sunken p-4 @3xl:col-span-2">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-col">
               <span className="text-sm text-fg-muted">Current plan</span>
-              <span className="font-display text-xl font-heading tracking-tight">{plan.name}</span>
+              <span className="font-display text-lg font-heading tracking-tight">{plan.name}</span>
             </div>
             <Badge tone={status.tone}>{status.label}</Badge>
           </div>
-          <p className="flex flex-wrap items-baseline gap-x-1.5">
-            <Money
-              amount={plan.price}
-              currency={currency}
-              locale={locale}
-              quietCurrency
-              className="text-3xl font-strong tracking-tight"
-            />
-            <span className="text-sm text-fg-muted">
-              per {INTERVAL_WORDS[plan.interval]}
-              {plan.seats !== undefined && `, ${String(plan.seats)} seats included`}
-            </span>
-          </p>
-          <p className="text-sm text-fg-muted">{renewalText}</p>
+          <div className="flex flex-col gap-0.5">
+            <p className="flex flex-wrap items-baseline gap-x-1.5">
+              <Money
+                amount={plan.price}
+                currency={currency}
+                locale={locale}
+                className="text-2xl font-strong tracking-tight"
+              />
+              <span className="text-sm text-fg-muted">
+                per {INTERVAL_WORDS[plan.interval]}
+                {plan.seats !== undefined && `, ${String(plan.seats)} seats included`}
+              </span>
+            </p>
+            <p className="text-sm text-fg-muted">{renewalText}</p>
+          </div>
           {(onChangePlan !== undefined || onCancelPlan !== undefined) && (
-            <div className="mt-auto flex flex-wrap gap-2 pointer-coarse:gap-3">
+            <div className="flex flex-wrap gap-2 pt-1 pointer-coarse:gap-3">
               {onChangePlan !== undefined && (
                 <Button variant="secondary" onClick={onChangePlan}>
                   <ArrowsClockwiseIcon aria-hidden weight="bold" className="size-4" />
@@ -263,28 +272,27 @@ export function Billing({
               return (
                 <li
                   key={invoice.id}
-                  className="flex items-center gap-3 rounded-control px-2 py-2 not-last:border-b not-last:border-line"
+                  className="flex items-center gap-3 rounded-control px-2 py-2 not-last:border-b not-last:border-line pointer-coarse:gap-4"
                 >
                   <span className="flex min-w-0 flex-1 flex-col @md:flex-row @md:items-baseline @md:gap-4">
                     <span className="font-medium numeric">{invoice.number}</span>
-                    <span className="text-sm text-fg-muted numeric">
-                      {formatShortDate(invoice.date, locale)}
+                    <span className="text-sm text-fg-muted">
+                      <span className="numeric">{formatShortDate(invoice.date, locale)}</span>
+                      {/* Narrow: the status as a plain word beside the date. */}
+                      <span className={cn('@md:hidden', INVOICE_WORD_TONE[invoice.status])}>
+                        , {state.label.toLowerCase()}
+                      </span>
                     </span>
                   </span>
                   <span className="hidden @md:inline-flex">
                     <StateBadge state={state.state} label={state.label} />
                   </span>
-                  <span className="flex flex-col items-end gap-1">
-                    <Money
-                      amount={invoice.amount}
-                      currency={currency}
-                      locale={locale}
-                      className={cn(invoice.status === 'void' && 'text-fg-muted line-through')}
-                    />
-                    <span className="@md:hidden">
-                      <StateBadge state={state.state} label={state.label} />
-                    </span>
-                  </span>
+                  <Money
+                    amount={invoice.amount}
+                    currency={currency}
+                    locale={locale}
+                    className={cn(invoice.status === 'void' && 'text-fg-muted line-through')}
+                  />
                   {onDownloadInvoice !== undefined && (
                     <Button
                       variant="ghost"

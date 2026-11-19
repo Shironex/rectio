@@ -30,18 +30,19 @@ const INVOICES: BillingInvoice[] = [
 ];
 
 describe('billing logic', () => {
-  it('grades usage, with the allowance exactly as a warning', () => {
+  it('grades usage, calm at the allowance exactly', () => {
     expect(billingUsageLevel(10, 100)).toBe('ok');
-    expect(billingUsageLevel(80, 100)).toBe('warning');
-    expect(billingUsageLevel(100, 100)).toBe('warning');
+    expect(billingUsageLevel(80, 100)).toBe('ok');
+    expect(billingUsageLevel(90, 100)).toBe('warning');
+    expect(billingUsageLevel(100, 100)).toBe('ok');
     expect(billingUsageLevel(101, 100)).toBe('over');
     expect(billingUsageLevel(0, 0)).toBe('ok');
   });
 
   it('says the level in words', () => {
     const base = { id: 'r', label: 'Runs', unit: 'runs' };
-    expect(billingUsageNote({ ...base, used: 8420, limit: 10000 }, 'en-GB', 'on 1 Apr')).toBe(
-      '1,580 runs left, resets on 1 Apr',
+    expect(billingUsageNote({ ...base, used: 9200, limit: 10000 }, 'en-GB', 'on 1 Apr')).toBe(
+      '800 runs left, resets on 1 Apr',
     );
     expect(billingUsageNote({ ...base, used: 10, limit: 10 }, 'en-GB', null)).toBe(
       'All 10 runs in use',

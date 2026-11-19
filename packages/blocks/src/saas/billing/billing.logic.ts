@@ -48,12 +48,14 @@ export interface BillingInvoice {
 
 export type BillingUsageLevel = 'ok' | 'warning' | 'over';
 
-/** Below 80 per cent is fine, from 80 (and at the allowance exactly) a warning, past it over. */
+/**
+ * Calm until it needs a decision: fine below 90 per cent and at the allowance exactly (a full seat
+ * count is normal), a warning from 90 per cent while still under it, over once past it.
+ */
 export function billingUsageLevel(used: number, limit: number): BillingUsageLevel {
   if (limit <= 0) return used > 0 ? 'over' : 'ok';
-  const share = used / limit;
-  if (share > 1) return 'over';
-  if (share >= 0.8) return 'warning';
+  if (used > limit) return 'over';
+  if (used < limit && used / limit >= 0.9) return 'warning';
   return 'ok';
 }
 
@@ -63,18 +65,16 @@ export function billingUsageNote(
   locale: string,
   resetText: string | null,
 ): string {
-  const level = billingUsageLevel(usage.used, usage.limit);
+  const format = new Intl.NumberFormat(locale);
   const reset = resetText === null ? '' : `, resets ${resetText}`;
-  if (level === 'over') {
-    const extra = new Intl.NumberFormat(locale).format(usage.used - usage.limit);
-    return `Over the allowance by ${extra} ${usage.unit}${reset}`;
+  if (usage.used > usage.limit) {
+    return `Over the allowance by ${format.format(usage.used - usage.limit)} ${usage.unit}${reset}`;
   }
-  if (level === 'warning') {
-    if (usage.used >= usage.limit) {
-      return `All ${new Intl.NumberFormat(locale).format(usage.limit)} ${usage.unit} in use${reset}`;
-    }
-    const left = new Intl.NumberFormat(locale).format(usage.limit - usage.used);
-    return `${left} ${usage.unit} left${reset}`;
+  if (usage.limit > 0 && usage.used === usage.limit) {
+    return `All ${format.format(usage.limit)} ${usage.unit} in use${reset}`;
+  }
+  if (billingUsageLevel(usage.used, usage.limit) === 'warning') {
+    return `${format.format(usage.limit - usage.used)} ${usage.unit} left${reset}`;
   }
   return resetText === null ? 'Within the allowance' : `Resets ${resetText}`;
 }
