@@ -122,7 +122,7 @@ try {
   const page = await context.newPage();
   await page.goto(`${base}?view=motion&theme=default&mode=light`);
   // The view is a lazy chunk: wait for it, or the still is the empty page before it loads.
-  await page.locator('[data-column="motion"]').waitFor();
+  await page.locator('[data-column="motion"]').first().waitFor();
   await settle(page);
   await page.screenshot({ path: join(out, 'page-default-light.png'), fullPage: true });
 
