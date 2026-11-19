@@ -40,13 +40,7 @@ function useGlidingHighlight(popup: RefObject<HTMLDivElement | null>, open: bool
     let glide: Controls | null = null;
 
     const follow = () => {
-      const item =
-        [...list.getElementsByTagName('*')].find(
-          (el): el is HTMLElement =>
-            el instanceof HTMLElement &&
-            el.dataset.slot === 'select-item' &&
-            el.dataset.highlighted !== undefined,
-        ) ?? null;
+      const item = list.querySelector<HTMLElement>('[data-slot="select-item"][data-highlighted]');
       const tokens = readMotionTokens(list);
       // Where the highlight is now, mid glide if a key came quickly: read before stopping it, so
       // the next glide starts from there instead of hopping to the last target first.
