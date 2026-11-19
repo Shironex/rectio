@@ -205,7 +205,8 @@
         "$value": "{easing.out-quint}"
       },
       "exit": {
-        "$value": "{easing.in-cubic}"
+        "$value": "{easing.out-quint}",
+        "$description": "Leaves on a strong ease-out at the fast duration: most of the way gone at once, so the interface answers immediately. Never an ease-in."
       },
       "settle": {
         "$value": "{easing.out-quart}",

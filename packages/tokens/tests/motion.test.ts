@@ -34,6 +34,17 @@ describe('motion tokens', () => {
     }
   });
 
+  it.each(themeModes)('$key enters and leaves on an ease-out, never an ease-in', ({ tokens }) => {
+    for (const name of ['enter', 'exit']) {
+      const value = tokens[`--rx-motion-easing-${name}`] ?? '';
+      const points = /^cubic-bezier\(([^)]*)\)$/.exec(value)?.[1]?.split(',').map(Number) ?? [];
+      expect(points, name).toHaveLength(4);
+      const [x1 = 0, y1 = 0] = points;
+      // The first control point above the diagonal: the curve starts fast and lands softly.
+      expect(y1, `${name} starts fast`).toBeGreaterThan(x1);
+    }
+  });
+
   it.each(themeModes)(
     '$key counts slower than any transition, but under a second',
     ({ tokens }) => {
