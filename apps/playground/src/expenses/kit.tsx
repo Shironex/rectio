@@ -29,6 +29,7 @@ export interface Kit {
   TableRow: (props: ComponentProps<'tr'>) => ReactNode;
   TableCell: typeof ui.TableCell;
   DataTableBody: typeof ui.DataTableBody;
+  ToastProvider: typeof ui.ToastProvider;
 }
 
 export const PLAIN_KIT: Kit = {
@@ -44,6 +45,7 @@ export const PLAIN_KIT: Kit = {
   TableRow: ui.TableRow,
   TableCell: ui.TableCell,
   DataTableBody: ui.DataTableBody,
+  ToastProvider: ui.ToastProvider,
 };
 
 export const MOTION_KIT: Kit = {
@@ -59,6 +61,7 @@ export const MOTION_KIT: Kit = {
   TableRow: motion.TableRow,
   TableCell: motion.TableCell,
   DataTableBody: motion.DataTableBody,
+  ToastProvider: motion.ToastProvider,
 };
 
 const KitContext = createContext<Kit>(PLAIN_KIT);

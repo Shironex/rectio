@@ -9,7 +9,6 @@ import {
   DateRangePicker,
   Money,
   ThemeScope,
-  ToastProvider,
   formatMoney,
   selectionColumn,
   useDataTable,
@@ -23,7 +22,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Mode, ThemeId } from '../themes';
 import { AddExpenseDialog } from './add-expense-dialog';
 import { EXPENSES, STATUSES, categoryLabel, type Expense } from './data';
-import { KitProvider, useKit, type Kit } from './kit';
+import { KitProvider, MOTION_KIT, PLAIN_KIT, useKit, type Kit } from './kit';
 
 const CURRENCY = 'EUR';
 const LOCALE = 'en-IE';
@@ -174,6 +173,8 @@ export function ExpenseReport({
   /** Swap in the motion add-on's components: rows that arrive and leave, a total that counts. */
   motion?: boolean;
 }) {
+  // The motion kit's toasts arrive calmly and the stack glides; the plain ones fade in place.
+  const { ToastProvider } = motion ? MOTION_KIT : PLAIN_KIT;
   return (
     <ThemeScope theme={theme} mode={mode} className="min-h-dvh">
       <KitProvider motion={motion}>

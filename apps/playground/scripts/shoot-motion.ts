@@ -263,6 +263,28 @@ try {
   console.log('motion dialog on save', await dialogFieldsVerdict(page));
   await settle(page);
   await page.screenshot({ path: join(out, 'report-saved-ledger-dark.png') });
+
+  // Two more toasts in quick succession: each arrives calmly and the stack glides up.
+  const remove = async (merchant: RegExp) => {
+    await page.getByRole('checkbox', { name: merchant }).click();
+    await page.getByRole('button', { name: 'Remove' }).click();
+  };
+  await slow.send('Animation.setPlaybackRate', { playbackRate: RATE });
+  const toastFiles = await filmstrip(
+    page,
+    'toast-stack',
+    'viewport',
+    async () => {
+      await remove(/^Select Figma/);
+      await page.waitForTimeout(GAP_MS * 2);
+      await remove(/^Select Linear/);
+    },
+    0,
+    GAP_MS * 2,
+  );
+  await slow.send('Animation.setPlaybackRate', { playbackRate: 1 });
+  await settle(page);
+  await page.screenshot({ path: join(out, 'report-toasts-ledger-dark.png') });
   await page.close();
   await context.close();
 
@@ -274,6 +296,7 @@ try {
   const sheets = await browser.newPage();
   for (const [name, rows] of Object.entries(strips)) await contactSheet(sheets, name, rows);
   await contactSheet(sheets, 'report-save', [{ label: 'motion, ledger dark', files: reportFiles }]);
+  await contactSheet(sheets, 'toast-stack', [{ label: 'motion, ledger dark', files: toastFiles }]);
   console.log(`motion captures in ${out}`);
 } finally {
   await browser.close();
