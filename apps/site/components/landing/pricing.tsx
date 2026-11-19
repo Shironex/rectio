@@ -45,7 +45,7 @@ export function Pricing() {
         </p>
         <Link
           href="/docs/installation"
-          className="shrink-0 text-base font-medium text-accent-strong underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="inline-flex min-h-11 shrink-0 items-center text-base font-medium text-accent-strong underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
           Install the free tier
         </Link>
