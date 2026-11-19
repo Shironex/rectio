@@ -1,4 +1,4 @@
-import { CheckCircleIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { BookOpenTextIcon, CheckCircleIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import {
   Badge,
   Table,
@@ -195,7 +195,7 @@ export function Ledger({
       bodyClassName="gap-4"
     >
       {account === undefined && ordered.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={BookOpenTextIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (

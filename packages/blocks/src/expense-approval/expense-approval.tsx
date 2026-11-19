@@ -1,5 +1,6 @@
 import {
   ArrowCounterClockwiseIcon,
+  CheckCircleIcon,
   CheckIcon,
   ClockCounterClockwiseIcon,
   FlagIcon,
@@ -314,7 +315,7 @@ export function ExpenseApproval({
       </div>
 
       {pending.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={CheckCircleIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (

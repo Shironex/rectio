@@ -1,3 +1,4 @@
+import { ChartBarIcon } from '@phosphor-icons/react';
 import {
   Table,
   TableBody,
@@ -185,7 +186,7 @@ export function CashFlowChart({
       bodyClassName="gap-4"
     >
       {points.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={ChartBarIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (

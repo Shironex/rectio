@@ -1,4 +1,4 @@
-import { CheckIcon, LinkBreakIcon, PlusIcon, SealCheckIcon } from '@phosphor-icons/react';
+import { BankIcon, CheckIcon, LinkBreakIcon, PlusIcon, SealCheckIcon } from '@phosphor-icons/react';
 import {
   Table,
   TableBody,
@@ -406,7 +406,7 @@ export function BankReconciliation({
       bodyClassName="gap-4"
     >
       {statement.length === 0 && book.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={BankIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (

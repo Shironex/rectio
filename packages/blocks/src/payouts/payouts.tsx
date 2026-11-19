@@ -1,4 +1,4 @@
-import { ArrowClockwiseIcon, WarningOctagonIcon } from '@phosphor-icons/react';
+import { ArrowClockwiseIcon, PaperPlaneTiltIcon, WarningOctagonIcon } from '@phosphor-icons/react';
 import {
   Table,
   TableBody,
@@ -161,7 +161,7 @@ export const PAYOUTS_MESSAGES: PayoutsMessages = {
   retry: 'Retry',
   retryLabel: (payee, amount) => `Retry ${amount} to ${payee}`,
   emptyTitle: 'No payouts yet',
-  emptyNote: 'Payouts you schedule appear here, from leaving to landing.',
+  emptyNote: 'Payouts you schedule appear here, with their status until they arrive.',
   noneInFilter: (filter) => `No ${filter.toLowerCase()} payouts`,
   noneInFilterNote: 'Every payout with this status will show here.',
   showAll: 'Show all payouts',
@@ -249,7 +249,7 @@ export function Payouts({
       bodyClassName="gap-4"
     >
       {all.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={PaperPlaneTiltIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (

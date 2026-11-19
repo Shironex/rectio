@@ -1,4 +1,4 @@
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon, ReceiptIcon } from '@phosphor-icons/react';
 import {
   DataTable,
   DataTableBody,
@@ -442,7 +442,7 @@ export function InvoiceList({
       bodyClassName="gap-4"
     >
       {invoices.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={ReceiptIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (

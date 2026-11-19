@@ -1,3 +1,4 @@
+import { TrayIcon, type Icon } from '@phosphor-icons/react';
 import { EmptyState } from '@rectio/ui';
 import type { ReactNode } from 'react';
 
@@ -10,11 +11,14 @@ import type { ReactNode } from 'react';
 export function EmptyNote({
   title,
   action,
+  icon: NoteIcon = TrayIcon,
   children,
 }: {
   title: ReactNode;
   /** The first step, such as a button that creates the first record. */
   action?: ReactNode;
+  /** A quiet glyph above the title, for the kind of record that is missing. */
+  icon?: Icon;
   children?: ReactNode;
 }) {
   return (
@@ -23,6 +27,7 @@ export function EmptyNote({
       size="sm"
       variant="dashed"
       className="py-10"
+      icon={<NoteIcon aria-hidden weight="duotone" />}
       title={title}
       description={children}
       actions={action ?? undefined}

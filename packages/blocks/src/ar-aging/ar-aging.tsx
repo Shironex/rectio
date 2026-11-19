@@ -1,3 +1,4 @@
+import { HourglassMediumIcon } from '@phosphor-icons/react';
 import {
   Table,
   TableBody,
@@ -203,7 +204,7 @@ export function ArAging({
       bodyClassName="gap-4"
     >
       {receivables.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={HourglassMediumIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (

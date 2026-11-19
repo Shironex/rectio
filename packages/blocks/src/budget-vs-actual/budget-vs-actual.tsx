@@ -1,4 +1,4 @@
-import { ArrowDownIcon, ArrowUpIcon, EqualsIcon } from '@phosphor-icons/react';
+import { ArrowDownIcon, ArrowUpIcon, EqualsIcon, TargetIcon } from '@phosphor-icons/react';
 import {
   Table,
   TableBody,
@@ -218,7 +218,7 @@ export function BudgetVsActual({
       bodyClassName="gap-3"
     >
       {lines.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={TargetIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (

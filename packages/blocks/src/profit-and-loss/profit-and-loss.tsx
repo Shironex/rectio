@@ -1,10 +1,11 @@
 import {
   ArrowDownIcon,
+  ArrowUpIcon,
   ArrowsInSimpleIcon,
   ArrowsOutSimpleIcon,
-  ArrowUpIcon,
   CaretRightIcon,
   EqualsIcon,
+  ScalesIcon,
 } from '@phosphor-icons/react';
 import {
   Table,
@@ -438,7 +439,7 @@ export function ProfitAndLoss({
       bodyClassName="gap-4"
     >
       {lines.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={ScalesIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (

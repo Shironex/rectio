@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon, PlusIcon } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon, PlusIcon, StorefrontIcon } from '@phosphor-icons/react';
 import {
   DataTable,
   DataTableBody,
@@ -465,7 +465,7 @@ export function VendorsList({
       bodyClassName="gap-4"
     >
       {vendors.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction}>
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={StorefrontIcon}>
           {m.emptyNote}
         </EmptyNote>
       ) : (
