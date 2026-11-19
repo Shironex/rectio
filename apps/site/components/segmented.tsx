@@ -38,7 +38,10 @@ export function Segmented<T extends string>({
       onValueChange={(next, details) => {
         const picked = options.find((o) => o.value === next[0]);
         if (picked === undefined) return;
-        const target = details.event.target;
+        // Only a pointer press has a place to start from; keyboard changes report no origin.
+        const { event } = details;
+        // A click from Enter or Space is a MouseEvent too, with no click count.
+        const target = event instanceof MouseEvent && event.detail > 0 ? event.target : null;
         const box = target instanceof Element ? target.getBoundingClientRect() : null;
         onChange(
           picked.value,

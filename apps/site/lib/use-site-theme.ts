@@ -34,6 +34,7 @@ const prefersReducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)'
 /**
  * Switches the whole site to a theme. Where the browser has view transitions, the new theme opens
  * as a circle from `origin` (the switch that was pressed); with reduced motion it crossfades.
+ * Without an origin, as from the keyboard, it switches without a transition.
  */
 export function setSiteTheme(theme: ThemeId, origin?: { x: number; y: number }) {
   const root = document.documentElement;
@@ -46,13 +47,14 @@ export function setSiteTheme(theme: ThemeId, origin?: { x: number; y: number }) 
   } catch {
     // Private windows may refuse storage; the switch still works for this visit.
   }
-  if (typeof document.startViewTransition !== 'function') {
+  // Keyboard changes (no origin) switch at once: an animation on every arrow press would be noise.
+  if (typeof document.startViewTransition !== 'function' || origin === undefined) {
     apply();
     return;
   }
   const reduced = prefersReducedMotion();
   root.dataset.morph = reduced ? 'fade' : 'circle';
-  if (origin !== undefined && !reduced) {
+  if (!reduced) {
     const radius = Math.hypot(
       Math.max(origin.x, innerWidth - origin.x),
       Math.max(origin.y, innerHeight - origin.y),
