@@ -1,0 +1,235 @@
+---
+title: File upload
+description: A dropzone or a compact trigger for files, with a list that shows each upload's progress.
+---
+
+import FileUploadDemo from '@/demos/file-upload';
+import FileUploadMotionDemo from '@/demos/file-upload.motion';
+
+<Preview
+  name="file-upload"
+  plain={<FileUploadDemo />}
+  motion={<FileUploadMotionDemo />}
+  importLine="import { FileDropzone, FileItem, FileList } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx rectio add file-upload
+```
+
+`field` and `button` install with it.
+
+## Usage
+
+```tsx
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import {
+  FileDropzone,
+  FileItem,
+  FileList,
+  FileUpload,
+  useFileUpload,
+} from '@/components/ui/file-upload';
+
+const upload = useFileUpload({
+  upload: (file, { onProgress, signal }) => sendReceipt(file, onProgress, signal),
+});
+
+<Field>
+  <FieldLabel>Receipts</FieldLabel>
+  <FileUpload {...upload.rootProps} accept=".pdf,.png,.jpg" maxSize={10 * 1024 * 1024}>
+    <FileDropzone />
+    <FileList aria-label="Attached receipts">
+      {upload.files.map((file) => (
+        <FileItem key={file.id} file={file} />
+      ))}
+    </FileList>
+  </FileUpload>
+  <FieldDescription>PDF, PNG or JPG, up to 10 MB each.</FieldDescription>
+</Field>;
+```
+
+The component sends nothing. `FileUpload` checks every picked or dropped file against `accept`,
+`maxSize` and `maxFiles`, hands the ones that pass to `onFilesAdded`, and the ones that fail to
+`onRejected`, each with a sentence such as "scan.pdf is 12.4 MB; the limit is 10 MB." The app owns
+the list: it passes entries with a `status` (`queued`, `uploading`, `done`, `error`), a `progress`
+from 0 to 100 and an `error` message, and gets `onRemove` and `onRetry` back.
+
+`useFileUpload` keeps that list for you. Give it an `upload` function that resolves when the server
+has the file and rejects with an Error the user can act on; it reports progress through
+`onProgress` and should pass `signal` to `fetch`, which aborts when the user removes the file.
+Without `upload`, files stay queued and you move them along with `updateFile`. Sizes are counted in
+steps of 1024, so `10 * 1024 * 1024` reads as 10 MB.
+
+Rejections are announced to screen readers. To keep them on screen as well, mark the Field invalid
+and show them in a `FieldError`, as the demo does.
+
+### Compact trigger
+
+For a single avatar or attachment, use `FileUploadTrigger` in place of the dropzone. It is a
+button with the same picker, rules and Field wiring, and takes dropped files too.
+
+```tsx
+<Field>
+  <FieldLabel>Profile photo</FieldLabel>
+  <FileUpload {...photo.rootProps} accept="image/png,image/jpeg" maxSize={2 * 1024 * 1024}>
+    <FileUploadTrigger>Upload photo</FileUploadTrigger>
+  </FileUpload>
+</Field>
+```
+
+With `multiple={false}` the picker takes one file and `useFileUpload({ multiple: false })` replaces
+the previous one.
+
+### Progress bar
+
+`FileProgress` is the bar the rows use, on Base UI's Progress. It works on its own for any transfer
+with a known size; pass `value={null}` while the size is unknown.
+
+The motion variant fades new rows up into place, lets removed rows fade out faster while the rows
+below glide into the gap, settles the check in when an upload finishes, and lifts the dropzone's
+icon while files are held over it. Use its `FileList` with its `FileItem`.
+
+## Props
+
+### FileUpload
+
+Every prop of a `div` is accepted as well.
+
+<TypeTable
+  type={{
+    accept: {
+      type: 'string',
+      description:
+        'Extensions and MIME types, comma separated, such as `.pdf,image/*`. Checked on drop as well as in the picker.',
+    },
+    acceptLabel: {
+      type: 'string',
+      description: 'Words for the accepted types in messages. Derived from `accept` when omitted.',
+    },
+    maxSize: { type: 'number', description: 'Largest file, in bytes.' },
+    maxFiles: { type: 'number', description: 'Most files in the list, counting `files`.' },
+    multiple: {
+      type: 'boolean',
+      default: 'true',
+      description: 'False takes one file at a time.',
+    },
+    disabled: { type: 'boolean', default: 'false' },
+    files: {
+      type: 'FileUploadEntry[]',
+      description:
+        'The current entries, counted against `maxFiles` and watched to announce finished and failed uploads.',
+    },
+    onFilesAdded: { type: '(files: File[]) => void', description: 'Files that passed every rule.' },
+    onRejected: {
+      type: '(rejections: FileRejection[]) => void',
+      description: 'Files turned away, each with a `code` and a `message`.',
+    },
+    onRemove: { type: '(file: FileUploadEntry) => void' },
+    onRetry: { type: '(file: FileUploadEntry) => void' },
+    locale: { type: 'string', description: 'BCP 47 locale for sizes and percentages.' },
+    messages: {
+      type: 'Partial<FileUploadMessages>',
+      description: 'Rewords or translates any sentence the component says or announces.',
+    },
+  }}
+/>
+
+### FileDropzone
+
+Every prop of a `button` is accepted as well.
+
+<TypeTable
+  type={{
+    children: {
+      type: 'ReactNode | ((state: { dragging: boolean }) => ReactNode)',
+      description: 'Replaces the default icon and text.',
+    },
+  }}
+/>
+
+### FileUploadTrigger
+
+Takes the props of `Button`: `variant` (default `secondary`), `size` and `children` (default a
+paperclip and "Attach file").
+
+### FileList
+
+Every prop of a `ul` is accepted as well. Give it an `aria-label` when the page has several.
+
+### FileItem
+
+Every prop of an `li` is accepted as well.
+
+<TypeTable
+  type={{
+    file: {
+      type: 'FileUploadEntry',
+      required: true,
+      description: '`id`, `name`, `size`, `type`, `status`, `progress` and `error`.',
+    },
+    onRemove: {
+      type: '(file: FileUploadEntry) => void',
+      description: "Overrides the root's `onRemove` for this row.",
+    },
+    onRetry: {
+      type: '(file: FileUploadEntry) => void',
+      description: "Overrides the root's `onRetry` for this row.",
+    },
+  }}
+/>
+
+### FileProgress
+
+Every prop of Base UI's `Progress.Root` is accepted as well.
+
+<TypeTable
+  type={{
+    value: {
+      type: 'number | null',
+      required: true,
+      description: '0 to 100, or null while the size is unknown.',
+    },
+  }}
+/>
+
+### useFileUpload
+
+<TypeTable
+  type={{
+    upload: {
+      type: '(file: File, task: { onProgress, signal }) => Promise<void>',
+      description: 'Sends one file. Reject with an Error whose message the user can act on.',
+    },
+    multiple: {
+      type: 'boolean',
+      default: 'true',
+      description: 'False keeps one file; a new one replaces it.',
+    },
+    initialFiles: {
+      type: 'FileUploadEntry[]',
+      description: 'Entries already saved, such as attachments on the record.',
+    },
+  }}
+/>
+
+It returns `files`, `addFiles`, `removeFile`, `retryFile`, `updateFile`, `clear` and `rootProps`
+to spread on `FileUpload`. `validateFiles`, `formatFileSize` and `describeAccept` are exported for
+checks outside the component, such as on the server.
+
+## Accessibility
+
+- The dropzone and the compact trigger are real buttons: Tab reaches them and Enter or Space opens
+  the native picker. The `FieldLabel` names them; the description and error are linked to them.
+- While files are held over the dropzone, its border turns solid and its icon and text change, so
+  the state never rests on colour.
+- Added, rejected, removed, finished and failed files are announced in a polite live region.
+- Each row states its status in words with an icon. The progress bar has `role="progressbar"`, is
+  named after the file and carries `aria-valuenow`.
+- Remove buttons are named after their file ("Remove invoice.pdf"), and Retry reads "Retry
+  scan.pdf". After a remove, focus moves to the next row, or back to the dropzone.
+- On touch screens the row buttons reach a 44px target.
+
+<ComponentSource path="file-upload/file-upload.tsx" />
