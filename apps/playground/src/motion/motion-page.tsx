@@ -31,6 +31,7 @@ import { createContext, use, useEffect, useRef, useState, type ReactNode } from 
 
 import { CATEGORIES } from '../expenses/data';
 import { KitProvider, useHeldUntilCount, useKit } from '../expenses/kit';
+import { usePageCanvas } from '../page-canvas';
 import { MODES, THEMES, type Mode, type ThemeId } from '../themes';
 
 const CURRENCY = 'EUR';
@@ -399,8 +400,9 @@ function Page({
   onOffChange: (off: boolean) => void;
 }) {
   const still = usePlainMotion();
+  const canvas = usePageCanvas(mode);
   return (
-    <ThemeScope theme={theme} mode={mode} className="min-h-dvh">
+    <ThemeScope ref={canvas} theme={theme} mode={mode} className="min-h-dvh">
       <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8">
         <a
           href="?"

@@ -1,4 +1,4 @@
-import { Suspense, lazy, useLayoutEffect } from 'react';
+import { Suspense, lazy } from 'react';
 
 import { readView } from './themes';
 
@@ -13,18 +13,6 @@ const MotionPage = lazy(() =>
 
 export function App() {
   const { theme, mode, view, motion } = readView(window.location.search);
-  // A single-theme view paints the page behind it too, so an overscroll or a page taller than the
-  // scope never shows a white band under a dark theme. The matrix shows several themes: no fill.
-  useLayoutEffect(() => {
-    if (view === 'matrix') return;
-    const root = document.documentElement;
-    root.dataset.theme = theme;
-    root.dataset.mode = mode;
-    return () => {
-      delete root.dataset.theme;
-      delete root.dataset.mode;
-    };
-  }, [theme, mode, view]);
   return (
     <Suspense>
       {view === 'app' ? (

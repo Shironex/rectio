@@ -19,6 +19,7 @@ import {
 } from '@rectio/ui';
 import { useEffect, useMemo, useState } from 'react';
 
+import { usePageCanvas } from '../page-canvas';
 import type { Mode, ThemeId } from '../themes';
 import { AddExpenseDialog } from './add-expense-dialog';
 import { EXPENSES, STATUSES, categoryLabel, type Expense } from './data';
@@ -175,8 +176,9 @@ export function ExpenseReport({
 }) {
   // The motion kit's toasts arrive calmly and the stack glides; the plain ones fade in place.
   const { ToastProvider } = motion ? MOTION_KIT : PLAIN_KIT;
+  const canvas = usePageCanvas(mode);
   return (
-    <ThemeScope theme={theme} mode={mode} className="min-h-dvh">
+    <ThemeScope ref={canvas} theme={theme} mode={mode} className="min-h-dvh">
       <KitProvider motion={motion}>
         <ToastProvider timeout={UNDO_MS}>
           <Report back={motion ? `?view=motion&theme=${theme}&mode=${mode}` : null} />
