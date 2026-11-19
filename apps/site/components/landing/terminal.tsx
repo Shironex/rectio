@@ -39,6 +39,51 @@ const SCRIPT = [
   },
 ] as const;
 
+/** A path that may wrap only after a slash, never inside a file name such as invoice-list. */
+function Path({ path }: { path: string }) {
+  const parts = path.split('/');
+  return parts.map((part, i) => (
+    <span key={i}>
+      <span className="whitespace-nowrap">
+        {part}
+        {i < parts.length - 1 ? '/' : ''}
+      </span>
+      {i < parts.length - 1 && <wbr />}
+    </span>
+  ));
+}
+
+/**
+ * One output line. Wrapped lines hang: their continuation starts under the text, not at the edge.
+ * Written files keep their plus in its own column, so a wrapped path lines up under the path.
+ */
+function OutputLine({ line }: { line: string }) {
+  const nested = line.startsWith('  ');
+  const text = line.trimStart();
+  if (text.startsWith('+ ')) {
+    return (
+      <p className="flex gap-2 ps-4 text-positive-strong">
+        <span aria-hidden>+</span>
+        <span className="min-w-0">
+          <Path path={text.slice(2)} />
+        </span>
+      </p>
+    );
+  }
+  // Words stay whole, so a wrap falls between them and never at the hyphen in theme-default.
+  const words = text.split(' ');
+  return (
+    <p className={nested ? 'ps-10 -indent-6' : 'ps-6 -indent-6'}>
+      {words.map((word, i) => (
+        <span key={i}>
+          <span className="whitespace-nowrap">{word}</span>
+          {i < words.length - 1 ? ' ' : ''}
+        </span>
+      ))}
+    </p>
+  );
+}
+
 /** Everything the terminal can show, one entry per character of a command or per output line. */
 const FRAMES = SCRIPT.flatMap((step, s) =>
   'command' in step
@@ -132,55 +177,48 @@ export function Terminal({ onDone }: { onDone?: () => void }) {
           'command' in step ? `$ ${step.command}` : step.output.join('\n'),
         ).join('\n')}
       </pre>
-      <div
-        aria-hidden
-        className="flex h-104 flex-col justify-end overflow-hidden px-4 py-4 font-mono text-xs leading-5 text-fg sm:px-5 sm:text-sm sm:leading-6"
-      >
-        {frame === 0 && (
-          <p className="whitespace-pre">
-            <span className="text-accent-strong">$ </span>
-            <span className="site-caret inline-block h-4 w-2 translate-y-0.5 bg-fg" />
-          </p>
-        )}
-        {SCRIPT.map((step, s) => {
-          if (at === undefined || frame === 0) return null;
-          if (!done && s > at.step) return null;
-          if ('command' in step) {
-            const shown = done || s < at.step ? step.command.length : at.chars;
-            return (
-              <p key={step.command} className="whitespace-pre-wrap sm:whitespace-pre">
-                <span className="text-accent-strong">$ </span>
-                {step.command.slice(0, shown)}
-                {s === typingStep && (
-                  <span className="site-caret ms-px inline-block h-4 w-2 translate-y-0.5 bg-fg" />
-                )}
-              </p>
-            );
-          }
-          const shown = done || s < at.step ? step.output.length : at.lines;
-          return (
-            <div key={s} className="mb-3 text-fg-muted">
-              {step.output.slice(0, shown).map((line, l) => (
-                <p
-                  key={l}
-                  className={
-                    line.startsWith('  +')
-                      ? 'whitespace-pre-wrap text-positive-strong'
-                      : 'whitespace-pre-wrap'
-                  }
-                >
-                  {line}
+      {/* The pane holds a whole number of lines (20 on a phone, 16 wider) and the gap is one line,
+          so the oldest line leaves at the top edge whole, never cut through. */}
+      {/* Padding sits outside the clipping box, so no part of a clipped line shows above the text. */}
+      <div aria-hidden className="px-4 py-2 sm:px-5 sm:py-4">
+        <div className="flex h-100 flex-col justify-end overflow-hidden font-mono text-xs leading-5 text-fg sm:h-96 sm:text-sm sm:leading-6">
+          {frame === 0 && (
+            <p className="whitespace-pre">
+              <span className="text-accent-strong">$ </span>
+              <span className="site-caret inline-block h-4 w-2 translate-y-0.5 bg-fg" />
+            </p>
+          )}
+          {SCRIPT.map((step, s) => {
+            if (at === undefined || frame === 0) return null;
+            if (!done && s > at.step) return null;
+            if ('command' in step) {
+              const shown = done || s < at.step ? step.command.length : at.chars;
+              return (
+                <p key={step.command} className="whitespace-pre-wrap sm:whitespace-pre">
+                  <span className="text-accent-strong">$ </span>
+                  {step.command.slice(0, shown)}
+                  {s === typingStep && (
+                    <span className="site-caret ms-px inline-block h-4 w-2 translate-y-0.5 bg-fg" />
+                  )}
                 </p>
-              ))}
-            </div>
-          );
-        })}
-        {done && (
-          <p className="whitespace-pre">
-            <span className="text-accent-strong">$ </span>
-            <span className="site-caret inline-block h-4 w-2 translate-y-0.5 bg-fg" />
-          </p>
-        )}
+              );
+            }
+            const shown = done || s < at.step ? step.output.length : at.lines;
+            return (
+              <div key={s} className="mb-5 text-fg-muted sm:mb-6">
+                {step.output.slice(0, shown).map((line, l) => (
+                  <OutputLine key={l} line={line} />
+                ))}
+              </div>
+            );
+          })}
+          {done && (
+            <p className="whitespace-pre">
+              <span className="text-accent-strong">$ </span>
+              <span className="site-caret inline-block h-4 w-2 translate-y-0.5 bg-fg" />
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

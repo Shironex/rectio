@@ -57,9 +57,43 @@ tab shows the preview's usage. The block's own source comes with the license.
       description: 'Customers listed before the rest are only counted in the total.',
     },
     title: { type: 'string', default: "'Receivables aging'" },
+    messages: {
+      type: 'Partial<ArAgingMessages>',
+      description: "The block's words. Pass the keys you change; see `AR_AGING_MESSAGES`.",
+    },
+    emptyAction: {
+      type: 'ReactNode',
+      description:
+        'A button that creates the first invoice.. Shown in the empty state under its note.',
+    },
     className: { type: 'string' },
   }}
 />
+
+## Messages
+
+Every word the block prints, including what screen readers hear, comes from `messages`. The full
+English defaults are exported as `AR_AGING_MESSAGES`, typed as `ArAgingMessages`. Pass only the keys you
+change; a message that counts or names a figure is a small function, so a language can order the
+words and choose its plural form with `plural()`.
+
+```tsx
+import { plural } from '@rectio/blocks';
+
+<ArAging
+  receivables={receivables}
+  currency="PLN"
+  locale="pl-PL"
+  messages={{
+    title: 'Wiekowanie należności',
+    customer: 'Klient',
+    oldestPastDue: (days) =>
+      `Najstarsza: ${days} ${plural(days, { one: 'dzień', other: 'dni' }, 'pl-PL')} po terminie`,
+  }}
+/>;
+```
+
+A complete set typed as `ArAgingMessages` fails to compile when a key is missing.
 
 ## Logic
 

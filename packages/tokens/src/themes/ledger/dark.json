@@ -221,8 +221,8 @@
     "$description": "Data visualisation. Series and sequence marks hold 3:1 against the surface and stay apart under protan, deutan and tritan vision; a legend, label or table always names them too.",
     "series": {
       "1": {
-        "$value": "{palette.citron.300}",
-        "$description": "First series, such as inflow or actual."
+        "$value": "{palette.sky.300}",
+        "$description": "First series, such as inflow or actual. A quiet blue, lighter than the orange second series, so the two differ in hue and lightness."
       },
       "2": {
         "$value": "{palette.orange.400}",
@@ -239,16 +239,17 @@
         "$description": "Ordered steps, such as aging buckets from current to 90+ days. Step 1 is the calm state."
       },
       "2": {
-        "$value": "{palette.amber.200}"
+        "$value": "{palette.heat.on-dark-1}"
       },
       "3": {
-        "$value": "{palette.orange.300}"
+        "$value": "{palette.heat.on-dark-2}"
       },
       "4": {
-        "$value": "{palette.red.500}"
+        "$value": "{palette.heat.on-dark-3}"
       },
       "5": {
-        "$value": "{palette.red.600}"
+        "$value": "{palette.heat.on-dark-4}",
+        "$description": "The most severe step, such as over 90 days past due: deepest in light mode, the most saturated in dark."
       }
     },
     "grid": {

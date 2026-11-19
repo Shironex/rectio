@@ -41,12 +41,19 @@ export type ApprovalCommand =
 /** The shortest reason accepted for a rejection, so "no" alone never reaches the employee. */
 export const MIN_REASON_LENGTH = 8;
 
-/** Null when the reason will do, or what is wrong with it. */
-export function reasonError(reason: string): string | null {
+/** What is wrong with a rejection reason, as a code a block turns into its own words. */
+export function reasonProblem(reason: string): 'missing' | 'short' | null {
   const text = reason.trim();
-  if (text === '') return 'Say why, so the employee knows what to fix.';
-  if (text.length < MIN_REASON_LENGTH)
-    return `Write at least ${String(MIN_REASON_LENGTH)} characters.`;
+  if (text === '') return 'missing';
+  if (text.length < MIN_REASON_LENGTH) return 'short';
+  return null;
+}
+
+/** Null when the reason will do, or what is wrong with it, in English. */
+export function reasonError(reason: string): string | null {
+  const problem = reasonProblem(reason);
+  if (problem === 'missing') return 'Say why, so the employee knows what to fix.';
+  if (problem === 'short') return `Write at least ${String(MIN_REASON_LENGTH)} characters.`;
   return null;
 }
 

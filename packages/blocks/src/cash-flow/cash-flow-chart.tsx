@@ -1,3 +1,4 @@
+import { ChartBarIcon } from '@phosphor-icons/react';
 import {
   Table,
   TableBody,
@@ -7,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@rectio/ui';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   Bar,
   CartesianGrid,
@@ -26,6 +27,7 @@ import { EmptyNote } from '../lib/empty-note';
 import { ChartFigure, ChartTooltip, TOOLTIP_LIFT, activeDatum, chartColor } from '../lib/chart';
 import { Figures } from '../lib/figures';
 import { formatCompactMoney, resolveLocale } from '../lib/finance';
+import { COMMON_MESSAGES, mergeMessages, type CommonMessages } from '../lib/messages';
 import { Segmented } from '../lib/segmented';
 import {
   aggregateCashFlow,
@@ -35,6 +37,60 @@ import {
   type CashFlowPoint,
   type Granularity,
 } from './cash-flow.logic';
+
+export interface CashFlowMessages extends CommonMessages {
+  title: string;
+  /** The description when there are no periods. */
+  noData: string;
+  /** The description: the first and last period, such as "Jan 2026 to Jun 2026". */
+  range: (from: string, to: string) => string;
+  /** A quarter's label; `short` is the axis form. Defaults to "Q1 2026" and "Q1 26". */
+  quarter: (quarter: number, year: number, short: boolean) => string;
+  groupBy: string;
+  monthly: string;
+  quarterly: string;
+  emptyTitle: string;
+  emptyNote: string;
+  inflow: string;
+  outflow: string;
+  net: string;
+  /** Under the net figure: how many periods came in positive. */
+  positiveNote: (positive: number, total: number, granularity: Granularity) => string;
+  /** The chart's summary, read before the plot. */
+  chartSummary: (info: {
+    granularity: Granularity;
+    range: string;
+    netNegative: boolean;
+    positive: number;
+    total: number;
+  }) => string;
+  tableCaption: (granularity: Granularity, currency: string) => string;
+  /** The first column's header: Month or Quarter. */
+  periodHeader: (granularity: Granularity) => string;
+}
+
+export const CASH_FLOW_MESSAGES: CashFlowMessages = {
+  ...COMMON_MESSAGES,
+  title: 'Cash flow',
+  noData: 'No data',
+  range: (from, to) => `${from} to ${to}`,
+  quarter: (quarter, year, short) =>
+    short ? `Q${String(quarter)} ${String(year).slice(2)}` : `Q${String(quarter)} ${String(year)}`,
+  groupBy: 'Group by',
+  monthly: 'Monthly',
+  quarterly: 'Quarterly',
+  emptyTitle: 'No cash movements yet',
+  emptyNote: 'Inflow and outflow appear here once payments are booked.',
+  inflow: 'Inflow',
+  outflow: 'Outflow',
+  net: 'Net',
+  positiveNote: (positive, total, granularity) =>
+    `Positive in ${String(positive)} of ${String(total)} ${granularity === 'month' ? 'months' : 'quarters'}`,
+  chartSummary: ({ granularity, range, netNegative, positive, total }) =>
+    `Cash flow by ${granularity}, ${range}. Net ${netNegative ? 'outflow' : 'inflow'} over the period, positive in ${String(positive)} of ${String(total)} ${granularity === 'month' ? 'months' : 'quarters'}. Use the arrow keys on the chart to read each ${granularity}, or show the table.`,
+  tableCaption: (granularity, currency) => `Cash flow by ${granularity}, in ${currency}`,
+  periodHeader: (granularity) => (granularity === 'month' ? 'Month' : 'Quarter'),
+};
 
 /** The focused period's bars get an outline in the text colour, so the pair stands out. */
 const ACTIVE_BAR = { stroke: 'var(--rx-text)', strokeWidth: 1.5 };
@@ -46,6 +102,10 @@ export interface CashFlowChartProps {
   locale?: string;
   defaultGranularity?: Granularity;
   title?: string;
+  /** Shown in the empty state under its note, such as a button that imports a bank feed. */
+  emptyAction?: ReactNode;
+  /** The block's words; pass the keys you change. See `CASH_FLOW_MESSAGES`. */
+  messages?: Partial<CashFlowMessages>;
   className?: string;
 }
 
@@ -64,26 +124,28 @@ export function CashFlowChart({
   currency,
   locale: requestedLocale,
   defaultGranularity = 'month',
-  title = 'Cash flow',
+  title,
+  emptyAction,
+  messages,
   className,
 }: CashFlowChartProps) {
   const locale = resolveLocale(requestedLocale);
+  const m = mergeMessages(CASH_FLOW_MESSAGES, messages);
+  const label = (p: Pick<CashFlowPeriod, 'start'>, short = false) =>
+    periodLabel(p, granularity, locale, short, m.quarter);
   const { Money } = useBlockParts();
   const [granularity, setGranularity] = useState<Granularity>(defaultGranularity);
   const periods = aggregateCashFlow(points, granularity, currency);
   const summary = summarizeCashFlow(periods, currency);
   const data: Datum[] = periods.map((p) => ({
     ...p,
-    label: periodLabel(p, granularity, locale, true),
+    label: label(p, true),
     out: -p.outflow,
   }));
   const first = periods[0];
   const last = periods.at(-1);
   const span =
-    first === undefined || last === undefined
-      ? 'No data'
-      : `${periodLabel(first, granularity, locale)} to ${periodLabel(last, granularity, locale)}`;
-  const unit = granularity === 'month' ? 'months' : 'quarters';
+    first === undefined || last === undefined ? m.noData : m.range(label(first), label(last));
 
   const tooltip = (props: TooltipContentProps) => {
     const datum = activeDatum(props, data);
@@ -91,13 +153,13 @@ export function CashFlowChart({
     return (
       <ChartTooltip
         layout="row"
-        title={periodLabel(datum, granularity, locale)}
+        title={label(datum)}
         currency={currency}
         locale={locale}
         rows={[
-          { label: 'Inflow', amount: datum.inflow, color: 'series-1' },
-          { label: 'Outflow', amount: -datum.outflow, color: 'series-2' },
-          { label: 'Net', amount: datum.net, color: 'series-3', shape: 'line', strong: true },
+          { label: m.inflow, amount: datum.inflow, color: 'series-1' },
+          { label: m.outflow, amount: -datum.outflow, color: 'series-2' },
+          { label: m.net, amount: datum.net, color: 'series-3', shape: 'line', strong: true },
         ]}
       />
     );
@@ -105,17 +167,17 @@ export function CashFlowChart({
 
   return (
     <BlockPanel
-      title={title}
+      title={title ?? m.title}
       description={span}
       actions={
         points.length > 0 && (
           <Segmented
-            label="Group by"
+            label={m.groupBy}
             value={granularity}
             onValueChange={setGranularity}
             options={[
-              { value: 'month', label: 'Monthly' },
-              { value: 'quarter', label: 'Quarterly' },
+              { value: 'month', label: m.monthly },
+              { value: 'quarter', label: m.quarterly },
             ]}
           />
         )
@@ -124,8 +186,8 @@ export function CashFlowChart({
       bodyClassName="gap-4"
     >
       {points.length === 0 ? (
-        <EmptyNote title="No cash movements yet">
-          Inflow and outflow appear here once payments are booked.
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={ChartBarIcon}>
+          {m.emptyNote}
         </EmptyNote>
       ) : (
         <>
@@ -133,35 +195,43 @@ export function CashFlowChart({
             currency={currency}
             locale={locale}
             items={[
-              { label: 'Inflow', amount: summary.inflow },
-              { label: 'Outflow', amount: -summary.outflow, signed: false },
+              { label: m.inflow, amount: summary.inflow },
+              { label: m.outflow, amount: -summary.outflow, signed: false },
               {
-                label: 'Net',
+                label: m.net,
                 amount: summary.net,
                 signed: true,
-                note: `Positive in ${String(summary.positive)} of ${String(periods.length)} ${unit}`,
+                note: m.positiveNote(summary.positive, periods.length, granularity),
               },
             ]}
           />
           <ChartFigure
-            summary={`Cash flow by ${granularity}, ${span}. Net ${summary.net < 0 ? 'outflow' : 'inflow'} over the period, positive in ${String(summary.positive)} of ${String(periods.length)} ${unit}. Use the arrow keys on the chart to read each ${granularity}, or show the table.`}
+            summary={m.chartSummary({
+              granularity,
+              range: span,
+              netNegative: summary.net < 0,
+              positive: summary.positive,
+              total: periods.length,
+            })}
             legend={[
-              { label: 'Inflow', color: 'series-1' },
-              { label: 'Outflow', color: 'series-2' },
-              { label: 'Net', color: 'series-3', shape: 'line' },
+              { label: m.inflow, color: 'series-1' },
+              { label: m.outflow, color: 'series-2' },
+              { label: m.net, color: 'series-3', shape: 'line' },
             ]}
             plotClassName="h-64"
+            showTableLabel={m.showTable}
+            hideTableLabel={m.hideTable}
             table={
               <Table>
                 <TableCaption className="sr-only">
-                  Cash flow by {granularity}, in {currency}
+                  {m.tableCaption(granularity, currency)}
                 </TableCaption>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{granularity === 'month' ? 'Month' : 'Quarter'}</TableHead>
-                    <TableHead align="end">Inflow</TableHead>
-                    <TableHead align="end">Outflow</TableHead>
-                    <TableHead align="end">Net</TableHead>
+                    <TableHead>{m.periodHeader(granularity)}</TableHead>
+                    <TableHead align="end">{m.inflow}</TableHead>
+                    <TableHead align="end">{m.outflow}</TableHead>
+                    <TableHead align="end">{m.net}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -171,7 +241,7 @@ export function CashFlowChart({
                         scope="row"
                         className="h-auto border-line bg-transparent font-normal text-fg"
                       >
-                        {periodLabel(p, granularity, locale)}
+                        {label(p)}
                       </TableHead>
                       <TableCell align="end">
                         <Money amount={p.inflow} currency={currency} locale={locale} />
@@ -228,7 +298,7 @@ export function CashFlowChart({
               />
               <Bar
                 dataKey="inflow"
-                name="Inflow"
+                name={m.inflow}
                 stackId="flow"
                 fill={chartColor('series-1')}
                 radius={[2, 2, 0, 0]}
@@ -238,7 +308,7 @@ export function CashFlowChart({
               />
               <Bar
                 dataKey="out"
-                name="Outflow"
+                name={m.outflow}
                 stackId="flow"
                 fill={chartColor('series-2')}
                 radius={[0, 0, 2, 2]}
@@ -259,7 +329,7 @@ export function CashFlowChart({
               />
               <Line
                 dataKey="net"
-                name="Net"
+                name={m.net}
                 stroke={chartColor('series-3')}
                 strokeWidth={2.5}
                 dot={{

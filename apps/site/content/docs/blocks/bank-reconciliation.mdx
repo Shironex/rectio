@@ -1,0 +1,163 @@
+---
+title: Bank reconciliation
+description: 'Statement lines beside book entries, with suggested matches and the difference to close.'
+pro: true
+---
+
+<Preview
+  name="bank-reconciliation"
+  plain={<Demo name="bank-reconciliation" />}
+  motion={<Demo name="bank-reconciliation.motion" />}
+  importLine="import { BankReconciliation } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add bank-reconciliation
+```
+
+The motion variant is `motion-bank-reconciliation`. It installs the plain block too and changes
+only how the block enters and how rows leave a filtered view.
+
+## Usage
+
+Every statement line shows its match, a suggested match or nothing yet. A suggestion has exactly
+the same amount, to the cent, and either the same reference (any date) or a date within
+`windowDays`. Match accepts it, Unmatch undoes a pair. Book entries with no statement line are
+listed under the table, since they explain part of the difference.
+
+The block holds no pairs: you pass `matches` and get `onMatch(bankId, bookId)` and
+`onUnmatch(bankId)` back. `reconciliationReducer` keeps a list of pairs one to one:
+
+```tsx
+import { BankReconciliation, reconciliationReducer } from '@rectio/blocks';
+
+const [matches, dispatch] = useReducer(reconciliationReducer, savedMatches);
+
+<BankReconciliation
+  statement={statement}
+  book={entries}
+  matches={matches}
+  statementBalance={53_236.27}
+  bookBalance={48_310.55}
+  currency="EUR"
+  account="Business current •• 4821"
+  period="March 2026"
+  onMatch={(bankId, bookId) => dispatch({ type: 'match', bankId, bookId })}
+  onUnmatch={(bankId) => dispatch({ type: 'unmatch', bankId })}
+  onReconcile={closePeriod}
+/>;
+```
+
+Mark reconciled stays disabled, still focusable and described, until the difference is zero and
+nothing is left unmatched on either side.
+
+## Props
+
+<TypeTable
+  type={{
+    statement: {
+      type: 'readonly StatementLine[]',
+      description: 'id, date, description, reference and signed amount (money in is positive).',
+    },
+    book: { type: 'readonly BookEntry[]', description: 'The book entries, same shape and sign.' },
+    matches: { type: 'readonly ReconciliationMatch[]', description: 'Pairs already made.' },
+    statementBalance: { type: 'number', description: 'The closing balance the statement prints.' },
+    bookBalance: { type: 'number', description: 'The closing balance in the books.' },
+    currency: {
+      type: 'string',
+      description: 'ISO 4217 code of the account, such as EUR or PLN.',
+    },
+    locale: {
+      type: 'string',
+      default: 'the runtime locale',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+    },
+    account: { type: 'string', description: 'The account as you name it, under the title.' },
+    period: { type: 'string', description: 'The period as you name it, under the title.' },
+    onMatch: { type: '(bankId: string, bookId: string) => void' },
+    onUnmatch: { type: '(bankId: string) => void' },
+    onReconcile: {
+      type: '() => void',
+      description: 'Shows Mark reconciled, enabled once everything agrees.',
+    },
+    onCreateEntry: {
+      type: '(line: StatementLine) => void',
+      description:
+        'Shows Add to books on statement lines with nothing to match, such as a bank fee.',
+    },
+    defaultFilter: {
+      type: "'unmatched' | 'suggested' | 'matched' | 'all'",
+      default: 'the work first',
+      description: 'Without it the block opens on Suggested, then Unmatched, then All.',
+    },
+    windowDays: {
+      type: 'number',
+      default: '3',
+      description: 'Days apart a same-amount pair may be to be suggested without a reference.',
+    },
+    suggestions: {
+      type: 'readonly MatchSuggestion[]',
+      description: "Your own suggestions in place of the block's, such as from server rules.",
+    },
+    title: { type: 'string', default: "'Bank reconciliation'" },
+    messages: {
+      type: 'Partial<BankReconciliationMessages>',
+      description:
+        "The block's words. Pass the keys you change; see `BANK_RECONCILIATION_MESSAGES`.",
+    },
+    emptyAction: {
+      type: 'ReactNode',
+      description: 'A button that imports a statement. Shown in the empty state under its note.',
+    },
+    className: { type: 'string' },
+  }}
+/>
+
+## Messages
+
+Every word the block prints, including what screen readers hear, comes from `messages`. The full
+English defaults are exported as `BANK_RECONCILIATION_MESSAGES`, typed as
+`BankReconciliationMessages`. Pass only the keys you change; a message that counts or names a figure
+is a small function, so a language can order the words and choose its plural form with `plural()`.
+
+```tsx
+import { plural } from '@rectio/blocks';
+
+<BankReconciliation
+  {...props}
+  currency="PLN"
+  locale="pl-PL"
+  messages={{
+    title: 'Uzgodnienie bankowe',
+    match: 'Dopasuj',
+    statementLines: (count) =>
+      `${count} ${plural(count, { one: 'pozycja', few: 'pozycje', many: 'pozycji', other: 'pozycji' }, 'pl-PL')} na wyciągu`,
+  }}
+/>;
+```
+
+A complete set typed as `BankReconciliationMessages` fails to compile when a key is missing.
+
+## Logic
+
+The logic is exported and tested on its own, so a server can match the same way:
+`suggestMatches(statement, book, matches, currency, { windowDays })`, `referencesMatch(a, b)`,
+`reconciliationSummary({ statement, book, matches, statementBalance, bookBalance, currency })` (the
+difference, what the unmatched items on each side add up to and what they leave unexplained, all in
+minor units) and `reconciliationReducer(matches, command)`.
+
+## Accessibility
+
+- Each line's state is a badge with a word and an icon (matched, suggested, unmatched), never colour alone.
+- Match and Unmatch name the line and the entry they act on for screen readers.
+- The filter is one toggle group: arrow keys move between options and the pressed one is announced.
+- Mark reconciled stays focusable while disabled and is described by the line that says what is left.
+- Every figure is in tabular numerals with a true minus sign; money in carries a plus.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

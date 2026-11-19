@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Bench } from '@/components/landing/bench';
 import { ClosingBand } from '@/components/landing/closing-band';
 import { CloseBooks } from '@/components/landing/close-books';
+import { ComponentStrip } from '@/components/landing/component-strip';
 import { CurrencyGrid } from '@/components/landing/currency-grid';
 import { currencies } from '@/components/landing/currencies';
 import { Faq } from '@/components/landing/faq';
@@ -37,8 +38,13 @@ export default function Home() {
 
         <CloseBooks />
 
-        <Section id="kit" className="py-16 md:py-24" label="The kit in numbers">
+        <Section
+          id="kit"
+          className="flex flex-col gap-16 pt-12 pb-16 md:gap-20 md:pt-16 md:pb-24"
+          label="The kit"
+        >
           <StatRow kit={kit} />
+          <ComponentStrip total={kit.components} />
         </Section>
 
         <Section className="py-16 md:py-24">
@@ -64,7 +70,6 @@ export default function Home() {
 
         <Section className="flex flex-col gap-10 py-16 md:py-24">
           <SectionIntro
-            eyebrow="CLI, registry and MCP"
             title={
               <>
                 <span className="font-regular">One command,</span> and the block is yours.
@@ -91,57 +96,59 @@ export default function Home() {
           />
         </Section>
 
-        <Section className="py-8 md:py-12">
-          <div className="site-panel flex flex-col gap-10 rounded-panel px-4 py-12 sm:px-8 md:px-12 md:py-16">
-            <SectionIntro
-              eyebrow="Motion add-on"
-              title={
-                <>
-                  <span className="font-regular">Plain where it should be still.</span> Motion where
-                  it helps.
-                </>
-              }
-            >
-              The motion add-on has the same names and props as the plain components and costs{' '}
-              {kit.motionKb} kB gzip. Choose per component by import path, and mix both on one
-              screen.
-            </SectionIntro>
-            <PlainVsMotion />
-          </div>
+        <Section className="flex flex-col gap-10 py-16 md:py-24">
+          <SectionIntro
+            title={
+              <>
+                <span className="font-regular">Plain where it should be still.</span> Motion where
+                it helps.
+              </>
+            }
+          >
+            The motion add-on has the same names and props as the plain components and costs{' '}
+            {kit.motionKb} kB gzip. Choose per component by import path, and mix both on one screen.
+          </SectionIntro>
+          <PlainVsMotion />
         </Section>
+
+        {/* Full bleed: the one band on the page that runs edge to edge. */}
+        <section aria-label="Currencies" className="site-panel my-8 border-y border-line md:my-12">
+          <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-8 md:py-24">
+            <CurrencyGrid
+              codes={money.codes}
+              names={money.names}
+              intro={
+                <SectionIntro
+                  title={
+                    <>
+                      <span className="font-regular">{money.codes.length} currencies,</span> one
+                      Money component.
+                    </>
+                  }
+                >
+                  Any currency the runtime knows, with its own symbol, decimals and grouping, a true
+                  minus sign and tabular figures. Type a figure, or search the list.
+                </SectionIntro>
+              }
+            />
+          </div>
+        </section>
 
         <Section className="py-16 md:py-24">
-          <div className="flex flex-col gap-10">
-            <SectionIntro
-              eyebrow="Currencies"
-              title={
-                <>
-                  <span className="font-regular">{money.codes.length} currencies,</span> one Money
-                  component.
-                </>
-              }
-            >
-              Money formats any currency the runtime knows, with the locale&apos;s grouping, a true
-              minus sign and tabular figures. Search the list.
-            </SectionIntro>
-            <CurrencyGrid codes={money.codes} names={money.names} />
-          </div>
-        </Section>
-
-        <Section className="py-8 md:py-12">
-          <div className="site-panel flex flex-col gap-10 rounded-panel px-4 py-12 sm:px-8 md:px-12 md:py-16">
-            <SectionIntro
-              eyebrow="Theme packs"
-              title={
-                <>
-                  <span className="font-regular">Themes are</span> token files.
-                </>
-              }
-            >
-              Two ship free with every component. Packs for charts and printed statements are next.
-            </SectionIntro>
-            <ThemePacks />
-          </div>
+          <ThemePacks
+            intro={
+              <SectionIntro
+                title={
+                  <>
+                    <span className="font-regular">Themes are</span> token files.
+                  </>
+                }
+              >
+                Two ship free with every component. Packs for charts and printed statements are
+                next.
+              </SectionIntro>
+            }
+          />
         </Section>
 
         <Section id="pricing" className="flex flex-col gap-10 py-16 md:py-24">
@@ -162,7 +169,6 @@ export default function Home() {
         <Section className="grid gap-10 py-16 md:py-24 lg:grid-cols-12">
           <div className="flex flex-col gap-6 lg:col-span-4">
             <SectionIntro
-              eyebrow="FAQ"
               title={
                 <>
                   <span className="font-regular">Questions,</span> answered.

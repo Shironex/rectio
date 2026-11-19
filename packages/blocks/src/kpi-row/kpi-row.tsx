@@ -5,7 +5,32 @@ import { Line, LineChart, YAxis } from 'recharts';
 import { useBlockParts } from '../lib/block-parts';
 import { chartColor } from '../lib/chart';
 import { MINUS, formatPercent, resolveLocale } from '../lib/finance';
+import { mergeMessages } from '../lib/messages';
 import { kpiDelta, type Kpi } from './kpi-row.logic';
+
+export interface KpiRowMessages {
+  /** Names the row for assistive technology when `label` is not given. */
+  label: string;
+  /** The change of a figure that had no previous value. */
+  new: string;
+  /** A change in percentage points: "+2.1 pts". `points` is already formatted with its sign. */
+  points: (points: string) => string;
+  /** The words after a favourable change, such as "better". */
+  better: string;
+  /** The words after an unfavourable change, such as "worse". */
+  worse: string;
+  /** Read by screen readers after a change of zero. */
+  noChange: string;
+}
+
+export const KPI_ROW_MESSAGES: KpiRowMessages = {
+  label: 'Key figures',
+  new: 'New',
+  points: (points) => `${points} pts`,
+  better: 'better',
+  worse: 'worse',
+  noChange: 'no change',
+};
 
 export interface KpiRowProps {
   kpis: readonly Kpi[];
@@ -15,19 +40,20 @@ export interface KpiRowProps {
   comparison: string;
   /** Names the row for assistive technology, such as "Key figures, March 2026". */
   label?: string;
+  /** The block's words; pass the keys you change. See `KPI_ROW_MESSAGES`. */
+  messages?: Partial<KpiRowMessages>;
   className?: string;
 }
 
 const ARROW = { up: ArrowUpRightIcon, down: ArrowDownRightIcon, flat: ArrowRightIcon };
 
 function formatPoints(change: number, locale: string) {
-  const points = new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(locale, {
     maximumFractionDigits: 1,
     signDisplay: 'exceptZero',
   })
     .format(change * 100)
     .replace('-', MINUS);
-  return `${points} pts`;
 }
 
 /** A line of the recent periods, decorative: the figure and its change say the same in words. */
@@ -75,13 +101,19 @@ export function KpiRow({
   currency,
   locale: requestedLocale,
   comparison,
-  label = 'Key figures',
+  label,
+  messages,
   className,
 }: KpiRowProps) {
   const locale = resolveLocale(requestedLocale);
+  const m = mergeMessages(KPI_ROW_MESSAGES, messages);
   const { Money, Reveal } = useBlockParts();
   return (
-    <section aria-label={label} data-slot="block" className={cn('@container', className)}>
+    <section
+      aria-label={label ?? m.label}
+      data-slot="block"
+      className={cn('@container', className)}
+    >
       <Reveal>
         <dl
           className={cn(
@@ -94,11 +126,11 @@ export function KpiRow({
             const Arrow = ARROW[delta.direction];
             const change =
               delta.change === null
-                ? 'New'
+                ? m.new
                 : kpi.format === 'percent'
-                  ? formatPoints(delta.change, locale)
+                  ? m.points(formatPoints(delta.change, locale))
                   : formatPercent(delta.change, locale, { signed: true });
-            const verdict = delta.favourable === true ? 'better' : 'worse';
+            const verdict = delta.favourable === true ? m.better : m.worse;
             return (
               <div
                 key={kpi.id}
@@ -131,7 +163,9 @@ export function KpiRow({
                       >
                         <Arrow aria-hidden weight="bold" className="size-3.5" />
                         <span className="numeric">{change}</span>
-                        {delta.favourable === null && <span className="sr-only">, no change</span>}
+                        {delta.favourable === null && (
+                          <span className="sr-only">, {m.noChange}</span>
+                        )}
                         {/* Good or bad news in words too, never in colour alone. */}
                         {delta.favourable !== null && (
                           <span className="font-regular">

@@ -285,16 +285,17 @@
         "$description": "Ordered steps, such as aging buckets from current to 90+ days. Step 1 is the calm state."
       },
       "2": {
-        "$value": "{palette.amber.200}"
+        "$value": "{palette.heat.on-dark-1}"
       },
       "3": {
-        "$value": "{palette.orange.300}"
+        "$value": "{palette.heat.on-dark-2}"
       },
       "4": {
-        "$value": "{palette.red.500}"
+        "$value": "{palette.heat.on-dark-3}"
       },
       "5": {
-        "$value": "{palette.red.600}"
+        "$value": "{palette.heat.on-dark-4}",
+        "$description": "The most severe step, such as over 90 days past due: deepest in light mode, the most saturated in dark."
       }
     },
     "grid": {

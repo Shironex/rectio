@@ -32,14 +32,38 @@ const SWATCH: Record<ChartColor, string> = {
   reference: 'bg-chart-reference',
 };
 
+/** How a legend key is drawn: a square for bars, a rule for lines, a broken rule for forecasts. */
+export type SwatchShape = 'bar' | 'hatched' | 'line' | 'dashed';
+
 /** A legend key: a square for bars, a short rule for lines. Always next to its name. */
 export function Swatch({
   color,
   shape = 'bar',
 }: {
   color: ChartColor;
-  shape?: 'bar' | 'line' | undefined;
+  shape?: SwatchShape | undefined;
 }) {
+  if (shape === 'dashed') {
+    return (
+      <span aria-hidden className="inline-flex w-3.5 shrink-0 justify-between">
+        <span className={cn('h-0.5 w-1.5 rounded-full', SWATCH[color])} />
+        <span className={cn('h-0.5 w-1.5 rounded-full', SWATCH[color])} />
+      </span>
+    );
+  }
+  if (shape === 'hatched') {
+    // The same stripes as the mark it keys, so the step reads without telling colours apart.
+    return (
+      <span
+        aria-hidden
+        className={cn('inline-block size-2.5 shrink-0 rounded-badge', SWATCH[color])}
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(135deg, transparent 0 2px, var(--rx-surface) 2px 3px)',
+        }}
+      />
+    );
+  }
   return (
     <span
       aria-hidden
@@ -55,7 +79,7 @@ export function Swatch({
 export interface LegendItem {
   label: ReactNode;
   color: ChartColor;
-  shape?: 'bar' | 'line';
+  shape?: SwatchShape;
 }
 
 export function ChartLegend({ items }: { items: readonly LegendItem[] }) {
@@ -90,7 +114,7 @@ export interface TooltipRow {
   label: ReactNode;
   amount: number;
   color?: ChartColor;
-  shape?: 'bar' | 'line';
+  shape?: SwatchShape;
   /** Bold the row, for a total or a net figure. */
   strong?: boolean;
 }
@@ -168,6 +192,9 @@ export interface ChartFigureProps {
   table: ReactNode;
   /** Height of the plot, a token utility such as `h-64`. */
   plotClassName?: string;
+  /** The toggle's words, from the block's messages. */
+  showTableLabel?: string;
+  hideTableLabel?: string;
   children: ReactNode;
   className?: string;
 }
@@ -181,6 +208,8 @@ export function ChartFigure({
   legend,
   table,
   plotClassName,
+  showTableLabel = 'Show table',
+  hideTableLabel = 'Hide table',
   children,
   className,
 }: ChartFigureProps) {
@@ -190,8 +219,11 @@ export function ChartFigure({
   return (
     <figure className={cn('m-0 flex min-w-0 flex-col gap-3', className)}>
       <figcaption className="sr-only">{summary}</figcaption>
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        {legend !== undefined ? <ChartLegend items={legend} /> : <span />}
+      {/* The legend wraps inside its own column, so the table switch keeps its place at the end. */}
+      <div className="flex items-start justify-between gap-x-4">
+        <div className="min-w-0 flex-1 pt-1.5">
+          {legend !== undefined && <ChartLegend items={legend} />}
+        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -200,10 +232,10 @@ export function ChartFigure({
           onClick={() => {
             setShowTable((shown) => !shown);
           }}
-          className="-me-2"
+          className="-me-2 shrink-0"
         >
           <TableIcon aria-hidden weight="bold" className="size-3.5" />
-          {showTable ? 'Hide table' : 'Show table'}
+          {showTable ? hideTableLabel : showTableLabel}
         </Button>
       </div>
       <ChartStage className={cn('relative min-w-0', chartSurface, plotClassName)}>

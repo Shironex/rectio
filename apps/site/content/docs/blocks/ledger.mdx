@@ -66,9 +66,49 @@ tab shows the preview's usage. The block's own source comes with the license.
     },
     period: { type: 'string', description: 'Shown under the title, such as "March 2026".' },
     title: { type: 'string', default: "'General journal'" },
+    messages: {
+      type: 'Partial<LedgerMessages>',
+      description: "The block's words. Pass the keys you change; see `LEDGER_MESSAGES`.",
+    },
+    emptyAction: {
+      type: 'ReactNode',
+      description: 'A button that adds the first entry.. Shown in the empty state under its note.',
+    },
     className: { type: 'string' },
   }}
 />
+
+## Messages
+
+Every word the block prints, including what screen readers hear, comes from `messages`. The full
+English defaults are exported as `LEDGER_MESSAGES`, typed as `LedgerMessages`. Pass only the keys you
+change; a message that counts or names a figure is a small function, so a language can order the
+words and choose its plural form with `plural()`.
+
+```tsx
+import { plural } from '@rectio/blocks';
+
+<Ledger
+  accounts={accounts}
+  lines={lines}
+  currency="PLN"
+  locale="pl-PL"
+  messages={{
+    title: 'Dziennik księgowy',
+    debit: 'Winien',
+    credit: 'Ma',
+    journalDescription: (period, entries) =>
+      [
+        period,
+        `${entries} ${plural(entries, { one: 'zapis', few: 'zapisy', many: 'zapisów', other: 'zapisu' }, 'pl-PL')}`,
+      ]
+        .filter(Boolean)
+        .join(', '),
+  }}
+/>;
+```
+
+A complete set typed as `LedgerMessages` fails to compile when a key is missing.
 
 ## Logic
 

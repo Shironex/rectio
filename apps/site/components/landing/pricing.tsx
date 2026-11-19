@@ -101,7 +101,7 @@ export function Pricing({ blocks }: { blocks: number }) {
           );
         })}
       </div>
-      <p className="site-reveal text-sm text-fg-muted">
+      <p className="site-reveal mt-2 max-w-prose text-base text-pretty text-fg-muted">
         One-time prices in US dollars. Theme packs come with every Pro license and are also sold on
         their own. Checkout opens at launch; until then each button leads to the free install, so
         you can start today.

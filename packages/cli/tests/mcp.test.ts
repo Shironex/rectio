@@ -83,9 +83,9 @@ describe('search_items', () => {
   it('needs every word to match and respects filters', async () => {
     expect((await searchItems(deps(), { query: 'date picker' })).text).toContain('date-picker');
     expect((await searchItems(deps(), { query: 'money zzzz' })).text).toContain('0 match(es)');
-    expect((await searchItems(deps(), { query: 'finance', tier: 'pro' })).text).toContain(
-      'ledger-summary',
-    );
+    expect(
+      (await searchItems(deps(), { query: 'finance', tier: 'pro', limit: 100 })).text,
+    ).toContain('ledger-summary');
     expect((await searchItems(deps(), { query: '   ' })).isError).toBe(true);
   });
 });

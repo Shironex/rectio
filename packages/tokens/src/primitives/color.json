@@ -1368,6 +1368,65 @@
         }
       },
       "$description": "Information."
+    },
+    "heat": {
+      "on-light-1": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.625, 0.13, 78],
+          "alpha": 1
+        }
+      },
+      "on-light-2": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.52, 0.128, 50],
+          "alpha": 1
+        }
+      },
+      "on-light-3": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.4, 0.16, 20],
+          "alpha": 1
+        }
+      },
+      "on-light-4": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.3, 0.13, 330],
+          "alpha": 1
+        }
+      },
+      "on-dark-1": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.9, 0.105, 90],
+          "alpha": 1
+        }
+      },
+      "on-dark-2": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.79, 0.14, 62],
+          "alpha": 1
+        }
+      },
+      "on-dark-3": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.66, 0.19, 28],
+          "alpha": 1
+        }
+      },
+      "on-dark-4": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.6, 0.19, 340],
+          "alpha": 1
+        }
+      },
+      "$description": "Severity ramp for ordered marks such as aging buckets: amber, orange, red, then magenta for the most severe. Each step moves in lightness and hue, so neighbours stay apart under protan, deutan and tritan vision. The on-light steps hold 3:1 on light surfaces, the on-dark steps on dark ones."
     }
   }
 }

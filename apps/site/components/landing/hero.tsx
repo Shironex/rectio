@@ -26,7 +26,7 @@ function facts(kit: KitFacts) {
 
 export function Hero({ kit }: { kit: KitFacts }) {
   return (
-    <section className="relative isolate overflow-hidden pb-16 md:pb-24">
+    <section className="relative isolate overflow-hidden pb-14 md:pb-16">
       <div aria-hidden className="site-dots site-dots-hero absolute inset-0 -z-10" />
       <Glow className="-top-80 -right-40 -z-10" />
 

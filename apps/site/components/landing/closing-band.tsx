@@ -2,7 +2,6 @@ import { ArrowRightIcon } from '@phosphor-icons/react/dist/ssr';
 import Link from 'next/link';
 
 import { CopyCommand } from './copy-command';
-import { Eyebrow } from './section';
 
 /** The page's last word: the install command and the docs, side by side with one line of pitch. */
 export function ClosingBand() {
@@ -10,7 +9,6 @@ export function ClosingBand() {
     <div className="site-panel relative isolate overflow-hidden rounded-panel px-6 py-14 sm:px-10 md:px-14 md:py-20">
       <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex max-w-2xl flex-col gap-4">
-          <Eyebrow>Start</Eyebrow>
           <h2 className="site-reveal site-headline text-fg">
             <span className="font-regular">Set your figures</span> right today.
           </h2>

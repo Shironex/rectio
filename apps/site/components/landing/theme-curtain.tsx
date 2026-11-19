@@ -8,7 +8,6 @@ import { Segmented } from '@/components/segmented';
 import { setSiteLook, useSiteTheme } from '@/lib/use-site-theme';
 
 import { READOUT, type Readout } from './readout';
-import { Eyebrow } from './section';
 
 const LOOKS = {
   calm: { theme: 'default', mode: 'light' },
@@ -171,7 +170,6 @@ export function ThemeCurtain({ values }: { values: Readout }) {
     <div className="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-16">
       <div className="flex flex-col gap-8 lg:col-span-5">
         <div className="flex flex-col gap-4">
-          <Eyebrow>Themes</Eyebrow>
           <h2 className="site-reveal site-headline text-fg">
             <span className="font-regular">Calm by day.</span> Ledger at close.
           </h2>

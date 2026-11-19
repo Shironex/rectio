@@ -39,7 +39,7 @@ export function HeroWindow() {
           <span className="text-sm text-fg-subtle">/</span>
           <span className="text-sm text-fg-muted">Finance, March 2026</span>
         </div>
-        <div className="relative flex max-h-176 overflow-hidden sm:max-h-208">
+        <div className="flex max-h-176 overflow-hidden sm:max-h-208">
           <nav className="hidden w-48 shrink-0 flex-col gap-0.5 border-e border-line bg-surface p-3 lg:flex">
             {NAV.map(({ label, icon: Icon, ...item }) => (
               <span
@@ -59,10 +59,12 @@ export function HeroWindow() {
               <ExpenseApprovalDemo />
             </div>
           </div>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-surface-canvas"
-          />
+        </div>
+        {/* A status bar closes the frame: the pane above is clipped by it, as a scrolled app pane
+            is, instead of fading out through a row of text. */}
+        <div className="flex items-center justify-end gap-6 border-t border-line bg-surface px-4 py-2.5">
+          <span className="text-sm text-fg-muted">Bank feed synced, 16 Mar</span>
+          <span className="hidden text-sm text-fg-muted sm:inline">4 open, 2 overdue</span>
         </div>
       </div>
 

@@ -33,6 +33,12 @@ const BLOCKS = [
   'expense-approval',
   'ar-aging',
   'budget-vs-actual',
+  'profit-and-loss',
+  'tax-summary',
+  'cash-runway',
+  'bank-reconciliation',
+  'payouts',
+  'vendors-list',
 ] as const;
 
 const wanted = (name: string) => only === undefined || name.includes(only);
@@ -131,6 +137,12 @@ try {
     'expense-approval',
     'ar-aging',
     'budget-vs-actual',
+    'profit-and-loss',
+    'tax-summary',
+    'cash-runway',
+    'bank-reconciliation',
+    'payouts',
+    'vendors-list',
   ]) {
     const page = await shoot(browser, base, `empty-${block}`, `block=${block}&empty=1`, {
       width: 1180,
@@ -159,7 +171,16 @@ try {
     await phone.close();
   }
   // The filter tabs of every segmented control must stay on one row at phone width.
-  for (const block of ['invoice-list', 'expense-approval']) {
+  for (const block of [
+    'invoice-list',
+    'expense-approval',
+    'profit-and-loss',
+    'tax-summary',
+    'cash-runway',
+    'bank-reconciliation',
+    'payouts',
+    'vendors-list',
+  ]) {
     const page = await shoot(browser, base, `phone-${block}`, `block=${block}&locale=pl-PL`, {
       width: 390,
       phone: true,
@@ -187,6 +208,11 @@ try {
         ),
       ),
     );
+    console.log(
+      `phone ${block} horizontal overflow px`,
+      await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
+    );
+    console.log(`phone ${block} smallest touch target`, await smallestTouchTarget(page));
     const filters = page.locator('[data-slot="segmented"]').first();
     if ((await filters.count()) > 0) {
       await filters.locator('..').screenshot({ path: join(out, `phone-${block}-filters.png`) });

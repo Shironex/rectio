@@ -1,4 +1,4 @@
-import { ArrowDownIcon, ArrowUpIcon, EqualsIcon } from '@phosphor-icons/react';
+import { ArrowDownIcon, ArrowUpIcon, EqualsIcon, TargetIcon } from '@phosphor-icons/react';
 import {
   Table,
   TableBody,
@@ -15,7 +15,10 @@ import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
 import { EmptyNote } from '../lib/empty-note';
 import { Swatch } from '../lib/chart';
+import type { ReactNode } from 'react';
+
 import { formatPercent, resolveLocale } from '../lib/finance';
+import { COMMON_MESSAGES, mergeMessages, type CommonMessages } from '../lib/messages';
 import {
   ON_BUDGET,
   budgetSummary,
@@ -34,8 +37,66 @@ export interface BudgetVsActualProps {
   title?: string;
   /** The period, such as "Q1 2026, 11 of 13 weeks". */
   period?: string;
+  /** Shown in the empty state under its note, such as a button that sets the first budget. */
+  emptyAction?: ReactNode;
+  /** The block's words; pass the keys you change. See `BUDGET_VS_ACTUAL_MESSAGES`. */
+  messages?: Partial<BudgetVsActualMessages>;
   className?: string;
 }
+
+export interface BudgetVsActualMessages extends CommonMessages {
+  title: string;
+  /** Under the title, after the period: nothing set, all on track, or how many went wrong. */
+  noBudgetSet: string;
+  allOnTrack: string;
+  /** "3 of 8 over budget" (expense) or "3 of 8 below target" (revenue). */
+  offTrack: (count: number, total: number, kind: BudgetKind) => string;
+  emptyTitle: string;
+  emptyNote: string;
+  legendBudget: string;
+  legendActual: string;
+  legendOver: string;
+  tableCaption: (currency: string) => string;
+  category: string;
+  spentOfBudget: string;
+  budget: string;
+  actual: string;
+  variance: string;
+  /** Under a category on a narrow block: "€820 of €1,000". */
+  actualOfBudget: (actual: ReactNode, budget: ReactNode) => ReactNode;
+  total: string;
+  /** The variance's words: "12% over" or "5% under"; `percent` is null for a zero budget. */
+  varianceWords: (position: 'under' | 'over', percent: string | null) => string;
+  onBudget: string;
+}
+
+export const BUDGET_VS_ACTUAL_MESSAGES: BudgetVsActualMessages = {
+  ...COMMON_MESSAGES,
+  title: 'Budget vs actual',
+  noBudgetSet: 'no budget set',
+  allOnTrack: 'every category on track',
+  offTrack: (count, total, kind) =>
+    `${String(count)} of ${String(total)} ${kind === 'expense' ? 'over budget' : 'below target'}`,
+  emptyTitle: 'No budget for this period',
+  emptyNote: 'Set a budget per category to compare spending against it.',
+  legendBudget: 'Budget',
+  legendActual: 'Actual',
+  legendOver: 'Over budget',
+  tableCaption: (currency) => `Budget against actual by category, in ${currency}`,
+  category: 'Category',
+  spentOfBudget: 'Spent of each budget',
+  budget: 'Budget',
+  actual: 'Actual',
+  variance: 'Variance',
+  actualOfBudget: (actual, budget) => (
+    <>
+      {actual} of {budget}
+    </>
+  ),
+  total: 'Total',
+  varianceWords: (position, percent) => `${percent === null ? '' : `${percent} `}${position}`,
+  onBudget: 'On budget',
+};
 
 const ICON = { under: ArrowDownIcon, over: ArrowUpIcon, on: EqualsIcon };
 
@@ -43,13 +104,26 @@ const ICON = { under: ArrowDownIcon, over: ArrowUpIcon, on: EqualsIcon };
  * Variance in three signals that agree: the amount signed as actual minus budget (plus is over),
  * an arrow with the words over or under, and colour for good or bad news, which depends on `kind`.
  */
-function VarianceCell({ v, currency, locale }: { v: Variance; currency: string; locale: string }) {
+function VarianceCell({
+  v,
+  currency,
+  locale,
+  m,
+}: {
+  v: Variance;
+  currency: string;
+  locale: string;
+  m: BudgetVsActualMessages;
+}) {
   const { Money } = useBlockParts();
   const Icon = ICON[v.position];
   const words =
     v.position === 'on'
-      ? 'On budget'
-      : `${v.relative === null ? '' : `${formatPercent(Math.abs(v.relative), locale, { digits: 0 })} `}${v.position}`;
+      ? m.onBudget
+      : m.varianceWords(
+          v.position,
+          v.relative === null ? null : formatPercent(Math.abs(v.relative), locale, { digits: 0 }),
+        );
   return (
     <span
       className={cn(
@@ -113,11 +187,14 @@ export function BudgetVsActual({
   currency,
   locale: requestedLocale,
   kind = 'expense',
-  title = 'Budget vs actual',
+  title,
   period,
+  emptyAction,
+  messages,
   className,
 }: BudgetVsActualProps) {
   const locale = resolveLocale(requestedLocale);
+  const m = mergeMessages(BUDGET_VS_ACTUAL_MESSAGES, messages);
   const { Money } = useBlockParts();
   const summary = budgetSummary(lines, kind, currency);
   const track = Math.max(
@@ -126,14 +203,14 @@ export function BudgetVsActual({
   );
   return (
     <BlockPanel
-      title={title}
+      title={title ?? m.title}
       description={[
         period,
         lines.length === 0
-          ? 'no budget set'
+          ? m.noBudgetSet
           : summary.unfavourable === 0
-            ? 'every category on track'
-            : `${String(summary.unfavourable)} of ${String(lines.length)} ${kind === 'expense' ? 'over budget' : 'below target'}`,
+            ? m.allOnTrack
+            : m.offTrack(summary.unfavourable, lines.length, kind),
       ]
         .filter(Boolean)
         .join(', ')}
@@ -141,8 +218,8 @@ export function BudgetVsActual({
       bodyClassName="gap-3"
     >
       {lines.length === 0 ? (
-        <EmptyNote title="No budget for this period">
-          Set a budget per category to compare spending against it.
+        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={TargetIcon}>
+          {m.emptyNote}
         </EmptyNote>
       ) : (
         <>
@@ -152,32 +229,30 @@ export function BudgetVsActual({
                 aria-hidden
                 className="inline-block h-2.5 w-3.5 rounded-badge border border-chart-reference"
               />
-              Budget
+              {m.legendBudget}
             </li>
             <li className="inline-flex items-center gap-1.5">
               <Swatch color="series-1" />
-              Actual
+              {m.legendActual}
             </li>
             <li className="inline-flex items-center gap-1.5">
               <Swatch color="series-2" />
-              Over budget
+              {m.legendOver}
             </li>
           </ul>
           <Table>
-            <TableCaption className="sr-only">
-              Budget against actual by category, in {currency}
-            </TableCaption>
+            <TableCaption className="sr-only">{m.tableCaption(currency)}</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead>Category</TableHead>
-                <TableHead className="hidden w-2/5 @2xl:table-cell">Spent of each budget</TableHead>
+                <TableHead>{m.category}</TableHead>
+                <TableHead className="hidden w-2/5 @2xl:table-cell">{m.spentOfBudget}</TableHead>
                 <TableHead align="end" className="hidden @xl:table-cell">
-                  Budget
+                  {m.budget}
                 </TableHead>
                 <TableHead align="end" className="hidden @xl:table-cell">
-                  Actual
+                  {m.actual}
                 </TableHead>
-                <TableHead align="end">Variance</TableHead>
+                <TableHead align="end">{m.variance}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -186,8 +261,10 @@ export function BudgetVsActual({
                   <TableCell>
                     <span className="block">{line.category}</span>
                     <span className="block text-sm text-fg-muted @xl:hidden">
-                      <Money amount={line.actual} currency={currency} locale={locale} /> of{' '}
-                      <Money amount={line.budget} currency={currency} locale={locale} />
+                      {m.actualOfBudget(
+                        <Money amount={line.actual} currency={currency} locale={locale} />,
+                        <Money amount={line.budget} currency={currency} locale={locale} />,
+                      )}
                     </span>
                   </TableCell>
                   <TableCell className="hidden @2xl:table-cell">
@@ -204,6 +281,7 @@ export function BudgetVsActual({
                       v={variance(line, kind, currency)}
                       currency={currency}
                       locale={locale}
+                      m={m}
                     />
                   </TableCell>
                 </TableRow>
@@ -212,10 +290,12 @@ export function BudgetVsActual({
             <TableFooter>
               <TableRow>
                 <TableHead scope="row" className="text-fg">
-                  Total
+                  {m.total}
                   <span className="block text-sm font-regular whitespace-normal text-fg-muted @xl:hidden">
-                    <Money amount={summary.actual} currency={currency} locale={locale} /> of{' '}
-                    <Money amount={summary.budget} currency={currency} locale={locale} />
+                    {m.actualOfBudget(
+                      <Money amount={summary.actual} currency={currency} locale={locale} />,
+                      <Money amount={summary.budget} currency={currency} locale={locale} />,
+                    )}
                   </span>
                 </TableHead>
                 <TableCell className="hidden @2xl:table-cell" />
@@ -231,7 +311,7 @@ export function BudgetVsActual({
                   />
                 </TableCell>
                 <TableCell align="end">
-                  <VarianceCell v={summary.variance} currency={currency} locale={locale} />
+                  <VarianceCell v={summary.variance} currency={currency} locale={locale} m={m} />
                 </TableCell>
               </TableRow>
             </TableFooter>

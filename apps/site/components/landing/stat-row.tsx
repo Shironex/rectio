@@ -18,7 +18,7 @@ export function StatRow({ kit }: { kit: KitFacts }) {
   ];
   return (
     <div className="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-16">
-      <p className="site-reveal font-display text-2xl font-regular text-pretty text-fg md:text-3xl lg:col-span-5">
+      <p className="site-reveal font-display text-2xl font-regular text-balance text-fg md:text-3xl lg:col-span-5">
         Built for the screens where a wrong sign costs money:{' '}
         <span className="font-heading">expense reports, invoices, ledgers and approvals.</span>
       </p>

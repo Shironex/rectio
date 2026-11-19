@@ -111,14 +111,16 @@ export function Bench() {
         )}
         <Tabs.List
           aria-label="Live blocks"
-          className="grid grid-cols-2 gap-x-6 gap-y-2 border-b border-line sm:grid-cols-4"
+          className="grid grid-cols-2 gap-x-2 gap-y-2 border-b border-line sm:grid-cols-4"
         >
           {TABS.map((t) => (
             <Tabs.Tab
               key={t.value}
               value={t.value}
               className={cn(
-                'group relative flex cursor-pointer flex-col items-start gap-1 pt-2 pb-4 text-start',
+                // A real tab: the open one sits on a raised surface; the others light up on hover.
+                'group relative flex cursor-pointer flex-col items-start gap-1 rounded-t-control px-3 pt-3 pb-4 text-start',
+                'border border-b-0 border-line transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover data-active:border-line-strong data-active:bg-surface',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
               )}
             >

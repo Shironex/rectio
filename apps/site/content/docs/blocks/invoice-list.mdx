@@ -71,9 +71,46 @@ tab shows the preview's usage. The block's own source comes with the license.
     },
     onCreateInvoice: { type: '() => void', description: 'Shows a New invoice button.' },
     title: { type: 'string', default: "'Invoices'" },
+    messages: {
+      type: 'Partial<InvoiceListMessages>',
+      description: "The block's words. Pass the keys you change; see `INVOICE_LIST_MESSAGES`.",
+    },
+    emptyAction: {
+      type: 'ReactNode',
+      description:
+        'A button that creates the first invoice.. Shown in the empty state under its note.',
+    },
     className: { type: 'string' },
   }}
 />
+
+## Messages
+
+Every word the block prints, including what screen readers hear, comes from `messages`. The full
+English defaults are exported as `INVOICE_LIST_MESSAGES`, typed as `InvoiceListMessages`. Pass only the keys you
+change; a message that counts or names a figure is a small function, so a language can order the
+words and choose its plural form with `plural()`.
+
+```tsx
+import { plural } from '@rectio/blocks';
+
+const invoices = (count: number) =>
+  plural(count, { one: 'faktura', few: 'faktury', many: 'faktur', other: 'faktury' }, 'pl-PL');
+
+<InvoiceList
+  invoices={rows}
+  currency="PLN"
+  locale="pl-PL"
+  messages={{
+    title: 'Faktury',
+    newInvoice: 'Nowa faktura',
+    description: (period, count) => `${period}, ${count} ${invoices(count)}`,
+    dueText: (due) => (due.kind === 'today' ? 'Termin dzisiaj' : `Termin za ${due.days} dni`),
+  }}
+/>;
+```
+
+A complete set typed as `InvoiceListMessages` fails to compile when a key is missing.
 
 ## Logic
 
