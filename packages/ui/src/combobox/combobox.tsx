@@ -111,6 +111,8 @@ export function Combobox<Value>({
 
   return (
     <BaseCombobox.Root<Value>
+      // The first match is highlighted as the user types, so Enter always has a visible target.
+      autoHighlight
       {...props}
       locale={locale}
       items={shown}
