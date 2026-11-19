@@ -320,6 +320,7 @@ export default defineRegistry({
             'lib/block-panel.tsx',
             'lib/chart.tsx',
             'lib/choice-select.tsx',
+            'lib/empty-note.tsx',
             'lib/figures.tsx',
             'lib/segmented.tsx',
             'lib/state-badge.tsx',
