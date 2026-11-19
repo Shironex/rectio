@@ -41,6 +41,9 @@ const BLOCKS = [
   'vendors-list',
 ] as const;
 
+/** The SaaS blocks, shot as `saas-<block>-...`; `shoot:blocks <n> saas` takes only these. */
+const SAAS_BLOCKS = ['sign-in', 'team-members'] as const;
+
 const wanted = (name: string) => only === undefined || name.includes(only);
 
 /** Wait until the view has drawn and no finite animation is running. */
@@ -148,6 +151,53 @@ try {
       width: 1180,
     });
     await page?.close();
+  }
+
+  for (const block of SAAS_BLOCKS) {
+    for (const theme of THEMES) {
+      for (const mode of MODES) {
+        const locale = mode === 'dark' ? 'pl-PL' : 'en-GB';
+        const page = await shoot(
+          browser,
+          base,
+          `saas-${block}-${theme}-${mode}-${locale}`,
+          `block=${block}&theme=${theme}&mode=${mode}&locale=${locale}`,
+          { width: 1180 },
+        );
+        await page?.close();
+      }
+    }
+    const empty = await shoot(browser, base, `saas-${block}-empty`, `block=${block}&empty=1`, {
+      width: 1180,
+    });
+    await empty?.close();
+    const phone = await shoot(
+      browser,
+      base,
+      `saas-${block}-phone-ledger-dark`,
+      `block=${block}&theme=ledger&mode=dark`,
+      { width: 390, phone: true },
+    );
+    if (phone !== null) {
+      await phone.setViewportSize({ width: 390, height: 844 });
+      const overflow = await phone.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      );
+      const target = await smallestTouchTarget(phone);
+      console.log(`saas ${block}: phone overflow ${String(overflow)}px, smallest target`, target);
+      await phone.close();
+    }
+  }
+  for (const theme of THEMES) {
+    for (const mode of MODES) {
+      const page = await shoot(
+        browser,
+        base,
+        `saas-all-${theme}-${mode}`,
+        `set=saas&theme=${theme}&mode=${mode}`,
+      );
+      await page?.close();
+    }
   }
 
   const compact = await shoot(browser, base, 'dashboard-compact', 'density=compact&locale=pl-PL');

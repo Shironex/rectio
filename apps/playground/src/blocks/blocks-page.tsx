@@ -16,6 +16,7 @@ import { kpiRowPl } from './pl/kpi-row';
 import { ledgerPl } from './pl/ledger';
 import { REPORTING_BLOCKS, isReportingBlock, renderReporting } from './reporting';
 import { OPERATIONS_BLOCKS, isOperationsBlock, renderOperations } from './operations';
+import { SaasPage, saasBlockFrom } from './saas/saas-page';
 
 /** The one action each block offers in its empty state, in the shown language. */
 function emptyAction(name: BlockName, locale: data.Locale): ReactNode {
@@ -283,6 +284,7 @@ export function BlocksPage({
   motion: boolean;
 }) {
   const { locale, block, compact, empty } = readParams(window.location.search);
+  const saas = saasBlockFrom(window.location.search);
   const blocks: Blocks = motion ? moving : plain;
   const canvas = usePageCanvas(theme, mode);
   return (
@@ -293,7 +295,9 @@ export function BlocksPage({
       density={compact ? 'compact' : 'comfortable'}
       className="min-h-dvh bg-surface-canvas"
     >
-      {block !== undefined ? (
+      {saas !== null ? (
+        <SaasPage selection={saas} motion={motion} empty={empty} locale={locale.id} />
+      ) : block !== undefined ? (
         <main className="mx-auto max-w-5xl px-4 py-8 sm:px-8">
           {renderBlock(block, blocks, locale, empty)}
         </main>
