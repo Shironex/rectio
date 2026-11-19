@@ -54,3 +54,19 @@ export {
   type FileItemProps,
   type FileListProps,
 } from './file-upload/file-upload';
+export {
+  ComboboxContent,
+  ComboboxItem,
+  type ComboboxContentProps,
+  type ComboboxItemProps,
+} from './combobox/combobox';
+export {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectInput,
+  MultiSelectItem,
+  type MultiSelectContentProps,
+  type MultiSelectInputProps,
+  type MultiSelectItemProps,
+  type MultiSelectProps,
+} from './multi-select/multi-select';
