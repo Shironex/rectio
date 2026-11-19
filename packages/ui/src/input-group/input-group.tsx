@@ -92,6 +92,10 @@ export function InputGroupAddon({ className, align = 'start', ...props }: InputG
         'flex shrink-0 items-center gap-1 text-base text-fg-subtle select-none',
         'data-[align=start]:has-[button]:-ms-1.5 data-[align=end]:has-[button]:-me-1.5',
         '[&_svg]:size-4 [&_svg]:shrink-0',
+        // A text addon ("https://", "EUR") is fenced off by a hairline, so it never reads as typed.
+        'not-has-[svg]:self-stretch not-has-[svg]:border-line',
+        'data-[align=start]:not-has-[svg]:border-e data-[align=start]:not-has-[svg]:pe-2.5',
+        'data-[align=end]:not-has-[svg]:border-s data-[align=end]:not-has-[svg]:ps-2.5',
         className,
       )}
       {...props}
