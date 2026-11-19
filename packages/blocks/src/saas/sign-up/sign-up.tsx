@@ -1,4 +1,4 @@
-import { Checkbox, Field, FieldDescription, FieldError, FieldLabel, Input } from '@rectio/ui';
+import { Checkbox, Field, FieldError, FieldLabel, Input } from '@rectio/ui';
 import { useId, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
@@ -10,6 +10,7 @@ import {
   PasswordInput,
   type LinkTarget,
 } from '../lib/auth';
+import { focusFirstInvalid } from '../lib/focus';
 import { hasErrors } from '../lib/saas';
 import { PasswordRules } from '../lib/password-rules';
 import { signUpErrors, type SignUpErrors, type SignUpValues } from './sign-up.logic';
@@ -36,6 +37,8 @@ export interface SignUpProps {
   defaultEmail?: string;
   /** Your mark or product name, above the heading. */
   brand?: ReactNode;
+  /** A brand panel beside the form on wide containers; it folds away on narrow ones. */
+  aside?: ReactNode;
   title?: ReactNode;
   description?: ReactNode;
   className?: string;
@@ -68,18 +71,20 @@ export function SignUp({
     acceptedTerms: false,
   });
   const [tried, setTried] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
   // The address that was refused as taken; editing it away clears the message.
   const [takenEmail, setTakenEmail] = useState(defaultEmail.trim());
   const options = { minLength: minPasswordLength, requireTerms: terms !== undefined };
   const errors: SignUpErrors = tried ? signUpErrors(values, options) : {};
   const showTaken = emailTaken && errors.email === undefined && takenEmail === values.email.trim();
-  const showRules = passwordFocused || values.password !== '';
 
-  const submit = (event: SyntheticEvent) => {
+  const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTried(true);
-    if (pending || hasErrors(signUpErrors(values, options))) return;
+    if (hasErrors(signUpErrors(values, options))) {
+      focusFirstInvalid(event.currentTarget);
+      return;
+    }
+    if (pending) return;
     setTakenEmail(values.email.trim());
     onSubmit({ ...values, name: values.name.trim(), email: values.email.trim() });
   };
@@ -141,7 +146,7 @@ export function SignUp({
           {errors.email !== undefined && <FieldError>{errors.email}</FieldError>}
           {showTaken && (
             <FieldError>
-              An account with this email already exists.
+              That email has an account.
               {signIn !== undefined && (
                 <>
                   {' '}
@@ -159,27 +164,15 @@ export function SignUp({
           <PasswordInput
             name="password"
             autoComplete="new-password"
-            aria-describedby={showRules ? rulesId : undefined}
+            aria-describedby={rulesId}
             value={values.password}
-            onFocus={() => {
-              setPasswordFocused(true);
-            }}
-            onBlur={() => {
-              setPasswordFocused(false);
-            }}
             onChange={(event) => {
               setValues({ ...values, password: event.target.value });
             }}
           />
           {errors.password !== undefined && <FieldError>{errors.password}</FieldError>}
-          {showRules ? (
-            <PasswordRules id={rulesId} password={values.password} minLength={minPasswordLength} />
-          ) : (
-            // The one-line rule stays in view, so an error elsewhere never hides what is asked.
-            <FieldDescription>
-              At least {minPasswordLength} characters, mixed case, a number and a symbol.
-            </FieldDescription>
-          )}
+          {/* The same checklist as a reset, in view from the start, so the rules never surprise. */}
+          <PasswordRules id={rulesId} password={values.password} minLength={minPasswordLength} />
         </Field>
 
         {terms !== undefined && (

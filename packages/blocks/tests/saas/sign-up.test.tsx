@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -57,11 +57,9 @@ describe('SignUp', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('could not reach');
   });
 
-  it('shows the rules only once the password is in use', async () => {
+  it('shows the password rules from the start', () => {
     render(<SignUp onSubmit={vi.fn()} />);
-    expect(screen.queryByText(/Upper and lower case letters/)).not.toBeInTheDocument();
-    await userEvent.click(screen.getByLabelText('Password'));
-    expect(screen.getByText(/Upper and lower case letters/)).toBeInTheDocument();
+    expect(screen.getByText(/Upper and lower case letters/)).toHaveTextContent('not met yet');
   });
 
   it('says a taken email under the field with a way to sign in, until it changes', async () => {
@@ -71,18 +69,31 @@ describe('SignUp', () => {
     );
     const email = screen.getByLabelText('Work email');
     expect(email).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByText(/already exists/)).toBeInTheDocument();
+    expect(screen.getByText(/has an account/)).toBeInTheDocument();
     // The first "Sign in" is the one under the field; the footer holds the second.
     const [inline] = screen.getAllByRole('button', { name: 'Sign in' });
     if (inline === undefined) throw new Error('No sign-in link under the email field');
     await userEvent.click(inline);
     expect(signIn).toHaveBeenCalled();
     await userEvent.type(email, 'x');
-    expect(screen.queryByText(/already exists/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/has an account/)).not.toBeInTheDocument();
   });
 
-  it('keeps the length rule in one line while the checklist is closed', () => {
-    render(<SignUp onSubmit={vi.fn()} emailTaken defaultEmail="margot@fernhill.io" />);
-    expect(screen.getByText(/At least 12 characters, mixed case/)).toBeInTheDocument();
+  it('points the password at both its rules and its error', async () => {
+    render(<SignUp onSubmit={vi.fn()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    const password = screen.getByLabelText('Password');
+    const ids = (password.getAttribute('aria-describedby') ?? '').split(' ');
+    const described = ids.map((id) => document.getElementById(id)?.textContent ?? '').join(' ');
+    expect(described).toContain('Choose a password.');
+    expect(described).toContain('Upper and lower case letters');
+  });
+
+  it('moves focus to the first invalid field after a refused submit', async () => {
+    render(<SignUp onSubmit={vi.fn()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    await waitFor(() => {
+      expect(screen.getByLabelText('Full name')).toHaveFocus();
+    });
   });
 });
