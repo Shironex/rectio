@@ -3,6 +3,8 @@
 import {
   ArrowRightIcon,
   BankIcon,
+  CaretDownIcon,
+  CaretUpIcon,
   ClockIcon,
   FilePlusIcon,
   FileTextIcon,
@@ -21,6 +23,7 @@ import {
   SelectTrigger,
   Timeline,
   TimelineItem,
+  cn,
 } from '@rectio/ui';
 import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
@@ -60,7 +63,7 @@ const TONE: Record<AttentionRow['tone'], string> = {
 const plural = (n: number, one: string, many: string) => `${String(n)} ${n === 1 ? one : many}`;
 
 /** What needs a person today: overdue money, decisions waiting, lines to match, drafts to send. */
-function NeedsAttention() {
+function NeedsAttention({ className }: { className?: string }) {
   const { expenses } = useAppData();
   const pending = expenses.requests.filter((r) => r.status === 'pending');
   const flagged = pending.filter((r) => (r.flags?.length ?? 0) > 0).length;
@@ -120,7 +123,12 @@ function NeedsAttention() {
     },
   ];
   return (
-    <BlockPanel title="Needs attention" description="Today, 19 November" bodyClassName="px-0 pb-2">
+    <BlockPanel
+      title="Needs attention"
+      description="Today, 19 November"
+      bodyClassName="px-0 pb-2"
+      {...(className === undefined ? {} : { className })}
+    >
       <ul className="flex flex-col">
         {rows.map((row) => (
           <li key={row.id} className="border-t border-line first:border-t-0">
@@ -227,23 +235,25 @@ function OverviewLoading() {
   return (
     <LoadingRegion label="Loading the overview">
       <LoadingPanel kind="figures" />
-      <div className="grid gap-6 lg:grid-cols-3">
-        <LoadingPanel kind="chart" className="lg:col-span-2" />
-        <LoadingPanel kind="list" rows={4} />
-      </div>
-      <div className="grid gap-6 lg:grid-cols-2">
-        <LoadingPanel kind="table" rows={5} />
-        <LoadingPanel kind="table" rows={5} />
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-start">
+        <div className="flex flex-col gap-6 lg:col-span-2">
+          <LoadingPanel kind="chart" />
+          <LoadingPanel kind="table" rows={6} columns={2} className="max-lg:hidden" />
+        </div>
+        <div className="flex flex-col gap-6">
+          <LoadingPanel kind="list" rows={4} />
+          <LoadingPanel kind="chart" />
+        </div>
       </div>
     </LoadingRegion>
   );
 }
 
-/** The dashboard: key figures for the period, cash, receivables, spend, and what needs doing. */
 export function OverviewPage() {
   const state = usePageState();
   const { openNewInvoice } = useAppData();
   const [period, setPeriod] = useState<Period>('month');
+  const [more, setMore] = useState(false);
   const figures = PERIOD_FIGURES[period];
 
   const actions = (
@@ -255,7 +265,7 @@ export function OverviewPage() {
           if (value !== null) setPeriod(value);
         }}
       >
-        <SelectTrigger aria-label="Period" className="sm:w-44" />
+        <SelectTrigger aria-label="Period" className="sm:w-44" disabled={state === 'empty'} />
         <SelectContent>
           {PERIODS.map((p) => (
             <SelectItem key={p.value} value={p.value}>
@@ -264,10 +274,13 @@ export function OverviewPage() {
           ))}
         </SelectContent>
       </Select>
-      <Button onClick={openNewInvoice}>
-        <FilePlusIcon aria-hidden weight="bold" className="size-4" />
-        New invoice
-      </Button>
+      {/* An empty page offers its first step in the panel, so the header does not repeat it. */}
+      {state !== 'empty' && (
+        <Button onClick={openNewInvoice}>
+          <FilePlusIcon aria-hidden weight="bold" className="size-4" />
+          New invoice
+        </Button>
+      )}
     </>
   );
 
@@ -301,29 +314,56 @@ export function OverviewPage() {
             comparison={figures.comparison}
             label={`Key figures, ${figures.label}`}
           />
-          <div className="grid gap-6 lg:grid-cols-3">
-            <CashFlowChart
-              points={CASH_FLOW}
-              currency={CURRENCY}
-              locale={LOCALE}
-              title="Cash flow"
-              className="lg:col-span-2"
-            />
-            <NeedsAttention />
-          </div>
-          <div className="grid gap-6 lg:grid-cols-2">
-            <ArAging receivables={RECEIVABLES} currency={CURRENCY} locale={LOCALE} today={TODAY} />
-            <BudgetVsActual
-              lines={figures.budget}
-              currency={CURRENCY}
-              locale={LOCALE}
-              title="Spend against budget"
-              period={figures.label}
-            />
-          </div>
-          <div className="grid items-start gap-6 lg:grid-cols-5">
-            <RecentActivity className="lg:col-span-3" />
-            <ComingUp className="lg:col-span-2" />
+          {/*
+            Two independent columns on a wide screen, so a short panel never stretches to match its
+            neighbour. On a phone the columns dissolve into one list ordered by urgency, and the
+            secondary panels fold away behind one button.
+          */}
+          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-start">
+            <div className="flex flex-col gap-6 max-lg:contents lg:col-span-2">
+              <CashFlowChart
+                points={CASH_FLOW}
+                currency={CURRENCY}
+                locale={LOCALE}
+                title="Cash flow"
+                className="max-lg:order-2"
+              />
+              <BudgetVsActual
+                lines={figures.budget}
+                currency={CURRENCY}
+                locale={LOCALE}
+                title="Spend against budget"
+                period={figures.label}
+                className={cn('max-lg:order-5', !more && 'max-lg:hidden')}
+              />
+              <RecentActivity className={cn('max-lg:order-7', !more && 'max-lg:hidden')} />
+            </div>
+            <div className="flex flex-col gap-6 max-lg:contents">
+              <NeedsAttention className="max-lg:order-1" />
+              <ArAging
+                receivables={RECEIVABLES}
+                currency={CURRENCY}
+                locale={LOCALE}
+                today={TODAY}
+                className="max-lg:order-3"
+              />
+              <ComingUp className={cn('max-lg:order-6', !more && 'max-lg:hidden')} />
+            </div>
+            <Button
+              variant="secondary"
+              aria-expanded={more}
+              className="max-lg:order-4 lg:hidden"
+              onClick={() => {
+                setMore((open) => !open);
+              }}
+            >
+              {more ? (
+                <CaretUpIcon aria-hidden weight="bold" className="size-4" />
+              ) : (
+                <CaretDownIcon aria-hidden weight="bold" className="size-4" />
+              )}
+              {more ? 'Show less' : 'Budget, deadlines and activity'}
+            </Button>
           </div>
         </>
       )}
