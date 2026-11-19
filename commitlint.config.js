@@ -10,6 +10,7 @@ export default {
         'ui',
         'playground',
         'motion',
+        'blocks',
         'registry',
         'cli',
         'mcp',

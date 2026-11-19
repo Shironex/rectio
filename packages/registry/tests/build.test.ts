@@ -250,21 +250,39 @@ describe('the rectio registry', () => {
   it('publishes every component, the tokens and one theme item per theme', () => {
     expect([...byName.keys()].sort()).toEqual([
       'amount-input',
+      'ar-aging',
       'badge',
+      'blocks-core',
+      'budget-vs-actual',
       'button',
       'calendar',
+      'cash-flow',
       'checkbox',
       'cn',
       'data-table',
       'date-picker',
       'dialog',
+      'expense-approval',
       'field',
+      'invoice-detail',
+      'invoice-list',
+      'kpi-row',
+      'ledger',
       'money',
       'motion-amount-input',
+      'motion-ar-aging',
+      'motion-blocks-core',
+      'motion-budget-vs-actual',
       'motion-button',
+      'motion-cash-flow',
       'motion-core',
       'motion-data-table',
       'motion-dialog',
+      'motion-expense-approval',
+      'motion-invoice-detail',
+      'motion-invoice-list',
+      'motion-kpi-row',
+      'motion-ledger',
       'motion-money',
       'motion-select',
       'motion-toast',
@@ -334,6 +352,41 @@ describe('the rectio registry', () => {
       for (const dep of item.registryDependencies)
         expect(byName.get(dep)?.tier, `${item.name} -> ${dep}`).toBe('free');
     }
+  });
+
+  it('publishes every finance block as a pro block with its motion twin', () => {
+    const blocks = [
+      'ar-aging',
+      'budget-vs-actual',
+      'cash-flow',
+      'expense-approval',
+      'invoice-detail',
+      'invoice-list',
+      'kpi-row',
+      'ledger',
+    ];
+    for (const name of blocks) {
+      for (const item of [byName.get(name), byName.get(`motion-${name}`)]) {
+        expect(item, name).toBeDefined();
+        expect(item?.tier, item?.name).toBe('pro');
+        expect(item?.type, item?.name).toBe('block');
+        expect(item?.version, item?.name).toBe('0.1.0');
+      }
+      // The plain block rests on the shared core; its twin on the plain block and the motion core.
+      expect(byName.get(name)?.registryDependencies).toContain('blocks-core');
+      expect(byName.get(`motion-${name}`)?.registryDependencies).toEqual(
+        expect.arrayContaining([name, 'motion-blocks-core']),
+      );
+    }
+    // npm dependencies come from the imports: recharts only where a chart is drawn.
+    expect(byName.get('cash-flow')?.dependencies).toHaveProperty('recharts');
+    expect(byName.get('ledger')?.dependencies).not.toHaveProperty('recharts');
+    // Imports of @rectio/motion became registry dependencies on the motion add-on items.
+    expect(byName.get('motion-blocks-core')?.registryDependencies).toContain('motion-core');
+    const list = byName.get('invoice-list')?.files.find((f) => f.path.endsWith('invoice-list.tsx'));
+    expect(list?.target).toBe('@blocks/finance/invoice-list.tsx');
+    expect(list?.content).toContain("from '@registry/lib/finance/finance'");
+    expect(list?.content).not.toMatch(/@rectio\/(ui|motion)/);
   });
 
   it('writes the pro motion items under pro/ only', () => {

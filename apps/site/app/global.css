@@ -9,6 +9,7 @@
 /* Components live in other packages: tell Tailwind to read their class names too. */
 @source '../../../packages/ui/src';
 @source '../../../packages/motion/src';
+@source '../../../packages/blocks/src';
 
 html {
   scrollbar-gutter: stable;

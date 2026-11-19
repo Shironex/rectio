@@ -76,3 +76,60 @@ export function formatOklch({ l, c, h, alpha = 1 }: Oklch): string {
   const base = `oklch(${round(l * 100, 2)}% ${round(c, 4)} ${round(h, 2)}`;
   return alpha < 1 ? `${base} / ${round(alpha, 3)})` : `${base})`;
 }
+
+/** A colour vision deficiency, simulated at full severity. */
+export type ColorVision = 'protan' | 'deutan' | 'tritan';
+
+/**
+ * Machado, Oliveira and Fernandes (2009) matrices at severity 1.0, applied in linear sRGB: what a
+ * person with no L, M or S cones sees.
+ */
+const CVD: Record<ColorVision, readonly (readonly [number, number, number])[]> = {
+  protan: [
+    [0.152286, 1.052583, -0.204868],
+    [0.114503, 0.786281, 0.099216],
+    [-0.003882, -0.048116, 1.051998],
+  ],
+  deutan: [
+    [0.367322, 0.860646, -0.227968],
+    [0.280085, 0.672501, 0.047413],
+    [-0.01182, 0.04294, 0.968881],
+  ],
+  tritan: [
+    [1.255528, -0.076749, -0.178779],
+    [-0.078411, 0.930809, 0.147602],
+    [0.004733, 0.691367, 0.3039],
+  ],
+};
+
+/** Linear sRGB to OKLab [L, a, b]. */
+function linearSrgbToOklab([r, g, b]: Rgb): Rgb {
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
+}
+
+/** The colour as OKLab, optionally as seen with a colour vision deficiency. */
+function seenAs(color: Oklch, vision?: ColorVision): Rgb {
+  const rgb = oklchToLinearSrgb(color).map(clamp01) as unknown as Rgb;
+  if (vision === undefined) return linearSrgbToOklab(rgb);
+  const seen = CVD[vision].map((row) =>
+    Math.max(0, row[0] * rgb[0] + row[1] * rgb[1] + row[2] * rgb[2]),
+  ) as unknown as Rgb;
+  return linearSrgbToOklab(seen);
+}
+
+/**
+ * Euclidean distance in OKLab (deltaE OK), optionally after simulating a colour vision deficiency.
+ * About 0.02 is a just noticeable difference; chart marks that sit side by side want far more.
+ */
+export function difference(a: Oklch, b: Oklch, vision?: ColorVision): number {
+  const [l1, a1, b1] = seenAs(a, vision);
+  const [l2, a2, b2] = seenAs(b, vision);
+  return Math.hypot(l1 - l2, a1 - a2, b1 - b2);
+}

@@ -1,0 +1,76 @@
+---
+title: Invoice detail
+description: 'One invoice: parties, lines, VAT per rate, payments received and the balance due.'
+pro: true
+---
+
+import InvoiceDetailDemo from '@/demos/invoice-detail';
+import InvoiceDetailMotionDemo from '@/demos/invoice-detail.motion';
+
+<Preview
+  name="invoice-detail"
+  plain={<InvoiceDetailDemo />}
+  motion={<InvoiceDetailMotionDemo />}
+  importLine="import { InvoiceDetail } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
+writes nothing.
+
+```sh
+pnpm dlx rectio add invoice-detail
+```
+
+The motion variant is `motion-invoice-detail`. It installs the plain block too and changes only how the
+block enters.
+
+## Usage
+
+Totals follow invoice practice: each line's net is rounded to the cent, VAT is computed once per
+rate on the summed nets and rounded once, so the VAT lines match what a tax authority recomputes.
+All sums run in minor units.
+
+The block is data-agnostic: it takes plain records and calls you back; it never fetches. The Code
+tab shows the preview's usage. The block's own source comes with the license.
+
+## Props
+
+<TypeTable
+  type={{
+    invoice: {
+      type: 'InvoiceDocument',
+      description:
+        'number, status, dates, seller and buyer, lines (quantity, unitPrice, taxRate), payments and notes.',
+    },
+    currency: {
+      type: 'string',
+      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+    },
+    locale: {
+      type: 'string',
+      default: 'the runtime locale',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+    },
+    today: { type: 'Date', default: 'new Date()' },
+    onRecordPayment: { type: '() => void', description: 'Shown while a balance is open.' },
+    onSend: { type: '() => void', description: 'Shown for drafts.' },
+    onDownload: { type: '() => void', description: 'Shows a PDF button.' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+The money logic is exported and tested on its own, so a server can compute the same figures:
+`documentTotals(lines, payments, currency)` and `paymentState(invoice, totals, today)`.
+
+## Accessibility
+
+- The totals are a `dl`; the balance due is its own row, in words as well as weight.
+- On narrow widths quantity, price and VAT fold under each line's description instead of scrolling.
+- Every figure is in tabular numerals with a true minus sign; negatives carry the sign as well as colour.
+- Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity, plays once on first view and renders the plain block under reduced motion.

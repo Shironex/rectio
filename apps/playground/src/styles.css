@@ -5,6 +5,7 @@
 /* Components live in another package: tell Tailwind to read their class names too. */
 @source '../../../packages/ui/src';
 @source '../../../packages/motion/src';
+@source '../../../packages/blocks/src';
 
 body {
   margin: 0;

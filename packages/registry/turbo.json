@@ -6,7 +6,11 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/packages/ui/src/**",
-        "$TURBO_ROOT$/packages/ui/package.json"
+        "$TURBO_ROOT$/packages/ui/package.json",
+        "$TURBO_ROOT$/packages/motion/src/**",
+        "$TURBO_ROOT$/packages/motion/package.json",
+        "$TURBO_ROOT$/packages/blocks/src/**",
+        "$TURBO_ROOT$/packages/blocks/package.json"
       ]
     }
   }

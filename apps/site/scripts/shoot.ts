@@ -27,6 +27,9 @@ const PAGES = [
   { name: 'docs-theming', path: '/docs/theming' },
   { name: 'docs-button', path: '/docs/components/button' },
   { name: 'docs-data-table', path: '/docs/components/data-table' },
+  { name: 'docs-blocks', path: '/docs/blocks' },
+  { name: 'docs-invoice-list', path: '/docs/blocks/invoice-list' },
+  { name: 'docs-cash-flow', path: '/docs/blocks/cash-flow' },
 ] as const;
 const VIEWPORTS = [
   { name: 'desktop', width: 1440, height: 900, mobile: false },

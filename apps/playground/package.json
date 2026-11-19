@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
+    "@rectio/blocks": "workspace:*",
     "@rectio/motion": "workspace:*",
     "@rectio/tokens": "workspace:*",
     "@rectio/ui": "workspace:*",
@@ -28,6 +29,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
     "shoot": "node scripts/shoot.ts",
-    "shoot:motion": "node scripts/shoot-motion.ts"
+    "shoot:motion": "node scripts/shoot-motion.ts",
+    "shoot:blocks": "node scripts/shoot-blocks.ts"
   }
 }
