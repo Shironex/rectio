@@ -145,7 +145,7 @@ export function SignUp({
           />
           {errors.email !== undefined && <FieldError>{errors.email}</FieldError>}
           {showTaken && (
-            <FieldError>
+            <FieldError className="pb-1">
               That email has an account.
               {signIn !== undefined && (
                 <>
@@ -172,7 +172,13 @@ export function SignUp({
           />
           {errors.password !== undefined && <FieldError>{errors.password}</FieldError>}
           {/* The same checklist as a reset, in view from the start, so the rules never surprise. */}
-          <PasswordRules id={rulesId} password={values.password} minLength={minPasswordLength} />
+          <div id={rulesId} className="flex flex-col gap-1.5">
+            {/* Before the first character, a lead line makes the list read as instructions. */}
+            {values.password === '' && (
+              <p className="text-sm font-medium text-fg">Your password needs:</p>
+            )}
+            <PasswordRules password={values.password} minLength={minPasswordLength} />
+          </div>
         </Field>
 
         {terms !== undefined && (

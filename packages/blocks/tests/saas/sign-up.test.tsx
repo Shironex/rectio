@@ -96,4 +96,11 @@ describe('SignUp', () => {
       expect(screen.getByLabelText('Full name')).toHaveFocus();
     });
   });
+
+  it('marks the terms checkbox when the terms are not accepted', async () => {
+    render(<SignUp onSubmit={vi.fn()} terms="/terms" />);
+    await userEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(screen.getByText('Accept the terms to create your account.')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox')).toHaveAttribute('aria-invalid', 'true');
+  });
 });
