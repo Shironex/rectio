@@ -156,10 +156,10 @@ function Loaders({ ui }: { ui: Moving }) {
       <div className="grid gap-4 md:grid-cols-5">
         {SPINNERS.map(({ variant, note }) => (
           <Tile key={variant} label={variant}>
-            <div className="flex items-end justify-center gap-5 py-3">
-              <Spinner variant={variant} size="sm" label={`Loading, ${variant}`} />
-              <Spinner variant={variant} size="md" label={`Loading, ${variant}`} />
-              <Spinner variant={variant} size="lg" label={`Loading, ${variant}`} />
+            <div className="flex items-end justify-center gap-4 py-3">
+              {(['sm', 'md', 'lg', 'xl'] as const).map((size) => (
+                <Spinner key={size} variant={variant} size={size} label={`Loading, ${variant}`} />
+              ))}
             </div>
             <p className="text-center text-sm text-fg-muted">{note}</p>
           </Tile>
@@ -175,9 +175,6 @@ function Loaders({ ui }: { ui: Moving }) {
           <div className="flex flex-wrap items-center gap-3">
             <Button loading={save.loading} onClick={() => void save.run()}>
               Save draft
-            </Button>
-            <Button variant="secondary" loading>
-              Export
             </Button>
           </div>
           <p className="text-sm text-fg-muted">
@@ -315,9 +312,7 @@ function ProgressGroup({ ui }: { ui: Moving }) {
             size="lg"
             tone="warning"
             label="Seats used"
-            showValue
-            format={{ style: 'decimal' }}
-            description="3 seats left on the Team plan"
+            description="7 of 10 seats, 3 left on the Team plan"
           />
         </Tile>
         <Tile label="Ring">
@@ -335,7 +330,7 @@ function ProgressGroup({ ui }: { ui: Moving }) {
             </ui.ProgressCircle>
             <div className="flex flex-col items-center gap-3">
               <ui.ProgressCircle value={40} size="md" label="Sync" />
-              <ui.ProgressCircle value={null} size="sm" label="Waiting" />
+              <ui.ProgressCircle value={null} size="sm" label="Waiting" showLabel />
             </div>
           </div>
         </Tile>
@@ -441,13 +436,17 @@ function Messages({ ui }: { ui: Moving }) {
       title="Alerts and banners"
       note="A banner speaks for the whole app, one at a time. An alert speaks for the part of the page it sits in. The icon and the title carry the tone, never a side stripe."
     >
-      <div className="flex flex-col gap-3 overflow-hidden rounded-panel border border-line">
-        <ui.Banner dismissible action={<a href="#messages">See what changed</a>}>
-          Bulk approvals are here: approve up to 50 expenses in one go.
-        </ui.Banner>
-        <ui.Banner tone="warning" icon={undefined}>
-          Scheduled maintenance on Sunday 16 March, 02:00 to 03:00 CET.
-        </ui.Banner>
+      <div className="grid gap-3 lg:grid-cols-2">
+        <div className="overflow-hidden rounded-panel border border-line">
+          <ui.Banner dismissible action={<a href="#messages">See what changed</a>}>
+            Bulk approvals are here: approve up to 50 expenses in one go.
+          </ui.Banner>
+        </div>
+        <div className="overflow-hidden rounded-panel border border-line">
+          <ui.Banner tone="neutral">
+            Scheduled maintenance on Sunday 16 March, 02:00 to 03:00 CET.
+          </ui.Banner>
+        </div>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="flex flex-col gap-3">
