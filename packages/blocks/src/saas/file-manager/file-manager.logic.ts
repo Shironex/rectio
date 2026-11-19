@@ -1,3 +1,6 @@
+import { resolveLocale } from '../../lib/finance';
+import { collator } from '../lib/saas';
+
 export interface FileEntry {
   id: string;
   name: string;
@@ -98,15 +101,16 @@ export function sortFileEntries(
   entries: readonly FileEntry[],
   key: FileSortKey,
   ascending = key === 'name',
+  locale?: string,
 ): FileEntry[] {
-  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+  const names = collator(resolveLocale(locale), { numeric: true, sensitivity: 'base' });
   const value = (entry: FileEntry): number =>
     key === 'modified' ? entry.modified.getTime() : (entry.size ?? 0);
   return [...entries].sort((a, b) => {
     if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
-    const by = key === 'name' ? collator.compare(a.name, b.name) : value(a) - value(b);
+    const by = key === 'name' ? names.compare(a.name, b.name) : value(a) - value(b);
     // Ties fall back to the name, so the order never shuffles between renders.
-    return (ascending ? by : -by) || collator.compare(a.name, b.name);
+    return (ascending ? by : -by) || names.compare(a.name, b.name);
   });
 }
 

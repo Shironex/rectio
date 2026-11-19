@@ -74,6 +74,14 @@ describe('FileManager', () => {
     expect(onRename).toHaveBeenCalledWith('d', 'Minutes');
   });
 
+  it('returns focus to the row menu when a rename is cancelled', async () => {
+    render(<FileManager path={PATH} entries={ENTRIES} now={NOW} onRename={vi.fn()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Actions for notes' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Rename' }));
+    await userEvent.keyboard('{Escape}');
+    expect(screen.getByRole('button', { name: 'Actions for notes' })).toHaveFocus();
+  });
+
   it('selects several and deletes them after confirming', async () => {
     const onDelete = vi.fn();
     render(<FileManager path={PATH} entries={ENTRIES} now={NOW} onDelete={onDelete} />);

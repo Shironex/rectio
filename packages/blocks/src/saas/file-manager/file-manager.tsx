@@ -12,7 +12,6 @@ import {
   FolderOpenIcon,
   FolderPlusIcon,
   FolderSimpleIcon,
-  HardDrivesIcon,
   ImageIcon,
   PencilSimpleIcon,
   PresentationChartIcon,
@@ -45,7 +44,7 @@ import {
   TableRow,
   cn,
 } from '@rectio/ui';
-import { useState, type DragEvent, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type DragEvent, type KeyboardEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -54,7 +53,8 @@ import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
 import { UsageMeter } from '../lib/meter';
-import { formatBytes, formatDateTime, plural, relativeTime } from '../lib/saas';
+import { useNow } from '../lib/focus';
+import { formatBytes, formatDateTime, isoDateTime, plural, relativeTime } from '../lib/saas';
 import { focusRing } from '../lib/styles';
 import {
   fileEntriesSize,
@@ -111,6 +111,21 @@ const KIND_ICONS: Record<FileKind, Icon> = {
   other: FileIcon,
 };
 
+// Each kind gets its own tint as well as its own shape, from the subtle and strong token pairs.
+const KIND_TINT: Record<FileKind, string> = {
+  folder: 'bg-surface text-accent-strong',
+  document: 'bg-info-subtle text-info-strong',
+  spreadsheet: 'bg-positive-subtle text-positive-strong',
+  presentation: 'bg-warning-subtle text-warning-strong',
+  pdf: 'bg-negative-subtle text-negative-strong',
+  image: 'bg-accent-subtle text-accent-strong',
+  video: 'bg-info-subtle text-info-strong',
+  audio: 'bg-warning-subtle text-warning-strong',
+  archive: 'bg-surface-sunken text-fg-muted',
+  code: 'bg-surface-sunken text-fg-muted',
+  other: 'bg-surface-sunken text-fg-muted',
+};
+
 const KIND_WORDS: Record<FileKind, string> = {
   folder: 'Folder',
   document: 'Document',
@@ -151,12 +166,13 @@ export function FileManager({
   onRename,
   onDownload,
   onDelete,
-  now = new Date(),
+  now: requestedNow,
   locale: requestedLocale,
   title,
   className,
 }: FileManagerProps) {
   const locale = resolveLocale(requestedLocale);
+  const now = useNow(requestedNow);
   const { Button, Rows, Row } = useBlockParts();
   const [sort, setSort] = useState<{ key: FileSortKey; ascending: boolean }>({
     key: 'name',
@@ -168,7 +184,22 @@ export function FileManager({
   const [dropping, setDropping] = useState(false);
 
   const current = path.at(-1);
-  const sorted = sortFileEntries(entries, sort.key, sort.ascending);
+  const sorted = sortFileEntries(entries, sort.key, sort.ascending, locale);
+  // In-place swaps hand focus back: a closed rename to the row's menu, a delete to the table.
+  const tableArea = useRef<HTMLDivElement>(null);
+  const returnFocus = useRef<string | null>(null);
+  const stopRenaming = () => {
+    if (renaming !== null) {
+      returnFocus.current = `[data-file-menu="${CSS.escape(renaming)}"] button`;
+    }
+    setRenaming(null);
+  };
+  useEffect(() => {
+    const selector = returnFocus.current;
+    if (selector === null) return;
+    returnFocus.current = null;
+    tableArea.current?.querySelector<HTMLElement>(selector)?.focus();
+  }, [renaming]);
   // Selection never outlives the entries it points at.
   const chosen = sorted.filter((entry) => selected.has(entry.id));
   const all = sorted.length > 0 && chosen.length === sorted.length;
@@ -390,8 +421,9 @@ export function FileManager({
               does both, so the toolbar only appears to act on a selection. */}
           <div
             className={cn(
-              'flex min-h-(--rx-control-height-md) flex-wrap items-center justify-between gap-3 rounded-control bg-surface-sunken px-3 py-1.5',
-              chosen.length === 0 && '@xl:hidden',
+              'flex min-h-(--rx-control-height-md) items-center justify-between gap-3 rounded-control bg-surface-sunken px-3 py-1.5',
+              // One row while browsing (select all beside sort); room to wrap once actions appear.
+              chosen.length === 0 ? '@xl:hidden' : 'flex-wrap',
             )}
           >
             {selectable ? (
@@ -420,7 +452,7 @@ export function FileManager({
             ) : (
               <span />
             )}
-            <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-5">
+            <div className="flex shrink-0 items-center gap-2 pointer-coarse:gap-3">
               {chosen.length > 0 && onDownload !== undefined && (
                 <Button
                   variant="ghost"
@@ -462,175 +494,178 @@ export function FileManager({
             {chosen.length === 0 ? '' : `${String(chosen.length)} selected`}
           </p>
 
-          <Table>
-            <TableCaption className="sr-only">
-              {current?.name ?? 'Files'}, folders first, sorted by{' '}
-              {SORTS.find((s) => s.value === sort.key)?.label.toLowerCase()}
-            </TableCaption>
-            <TableHeader className="hidden @xl:table-header-group">
-              <TableRow>
-                {selectable && (
-                  <TableHead className="w-0 pe-0">
-                    <span className="flex items-center">
-                      <Checkbox
-                        aria-label="Select everything in this folder"
-                        checked={all}
-                        indeterminate={chosen.length > 0 && !all}
-                        onCheckedChange={selectAll}
-                      />
-                    </span>
+          <div
+            ref={tableArea}
+            tabIndex={-1}
+            className="rounded-control focus-visible:outline-2 focus-visible:outline-focus"
+          >
+            <Table>
+              <TableCaption className="sr-only">
+                {current?.name ?? 'Files'}, folders first, sorted by{' '}
+                {SORTS.find((s) => s.value === sort.key)?.label.toLowerCase()}
+              </TableCaption>
+              <TableHeader className="hidden @xl:table-header-group">
+                <TableRow>
+                  {selectable && (
+                    <TableHead className="w-0 pe-0">
+                      <span className="flex items-center">
+                        <Checkbox
+                          aria-label="Select everything in this folder"
+                          checked={all}
+                          indeterminate={chosen.length > 0 && !all}
+                          onCheckedChange={selectAll}
+                        />
+                      </span>
+                    </TableHead>
+                  )}
+                  <FileSortHead column="name" sort={sort} onSort={sortBy}>
+                    Name
+                  </FileSortHead>
+                  <TableHead className={WIDE}>Owner</TableHead>
+                  <FileSortHead column="modified" sort={sort} onSort={sortBy}>
+                    Modified
+                  </FileSortHead>
+                  <FileSortHead column="size" sort={sort} onSort={sortBy} align="end">
+                    Size
+                  </FileSortHead>
+                  <TableHead className="w-0">
+                    <span className="sr-only">Actions</span>
                   </TableHead>
-                )}
-                <FileSortHead column="name" sort={sort} onSort={sortBy}>
-                  Name
-                </FileSortHead>
-                <TableHead className={WIDE}>Owner</TableHead>
-                <FileSortHead column="modified" sort={sort} onSort={sortBy}>
-                  Modified
-                </FileSortHead>
-                <FileSortHead column="size" sort={sort} onSort={sortBy} align="end">
-                  Size
-                </FileSortHead>
-                <TableHead className="w-0">
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <Rows>
-                {sorted.map((entry) => {
-                  const kind = fileKindOf(entry);
-                  const KindIcon = KIND_ICONS[kind];
-                  const actions = rowActions(entry);
-                  return (
-                    <Row key={entry.id} data-selected={selected.has(entry.id) || undefined}>
-                      {selectable && (
-                        <TableCell className="w-0 pe-0">
-                          <span className="flex items-center">
-                            <Checkbox
-                              aria-label={`Select ${entry.name}`}
-                              checked={selected.has(entry.id)}
-                              onCheckedChange={(checked) => {
-                                toggle(entry.id, checked);
-                              }}
-                            />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <Rows>
+                  {sorted.map((entry) => {
+                    const kind = fileKindOf(entry);
+                    const KindIcon = KIND_ICONS[kind];
+                    const actions = rowActions(entry);
+                    return (
+                      <Row key={entry.id} data-selected={selected.has(entry.id) || undefined}>
+                        {selectable && (
+                          <TableCell className="w-0 pe-0">
+                            <span className="flex items-center">
+                              <Checkbox
+                                aria-label={`Select ${entry.name}`}
+                                checked={selected.has(entry.id)}
+                                onCheckedChange={(checked) => {
+                                  toggle(entry.id, checked);
+                                }}
+                              />
+                            </span>
+                          </TableCell>
+                        )}
+                        <TableCell className="w-full max-w-0">
+                          <span className="flex min-w-0 items-center gap-3">
+                            <span
+                              className={cn(
+                                'inline-flex size-8 shrink-0 items-center justify-center rounded-control',
+                                kind === 'folder' && 'border border-line',
+                                KIND_TINT[kind],
+                              )}
+                            >
+                              <KindIcon
+                                aria-hidden
+                                weight={kind === 'folder' ? 'duotone' : 'regular'}
+                                className="size-4"
+                              />
+                              <span className="sr-only">{KIND_WORDS[kind]}</span>
+                            </span>
+                            {renaming === entry.id && onRename !== undefined ? (
+                              <RenameField
+                                entry={entry}
+                                siblings={entries}
+                                onCancel={stopRenaming}
+                                onSave={(name) => {
+                                  onRename(entry.id, name);
+                                  stopRenaming();
+                                }}
+                              />
+                            ) : (
+                              <span className="flex min-w-0 flex-col">
+                                {onOpen === undefined ? (
+                                  <span
+                                    className="font-medium break-words @xl:truncate"
+                                    title={entry.name}
+                                  >
+                                    {entry.name}
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    title={entry.name}
+                                    onClick={() => {
+                                      onOpen(entry);
+                                    }}
+                                    className={cn(
+                                      'w-fit max-w-full cursor-pointer rounded-badge text-start font-medium break-words @xl:truncate',
+                                      'hover:underline hover:decoration-line-strong hover:underline-offset-4',
+                                      focusRing,
+                                    )}
+                                  >
+                                    {entry.name}
+                                  </button>
+                                )}
+                                {/* Narrow: what the hidden columns said, under the name. */}
+                                <span className="text-sm text-fg-muted @xl:hidden">
+                                  {[
+                                    entry.type === 'file'
+                                      ? formatBytes(entry.size ?? 0, locale)
+                                      : entry.itemCount === undefined
+                                        ? null
+                                        : plural(entry.itemCount, 'item'),
+                                    relativeTime(entry.modified, now, locale),
+                                  ]
+                                    .filter(Boolean)
+                                    .join(', ')}
+                                </span>
+                              </span>
+                            )}
                           </span>
                         </TableCell>
-                      )}
-                      <TableCell className="w-full max-w-0">
-                        <span className="flex min-w-0 items-center gap-3">
-                          <span
-                            className={cn(
-                              'inline-flex size-8 shrink-0 items-center justify-center rounded-control border',
-                              // A low tint for folders: an outline glyph in the accent, not a solid block.
-                              kind === 'folder'
-                                ? 'border-line bg-surface text-accent-strong'
-                                : 'border-line bg-surface-sunken text-fg-muted',
-                            )}
+                        <TableCell className={cn(WIDE, 'whitespace-nowrap text-fg-muted')}>
+                          {entry.owner ?? <span className="text-fg-subtle">No owner</span>}
+                        </TableCell>
+                        <TableCell className="hidden whitespace-nowrap @xl:table-cell">
+                          <time
+                            dateTime={isoDateTime(entry.modified)}
+                            title={formatDateTime(entry.modified, locale)}
+                            className="text-fg-muted"
                           >
-                            <KindIcon
-                              aria-hidden
-                              weight={kind === 'folder' ? 'duotone' : 'regular'}
-                              className="size-4"
-                            />
-                            <span className="sr-only">{KIND_WORDS[kind]}</span>
-                          </span>
-                          {renaming === entry.id && onRename !== undefined ? (
-                            <RenameField
-                              entry={entry}
-                              siblings={entries}
-                              onCancel={() => {
-                                setRenaming(null);
-                              }}
-                              onSave={(name) => {
-                                onRename(entry.id, name);
-                                setRenaming(null);
-                              }}
-                            />
-                          ) : (
-                            <span className="flex min-w-0 flex-col">
-                              {onOpen === undefined ? (
-                                <span className="font-medium break-words @xl:truncate">
-                                  {entry.name}
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    onOpen(entry);
-                                  }}
-                                  className={cn(
-                                    'w-fit max-w-full cursor-pointer rounded-badge text-start font-medium break-words @xl:truncate',
-                                    'hover:underline hover:decoration-line-strong hover:underline-offset-4',
-                                    focusRing,
-                                  )}
-                                >
-                                  {entry.name}
-                                </button>
-                              )}
-                              {/* Narrow: what the hidden columns said, under the name. */}
-                              <span className="text-sm text-fg-muted @xl:hidden">
-                                {[
-                                  entry.type === 'file'
-                                    ? formatBytes(entry.size ?? 0, locale)
-                                    : entry.itemCount === undefined
-                                      ? null
-                                      : plural(entry.itemCount, 'item'),
-                                  relativeTime(entry.modified, now, locale),
-                                ]
-                                  .filter(Boolean)
-                                  .join(', ')}
+                            {relativeTime(entry.modified, now, locale)}
+                          </time>
+                        </TableCell>
+                        <TableCell
+                          align="end"
+                          className="hidden whitespace-nowrap text-fg-muted numeric @xl:table-cell"
+                        >
+                          {entry.type === 'folder' ? (
+                            entry.itemCount === undefined ? null : (
+                              <span className="text-fg-subtle">
+                                {plural(entry.itemCount, 'item')}
                               </span>
+                            )
+                          ) : (
+                            formatBytes(entry.size ?? 0, locale)
+                          )}
+                        </TableCell>
+                        <TableCell className="w-0">
+                          {actions.length > 0 && (
+                            <span className="flex" data-file-menu={entry.id}>
+                              <ActionMenu label={`Actions for ${entry.name}`} actions={actions} />
                             </span>
                           )}
-                        </span>
-                      </TableCell>
-                      <TableCell className={cn(WIDE, 'whitespace-nowrap text-fg-muted')}>
-                        {entry.owner ?? <span className="text-fg-subtle">No owner</span>}
-                      </TableCell>
-                      <TableCell className="hidden whitespace-nowrap @xl:table-cell">
-                        <time
-                          dateTime={entry.modified.toISOString()}
-                          title={formatDateTime(entry.modified, locale)}
-                          className="text-fg-muted"
-                        >
-                          {relativeTime(entry.modified, now, locale)}
-                        </time>
-                      </TableCell>
-                      <TableCell
-                        align="end"
-                        className="hidden whitespace-nowrap text-fg-muted numeric @xl:table-cell"
-                      >
-                        {entry.type === 'folder' ? (
-                          entry.itemCount === undefined ? null : (
-                            <span className="text-fg-subtle">
-                              {plural(entry.itemCount, 'item')}
-                            </span>
-                          )
-                        ) : (
-                          formatBytes(entry.size ?? 0, locale)
-                        )}
-                      </TableCell>
-                      <TableCell className="w-0">
-                        {actions.length > 0 && (
-                          <ActionMenu label={`Actions for ${entry.name}`} actions={actions} />
-                        )}
-                      </TableCell>
-                    </Row>
-                  );
-                })}
-              </Rows>
-            </TableBody>
-          </Table>
+                        </TableCell>
+                      </Row>
+                    );
+                  })}
+                </Rows>
+              </TableBody>
+            </Table>
+          </div>
           {storage !== undefined && (
             <UsageMeter
-              className="@xl:max-w-xs"
-              label={
-                <span className="inline-flex items-center gap-1.5 font-normal text-fg-muted">
-                  <HardDrivesIcon aria-hidden weight="bold" className="size-4 text-fg-subtle" />
-                  Storage
-                </span>
-              }
+              className="w-full"
+              label="Storage"
               value={storage.used}
               max={storage.total}
               valueText={`${formatBytes(storage.used, locale)} of ${formatBytes(storage.total, locale)}`}
@@ -649,6 +684,7 @@ export function FileManager({
       )}
 
       <DeleteEntriesDialog
+        finalFocus={() => tableArea.current ?? true}
         entries={deleting === null ? [] : deleting.flatMap((id) => byId.get(id) ?? [])}
         onCancel={() => {
           setDeleting(null);
@@ -725,14 +761,18 @@ function RenameField({
 
 function DeleteEntriesDialog({
   entries,
+  finalFocus,
   onCancel,
   onConfirm,
 }: {
   entries: FileEntry[];
+  /** Where focus goes after a confirmed delete: the deleted row and its menu are gone by then. */
+  finalFocus: () => HTMLElement | true;
   onCancel: () => void;
   onConfirm: (ids: string[]) => void;
 }) {
   const { Button } = useBlockParts();
+  const confirmed = useRef(false);
   // While the dialog closes it keeps naming what it was about.
   const [shown, setShown] = useState(entries);
   const key = entries.map((e) => e.id).join();
@@ -746,7 +786,13 @@ function DeleteEntriesDialog({
         if (!open) onCancel();
       }}
     >
-      <DialogContent>
+      <DialogContent
+        finalFocus={() => {
+          const after = confirmed.current;
+          confirmed.current = false;
+          return after ? finalFocus() : true;
+        }}
+      >
         <DialogHeader>
           <DialogTitle>
             {one === undefined ? `Delete ${plural(shown.length, 'item')}?` : `Delete ${one.name}?`}
@@ -764,6 +810,7 @@ function DeleteEntriesDialog({
           <Button
             variant="danger"
             onClick={() => {
+              confirmed.current = true;
               onConfirm(shown.map((e) => e.id));
             }}
           >
