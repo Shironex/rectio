@@ -156,13 +156,12 @@ export function TeamMembers({
                   <span className="flex items-center gap-2">
                     <span className="truncate font-medium">{member.name}</span>
                     {member.you === true && <Badge>You</Badge>}
+                    {/* Narrow: the role column folds into a tag beside the name. */}
+                    <Badge className="@xl:hidden">{ROLE_LABELS[member.role]}</Badge>
                   </span>
-                  <span className="truncate text-sm text-fg-muted">
-                    {member.email}
-                    <span className="@xl:hidden">, {ROLE_LABELS[member.role]}</span>
-                  </span>
+                  <span className="truncate text-sm text-fg-muted">{member.email}</span>
                 </div>
-                <span className="hidden w-32 text-sm text-fg-subtle @2xl:block">
+                <span className="hidden text-sm whitespace-nowrap text-fg-subtle @2xl:block">
                   {member.lastActive === undefined
                     ? 'Never signed in'
                     : `Active ${relativeTime(member.lastActive, now, locale)}`}
@@ -178,7 +177,7 @@ export function TeamMembers({
                       }}
                     />
                   ) : (
-                    <span className="inline-flex h-(--rx-control-height-sm) w-32 items-center px-2.5 text-sm text-fg-muted">
+                    <span className="inline-flex h-(--rx-control-height-sm) w-32 items-center border border-transparent px-(--rx-field-padding-x) text-sm text-fg-muted">
                       {ROLE_LABELS[member.role]}
                     </span>
                   )}
@@ -223,7 +222,7 @@ export function TeamMembers({
       </ul>
 
       {invites.length > 0 && (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 border-t border-line pt-4">
           <h3 className="text-sm font-medium text-fg-muted">
             Pending invites <span className="numeric text-fg-subtle">{invites.length}</span>
           </h3>
@@ -248,7 +247,40 @@ export function TeamMembers({
                       {invite.invitedBy !== undefined && ` by ${invite.invitedBy}`}
                     </span>
                   </div>
-                  <span className="flex items-center gap-2 pointer-coarse:gap-5">
+                  {/* Narrow: the two actions fold into a menu, so the address keeps the width. */}
+                  <span className="@xl:hidden">
+                    <ActionMenu
+                      label={`Actions for the invite to ${invite.email}`}
+                      actions={[
+                        ...(onResendInvite === undefined
+                          ? []
+                          : [
+                              {
+                                id: 'resend',
+                                label: 'Resend invite',
+                                icon: ArrowClockwiseIcon,
+                                onSelect: () => {
+                                  onResendInvite(invite.id);
+                                },
+                              },
+                            ]),
+                        ...(onRevokeInvite === undefined
+                          ? []
+                          : [
+                              {
+                                id: 'revoke',
+                                label: 'Revoke invite',
+                                icon: XIcon,
+                                danger: true,
+                                onSelect: () => {
+                                  onRevokeInvite(invite.id);
+                                },
+                              },
+                            ]),
+                      ]}
+                    />
+                  </span>
+                  <span className="hidden items-center gap-2 @xl:flex pointer-coarse:gap-5">
                     {onResendInvite !== undefined && (
                       <Button
                         variant="ghost"
