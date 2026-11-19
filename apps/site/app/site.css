@@ -314,3 +314,14 @@
 html[data-mode='dark'] .site-panel {
   background: var(--rx-surface-raised);
 }
+
+/* The pinned sequence's runway: one band per step along it, shorter on phones. */
+.site-runway {
+  --site-runway: 280vh;
+  --site-band: calc((var(--site-runway) - 100vh) / 7);
+}
+@media (width >= 40rem) {
+  .site-runway {
+    --site-runway: 340vh;
+  }
+}

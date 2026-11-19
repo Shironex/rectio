@@ -68,9 +68,6 @@ const STEPS = [
 const MATCH_FROM = 1;
 const TOTAL_STEP = MATCH_FROM + LINES.length;
 const LAST = TOTAL_STEP + 1;
-const SECTION_VH = 340;
-/** Each step's share of the pinned stretch (the section less one screen), in vh. */
-const BAND_VH = (SECTION_VH - 100) / (LAST + 1);
 
 /** Which caption a scroll step belongs to. */
 const captionOf = (step: number) =>
@@ -172,9 +169,9 @@ export function CloseBooks() {
   return (
     <section
       aria-labelledby="close-books-title"
-      className="relative"
-      // Tall enough for a step every 35vh or so; the panel inside stays pinned meanwhile.
-      style={still ? undefined : { height: `${String(SECTION_VH)}vh` }}
+      className="site-runway relative"
+      // The runway (site.css) is shorter on phones; the panel inside stays pinned along it.
+      style={still ? undefined : { height: 'var(--site-runway)' }}
     >
       <a
         href="#kit"
@@ -191,7 +188,10 @@ export function CloseBooks() {
             }}
             aria-hidden
             className="absolute inset-x-0"
-            style={{ top: `${String(50 + i * BAND_VH)}vh`, height: `${String(BAND_VH)}vh` }}
+            style={{
+              top: `calc(50vh + ${String(i)} * var(--site-band))`,
+              height: 'var(--site-band)',
+            }}
           />
         ))}
       <div
@@ -247,9 +247,20 @@ export function CloseBooks() {
               ))}
             </ol>
             <p className="text-sm text-fg-muted sm:text-base lg:hidden" aria-live="polite">
-              <span className="font-mono text-xs text-fg-muted tabular-nums">
-                {caption + 1}/{STEPS.length}
-              </span>{' '}
+              <span aria-hidden className="me-2 inline-flex gap-1 align-middle">
+                {STEPS.map((s, i) => (
+                  <span
+                    key={s.title}
+                    className={cn(
+                      'size-1.5 rounded-full transition-colors duration-base ease-standard',
+                      i <= caption ? 'bg-accent' : 'bg-line-strong',
+                    )}
+                  />
+                ))}
+              </span>
+              <span className="sr-only">
+                Step {caption + 1} of {STEPS.length}:
+              </span>
               <span className="font-strong text-fg">{STEPS[caption].title}.</span>{' '}
               {STEPS[caption].text}
             </p>

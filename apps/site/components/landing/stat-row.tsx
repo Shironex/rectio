@@ -17,27 +17,30 @@ export function StatRow({ kit }: { kit: KitFacts }) {
     },
   ];
   return (
-    <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-16">
+    <div className="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-16">
       <p className="site-reveal font-display text-2xl font-regular text-pretty text-fg md:text-3xl lg:col-span-5">
         Built for the screens where a wrong sign costs money:{' '}
         <span className="font-heading">expense reports, invoices, ledgers and approvals.</span>
       </p>
-      <dl className="grid grid-cols-2 border-t border-line-strong lg:col-span-7 lg:grid-cols-4">
+      {/* Set like a statement: a ruled line per figure, the label on the left, the amount right. */}
+      <dl className="flex flex-col border-y border-line-strong lg:col-span-7">
         {stats.map((stat, i) => (
           <div
             key={stat.label}
-            className={`site-reveal ${i === 0 ? '' : `site-step-${String(Math.min(i, 3))}`} flex flex-col gap-1 border-b border-line py-5 pe-4 lg:border-b-0`}
+            className={`site-reveal ${i === 0 ? '' : `site-step-${String(Math.min(i, 3))}`} flex items-baseline justify-between gap-6 border-b border-line py-4 last:border-b-0`}
           >
-            <dd className="font-display text-4xl font-heading text-fg tabular-nums md:text-5xl">
+            <div className="flex min-w-0 flex-col">
+              <dt className="text-base font-strong text-fg">{stat.label}</dt>
+              <dd className="text-sm text-fg-muted">{stat.note}</dd>
+            </div>
+            <dd className="shrink-0 font-display text-3xl font-heading text-fg tabular-nums md:text-4xl">
               {stat.value}
               {stat.unit !== undefined && (
-                <span className="ms-1 text-xl font-strong text-fg-muted md:text-2xl">
+                <span className="ms-1 text-lg font-strong text-fg-muted md:text-xl">
                   {stat.unit}
                 </span>
               )}
             </dd>
-            <dt className="text-sm font-strong text-fg">{stat.label}</dt>
-            <dd className="text-sm text-fg-muted">{stat.note}</dd>
           </div>
         ))}
       </dl>
