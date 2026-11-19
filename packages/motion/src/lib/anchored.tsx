@@ -54,17 +54,31 @@ function away(element: HTMLElement, tokens: MotionTokens) {
  */
 export function useAnchoredEntrance(node: RefObject<HTMLElement | null>, open: boolean) {
   const running = useRef<Controls[]>([]);
+  const closing = useRef(false);
   useLayoutEffect(() => {
     const element = node.current;
     if (element === null) return;
     const tokens = readMotionTokens(element);
     if (tokens === null) return;
-    const opacity = getComputedStyle(element).opacity;
+    const style = getComputedStyle(element);
+    const opacity = style.opacity;
+    // Reopened while it fades out: carry on from where it is instead of replaying the entrance.
+    const resumed = open && closing.current && Number(opacity) > 0;
     for (const controls of running.current) controls.stop();
+    closing.current = !open;
     running.current = open
       ? [
-          springTo(element, { transform: [away(element, tokens), 'none'] }, tokens.spring.overlay),
-          tweenTo(element, { opacity: [0, 1] }, tokens.duration.fast, tokens.easing.enter),
+          springTo(
+            element,
+            { transform: [resumed ? style.transform : away(element, tokens), 'none'] },
+            tokens.spring.overlay,
+          ),
+          tweenTo(
+            element,
+            { opacity: [resumed ? opacity : 0, 1] },
+            tokens.duration.fast,
+            tokens.easing.enter,
+          ),
         ]
       : [tweenTo(element, { opacity: [opacity, 0] }, tokens.duration.fast, tokens.easing.exit)];
   }, [node, open]);
