@@ -414,6 +414,7 @@ describe('the rectio registry', () => {
       'payouts',
       'popover',
       'pricing-table',
+      'product-launch',
       'profile-settings',
       'profit-and-loss',
       'progress',
@@ -421,6 +422,7 @@ describe('the rectio registry', () => {
       'radio-group',
       'reset-password',
       'saas-core',
+      'saas-landing',
       'scroll-area',
       'search-input',
       'select',
@@ -681,7 +683,11 @@ describe('the rectio registry', () => {
 
   it('publishes every template as a pro template item that names no workspace package', () => {
     const templates = result.items.filter((i) => i.type === 'template');
-    expect(templates.map((t) => t.name)).toContain('finance-app');
+    expect(templates.map((t) => t.name).sort()).toEqual([
+      'finance-app',
+      'product-launch',
+      'saas-landing',
+    ]);
     for (const template of templates) {
       expect(template.tier).toBe('pro');
       expect(template.registryDependencies).toEqual(

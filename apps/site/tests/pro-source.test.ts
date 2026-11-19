@@ -78,7 +78,9 @@ void test('every template has a published page marked Pro, with its screenshots'
       (entry) => entry.isDirectory() && existsSync(join(TEMPLATES, entry.name, 'template.json')),
     )
     .map((entry) => entry.name);
-  assert.ok(names.includes('finance-app'), 'expected the finance app template');
+  for (const name of ['finance-app', 'saas-landing', 'product-launch']) {
+    assert.ok(names.includes(name), `expected the ${name} template`);
+  }
   for (const name of names) {
     const page = published.find((file) => file.path === join('docs', 'templates', `${name}.html`));
     assert.ok(page, `docs/templates/${name}.html is missing`);
