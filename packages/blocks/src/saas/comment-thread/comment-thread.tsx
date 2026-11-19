@@ -1,10 +1,12 @@
 import {
   ArrowBendUpLeftIcon,
+  AtIcon,
   ArrowCounterClockwiseIcon,
   ChatsCircleIcon,
   CaretDownIcon,
   CheckCircleIcon,
   LinkSimpleIcon,
+  PaperclipIcon,
   PencilSimpleIcon,
   TrashIcon,
   type Icon,
@@ -30,6 +32,7 @@ import {
   useState,
   useSyncExternalStore,
   type KeyboardEvent,
+  type ReactNode,
   type SyntheticEvent,
 } from 'react';
 
@@ -68,6 +71,8 @@ export interface CommentThreadProps {
   resolved?: CommentThreadResolution | undefined;
   onResolve?: () => void;
   onReopen?: () => void;
+  /** Adds an attach button to the composers; open your own file picker from it. */
+  onAttach?: () => void;
   /** The moment comment times are measured from. */
   now?: Date;
   locale?: string;
@@ -89,6 +94,7 @@ export function CommentThread({
   onCopyLink,
   resolved,
   onResolve,
+  onAttach,
   onReopen,
   now: requestedNow,
   locale: requestedLocale,
@@ -181,28 +187,30 @@ export function CommentThread({
         <Avatar name={comment.author.name} src={comment.author.avatarUrl} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <header className="flex items-start justify-between gap-2">
-            <p className="flex flex-wrap items-baseline gap-x-2 text-base">
+            {/* Narrow: the name on its own line, then role and time on one that wraps. Wide: all
+                three on one line. */}
+            <p className="flex min-w-0 flex-col gap-y-0.5 text-base @md:flex-row @md:flex-wrap @md:items-baseline @md:gap-x-2">
               <span className="font-medium text-fg">{comment.author.name}</span>
-              {comment.author.role !== undefined && (
-                <Badge className="self-center">{comment.author.role}</Badge>
-              )}
-              {/* Time and the edited mark stay together on one line. */}
-              <span className="whitespace-nowrap text-fg-muted">
-                <time
-                  dateTime={isoDateTime(comment.createdAt)}
-                  title={formatDateTime(comment.createdAt, locale)}
-                >
-                  {relativeTime(comment.createdAt, now, locale)}
-                </time>
-                {comment.editedAt !== undefined && (
-                  <span
-                    className="text-sm text-fg-subtle"
-                    title={`Edited ${formatDateTime(comment.editedAt, locale)}`}
+              <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                {comment.author.role !== undefined && <Badge>{comment.author.role}</Badge>}
+                {/* Time and the edited mark stay together on one line. */}
+                <span className="whitespace-nowrap text-sm text-fg-muted @md:text-base">
+                  <time
+                    dateTime={isoDateTime(comment.createdAt)}
+                    title={formatDateTime(comment.createdAt, locale)}
                   >
-                    {' '}
-                    · edited
-                  </span>
-                )}
+                    {relativeTime(comment.createdAt, now, locale)}
+                  </time>
+                  {comment.editedAt !== undefined && (
+                    <span
+                      className="text-sm text-fg-subtle"
+                      title={`Edited ${formatDateTime(comment.editedAt, locale)}`}
+                    >
+                      {' '}
+                      · edited
+                    </span>
+                  )}
+                </span>
               </span>
             </p>
             {actions.length > 0 && editing !== comment.id && (
@@ -227,6 +235,7 @@ export function CommentThread({
           </header>
           {editing === comment.id ? (
             <Composer
+              onAttach={onAttach}
               label="Edit comment"
               initial={comment.body}
               submitLabel="Save"
@@ -288,7 +297,7 @@ export function CommentThread({
       }
       actions={
         resolved === undefined && onResolve !== undefined && comments.length > 0 ? (
-          <Button variant="secondary" onClick={onResolve}>
+          <Button variant="ghost" onClick={onResolve}>
             <CheckCircleIcon aria-hidden weight="bold" className="size-4" />
             Resolve
           </Button>
@@ -372,7 +381,7 @@ export function CommentThread({
                 {(replies.length > 0 || replyingTo === comment.id) && (
                   <ol
                     aria-label={`Replies to ${comment.author.name}`}
-                    className="ms-4 flex flex-col gap-4 border-s border-line ps-6"
+                    className="ms-4 flex flex-col gap-4 border-s border-line-strong ps-6"
                   >
                     <Items>
                       {replies.map((reply) => (
@@ -384,6 +393,7 @@ export function CommentThread({
                         <Avatar name={writer.name} src={writer.avatarUrl} />
                         <div className="min-w-0 flex-1">
                           <Composer
+                            onAttach={onAttach}
                             label={`Reply to ${comment.author.name}`}
                             submitLabel="Reply"
                             autoFocus
@@ -409,6 +419,7 @@ export function CommentThread({
           <Avatar name={writer.name} src={writer.avatarUrl} />
           <div className="min-w-0 flex-1">
             <Composer
+              onAttach={onAttach}
               label="Add a comment"
               submitLabel="Comment"
               icon={ChatsCircleIcon}
@@ -446,6 +457,7 @@ function Composer({
   placeholder,
   autoFocus = false,
   icon: SubmitIcon,
+  onAttach,
   onSubmit,
   onCancel,
 }: {
@@ -453,6 +465,7 @@ function Composer({
   submitLabel: string;
   /** Drawn before the submit label. */
   icon?: Icon;
+  onAttach?: (() => void) | undefined;
   initial?: string;
   placeholder?: string;
   autoFocus?: boolean;
@@ -476,6 +489,21 @@ function Composer({
     onSubmit(body.trim());
     setBody('');
     setTried(false);
+  };
+  // Puts "@" at the caret, with a space before it when it would touch a word, so a mention can
+  // be started without hunting for the key.
+  const mention = () => {
+    const field = form.current?.querySelector('textarea');
+    const start = field?.selectionStart ?? body.length;
+    const end = field?.selectionEnd ?? body.length;
+    const before = body.slice(0, start);
+    const insert = before === '' || /\s$/.test(before) ? '@' : ' @';
+    const caret = start + insert.length;
+    setBody(before + insert + body.slice(end));
+    requestAnimationFrame(() => {
+      field?.focus();
+      field?.setSelectionRange(caret, caret);
+    });
   };
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) submit();
@@ -503,9 +531,43 @@ function Composer({
         {error !== null && <FieldError>{error}</FieldError>}
       </Field>
       <div className="flex flex-wrap items-center justify-end gap-2">
-        <span className="me-auto hidden text-sm text-fg-subtle pointer-fine:inline">
-          <kbd className="font-sans">{modifier}</kbd> and <kbd className="font-sans">Enter</kbd> to
-          send
+        <span className="me-auto flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            iconOnly
+            aria-label="Mention someone"
+            className="text-fg-muted"
+            onClick={mention}
+          >
+            <AtIcon aria-hidden weight="bold" className="size-4" />
+          </Button>
+          {onAttach !== undefined && (
+            <Button
+              variant="ghost"
+              size="sm"
+              iconOnly
+              aria-label="Attach a file"
+              className="text-fg-muted"
+              onClick={onAttach}
+            >
+              <PaperclipIcon aria-hidden weight="bold" className="size-4" />
+            </Button>
+          )}
+          <span className="ms-2 hidden items-center gap-1 text-sm text-fg-subtle pointer-fine:inline-flex">
+            <Keycap>
+              {modifier === 'Cmd' ? (
+                <>
+                  <span aria-hidden>⌘</span>
+                  <span className="sr-only">Command</span>
+                </>
+              ) : (
+                'Ctrl'
+              )}
+            </Keycap>
+            <Keycap>Enter</Keycap>
+            <span className="ms-1">to send</span>
+          </span>
         </span>
         {onCancel !== undefined && (
           <Button variant="ghost" size="sm" onClick={onCancel}>
@@ -520,6 +582,15 @@ function Composer({
         </Button>
       </div>
     </form>
+  );
+}
+
+/** A key drawn as a small cap, from the sunken surface and a hairline. */
+function Keycap({ children }: { children: ReactNode }) {
+  return (
+    <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded-badge border border-line bg-surface-sunken px-1.5 font-sans text-xs text-fg-muted">
+      {children}
+    </kbd>
   );
 }
 

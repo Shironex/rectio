@@ -152,6 +152,19 @@ describe('CommentThread', () => {
     expect(screen.getByRole('button', { name: 'Reply, Ines Duarte' })).toHaveFocus();
   });
 
+  it('starts a mention from the composer and offers attach when given', async () => {
+    const onAttach = vi.fn();
+    render(
+      <CommentThread comments={[]} writer={ME} now={NOW} onAdd={vi.fn()} onAttach={onAttach} />,
+    );
+    const field = screen.getByLabelText('Add a comment');
+    await userEvent.type(field, 'Ask');
+    await userEvent.click(screen.getByRole('button', { name: 'Mention someone' }));
+    expect(field).toHaveValue('Ask @');
+    await userEvent.click(screen.getByRole('button', { name: 'Attach a file' }));
+    expect(onAttach).toHaveBeenCalledOnce();
+  });
+
   it('moves focus to the field after a refused comment', async () => {
     render(<CommentThread comments={[]} writer={ME} now={NOW} onAdd={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Comment' }));
