@@ -40,7 +40,7 @@ export function copy(locale: Locale) {
     month: pick(pl, 'March 2026', 'marzec 2026'),
     quarter: pick(pl, 'Q1 2026', 'I kwartał 2026'),
     quarterProgress: pick(pl, 'Q1 2026, 11 of 13 weeks', 'I kwartał 2026, 11 z 13 tygodni'),
-    comparison: pick(pl, 'vs February', 'vs luty'),
+    comparison: pick(pl, 'vs February', 'wobec lutego'),
     kpiLabel: pick(pl, 'Key figures, March 2026', 'Kluczowe wskaźniki, marzec 2026'),
     dashboardTitle: pick(pl, 'Finance, March 2026', 'Finanse, marzec 2026'),
   };

@@ -328,6 +328,16 @@ function Dashboard({ blocks, locale }: { blocks: Blocks; locale: data.Locale }) 
         {renderBlock('ledger', blocks, locale)}
         {renderBlock('invoice-detail', blocks, locale)}
       </div>
+      <div className="grid items-start gap-6 xl:grid-cols-2">
+        {renderBlock('cash-runway', blocks, locale)}
+        {renderBlock('tax-summary', blocks, locale)}
+      </div>
+      {renderBlock('profit-and-loss', blocks, locale)}
+      {renderBlock('bank-reconciliation', blocks, locale)}
+      <div className="grid items-start gap-6 xl:grid-cols-2">
+        {renderBlock('payouts', blocks, locale)}
+        {renderBlock('vendors-list', blocks, locale)}
+      </div>
     </div>
   );
 }

@@ -21,11 +21,17 @@ const BLOCKS = [
   'expense-approval',
   'ar-aging',
   'budget-vs-actual',
+  'bank-reconciliation',
+  'payouts',
+  'vendors-list',
+  'profit-and-loss',
+  'tax-summary',
+  'cash-runway',
 ] as const;
 
 /** English words that never belong on a Polish screen. Names and brands are not in this list. */
 const ENGLISH =
-  /(?<![\p{L}])(the|of|and|to|in|no|for|with|from|all|paid|due|overdue|draft|void|pending|approved|rejected|total|balance|amount|date|invoice|invoices|customer|show|hide|table|select|reject|approve|cancel|close|reason|undo|sort|period|status|month|months|quarter|quarters|monthly|quarterly|inflow|outflow|net|debit|credit|budget|actual|variance|over|under|current|days|day|waiting|selected|nothing|none|description|reference|issued|opening|closing|entries|entry|account|accounts|key|figures|better|worse|new|create|import|set|view|submitted|expenses|expense|bank|feed|decision|decisions|recent|category|bucket|share|outstanding|receivables|aging|travel|software|meals|accommodation|salaries|contractors|licence|training|printed|guides|group|by|on|day|part|full|record|payment|payments|received|send|unit|price|qty|subtotal|tax|billed|ireland|poland|annual|seats|seat)(?![\p{L}])/giu;
+  /(?<![\p{L}])(the|of|and|to|in|no|for|with|from|all|paid|due|overdue|draft|void|pending|approved|rejected|total|balance|amount|date|invoice|invoices|customer|show|hide|table|select|reject|approve|cancel|close|reason|undo|sort|period|status|month|months|quarter|quarters|monthly|quarterly|inflow|outflow|net|debit|credit|budget|actual|variance|over|under|current|days|day|waiting|selected|nothing|none|description|reference|issued|opening|closing|entries|entry|account|accounts|key|figures|better|worse|new|create|import|set|view|submitted|expenses|expense|bank|feed|decision|decisions|recent|category|bucket|share|outstanding|receivables|aging|travel|software|meals|accommodation|salaries|contractors|licence|training|printed|guides|group|by|on|day|part|full|record|payment|payments|received|send|unit|price|qty|subtotal|tax|billed|ireland|poland|annual|seats|seat|vs|runway|cash|burn|payout|payouts|vendor|vendors|scheduled|transit|failed|retry|match|matched|unmatched|suggested|reconciled|statement|books|profit|loss|revenue|gross|margin|operating|collected|return|prepare|export|filed|active|hold|archived|search|terms|next|last)(?![\p{L}])/giu;
 
 /** Words that read the same in Polish and English, or are names. */
 const ALLOWED = new Set(['marketing', 'pdf', 'vat', 'sepa', 'ok', 'status', 'bank']);
