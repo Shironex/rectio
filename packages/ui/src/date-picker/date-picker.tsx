@@ -52,15 +52,24 @@ function dayToFocus(popup: HTMLElement | null): HTMLElement | true {
 
 function CalendarPopup({
   popupRef,
+  anchor,
   children,
 }: {
   popupRef: RefObject<HTMLDivElement | null>;
+  /** Lines the popup up with the whole control rather than the small trigger inside it. */
+  anchor?: RefObject<HTMLDivElement | null>;
   children: ReactNode;
 }) {
   const container = usePortalContainer();
   return (
     <Popover.Portal container={container}>
-      <Popover.Positioner sideOffset={6} align="start" className="z-50 outline-none">
+      <Popover.Positioner
+        sideOffset={6}
+        align="start"
+        collisionPadding={8}
+        {...(anchor === undefined ? {} : { anchor })}
+        className="z-50 outline-none"
+      >
         <Popover.Popup
           ref={popupRef}
           initialFocus={() => dayToFocus(popupRef.current)}
@@ -131,6 +140,7 @@ export function DatePicker({
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(() => (value === null ? '' : formatDate(value, dateLocale)));
   const [shownValue, setShownValue] = useState(value);
+  const groupRef = useRef<HTMLDivElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
 
   // Keep the text in step when the value changes from outside (picked, reset, loaded).
@@ -160,6 +170,7 @@ export function DatePicker({
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <div
+        ref={groupRef}
         data-slot="date-picker"
         data-disabled={disabled || undefined}
         className={cn(
@@ -197,7 +208,7 @@ export function DatePicker({
           <CalendarBlankIcon aria-hidden weight="bold" className="size-4" />
         </Popover.Trigger>
       </div>
-      <CalendarPopup popupRef={popupRef}>
+      <CalendarPopup popupRef={popupRef} anchor={groupRef}>
         <Calendar
           mode="single"
           required={false}
@@ -291,6 +302,8 @@ export function DateRangePicker({
           required={false}
           dateLocale={dateLocale}
           numberOfMonths={numberOfMonths}
+          // Side by side months would repeat the days where they meet.
+          showOutsideDays={numberOfMonths === 1}
           selected={value}
           {...(from === undefined ? {} : { defaultMonth: from })}
           disabled={disabledDays}

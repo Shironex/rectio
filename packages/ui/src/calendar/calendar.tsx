@@ -26,7 +26,8 @@ const CLASS_NAMES: DayPickerProps['classNames'] = {
   month: 'flex flex-col gap-2',
   month_caption: cn('flex h-(--rx-calendar-day-size) items-center ps-2'),
   caption_label: 'text-base font-medium text-fg',
-  nav: 'absolute end-3 top-3 z-10 flex items-center gap-1',
+  // The nav sits inside the months box, on the first caption's line.
+  nav: 'absolute end-0 top-0 z-10 flex items-center gap-1',
   button_previous: cn(
     day,
     'inline-flex cursor-pointer items-center justify-center rounded-(--rx-calendar-radius) text-fg-muted',
@@ -70,10 +71,9 @@ const CLASS_NAMES: DayPickerProps['classNames'] = {
     '[&>button]:hover:bg-surface-hover!',
   ),
   outside: 'not-data-selected:[&>button]:text-fg-subtle',
-  disabled: cn(
-    '[&>button]:cursor-not-allowed [&>button]:text-fg-disabled [&>button]:line-through',
-    '[&>button]:hover:bg-transparent',
-  ),
+  // Dimmed, not struck through: in finance a strike reads as a voided entry.
+  disabled:
+    '[&>button]:cursor-not-allowed [&>button]:text-fg-disabled [&>button]:hover:bg-transparent',
   hidden: 'invisible',
 };
 
