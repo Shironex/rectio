@@ -231,7 +231,12 @@ try {
   );
   console.log('phone horizontal overflow px', overflow);
   console.log('phone smallest touch target', await smallestTouchTarget(phone));
-  await phone.screenshot({ path: join(out, 'phone-app.png'), fullPage: true });
+  // Not `fullPage`: its capture override drops the touch emulation for a moment, so `pointer: coarse`
+  // sizes vanish from the picture. A viewport as tall as the page keeps them.
+  const pageHeight = await phone.evaluate(() => document.documentElement.scrollHeight);
+  await phone.setViewportSize({ width: 390, height: pageHeight });
+  await phone.screenshot({ path: join(out, 'phone-app.png') });
+  await phone.setViewportSize({ width: 390, height: 844 });
   // Sort by a column the phone header folds away.
   await phone.getByRole('combobox', { name: 'Sort by' }).tap();
   await phone.getByRole('listbox').waitFor();
