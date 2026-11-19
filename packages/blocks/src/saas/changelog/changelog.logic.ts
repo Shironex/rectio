@@ -40,6 +40,24 @@ export function filterChangelog(
 }
 
 /** How many changes of each kind, across every release. */
+/** How many releases carry each kind of change: the same unit as "2 releases since your last visit". */
+export function changelogReleaseCounts(
+  releases: readonly ChangelogRelease[],
+): Record<ChangelogFilter, number> {
+  const counts: Record<ChangelogFilter, number> = {
+    all: releases.length,
+    new: 0,
+    improved: 0,
+    fixed: 0,
+  };
+  for (const release of releases) {
+    for (const kind of ['new', 'improved', 'fixed'] as const) {
+      if (release.changes.some((change) => change.kind === kind)) counts[kind] += 1;
+    }
+  }
+  return counts;
+}
+
 export function changelogCounts(
   releases: readonly ChangelogRelease[],
 ): Record<ChangelogFilter, number> {

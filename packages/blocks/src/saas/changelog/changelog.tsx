@@ -7,7 +7,7 @@ import {
   type Icon,
 } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -17,7 +17,7 @@ import { isoDateTime } from '../lib/saas';
 import { Segmented } from '../../lib/segmented';
 import {
   CHANGE_KIND_LABELS,
-  changelogCounts,
+  changelogReleaseCounts,
   filterChangelog,
   isReleaseUnseen,
   unseenReleaseCount,
@@ -71,9 +71,10 @@ export function Changelog({
   const locale = resolveLocale(requestedLocale);
   const { Button } = useBlockParts();
   const [filter, setFilter] = useState<ChangelogFilter>('all');
-  const counts = changelogCounts(releases);
+  const counts = changelogReleaseCounts(releases);
   const unseen = unseenReleaseCount(releases, lastSeen);
   const shown = filterChangelog(releases, filter);
+  const { listRef, markSeen } = useMarkSeenFocus(unseen, onMarkSeen);
 
   return (
     <BlockPanel
@@ -86,13 +87,6 @@ export function Changelog({
               ? `${String(unseen)} ${unseen === 1 ? 'release' : 'releases'} since your last visit`
               : 'You are up to date'}
         </span>
-      }
-      actions={
-        unseen > 0 && onMarkSeen !== undefined ? (
-          <Button variant="secondary" size="sm" onClick={onMarkSeen}>
-            Mark as read
-          </Button>
-        ) : undefined
       }
       className={className}
       bodyClassName="gap-5"
@@ -119,9 +113,9 @@ export function Changelog({
       ) : (
         <>
           <Segmented
-            label="Show changes"
             value={filter}
             onValueChange={setFilter}
+            label="Show releases with"
             options={(['all', 'new', 'improved', 'fixed'] as const).map((value) => ({
               value,
               label: value === 'all' ? 'All' : CHANGE_KIND_LABELS[value],
@@ -134,7 +128,21 @@ export function Changelog({
               these releases.
             </p>
           ) : (
-            <ReleaseList releases={shown} lastSeen={lastSeen} locale={locale} />
+            // Focus lands on the list once "Mark as read" leaves with the new group.
+            <div
+              ref={listRef}
+              tabIndex={-1}
+              role="group"
+              aria-label="Releases"
+              className="outline-none"
+            >
+              <ReleaseList
+                releases={shown}
+                lastSeen={lastSeen}
+                onMarkSeen={markSeen}
+                locale={locale}
+              />
+            </div>
           )}
           {hasMore && onLoadMore !== undefined && (
             <Button
@@ -159,12 +167,15 @@ export function Changelog({
 function ReleaseList({
   releases,
   lastSeen,
+  onMarkSeen,
   locale,
 }: {
   releases: readonly ChangelogRelease[];
   lastSeen: Date | undefined;
+  onMarkSeen: (() => void) | undefined;
   locale: string;
 }) {
+  const { Button } = useBlockParts();
   const unseen = releases.filter((release) => isReleaseUnseen(release, lastSeen));
   const seen = releases.filter((release) => !isReleaseUnseen(release, lastSeen));
   if (unseen.length === 0) {
@@ -173,7 +184,14 @@ function ReleaseList({
   return (
     <div className="flex flex-col gap-2">
       <section className="flex flex-col">
-        <GroupHeading label="New since your last visit" accent />
+        <div className="flex items-center gap-3">
+          <GroupHeading label="New since your last visit" accent />
+          {onMarkSeen !== undefined && (
+            <Button variant="secondary" size="sm" onClick={onMarkSeen}>
+              Mark as read
+            </Button>
+          )}
+        </div>
         <Releases releases={unseen} heading="h4" locale={locale} />
       </section>
       {seen.length > 0 && (
@@ -190,7 +208,7 @@ function GroupHeading({ label, accent = false }: { label: string; accent?: boole
   return (
     <h3
       className={cn(
-        'flex items-center gap-3 text-sm font-medium',
+        'flex flex-1 items-center gap-3 text-sm font-medium',
         accent ? 'text-accent-strong' : 'text-fg-muted',
       )}
     >
@@ -298,4 +316,27 @@ function KindTag({ kind }: { kind: ChangeKind }) {
       {CHANGE_KIND_LABELS[kind]}
     </p>
   );
+}
+
+/**
+ * "Mark as read" lives in the new group's divider and leaves with it, so after a press focus
+ * moves to the release list instead of dropping to the page. A change from the app on its own
+ * leaves focus where it is.
+ */
+function useMarkSeenFocus(unseen: number, onMarkSeen: (() => void) | undefined) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const pressed = useRef(false);
+
+  // Runs after every render: a press is only counted for the render it caused.
+  useEffect(() => {
+    if (unseen === 0 && pressed.current) listRef.current?.focus();
+    pressed.current = false;
+  });
+
+  const handler = useCallback(() => {
+    pressed.current = true;
+    onMarkSeen?.();
+  }, [onMarkSeen]);
+
+  return { listRef, markSeen: onMarkSeen === undefined ? undefined : handler };
 }

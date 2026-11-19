@@ -1,10 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
   Changelog,
   changelogCounts,
+  changelogReleaseCounts,
   filterChangelog,
   isReleaseUnseen,
   unseenReleaseCount,
@@ -83,5 +85,29 @@ describe('Changelog', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Nothing released yet');
     await userEvent.click(screen.getByRole('button', { name: 'Subscribe to updates' }));
     expect(onSubscribe).toHaveBeenCalled();
+  });
+
+  it('counts releases per kind, the unit the description uses', () => {
+    expect(changelogReleaseCounts(RELEASES)).toMatchObject({ all: RELEASES.length });
+  });
+
+  it('moves focus to the release list when "Mark as read" leaves', async () => {
+    function Harness() {
+      const [lastSeen, setLastSeen] = useState(new Date(2026, 2, 1));
+      return (
+        <Changelog
+          releases={RELEASES}
+          lastSeen={lastSeen}
+          onMarkSeen={() => {
+            setLastSeen(new Date(2026, 11, 31));
+          }}
+          locale="en-GB"
+        />
+      );
+    }
+    render(<Harness />);
+    await userEvent.click(screen.getByRole('button', { name: 'Mark as read' }));
+    expect(screen.queryByRole('button', { name: 'Mark as read' })).not.toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Releases' })).toHaveFocus();
   });
 });
