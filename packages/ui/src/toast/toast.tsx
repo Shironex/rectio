@@ -1,6 +1,6 @@
 import { Toast } from '@base-ui/react/toast';
 import { CheckCircleIcon, InfoIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react';
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 
 import { cn, touchHitArea } from '../lib/cn';
 import { usePortalContainer } from '../theme-scope/theme-scope';
@@ -25,6 +25,10 @@ export interface ToastProviderProps {
   limit?: number;
   /** Label of each toast's close button. */
   closeLabel?: string;
+  /** Classes for every toast, merged after the defaults so they win, such as other transitions. */
+  toastClassName?: string | undefined;
+  /** The element that stacks the toasts, for measuring or animating the stack. */
+  viewportRef?: Ref<HTMLDivElement> | undefined;
 }
 
 /**
@@ -37,11 +41,17 @@ export function ToastProvider({
   timeout = 6000,
   limit = 3,
   closeLabel = 'Dismiss',
+  toastClassName,
+  viewportRef,
 }: ToastProviderProps) {
   return (
     <Toast.Provider timeout={timeout} limit={limit}>
       {children}
-      <ToastViewport closeLabel={closeLabel} />
+      <ToastViewport
+        closeLabel={closeLabel}
+        toastClassName={toastClassName}
+        viewportRef={viewportRef}
+      />
     </Toast.Provider>
   );
 }
@@ -52,12 +62,19 @@ export function ToastProvider({
  */
 export const useToast = Toast.useToastManager;
 
-function ToastViewport({ closeLabel }: { closeLabel: string }) {
+interface ViewportProps {
+  closeLabel: string;
+  toastClassName: string | undefined;
+  viewportRef: Ref<HTMLDivElement> | undefined;
+}
+
+function ToastViewport({ closeLabel, toastClassName, viewportRef }: ViewportProps) {
   const container = usePortalContainer();
   const { toasts } = Toast.useToastManager();
   return (
     <Toast.Portal container={container}>
       <Toast.Viewport
+        ref={viewportRef}
         data-slot="toast-viewport"
         className={cn(
           // Newest at the bottom, nearest the corner; older toasts move up.
@@ -66,14 +83,27 @@ function ToastViewport({ closeLabel }: { closeLabel: string }) {
         )}
       >
         {toasts.map((toast) => (
-          <ToastItem key={toast.id} toast={toast} closeLabel={closeLabel} />
+          <ToastItem
+            key={toast.id}
+            toast={toast}
+            closeLabel={closeLabel}
+            className={toastClassName}
+          />
         ))}
       </Toast.Viewport>
     </Toast.Portal>
   );
 }
 
-function ToastItem({ toast, closeLabel }: { toast: Toast.Root.ToastObject; closeLabel: string }) {
+function ToastItem({
+  toast,
+  closeLabel,
+  className,
+}: {
+  toast: Toast.Root.ToastObject;
+  closeLabel: string;
+  className: string | undefined;
+}) {
   const kind = ICONS[toast.type as ToastType] as (typeof ICONS)[ToastType] | undefined;
   return (
     <Toast.Root
@@ -94,6 +124,7 @@ function ToastItem({ toast, closeLabel }: { toast: Toast.Root.ToastObject; close
         'motion-safe:data-ending-style:data-[swipe-direction=down]:translate-y-full',
         'data-swiping:transition-none',
         'data-limited:hidden',
+        className,
       )}
     >
       {kind !== undefined && (
