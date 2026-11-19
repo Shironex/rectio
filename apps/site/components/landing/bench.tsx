@@ -120,7 +120,7 @@ export function Bench() {
               className={cn(
                 // A real tab: the open one sits on a raised surface; the others light up on hover.
                 'group relative flex cursor-pointer flex-col items-start gap-1 rounded-t-control px-3 pt-3 pb-4 text-start',
-                'transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover data-active:bg-surface',
+                'border border-b-0 border-line transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover data-active:border-line-strong data-active:bg-surface',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
               )}
             >
