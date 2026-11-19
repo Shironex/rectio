@@ -112,6 +112,21 @@ describe('NotificationPreferences', () => {
     expect(screen.queryByRole('button', { name: 'Use recommended' })).not.toBeInTheDocument();
   });
 
+  it('turns everything on from one control on a narrow block', async () => {
+    const onChange = vi.fn();
+    render(
+      <NotificationPreferences
+        channels={CHANNELS}
+        events={EVENTS}
+        value={VALUE}
+        onChange={onChange}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Turn all on' }));
+    const next = onChange.mock.calls[0]?.[0] as NotificationMatrix;
+    expect(notificationCount(next, EVENTS, CHANNELS)).toBe(6);
+  });
+
   it('locks required pairs and says why', () => {
     render(
       <NotificationPreferences
@@ -124,6 +139,6 @@ describe('NotificationPreferences', () => {
     const locked = screen.getByRole('checkbox', { name: 'New sign in by Email' });
     expect(locked).toHaveAttribute('aria-checked', 'true');
     expect(locked).toHaveAttribute('aria-disabled', 'true');
-    expect(locked).toHaveAccessibleDescription(/always go out/);
+    expect(locked).toHaveAccessibleDescription('Email always on');
   });
 });

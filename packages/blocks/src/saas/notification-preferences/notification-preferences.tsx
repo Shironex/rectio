@@ -55,11 +55,14 @@ export function NotificationPreferences({
 }: NotificationPreferencesProps) {
   const groups = groupNotificationEvents(events);
   const on = notificationCount(value, events, channels);
-  const lockNoteId = useId();
   const { Button } = useBlockParts();
   const lockedCount = events.reduce((sum, event) => sum + (event.required?.length ?? 0), 0);
   const anyLocked = lockedCount > 0;
+  const uid = useId();
+  /** Each layout draws its own "always on" note, so each gets its own id for the boxes to cite. */
+  const lockId = (layout: 'wide' | 'narrow', eventId: string) => `${uid}-${layout}-${eventId}`;
   const untouched = on <= lockedCount;
+  const allOn = on === events.length * channels.length;
 
   return (
     <BlockPanel
@@ -113,10 +116,12 @@ export function NotificationPreferences({
                   </th>
                 ))}
               </tr>
+            </thead>
+            <tbody>
               <tr className="border-b border-line">
                 <th
                   scope="row"
-                  className="pb-2.5 pe-4 text-start text-xs font-medium text-fg-subtle"
+                  className="pb-2.5 pe-4 text-start text-sm font-medium text-fg-muted"
                 >
                   All events
                 </th>
@@ -139,15 +144,13 @@ export function NotificationPreferences({
                   );
                 })}
               </tr>
-            </thead>
-            <tbody>
               {groups.map((group) => (
                 <Fragment key={group.name}>
                   <tr>
                     <th
                       scope="colgroup"
                       colSpan={channels.length + 1}
-                      className="pt-5 pb-1.5 text-start text-xs font-medium tracking-caps text-fg-subtle uppercase"
+                      className="pt-5 pb-1.5 text-start text-xs font-medium tracking-caps text-fg-muted uppercase"
                     >
                       {group.name}
                     </th>
@@ -155,10 +158,14 @@ export function NotificationPreferences({
                   {group.events.map((event) => (
                     <tr
                       key={event.id}
-                      className="border-b border-line transition-colors duration-fast ease-standard last:border-b-0 hover:bg-surface-hover"
+                      className="border-b border-line transition-colors duration-fast ease-standard last:border-b-0 hover:bg-surface-sunken"
                     >
                       <th scope="row" className="py-3 pe-4 text-start font-regular">
-                        <EventLabel event={event} channels={channels} />
+                        <EventLabel
+                          event={event}
+                          channels={channels}
+                          lockLabelId={lockId('wide', event.id)}
+                        />
                         {event.description !== undefined && (
                           <span className="block text-fg-muted">{event.description}</span>
                         )}
@@ -170,8 +177,8 @@ export function NotificationPreferences({
                             channel={channel}
                             value={value}
                             disabled={disabled}
-                            lockNoteId={lockNoteId}
                             onChange={onChange}
+                            lockLabelId={lockId('wide', event.id)}
                           />
                         </td>
                       ))}
@@ -184,13 +191,30 @@ export function NotificationPreferences({
 
           {/* Narrow: each event, then its channels as labelled boxes. */}
           <div className="flex flex-col @xl:hidden">
+            <div className="flex justify-end pb-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={disabled}
+                onClick={() => {
+                  onChange(
+                    channels.reduce(
+                      (next, channel) => setNotificationColumn(next, events, channel.id, !allOn),
+                      value,
+                    ),
+                  );
+                }}
+              >
+                {allOn ? 'Turn all off' : 'Turn all on'}
+              </Button>
+            </div>
             {groups.map((group) => (
               <section
                 key={group.name}
                 aria-label={group.name}
                 className="flex flex-col pt-6 first:pt-0"
               >
-                <h3 className="pb-1 text-xs font-medium tracking-caps text-fg-subtle uppercase">
+                <h3 className="pb-1 text-xs font-medium tracking-caps text-fg-muted uppercase">
                   {group.name}
                 </h3>
                 <ul className="flex flex-col">
@@ -200,7 +224,11 @@ export function NotificationPreferences({
                       className="flex flex-col gap-1 border-b border-line py-2.5 last:border-b-0"
                     >
                       <span className="flex flex-col text-sm">
-                        <EventLabel event={event} channels={channels} />
+                        <EventLabel
+                          event={event}
+                          channels={channels}
+                          lockLabelId={lockId('narrow', event.id)}
+                        />
                         {event.description !== undefined && (
                           <span className="text-fg-muted">{event.description}</span>
                         )}
@@ -220,8 +248,8 @@ export function NotificationPreferences({
                               channel={channel}
                               value={value}
                               disabled={disabled}
-                              lockNoteId={lockNoteId}
                               onChange={onChange}
+                              lockLabelId={lockId('narrow', event.id)}
                               labelled
                             />
                             {channel.label}
@@ -234,13 +262,6 @@ export function NotificationPreferences({
               </section>
             ))}
           </div>
-
-          {anyLocked && (
-            <p id={lockNoteId} className="flex items-center gap-1.5 text-sm text-fg-subtle">
-              <LockSimpleIcon aria-hidden weight="bold" className="size-3.5" />
-              Required to keep your account safe; these always go out.
-            </p>
-          )}
         </>
       )}
     </BlockPanel>
@@ -253,16 +274,17 @@ function Cell({
   channel,
   value,
   disabled,
-  lockNoteId,
   onChange,
+  lockLabelId,
   labelled = false,
 }: {
   event: NotificationEvent;
   channel: NotificationChannel;
   value: NotificationMatrix;
   disabled: boolean;
-  lockNoteId: string;
   onChange: (value: NotificationMatrix) => void;
+  /** The "always on" note this box points to when locked. */
+  lockLabelId: string;
   /** A visible label wraps the box, so it needs no name of its own. */
   labelled?: boolean;
 }) {
@@ -271,7 +293,12 @@ function Cell({
     <span className={cn('inline-flex items-center', !labelled && 'justify-center')}>
       <Checkbox
         aria-label={labelled ? undefined : `${event.label} by ${channel.label}`}
-        aria-describedby={locked ? lockNoteId : undefined}
+        aria-describedby={locked ? lockLabelId : undefined}
+        // A required box reads as on: a filled, muted tick rather than a pale disabled one.
+        className={cn(
+          locked &&
+            'data-disabled:border-fg-muted data-disabled:bg-fg-muted data-disabled:text-surface',
+        )}
         checked={notificationOn(value, event, channel.id)}
         disabled={disabled || locked}
         onCheckedChange={(checked) => {
@@ -286,16 +313,21 @@ function Cell({
 function EventLabel({
   event,
   channels,
+  lockLabelId,
 }: {
   event: NotificationEvent;
   channels: readonly NotificationChannel[];
+  lockLabelId: string;
 }) {
   const required = channels.filter((channel) => notificationLocked(event, channel.id));
   return (
     <span className="flex flex-wrap items-center gap-x-2 font-medium text-fg">
       {event.label}
       {required.length > 0 && (
-        <span className="inline-flex items-center gap-1 text-xs font-regular text-fg-subtle">
+        <span
+          id={lockLabelId}
+          className="inline-flex items-center gap-1 text-xs font-regular text-fg-muted"
+        >
           <LockSimpleIcon aria-hidden weight="bold" className="size-3" />
           {required.map((channel) => channel.label).join(' and ')} always on
         </span>
