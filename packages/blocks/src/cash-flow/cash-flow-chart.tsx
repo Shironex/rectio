@@ -22,7 +22,7 @@ import {
 
 import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
-import { ChartFigure, ChartTooltip, activeDatum, chartColor } from '../lib/chart';
+import { ChartFigure, ChartTooltip, TOOLTIP_LIFT, activeDatum, chartColor } from '../lib/chart';
 import { Figures } from '../lib/figures';
 import { formatCompactMoney, resolveLocale } from '../lib/finance';
 import { Segmented } from '../lib/segmented';
@@ -207,8 +207,9 @@ export function CashFlowChart({
           <Tooltip
             content={tooltip}
             cursor={{ fill: 'var(--rx-surface-hover)' }}
-            // Pinned to the top of the plot, so the tooltip never covers the bars it describes.
-            position={{ y: 0 }}
+            // Above the plot, over the legend, so the tooltip never covers the bars it describes.
+            position={{ y: -TOOLTIP_LIFT }}
+            allowEscapeViewBox={{ x: false, y: true }}
             offset={16}
             isAnimationActive={false}
           />

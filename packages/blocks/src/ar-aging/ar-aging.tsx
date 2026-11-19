@@ -24,7 +24,14 @@ import {
 
 import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
-import { ChartFigure, ChartTooltip, activeDatum, chartColor, type ChartColor } from '../lib/chart';
+import {
+  ChartFigure,
+  ChartTooltip,
+  TOOLTIP_LIFT,
+  activeDatum,
+  chartColor,
+  type ChartColor,
+} from '../lib/chart';
 import { formatCompactMoney, formatPercent, resolveLocale } from '../lib/finance';
 import { AGING_BUCKETS, agingReport, type AgingBucket, type Receivable } from './ar-aging.logic';
 
@@ -171,8 +178,9 @@ export function ArAging({
           <Tooltip
             content={tooltip}
             cursor={{ fill: 'var(--rx-surface-hover)' }}
-            // Pinned to the top of the plot, so the tooltip never covers the bars it describes.
-            position={{ y: 0 }}
+            // Above the plot, over the legend, so the tooltip never covers the bars it describes.
+            position={{ y: -TOOLTIP_LIFT }}
+            allowEscapeViewBox={{ x: false, y: true }}
             offset={16}
             isAnimationActive={false}
           />
@@ -193,7 +201,8 @@ export function ArAging({
               dataKey="amount"
               position="top"
               offset={6}
-              className="fill-fg font-medium"
+              // On a narrow block the labels would collide; the table below carries the figures.
+              className="hidden fill-fg font-medium @lg:inline"
               formatter={(value: unknown) =>
                 typeof value === 'number' ? formatCompactMoney(value, currency, locale) : ''
               }
@@ -236,12 +245,12 @@ export function ArAging({
               </TableCell>
               {AGING_BUCKETS.map((bucket) => (
                 <TableCell key={bucket} align="end" className="hidden @4xl:table-cell">
-                  <Money
-                    amount={row.buckets[bucket]}
-                    currency={currency}
-                    locale={locale}
-                    className={cn(row.buckets[bucket] === 0 && 'text-fg-subtle')}
-                  />
+                  {row.buckets[bucket] === 0 ? (
+                    // Blank, so the amounts and their staircase read at a glance.
+                    <span className="sr-only">None</span>
+                  ) : (
+                    <Money amount={row.buckets[bucket]} currency={currency} locale={locale} />
+                  )}
                 </TableCell>
               ))}
               <TableCell align="end">

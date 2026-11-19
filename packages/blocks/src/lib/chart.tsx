@@ -132,6 +132,9 @@ export function ChartTooltip({ title, rows, currency, locale }: ChartTooltipProp
   );
 }
 
+/** How far above the plot a tooltip sits, in px: clear of the bars, over the legend row. */
+export const TOOLTIP_LIFT = 96;
+
 /** The hovered or focused datum: Recharts' active index, read back into the chart's own data. */
 export function activeDatum<T>(props: TooltipContentProps, data: readonly T[]): T | undefined {
   if (!props.active) return undefined;

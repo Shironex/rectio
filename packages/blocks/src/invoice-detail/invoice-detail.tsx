@@ -238,22 +238,25 @@ export function InvoiceDetail({
           {invoice.notes !== undefined && <p className="text-sm text-fg-muted">{invoice.notes}</p>}
         </div>
 
-        <dl className="grid min-w-72 grid-cols-2 gap-x-8 gap-y-1.5 text-sm @2xl:max-w-sm">
+        <dl className="grid min-w-0 grid-cols-2 gap-x-6 gap-y-1.5 px-(--rx-table-cell-padding-x) text-sm @2xl:min-w-72 @2xl:max-w-sm @2xl:px-0">
           <dt className="text-fg-muted">Subtotal</dt>
           <dd className="text-end">{money(totals.subtotal)}</dd>
           {totals.vat.map((group) => (
             <div key={group.rate} className="contents">
               <dt className="text-fg-muted">
-                VAT {formatPercent(group.rate, locale, { digits: 0 })}{' '}
-                <span className="text-fg-subtle">on {money(group.net)}</span>
+                VAT {formatPercent(group.rate, locale, { digits: 0 })}
+                <span className="block text-fg-subtle @2xl:inline">
+                  <span className="hidden @2xl:inline"> </span>on {money(group.net)}
+                </span>
               </dt>
               <dd className="text-end">{money(group.vat)}</dd>
             </div>
           ))}
-          <dt className="border-t border-line-strong pt-2 font-medium">Total</dt>
-          <dd className="border-t border-line-strong pt-2 text-end">
-            {money(totals.total, 'text-base font-strong')}
-          </dd>
+          {/* One rule across the row, not one per cell with the column gap between them. */}
+          <div className="col-span-2 grid grid-cols-subgrid border-t border-line-strong pt-2">
+            <dt className="font-medium">Total</dt>
+            <dd className="text-end">{money(totals.total, 'text-base font-strong')}</dd>
+          </div>
           {totals.paid > 0 && (
             <>
               <dt className="text-fg-muted">Paid</dt>
@@ -262,7 +265,7 @@ export function InvoiceDetail({
           )}
           {state !== 'draft' && state !== 'void' && (
             // One tinted row for the figure the page exists to answer.
-            <div className="col-span-2 mt-1 grid grid-cols-2 items-baseline gap-x-8 rounded-control bg-surface-sunken px-3 py-2">
+            <div className="col-span-2 mt-1 grid grid-cols-subgrid items-baseline rounded-control bg-surface-sunken py-2 -mx-3 px-3">
               <dt className="font-medium">Balance due</dt>
               <dd className={cn('text-end', state === 'overdue' && 'text-negative-strong')}>
                 {money(totals.balance, 'text-lg font-strong')}

@@ -51,7 +51,7 @@ function VarianceCell({ v, currency, locale }: { v: Variance; currency: string; 
   return (
     <span
       className={cn(
-        'flex flex-col items-end whitespace-nowrap',
+        'flex flex-col items-end',
         v.favourable === true && 'text-positive-strong',
         v.favourable === false && 'text-negative-strong',
         v.favourable === null && 'text-fg-muted',
@@ -135,7 +135,7 @@ export function BudgetVsActual({
       className={className}
       bodyClassName="gap-3"
     >
-      <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-fg-muted">
+      <ul className="hidden flex-wrap items-center gap-x-4 gap-y-1 text-sm text-fg-muted @2xl:flex">
         <li className="inline-flex items-center gap-1.5">
           <span
             aria-hidden
@@ -205,7 +205,7 @@ export function BudgetVsActual({
           <TableRow>
             <TableHead scope="row" className="text-fg">
               Total
-              <span className="block text-sm font-regular text-fg-muted @xl:hidden">
+              <span className="block text-sm font-regular whitespace-normal text-fg-muted @xl:hidden">
                 <Money amount={summary.actual} currency={currency} locale={locale} /> of{' '}
                 <Money amount={summary.budget} currency={currency} locale={locale} />
               </span>
