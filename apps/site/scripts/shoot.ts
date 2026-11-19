@@ -135,11 +135,21 @@ try {
           scripts.add(new URL(response.url()).pathname);
       });
       await page.addInitScript(() => {
-        const w = window as unknown as { __lcp: number; __cls: number };
+        const w = window as unknown as { __lcp: number; __cls: number; __lcpEl: string | null };
         w.__lcp = 0;
         w.__cls = 0;
+        w.__lcpEl = null;
         new PerformanceObserver((list) => {
-          for (const e of list.getEntries()) w.__lcp = e.startTime;
+          for (const e of list.getEntries() as (PerformanceEntry & {
+            element?: Element | null;
+          })[]) {
+            w.__lcp = e.startTime;
+            const el = e.element;
+            w.__lcpEl =
+              el == null
+                ? null
+                : `${el.tagName.toLowerCase()}: ${el.textContent.trim().slice(0, 60)}`;
+          }
         }).observe({ type: 'largest-contentful-paint', buffered: true });
         new PerformanceObserver((list) => {
           for (const e of list.getEntries() as (PerformanceEntry & {
@@ -149,24 +159,23 @@ try {
             if (!e.hadRecentInput) w.__cls += e.value;
         }).observe({ type: 'layout-shift', buffered: true });
       });
+      // Phones are measured as a mid-range phone on a fast 4G link, desktops unthrottled.
+      if (view.mobile) {
+        const cdp = await context.newCDPSession(page);
+        await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+        await cdp.send('Network.enable');
+        await cdp.send('Network.emulateNetworkConditions', {
+          offline: false,
+          latency: 150,
+          downloadThroughput: (9 * 1024 * 1024) / 8,
+          uploadThroughput: (1.5 * 1024 * 1024) / 8,
+        });
+      }
       await page.goto(base + entry.path, { waitUntil: 'networkidle' });
       await page.waitForTimeout(800);
       const { lcp, cls, lcpElement } = await page.evaluate(() => {
-        const w = window as unknown as { __lcp: number; __cls: number };
-        const entries = performance.getEntriesByType(
-          'largest-contentful-paint',
-        ) as (PerformanceEntry & {
-          element?: Element;
-        })[];
-        const last = entries.at(-1)?.element;
-        return {
-          lcp: Math.round(w.__lcp),
-          cls: Number(w.__cls.toFixed(4)),
-          lcpElement:
-            last === undefined
-              ? null
-              : `${last.tagName.toLowerCase()}: ${last.textContent.trim().slice(0, 60)}`,
-        };
+        const w = window as unknown as { __lcp: number; __cls: number; __lcpEl: string | null };
+        return { lcp: Math.round(w.__lcp), cls: Number(w.__cls.toFixed(4)), lcpElement: w.__lcpEl };
       });
       let raw = 0;
       let gzip = 0;
@@ -176,6 +185,7 @@ try {
         gzip += gzipSync(bytes).length;
       }
       metrics[`${entry.name}/${view.name}`] = {
+        throttled: view.mobile ? '4x CPU, 9 Mbps, 150 ms' : 'none',
         lcpMs: lcp,
         lcpElement,
         cls,
