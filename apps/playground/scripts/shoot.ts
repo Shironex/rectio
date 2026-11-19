@@ -199,6 +199,9 @@ try {
   const phone = await browser.newPage({
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 2,
+    // A touch screen, so coarse pointer sizes (44px days and checkbox areas) apply.
+    isMobile: true,
+    hasTouch: true,
   });
   await phone.goto(`${base}?view=app&theme=ledger&mode=dark`);
   await settle(phone);
