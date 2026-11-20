@@ -20,7 +20,7 @@ export function Footer() {
           <p className="text-sm text-fg-muted">Made by noctcore.</p>
         </div>
         <nav aria-label="Footer">
-          <ul className="grid grid-cols-3 gap-x-6 gap-y-2 sm:flex sm:flex-wrap">
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-2 sm:flex sm:flex-wrap">
             {LINKS.map((l) => (
               <li key={l.href}>
                 <Link

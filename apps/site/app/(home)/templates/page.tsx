@@ -43,7 +43,7 @@ export default function TemplatesPage() {
             {templates.map((template, i) => (
               <li
                 key={template.name}
-                className="site-reveal group grid grid-cols-1 items-center gap-8 border-t border-line py-12 first:border-t-0 first:pt-0 md:py-16 lg:grid-cols-12 lg:gap-12"
+                className="site-reveal group grid grid-cols-1 items-center gap-6 border-t border-line py-10 first:border-t-0 sm:gap-8 first:pt-0 md:py-16 lg:grid-cols-12 lg:gap-12"
               >
                 <Link
                   href={template.previewHref}
