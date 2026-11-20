@@ -29,6 +29,7 @@ import { useEffect, useId, useRef, useState, type ReactNode, type SyntheticEvent
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
+import { EmptyNote } from '../../lib/empty-note';
 import { formatShortDate, resolveLocale } from '../../lib/finance';
 import { StateBadge } from '../../lib/state-badge';
 import { FormMessage } from '../lib/auth';
@@ -248,42 +249,35 @@ export function ApiKeys({
       {keys.length === 0 ? (
         !showForm &&
         createdKey === undefined && (
-          <div
-            role="status"
-            className="flex flex-col items-center gap-3 rounded-control border border-dashed border-line px-4 py-10 text-center"
+          <EmptyNote
+            icon={KeyIcon}
+            title="No API keys yet"
+            action={
+              onCreate === undefined && docsHref === undefined ? undefined : (
+                <span className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                  {onCreate !== undefined && (
+                    <Button
+                      ref={createButtonRef}
+                      onClick={() => {
+                        setCreating(true);
+                      }}
+                    >
+                      <PlusIcon aria-hidden weight="bold" className="size-4" />
+                      Create key
+                    </Button>
+                  )}
+                  {docsHref !== undefined && (
+                    <a href={docsHref} className={cn(inlineLink, 'text-sm')}>
+                      Read the API docs
+                    </a>
+                  )}
+                </span>
+              )
+            }
           >
-            <span
-              aria-hidden
-              className="inline-flex size-10 items-center justify-center rounded-full bg-surface-sunken text-fg-muted ring-1 ring-line"
-            >
-              <KeyIcon weight="bold" className="size-5" />
-            </span>
-            <div className="flex max-w-md flex-col gap-1">
-              <p className="font-medium">No API keys yet</p>
-              <p className="text-sm text-pretty text-fg-muted">
-                Keys let your scripts and servers call the API as your workspace. Make one per place
-                that calls it, so you can revoke one without the others.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-              {onCreate !== undefined && (
-                <Button
-                  ref={createButtonRef}
-                  onClick={() => {
-                    setCreating(true);
-                  }}
-                >
-                  <PlusIcon aria-hidden weight="bold" className="size-4" />
-                  Create key
-                </Button>
-              )}
-              {docsHref !== undefined && (
-                <a href={docsHref} className={cn(inlineLink, 'text-sm')}>
-                  Read the API docs
-                </a>
-              )}
-            </div>
-          </div>
+            Keys let your scripts and servers call the API as your workspace. Make one per place
+            that calls it, so you can revoke one without the others.
+          </EmptyNote>
         )
       ) : (
         <>

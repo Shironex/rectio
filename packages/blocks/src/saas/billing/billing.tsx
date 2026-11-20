@@ -5,7 +5,7 @@ import {
   PlusIcon,
   WarningCircleIcon,
 } from '@phosphor-icons/react';
-import { Badge, cn } from '@rectio/ui';
+import { Badge, Meter, cn } from '@rectio/ui';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
@@ -13,7 +13,7 @@ import { EmptyNote } from '../../lib/empty-note';
 import { formatLongDate, formatShortDate, resolveLocale } from '../../lib/finance';
 import { StateBadge } from '../../lib/state-badge';
 import { useNow } from '../lib/focus';
-import { UsageMeter } from '../lib/meter';
+import { USAGE_NOTE, USAGE_TONE } from '../lib/styles';
 import { numberFormat, countLabel } from '../lib/saas';
 import {
   billingCardState,
@@ -199,6 +199,7 @@ export function Billing({
               {usage.map((item) => {
                 const level = billingUsageLevel(item.used, item.limit);
                 const format = numberFormat(locale);
+                const valueText = `${format.format(item.used)} of ${format.format(item.limit)} ${item.unit}`;
                 const seatsFull =
                   onAddSeats !== undefined &&
                   (item.id === 'seats' || item.unit === 'seats') &&
@@ -206,20 +207,28 @@ export function Billing({
                   item.used >= item.limit;
                 return (
                   <div key={item.id} className="flex flex-col items-start gap-1">
-                    <UsageMeter
+                    <Meter
+                      variant="bar"
                       className="w-full"
                       label={item.label}
-                      value={item.used}
+                      value={Math.min(Math.max(item.used, 0), item.limit)}
                       max={item.limit}
-                      level={level}
-                      valueText={`${format.format(item.used)} of ${format.format(item.limit)} ${item.unit}`}
-                      note={billingUsageNote(
-                        item,
-                        locale,
-                        item.resetsOn === undefined
-                          ? null
-                          : `on ${formatLongDate(item.resetsOn, locale)}`,
-                      )}
+                      tone={USAGE_TONE[level]}
+                      getAriaValueText={() => valueText}
+                      description={
+                        <span className="flex flex-col gap-0.5 text-sm">
+                          <span className="numeric">{valueText}</span>
+                          <span className={USAGE_NOTE[level]}>
+                            {billingUsageNote(
+                              item,
+                              locale,
+                              item.resetsOn === undefined
+                                ? null
+                                : `on ${formatLongDate(item.resetsOn, locale)}`,
+                            )}
+                          </span>
+                        </span>
+                      }
                     />
                     {seatsFull && (
                       <Button variant="secondary" size="sm" className="mt-1" onClick={onAddSeats}>

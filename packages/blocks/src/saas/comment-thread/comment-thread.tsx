@@ -23,6 +23,7 @@ import {
   FieldError,
   FieldLabel,
   Input,
+  Kbd,
   cn,
 } from '@rectio/ui';
 import {
@@ -32,7 +33,6 @@ import {
   useState,
   useSyncExternalStore,
   type KeyboardEvent,
-  type ReactNode,
   type SyntheticEvent,
 } from 'react';
 
@@ -558,17 +558,8 @@ function Composer({
             </Button>
           )}
           <span className="ms-2 hidden items-center gap-1 text-sm text-fg-subtle pointer-fine:inline-flex">
-            <Keycap>
-              {modifier === 'Cmd' ? (
-                <>
-                  <span aria-hidden>⌘</span>
-                  <span className="sr-only">Command</span>
-                </>
-              ) : (
-                'Ctrl'
-              )}
-            </Keycap>
-            <Keycap>Enter</Keycap>
+            <Kbd>{modifier === 'Cmd' ? '⌘' : 'Ctrl'}</Kbd>
+            <Kbd>Enter</Kbd>
             <span className="ms-1">to send</span>
           </span>
         </span>
@@ -585,15 +576,6 @@ function Composer({
         </Button>
       </div>
     </form>
-  );
-}
-
-/** A key drawn as a small cap, from the sunken surface and a hairline. */
-function Keycap({ children }: { children: ReactNode }) {
-  return (
-    <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded-badge border border-line bg-surface-sunken px-1.5 font-sans text-xs text-fg-muted">
-      {children}
-    </kbd>
   );
 }
 

@@ -14,7 +14,7 @@ import {
   UserFocusIcon,
   type Icon,
 } from '@phosphor-icons/react';
-import { cn } from '@rectio/ui';
+import { EmptyState, cn } from '@rectio/ui';
 import { useState, type ReactNode } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
@@ -200,28 +200,30 @@ function NotificationsBody({
     const EmptyIcon = none ? BellSlashIcon : CheckCircleIcon;
     content = (
       // The panel is already a surface, so the empty state sits in it without a box of its own.
-      <div role="status" className="flex flex-col items-center gap-3 px-6 py-10 text-center">
-        <EmptyIcon aria-hidden weight="duotone" className="size-8 text-fg-subtle" />
-        <div className="flex flex-col gap-1">
-          <p className="font-medium">{none ? 'No notifications yet' : 'You are all caught up'}</p>
-          <p className="max-w-xs text-sm text-pretty text-fg-muted">
-            {none
-              ? 'You will hear here when someone mentions you, assigns you work or your plan changes.'
-              : 'Every notification is read. Earlier ones stay under All.'}
-          </p>
-        </div>
-        {!none && (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setFilter('all');
-            }}
-          >
-            Show all
-          </Button>
-        )}
-      </div>
+      <EmptyState
+        role="status"
+        size="sm"
+        icon={<EmptyIcon aria-hidden weight="duotone" />}
+        title={none ? 'No notifications yet' : 'You are all caught up'}
+        description={
+          none
+            ? 'You will hear here when someone mentions you, assigns you work or your plan changes.'
+            : 'Every notification is read. Earlier ones stay under All.'
+        }
+        actions={
+          none ? undefined : (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setFilter('all');
+              }}
+            >
+              Show all
+            </Button>
+          )
+        }
+      />
     );
   } else {
     content = (

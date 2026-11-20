@@ -35,6 +35,7 @@ import {
   FieldError,
   FieldLabel,
   Input,
+  Meter,
   Table,
   TableBody,
   TableCaption,
@@ -52,10 +53,9 @@ import { ChoiceSelect, type Choice } from '../../lib/choice-select';
 import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
-import { UsageMeter } from '../lib/meter';
 import { useNow } from '../lib/focus';
 import { formatBytes, formatDateTime, isoDateTime, countLabel, relativeTime } from '../lib/saas';
-import { focusRing } from '../lib/styles';
+import { USAGE_NOTE, USAGE_TONE, focusRing } from '../lib/styles';
 import {
   fileEntriesSize,
   fileKindOf,
@@ -673,16 +673,26 @@ export function FileManager({
             </Table>
           </div>
           {storage !== undefined && (
-            <UsageMeter
+            <Meter
+              variant="bar"
               className="w-full"
               label="Storage"
-              value={storage.used}
+              value={Math.min(Math.max(storage.used, 0), storage.total)}
               max={storage.total}
-              valueText={`${formatBytes(storage.used, locale)} of ${formatBytes(storage.total, locale)}`}
-              level={storageLevel(storage)}
-              note={
-                <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                  <span>{storageNote(storage, locale)}</span>
+              tone={USAGE_TONE[storageLevel(storage)]}
+              getAriaValueText={() =>
+                `${formatBytes(storage.used, locale)} of ${formatBytes(storage.total, locale)}`
+              }
+              description={
+                <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm">
+                  <span className="flex flex-wrap items-baseline gap-x-2">
+                    <span className="numeric">
+                      {formatBytes(storage.used, locale)} of {formatBytes(storage.total, locale)}
+                    </span>
+                    <span className={USAGE_NOTE[storageLevel(storage)]}>
+                      {storageNote(storage, locale)}
+                    </span>
+                  </span>
                   {onUpgrade !== undefined &&
                     // A quiet link while there is room; a real button once space runs short.
                     (storageLevel(storage) === 'ok' ? (
