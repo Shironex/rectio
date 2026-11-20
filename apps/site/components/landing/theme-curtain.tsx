@@ -158,7 +158,7 @@ function CompareSlider({ values }: { values: Readout }) {
 }
 
 /**
- * The theme curtain: a persistent Calm or Ledger switch for the whole page, opening the new look
+ * The theme curtain: a persistent Default or Ledger switch for the whole page, opening the new look
  * as a circle from the pressed option, and the two themes side by side under a draggable split.
  */
 export function ThemeCurtain({ values }: { values: Readout }) {
@@ -184,7 +184,7 @@ export function ThemeCurtain({ values }: { values: Readout }) {
             size="md"
             value={look}
             options={[
-              { value: 'calm', label: 'Calm' },
+              { value: 'calm', label: 'Default' },
               { value: 'ledger', label: 'Ledger' },
             ]}
             onChange={(next, origin) => {
