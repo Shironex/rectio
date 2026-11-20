@@ -117,6 +117,7 @@ function renderBlock(
           invoice={data.invoiceDocument(locale.rate, pl)}
           today={data.TODAY}
           onRecordPayment={() => undefined}
+          onSendReminder={() => undefined}
           onDownload={() => undefined}
         />
       );

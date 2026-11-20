@@ -1,4 +1,9 @@
-import { DownloadSimpleIcon, PaperPlaneTiltIcon, ReceiptIcon } from '@phosphor-icons/react';
+import {
+  BellRingingIcon,
+  DownloadSimpleIcon,
+  PaperPlaneTiltIcon,
+  ReceiptIcon,
+} from '@phosphor-icons/react';
 import {
   Table,
   TableBody,
@@ -38,6 +43,11 @@ export interface InvoiceDetailProps {
   onRecordPayment?: () => void;
   /** Shown for drafts. */
   onSend?: () => void;
+  /**
+   * Chases the buyer for the open balance. Shown while the invoice is unpaid (due, part paid or
+   * overdue); never on drafts, void or paid invoices.
+   */
+  onSendReminder?: () => void;
   onDownload?: () => void;
   /** The block's words; pass the keys you change. See `INVOICE_DETAIL_MESSAGES`. */
   messages?: Partial<InvoiceDetailMessages>;
@@ -53,6 +63,7 @@ export interface InvoiceDetailMessages extends CommonMessages {
   dueDescription: (due: string) => string;
   pdf: string;
   sendInvoice: string;
+  sendReminder: string;
   recordPayment: string;
   billedTo: string;
   from: string;
@@ -88,6 +99,7 @@ export const INVOICE_DETAIL_MESSAGES: InvoiceDetailMessages = {
   dueDescription: (due) => `Due ${due}`,
   pdf: 'PDF',
   sendInvoice: 'Send invoice',
+  sendReminder: 'Send reminder',
   recordPayment: 'Record payment',
   billedTo: 'Billed to',
   from: 'From',
@@ -165,6 +177,7 @@ export function InvoiceDetail({
   today = new Date(),
   onRecordPayment,
   onSend,
+  onSendReminder,
   onDownload,
   messages,
   className,
@@ -208,6 +221,12 @@ export function InvoiceDetail({
             <Button onClick={onSend}>
               <PaperPlaneTiltIcon aria-hidden weight="bold" className="size-4" />
               {m.sendInvoice}
+            </Button>
+          )}
+          {open && onSendReminder !== undefined && (
+            <Button variant="secondary" onClick={onSendReminder}>
+              <BellRingingIcon aria-hidden weight="bold" className="size-4" />
+              {m.sendReminder}
             </Button>
           )}
           {open && onRecordPayment !== undefined && (

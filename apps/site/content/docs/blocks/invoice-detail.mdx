@@ -54,6 +54,11 @@ tab shows the preview's usage. The block's own source comes with the license.
     today: { type: 'Date', default: 'new Date()' },
     onRecordPayment: { type: '() => void', description: 'Shown while a balance is open.' },
     onSend: { type: '() => void', description: 'Shown for drafts.' },
+    onSendReminder: {
+      type: '() => void',
+      description:
+        'Chases the buyer for the open balance. Shown while the invoice is unpaid (due, part paid or overdue).',
+    },
     onDownload: { type: '() => void', description: 'Shows a PDF button.' },
     messages: {
       type: 'Partial<InvoiceDetailMessages>',

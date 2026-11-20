@@ -242,12 +242,6 @@ export function InvoiceDetailPage({ id }: { id: string }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {open && (
-              <Button variant="secondary" onClick={remind}>
-                <BellRingingIcon aria-hidden weight="bold" className="size-4" />
-                Send reminder
-              </Button>
-            )}
             <Menu>
               <MenuTrigger
                 render={
@@ -307,6 +301,7 @@ export function InvoiceDetailPage({ id }: { id: string }) {
             onRecordPayment={() => {
               setPaying(true);
             }}
+            onSendReminder={remind}
             onSend={() => {
               setDocument({ ...document, status: 'sent' });
               toast.add({
