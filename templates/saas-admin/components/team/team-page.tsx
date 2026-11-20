@@ -37,7 +37,7 @@ function RolesTable() {
           <TableCaption className="sr-only">What each role can do</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="ps-5">Permission</TableHead>
+              <TableHead className="min-w-44 ps-5">Permission</TableHead>
               {ROLES.map((role) => (
                 <TableHead key={role} align="center">
                   <abbr title={ROLE_HINTS[role]} className="no-underline">
