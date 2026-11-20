@@ -1,10 +1,31 @@
 {
   "name": "@rectio/cli",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
+  "description": "The rectio CLI: set up a React project, add components, blocks and themes from the rectio registry, and diff them against upstream. Includes a read-only MCP server.",
+  "keywords": [
+    "rectio",
+    "cli",
+    "react",
+    "tailwindcss",
+    "components",
+    "ui",
+    "design-system",
+    "registry",
+    "mcp",
+    "finance"
+  ],
+  "homepage": "https://shironex.github.io/rectio/",
+  "bugs": {
+    "url": "https://github.com/Shironex/rectio/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shironex/rectio.git",
+    "directory": "packages/cli"
+  },
   "license": "MIT",
+  "author": "Shironex",
   "type": "module",
-  "description": "The rectio CLI: init a project, add components, blocks and themes from the rectio registry, diff them against upstream.",
   "engines": {
     "node": ">=22.12"
   },
@@ -12,8 +33,13 @@
     "rectio": "./dist/bin.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "test": "vitest run",
