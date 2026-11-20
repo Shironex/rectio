@@ -33,6 +33,8 @@ export default tseslint.config(
       '**/out/**',
       '**/.source/**',
       '**/next-env.d.ts',
+      '.preview-builds/**',
+      '**/.previews/**',
     ],
   },
 

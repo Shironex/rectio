@@ -17,6 +17,11 @@ const TYPES: Record<string, string> = {
   '.woff': 'font/woff',
   '.png': 'image/png',
   '.ico': 'image/x-icon',
+  '.webp': 'image/webp',
+  '.jpg': 'image/jpeg',
+  '.avif': 'image/avif',
+  '.xml': 'application/xml; charset=utf-8',
+  '.webmanifest': 'application/manifest+json',
 };
 
 function resolveFile(root: string, url: string): string | null {
