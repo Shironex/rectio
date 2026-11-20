@@ -1,11 +1,11 @@
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
 
-import { readFreeSource } from './source';
+import { readComponentSource } from './source';
 
-/** The full source of a free component, folded away at the end of its page. */
+/** The full source of a component, folded away at the end of its page. */
 export async function ComponentSource({ path }: { path: string }) {
-  const code = await readFreeSource(path);
+  const code = await readComponentSource(path);
   const file = path.split('/').at(-1) ?? path;
   return (
     <Accordions>

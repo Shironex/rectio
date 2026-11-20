@@ -1,14 +1,12 @@
 'use client';
 
 import { Tabs } from '@base-ui/react/tabs';
-import { LockSimpleIcon } from '@phosphor-icons/react';
 import { ThemeScope, cn } from '@rectio/ui';
 import { useState, type ReactNode } from 'react';
 
 import { MODES, THEMES, type Mode, type ThemeId } from '@/lib/site';
 import { useSiteTheme } from '@/lib/use-site-theme';
 
-import { ProBadge } from '../pro-badge';
 import { Segmented } from '../segmented';
 
 type Variant = 'plain' | 'motion';
@@ -24,14 +22,17 @@ export function PreviewShell({
   plain,
   motion,
   code,
+  motionCode,
   importLine,
   align = 'center',
 }: {
   plain: ReactNode;
-  /** The motion add-on's variant, when the component has one. Rendered live; its source is Pro. */
+  /** The motion add-on's variant, when the component has one. Rendered live. */
   motion?: ReactNode;
   code: ReactNode;
-  /** How the motion variant is imported, shown in place of its source. */
+  /** The motion variant's demo code, shown in the Code tab while the variant is on. */
+  motionCode?: ReactNode;
+  /** How the motion variant is imported, shown when it has no demo code of its own. */
   importLine?: string | undefined;
   align?: 'center' | 'start' | undefined;
 }) {
@@ -95,23 +96,18 @@ export function PreviewShell({
         </ThemeScope>
       </Tabs.Panel>
       <Tabs.Panel value="code" className="max-h-128 overflow-auto">
-        {isMotion ? <LockedSource importLine={importLine} /> : code}
+        {isMotion ? (motionCode ?? <MotionImport importLine={importLine} />) : code}
       </Tabs.Panel>
     </Tabs.Root>
   );
 }
 
-function LockedSource({ importLine }: { importLine: string | undefined }) {
+/** A motion variant without a demo file of its own: the usage is the plain one, from another path. */
+function MotionImport({ importLine }: { importLine: string | undefined }) {
   return (
     <div className="flex flex-col gap-3 p-6">
-      <p className="flex items-center gap-2 text-sm font-medium text-fg">
-        <LockSimpleIcon aria-hidden weight="bold" className="size-4 text-fg-muted" />
-        The motion variant is part of rectio Pro
-        <ProBadge />
-      </p>
       <p className="max-w-prose text-sm text-fg-muted">
-        The preview is the real component. Its source comes with a Pro license and is not shown
-        here; the usage is the same as the plain example, from another import path.
+        The usage is the same as the plain example, from another import path.
       </p>
       {importLine !== undefined && (
         <code className="w-fit rounded-control border border-line bg-surface-sunken px-2 py-1 font-mono text-sm text-fg">
