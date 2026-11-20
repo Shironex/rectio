@@ -59,11 +59,10 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the maintainer privately, through a direct message to one of the
-contacts linked on the maintainer's GitHub profile
-(<https://github.com/Shironex>). Start the message with "rectio Code of
-Conduct". Do not post the report in a public issue or discussion.
-<!-- TODO(coordinator): confirm the conduct contact, or replace it with a dedicated address. -->
+reported to the maintainer privately. Reach the maintainer through the contact
+listed on their GitHub profile at <https://github.com/Shironex>, and start the
+message with "rectio Code of Conduct". Do not post the report in a public issue
+or discussion.
 
 All complaints will be reviewed and investigated promptly and fairly.
 
