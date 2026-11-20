@@ -102,6 +102,8 @@ function HiddenLevels({
       <Menu>
         <MenuTrigger
           aria-label={label}
+          // The dots alone say nothing to a sighted pointer user; the name shows on hover too.
+          title={label}
           className={cn(
             'relative inline-flex h-6 w-7 cursor-pointer items-center justify-center rounded-control text-fg-muted',
             'hover:bg-surface-hover hover:text-fg data-popup-open:bg-surface-hover',

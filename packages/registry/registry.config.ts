@@ -737,7 +737,7 @@ export default defineRegistry({
     {
       name: 'breadcrumb',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Breadcrumb',
       description: 'Where the page sits, with the middle collapsed into a menu when long.',
       categories: ['navigation'],
