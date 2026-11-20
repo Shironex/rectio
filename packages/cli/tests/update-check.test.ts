@@ -7,9 +7,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   CACHE_FILE,
   CHECK_INTERVAL_MS,
+  FAILED_CHECK_INTERVAL_MS,
   LATEST_URL,
   cacheDir,
   checkForUpdate,
+  dlxCacheNote,
   isNewer,
   startUpdateCheck,
   updateCheckEnabled,
@@ -78,7 +80,53 @@ describe('checkForUpdate', () => {
     const dir = cache();
     const fetchFn = vi.fn<typeof fetch>(() => Promise.reject(new TypeError('fetch failed')));
     expect(await checkForUpdate(options({ fetch: fetchFn, cacheDir: dir }))).toBeUndefined();
-    expect(JSON.parse(readFileSync(join(dir, CACHE_FILE), 'utf8'))).toEqual({ checkedAt: NOW });
+    expect(JSON.parse(readFileSync(join(dir, CACHE_FILE), 'utf8'))).toEqual({
+      checkedAt: NOW,
+      failed: true,
+    });
+  });
+
+  it('retries a failed check after an hour, not a day', async () => {
+    const dir = cache();
+    // npm answers 404 before the first publish.
+    const missing = vi.fn<typeof fetch>(() =>
+      Promise.resolve(new Response('not found', { status: 404 })),
+    );
+    expect(await checkForUpdate(options({ fetch: missing, cacheDir: dir }))).toBeUndefined();
+    expect(JSON.parse(readFileSync(join(dir, CACHE_FILE), 'utf8'))).toEqual({
+      checkedAt: NOW,
+      failed: true,
+    });
+
+    const fetchFn = answering('0.2.0');
+    const soon = NOW + FAILED_CHECK_INTERVAL_MS - 60_000;
+    expect(
+      await checkForUpdate(options({ fetch: fetchFn, cacheDir: dir, now: () => soon })),
+    ).toBeUndefined();
+    expect(fetchFn).not.toHaveBeenCalled();
+
+    const later = NOW + FAILED_CHECK_INTERVAL_MS;
+    expect(await checkForUpdate(options({ fetch: fetchFn, cacheDir: dir, now: () => later }))).toBe(
+      '0.2.0',
+    );
+    expect(fetchFn).toHaveBeenCalledOnce();
+    // A success is kept for the whole day again.
+    expect(JSON.parse(readFileSync(join(dir, CACHE_FILE), 'utf8'))).toEqual({
+      checkedAt: later,
+      latest: '0.2.0',
+    });
+  });
+
+  it('keeps the last known version when a later check fails', async () => {
+    const dir = cache();
+    seed(dir, { checkedAt: NOW - CHECK_INTERVAL_MS, latest: '0.3.0' });
+    const fetchFn = vi.fn<typeof fetch>(() => Promise.reject(new TypeError('fetch failed')));
+    expect(await checkForUpdate(options({ fetch: fetchFn, cacheDir: dir }))).toBe('0.3.0');
+    expect(JSON.parse(readFileSync(join(dir, CACHE_FILE), 'utf8'))).toEqual({
+      checkedAt: NOW,
+      latest: '0.3.0',
+      failed: true,
+    });
   });
 
   it('uses the cache inside 24 hours and asks again after', async () => {
@@ -104,6 +152,31 @@ describe('startUpdateCheck', () => {
     expect(notice).toBe(
       '\nrectio 0.2.0 is available (you have 0.1.0).\nUse it with: pnpm add -g @rectio/cli@latest',
     );
+  });
+
+  it('explains the pnpm dlx cache when started through pnpm dlx', async () => {
+    const dlx = '/Users/me/Library/Caches/pnpm/dlx/xyz/1/node_modules/@rectio/cli/dist/bin.js';
+    const env = { npm_config_user_agent: 'pnpm/10.34.5 npm/? node/v22.23.4 darwin arm64' };
+    const notice = await startUpdateCheck(
+      options({
+        fetch: answering('0.2.0'),
+        cacheDir: cache(),
+        scriptPath: dlx,
+        command: 'init',
+        env,
+      }),
+    );
+    expect(notice).toBe(
+      '\nrectio 0.2.0 is available (you have 0.1.0).\nUse it with: pnpm dlx @rectio/cli@latest init\npnpm caches dlx packages for a day, so add @latest to get the new version now.',
+    );
+    // The dlx path alone, or pnpm alone, is not a dlx run.
+    expect(dlxCacheNote(dlx, {})).toBeUndefined();
+    expect(
+      dlxCacheNote('/usr/local/lib/node_modules/@rectio/cli/dist/bin.js', env),
+    ).toBeUndefined();
+    expect(
+      dlxCacheNote('C:\\Users\\me\\AppData\\Local\\pnpm-cache\\dlx\\x\\bin.js', env),
+    ).toBeDefined();
   });
 
   it('gives up at the timeout instead of waiting for a slow registry', async () => {

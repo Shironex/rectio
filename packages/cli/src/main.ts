@@ -68,12 +68,13 @@ function help(ui: Ui): string[] {
 
 /** The update notice in the same language as the rest: a dim box-free block on stderr. */
 function renderNotice(ui: Ui) {
-  return (current: string, latest: string, how: string): string => {
-    if (!ui.term.fancy) return updateNotice(current, latest, how);
+  return (current: string, latest: string, how: string, note?: string): string => {
+    if (!ui.term.fancy) return updateNotice(current, latest, how, note);
     const { s } = ui;
     return [
       `  ${s.yellow(ui.g.warn)} rectio ${s.bold(latest)} is available ${s.dim(`(you have ${current})`)}`,
       `    ${s.dim('Update with')}  ${s.cyan(how)}`,
+      ...(note === undefined ? [] : [`    ${s.dim(note)}`]),
       '',
     ].join('\n');
   };

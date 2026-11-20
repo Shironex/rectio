@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 /** npm's answer for the newest published @rectio/cli. */
 export const LATEST_URL = 'https://registry.npmjs.org/@rectio/cli/latest';
 export const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
+/** A failed ask (offline, or npm answered 404 before a publish) is retried sooner than a success. */
+export const FAILED_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 export const CHECK_TIMEOUT_MS = 1500;
 export const CACHE_FILE = 'update-check.json';
 
@@ -27,12 +29,14 @@ export interface UpdateCheckOptions {
   /** Where the running CLI lives, to tell dlx and npx runs from global installs. */
   scriptPath?: string;
   /** Formats the notice; the plain updateNotice by default. */
-  render?: (current: string, latest: string, how: string) => string;
+  render?: (current: string, latest: string, how: string, note?: string) => string;
 }
 
 interface CacheRecord {
   checkedAt: number;
   latest?: string;
+  /** The last ask failed: it is retried after FAILED_CHECK_INTERVAL_MS, not a whole day. */
+  failed?: true;
 }
 
 const on = (value: string | undefined) =>
@@ -83,9 +87,11 @@ function readCache(file: string): CacheRecord | undefined {
   try {
     const raw = JSON.parse(readFileSync(file, 'utf8')) as Partial<CacheRecord>;
     if (typeof raw.checkedAt !== 'number') return undefined;
-    return typeof raw.latest === 'string'
-      ? { checkedAt: raw.checkedAt, latest: raw.latest }
-      : { checkedAt: raw.checkedAt };
+    return {
+      checkedAt: raw.checkedAt,
+      ...(typeof raw.latest === 'string' ? { latest: raw.latest } : {}),
+      ...(raw.failed === true ? { failed: true as const } : {}),
+    };
   } catch {
     return undefined;
   }
@@ -112,22 +118,28 @@ async function fetchLatest(fetchFn: typeof fetch, timeoutMs: number): Promise<st
 
 /**
  * The newest version on npm when it is newer than the running one. Asks npm at most once per
- * CHECK_INTERVAL_MS (a failed ask counts too, so an offline machine does not retry every run).
+ * CHECK_INTERVAL_MS after a success, and once per FAILED_CHECK_INTERVAL_MS after a failure, so an
+ * offline machine does not retry every run but a 404 before the first publish clears within an hour.
  */
 export async function checkForUpdate(options: UpdateCheckOptions): Promise<string | undefined> {
   const now = (options.now ?? Date.now)();
   const dir = options.cacheDir ?? cacheDir(options.env, options.platform, options.home);
   const cached = readCache(join(dir, CACHE_FILE));
   let latest = cached?.latest;
+  const interval = cached?.failed === true ? FAILED_CHECK_INTERVAL_MS : CHECK_INTERVAL_MS;
   const fresh =
-    cached !== undefined && now >= cached.checkedAt && now - cached.checkedAt < CHECK_INTERVAL_MS;
+    cached !== undefined && now >= cached.checkedAt && now - cached.checkedAt < interval;
   if (!fresh) {
     const fetched = await fetchLatest(
       options.fetch ?? fetch,
       options.timeoutMs ?? CHECK_TIMEOUT_MS,
     ).catch(() => undefined);
     latest = fetched ?? latest;
-    writeCache(dir, latest === undefined ? { checkedAt: now } : { checkedAt: now, latest });
+    writeCache(dir, {
+      checkedAt: now,
+      ...(latest === undefined ? {} : { latest }),
+      ...(fetched === undefined ? { failed: true as const } : {}),
+    });
   }
   return latest !== undefined && isNewer(latest, options.current) ? latest : undefined;
 }
@@ -145,8 +157,22 @@ export function updateCommand(scriptPath: string, command: string | undefined): 
   return `pnpm dlx @rectio/cli@latest${args}`;
 }
 
-export function updateNotice(current: string, latest: string, how: string): string {
-  return `\nrectio ${latest} is available (you have ${current}).\nUse it with: ${how}`;
+/**
+ * Started through `pnpm dlx` (pnpm's user agent and a path in its dlx cache): pnpm keeps a dlx
+ * package for a day (dlx-cache-max-age), so a plain `pnpm dlx @rectio/cli` can run an older copy.
+ */
+export function dlxCacheNote(
+  scriptPath: string,
+  env: Readonly<Record<string, string | undefined>>,
+): string | undefined {
+  const pnpm = env.npm_config_user_agent?.trim().toLowerCase().startsWith('pnpm/') === true;
+  if (!pnpm || !scriptPath.replaceAll('\\', '/').includes('/dlx/')) return undefined;
+  return 'pnpm caches dlx packages for a day, so add @latest to get the new version now.';
+}
+
+export function updateNotice(current: string, latest: string, how: string, note?: string): string {
+  const text = `\nrectio ${latest} is available (you have ${current}).\nUse it with: ${how}`;
+  return note === undefined ? text : `${text}\n${note}`;
 }
 
 /**
@@ -161,7 +187,8 @@ export function startUpdateCheck(options: UpdateCheckOptions): Promise<string | 
     if (latest === undefined) return undefined;
     const script = options.scriptPath ?? fileURLToPath(import.meta.url);
     const render = options.render ?? updateNotice;
-    return render(options.current, latest, updateCommand(script, options.command));
+    const how = updateCommand(script, options.command);
+    return render(options.current, latest, how, dlxCacheNote(script, options.env));
   })().catch(() => undefined);
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<undefined>((resolve) => {
