@@ -1,5 +1,10 @@
 /* Site-only styles, all on rectio tokens. */
 
+/* The height of the site's top bar (the docs framework draws it), for views that fill the rest. */
+:root {
+  --site-nav-height: 3.5rem;
+}
+
 /*
  * The theme morph. The new theme opens as a circle from the switch that was pressed; with reduced
  * motion it crossfades instead, gentler but still a transition.
@@ -376,5 +381,23 @@ html[data-mode='dark'] .site-shot-dark {
 @media (hover: hover) and (pointer: fine) {
   .group:hover .site-gallery-frame {
     translate: 0 calc(var(--rx-motion-distance-reveal) * -0.5);
+  }
+}
+
+/*
+ * The template viewer: from the small breakpoint up it fills the window under the top bar and the
+ * frame takes the room left; on a phone the page scrolls and the frame is most of a screen tall.
+ */
+.site-viewer-stage {
+  height: 75dvh;
+}
+@media (width >= 40rem) {
+  .site-viewer {
+    height: calc(100dvh - var(--site-nav-height));
+  }
+  .site-viewer-stage {
+    flex: 1;
+    min-height: 0;
+    height: auto;
   }
 }
