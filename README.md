@@ -108,6 +108,18 @@ everywhere without other changes. Its code lives in `app/`, `components/` and `d
 are named imports from package roots; repo-only lines end in `rectio:workspace`. `pnpm --filter
 @rectio/template-<name> shoot` writes the gallery screenshots, `shoot <n>` a design round.
 
+**Live previews.** The site serves every template as its real static build under
+`/preview/<name>/`, and `/templates/<name>` frames it in a viewer (page picker, desktop, tablet and
+phone widths, both themes and modes). The site's `previews` task (`apps/site/scripts/previews.ts`,
+cached by Turborepo on the templates and the kit) builds each template in a scratch copy with
+`PREVIEW_BASE_PATH=/preview/<name>`, which the one `basePath` line in its `next.config` reads
+(marked `rectio:workspace`, so a buyer's copy has no trace of it); the site build copies the result
+into `out/preview/`, marks every page noindex and keeps root-relative `<a>` links inside the
+preview. A new template folder gets its preview with no site change, provided it keeps that
+`basePath` line, routes through `next/link` or the router (never `location.pathname` into the
+router), and keeps its look on `<html>` as `data-theme` and `data-mode` (the viewer sets those).
+`pnpm --filter @rectio/site walk-previews` opens every page of every preview headless after a build.
+
 ## The token rule
 
 Components never hardcode colour, radius, font, shadow, duration or easing. In `packages/ui/src`
