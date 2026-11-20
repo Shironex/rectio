@@ -74,6 +74,19 @@ export const NESTED: [fg: string, bg: string, min: number][] = [
   ]),
 ];
 
+/**
+ * Solid status fills used as a secondary cue: the same meaning is always in words beside them (a
+ * status chip's label, a strength grade, a progress bar's value or label), so the fill is reported,
+ * not gated, in these files. Light amber cannot reach 3:1 on a light surface without changing the
+ * palette, so it relies on this.
+ */
+export const SECONDARY_MARKS: { file: string; tokens: string[] }[] = [
+  { file: 'packages/blocks/src/saas/users-table/users-table.tsx', tokens: ['warning'] },
+  { file: 'packages/blocks/src/saas/lib/password-rules.tsx', tokens: ['warning'] },
+  { file: 'packages/ui/src/progress/progress.tsx', tokens: ['warning'] },
+  { file: 'packages/ui/src/progress-circle/progress-circle.tsx', tokens: ['warning'] },
+];
+
 const UTILITY =
   /^(bg|text|border|ring|outline|fill|stroke|divide|decoration|caret|placeholder)-(surface|fg|line|accent|positive|negative|warning|info|focus|scrim|chart|identity|code)([a-z0-9-]*)(?:\/(\d+))?$/;
 const RESPONSIVE =
@@ -132,6 +145,7 @@ const UI_EDGES = new Set([
   'negative',
   'negative-strong',
   'positive',
+  'warning-strong',
   'focus',
 ]);
 const SOLID_MARK = /^(accent|positive|negative|warning|info)$/;
@@ -222,6 +236,11 @@ export function derivePairs(roots = SCAN_ROOTS): Pair[] {
         const bgFor = (state: string) =>
           bgs.filter((b) => b.state === state).at(-1) ?? bgs.filter((b) => b.state === '').at(-1);
         const hasText = uses.some((u) => u.kind === 'text');
+        // A mark with a solid edge of its own (an amber dot with a darker hairline): the edge is its
+        // boundary and is checked against the surface instead of the fill.
+        const edged = uses.some(
+          (u) => u.kind === 'border' && u.alpha === 1 && u.state === '' && UI_EDGES.has(u.token),
+        );
         const insetOutline = /(?:^|\s)-outline-offset-|outline-offset-\[-/.test(str);
         for (const use of uses) {
           let rule = classify(use);
@@ -231,12 +250,17 @@ export function derivePairs(roots = SCAN_ROOTS): Pair[] {
             rule === undefined &&
             use.kind === 'bg' &&
             !hasText &&
+            !edged &&
             use.alpha === 1 &&
             !/hover|focus|active/.test(use.state) &&
             INDICATOR_FILLS.test(use.token)
           )
             rule = { gate: 'ui', min: 3 };
           if (rule === undefined) continue;
+          const secondary = SECONDARY_MARKS.some(
+            (m) => m.file === where && m.tokens.includes(use.token),
+          );
+          if (secondary) rule = { ...rule, gate: 'info' };
           const own = use.kind === 'bg' ? undefined : bgFor(use.state);
           const partner = partners(use.token);
           const edge = ['border', 'ring', 'divide', 'stroke'].includes(use.kind);
@@ -270,7 +294,7 @@ export function derivePairs(roots = SCAN_ROOTS): Pair[] {
           }
           // A solid status colour with no fill of its own is a mark (an icon, a ring, a stroke).
           const ambientRule =
-            use.kind === 'text' && SOLID_MARK.test(use.token)
+            use.kind === 'text' && SOLID_MARK.test(use.token) && !secondary
               ? { gate: 'ui' as const, min: 3 }
               : rule;
           for (const bg of AMBIENT)
