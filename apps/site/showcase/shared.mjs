@@ -9,8 +9,6 @@ const URL = `http://127.0.0.1:${String(PORT)}/`;
 
 /** Every view the README shows, light and dark. */
 const SHOTS = [
-  { id: 'landing', title: 'Landing', nav: '/', waitFor: 'h1' },
-  { id: 'templates', title: 'Templates gallery', nav: '/templates', waitFor: 'h1' },
   { id: 'finance-app', title: 'Finance app template', nav: '/preview/finance-app/' },
   { id: 'saas-admin', title: 'SaaS admin template', nav: '/preview/saas-admin/' },
   {
@@ -43,8 +41,6 @@ export function rectioShowcase(scheme) {
     viewport: { width: 1440, height: 900 },
     colorScheme: scheme,
     deviceScaleFactor: 1.5,
-    // The landing ticker scrolls on its own; frozen at its start it reads the same on every run.
-    css: '[aria-label="rectio in numbers"] * { animation: none !important; }',
     shots: SHOTS,
     frame: {
       style: 'browser',
