@@ -7,7 +7,7 @@ import { CONFIG_SCHEMA_URL, DEFAULT_REGISTRY, registryUrl } from '../src/core/co
 
 import { cssImports, updateCssEntry } from '../src/core/css-entry.ts';
 import { parseJsonc, readText } from '../src/core/fs.ts';
-import { mergeDependencies } from '../src/core/install.ts';
+import { installCommand, mergeDependencies } from '../src/core/install.ts';
 import type { Lockfile } from '../src/core/lockfile.ts';
 import {
   checkTailwind,
@@ -275,5 +275,17 @@ describe('package.json edits', () => {
     } finally {
       temp.cleanup();
     }
+  });
+});
+
+describe('installCommand', () => {
+  it('lets pnpm and yarn update the lockfile when CI defaults to frozen installs', () => {
+    expect(installCommand('pnpm')).toEqual({ args: ['install', '--no-frozen-lockfile'], env: {} });
+    expect(installCommand('yarn')).toEqual({
+      args: ['install'],
+      env: { YARN_ENABLE_IMMUTABLE_INSTALLS: 'false' },
+    });
+    expect(installCommand('npm')).toEqual({ args: ['install'], env: {} });
+    expect(installCommand('bun')).toEqual({ args: ['install'], env: {} });
   });
 });

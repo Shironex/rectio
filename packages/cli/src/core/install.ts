@@ -45,18 +45,34 @@ export function mergeDependencies(cwd: string, wanted: DependencyChanges): Depen
 }
 
 /**
+ * The install command per manager. The CLI has just added packages to package.json, so the lockfile
+ * is out of date on purpose: pnpm and yarn refuse that when CI is set (frozen or immutable installs
+ * by default), so both are told to update the lockfile.
+ */
+export function installCommand(manager: PackageManager): {
+  args: string[];
+  env: NodeJS.ProcessEnv;
+} {
+  if (manager === 'pnpm') return { args: ['install', '--no-frozen-lockfile'], env: {} };
+  if (manager === 'yarn')
+    return { args: ['install'], env: { YARN_ENABLE_IMMUTABLE_INSTALLS: 'false' } };
+  return { args: ['install'], env: {} };
+}
+
+/**
  * Runs `<manager> install` in the project. On Windows the managers are .cmd shims, which Node only
- * spawns through a shell; the command is then one fixed string (`pnpm install`), never arguments
+ * spawns through a shell; the command is then one fixed string (`pnpm install --no-frozen-lockfile`), never arguments
  * passed beside `shell`, which Node deprecates because a shell would re-split them.
  */
 export function runInstall(cwd: string, manager: PackageManager): Promise<void> {
   const windows = process.platform === 'win32';
+  const { args, env } = installCommand(manager);
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(windows ? `${manager} install` : manager, windows ? [] : ['install'], {
+    const child = spawn(windows ? [manager, ...args].join(' ') : manager, windows ? [] : args, {
       cwd,
       shell: windows,
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: process.env,
+      env: { ...process.env, ...env },
     });
     let output = '';
     child.stdout.on('data', (chunk: Buffer) => (output += chunk.toString()));
