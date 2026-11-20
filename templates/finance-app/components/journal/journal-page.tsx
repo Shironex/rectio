@@ -4,6 +4,7 @@ import { BookOpenTextIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
 import { journalTotals } from '@rectio/blocks';
 import { Ledger } from '@rectio/blocks/motion';
 import { Button, Menu, MenuContent, MenuItem, MenuTrigger, useToast } from '@rectio/ui';
+import { useRouter } from 'next/navigation';
 
 import { CURRENCY, LOCALE } from '@/data/company';
 import { ACCOUNTS, JOURNAL, JOURNAL_PERIOD, OPENING_BALANCES } from '@/data/journal';
@@ -24,6 +25,7 @@ const FORMATS = [
 export function JournalPage() {
   const state = usePageState();
   const toast = useToast();
+  const router = useRouter();
   const accountParam = useQueryParam('account');
   const account = ACCOUNTS.find((a) => a.code === accountParam)?.code ?? 'all';
   const entries = new Set(JOURNAL.map((l) => l.entryId)).size;
@@ -81,13 +83,17 @@ export function JournalPage() {
         />
       ) : (
         <Ledger
-          key={account}
           accounts={ACCOUNTS}
           lines={JOURNAL}
           currency={CURRENCY}
           locale={LOCALE}
           openingBalances={OPENING_BALANCES}
-          defaultAccount={account}
+          account={account}
+          onAccountChange={(next) => {
+            router.replace(next === 'all' ? '/journal' : `/journal?account=${next}`, {
+              scroll: false,
+            });
+          }}
           period={JOURNAL_PERIOD}
         />
       )}
