@@ -1,6 +1,9 @@
 import { join } from 'node:path';
 
+import { REGISTRY_URL } from '@rectio/registry';
 import { afterEach, describe, expect, it } from 'vitest';
+
+import { CONFIG_SCHEMA_URL, DEFAULT_REGISTRY, registryUrl } from '../src/core/config.ts';
 
 import { cssImports, updateCssEntry } from '../src/core/css-entry.ts';
 import { parseJsonc, readText } from '../src/core/fs.ts';
@@ -16,7 +19,7 @@ import {
   resolveAlias,
 } from '../src/core/project.ts';
 import { cssVarsFile, projectContent, rewriteImports } from '../src/core/transform.ts';
-import { tempDir, writeTree } from './helpers.ts';
+import { capture, tempDir, writeTree } from './helpers.ts';
 
 const aliases = {
   ui: '@/components/ui',
@@ -37,6 +40,15 @@ function project(files: Record<string, string>) {
   writeTree(temp.dir, files);
   return temp.dir;
 }
+
+describe('the default registry', () => {
+  it('is the registry under the site on GitHub Pages', () => {
+    expect(DEFAULT_REGISTRY).toBe(REGISTRY_URL);
+    expect(DEFAULT_REGISTRY).toBe('https://shironex.github.io/rectio/r');
+    expect(CONFIG_SCHEMA_URL).toBe(`${REGISTRY_URL}/schema/config.json`);
+    expect(registryUrl(capture('/').ctx, undefined, undefined)).toBe(REGISTRY_URL);
+  });
+});
 
 describe('rewriteImports', () => {
   it('maps every alias key in single and double quotes', () => {

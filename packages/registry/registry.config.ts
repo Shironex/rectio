@@ -2,6 +2,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { defineRegistry } from './src/build/config.ts';
+import { SITE_URL } from './src/site.ts';
 
 const packages = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ui = join(packages, 'ui');
@@ -176,7 +177,7 @@ const docsItems = (
  */
 export default defineRegistry({
   name: 'rectio',
-  homepage: 'https://rectio.dev',
+  homepage: SITE_URL,
   sourceDir: join(ui, 'src'),
   packageJsons: [
     join(ui, 'package.json'),

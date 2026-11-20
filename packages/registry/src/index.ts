@@ -38,6 +38,7 @@ export {
   type IntegrityProblem,
 } from './integrity.ts';
 export { INDEX_PATH, SCHEMA_PATHS, itemPath } from './layout.ts';
+export { REGISTRY_URL, SITE_URL } from './site.ts';
 export { resolveGraph, type GraphNode } from './graph.ts';
 export { jsonSchemas } from './json-schemas.ts';
 export { FRAMEWORKS, configSchema, type Framework, type RectioConfig } from './config-schema.ts';

@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { itemIntegrity, sha256Hex } from '../integrity.ts';
+import { SCHEMA_PATHS } from '../layout.ts';
 import {
   SCHEMA_VERSION,
   TEMPLATE_ALIAS_DIRS,
@@ -12,13 +13,14 @@ import {
   type RegistryIndex,
   type RegistryItem,
 } from '../schema.ts';
+import { REGISTRY_URL } from '../site.ts';
 import type { RegistryConfig } from './config.ts';
 import { buildSourceItems, readRanges, sortRecord, type BuiltFile } from './sources.ts';
 import { buildTemplate, findTemplates } from './templates.ts';
 import { splitTokens } from './themes.ts';
 
-export const ITEM_SCHEMA_URL = 'https://rectio.dev/r/schema/item.json';
-export const INDEX_SCHEMA_URL = 'https://rectio.dev/r/schema/index.json';
+export const ITEM_SCHEMA_URL = `${REGISTRY_URL}/${SCHEMA_PATHS.item}`;
+export const INDEX_SCHEMA_URL = `${REGISTRY_URL}/${SCHEMA_PATHS.index}`;
 const TAILWIND_RANGE = '>=4.0.0';
 const TOKENS_ITEM = 'tokens';
 

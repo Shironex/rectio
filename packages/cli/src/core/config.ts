@@ -1,15 +1,22 @@
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { FRAMEWORKS, configSchema, type Framework, type RectioConfig } from '@rectio/registry';
+import {
+  FRAMEWORKS,
+  REGISTRY_URL,
+  SCHEMA_PATHS,
+  configSchema,
+  type Framework,
+  type RectioConfig,
+} from '@rectio/registry';
 
 import { CliError, type CliContext } from './context.ts';
 import { readJson, writeJson } from './fs.ts';
 
 export const CONFIG_FILE = 'rectio.json';
-export const CONFIG_SCHEMA_URL = 'https://rectio.dev/r/schema/config.json';
-/** Placeholder until the hosted registry exists; override with --registry or RECTIO_REGISTRY_URL. */
-export const DEFAULT_REGISTRY = 'https://rectio.dev/r';
+export const CONFIG_SCHEMA_URL = `${REGISTRY_URL}/${SCHEMA_PATHS.config}`;
+/** The hosted registry; override with --registry or RECTIO_REGISTRY_URL. */
+export const DEFAULT_REGISTRY = REGISTRY_URL;
 
 export { FRAMEWORKS, configSchema, type Framework, type RectioConfig };
 

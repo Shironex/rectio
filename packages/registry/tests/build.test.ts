@@ -13,7 +13,7 @@ import {
   splitBlocks,
   writeRegistry,
 } from '../src/build/index.ts';
-import { registryItemSchema, verifyItem } from '../src/index.ts';
+import { REGISTRY_URL, SITE_URL, registryItemSchema, verifyItem } from '../src/index.ts';
 import { FIXTURE_SOURCES, fixtureConfig, fixtureItem, tempTree } from './helpers.ts';
 
 let cleanups: (() => void)[] = [];
@@ -231,6 +231,14 @@ describe('the token split', () => {
 describe('the rectio registry', () => {
   const result = buildRegistry(config);
   const byName = new Map(result.items.map((i) => [i.name, i]));
+
+  it('points the index and every item at the site on GitHub Pages', () => {
+    expect(SITE_URL).toBe('https://shironex.github.io/rectio');
+    expect(REGISTRY_URL).toBe(`${SITE_URL}/r`);
+    expect(result.index.homepage).toBe(SITE_URL);
+    expect(result.index.$schema).toBe(`${REGISTRY_URL}/schema/index.json`);
+    for (const item of result.items) expect(item.$schema).toBe(`${REGISTRY_URL}/schema/item.json`);
+  });
 
   it('publishes every component, the tokens and one theme item per theme', () => {
     expect([...byName.keys()].sort()).toEqual([
