@@ -166,6 +166,13 @@ function Meta({ label, children }: { label: string; children: ReactNode }) {
 }
 
 /**
+ * On a narrow block the primary action leads on its own full-width row and the others share the
+ * row under it, instead of wrapping ragged with the primary left alone at the end.
+ */
+const NARROW_PRIMARY = '@max-md:order-first @max-md:basis-full';
+const NARROW_SECONDARY = '@max-md:grow';
+
+/**
  * One invoice as the reader checks it: who billed whom, each line with its VAT rate, the totals
  * per rate, what has been paid and what is still owed. Totals are computed here from the lines,
  * in minor units, so the document always adds up.
@@ -212,25 +219,25 @@ export function InvoiceDetail({
       actions={
         <>
           {onDownload !== undefined && (
-            <Button variant="secondary" onClick={onDownload}>
+            <Button variant="secondary" onClick={onDownload} className={NARROW_SECONDARY}>
               <DownloadSimpleIcon aria-hidden weight="bold" className="size-4" />
               {m.pdf}
             </Button>
           )}
           {state === 'draft' && onSend !== undefined && (
-            <Button onClick={onSend}>
+            <Button onClick={onSend} className={NARROW_PRIMARY}>
               <PaperPlaneTiltIcon aria-hidden weight="bold" className="size-4" />
               {m.sendInvoice}
             </Button>
           )}
           {open && onSendReminder !== undefined && (
-            <Button variant="secondary" onClick={onSendReminder}>
+            <Button variant="secondary" onClick={onSendReminder} className={NARROW_SECONDARY}>
               <BellRingingIcon aria-hidden weight="bold" className="size-4" />
               {m.sendReminder}
             </Button>
           )}
           {open && onRecordPayment !== undefined && (
-            <Button onClick={onRecordPayment}>
+            <Button onClick={onRecordPayment} className={NARROW_PRIMARY}>
               <ReceiptIcon aria-hidden weight="bold" className="size-4" />
               {m.recordPayment}
             </Button>
