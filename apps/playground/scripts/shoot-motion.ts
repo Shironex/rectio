@@ -120,7 +120,7 @@ try {
     recordVideo: { dir: out, size: { width: 1440, height: 1100 } },
   });
   const page = await context.newPage();
-  await page.goto(`${base}?view=motion&theme=default&mode=light`);
+  await page.goto(`${base}?view=motion&mode=light`);
   // The view is a lazy chunk: wait for it, or the still is the empty page before it loads.
   await page.locator('[data-column="motion"]').first().waitFor();
   await settle(page);
@@ -238,15 +238,15 @@ try {
     );
   });
 
-  // The expense report with motion on, ledger dark: add an expense through the dialog.
+  // The expense report with motion on, in dark: add an expense through the dialog.
   await cdp.send('Animation.setPlaybackRate', { playbackRate: 1 });
-  await page.goto(`${base}?view=app&motion=on&theme=ledger&mode=dark`);
+  await page.goto(`${base}?view=app&motion=on&mode=dark`);
   await settle(page);
-  await page.screenshot({ path: join(out, 'report-ledger-dark.png') });
+  await page.screenshot({ path: join(out, 'report-dark.png') });
   await page.getByRole('button', { name: 'Add expense' }).click();
   await page.getByRole('dialog').waitFor();
   await settle(page);
-  await page.screenshot({ path: join(out, 'report-dialog-ledger-dark.png') });
+  await page.screenshot({ path: join(out, 'report-dialog-dark.png') });
   await page.getByRole('textbox', { name: 'Merchant' }).fill('Deutsche Bahn');
   await page.getByRole('textbox', { name: 'Amount, EUR' }).fill('129.40');
   await page.getByRole('combobox', { name: 'Category' }).click();
@@ -266,7 +266,7 @@ try {
   await page.getByRole('dialog').waitFor({ state: 'detached' });
   console.log('motion dialog on save', await dialogFieldsVerdict(page));
   await settle(page);
-  await page.screenshot({ path: join(out, 'report-saved-ledger-dark.png') });
+  await page.screenshot({ path: join(out, 'report-saved-dark.png') });
 
   // Two more toasts in quick succession: each arrives calmly and the stack glides up.
   const remove = async (merchant: RegExp) => {
@@ -292,7 +292,7 @@ try {
   await remove(/^Select Lufthansa/);
   await remove(/^Select Atelier/);
   await settle(page);
-  await page.screenshot({ path: join(out, 'report-toasts-ledger-dark.png') });
+  await page.screenshot({ path: join(out, 'report-toasts-dark.png') });
   await page.close();
   await context.close();
 
@@ -303,8 +303,8 @@ try {
 
   const sheets = await browser.newPage();
   for (const [name, rows] of Object.entries(strips)) await contactSheet(sheets, name, rows);
-  await contactSheet(sheets, 'report-save', [{ label: 'motion, ledger dark', files: reportFiles }]);
-  await contactSheet(sheets, 'toast-stack', [{ label: 'motion, ledger dark', files: toastFiles }]);
+  await contactSheet(sheets, 'report-save', [{ label: 'motion, dark', files: reportFiles }]);
+  await contactSheet(sheets, 'toast-stack', [{ label: 'motion, dark', files: toastFiles }]);
   console.log(`motion captures in ${out}`);
 } finally {
   await browser.close();

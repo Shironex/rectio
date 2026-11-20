@@ -1,9 +1,9 @@
 /**
  * Headless screenshots of the docs blocks for a design round: `pnpm shoot:docs <round>`. Writes to
  * .rounds/docs-kit-round-<n>/blocks/ at the repo root (gitignored). Starts its own Vite server and
- * never touches the screen. Shots: the article, home and changelog pages in both themes and modes
- * at desktop and phone width, plain and motion, plus search open on desktop, and search and the
- * phone navigation open on a dark phone in both themes.
+ * never touches the screen. Shots: the article, home and changelog pages in both modes at
+ * desktop and phone width, plain and motion, plus search open on desktop, and search and the
+ * phone navigation open on a dark phone.
  */
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -75,16 +75,15 @@ try {
       }
     }
   }
-  const searchPage = await open(browser, base, 'theme=default&mode=light', false);
+  const searchPage = await open(browser, base, 'mode=light', false);
   await searchPage.keyboard.press('ControlOrMeta+k');
   await searchPage.waitForTimeout(250);
   await searchPage.keyboard.type('retry');
   await searchPage.waitForTimeout(500);
-  await searchPage.screenshot({ path: join(out, 'search-default-light.png') });
+  await searchPage.screenshot({ path: join(out, 'search-light.png') });
   await searchPage.close();
-  // Phones in the dark: search and the navigation sheet, in both themes, since the pages above
-  // show neither open.
-  const phoneSearch = await open(browser, base, `mode=dark`, true);
+  // Phones in the dark: search and the navigation sheet, since the pages above show neither open.
+  const phoneSearch = await open(browser, base, 'mode=dark', true);
   await phoneSearch
     .getByRole('button', { name: /search/i })
     .first()
@@ -92,12 +91,12 @@ try {
   await phoneSearch.waitForTimeout(250);
   await phoneSearch.keyboard.type('retry');
   await phoneSearch.waitForTimeout(500);
-  await phoneSearch.screenshot({ path: join(out, `search-dark-phone.png`) });
+  await phoneSearch.screenshot({ path: join(out, 'search-dark-phone.png') });
   await phoneSearch.close();
-  const nav = await open(browser, base, `mode=dark`, true);
+  const nav = await open(browser, base, 'mode=dark', true);
   await nav.getByRole('button', { name: 'Navigation' }).click();
   await nav.waitForTimeout(500);
-  await nav.screenshot({ path: join(out, `phone-nav-dark.png`) });
+  await nav.screenshot({ path: join(out, 'phone-nav-dark.png') });
   await nav.close();
   console.log(`docs blocks shots in ${out}`);
 } finally {

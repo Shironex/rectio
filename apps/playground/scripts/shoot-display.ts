@@ -1,8 +1,8 @@
 /**
  * Headless screenshots of the display components for a design round: `pnpm shoot:display <round>`.
  * Writes to .rounds/round-<n>/display/ at the repo root (gitignored). Starts its own Vite server and
- * never touches the screen. Shots: the whole view at desktop width and at phone width in every theme
- * and mode, the motion add-on, reduced motion, and close-ups of the loaders and skeletons, plus
+ * never touches the screen. Shots: the whole view at desktop width and at phone width in every mode,
+ * the motion add-on, reduced motion, and close-ups of the loaders and skeletons, plus
  * browser checks (horizontal overflow, smallest touch target). Looping animations are paused at the
  * same moment in every shot, so rounds compare like with like.
  */

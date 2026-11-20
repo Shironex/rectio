@@ -3,16 +3,14 @@ import { ThemeScope } from '@rectio/ui';
 import { MODES, THEMES } from '../themes';
 import { Gallery } from './gallery';
 
-/** Both themes in both modes, side by side, so a token change can be judged everywhere at once. */
+/** The theme in both modes, side by side, so a token change can be judged everywhere at once. */
 export function Matrix() {
   return (
     <ThemeScope theme="default" mode="light" className="min-h-dvh">
       <header className="flex flex-wrap items-baseline justify-between gap-4 px-4 pt-8 pb-6 sm:px-8">
         <div className="flex flex-col gap-1">
           <h1 className="font-display text-2xl font-heading tracking-tight">rectio</h1>
-          <p className="text-sm text-fg-muted">
-            Every component and state, in each theme and mode.
-          </p>
+          <p className="text-sm text-fg-muted">Every component and state, in each mode.</p>
         </div>
       </header>
       <div className="grid xl:grid-cols-2">

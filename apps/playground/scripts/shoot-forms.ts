@@ -2,7 +2,7 @@
  * Headless screenshots of the forms view for a design round: `pnpm shoot:forms <round>`.
  * Writes to .rounds/round-<n>/forms/ at the repo root (gitignored). Starts its own Vite server and
  * never touches the screen. Shots: the settings form at desktop (1440) and phone (390) width in
- * every theme and mode, open popups, the invalid state after a save, the motion variant, compact
+ * every mode, open popups, the invalid state after a save, the motion variant, compact
  * density, plus browser checks (phone overflow, touch targets).
  */
 import { mkdirSync } from 'node:fs';
@@ -78,7 +78,7 @@ if (base === undefined) throw new Error('vite did not report a local url');
 const browser = await chromium.launch();
 try {
   for (const mode of MODES) {
-    const name = `${mode}`;
+    const name = mode;
     if (wanted(`desktop-${name}`)) {
       const page = await open(browser, base, `mode=${mode}`);
       await tall(page, `desktop-${name}.png`);
@@ -98,12 +98,9 @@ try {
     }
   }
 
-  // Open popups and the invalid state, in one theme per mode.
-  for (const [theme, mode] of [
-    ['default', 'light'],
-    ['ledger', 'dark'],
-  ] as const) {
-    const name = `${mode}`;
+  // Open popups and the invalid state, in each mode.
+  for (const mode of MODES) {
+    const name = mode;
     if (wanted(`popups-${name}`)) {
       const page = await open(browser, base, `mode=${mode}`);
       const timezone = page.getByRole('combobox', { name: 'Time zone' });
@@ -139,17 +136,17 @@ try {
   }
 
   if (wanted('compact')) {
-    const page = await open(browser, base, 'theme=default&mode=light&density=compact');
-    await tall(page, 'compact-default-light.png');
+    const page = await open(browser, base, 'mode=light&density=compact');
+    await tall(page, 'compact-light.png');
     await page.close();
   }
   if (wanted('motion')) {
     const page = await open(browser, base, 'mode=light&motion=on');
-    await tall(page, 'motion-ledger-light.png');
+    await tall(page, 'motion-light.png');
     await page.close();
   }
   if (wanted('reduced')) {
-    const page = await open(browser, base, 'theme=default&mode=dark&motion=on', {
+    const page = await open(browser, base, 'mode=dark&motion=on', {
       reducedMotion: true,
     });
     await tall(page, 'reduced-default-dark.png');

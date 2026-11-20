@@ -1,8 +1,8 @@
 /**
  * Headless screenshots of the pro blocks for a design round: `pnpm shoot:blocks <round>`.
  * Writes to .rounds/round-<n>/blocks/ at the repo root (gitignored). Starts its own Vite server and
- * never touches the screen. Shots: the dashboard in every theme and mode, each block alone in every
- * theme, mode and compact density, phone width, reduced motion and the motion
+ * never touches the screen. Shots: the dashboard in every mode, each block alone in every mode and
+ * compact density, phone width, reduced motion and the motion
  * variant's entrance, plus browser checks (overflow, touch targets, chart keyboard tooltips).
  */
 import { mkdirSync } from 'node:fs';
@@ -175,7 +175,7 @@ try {
     const phone = await shoot(
       browser,
       base,
-      `saas-${block}-phone-ledger-dark`,
+      `saas-${block}-phone-dark`,
       `block=${block}&mode=dark`,
       { width: 390, phone: true },
     );

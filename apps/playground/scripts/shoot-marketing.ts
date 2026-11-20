@@ -1,8 +1,8 @@
 /**
  * Headless screenshots of the marketing blocks for a design round: `pnpm shoot:marketing <round>`.
  * Writes to .rounds/round-<n>/marketing/ at the repo root (gitignored). Starts its own Vite server
- * and never touches the screen. Shots: the landing template in every theme and mode at desktop and
- * phone width, each block's variants, the motion variant's entrance and reduced motion, plus
+ * and never touches the screen. Shots: the landing template in every mode at desktop and phone
+ * width, each block's variants, the motion variant's entrance and reduced motion, plus
  * browser checks (horizontal overflow, the smallest touch target among links and buttons).
  */
 import { mkdirSync } from 'node:fs';
@@ -166,10 +166,7 @@ try {
   }
 
   for (const block of BLOCKS) {
-    for (const [theme, mode] of [
-      ['default', 'light'],
-      ['ledger', 'dark'],
-    ] as const) {
+    for (const mode of MODES) {
       const page = await shoot(
         browser,
         base,
@@ -199,7 +196,7 @@ try {
       isMobile: true,
       hasTouch: true,
     });
-    await page.goto(`${base}?view=marketing&theme=default&mode=dark`);
+    await page.goto(`${base}?view=marketing&mode=dark`);
     await settle(page);
     await page.getByRole('button', { name: 'Menu' }).click();
     await settle(page);

@@ -1,11 +1,17 @@
-export const THEMES = [
+export interface PlaygroundTheme {
+  id: string;
+  name: string;
+  note: string;
+}
+
+/** The themes the playground shows. The kit ships one; a theme in progress can be added here. */
+export const THEMES: readonly PlaygroundTheme[] = [
   { id: 'default', name: 'Default', note: 'Calm back-office' },
-  { id: 'ledger', name: 'Ledger', note: 'Editorial finance' },
-] as const;
+];
 
 export const MODES = ['light', 'dark'] as const;
 
-export type ThemeId = (typeof THEMES)[number]['id'];
+export type ThemeId = PlaygroundTheme['id'];
 export type Mode = (typeof MODES)[number];
 
 export function readView(search: string) {

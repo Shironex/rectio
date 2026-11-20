@@ -1,8 +1,8 @@
 /**
  * Headless screenshots of the kit fixes for a design round: `pnpm shoot:gaps <round> [filter]`.
  * Writes to .rounds/round-<n>/gaps/ at the repo root (gitignored). Starts its own Vite server and
- * never touches the screen. Shots, at desktop (1440) and phone (390) width in every theme and
- * mode: the fixes page (field errors, skeleton widths, loading buttons, date formats), the command
+ * never touches the screen. Shots, at desktop (1440) and phone (390) width in every mode: the
+ * fixes page (field errors, skeleton widths, loading buttons, date formats), the command
  * menu open at its top and scrolled to the middle, the app shell's sidebar with its current page,
  * and the finance blocks that changed. Logs phone overflow and the smallest touch target.
  */
@@ -123,7 +123,7 @@ try {
 
       for (const [block, query] of BLOCKS) {
         if (!wanted(`${block}-${name}`)) continue;
-        // The extra status views once per width, in the default light look.
+        // The extra status views once per width, in light.
         if (block.startsWith('expense-approval-') && mode !== 'light') {
           continue;
         }

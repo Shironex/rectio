@@ -100,7 +100,7 @@ if (base === undefined) throw new Error('vite did not report a local url');
 
 const browser = await chromium.launch();
 try {
-  // At rest: the shell and the gallery, every theme and mode, desktop and phone.
+  // At rest: the shell and the gallery, every mode, desktop and phone.
   for (const mode of MODES) {
     const q = `mode=${mode}`;
     for (const phone of [false, true]) {
@@ -126,13 +126,10 @@ try {
     }
   }
 
-  // Open states, in the default light and the ledger dark.
-  for (const [theme, mode] of [
-    ['default', 'light'],
-    ['ledger', 'dark'],
-  ] as const) {
+  // Open states, in light and dark.
+  for (const mode of MODES) {
     const q = `mode=${mode}`;
-    const tag = `${mode}`;
+    const tag = mode;
 
     if (wanted(`open-command-${tag}`)) {
       const page = await open(browser, base, `view=shell&${q}`);

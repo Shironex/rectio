@@ -87,7 +87,7 @@ try {
   await page.goto(base);
   await settle(page);
   await page.screenshot({ path: join(out, 'matrix.png'), fullPage: true });
-  // Close-ups of the calendar with closed days, one per theme column: today boxed, outside days
+  // Close-ups of the calendar with closed days, one per mode column: today boxed, outside days
   // muted, closed days struck.
   const closedDays = page
     .locator('div.grid')
@@ -102,7 +102,7 @@ try {
   console.log('tabular figures', await tabularCheck(page));
 
   for (const mode of MODES) {
-    const name = `${mode}`;
+    const name = mode;
     const app = await browser.newPage({
       viewport: { width: 1280, height: 860 },
       deviceScaleFactor: 2,
