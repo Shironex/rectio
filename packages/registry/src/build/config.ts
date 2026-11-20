@@ -28,6 +28,16 @@ export interface ThemeItemConfig {
   version: string;
   title: string;
   description: string;
+  /**
+   * Why the item is going away and what to use instead. `rectio add` prints it as a warning, and
+   * templates no longer install the theme.
+   */
+  deprecated?: string;
+  /**
+   * A theme no longer built by @rectio/tokens, published from a snapshot of its last stylesheet
+   * until it is removed: the CSS file and the font packages it imports.
+   */
+  frozen?: { css: string; dependencies: Record<string, string> };
 }
 
 export interface TokensItemConfig {

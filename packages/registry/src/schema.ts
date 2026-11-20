@@ -183,6 +183,8 @@ export const registryItemSchema = z
     template: templateMetaSchema.optional(),
     /** Printed after install. */
     docs: z.string().optional(),
+    /** Why the item is going away and what to use instead. The CLI prints it as a warning. */
+    deprecated: z.string().min(1).optional(),
     meta: z.record(z.string(), z.unknown()).optional(),
     /** `sha256-<base64>` over the canonical JSON of the item without this field. */
     integrity: z.string().regex(/^sha256-[A-Za-z0-9+/]+=*$/),
@@ -226,6 +228,8 @@ export const indexEntrySchema = z.object({
   description: z.string(),
   categories: z.array(z.string()).default([]),
   registryDependencies: z.array(itemNameSchema).default([]),
+  /** Set on an item that is going away: the reason and what to use instead. */
+  deprecated: z.string().min(1).optional(),
 });
 export type IndexEntry = z.infer<typeof indexEntrySchema>;
 

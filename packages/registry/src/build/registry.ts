@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { itemIntegrity, sha256Hex } from '../integrity.ts';
+import { itemIntegrity, normalizeLineEndings, sha256Hex } from '../integrity.ts';
 import { SCHEMA_PATHS } from '../layout.ts';
 import {
   SCHEMA_VERSION,
@@ -141,11 +141,19 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
       }
     }
     for (const theme of themes) {
-      const css = split.themes.get(theme.id);
+      const css =
+        theme.frozen === undefined
+          ? split.themes.get(theme.id)
+          : {
+              css: normalizeLineEndings(readFileSync(theme.frozen.css, 'utf8')),
+              fontPackages: Object.keys(theme.frozen.dependencies),
+            };
       if (css === undefined) throw new Error(`theme "${theme.id}" is not in @rectio/tokens`);
+      if (theme.frozen !== undefined && split.themes.has(theme.id))
+        throw new Error(`theme "${theme.id}" is frozen but still built by @rectio/tokens`);
       const dependencies: Record<string, string> = {};
       for (const pkg of css.fontPackages) {
-        const range = tokenRanges.get(pkg);
+        const range = theme.frozen?.dependencies[pkg] ?? tokenRanges.get(pkg);
         if (range === undefined) throw new Error(`font package ${pkg} is not in the tokens deps`);
         dependencies[pkg] = range;
       }
@@ -169,6 +177,7 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
             },
           ],
           theme: { id: theme.id, modes: ['light', 'dark'], densities: ['comfortable', 'compact'] },
+          ...(theme.deprecated === undefined ? {} : { deprecated: theme.deprecated }),
           docs:
             theme.id === defaultTheme.id
               ? undefined
@@ -179,7 +188,11 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
   }
 
   // Templates last: they rest on every kit item, and must not collide with any kit file.
-  const themeIds = config.tokens?.themes.map((theme) => `theme-${theme.id}`) ?? [];
+  // A deprecated theme stays installable on its own, but templates no longer bring it in.
+  const themeIds =
+    config.tokens?.themes
+      .filter((theme) => theme.deprecated === undefined)
+      .map((theme) => `theme-${theme.id}`) ?? [];
   const kitPaths = new Set(
     items.flatMap((item) => [
       ...item.files.map((file) => {
@@ -243,6 +256,7 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
       description: item.description,
       categories: item.categories,
       registryDependencies: item.registryDependencies,
+      ...(item.deprecated === undefined ? {} : { deprecated: item.deprecated }),
     })),
   });
   return { index, items, warnings };
