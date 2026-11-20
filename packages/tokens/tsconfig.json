@@ -4,5 +4,5 @@
     "allowImportingTsExtensions": true,
     "types": ["node"]
   },
-  "include": ["scripts", "tests"]
+  "include": ["scripts", "tests", "generator"]
 }

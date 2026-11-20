@@ -16,16 +16,20 @@
   "description": "Design tokens for rectio: DTCG sources, CSS variables and a Tailwind v4 theme.",
   "files": [
     "dist",
-    "src"
+    "src",
+    "generator",
+    "scripts"
   ],
   "exports": {
     "./themes.css": "./dist/themes.css",
     "./tailwind.css": "./dist/tailwind.css",
     "./fonts.css": "./dist/fonts.css",
-    "./tokens.json": "./dist/tokens.json"
+    "./tokens.json": "./dist/tokens.json",
+    "./generator": "./generator/index.ts",
+    "./generator.json": "./dist/generator.json"
   },
   "scripts": {
-    "build": "node scripts/build.ts",
+    "build": "node scripts/build.ts && node scripts/generator-data.ts",
     "contrast": "node scripts/contrast.ts",
     "derive": "node scripts/derive.ts",
     "test": "vitest run",

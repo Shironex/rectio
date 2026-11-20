@@ -1,0 +1,18 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/ui/src/**",
+        "$TURBO_ROOT$/packages/motion/src/**",
+        "$TURBO_ROOT$/packages/blocks/src/**",
+        "$TURBO_ROOT$/templates/*/app/**",
+        "$TURBO_ROOT$/templates/*/components/**",
+        "$TURBO_ROOT$/apps/site/app/**",
+        "$TURBO_ROOT$/apps/site/components/**"
+      ]
+    }
+  }
+}
