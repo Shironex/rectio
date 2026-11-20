@@ -22,8 +22,9 @@ export interface SegmentedProps<Value extends string> {
 /**
  * One choice from a few, always visible: a status filter or a period switch. Arrow keys move
  * between options and the pressed one is announced; pressing the chosen option again keeps it.
- * One row while it fits; on a narrow block the options wrap, and on a phone they sit in two even
- * columns, so every label stays whole and every option stays in sight.
+ * One row, never wrapped inside the track. In a narrow block (under 28rem) and on a phone the
+ * options sit in two even columns, so every label stays whole and every option stays in sight;
+ * outside a block, a row that still cannot fit scrolls sideways instead of breaking.
  */
 export function Segmented<Value extends string>({
   label,
@@ -42,8 +43,9 @@ export function Segmented<Value extends string>({
       }}
       data-slot="segmented"
       className={cn(
-        'flex w-fit max-w-full flex-wrap gap-0.5 rounded-control border border-line bg-surface-sunken p-0.5',
-        // On a phone, two even columns: wrapped rows line up instead of stretching unevenly.
+        'flex w-fit max-w-full gap-0.5 overflow-x-auto rounded-control border border-line bg-surface-sunken p-0.5 scrollbar-none',
+        // In a narrow block or on a phone, two even columns instead of a row that breaks unevenly.
+        '@max-md:grid @max-md:w-full @max-md:grid-cols-2',
         'max-sm:grid max-sm:w-full max-sm:grid-cols-2',
         className,
       )}
@@ -56,7 +58,7 @@ export function Segmented<Value extends string>({
             'inline-flex h-(--rx-control-height-sm) shrink-0 grow cursor-pointer items-center justify-center gap-1.5 rounded-control px-2.5',
             'pointer-coarse:h-(--rx-control-height-touch) pointer-coarse:px-3.5',
             // An odd last option takes the whole row on a phone, so no empty cell sits beside it.
-            'max-sm:last:odd:col-span-2',
+            '@max-md:last:odd:col-span-2 max-sm:last:odd:col-span-2',
             'text-sm font-medium whitespace-nowrap text-fg-muted',
             'transition-[background-color,color,box-shadow] duration-fast ease-standard',
             // The raised chip on the sunken track, as the kit's segmented tabs and toggle group.
