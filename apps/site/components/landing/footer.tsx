@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { Wordmark } from '@/components/wordmark';
+import { repoUrl } from '@/lib/site';
 
 const LINKS = [
   { href: '/docs', label: 'Docs' },
@@ -8,7 +9,7 @@ const LINKS = [
   { href: '/templates', label: 'Templates' },
   { href: '/docs/cli', label: 'CLI' },
   { href: '/docs/mcp', label: 'MCP' },
-  { href: 'https://github.com/Shironex/rectio', label: 'GitHub' },
+  { href: repoUrl, label: 'GitHub' },
 ] as const;
 
 export function Footer() {

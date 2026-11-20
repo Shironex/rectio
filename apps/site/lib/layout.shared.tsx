@@ -1,6 +1,7 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
 import { Wordmark } from '@/components/wordmark';
+import { repoUrl } from '@/lib/site';
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -10,6 +11,6 @@ export function baseOptions(): BaseLayoutProps {
       { text: 'Components', url: '/docs/components/button', active: 'none' },
       { text: 'Templates', url: '/templates', active: 'nested-url' },
     ],
-    githubUrl: 'https://github.com/Shironex/rectio',
+    githubUrl: repoUrl,
   };
 }

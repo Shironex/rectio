@@ -1,7 +1,8 @@
-import { ArrowRightIcon, GithubLogoIcon } from '@phosphor-icons/react/dist/ssr';
+import { ArrowRightIcon } from '@phosphor-icons/react/dist/ssr';
 import Link from 'next/link';
 
 import { CopyCommand } from './copy-command';
+import { GithubButton } from './github-button';
 
 /** The page's last word: the install command, the docs and the source, with one line of pitch. */
 export function ClosingBand() {
@@ -26,13 +27,7 @@ export function ClosingBand() {
             Read the docs
             <ArrowRightIcon aria-hidden weight="bold" className="size-4" />
           </Link>
-          <a
-            href="https://github.com/Shironex/rectio"
-            className="site-press inline-flex h-11 items-center gap-2 rounded-control border border-line-strong px-5 text-base font-medium text-fg transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          >
-            <GithubLogoIcon aria-hidden weight="bold" className="size-4" />
-            View on GitHub
-          </a>
+          <GithubButton />
         </div>
       </div>
     </div>

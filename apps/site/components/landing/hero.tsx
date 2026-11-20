@@ -2,6 +2,7 @@ import { ArrowRightIcon } from '@phosphor-icons/react/dist/ssr';
 import Link from 'next/link';
 
 import { CopyCommand } from './copy-command';
+import { GithubButton } from './github-button';
 import { Glow } from './glow';
 import { HeroWindow } from './hero-window';
 import type { KitFacts } from './kit-facts';
@@ -57,6 +58,7 @@ export function Hero({ kit }: { kit: KitFacts }) {
               Read the docs
               <ArrowRightIcon aria-hidden weight="bold" className="size-4" />
             </Link>
+            <GithubButton />
             <CopyCommand command="pnpm dlx @rectio/cli init" />
           </div>
         </div>
