@@ -7,6 +7,7 @@ export const CATEGORY_LABELS: Record<TemplateCategory, string> = {
   app: 'App',
   dashboard: 'Dashboard',
   marketing: 'Marketing',
+  docs: 'Docs',
 };
 export const TEMPLATE_CATEGORIES = Object.keys(CATEGORY_LABELS) as TemplateCategory[];
 

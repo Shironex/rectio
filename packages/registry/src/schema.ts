@@ -134,7 +134,7 @@ export const requiresSchema = z.object({
   tokenContract: z.number().int().positive().optional(),
 });
 
-export const TEMPLATE_CATEGORIES = ['app', 'dashboard', 'marketing'] as const;
+export const TEMPLATE_CATEGORIES = ['app', 'dashboard', 'marketing', 'docs'] as const;
 export const templateCategorySchema = z.enum(TEMPLATE_CATEGORIES);
 export type TemplateCategory = z.infer<typeof templateCategorySchema>;
 
