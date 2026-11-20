@@ -4,6 +4,7 @@ import {
   agingBucket,
   agingReport,
   aggregateCashFlow,
+  averageBurn,
   approvalReducer,
   budgetSummary,
   canTransition,
@@ -17,9 +18,12 @@ import {
   pendingTotal,
   periodRange,
   reasonError,
+  roundHalfAway,
+  roundMoney,
   runningBalances,
   sumMoney,
   summarizeCashFlow,
+  taxOn,
   toMinor,
   unbalancedEntries,
   variance,
@@ -48,6 +52,36 @@ describe('money', () => {
   it('rounds half away from zero', () => {
     expect(toMinor(1.005, 'EUR')).toBe(101);
     expect(toMinor(-1.005, 'EUR')).toBe(-101);
+  });
+
+  // Regression: a nudge of 1e-9 was below the spacing of doubles past about a million minor
+  // units, so a true half such as 271,647.155 lost a grosz.
+  it('rounds a true half up at any size, never a grosz short', () => {
+    expect(5_432_943.1 * 0.05).toBe(271_647.15499999997);
+    expect(toMinor(5_432_943.1 * 0.05, 'PLN')).toBe(27_164_716);
+    expect(taxOn(5_432_943.1, 0.05, 'PLN')).toBe(271_647.16);
+    expect(roundMoney(-271_647.155, 'PLN')).toBe(-271_647.16);
+    expect(toMinor(8.345, 'EUR')).toBe(835);
+    expect(toMinor(0.285, 'EUR')).toBe(29);
+  });
+
+  it('rounds halves away from zero on both sides of it', () => {
+    expect(roundHalfAway(2.5)).toBe(3);
+    expect(roundHalfAway(-2.5)).toBe(-3);
+    expect(roundHalfAway(-2.4)).toBe(-2);
+    expect(roundHalfAway(0)).toBe(0);
+  });
+
+  it('averages a burn and the same gain to the same size', () => {
+    const month = (m: number, inflow: number, outflow: number) => ({
+      month: d(2026, m, 1),
+      inflow,
+      outflow,
+    });
+    const loss = averageBurn([month(1, 0, 0.01), month(2, 0, 0.02)], 'EUR', 2);
+    const gain = averageBurn([month(1, 0.01, 0), month(2, 0.02, 0)], 'EUR', 2);
+    expect(gain.net).toBe(0.02);
+    expect(loss.net).toBe(-0.02);
   });
 
   it('counts calendar days, whatever the time of day', () => {

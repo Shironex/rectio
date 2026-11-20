@@ -1,5 +1,6 @@
 'use client';
 
+import { roundMoney } from '@rectio/blocks';
 import {
   AmountInput,
   Button,
@@ -76,7 +77,7 @@ export function NewInvoiceDialog({
   };
   const show = (key: keyof typeof errors) => (tried ? errors[key] : null);
   const vat =
-    customer === undefined || net === null ? 0 : Math.round(net * customer.vatRate * 100) / 100;
+    customer === undefined || net === null ? 0 : roundMoney(net * customer.vatRate, CURRENCY);
 
   const reset = () => {
     setCustomerId(null);

@@ -34,8 +34,18 @@ export interface LedgerProps {
   locale?: string;
   /** Balance of each account before the first line, by account code. */
   openingBalances?: Readonly<Record<string, number>>;
-  /** Start on one account's ledger instead of the whole journal. */
+  /**
+   * Start on one account's ledger instead of the whole journal, when `account` is not set. Read
+   * once, like any default: to switch the account from outside, use `account`.
+   */
   defaultAccount?: string;
+  /**
+   * The account shown, controlled: an account code, or `'all'` for the whole journal. Follows
+   * every change, for example a sidebar link. Pair it with `onAccountChange`.
+   */
+  account?: string;
+  /** Called with the account code the user picks, or `'all'` for the journal. */
+  onAccountChange?: (account: string) => void;
   title?: string;
   /** The period the lines cover, shown under the title, such as "March 2026". */
   period?: string;
@@ -141,6 +151,8 @@ export function Ledger({
   locale: requestedLocale,
   openingBalances = {},
   defaultAccount = ALL,
+  account: accountProp,
+  onAccountChange,
   title,
   period,
   emptyAction,
@@ -150,7 +162,12 @@ export function Ledger({
   const locale = resolveLocale(requestedLocale);
   const m = mergeMessages(LEDGER_MESSAGES, messages);
   const { Money } = useBlockParts();
-  const [accountCode, setAccountCode] = useState(defaultAccount);
+  const [accountState, setAccountState] = useState(defaultAccount);
+  const accountCode = accountProp ?? accountState;
+  const setAccountCode = (next: string) => {
+    if (accountProp === undefined) setAccountState(next);
+    onAccountChange?.(next);
+  };
   const account = accounts.find((a) => a.code === accountCode);
   const nameOf = (code: string) => accounts.find((a) => a.code === code)?.name ?? code;
   const shown = account === undefined ? lines : lines.filter((l) => l.accountCode === account.code);

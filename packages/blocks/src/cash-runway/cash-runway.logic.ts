@@ -1,4 +1,4 @@
-import { fromMinor, toMinor } from '../lib/finance';
+import { fromMinor, roundHalfAway, toMinor } from '../lib/finance';
 
 export interface RunwayMonth {
   /** First day of the month the figures cover. */
@@ -47,7 +47,8 @@ export function averageBurn(history: readonly RunwayMonth[], currency: string, w
   const recent = monthlyNets(history, currency).slice(-Math.max(1, window));
   if (recent.length === 0) return { burn: 0, net: 0, months: 0 };
   const total = recent.reduce((sum, [, net]) => sum + net, 0);
-  const average = Math.round(total / recent.length);
+  // Half away from zero, so a burn and the same gain round to the same size.
+  const average = roundHalfAway(total / recent.length);
   return {
     burn: fromMinor(-average, currency),
     net: fromMinor(average, currency),

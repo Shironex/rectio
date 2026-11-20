@@ -179,7 +179,7 @@ function DetailLoading() {
   return (
     <LoadingRegion label="Loading the invoice">
       <div className="flex flex-col gap-2">
-        <SkeletonLine size="2xl" width="w-64" />
+        <SkeletonLine size="2xl" width="2xl" />
         <SkeletonLine size="sm" width="w-40" />
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-3">
@@ -242,12 +242,6 @@ export function InvoiceDetailPage({ id }: { id: string }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {open && (
-              <Button variant="secondary" onClick={remind}>
-                <BellRingingIcon aria-hidden weight="bold" className="size-4" />
-                Send reminder
-              </Button>
-            )}
             <Menu>
               <MenuTrigger
                 render={
@@ -307,6 +301,7 @@ export function InvoiceDetailPage({ id }: { id: string }) {
             onRecordPayment={() => {
               setPaying(true);
             }}
+            onSendReminder={remind}
             onSend={() => {
               setDocument({ ...document, status: 'sent' });
               toast.add({

@@ -16,12 +16,20 @@ export function minorDigits(currency: string): number {
   return digits;
 }
 
+/**
+ * Rounds to a whole number, half away from zero, as invoices and tax returns do: 2.5 is 3 and
+ * -2.5 is -3, where Math.round gives -2. The value is first read back at 15 significant digits,
+ * which drops binary noise at any size: 1.005 * 100 is 100.49999999999999 and 5432943.1 * 0.05 *
+ * 100 is 27164715.499999996, and both are true halves.
+ */
+export function roundHalfAway(value: number): number {
+  const clean = Number(Math.abs(value).toPrecision(15));
+  return Math.sign(value) * Math.round(clean);
+}
+
 /** Major units to integer minor units, rounding half away from zero as invoices do. */
 export function toMinor(amount: number, currency: string): number {
-  const factor = 10 ** minorDigits(currency);
-  const scaled = amount * factor;
-  // A tiny nudge absorbs binary noise such as 1.005 * 100 = 100.49999999999999.
-  return Math.sign(scaled) * Math.round(Math.abs(scaled) + 1e-9);
+  return roundHalfAway(amount * 10 ** minorDigits(currency));
 }
 
 export function fromMinor(minor: number, currency: string): number {

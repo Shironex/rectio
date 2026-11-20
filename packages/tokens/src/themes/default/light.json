@@ -48,7 +48,7 @@
       "$value": "{palette.stone.700}"
     },
     "subtle": {
-      "$value": "{palette.stone.600}"
+      "$value": "{palette.stone.650}"
     },
     "disabled": {
       "$value": "{palette.stone.500}"

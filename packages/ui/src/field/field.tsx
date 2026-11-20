@@ -75,19 +75,31 @@ export function FieldDescription({ className, ...props }: FieldDescriptionProps)
 }
 
 export type FieldErrorProps = WithClassName<ComponentProps<typeof BaseField.Error>> & {
-  children: ReactNode;
+  /**
+   * The message. Leave it empty (`null`, `false` or `''`) to show the browser's own validation
+   * message, or nothing at all when there is none: the icon never shows without words.
+   */
+  children?: ReactNode;
 };
 
+/** True when a node would render no text: nothing, a boolean, or an empty string. */
+const isEmpty = (node: ReactNode) =>
+  node === null || node === undefined || typeof node === 'boolean' || node === '';
+
 /**
- * Shown when the control is invalid. Colour is never the only signal: it carries an icon and text.
+ * Shown when the control is invalid. Colour is never the only signal: it carries an icon and text,
+ * and the icon sits on the first line's centre, so it stays level with a message of any length.
  * Base UI shows an error only for a failed native or `validate` check; when the app sets
  * `<Field invalid>` itself, the error shows too, so a server message is never a bare red border.
+ * An empty message renders nothing: a lone warning icon is never left under the field.
  */
 export function FieldError({ className, children, match, ...props }: FieldErrorProps) {
   const externalInvalid = use(ExternalInvalidContext);
+  const empty = isEmpty(children);
   return (
     <BaseField.Error
-      match={match ?? (externalInvalid ? true : undefined)}
+      // Only a message of the app's own forces the error open; an empty one waits for a real check.
+      match={match ?? (externalInvalid && !empty ? true : undefined)}
       className={cn(
         'flex items-start gap-1.5 text-sm text-negative-strong',
         'transition-[opacity,translate] duration-fast ease-enter',
@@ -95,11 +107,24 @@ export function FieldError({ className, children, match, ...props }: FieldErrorP
         'data-ending-style:opacity-0',
         className,
       )}
+      // Base UI fills the children with the check's message when the app passes none.
+      render={(renderProps) => {
+        const message: ReactNode = empty ? renderProps.children : children;
+        return (
+          <div {...renderProps} data-slot="field-error" hidden={isEmpty(message) || undefined}>
+            {!isEmpty(message) && (
+              <>
+                <span aria-hidden className="flex h-lh shrink-0 items-center">
+                  <WarningCircleIcon weight="bold" className="size-3.5" />
+                </span>
+                <span className="min-w-0">{message}</span>
+              </>
+            )}
+          </div>
+        );
+      }}
       {...props}
-    >
-      <WarningCircleIcon aria-hidden weight="bold" className="mt-0.5 size-3.5 shrink-0" />
-      <span>{children}</span>
-    </BaseField.Error>
+    />
   );
 }
 

@@ -62,7 +62,17 @@ tab shows the preview's usage. The block's own source comes with the license.
     },
     defaultAccount: {
       type: 'string',
-      description: 'Start on one account instead of the whole journal.',
+      description:
+        'Start on one account instead of the whole journal. Read once; to switch accounts from outside, use `account`.',
+    },
+    account: {
+      type: 'string',
+      description:
+        "The account shown, controlled: a code, or 'all' for the journal. Follows every change, such as a sidebar link. Pair it with `onAccountChange`.",
+    },
+    onAccountChange: {
+      type: '(account: string) => void',
+      description: "Called with the account code the user picks, or 'all'.",
     },
     period: { type: 'string', description: 'Shown under the title, such as "March 2026".' },
     title: { type: 'string', default: "'General journal'" },

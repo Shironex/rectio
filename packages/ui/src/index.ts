@@ -1,6 +1,13 @@
 export { cn } from './lib/cn';
 export { ThemeScope, usePortalContainer, type ThemeScopeProps } from './theme-scope/theme-scope';
-export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './button/button';
+export {
+  Button,
+  ButtonSpinner,
+  splitLeadingIcon,
+  type ButtonProps,
+  type ButtonSize,
+  type ButtonVariant,
+} from './button/button';
 export {
   Field,
   FieldDescription,
@@ -89,7 +96,9 @@ export {
   DatePicker,
   DateRangePicker,
   datePattern,
+  formatDisplayDate,
   parseDate,
+  type DateDisplayFormat,
   type DatePickerProps,
   type DateRangePickerProps,
   type DateRangePreset,
@@ -123,12 +132,15 @@ export {
   type SkeletonCardProps,
   type SkeletonChartProps,
   type SkeletonCircleProps,
+  type SkeletonFixedWidth,
+  type SkeletonFraction,
   type SkeletonLineProps,
   type SkeletonListItemProps,
   type SkeletonProps,
   type SkeletonSwapProps,
   type SkeletonTableProps,
   type SkeletonTextProps,
+  type SkeletonWidth,
 } from './skeleton/skeleton';
 export {
   LoadingOverlay,

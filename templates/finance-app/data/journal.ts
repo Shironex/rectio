@@ -1,6 +1,6 @@
-import type { JournalLine, LedgerAccount } from '@rectio/blocks';
+import { documentTotals, toMinor, type JournalLine, type LedgerAccount } from '@rectio/blocks';
 
-import { TODAY, day } from './company';
+import { CURRENCY, TODAY, day } from './company';
 import { EXPENSES, type ExpenseCategory } from './expenses';
 import { INVOICE_RECORDS } from './invoice-records';
 
@@ -44,7 +44,7 @@ interface Entry {
   postings: Posting[];
 }
 
-const cents = (amount: number) => Math.round(amount * 100);
+const cents = (amount: number) => toMinor(amount, CURRENCY);
 const major = (amountCents: number) => amountCents / 100;
 
 function revenueAccount(description: string): string {
@@ -72,15 +72,16 @@ function invoiceEntries(): Entry[] {
   for (const { document, customer } of INVOICE_RECORDS) {
     if (document.status === 'draft') continue;
     if (inPeriod(document.issued) && document.status !== 'void') {
+      // The invoice's own totals: VAT per rate on the summed nets, as printed on the invoice, so
+      // the receivable posted here is the invoice total to the cent.
+      const totals = documentTotals(document.lines, [], CURRENCY);
       const byAccount = new Map<string, number>();
-      let vat = 0;
-      for (const line of document.lines) {
-        const net = cents(line.quantity * line.unitPrice);
+      document.lines.forEach((line, index) => {
         const account = revenueAccount(line.description.toLowerCase());
-        byAccount.set(account, (byAccount.get(account) ?? 0) + net);
-        vat += Math.round(net * line.taxRate);
-      }
-      const net = [...byAccount.values()].reduce((a, b) => a + b, 0);
+        byAccount.set(account, (byAccount.get(account) ?? 0) + cents(totals.lineNets[index] ?? 0));
+      });
+      const net = cents(totals.subtotal);
+      const vat = cents(totals.vatTotal);
       entries.push({
         id: `j-${document.number}`,
         date: document.issued,

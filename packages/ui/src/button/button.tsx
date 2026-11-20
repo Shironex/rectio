@@ -1,6 +1,13 @@
 import { Button as BaseButton } from '@base-ui/react/button';
 import { CircleNotchIcon } from '@phosphor-icons/react';
-import type { ComponentProps, ReactNode } from 'react';
+import {
+  Children,
+  Fragment,
+  isValidElement,
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 
 import { cn, touchHitArea } from '../lib/cn';
 
@@ -43,13 +50,56 @@ const ICON_ONLY: Record<ButtonSize, string> = {
   lg: 'w-(--rx-button-height-lg) pointer-coarse:w-(--rx-button-height-touch) px-0',
 };
 
+/**
+ * Splits a leading icon off a button's children, so the loading spinner can take its slot and the
+ * button keeps its width. An element counts as the icon only when a label follows it, or when it
+ * is all an icon-only button holds; a lone component child is treated as the label.
+ */
+export function splitLeadingIcon(
+  children: ReactNode,
+  iconOnly = false,
+): { icon: ReactNode; label: ReactNode } {
+  let items = Children.toArray(children);
+  const [only] = items;
+  if (
+    items.length === 1 &&
+    isValidElement<{ children?: ReactNode }>(only) &&
+    only.type === Fragment
+  ) {
+    items = Children.toArray(only.props.children);
+  }
+  const [first, ...rest] = items;
+  const isIcon =
+    isValidElement(first) &&
+    (typeof first.type !== 'string' || first.type === 'svg') &&
+    (rest.length > 0 || iconOnly);
+  return isIcon ? { icon: first, label: rest } : { icon: null, label: items };
+}
+
+/**
+ * The loading mark: it turns, and under reduced motion it breathes in place instead. Sized like a
+ * button icon, so it can stand in for one.
+ */
+export function ButtonSpinner({ className }: { className?: string }): ReactElement {
+  return (
+    <CircleNotchIcon
+      aria-hidden
+      data-part="spinner"
+      weight="bold"
+      className={cn('size-4 animate-spin motion-reduce:animate-breathe', className)}
+    />
+  );
+}
+
 export interface ButtonProps extends Omit<ComponentProps<typeof BaseButton>, 'className'> {
   className?: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
   /**
-   * Shows a spinner and blocks presses while keeping the label's width and the focus, so the
-   * layout does not jump and keyboard users stay in place. Sets `aria-busy`.
+   * Shows a spinner beside the label and blocks presses while keeping the focus, so keyboard users
+   * stay in place and everyone still reads what is happening. A leading icon gives its slot to the
+   * spinner, so an icon button keeps its exact width; a text-only button grows by the spinner.
+   * Sets `aria-busy`.
    */
   loading?: boolean;
   /** A square button holding only an icon. Give it an `aria-label`. */
@@ -58,7 +108,11 @@ export interface ButtonProps extends Omit<ComponentProps<typeof BaseButton>, 'cl
    * Draws the label and the loading indicator in place of the default spinner swap, for example
    * the motion add-on's morph. Busy semantics stay here: `aria-busy`, blocked presses, kept focus.
    */
-  renderContent?: (content: { children: ReactNode; loading: boolean }) => ReactNode;
+  renderContent?: (content: {
+    children: ReactNode;
+    loading: boolean;
+    iconOnly: boolean;
+  }) => ReactNode;
   children?: ReactNode;
 }
 
@@ -90,7 +144,7 @@ export function Button({
         'transition-[background-color,color,box-shadow,scale] duration-fast ease-standard',
         'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         'active:scale-(--rx-motion-scale-press)',
-        'data-disabled:cursor-not-allowed data-disabled:shadow-none',
+        'data-disabled:cursor-not-allowed data-disabled:shadow-none data-loading:cursor-progress',
         '[&_svg]:pointer-events-none [&_svg]:shrink-0',
         touchHitArea,
         VARIANTS[variant],
@@ -102,18 +156,40 @@ export function Button({
       {...props}
     >
       {renderContent ? (
-        renderContent({ children, loading })
+        renderContent({ children, loading, iconOnly })
       ) : loading ? (
-        <>
-          {/* Transparent, not hidden: the label keeps its width and stays the accessible name. */}
-          <span className="contents text-transparent">{children}</span>
-          <span className="absolute inset-0 inline-flex items-center justify-center">
-            <CircleNotchIcon aria-hidden className="size-4 animate-spin" weight="bold" />
-          </span>
-        </>
+        <LoadingContent iconOnly={iconOnly}>{children}</LoadingContent>
       ) : (
         children
       )}
     </BaseButton>
+  );
+}
+
+/**
+ * The label stays visible and stays the accessible name. A leading icon keeps its box, hidden,
+ * with the spinner drawn over it, so the button keeps its exact width; without one the spinner
+ * goes before the label.
+ */
+function LoadingContent({ children, iconOnly }: { children: ReactNode; iconOnly: boolean }) {
+  const { icon, label } = splitLeadingIcon(children, iconOnly);
+  if (icon === null) {
+    return (
+      <>
+        <ButtonSpinner />
+        {children}
+      </>
+    );
+  }
+  return (
+    <>
+      <span data-part="icon-slot" className="relative inline-flex items-center justify-center">
+        <span className="invisible inline-flex">{icon}</span>
+        <span className="absolute inset-0 inline-flex items-center justify-center">
+          <ButtonSpinner />
+        </span>
+      </span>
+      {label}
+    </>
   );
 }

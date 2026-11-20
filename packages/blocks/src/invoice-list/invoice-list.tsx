@@ -27,8 +27,10 @@ import {
   inPeriod,
   invoiceState,
   invoiceTotals,
+  DEFAULT_INVOICE_SORT,
   matchesFilter,
   type DueInfo,
+  type InvoiceSort,
   type InvoicePeriod,
   type InvoiceState,
   type InvoiceSummary,
@@ -45,7 +47,17 @@ export interface InvoiceListProps {
   today?: Date;
   title?: string;
   defaultPeriod?: InvoicePeriod;
+  /** The status filter the list opens on when `filter` is not set. Default `all`. */
   defaultFilter?: StatusFilter;
+  /** The status filter, controlled, for example from the address. Pair it with `onFilterChange`. */
+  filter?: StatusFilter;
+  /** Called with the status the user picks, or `all` when they press Show all. */
+  onFilterChange?: (filter: StatusFilter) => void;
+  /**
+   * The order the list opens in: a column and a direction. Default the due date, soonest first,
+   * so what needs chasing leads. The user can still sort by any column.
+   */
+  defaultSort?: InvoiceSort;
   /** Opens an invoice; the number becomes a button when given. */
   onOpenInvoice?: (invoice: InvoiceSummary) => void;
   /** Shows a New invoice button. */
@@ -224,6 +236,9 @@ export function InvoiceList({
   title,
   defaultPeriod = 'quarter',
   defaultFilter = 'all',
+  filter: filterProp,
+  onFilterChange,
+  defaultSort = DEFAULT_INVOICE_SORT,
   onOpenInvoice,
   onCreateInvoice,
   emptyAction,
@@ -235,7 +250,12 @@ export function InvoiceList({
   const heading = title ?? m.title;
   const { Button, Money } = useBlockParts();
   const [period, setPeriod] = useState<InvoicePeriod>(defaultPeriod);
-  const [filter, setFilter] = useState<StatusFilter>(defaultFilter);
+  const [filterState, setFilterState] = useState<StatusFilter>(defaultFilter);
+  const filter = filterProp ?? filterState;
+  const setFilter = (next: StatusFilter) => {
+    if (filterProp === undefined) setFilterState(next);
+    onFilterChange?.(next);
+  };
 
   const inRange = invoices.filter((invoice) => inPeriod(invoice.issued, period, today));
   const totals = invoiceTotals(inRange, today, currency);
@@ -280,7 +300,8 @@ export function InvoiceList({
                   <span
                     className={cn('@3xl:hidden', state === 'overdue' && 'text-negative-strong')}
                   >
-                    , {m.dueText(due)}
+                    {/* "19 days overdue" stays one phrase: it wraps whole, never mid-way. */},{' '}
+                    <span className="whitespace-nowrap">{m.dueText(due)}</span>
                   </span>
                 )}
               </span>
@@ -403,7 +424,7 @@ export function InvoiceList({
     data: rows,
     columns,
     getRowId: (row) => row.invoice.id,
-    initialState: { sorting: [{ id: 'due', desc: false }] },
+    initialState: { sorting: [{ id: defaultSort.column, desc: defaultSort.desc ?? false }] },
   });
 
   const periodChoices = useMemo<Choice<InvoicePeriod>[]>(

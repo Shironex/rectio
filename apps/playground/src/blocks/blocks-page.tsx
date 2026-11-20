@@ -117,6 +117,7 @@ function renderBlock(
           invoice={data.invoiceDocument(locale.rate, pl)}
           today={data.TODAY}
           onRecordPayment={() => undefined}
+          onSendReminder={() => undefined}
           onDownload={() => undefined}
         />
       );
@@ -254,8 +255,13 @@ function Approvals({ blocks, locale }: { blocks: Blocks; locale: data.Locale }) 
     data.expenses(rate, pl),
   );
   const actor = 'Niamh Walsh';
+  // `?approval=approved` opens a decided view, for the shoot scripts.
+  const view = plain.APPROVAL_VIEWS.find(
+    (v) => v === new URLSearchParams(window.location.search).get('approval'),
+  );
   return (
     <blocks.ExpenseApproval
+      {...(view === undefined ? {} : { defaultStatus: view })}
       currency={locale.currency}
       locale={locale.locale}
       {...(pl ? { messages: expenseApprovalPl } : {})}

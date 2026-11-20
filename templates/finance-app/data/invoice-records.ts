@@ -1,6 +1,12 @@
-import type { InvoiceDocument, InvoiceLine, InvoicePayment, InvoiceStatus } from '@rectio/blocks';
+import {
+  documentTotals,
+  type InvoiceDocument,
+  type InvoiceLine,
+  type InvoicePayment,
+  type InvoiceStatus,
+} from '@rectio/blocks';
 
-import { COMPANY, TODAY, addDays, day } from './company';
+import { COMPANY, CURRENCY, TODAY, addDays, day } from './company';
 import { CUSTOMERS, type Customer } from './customers';
 
 /**
@@ -133,16 +139,9 @@ function buildLines(random: () => number, customer: Customer, index: number): In
     });
 }
 
-/** Gross total of a set of lines, VAT per rate on the rounded nets, as the invoice block does. */
+/** Gross total of a set of lines, by the same rule the invoice block prints. */
 function grossTotal(lines: readonly InvoiceLine[]): number {
-  const byRate = new Map<number, number>();
-  for (const line of lines) {
-    const net = Math.round(line.quantity * line.unitPrice * 100);
-    byRate.set(line.taxRate, (byRate.get(line.taxRate) ?? 0) + net);
-  }
-  let cents = 0;
-  for (const [rate, net] of byRate) cents += net + Math.round(net * rate);
-  return cents / 100;
+  return documentTotals(lines, [], CURRENCY).total;
 }
 
 function buildRecords(): InvoiceRecord[] {

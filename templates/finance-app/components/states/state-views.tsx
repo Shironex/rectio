@@ -23,21 +23,10 @@ function SkeletonFigures({ count, className }: { count: number; className: strin
     >
       {Array.from({ length: count }, (_, i) => (
         <div key={i} className="flex flex-col gap-2 p-4">
-          <SkeletonLine size="sm" width="w-1/2" index={i} />
-          <SkeletonLine size="2xl" width="w-3/4" index={i} />
-          <SkeletonLine size="xs" width="w-2/5" index={i} />
+          <SkeletonLine size="sm" width="1/2" index={i} />
+          <SkeletonLine size="2xl" width="3/4" index={i} />
+          <SkeletonLine size="xs" width="2/5" index={i} />
         </div>
-      ))}
-    </div>
-  );
-}
-
-/** A row of tabs while the page loads: short labels over a rule. */
-export function LoadingTabs({ count }: { count: number }) {
-  return (
-    <div aria-hidden className="flex gap-6 border-b border-line pb-3">
-      {Array.from({ length: count }, (_, i) => (
-        <SkeletonLine key={i} size="sm" width="w-18" index={i} />
       ))}
     </div>
   );
@@ -84,8 +73,8 @@ export function LoadingPanel({
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-1 flex-col gap-2">
-          <SkeletonLine size="lg" width="w-2/5" />
-          <SkeletonLine size="sm" width="w-1/4" />
+          <SkeletonLine size="lg" width="2/5" />
+          <SkeletonLine size="sm" width="1/4" />
         </div>
         {toolbar && <SkeletonLine size="2xl" width="w-40" />}
       </div>
@@ -105,10 +94,10 @@ export function LoadingPanel({
         <div className="flex flex-col gap-4">
           {Array.from({ length: rows }, (_, i) => (
             <div key={i} className="flex items-center gap-3">
-              <SkeletonLine size="2xl" width="w-8" index={i} />
+              <SkeletonLine size="2xl" width="xs" index={i} />
               <div className="flex flex-1 flex-col gap-1.5">
-                <SkeletonLine size="base" width="w-3/5" index={i} />
-                <SkeletonLine size="sm" width="w-1/3" index={i} />
+                <SkeletonLine size="base" width="3/5" index={i} />
+                <SkeletonLine size="sm" width="1/3" index={i} />
               </div>
             </div>
           ))}

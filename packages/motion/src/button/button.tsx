@@ -1,5 +1,10 @@
-import { CircleNotchIcon } from '@phosphor-icons/react';
-import { Button as PlainButton, cn, type ButtonProps } from '@rectio/ui';
+import {
+  ButtonSpinner,
+  Button as PlainButton,
+  cn,
+  splitLeadingIcon,
+  type ButtonProps,
+} from '@rectio/ui';
 import { useCallback, useRef, useState, type ReactNode, type Ref } from 'react';
 
 import { springTo, type Controls } from '../lib/animate';
@@ -19,52 +24,81 @@ const PRESS_KEYS = new Set([' ', 'Enter']);
  */
 const AFTER_EXIT = { transitionDelay: 'calc(var(--rx-motion-duration-fast) * 0.33)' };
 
+/** Rises into place on the enter curve; drops away on the exit curve when the work is done. */
+const ARRIVE = cn(
+  'transition-[opacity,translate] duration-fast ease-exit',
+  'translate-y-(--rx-motion-distance-shift) opacity-0',
+  'in-data-loading:translate-y-0 in-data-loading:opacity-100',
+  'in-data-loading:duration-base in-data-loading:ease-enter',
+  // Starts hidden on the first frame, so the arrival is a transition too.
+  'starting:in-data-loading:translate-y-(--rx-motion-distance-shift) starting:in-data-loading:opacity-0',
+);
+
 /**
- * The label leaves upward and the spinner arrives from below, then the reverse when the work is
- * done. CSS transitions on the button's `data-loading`: no script runs per frame. The label stays
- * in the layout and in the accessibility tree, so the width never changes and the name is kept.
+ * The label stays put and readable the whole time. A leading icon leaves upward and the spinner
+ * arrives from below in its slot, so the width never changes; a text-only button gains the spinner
+ * before its label. CSS transitions on the button's `data-loading`: no script runs per frame.
  */
-function MorphContent({ children, loading }: { children: ReactNode; loading: boolean }) {
+function MorphContent({
+  children,
+  loading,
+  iconOnly,
+}: {
+  children: ReactNode;
+  loading: boolean;
+  iconOnly: boolean;
+}) {
   const [indicator, setIndicator] = useState(loading);
   // Mount the spinner as loading starts; unmount it once it has faded out, so idle buttons never
   // keep an invisible animation running.
   if (loading && !indicator) setIndicator(true);
-  return (
-    <>
+  const { icon, label } = splitLeadingIcon(children, iconOnly);
+
+  const spinner = (slot: boolean) =>
+    indicator && (
       <span
-        data-part="label"
-        style={loading ? { gap: 'inherit' } : { gap: 'inherit', ...AFTER_EXIT }}
+        data-part="indicator"
+        aria-hidden
+        style={loading && slot ? AFTER_EXIT : undefined}
+        onTransitionEnd={(event) => {
+          if (!loading && event.target === event.currentTarget) setIndicator(false);
+        }}
         className={cn(
-          'inline-flex items-center',
-          'transition-[opacity,translate] duration-base ease-enter',
-          'in-data-loading:-translate-y-(--rx-motion-distance-shift) in-data-loading:opacity-0',
-          // Leaves on the exit easing: mostly gone early instead of holding, then vanishing.
-          'in-data-loading:duration-fast in-data-loading:ease-exit',
+          'inline-flex items-center justify-center',
+          slot && 'absolute inset-0',
+          ARRIVE,
         )}
       >
-        {children}
+        <ButtonSpinner />
       </span>
-      {indicator && (
+    );
+
+  if (icon === null) {
+    return (
+      <>
+        {spinner(false)}
+        {children}
+      </>
+    );
+  }
+  return (
+    <>
+      <span data-part="icon-slot" className="relative inline-flex items-center justify-center">
         <span
-          data-part="indicator"
-          aria-hidden
-          style={loading ? AFTER_EXIT : undefined}
-          onTransitionEnd={(event) => {
-            if (!loading && event.target === event.currentTarget) setIndicator(false);
-          }}
+          data-part="icon"
+          style={loading ? undefined : AFTER_EXIT}
           className={cn(
-            'absolute inset-0 inline-flex items-center justify-center',
-            'translate-y-(--rx-motion-distance-shift) opacity-0',
-            'transition-[opacity,translate] duration-fast ease-exit',
-            'in-data-loading:translate-y-0 in-data-loading:opacity-100',
-            'in-data-loading:duration-base in-data-loading:ease-enter',
-            // Starts hidden on the first frame, so the arrival is a transition too.
-            'starting:in-data-loading:translate-y-(--rx-motion-distance-shift) starting:in-data-loading:opacity-0',
+            'inline-flex transition-[opacity,translate] duration-base ease-enter',
+            'in-data-loading:-translate-y-(--rx-motion-distance-shift) in-data-loading:opacity-0',
+            // Leaves on the exit easing: mostly gone early instead of holding, then vanishing.
+            'in-data-loading:duration-fast in-data-loading:ease-exit',
           )}
         >
-          <CircleNotchIcon aria-hidden className="size-4 animate-spin" weight="bold" />
+          {icon}
         </span>
-      )}
+        {spinner(true)}
+      </span>
+      {label}
     </>
   );
 }

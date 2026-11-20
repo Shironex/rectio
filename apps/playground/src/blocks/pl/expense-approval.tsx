@@ -16,6 +16,31 @@ const PAST = {
 export const expenseApprovalPl: ExpenseApprovalMessages = {
   ...commonPl,
   title: 'Akceptacja wydatków',
+  statusLabel: 'Status',
+  views: {
+    pending: 'Oczekujące',
+    approved: 'Zatwierdzone',
+    rejected: 'Odrzucone',
+    all: 'Wszystkie',
+  },
+  viewSummary: (view, count, total) => (
+    <>
+      {view === 'approved' ? 'Zatwierdzone' : view === 'rejected' ? 'Odrzucone' : 'Wszystkie'}:{' '}
+      {count} {expenses(count)}, łącznie {total}
+    </>
+  ),
+  viewEmptyTitle: (view) =>
+    view === 'approved'
+      ? 'Nic jeszcze nie zatwierdzono'
+      : view === 'rejected'
+        ? 'Nic nie odrzucono'
+        : 'Brak wydatków',
+  viewEmptyNote: 'Tu trafiają rozpatrzone wydatki, z informacją, kto i kiedy zdecydował.',
+  viewCaption: (view, currency) => `${view} wydatki, kwoty w ${currency}`,
+  decisionLine: (action, actor, date) =>
+    `${action === 'approved' ? 'Zatwierdził(a)' : 'Odrzucił(a)'}: ${actor}, ${date}`,
+  reopen: 'Wznów',
+  reopenOne: (merchant, employee) => `Wznów ${merchant}, ${employee}`,
   summary: (count, total) => (
     <>
       Oczekuje: {count}, łącznie {total}
@@ -58,8 +83,8 @@ export const expenseApprovalPl: ExpenseApprovalMessages = {
     </>
   ),
   reasonLine: (reason) => `Powód: ${reason}`,
-  undo: 'Cofnij',
-  undoLabel: (merchant) => `Cofnij, przywróć ${merchant} do oczekujących`,
+  undo: 'Wznów',
+  undoLabel: (merchant) => `Wznów ${merchant}, z powrotem do oczekujących`,
   rejectManyTitle: (count) => `Odrzuć ${String(count)} ${expenses(count)}`,
   rejectOneTitle: (merchant) => `Odrzuć ${merchant}`,
   rejectManyNote: (total) => <>Łącznie {total}. Każdy pracownik dostanie ten sam powód.</>,

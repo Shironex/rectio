@@ -238,8 +238,8 @@ function Skeletons({ ui }: { ui: Moving }) {
           <div className="flex items-center gap-3">
             <SkeletonCircle size="lg" />
             <div className="flex flex-1 flex-col gap-2">
-              <SkeletonLine width="w-2/3" index={1} />
-              <SkeletonLine size="sm" width="w-1/2" index={2} />
+              <SkeletonLine width="2/3" index={1} />
+              <SkeletonLine size="sm" width="1/2" index={2} />
             </div>
           </div>
           <Skeleton className="h-20" index={3} />

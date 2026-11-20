@@ -35,6 +35,7 @@
     "shoot:marketing": "node scripts/shoot-marketing.ts",
     "shoot:docs": "node scripts/shoot-docs.ts",
     "shoot:forms": "node scripts/shoot-forms.ts",
-    "shoot:nav": "node scripts/shoot-nav.ts"
+    "shoot:nav": "node scripts/shoot-nav.ts",
+    "shoot:gaps": "node scripts/shoot-gaps.ts"
   }
 }

@@ -22,7 +22,7 @@ pnpm dlx rectio add skeleton
 import { SkeletonCard, SkeletonLine, SkeletonText } from '@/components/ui/skeleton';
 
 <SkeletonText heading lines={3} label="Loading the note" />;
-<SkeletonLine width="w-1/2" size="sm" />;
+<SkeletonLine width="1/2" size="sm" />;
 ```
 
 Reach for a skeleton when the shape of the result is known: it keeps the layout still when the
@@ -59,9 +59,10 @@ Every prop of a `span` is accepted as well.
       description: 'Position in a group, for the wave. Presets set it.',
     },
     width: {
-      type: 'string',
-      default: "'w-full'",
-      description: 'SkeletonLine: a width utility such as `w-3/4`.',
+      type: "SkeletonFraction | 'xs' to '2xl' | `${number}%` | `w-${string}`",
+      default: "'full'",
+      description:
+        "SkeletonLine: a share of the container ('3/4'), a fixed preset from the spacing scale ('xs' 2rem to '2xl' 16rem), a percentage ('60%') or a Tailwind width class ('w-18').",
     },
     size: {
       type: "SkeletonLine: 'xs' to '2xl'; SkeletonCircle: 'sm' to 'xl'",

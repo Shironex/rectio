@@ -1,4 +1,4 @@
-import { daysBetween, fromMinor, toMinor, type InvoiceStatus } from '../lib/finance';
+import { daysBetween, fromMinor, roundHalfAway, toMinor, type InvoiceStatus } from '../lib/finance';
 
 export interface InvoiceLine {
   id: string;
@@ -79,7 +79,7 @@ export function documentTotals(
   });
   const groups = [...byRate]
     .sort(([a], [b]) => b - a)
-    .map(([rate, net]) => ({ rate, net, vat: Math.sign(net) * Math.round(Math.abs(net * rate)) }));
+    .map(([rate, net]) => ({ rate, net, vat: roundHalfAway(net * rate) }));
   const subtotal = netMinor.reduce((sum, value) => sum + value, 0);
   const vatTotal = groups.reduce((sum, group) => sum + group.vat, 0);
   const paid = payments.reduce((sum, payment) => sum + toMinor(payment.amount, currency), 0);

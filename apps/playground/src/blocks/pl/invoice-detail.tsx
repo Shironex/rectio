@@ -11,6 +11,7 @@ export const invoiceDetailPl: InvoiceDetailMessages = {
   dueDescription: (due) => `Termin płatności ${due}`,
   pdf: 'PDF',
   sendInvoice: 'Wyślij fakturę',
+  sendReminder: 'Wyślij przypomnienie',
   recordPayment: 'Zapisz płatność',
   billedTo: 'Nabywca',
   from: 'Sprzedawca',

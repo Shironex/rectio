@@ -36,6 +36,10 @@ const PAIRS: [string, string, number][] = [
   ['text-subtle', 'surface-canvas', 4.5],
   ['text-subtle', 'surface-overlay', 4.5],
   ['text-subtle', 'surface-inset', 4.5],
+  // Hints and meta lines inside a well, a hovered row and a selected row.
+  ['text-subtle', 'surface-sunken', 4.5],
+  ['text-subtle', 'surface-hover', 4.5],
+  ['text-subtle', 'surface-selected', 4.5],
   ['text', 'surface-inset', 4.5],
   // Popovers and toasts: the calendar's today marker, a toast's description and status icon.
   ['text-muted', 'surface-overlay', 4.5],
@@ -201,6 +205,40 @@ describe('code colours', () => {
       const ratio = contrast(parse(tokens[`--rx-${fg}`]), parse(tokens[`--rx-${bg}`]));
       return ratio >= 4.5 ? [] : [`${fg} on ${bg}: ${ratio.toFixed(2)}`];
     });
+    expect(failures).toEqual([]);
+  });
+});
+
+describe('selected fill', () => {
+  const darkModes = themeModes.filter(({ key }) => key.endsWith('/dark'));
+
+  // The current page in a sidebar sits on surface-selected. In dark mode it has to read as a step
+  // above hover and clearly off the canvas, or the active item looks like a hovered one.
+  it.each(darkModes)('$key selected sits above hover and off the canvas', ({ tokens }) => {
+    const selected = parse(tokens['--rx-surface-selected']);
+    const hover = parse(tokens['--rx-surface-hover']);
+    expect(selected.l).toBeGreaterThan(hover.l);
+    expect(contrast(selected, parse(tokens['--rx-surface-canvas']))).toBeGreaterThanOrEqual(1.25);
+  });
+});
+
+describe('quiet text margin', () => {
+  // Muted and subtle text is small and often sits on a tint; a ratio of 4.51 passes on paper and
+  // fails after a browser's colour conversion or a slightly different display. Keep a margin.
+  const SURFACES = [
+    'surface',
+    'surface-canvas',
+    'surface-sunken',
+    'surface-hover',
+    'surface-selected',
+  ];
+  it.each(themeModes)('$key muted and subtle text clear AA with room to spare', ({ tokens }) => {
+    const failures = ['text-muted', 'text-subtle'].flatMap((fg) =>
+      SURFACES.flatMap((bg) => {
+        const ratio = contrast(parse(tokens[`--rx-${fg}`]), parse(tokens[`--rx-${bg}`]));
+        return ratio >= 4.75 ? [] : [`${fg} on ${bg}: ${ratio.toFixed(2)}`];
+      }),
+    );
     expect(failures).toEqual([]);
   });
 });

@@ -819,7 +819,11 @@ export default defineRegistry({
       description:
         'A command palette in a dialog: groups, fuzzy filter, keyboard navigation, empty state and shortcut hints.',
       categories: ['navigation'],
-      files: ['command-menu/command-menu.tsx', 'command-menu/fuzzy.ts'],
+      files: [
+        'command-menu/command-menu.tsx',
+        'command-menu/fuzzy.ts',
+        'command-menu/scroll-edges.ts',
+      ],
     },
     {
       name: 'sidebar',

@@ -30,16 +30,42 @@ export function datePattern(dateLocale: DayPickerLocale): string {
     .replace('12', 'mm');
 }
 
-/** Typed text to a date in the locale's short pattern, or null. Four-digit years only. */
-export function parseDate(text: string, dateLocale: DayPickerLocale): Date | null {
+/**
+ * How a date field shows its date: a date-fns pattern such as `'d MMM yyyy'` (31 Dec 2026) or
+ * `'PP'` (the locale's medium date), or a function of the date and the locale. Default `'P'`, the
+ * locale's short date, such as 31/12/2026.
+ */
+export type DateDisplayFormat = string | ((date: Date, dateLocale: DayPickerLocale) => string);
+
+/**
+ * Typed text to a date, or null. Reads the field's own pattern first, then the locale's short
+ * pattern, so `31/12/2026` still works in a field that shows `31 Dec 2026`. Four-digit years only.
+ */
+export function parseDate(
+  text: string,
+  dateLocale: DayPickerLocale,
+  displayFormat: DateDisplayFormat = 'P',
+): Date | null {
   const trimmed = text.trim();
   if (trimmed === '') return null;
-  const parsed = parse(trimmed, 'P', new Date(), { locale: dateLocale });
-  return isValid(parsed) && parsed.getFullYear() >= 1000 ? parsed : null;
+  const patterns = typeof displayFormat === 'string' ? [displayFormat, 'P'] : ['P'];
+  for (const pattern of patterns) {
+    const parsed = parse(trimmed, pattern, new Date(), { locale: dateLocale });
+    if (isValid(parsed) && parsed.getFullYear() >= 1000) return parsed;
+  }
+  return null;
 }
 
-const formatDate = (date: Date, dateLocale: DayPickerLocale) =>
-  format(date, 'P', { locale: dateLocale });
+/** A date as the field shows it. */
+export function formatDisplayDate(
+  date: Date,
+  dateLocale: DayPickerLocale,
+  displayFormat: DateDisplayFormat = 'P',
+): string {
+  return typeof displayFormat === 'function'
+    ? displayFormat(date, dateLocale)
+    : format(date, displayFormat, { locale: dateLocale });
+}
 
 /**
  * The day the calendar would focus itself: the one in its tab order (selected, else today), else
@@ -124,7 +150,13 @@ export interface DatePickerProps {
   /** BCP 47 tag: the typed pattern, month names and first weekday follow it. */
   locale?: string;
   dateLocale?: DayPickerLocale;
-  /** Defaults to the locale's pattern, such as `dd/mm/yyyy`. */
+  /**
+   * How the field shows the date: a date-fns pattern such as `'d MMM yyyy'`, `'PP'` for the
+   * locale's medium date, or a function. Typing in the locale's short pattern always works too.
+   * Default `'P'`, the locale's short date.
+   */
+  displayFormat?: DateDisplayFormat;
+  /** Defaults to the locale's pattern, such as `dd/mm/yyyy`, or the display pattern when set. */
   placeholder?: string;
   disabled?: boolean;
   /** Days that cannot be picked, in DayPicker matcher form, such as `{ after: new Date() }`. */
@@ -148,6 +180,7 @@ export function DatePicker({
   onValueChange,
   locale,
   dateLocale: dateLocaleProp,
+  displayFormat = 'P',
   placeholder,
   disabled = false,
   disabledDays,
@@ -159,8 +192,9 @@ export function DatePicker({
   'aria-label': ariaLabel,
 }: DatePickerProps) {
   const dateLocale = dateLocaleProp ?? resolveDateLocale(locale);
+  const formatDate = (date: Date) => formatDisplayDate(date, dateLocale, displayFormat);
   const [open, setOpen] = useState(false);
-  const [text, setText] = useState(() => (value === null ? '' : formatDate(value, dateLocale)));
+  const [text, setText] = useState(() => (value === null ? '' : formatDate(value)));
   const [shownValue, setShownValue] = useState(value);
   const groupRef = useRef<HTMLDivElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
@@ -168,12 +202,12 @@ export function DatePicker({
   // Keep the text in step when the value changes from outside (picked, reset, loaded).
   if (value?.getTime() !== shownValue?.getTime()) {
     setShownValue(value);
-    setText(value === null ? '' : formatDate(value, dateLocale));
+    setText(value === null ? '' : formatDate(value));
   }
 
   const commit = () => {
-    const parsed = parseDate(text, dateLocale);
-    if (parsed !== null) setText(formatDate(parsed, dateLocale));
+    const parsed = parseDate(text, dateLocale, displayFormat);
+    if (parsed !== null) setText(formatDate(parsed));
     if (parsed?.getTime() !== value?.getTime()) {
       setShownValue(parsed);
       onValueChange(parsed);
@@ -209,9 +243,15 @@ export function DatePicker({
           disabled={disabled}
           autoFocus={autoFocus}
           aria-label={ariaLabel}
-          placeholder={placeholder ?? datePattern(dateLocale)}
+          placeholder={
+            placeholder ??
+            (displayFormat === 'P' || typeof displayFormat === 'function'
+              ? datePattern(dateLocale)
+              : displayFormat.toLowerCase())
+          }
           autoComplete="off"
-          inputMode="numeric"
+          // A pattern with month names needs letters; the short pattern needs only digits.
+          inputMode={displayFormat === 'P' ? 'numeric' : 'text'}
           onValueChange={setText}
           onKeyDown={onKeyDown}
           onBlur={() => {
@@ -222,9 +262,7 @@ export function DatePicker({
         />
         <Popover.Trigger
           disabled={disabled}
-          aria-label={
-            value === null ? calendarLabel : `${calendarLabel}, ${formatDate(value, dateLocale)}`
-          }
+          aria-label={value === null ? calendarLabel : `${calendarLabel}, ${formatDate(value)}`}
           className={triggerButton}
         >
           <CalendarBlankIcon aria-hidden weight="bold" className="size-4" />
@@ -242,7 +280,7 @@ export function DatePicker({
             // Pressing the chosen day again confirms it; it never empties the field.
             const next = date ?? value;
             setShownValue(next);
-            setText(next === null ? '' : formatDate(next, dateLocale));
+            setText(next === null ? '' : formatDate(next));
             onValueChange(next);
             setOpen(false);
           }}
@@ -257,6 +295,11 @@ export interface DateRangePickerProps {
   onValueChange: (value: DateRange | undefined) => void;
   locale?: string;
   dateLocale?: DayPickerLocale;
+  /**
+   * How the button shows each end of the range: a date-fns pattern or a function, as on
+   * DatePicker. Default `'PP'`, the locale's medium date, such as 31 Dec 2026.
+   */
+  displayFormat?: DateDisplayFormat;
   /** Shown when no range is picked. */
   placeholder?: string;
   /** Months side by side. Two by default; they stack on narrow screens. */
@@ -293,6 +336,7 @@ export function DateRangePicker({
   onValueChange,
   locale,
   dateLocale: dateLocaleProp,
+  displayFormat = 'PP',
   placeholder = 'Choose dates',
   numberOfMonths = 2,
   disabledDays,
@@ -315,8 +359,8 @@ export function DateRangePicker({
     from === undefined
       ? placeholder
       : to === undefined
-        ? `${format(from, 'PP', { locale: dateLocale })} to …`
-        : `${format(from, 'PP', { locale: dateLocale })} to ${format(to, 'PP', { locale: dateLocale })}`;
+        ? `${formatDisplayDate(from, dateLocale, displayFormat)} to …`
+        : `${formatDisplayDate(from, dateLocale, displayFormat)} to ${formatDisplayDate(to, dateLocale, displayFormat)}`;
 
   return (
     <Popover.Root open={open} onOpenChange={onOpenChange}>
