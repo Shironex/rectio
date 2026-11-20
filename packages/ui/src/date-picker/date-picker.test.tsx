@@ -6,17 +6,25 @@ import { describe, expect, it, vi } from 'vitest';
 import { Calendar } from '../calendar/calendar';
 import { resolveDateLocale } from '../calendar/locales';
 import { Field, FieldLabel } from '../field/field';
-import { DatePicker, DateRangePicker, datePattern, parseDate } from './date-picker';
+import {
+  DatePicker,
+  DateRangePicker,
+  datePattern,
+  parseDate,
+  type DateDisplayFormat,
+} from './date-picker';
 import type { DateRange } from '@daypicker/react';
 
 function Controlled({
   locale,
   initial = null,
   onChange = vi.fn(),
+  displayFormat,
 }: {
   locale: string;
   initial?: Date | null;
   onChange?: (value: Date | null) => void;
+  displayFormat?: DateDisplayFormat;
 }) {
   const [value, setValue] = useState<Date | null>(initial);
   return (
@@ -25,6 +33,7 @@ function Controlled({
       <DatePicker
         value={value}
         locale={locale}
+        {...(displayFormat === undefined ? {} : { displayFormat })}
         onValueChange={(next) => {
           setValue(next);
           onChange(next);
@@ -207,5 +216,50 @@ describe('DateRangePicker', () => {
     await waitFor(() => {
       expect(screen.queryByRole('grid')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('DatePicker display format', () => {
+  it('shows the date in the pattern it is given', () => {
+    render(<Controlled locale="en-GB" initial={new Date(2026, 2, 5)} displayFormat="d MMM yyyy" />);
+    expect(screen.getByRole('textbox', { name: 'Date' })).toHaveValue('5 Mar 2026');
+  });
+
+  it('follows the locale for month names', () => {
+    render(<Controlled locale="pl-PL" initial={new Date(2026, 2, 5)} displayFormat="PP" />);
+    expect(screen.getByRole('textbox', { name: 'Date' })).toHaveValue('5 mar 2026');
+  });
+
+  it('reads both its own pattern and the short one, then shows its own', async () => {
+    const onChange = vi.fn();
+    render(<Controlled locale="en-GB" onChange={onChange} displayFormat="d MMM yyyy" />);
+    const input = screen.getByRole('textbox', { name: 'Date' });
+    expect(input).toHaveAttribute('placeholder', 'd mmm yyyy');
+    await userEvent.type(input, '19/3/2026');
+    await userEvent.tab();
+    expect(ymd(onChange.mock.lastCall?.[0] as Date)).toBe('2026-03-19');
+    expect(input).toHaveValue('19 Mar 2026');
+    await userEvent.clear(input);
+    await userEvent.type(input, '2 Apr 2026');
+    await userEvent.tab();
+    expect(ymd(onChange.mock.lastCall?.[0] as Date)).toBe('2026-04-02');
+  });
+
+  it('takes a function', () => {
+    render(
+      <Controlled
+        locale="en-GB"
+        initial={new Date(2026, 2, 5)}
+        displayFormat={(date) => date.toISOString().slice(0, 10)}
+      />,
+    );
+    expect(screen.getByRole('textbox', { name: 'Date' })).toHaveValue(
+      new Date(2026, 2, 5).toISOString().slice(0, 10),
+    );
+  });
+
+  it('parseDate reads a custom pattern', () => {
+    const date = parseDate('5 marca 2026', resolveDateLocale('pl-PL'), 'd MMMM yyyy');
+    expect(ymd(date)).toBe('2026-03-05');
   });
 });

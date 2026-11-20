@@ -33,7 +33,12 @@ the button or Alt and Arrow Down. A typed date is read on blur or Enter and rewr
 format. Text that is not a date reports `null` and stays in the field to be fixed. Pressing the
 chosen day again keeps it; it never empties the field.
 
-`datePattern(dateLocale)` and `parseDate(text, dateLocale)` are exported for your own validation
+`displayFormat` sets how the field shows the date: a date-fns pattern such as `'d MMM yyyy'`
+(5 Mar 2026), `'PP'` for the locale's medium date, or a function. The field reads its own pattern
+and the locale's short one, so typing `5/3/2026` still works in a field that shows `5 Mar 2026`.
+
+`datePattern(dateLocale)`, `parseDate(text, dateLocale, displayFormat?)` and
+`formatDisplayDate(date, dateLocale, displayFormat?)` are exported for your own validation
 messages, such as "Enter the date as dd/mm/yyyy."
 
 ### DateRangePicker
@@ -75,9 +80,16 @@ bottom edge, with its own close button.
       description: 'BCP 47 tag: the typed pattern, month names and first weekday follow it.',
     },
     dateLocale: { type: 'DayPickerLocale', description: 'Wins over locale.' },
+    displayFormat: {
+      type: 'string | ((date: Date, dateLocale: DayPickerLocale) => string)',
+      default: "'P'",
+      description:
+        "How the field shows the date: a date-fns pattern such as 'd MMM yyyy', 'PP' for the locale's medium date, or a function. The locale's short pattern is always read too.",
+    },
     placeholder: {
       type: 'string',
-      description: "Defaults to the locale's pattern, such as dd/mm/yyyy.",
+      description:
+        "Defaults to the locale's pattern, such as dd/mm/yyyy, or the display pattern when one is set.",
     },
     disabled: { type: 'boolean', default: 'false' },
     disabledDays: {
@@ -110,6 +122,11 @@ bottom edge, with its own close button.
     },
     locale: { type: 'string' },
     dateLocale: { type: 'DayPickerLocale' },
+    displayFormat: {
+      type: 'string | ((date: Date, dateLocale: DayPickerLocale) => string)',
+      default: "'PP'",
+      description: 'How the button shows each end of the range.',
+    },
     placeholder: { type: 'string', default: "'Choose dates'" },
     numberOfMonths: {
       type: 'number',
