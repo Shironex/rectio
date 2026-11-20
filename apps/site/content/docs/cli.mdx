@@ -10,6 +10,9 @@ Node 22.12 or later. It asks nothing: every choice is a flag, so it runs the sam
 pnpm dlx @rectio/cli <command> [options]
 ```
 
+The commands below write `rectio` for short. Run them through `pnpm dlx @rectio/cli` (or
+`npx @rectio/cli`), or install the CLI globally with `pnpm add -g @rectio/cli` to type `rectio`.
+
 ## Commands
 
 ### init
@@ -155,3 +158,15 @@ The CLI uses the first of:
 
 A plain folder or a `file://` URL works for development, as does the
 [local registry server](/docs/registry#local-registry).
+
+## Update notice
+
+When a newer version of `@rectio/cli` is on npm, the CLI prints a short notice on stderr after the
+command, with the version and how to get it. It asks npm at most once a day, caches the answer in
+your user cache folder, and gives up after 1.5 seconds, so it never slows a command down or makes
+it fail. It stays quiet in CI, when stdout is not a terminal, and always in `rectio mcp`.
+
+Set `RECTIO_NO_UPDATE_CHECK=1` to turn it off.
+
+`add` and `list` also say in one line when installed items have a newer version in the registry,
+from the index they already fetched; `update` lists them.

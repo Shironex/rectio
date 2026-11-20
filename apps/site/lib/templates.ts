@@ -44,7 +44,7 @@ export function readTemplates(): SiteTemplate[] {
         uses: manifest.uses,
         href: `/docs/templates/${manifest.name}`,
         previewHref: `/templates/${manifest.name}`,
-        command: `rectio init --template ${manifest.name}`,
+        command: `pnpm dlx @rectio/cli init --template ${manifest.name}`,
         shots: {
           light: served(manifest.name, light),
           dark: served(manifest.name, pick('dark') ?? light),
