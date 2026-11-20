@@ -104,14 +104,16 @@ export function ViewerControls({
           };
         })}
       />
-      {/* The site's own theme switch sits in the bar above: a framed, named group says this one
-          changes the template. */}
+      {/* The site's own theme switch sits in the bar above: a tinted, named group says this one
+          changes the preview only. */}
       <div
         role="group"
-        aria-label="Template look"
-        className="flex items-center gap-2 rounded-control border border-dashed border-line-strong py-1 ps-3 pe-1 sm:ms-auto"
+        aria-label="Preview look, changes the preview only"
+        className="flex items-center gap-2 rounded-control bg-surface-sunken py-1 ps-3 pe-1 max-sm:w-full max-sm:[&>*:last-child]:ms-auto sm:ms-auto"
       >
-        <span className="text-sm text-fg-muted">Template</span>
+        <span className="text-sm text-fg-muted" title="Changes the preview only, not this site">
+          Preview
+        </span>
         <Segmented
           touch
           label="Template theme"

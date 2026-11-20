@@ -54,7 +54,7 @@ export default function TemplatesPage() {
                   <TemplateFrame template={template} phone eager={i === 0} />
                 </Link>
                 <div className="flex min-w-0 flex-col items-start gap-4 lg:col-span-5">
-                  <p className="flex items-center gap-2 text-sm text-fg-muted">
+                  <p className="flex items-center gap-2 text-base text-fg-muted">
                     <ProBadge />
                     {CATEGORY_LABELS[template.category]}, {template.pages.length}{' '}
                     {template.pages.length === 1 ? 'page' : 'pages'}
@@ -69,6 +69,9 @@ export default function TemplatesPage() {
                   <div className="mt-2 flex w-full flex-col items-start gap-2 border-t border-line pt-5">
                     <p className="text-sm text-fg-muted">Start a project from it</p>
                     <CopyCommand command={template.command} />
+                    <p className="text-sm text-fg-muted">
+                      The command asks for your Pro license key.
+                    </p>
                   </div>
                 </div>
               </li>

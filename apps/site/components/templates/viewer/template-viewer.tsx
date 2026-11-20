@@ -144,7 +144,7 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
       <div className="site-panel flex min-h-0 flex-1 flex-col border-t border-line">
         <div
           ref={stageRef}
-          className="site-viewer-stage flex justify-center px-4 pt-4 pb-3 sm:px-6"
+          className="site-viewer-stage flex justify-center px-4 pt-4 pb-4 sm:px-6"
         >
           <PreviewFrame
             key={opened?.n ?? 0}
