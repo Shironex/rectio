@@ -18,6 +18,7 @@ import {
 } from '@rectio/ui';
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 
+import { mergeMessages, plural, resolveLocale } from '../lib/messages';
 import {
   groupResults,
   matchRanges,
@@ -50,8 +51,68 @@ export interface DocsSearchProps {
   /** Draws the trigger. Pass false to open the search only with the shortcut or `open`. */
   trigger?: boolean;
   triggerClassName?: string;
+  /** BCP 47 locale for the result count's plural form. Defaults to the runtime locale. */
+  locale?: string;
+  /** The block's words; pass the keys you change. See `DOCS_SEARCH_MESSAGES`. */
+  messages?: Partial<DocsSearchMessages>;
   className?: string;
 }
+
+export interface DocsSearchMessages {
+  /** Name of the search dialog and its field. */
+  label: string;
+  placeholder: string;
+  /** The words in the trigger. */
+  triggerLabel: string;
+  searching: string;
+  searchFailed: string;
+  noResults: string;
+  /** Said when results arrive: "3 results". */
+  results: (count: number, locale: string) => string;
+  errorTitle: string;
+  errorNote: string;
+  emptyTitle: string;
+  emptyNote: string;
+  /** The title of the empty state when nothing matched: No results for "queue". */
+  noResultsTitle: (query: string) => string;
+  noResultsNote: string;
+  /** Heading of the recent searches. */
+  recent: string;
+  /** Heading of the suggestions. */
+  suggested: string;
+  clear: string;
+  close: string;
+  /** Read to a screen reader as the field's description. */
+  hints: string;
+  toMove: string;
+  toOpen: string;
+  toClose: string;
+}
+
+export const DOCS_SEARCH_MESSAGES: DocsSearchMessages = {
+  label: 'Search the docs',
+  placeholder: 'Search the docs',
+  triggerLabel: 'Search docs',
+  searching: 'Searching',
+  searchFailed: 'Search failed',
+  noResults: 'No results',
+  results: (count, locale) =>
+    `${String(count)} ${plural(count, { one: 'result', other: 'results' }, locale)}`,
+  errorTitle: 'Search is not available right now',
+  errorNote: 'Check your connection and try again, or browse the navigation.',
+  emptyTitle: 'Search the docs',
+  emptyNote: 'Pages, sections and API names. Results you open show up here next time.',
+  noResultsTitle: (query) => `No results for “${query}”`,
+  noResultsNote: 'Try fewer words, or the name of a function or option.',
+  recent: 'Recent',
+  suggested: 'Suggested',
+  clear: 'Clear',
+  close: 'Close',
+  hints: 'Arrow keys move through the results, Enter opens one, Escape closes.',
+  toMove: 'to move',
+  toOpen: 'to open',
+  toClose: 'to close',
+};
 
 type Status = 'idle' | 'loading' | 'done' | 'error';
 
@@ -90,13 +151,18 @@ export function DocsSearch({
   recentKey = 'rectio-docs-recent-searches',
   suggestions,
   debounce = 120,
-  label = 'Search the docs',
-  placeholder = 'Search the docs',
-  triggerLabel = 'Search docs',
+  label,
+  placeholder,
+  triggerLabel,
   trigger = true,
   triggerClassName,
+  locale,
+  messages,
   className,
 }: DocsSearchProps) {
+  const m = mergeMessages(DOCS_SEARCH_MESSAGES, messages);
+  const name = label ?? m.label;
+  const resultsLocale = resolveLocale(locale);
   const [openState, setOpenState] = useState(false);
   const open = openProp ?? openState;
   const [query, setQuery] = useState('');
@@ -154,12 +220,12 @@ export function DocsSearch({
   const showingRecent = query.trim() === '';
   const groups = useMemo(() => {
     if (!showingRecent) return status === 'done' ? groupResults(results) : [];
-    if (recent.length > 0) return [{ label: 'Recent', items: recent }];
+    if (recent.length > 0) return [{ label: m.recent, items: recent }];
     if (suggestions !== undefined && suggestions.length > 0) {
-      return [{ label: 'Suggested', items: [...suggestions] }];
+      return [{ label: m.suggested, items: [...suggestions] }];
     }
     return [];
-  }, [showingRecent, status, results, recent, suggestions]);
+  }, [showingRecent, status, results, recent, suggestions, m.recent, m.suggested]);
   const count = groups.reduce((sum, group) => sum + group.items.length, 0);
 
   const go = (result: DocsSearchResult) => {
@@ -193,7 +259,9 @@ export function DocsSearch({
           )}
         >
           <MagnifyingGlassIcon aria-hidden weight="bold" className="size-4 shrink-0" />
-          <span className="max-sm:sr-only sm:min-w-36 sm:text-start">{triggerLabel}</span>
+          <span className="max-sm:sr-only sm:min-w-36 sm:text-start">
+            {triggerLabel ?? m.triggerLabel}
+          </span>
           {shortcut !== null && (
             <KbdShortcut shortcut={shortcut} className="ms-auto max-sm:hidden" />
           )}
@@ -203,7 +271,7 @@ export function DocsSearch({
         <BaseDialog.Backdrop className="fixed inset-0 z-50 bg-scrim" />
         <BaseDialog.Viewport className="fixed inset-0 z-50 flex items-start justify-center p-2 pt-4 sm:p-4 sm:pt-24">
           <BaseDialog.Popup
-            aria-label={label}
+            aria-label={name}
             data-slot="docs-search"
             className={cn(
               'flex max-h-full w-(--rx-command-width) max-w-full flex-col overflow-hidden',
@@ -225,7 +293,7 @@ export function DocsSearch({
             >
               <div className="flex items-center gap-2 border-b border-line px-4">
                 {status === 'loading' ? (
-                  <Spinner size="sm" label="Searching" className="shrink-0" />
+                  <Spinner size="sm" label={m.searching} className="shrink-0" />
                 ) : (
                   <MagnifyingGlassIcon
                     aria-hidden
@@ -234,9 +302,9 @@ export function DocsSearch({
                   />
                 )}
                 <Autocomplete.Input
-                  aria-label={label}
+                  aria-label={name}
                   aria-describedby={hintsId}
-                  placeholder={placeholder}
+                  placeholder={placeholder ?? m.placeholder}
                   data-slot="docs-search-input"
                   className={cn(
                     'h-12 w-full min-w-0 bg-transparent text-base text-fg outline-none',
@@ -251,7 +319,7 @@ export function DocsSearch({
                     'pointer-coarse:text-base pointer-coarse:font-medium pointer-coarse:text-accent-strong',
                   )}
                 >
-                  Close
+                  {m.close}
                 </BaseDialog.Close>
               </div>
 
@@ -260,29 +328,21 @@ export function DocsSearch({
                   {showingRecent
                     ? null
                     : status === 'loading'
-                      ? 'Searching'
+                      ? m.searching
                       : status === 'error'
-                        ? 'Search failed'
+                        ? m.searchFailed
                         : count === 0
-                          ? 'No results'
-                          : count === 1
-                            ? '1 result'
-                            : `${String(count)} results`}
+                          ? m.noResults
+                          : m.results(count, resultsLocale)}
                 </Autocomplete.Status>
                 {status === 'error' ? (
-                  <Note title="Search is not available right now">
-                    Check your connection and try again, or browse the navigation.
-                  </Note>
+                  <Note title={m.errorTitle}>{m.errorNote}</Note>
                 ) : (
                   <Autocomplete.Empty>
                     {showingRecent ? (
-                      <Note title="Search the docs">
-                        Pages, sections and API names. Results you open show up here next time.
-                      </Note>
+                      <Note title={m.emptyTitle}>{m.emptyNote}</Note>
                     ) : status === 'done' ? (
-                      <Note title={`No results for “${query.trim()}”`}>
-                        Try fewer words, or the name of a function or option.
-                      </Note>
+                      <Note title={m.noResultsTitle(query.trim())}>{m.noResultsNote}</Note>
                     ) : null}
                   </Autocomplete.Empty>
                 )}
@@ -297,7 +357,7 @@ export function DocsSearch({
                         <Autocomplete.GroupLabel className="text-xs font-medium tracking-caps text-fg-subtle uppercase select-none">
                           {group.label}
                         </Autocomplete.GroupLabel>
-                        {group.label === 'Recent' && showingRecent && (
+                        {group.label === m.recent && showingRecent && (
                           <button
                             type="button"
                             onClick={() => {
@@ -306,7 +366,7 @@ export function DocsSearch({
                             }}
                             className="rounded-control text-xs text-fg-muted underline-offset-4 outline-offset-2 hover:text-fg hover:underline focus-visible:outline-2 focus-visible:outline-focus"
                           >
-                            Clear
+                            {m.clear}
                           </button>
                         )}
                       </div>
@@ -316,7 +376,7 @@ export function DocsSearch({
                             key={item.id}
                             item={item}
                             query={query}
-                            recent={showingRecent && group.label === 'Recent'}
+                            recent={showingRecent && group.label === m.recent}
                             onOpen={go}
                           />
                         )}
@@ -327,7 +387,7 @@ export function DocsSearch({
               </div>
 
               <p id={hintsId} className="sr-only">
-                Arrow keys move through the results, Enter opens one, Escape closes.
+                {m.hints}
               </p>
               <div
                 aria-hidden
@@ -338,15 +398,15 @@ export function DocsSearch({
                     <Kbd>↑</Kbd>
                     <Kbd>↓</Kbd>
                   </span>
-                  <span>to move</span>
+                  <span>{m.toMove}</span>
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Kbd>↵</Kbd>
-                  <span>to open</span>
+                  <span>{m.toOpen}</span>
                 </span>
                 <span className="ms-auto flex items-center gap-1.5">
                   <Kbd>esc</Kbd>
-                  <span>to close</span>
+                  <span>{m.toClose}</span>
                 </span>
               </div>
             </Autocomplete.Root>

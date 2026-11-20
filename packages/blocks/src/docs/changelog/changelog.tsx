@@ -1,6 +1,7 @@
 import { ArrowUpRightIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 
+import { mergeMessages } from '../lib/messages';
 import { DocsBadge } from '../lib/badge';
 import { formatDate, isoDate } from '../lib/docs';
 import { DocsLink, linkFocus } from '../lib/link';
@@ -22,8 +23,25 @@ export interface ChangelogProps {
   locale?: string | undefined;
   /** Heading level of each version: 2 when the changelog is the page. */
   level?: 2 | 3;
+  /** The block's words; pass the keys you change. See `CHANGELOG_MESSAGES`. */
+  messages?: Partial<ChangelogMessages>;
   className?: string;
 }
+
+export interface ChangelogMessages {
+  /** Badge on the newest release. */
+  latest: string;
+  /** The heading of each group of changes, and the badge of a breaking release. */
+  changes: Record<ChangeType, string>;
+  /** The link to a release's notes: "Full release notes for 2.4.0". */
+  fullNotes: (version: string) => string;
+}
+
+export const CHANGELOG_MESSAGES: ChangelogMessages = {
+  latest: 'Latest',
+  changes: CHANGE_LABELS,
+  fullNotes: (version) => `Full release notes for ${version}`,
+};
 
 const GROUP_TONE: Record<ChangeType, string> = {
   breaking: 'text-negative-strong',
@@ -45,8 +63,10 @@ export function Changelog({
   markLatest = true,
   locale,
   level = 2,
+  messages,
   className,
 }: ChangelogProps) {
+  const m = mergeMessages(CHANGELOG_MESSAGES, messages);
   const { Reveal } = useDocsParts();
   const Heading = level === 2 ? 'h2' : 'h3';
   const sorted = sortReleases(releases);
@@ -72,8 +92,10 @@ export function Changelog({
                 {formatDate(release.date, locale)}
               </time>
               <div className="flex flex-wrap gap-1.5">
-                {markLatest && index === 0 && <DocsBadge tone="new">Latest</DocsBadge>}
-                {isBreaking(release) && <DocsBadge tone="deprecated">Breaking</DocsBadge>}
+                {markLatest && index === 0 && <DocsBadge tone="new">{m.latest}</DocsBadge>}
+                {isBreaking(release) && (
+                  <DocsBadge tone="deprecated">{m.changes.breaking}</DocsBadge>
+                )}
               </div>
             </div>
             <Reveal className="flex min-w-0 flex-col gap-5 @3xl:col-span-3">
@@ -93,7 +115,7 @@ export function Changelog({
                       GROUP_TONE[group.type],
                     )}
                   >
-                    {CHANGE_LABELS[group.type]}
+                    {m.changes[group.type]}
                   </h4>
                   <ul className="flex flex-col gap-1.5 ps-5">
                     {group.changes.map((change) => (
@@ -129,7 +151,7 @@ export function Changelog({
                     linkFocus,
                   )}
                 >
-                  Full release notes for {release.version}
+                  {m.fullNotes(release.version)}
                   <ArrowUpRightIcon aria-hidden weight="bold" className="size-3.5" />
                 </DocsLink>
               )}

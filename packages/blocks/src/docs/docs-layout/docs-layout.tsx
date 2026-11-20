@@ -3,6 +3,7 @@ import { CaretRightIcon, ListIcon } from '@phosphor-icons/react';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger, cn } from '@rectio/ui';
 import { useCallback, useState, type ReactNode } from 'react';
 
+import { mergeMessages } from '../lib/messages';
 import { normalizePath } from '../lib/docs';
 import { DocsLink, linkFocus } from '../lib/link';
 import { CloseNavContext } from '../lib/nav-context';
@@ -33,8 +34,22 @@ export interface DocsHeaderProps {
    */
   mobileNav?: ReactNode;
   menuLabel?: string;
+  /** The block's words; pass the keys you change. See `DOCS_HEADER_MESSAGES`. */
+  messages?: Partial<DocsHeaderMessages>;
   className?: string;
 }
+
+export interface DocsHeaderMessages {
+  /** Accessible name of the menu button and the sheet it opens. */
+  navigation: string;
+  /** Name of the top links' navigation landmark. */
+  main: string;
+}
+
+export const DOCS_HEADER_MESSAGES: DocsHeaderMessages = {
+  navigation: 'Navigation',
+  main: 'Main',
+};
 
 /**
  * The bar across the top of every docs page: brand, a few top links, search, and switchers. Below
@@ -49,9 +64,12 @@ export function DocsHeader({
   search,
   actions,
   mobileNav,
-  menuLabel = 'Navigation',
+  menuLabel,
+  messages,
   className,
 }: DocsHeaderProps) {
+  const m = mergeMessages(DOCS_HEADER_MESSAGES, messages);
+  const menuName = menuLabel ?? m.navigation;
   const [open, setOpen] = useState(false);
   const current = currentLink(links ?? [], currentHref);
   const closeNav = useCallback(() => {
@@ -70,7 +88,7 @@ export function DocsHeader({
         {mobileNav !== undefined && (
           <Sheet side="left" open={open} onOpenChange={setOpen}>
             <SheetTrigger
-              aria-label={menuLabel}
+              aria-label={menuName}
               className={cn(
                 'relative -ms-1.5 inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-control text-fg lg:hidden',
                 'pointer-fine:hover:bg-surface-hover pointer-coarse:size-(--rx-button-height-touch)',
@@ -80,7 +98,7 @@ export function DocsHeader({
               <ListIcon aria-hidden weight="bold" className="size-5" />
             </SheetTrigger>
             <SheetContent className="w-80">
-              <SheetTitle className="sr-only">{menuLabel}</SheetTitle>
+              <SheetTitle className="sr-only">{menuName}</SheetTitle>
               <div className="flex h-(--rx-app-shell-header-height) shrink-0 items-center border-b border-line px-4">
                 <span aria-hidden className="inline-flex items-center">
                   {brand}
@@ -100,7 +118,7 @@ export function DocsHeader({
           {brand}
         </DocsLink>
         {links !== undefined && links.length > 0 && (
-          <nav aria-label="Main" className="ms-4 hidden md:block">
+          <nav aria-label={m.main} className="ms-4 hidden md:block">
             <ul className="flex items-center gap-1">
               {links.map((link) => (
                 <li key={link.href}>
@@ -167,9 +185,23 @@ export interface DocsLayoutProps {
   footer?: ReactNode;
   /** Lets the content run wider, for a home page or a changelog without a table of contents. */
   wide?: boolean;
+  /** The layout's words; pass the keys you change. See `DOCS_LAYOUT_MESSAGES`. */
+  messages?: Partial<DocsLayoutMessages>;
   children: ReactNode;
   className?: string;
 }
+
+export interface DocsLayoutMessages {
+  /** The skip link's text. */
+  skipToContent: string;
+  /** Label of the small-screen disclosure that holds the table of contents. */
+  tocLabel: string;
+}
+
+export const DOCS_LAYOUT_MESSAGES: DocsLayoutMessages = {
+  skipToContent: 'Skip to content',
+  tocLabel: 'On this page',
+};
 
 /**
  * The frame of a docs site: the header across the top, the navigation down the start edge, the
@@ -180,14 +212,16 @@ export function DocsLayout({
   header,
   sidebar,
   toc,
-  tocLabel = 'On this page',
+  tocLabel,
   top,
   bottom,
   footer,
   wide = false,
+  messages,
   children,
   className,
 }: DocsLayoutProps) {
+  const m = mergeMessages(DOCS_LAYOUT_MESSAGES, messages);
   return (
     <div
       data-slot="docs-layout"
@@ -200,7 +234,7 @@ export function DocsLayout({
           'focus-visible:translate-y-0 focus-visible:outline-2 focus-visible:outline-focus',
         )}
       >
-        Skip to content
+        {m.skipToContent}
       </a>
       {header}
       <div className="flex flex-1">
@@ -242,7 +276,7 @@ export function DocsLayout({
                     weight="bold"
                     className="size-3.5 text-fg-subtle transition-transform duration-base ease-standard group-data-panel-open/toc:rotate-90 motion-reduce:transition-none rtl:-scale-x-100"
                   />
-                  {tocLabel}
+                  {tocLabel ?? m.tocLabel}
                 </Collapsible.Trigger>
                 <Collapsible.Panel className="border-t border-line px-4 py-3 [&_nav>p]:hidden">
                   {toc}

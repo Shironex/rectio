@@ -2,6 +2,7 @@ import { TextAlignLeftIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
+import { mergeMessages } from '../lib/messages';
 import { linkFocus } from '../lib/link';
 import { useDocsParts } from '../lib/parts';
 import { scrollToHeading, useActiveHeading, type TocHeading } from './docs-toc.logic';
@@ -17,8 +18,22 @@ export interface DocsTocProps {
   offset?: number;
   /** Something under the list, such as "Edit this page" or a back to top link. */
   footer?: ReactNode;
+  /** The block's words; pass the keys you change. See `DOCS_TOC_MESSAGES`. */
+  messages?: Partial<DocsTocMessages>;
   className?: string;
 }
+
+export interface DocsTocMessages {
+  /** The heading above the list. */
+  title: string;
+  /** Name of the navigation landmark. */
+  label: string;
+}
+
+export const DOCS_TOC_MESSAGES: DocsTocMessages = {
+  title: 'On this page',
+  label: 'On this page',
+};
 
 /**
  * On this page: the page's headings with the one being read marked as you scroll. A link scrolls
@@ -27,11 +42,13 @@ export interface DocsTocProps {
  */
 export function DocsToc({
   headings,
-  title = 'On this page',
+  title,
   offset = 96,
   footer,
+  messages,
   className,
 }: DocsTocProps) {
+  const m = mergeMessages(DOCS_TOC_MESSAGES, messages);
   const { Marker } = useDocsParts();
   const active = useActiveHeading(
     headings.map((heading) => heading.id),
@@ -47,14 +64,10 @@ export function DocsToc({
 
   if (headings.length === 0) return null;
   return (
-    <nav
-      aria-label="On this page"
-      data-slot="docs-toc"
-      className={cn('flex flex-col gap-3', className)}
-    >
+    <nav aria-label={m.label} data-slot="docs-toc" className={cn('flex flex-col gap-3', className)}>
       <p className="flex items-center gap-2 text-sm font-strong text-fg">
         <TextAlignLeftIcon aria-hidden weight="bold" className="size-4 text-fg-subtle" />
-        {title}
+        {title ?? m.title}
       </p>
       <div className="relative">
         <span aria-hidden className="absolute inset-y-0 start-0 w-px bg-line" />

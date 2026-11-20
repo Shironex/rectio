@@ -2,6 +2,8 @@ import { CheckIcon, CopyIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 import { useEffect, useRef, useState } from 'react';
 
+import { mergeMessages } from './messages';
+
 export interface CopyButtonProps {
   /** The text to copy, or a function that reads it at the moment of the press. */
   value: string | (() => string);
@@ -9,19 +11,31 @@ export interface CopyButtonProps {
   label?: string;
   /** Said and shown once the text is on the clipboard. Default "Copied". */
   copiedLabel?: string;
+  /** The button's words; pass the keys you change. See `COPY_BUTTON_MESSAGES`. */
+  messages?: Partial<CopyButtonMessages>;
   className?: string;
 }
+
+export interface CopyButtonMessages {
+  /** Accessible name before the copy. */
+  copy: string;
+  /** Said and shown once the text is on the clipboard. */
+  copied: string;
+}
+
+export const COPY_BUTTON_MESSAGES: CopyButtonMessages = {
+  copy: 'Copy code',
+  copied: 'Copied',
+};
 
 /**
  * Copies a value to the clipboard and says so: the icon turns into a check for two seconds and a
  * polite status announces it. A browser that refuses the clipboard leaves the icon as it was.
  */
-export function CopyButton({
-  value,
-  label = 'Copy code',
-  copiedLabel = 'Copied',
-  className,
-}: CopyButtonProps) {
+export function CopyButton({ value, label, copiedLabel, messages, className }: CopyButtonProps) {
+  const m = mergeMessages(COPY_BUTTON_MESSAGES, messages);
+  const copyName = label ?? m.copy;
+  const copiedName = copiedLabel ?? m.copied;
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(
@@ -46,7 +60,7 @@ export function CopyButton({
     <>
       <button
         type="button"
-        aria-label={copied ? copiedLabel : label}
+        aria-label={copied ? copiedName : copyName}
         data-slot="copy-button"
         data-copied={copied || undefined}
         onClick={() => {
@@ -68,7 +82,7 @@ export function CopyButton({
         )}
       </button>
       <span role="status" className="sr-only">
-        {copied ? copiedLabel : ''}
+        {copied ? copiedName : ''}
       </span>
     </>
   );

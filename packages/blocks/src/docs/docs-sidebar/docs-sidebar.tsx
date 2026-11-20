@@ -1,8 +1,9 @@
 import { Collapsible } from '@base-ui/react/collapsible';
 import { ArrowUpRightIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
-import { useId, type ReactNode } from 'react';
+import { createContext, use, useId, type ReactNode } from 'react';
 
+import { mergeMessages } from '../lib/messages';
 import { DocsBadge, badgeFrom } from '../lib/badge';
 import { isSamePage, trailTo, type DocsNavItem, type DocsNavSection } from '../lib/docs';
 import { DocsLink, linkFocus } from '../lib/link';
@@ -20,8 +21,27 @@ export interface DocsSidebarProps {
   header?: ReactNode;
   /** Something below the tree, such as a link to the changelog or a status note. */
   footer?: ReactNode;
+  /** The block's words; pass the keys you change. See `DOCS_SIDEBAR_MESSAGES`. */
+  messages?: Partial<DocsSidebarMessages>;
   className?: string;
 }
+
+export interface DocsSidebarMessages {
+  /** Name of the navigation landmark. */
+  label: string;
+  /** Read after a link that leaves the docs. */
+  opensInNewTab: string;
+  /** Name of the button that opens or closes a group, given the group's title. */
+  groupPages: (title: string) => string;
+}
+
+export const DOCS_SIDEBAR_MESSAGES: DocsSidebarMessages = {
+  label: 'Docs',
+  opensInNewTab: '(opens in a new tab)',
+  groupPages: (title) => `${title} pages`,
+};
+
+const MessagesContext = createContext<DocsSidebarMessages>(DOCS_SIDEBAR_MESSAGES);
 
 const ROW = cn(
   'group/row relative flex w-full min-h-8 items-center gap-2 px-2.5 py-1 text-start text-base text-fg-muted',
@@ -42,33 +62,37 @@ const CURRENT =
 export function DocsSidebar({
   sections,
   currentHref,
-  label = 'Docs',
+  label,
   onNavigate,
   header,
   footer,
+  messages,
   className,
 }: DocsSidebarProps) {
+  const m = mergeMessages(DOCS_SIDEBAR_MESSAGES, messages);
   const trail = new Set(trailTo(sections, currentHref));
   const closeNav = useCloseNav();
   const navigate = onNavigate ?? closeNav ?? undefined;
   return (
-    <nav
-      aria-label={label}
-      data-slot="docs-sidebar"
-      className={cn('flex flex-col gap-6', className)}
-    >
-      {header}
-      {sections.map((section, index) => (
-        <Section
-          key={section.title ?? `section-${String(index)}`}
-          section={section}
-          currentHref={currentHref}
-          trail={trail}
-          onNavigate={navigate}
-        />
-      ))}
-      {footer}
-    </nav>
+    <MessagesContext value={m}>
+      <nav
+        aria-label={label ?? m.label}
+        data-slot="docs-sidebar"
+        className={cn('flex flex-col gap-6', className)}
+      >
+        {header}
+        {sections.map((section, index) => (
+          <Section
+            key={section.title ?? `section-${String(index)}`}
+            section={section}
+            currentHref={currentHref}
+            trail={trail}
+            onNavigate={navigate}
+          />
+        ))}
+        {footer}
+      </nav>
+    </MessagesContext>
   );
 }
 
@@ -160,6 +184,7 @@ function PageLink({
   currentHref: string;
   onNavigate: (() => void) | undefined;
 }) {
+  const m = use(MessagesContext);
   if (item.href === undefined) {
     return (
       <span className={cn(ROW, 'text-fg-subtle')}>
@@ -177,7 +202,7 @@ function PageLink({
       className={cn(ROW, CURRENT)}
     >
       <Label item={item} />
-      {item.external === true && <span className="sr-only">(opens in a new tab)</span>}
+      {item.external === true && <span className="sr-only">{m.opensInNewTab}</span>}
     </DocsLink>
   );
 }
@@ -193,6 +218,7 @@ function Group({
   trail: Set<DocsNavItem>;
   onNavigate: (() => void) | undefined;
 }) {
+  const m = use(MessagesContext);
   const caret = (
     <CaretRightIcon
       aria-hidden
@@ -222,7 +248,7 @@ function Group({
             <Label item={item} />
           </DocsLink>
           <Collapsible.Trigger
-            aria-label={`${item.title} pages`}
+            aria-label={m.groupPages(item.title)}
             className={cn(
               'group/toggle inline-flex size-8 shrink-0 cursor-pointer items-center justify-center text-fg-subtle',
               'pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg pointer-coarse:size-(--rx-control-height-touch)',

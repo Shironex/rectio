@@ -1457,7 +1457,7 @@ export default defineRegistry({
           version: '0.1.0',
           title: 'Docs core',
           description:
-            'The navigation tree helpers, the one link every docs block draws, badges, the copy button and the parts the motion twins swap.',
+            'The navigation tree helpers, the one link every docs block draws, badges, the copy button, the messages helpers and the parts the motion twins swap.',
           categories: ['docs', 'blocks'],
           files: [
             'lib/docs.ts',
@@ -1466,6 +1466,7 @@ export default defineRegistry({
             'lib/badge.tsx',
             'lib/copy-button.tsx',
             'lib/nav-context.ts',
+            'lib/messages.ts',
           ],
         },
         {

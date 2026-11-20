@@ -2,6 +2,7 @@ import { ArrowLeftIcon, ArrowRightIcon, PencilSimpleIcon } from '@phosphor-icons
 import { Breadcrumb, cn, type BreadcrumbItem } from '@rectio/ui';
 import type { ReactNode } from 'react';
 
+import { mergeMessages } from '../lib/messages';
 import { formatDate, isoDate, type DocsPageLink } from '../lib/docs';
 import { DocsLink, linkFocus } from '../lib/link';
 
@@ -10,28 +11,44 @@ export interface DocsPagerProps {
   next?: DocsPageLink | null | undefined;
   /** Words above each title, for translation. */
   labels?: { prev?: string; next?: string };
+  /** The block's words; pass the keys you change. See `DOCS_PAGER_MESSAGES`. */
+  messages?: Partial<DocsPagerMessages>;
   className?: string;
 }
+
+export interface DocsPagerMessages {
+  /** Name of the navigation landmark. */
+  label: string;
+  previous: string;
+  next: string;
+}
+
+export const DOCS_PAGER_MESSAGES: DocsPagerMessages = {
+  label: 'Previous and next page',
+  previous: 'Previous',
+  next: 'Next',
+};
 
 /**
  * Previous and next page at the foot of a page, in reading order. Each is one large link with its
  * direction in words above the title; `pagerFor` works them out from the navigation.
  */
-export function DocsPager({ prev, next, labels, className }: DocsPagerProps) {
+export function DocsPager({ prev, next, labels, messages, className }: DocsPagerProps) {
+  const m = mergeMessages(DOCS_PAGER_MESSAGES, messages);
   if ((prev ?? null) === null && (next ?? null) === null) return null;
   return (
     <nav
-      aria-label="Previous and next page"
+      aria-label={m.label}
       data-slot="docs-pager"
       className={cn('grid gap-3 sm:grid-cols-2', className)}
     >
       {prev !== null && prev !== undefined ? (
-        <PagerLink page={prev} direction="prev" label={labels?.prev ?? 'Previous'} />
+        <PagerLink page={prev} direction="prev" label={labels?.prev ?? m.previous} />
       ) : (
         <span aria-hidden className="max-sm:hidden" />
       )}
       {next !== null && next !== undefined && (
-        <PagerLink page={next} direction="next" label={labels?.next ?? 'Next'} />
+        <PagerLink page={next} direction="next" label={labels?.next ?? m.next} />
       )}
     </nav>
   );
@@ -84,14 +101,31 @@ function PagerLink({
 export interface DocsBreadcrumbProps {
   /** From the docs home to the current page; the last item is the current page. */
   items: readonly BreadcrumbItem[];
+  /** The block's words; pass the keys you change. See `DOCS_BREADCRUMB_MESSAGES`. */
+  messages?: Partial<DocsBreadcrumbMessages>;
   className?: string;
 }
 
+export interface DocsBreadcrumbMessages {
+  /** Name of the navigation landmark. */
+  label: string;
+  /** Name of the menu that holds the collapsed levels. */
+  more: string;
+}
+
+export const DOCS_BREADCRUMB_MESSAGES: DocsBreadcrumbMessages = {
+  label: 'Breadcrumb',
+  more: 'Show hidden levels',
+};
+
 /** Where the page sits in the docs, with links through the router via `DocsLinkProvider`. */
-export function DocsBreadcrumb({ items, className }: DocsBreadcrumbProps) {
+export function DocsBreadcrumb({ items, messages, className }: DocsBreadcrumbProps) {
+  const m = mergeMessages(DOCS_BREADCRUMB_MESSAGES, messages);
   return (
     <Breadcrumb
       items={items}
+      label={m.label}
+      moreLabel={m.more}
       maxItems={4}
       className={cn('text-sm', className)}
       renderLink={({ href, className: linkClass, children }) => (
@@ -111,21 +145,38 @@ export interface DocsPageMetaProps {
   lastUpdated?: string | Date | undefined;
   lastUpdatedLabel?: string;
   locale?: string | undefined;
+  /** The block's words; pass the keys you change. See `DOCS_PAGE_META_MESSAGES`. */
+  messages?: Partial<DocsPageMetaMessages>;
   /** Something else for the row, such as the feedback widget. */
   children?: ReactNode;
   className?: string;
 }
 
+export interface DocsPageMetaMessages {
+  edit: string;
+  lastUpdated: string;
+  /** Read after the edit link, which leaves the docs. */
+  opensInNewTab: string;
+}
+
+export const DOCS_PAGE_META_MESSAGES: DocsPageMetaMessages = {
+  edit: 'Edit this page',
+  lastUpdated: 'Last updated',
+  opensInNewTab: '(opens in a new tab)',
+};
+
 /** The row under a page: edit this page, and when it last changed. */
 export function DocsPageMeta({
   editHref,
-  editLabel = 'Edit this page',
+  editLabel,
   lastUpdated,
-  lastUpdatedLabel = 'Last updated',
+  lastUpdatedLabel,
   locale,
+  messages,
   children,
   className,
 }: DocsPageMetaProps) {
+  const m = mergeMessages(DOCS_PAGE_META_MESSAGES, messages);
   if (editHref === undefined && lastUpdated === undefined && children === undefined) return null;
   return (
     <div
@@ -146,13 +197,13 @@ export function DocsPageMeta({
           )}
         >
           <PencilSimpleIcon aria-hidden weight="bold" className="size-4" />
-          {editLabel}
-          <span className="sr-only">(opens in a new tab)</span>
+          {editLabel ?? m.edit}
+          <span className="sr-only">{m.opensInNewTab}</span>
         </DocsLink>
       )}
       {lastUpdated !== undefined && (
         <p className="text-fg-muted">
-          {lastUpdatedLabel}{' '}
+          {lastUpdatedLabel ?? m.lastUpdated}{' '}
           <time dateTime={isoDate(lastUpdated)} className="text-fg-muted">
             {formatDate(lastUpdated, locale)}
           </time>
