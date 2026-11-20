@@ -57,7 +57,7 @@ export function Hero({ kit }: { kit: KitFacts }) {
               Read the docs
               <ArrowRightIcon aria-hidden weight="bold" className="size-4" />
             </Link>
-            <CopyCommand command="pnpm dlx rectio init" />
+            <CopyCommand command="pnpm dlx @rectio/cli init" />
           </div>
         </div>
       </div>

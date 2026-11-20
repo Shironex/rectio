@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
  * install step. Long lines wrap.
  */
 const SCRIPT = [
-  { command: 'npx rectio add invoice-list' },
+  { command: 'npx @rectio/cli add invoice-list' },
   {
     output: [
       'Installed theme-default@0.2.1, tokens@0.2.1, cn@0.2.0, badge@0.1.0, button@0.2.0, checkbox@0.2.0, field@0.2.0, theme-scope@0.1.0, select@0.1.0, data-table@0.2.0, money@0.1.0, blocks-core@0.1.0, invoice-list@0.1.0',
