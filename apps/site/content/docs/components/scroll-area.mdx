@@ -43,6 +43,12 @@ Every prop of Base UI's `ScrollArea.Root` is accepted as well.
     },
     label: { type: 'string', description: 'Names the scrolling region.' },
     viewportClassName: { type: 'string', description: 'Classes for the scrolling viewport.' },
+    scrollbar: {
+      type: "'scroll' | 'always'",
+      default: "'scroll'",
+      description:
+        'When the scrollbar shows: while scrolling or under the pointer, or always when the content overflows, so a short list in a popup says at rest that it scrolls.',
+    },
   }}
 />
 

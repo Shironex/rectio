@@ -13,16 +13,27 @@ export type ScrollAreaProps = WithClassName<ComponentProps<typeof BaseScrollArea
   /** Names the scrolling region, for a region that holds more than plain text. */
   label?: string | undefined;
   viewportClassName?: string | undefined;
+  /**
+   * When the scrollbar shows: `scroll` while scrolling or under the pointer, `always` whenever
+   * the content overflows, so a short popup list says at rest that it scrolls.
+   */
+  scrollbar?: 'scroll' | 'always' | undefined;
 };
 
-function Scrollbar({ orientation }: { orientation: 'vertical' | 'horizontal' }) {
+function Scrollbar({
+  orientation,
+  always,
+}: {
+  orientation: 'vertical' | 'horizontal';
+  always: boolean;
+}) {
   return (
     <BaseScrollArea.Scrollbar
       orientation={orientation}
       className={cn(
         'flex touch-none p-0.5 select-none',
         // Thin and faint at rest; it shows while scrolling or under the pointer, and widens on hover.
-        'opacity-0 transition-opacity duration-base ease-standard',
+        always ? 'opacity-100' : 'opacity-0 transition-opacity duration-base ease-standard',
         'data-hovering:opacity-100 data-scrolling:opacity-100 data-scrolling:duration-fast',
         orientation === 'vertical' ? 'w-2.5 hover:w-3' : 'h-2.5 flex-col hover:h-3',
       )}
@@ -42,9 +53,11 @@ export function ScrollArea({
   label,
   className,
   viewportClassName,
+  scrollbar = 'scroll',
   children,
   ...props
 }: ScrollAreaProps) {
+  const always = scrollbar === 'always';
   return (
     <BaseScrollArea.Root
       data-slot="scroll-area"
@@ -68,8 +81,8 @@ export function ScrollArea({
           {children}
         </BaseScrollArea.Content>
       </BaseScrollArea.Viewport>
-      {orientation !== 'horizontal' && <Scrollbar orientation="vertical" />}
-      {orientation !== 'vertical' && <Scrollbar orientation="horizontal" />}
+      {orientation !== 'horizontal' && <Scrollbar orientation="vertical" always={always} />}
+      {orientation !== 'vertical' && <Scrollbar orientation="horizontal" always={always} />}
       {orientation === 'both' && <BaseScrollArea.Corner />}
     </BaseScrollArea.Root>
   );

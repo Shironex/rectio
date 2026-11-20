@@ -516,7 +516,7 @@ export default defineRegistry({
     {
       name: 'scroll-area',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'ScrollArea',
       description:
         'A region with its own themed scrollbar and fading edges, native scrolling underneath.',
