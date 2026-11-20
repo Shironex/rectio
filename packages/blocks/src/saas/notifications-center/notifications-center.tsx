@@ -127,7 +127,7 @@ export function NotificationsCenter({
         </button>
       }
     >
-      <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-3">
+      <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-2">
         {/* The popup is named by its own title; this line only shows it. */}
         <p aria-hidden className="font-display text-lg font-heading tracking-tight">
           {title}
@@ -349,13 +349,21 @@ function NotificationRow({
         )}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        {/* Unread: the dot, a strong lead and full text colour. Read: regular weight, muted. */}
+        {/* Unread: the dot, a strong lead and full text colour. Read: regular weight, muted, its body a
+            step quieter so the title still leads. */}
         <span className={cn('text-sm', notification.read ? 'text-fg-muted' : 'text-fg')}>
           {!notification.read && <span className="sr-only">Unread, </span>}
           <NotificationTitle notification={notification} />
         </span>
         {notification.body !== undefined && (
-          <span className="line-clamp-2 text-sm text-fg-muted">{notification.body}</span>
+          <span
+            className={cn(
+              'line-clamp-2 text-sm',
+              notification.read ? 'text-fg-subtle' : 'text-fg-muted',
+            )}
+          >
+            {notification.body}
+          </span>
         )}
         <span className="text-xs text-fg-muted">
           <time
