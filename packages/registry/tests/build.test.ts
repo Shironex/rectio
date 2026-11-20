@@ -422,6 +422,7 @@ describe('the rectio registry', () => {
       'progress-circle',
       'radio-group',
       'reset-password',
+      'saas-admin',
       'saas-core',
       'saas-landing',
       'scroll-area',
@@ -688,6 +689,7 @@ describe('the rectio registry', () => {
       'docs',
       'finance-app',
       'product-launch',
+      'saas-admin',
       'saas-landing',
     ]);
     for (const template of templates) {
