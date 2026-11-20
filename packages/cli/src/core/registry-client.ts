@@ -78,10 +78,10 @@ export function createRegistryClient(url: string): RegistryClient {
   // One fetch per item per run: `init --template` checks every item before writing, then installs.
   const items = new Map<string, Promise<RegistryItem>>();
   const fetchItem = async (entry: IndexEntry): Promise<RegistryItem> => {
-    const path = itemPath(entry.name, entry.tier);
+    const path = itemPath(entry.name);
     const item = parse(registryItemSchema, await readRaw(url, path), path);
-    if (item.name !== entry.name || item.tier !== entry.tier) {
-      throw new CliError(`${path} holds "${item.name}" (${item.tier}), not "${entry.name}"`);
+    if (item.name !== entry.name) {
+      throw new CliError(`${path} holds "${item.name}", not "${entry.name}"`);
     }
     const problems = verifyItem(item);
     if (problems.length > 0) {

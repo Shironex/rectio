@@ -82,7 +82,7 @@ describe('buildRegistry on a fixture', () => {
     expect(toggle?.files[0]?.content.startsWith("'use client';\n\n")).toBe(true);
 
     const card = byName.get('ledger-card');
-    expect(card).toMatchObject({ tier: 'pro', type: 'block', version: '2.1.0' });
+    expect(card).toMatchObject({ type: 'block', version: '2.1.0' });
     expect(card?.dependencies).toEqual({ motion: '^14.0.0' });
     expect(card?.registryDependencies).toEqual(['badge']);
     expect(card?.files[0]?.target).toBe('@blocks/ledger-card.tsx');
@@ -94,12 +94,8 @@ describe('buildRegistry on a fixture', () => {
       expect(registryItemSchema.safeParse(item).success).toBe(true);
       expect(verifyItem(item)).toEqual([]);
     }
-    expect(index.items.map((i) => [i.name, i.tier])).toEqual([
-      ['badge', 'free'],
-      ['cn', 'free'],
-      ['ledger-card', 'pro'],
-      ['toggle', 'free'],
-    ]);
+    expect(index.items.map((i) => i.name)).toEqual(['badge', 'cn', 'ledger-card', 'toggle']);
+    expect(index.items[0]).not.toHaveProperty('tier');
   });
 
   it('is deterministic', () => {
@@ -134,17 +130,6 @@ describe('buildRegistry on a fixture', () => {
     );
   });
 
-  it('fails when a free item depends on a pro one', () => {
-    const dir = fixture({
-      'src/badge/badge.tsx':
-        "import { LedgerCard } from '../ledger-card/ledger-card';\nexport const B = LedgerCard;\n",
-      'src/ledger-card/ledger-card.tsx': 'export const LedgerCard = 1;\n',
-    });
-    expect(() => buildRegistry(fixtureConfig(dir))).toThrow(
-      'free item badge depends on pro item ledger-card',
-    );
-  });
-
   it('builds an add-on tree on the base items through the base package barrel', () => {
     const dir = fixture({
       'base/index.ts':
@@ -160,7 +145,7 @@ describe('buildRegistry on a fixture', () => {
           sourceDir: join(dir, 'addon'),
           targetFolder: 'extra',
           requireEveryFolder: true,
-          items: [fixtureItem({ name: 'extra-badge', tier: 'pro', files: ['badge/badge.tsx'] })],
+          items: [fixtureItem({ name: 'extra-badge', files: ['badge/badge.tsx'] })],
         },
       ],
     });
@@ -173,25 +158,25 @@ describe('buildRegistry on a fixture', () => {
     expect(extra?.files[0]?.content).toContain("import { cn } from '@registry/lib/cn';");
   });
 
-  it('fails when a free add-on item depends on a pro one', () => {
+  it('lets any add-on item depend on any base item', () => {
     const dir = fixture({
       'base/index.ts': "export { LedgerCard } from '../src/ledger-card/ledger-card';\n",
       'addon/card/card.tsx':
         "import { LedgerCard } from '@fixture/base';\nexport const Card = LedgerCard;\n",
     });
-    expect(() =>
-      buildRegistry({
-        ...fixtureConfig(dir),
-        workspacePackages: { '@fixture/base': join(dir, 'base/index.ts') },
-        addons: [
-          {
-            sourceDir: join(dir, 'addon'),
-            targetFolder: 'extra',
-            items: [fixtureItem({ name: 'extra-card', files: ['card/card.tsx'] })],
-          },
-        ],
-      }),
-    ).toThrow('free item extra-card depends on pro item ledger-card');
+    const result = buildRegistry({
+      ...fixtureConfig(dir),
+      workspacePackages: { '@fixture/base': join(dir, 'base/index.ts') },
+      addons: [
+        {
+          sourceDir: join(dir, 'addon'),
+          targetFolder: 'extra',
+          items: [fixtureItem({ name: 'extra-card', files: ['card/card.tsx'] })],
+        },
+      ],
+    });
+    const card = result.items.find((i) => i.name === 'extra-card');
+    expect(card?.registryDependencies).toEqual(['ledger-card']);
   });
 
   it('fails on a test file in an item', () => {
@@ -202,7 +187,7 @@ describe('buildRegistry on a fixture', () => {
     ).toThrow('is a test or story file');
   });
 
-  it('writes the index, latest and versioned copies, pro bodies apart, and the schemas', () => {
+  it('writes the index, latest and versioned copies of every item, and the schemas', () => {
     const dir = fixture();
     const out = join(dir, 'out');
     writeRegistry(out, buildRegistry(fixtureConfig(dir)));
@@ -210,15 +195,15 @@ describe('buildRegistry on a fixture', () => {
       'index.json',
       'items/badge.json',
       'items/badge@1.0.0.json',
-      'pro/items/ledger-card.json',
-      'pro/items/ledger-card@2.1.0.json',
+      'items/ledger-card.json',
+      'items/ledger-card@2.1.0.json',
       'schema/item.json',
       'schema/index.json',
       'schema/config.json',
     ]) {
       expect(existsSync(join(out, path)), path).toBe(true);
     }
-    expect(existsSync(join(out, 'items/ledger-card.json'))).toBe(false);
+    expect(existsSync(join(out, 'pro'))).toBe(false);
     const index = readFileSync(join(out, 'index.json'), 'utf8');
     expect(index).not.toContain('content');
   });
@@ -492,10 +477,9 @@ describe('the rectio registry', () => {
     expect(byName.get('cn')?.dependencies).toEqual({ clsx: '^2.1.1', 'tailwind-merge': '^3.7.0' });
   });
 
-  it('publishes the motion add-on as pro items built on the plain ones', () => {
+  it('publishes the motion add-on as items built on the plain ones', () => {
     const motion = result.items.filter((item) => item.name.startsWith('motion-'));
     expect(motion.length).toBeGreaterThan(0);
-    for (const item of motion) expect(item.tier, item.name).toBe('pro');
     // The npm dependency is computed from the imports, not declared by hand.
     expect(byName.get('motion-core')?.dependencies).toEqual({ motion: '^14.12.0' });
     expect(byName.get('motion-core')?.files.map((f) => f.target)).toContain(
@@ -515,14 +499,7 @@ describe('the rectio registry', () => {
     expect(byName.get('motion-toast')?.registryDependencies).toContain('toast');
   });
 
-  it('never lets a free item depend on a pro one', () => {
-    for (const item of result.items.filter((i) => i.tier === 'free')) {
-      for (const dep of item.registryDependencies)
-        expect(byName.get(dep)?.tier, `${item.name} -> ${dep}`).toBe('free');
-    }
-  });
-
-  it('publishes every finance block as a pro block with its motion twin', () => {
+  it('publishes every finance block as a block with its motion twin', () => {
     const blocks = [
       'ar-aging',
       'budget-vs-actual',
@@ -536,7 +513,6 @@ describe('the rectio registry', () => {
     for (const name of blocks) {
       for (const item of [byName.get(name), byName.get(`motion-${name}`)]) {
         expect(item, name).toBeDefined();
-        expect(item?.tier, item?.name).toBe('pro');
         expect(item?.type, item?.name).toBe('block');
         expect(item?.version, item?.name).toBe('0.1.0');
       }
@@ -576,7 +552,6 @@ describe('the rectio registry', () => {
     for (const name of [...withMotion, ...plainOnly]) {
       const item = byName.get(name);
       expect(item, name).toBeDefined();
-      expect(item?.tier, name).toBe('pro');
       expect(item?.type, name).toBe('block');
       expect(item?.categories, name).toEqual(['marketing', 'blocks']);
       expect(item?.registryDependencies, name).toContain('marketing-core');
@@ -619,7 +594,6 @@ describe('the rectio registry', () => {
     for (const name of blocks) {
       for (const item of [byName.get(name), byName.get(`motion-${name}`)]) {
         expect(item, name).toBeDefined();
-        expect(item?.tier, item?.name).toBe('pro');
         expect(item?.type, item?.name).toBe('block');
       }
       expect(byName.get(name)?.categories).toContain('saas');
@@ -656,7 +630,6 @@ describe('the rectio registry', () => {
     for (const name of [...withMotion, ...plainOnly]) {
       const item = byName.get(name);
       expect(item, name).toBeDefined();
-      expect(item?.tier, name).toBe('pro');
       expect(item?.categories, name).toEqual(['docs', 'blocks']);
       expect(item?.registryDependencies, name).toContain('docs-core');
       for (const file of item?.files ?? []) expect(file.target).toMatch(/^@blocks\/docs\//);
@@ -674,16 +647,16 @@ describe('the rectio registry', () => {
     expect(byName.get('docs-prose')?.registryDependencies).toContain('docs-api-reference');
   });
 
-  it('writes the pro motion items under pro/ only', () => {
+  it('writes the motion items under items/ with the rest', () => {
     const dir = fixture();
     const out = join(dir, 'registry');
     writeRegistry(out, result);
-    expect(existsSync(join(out, 'pro/items/motion-dialog.json'))).toBe(true);
-    expect(existsSync(join(out, 'pro/items/motion-dialog@0.1.0.json'))).toBe(true);
-    expect(existsSync(join(out, 'items/motion-dialog.json'))).toBe(false);
+    expect(existsSync(join(out, 'items/motion-dialog.json'))).toBe(true);
+    expect(existsSync(join(out, 'items/motion-dialog@0.1.0.json'))).toBe(true);
+    expect(existsSync(join(out, 'pro'))).toBe(false);
   });
 
-  it('publishes every template as a pro template item that names no workspace package', () => {
+  it('publishes every template as a template item that names no workspace package', () => {
     const templates = result.items.filter((i) => i.type === 'template');
     expect(templates.map((t) => t.name).sort()).toEqual([
       'docs',
@@ -693,7 +666,6 @@ describe('the rectio registry', () => {
       'saas-landing',
     ]);
     for (const template of templates) {
-      expect(template.tier).toBe('pro');
       expect(template.registryDependencies).toEqual(
         expect.arrayContaining([
           'tokens',

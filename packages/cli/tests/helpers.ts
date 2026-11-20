@@ -35,8 +35,8 @@ export function writeTree(root: string, files: Record<string, string>): void {
 
 export const read = (root: string, path: string) => readFileSync(join(root, path), 'utf8');
 
-/** A pro block that depends on free items, added to the built registry by hand. */
-export function proItem(): RegistryItem {
+/** A block that depends on kit items, added to the built registry by hand. */
+export function blockItem(): RegistryItem {
   const content =
     'import { Money } from \'@registry/ui/money\';\n\nexport function LedgerSummary() {\n  return <Money amount={-12.5} currency="EUR" />;\n}\n';
   const body = {
@@ -44,9 +44,8 @@ export function proItem(): RegistryItem {
     name: 'ledger-summary',
     version: '1.0.0',
     type: 'block' as const,
-    tier: 'pro' as const,
     title: 'Ledger summary',
-    description: 'A pro block.',
+    description: 'A finance block.',
     categories: ['finance'],
     dependencies: {},
     devDependencies: {},
@@ -66,7 +65,7 @@ export function proItem(): RegistryItem {
   return { ...body, integrity: itemIntegrity(body) };
 }
 
-/** A small pro template on the real kit items, added to the built registry by hand. */
+/** A small template on the real kit items, added to the built registry by hand. */
 export function templateItem(): RegistryItem {
   const file = (path: string, content: string) => ({
     path: `template/${path}`,
@@ -80,7 +79,6 @@ export function templateItem(): RegistryItem {
     name: 'books',
     version: '0.3.0',
     type: 'template' as const,
-    tier: 'pro' as const,
     title: 'Books',
     description: 'A small bookkeeping app.',
     categories: ['template', 'app'],
@@ -114,7 +112,7 @@ export function templateItem(): RegistryItem {
 /** Writes a hand-made item into a built registry folder: its body and its index entry. */
 function publish(dir: string, item: RegistryItem): void {
   for (const version of [undefined, item.version]) {
-    const path = join(dir, itemPath(item.name, item.tier, version));
+    const path = join(dir, itemPath(item.name, version));
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, JSON.stringify(item));
   }
@@ -123,7 +121,6 @@ function publish(dir: string, item: RegistryItem): void {
   index.items.push({
     name: item.name,
     type: item.type,
-    tier: item.tier,
     version: item.version,
     versions: [item.version],
     title: item.title,
@@ -134,14 +131,14 @@ function publish(dir: string, item: RegistryItem): void {
   writeFileSync(indexFile, JSON.stringify(index));
 }
 
-/** The real rectio registry plus one pro item and one small template, written to a temp folder. */
+/** The real rectio registry plus one block and one small template, written to a temp folder. */
 export function buildTestRegistry(): { dir: string; url: string; cleanup: () => void } {
   const temp = tempDir('rectio-cli-registry-');
   // The real templates are covered by the end-to-end test; command tests use the small one.
   const kit = { ...config };
   delete kit.templates;
   writeRegistry(temp.dir, buildRegistry(kit));
-  publish(temp.dir, proItem());
+  publish(temp.dir, blockItem());
   publish(temp.dir, templateItem());
   return { ...temp, url: pathToFileURL(temp.dir).href };
 }

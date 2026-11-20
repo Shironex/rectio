@@ -1,6 +1,6 @@
 import * as z from 'zod';
 
-import { itemNameSchema, templateCategorySchema, tierSchema } from './schema.ts';
+import { itemNameSchema, templateCategorySchema } from './schema.ts';
 
 /**
  * `template.json` at the root of each folder under `templates/`. The registry build turns it into a
@@ -14,7 +14,6 @@ export const templateManifestSchema = z.object({
   /** One sentence. */
   description: z.string().min(1),
   category: templateCategorySchema,
-  tier: tierSchema,
   /** App routes, `/invoices/[id]` style for dynamic ones. */
   pages: z.array(z.string().startsWith('/')).min(1),
   /** Registry items the template imports directly (checked against its imports by the build). */

@@ -19,7 +19,6 @@ function validItem(): RegistryItem {
     name: 'button',
     version: '1.2.3',
     type: 'component' as const,
-    tier: 'free' as const,
     title: 'Button',
     description: 'A button.',
     categories: [],
@@ -54,7 +53,6 @@ describe('registryItemSchema', () => {
     ['a non kebab name', { name: 'Button' }],
     ['a bad version', { version: '1.2' }],
     ['an unknown type', { type: 'widget' }],
-    ['an unknown tier', { tier: 'gold' }],
     ['no files', { files: [] }],
     ['a newer schema version', { schemaVersion: 2 }],
   ])('rejects %s', (_label, patch) => {
@@ -118,7 +116,7 @@ describe('published JSON Schema', () => {
       config: { properties: Record<string, unknown> };
     };
     expect(Object.keys(item.properties)).toEqual(
-      expect.arrayContaining(['tier', 'version', 'files', 'registryDependencies', 'integrity']),
+      expect.arrayContaining(['version', 'files', 'registryDependencies', 'integrity']),
     );
     expect(item.required).toContain('integrity');
     expect(item.required).not.toContain('categories');
@@ -134,7 +132,6 @@ describe('published JSON Schema', () => {
         {
           name: 'x',
           type: 'lib',
-          tier: 'pro',
           version: '1.0.0',
           versions: ['1.0.0'],
           title: 'X',

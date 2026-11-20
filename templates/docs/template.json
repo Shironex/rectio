@@ -3,7 +3,6 @@
   "title": "Docs",
   "description": "A static documentation site from MDX files: navigation from the folders, local search, code highlighted at build time, API reference pages, a changelog and a home page.",
   "category": "docs",
-  "tier": "pro",
   "pages": [
     "/",
     "/docs",

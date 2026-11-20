@@ -84,7 +84,6 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
       finish({
         ...base(item.name, item.version),
         type: item.type,
-        tier: item.tier,
         title: item.title,
         description: item.description,
         categories: item.categories ?? [],
@@ -115,7 +114,6 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
       finish({
         ...base(TOKENS_ITEM, item.version),
         type: 'style',
-        tier: 'free',
         title: item.title,
         description: item.description,
         categories: ['tokens'],
@@ -153,7 +151,6 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
         finish({
           ...base(`theme-${theme.id}`, theme.version),
           type: 'theme',
-          tier: theme.tier,
           title: theme.title,
           description: theme.description,
           categories: ['theme'],
@@ -200,7 +197,6 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
       finish({
         ...base(manifest.name, built.version),
         type: 'template',
-        tier: manifest.tier,
         title: manifest.title,
         description: manifest.description,
         categories: ['template', manifest.category],
@@ -239,7 +235,6 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
     items: items.map((item) => ({
       name: item.name,
       type: item.type,
-      tier: item.tier,
       version: item.version,
       versions: [item.version],
       title: item.title,
@@ -251,21 +246,17 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
   return { index, items, warnings };
 }
 
-/** Unique names, known dependencies, and no free item that pulls in a pro one. */
+/** Unique names and known dependencies. */
 function checkGraph(items: readonly RegistryItem[]): void {
   const problems: string[] = [];
-  const byName = new Map<string, RegistryItem>();
+  const names = new Set<string>();
   for (const item of items) {
-    if (byName.has(item.name)) problems.push(`duplicate item name "${item.name}"`);
-    byName.set(item.name, item);
+    if (names.has(item.name)) problems.push(`duplicate item name "${item.name}"`);
+    names.add(item.name);
   }
   for (const item of items) {
     for (const dep of item.registryDependencies) {
-      const target = byName.get(dep);
-      if (target === undefined) problems.push(`${item.name} depends on unknown item "${dep}"`);
-      else if (item.tier === 'free' && target.tier === 'pro') {
-        problems.push(`free item ${item.name} depends on pro item ${dep}`);
-      }
+      if (!names.has(dep)) problems.push(`${item.name} depends on unknown item "${dep}"`);
     }
   }
   if (problems.length > 0) throw new Error(`registry graph:\n  ${problems.join('\n  ')}`);

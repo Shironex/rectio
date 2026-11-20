@@ -32,7 +32,7 @@ describe('the dev registry server', () => {
   it('serves the index and every item to anyone, without a key', async () => {
     expect((await get('index.json')).status).toBe(200);
     expect((await get('items/badge.json')).status).toBe(200);
-    const res = await get('pro/items/ledger-card.json');
+    const res = await get('items/ledger-card.json');
     expect(res.status).toBe(200);
     expect(((await res.json()) as { name: string }).name).toBe('ledger-card');
   });

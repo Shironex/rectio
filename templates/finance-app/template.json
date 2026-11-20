@@ -3,7 +3,6 @@
   "title": "Finance app",
   "description": "A finance back office with a sidebar and command menu: overview, invoices, expense approvals, the general journal, reports and settings.",
   "category": "app",
-  "tier": "pro",
   "pages": [
     "/",
     "/invoices",

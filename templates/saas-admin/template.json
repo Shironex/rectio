@@ -3,7 +3,6 @@
   "title": "SaaS admin",
   "description": "The admin back office of a help desk product: an overview, a ticket board, customers with a detail page, team and roles, billing, API keys, notifications, settings and the account screens.",
   "category": "app",
-  "tier": "pro",
   "pages": [
     "/",
     "/tickets",

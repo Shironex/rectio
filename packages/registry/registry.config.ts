@@ -9,7 +9,7 @@ const tokens = join(packages, 'tokens');
 const motion = join(packages, 'motion');
 const blocks = join(packages, 'blocks');
 
-/** A motion add-on item: pro, installed under `@ui/motion/` beside the plain components. */
+/** A motion add-on item, installed under `@ui/motion/` beside the plain components. */
 const motionItem = (
   name: string,
   title: string,
@@ -20,7 +20,6 @@ const motionItem = (
 ) => ({
   name: `motion-${name}`,
   type,
-  tier: 'pro' as const,
   version,
   title,
   description,
@@ -28,7 +27,7 @@ const motionItem = (
   files,
 });
 
-/** A finance block: pro, installed under `@blocks/finance/`, with its motioned twin beside it. */
+/** A finance block, installed under `@blocks/finance/`, with its motioned twin beside it. */
 const blockItems = (
   name: string,
   title: string,
@@ -39,7 +38,6 @@ const blockItems = (
   {
     name,
     type: 'block' as const,
-    tier: 'pro' as const,
     version: '0.1.0',
     title,
     description,
@@ -49,7 +47,6 @@ const blockItems = (
   {
     name: `motion-${name}`,
     type: 'block' as const,
-    tier: 'pro' as const,
     version: '0.1.0',
     title: `Motion ${title}`,
     description: `${title} with entrances that play once, on first view.`,
@@ -58,12 +55,11 @@ const blockItems = (
   },
 ];
 
-/** A SaaS or app block: pro, installed under `@blocks/saas/`, with its motioned twin beside it. */
+/** A SaaS or app block, installed under `@blocks/saas/`, with its motioned twin beside it. */
 const saasItems = (name: string, title: string, description: string) => [
   {
     name,
     type: 'block' as const,
-    tier: 'pro' as const,
     version: '0.1.0',
     title,
     description,
@@ -73,7 +69,6 @@ const saasItems = (name: string, title: string, description: string) => [
   {
     name: `motion-${name}`,
     type: 'block' as const,
-    tier: 'pro' as const,
     version: '0.1.0',
     title: `Motion ${title}`,
     description: `${title} with entrances that play once and list items that arrive and leave in place.`,
@@ -83,7 +78,7 @@ const saasItems = (name: string, title: string, description: string) => [
 ];
 
 /**
- * A marketing block: pro, installed under `@blocks/marketing/`. `logic` adds its logic file; `motion`
+ * A marketing block, installed under `@blocks/marketing/`. `logic` adds its logic file; `motion`
  * adds a `motion-<name>` twin for blocks with something to animate.
  */
 const marketingItems = (
@@ -100,7 +95,6 @@ const marketingItems = (
   {
     name,
     type: 'block' as const,
-    tier: 'pro' as const,
     version: '0.1.0',
     title,
     description,
@@ -119,7 +113,6 @@ const marketingItems = (
         {
           name: `motion-${name}`,
           type: 'block' as const,
-          tier: 'pro' as const,
           version: '0.1.0',
           title: `Motion ${title}`,
           description: `${title} with entrances that play once, on first view.`,
@@ -133,7 +126,7 @@ const marketingItems = (
 ];
 
 /**
- * A docs block: pro, installed under `@blocks/docs/`. `files` overrides the default
+ * A docs block, installed under `@blocks/docs/`. `files` overrides the default
  * `<folder>/<folder>.tsx`; `logic` adds its logic file; `motion` adds a `motion-<name>` twin for
  * blocks with something to animate.
  */
@@ -151,7 +144,6 @@ const docsItems = (
   {
     name,
     type: 'block' as const,
-    tier: 'pro' as const,
     version: '0.1.0',
     title,
     description,
@@ -166,7 +158,6 @@ const docsItems = (
         {
           name: `motion-${name}`,
           type: 'block' as const,
-          tier: 'pro' as const,
           version: '0.1.0',
           title: `Motion ${title}`,
           description: `${title} with the motion parts: entrances once on first view, gliding indicators.`,
@@ -180,7 +171,7 @@ const docsItems = (
 
 /**
  * What the registry publishes. Every folder in packages/ui/src must belong to an item, so a new
- * component fails the build until it is listed here with its tier and version. Bump an item's
+ * component fails the build until it is listed here with its version. Bump an item's
  * version whenever its published content changes: versioned copies are immutable.
  */
 export default defineRegistry({
@@ -205,14 +196,12 @@ export default defineRegistry({
     themes: [
       {
         id: 'default',
-        tier: 'free',
         version: '0.2.2',
         title: 'Default theme',
         description: 'Warm stone neutrals, cobalt accent, 4px controls, IBM Plex. Light and dark.',
       },
       {
         id: 'ledger',
-        tier: 'free',
         version: '0.2.2',
         title: 'Ledger theme',
         description:
@@ -224,7 +213,6 @@ export default defineRegistry({
     {
       name: 'cn',
       type: 'lib',
-      tier: 'free',
       version: '0.2.0',
       title: 'cn',
       description: 'Class name merging that knows the rectio token utilities.',
@@ -233,7 +221,6 @@ export default defineRegistry({
     {
       name: 'theme-scope',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'ThemeScope',
       description: 'Applies a theme, mode and density to a subtree; popups render inside it.',
@@ -243,7 +230,6 @@ export default defineRegistry({
     {
       name: 'button',
       type: 'component',
-      tier: 'free',
       version: '0.2.0',
       title: 'Button',
       description: 'Primary, secondary, ghost and danger buttons with a loading state.',
@@ -253,7 +239,6 @@ export default defineRegistry({
     {
       name: 'field',
       type: 'component',
-      tier: 'free',
       version: '0.2.0',
       title: 'Field and Input',
       description: 'Label, description, error and text input wired for accessibility.',
@@ -263,7 +248,6 @@ export default defineRegistry({
     {
       name: 'amount-input',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'AmountInput',
       description: 'Locale-aware money entry with the currency symbol in place.',
@@ -273,7 +257,6 @@ export default defineRegistry({
     {
       name: 'select',
       type: 'component',
-      tier: 'free',
       version: '0.1.1',
       title: 'Select',
       description: 'A select with a styled popup that follows the theme scope.',
@@ -283,7 +266,6 @@ export default defineRegistry({
     {
       name: 'dialog',
       type: 'component',
-      tier: 'free',
       version: '0.2.0',
       title: 'Dialog',
       description: 'Modal dialog with header, body and footer, focus trapped and restored.',
@@ -293,7 +275,6 @@ export default defineRegistry({
     {
       name: 'money',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Money',
       description: 'A formatted amount in tabular figures with the true minus sign.',
@@ -303,7 +284,6 @@ export default defineRegistry({
     {
       name: 'badge',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Badge',
       description: 'A record state in words, tinted neutral, positive, negative, warning or info.',
@@ -313,7 +293,6 @@ export default defineRegistry({
     {
       name: 'checkbox',
       type: 'component',
-      tier: 'free',
       version: '0.2.0',
       title: 'Checkbox',
       description: 'A checkbox with an indeterminate state for partial selections.',
@@ -323,7 +302,6 @@ export default defineRegistry({
     {
       name: 'data-table',
       type: 'component',
-      tier: 'free',
       version: '0.2.0',
       title: 'DataTable',
       description:
@@ -339,7 +317,6 @@ export default defineRegistry({
     {
       name: 'calendar',
       type: 'component',
-      tier: 'free',
       version: '0.2.1',
       title: 'Calendar',
       description:
@@ -350,7 +327,6 @@ export default defineRegistry({
     {
       name: 'date-picker',
       type: 'component',
-      tier: 'free',
       version: '0.2.0',
       title: 'DatePicker',
       description:
@@ -361,7 +337,6 @@ export default defineRegistry({
     {
       name: 'toast',
       type: 'component',
-      tier: 'free',
       version: '0.2.0',
       title: 'Toast',
       description: 'Success, error and info toasts with an action such as Undo, on Base UI Toast.',
@@ -371,7 +346,6 @@ export default defineRegistry({
     {
       name: 'avatar',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Avatar',
       description:
@@ -382,7 +356,6 @@ export default defineRegistry({
     {
       name: 'avatar-group',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'AvatarGroup',
       description: 'Overlapping or spaced avatars with a +N chip; names appear on hover and focus.',
@@ -392,7 +365,6 @@ export default defineRegistry({
     {
       name: 'skeleton',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Skeleton',
       description:
@@ -403,7 +375,6 @@ export default defineRegistry({
     {
       name: 'spinner',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Spinner and loaders',
       description:
@@ -414,7 +385,6 @@ export default defineRegistry({
     {
       name: 'progress',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Progress',
       description:
@@ -425,7 +395,6 @@ export default defineRegistry({
     {
       name: 'progress-circle',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'ProgressCircle',
       description: 'Progress as a ring with the figure inside, for cards, rows and steps.',
@@ -435,7 +404,6 @@ export default defineRegistry({
     {
       name: 'meter',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Meter',
       description:
@@ -446,7 +414,6 @@ export default defineRegistry({
     {
       name: 'alert',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Alert',
       description:
@@ -457,7 +424,6 @@ export default defineRegistry({
     {
       name: 'banner',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Banner',
       description: 'A page-level announcement across the top of the app, dismissible.',
@@ -467,7 +433,6 @@ export default defineRegistry({
     {
       name: 'card',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Card',
       description:
@@ -478,7 +443,6 @@ export default defineRegistry({
     {
       name: 'accordion',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Accordion',
       description: 'Sections that open in place, plain or separated, with headings and arrow keys.',
@@ -488,7 +452,6 @@ export default defineRegistry({
     {
       name: 'collapsible',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Collapsible',
       description: 'One section that shows and hides behind a quiet trigger.',
@@ -498,7 +461,6 @@ export default defineRegistry({
     {
       name: 'separator',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Separator',
       description: 'A hairline between groups, horizontal or vertical, with an optional label.',
@@ -508,7 +470,6 @@ export default defineRegistry({
     {
       name: 'kbd',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Kbd',
       description:
@@ -519,7 +480,6 @@ export default defineRegistry({
     {
       name: 'empty-state',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'EmptyState',
       description: 'What a screen or panel shows with nothing in it, and the next step.',
@@ -529,7 +489,6 @@ export default defineRegistry({
     {
       name: 'timeline',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Timeline',
       description: 'Events in order with dots, icons or avatars: audit trails and activity feeds.',
@@ -539,7 +498,6 @@ export default defineRegistry({
     {
       name: 'stat',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Stat',
       description: 'A figure with its label and change in words, alone or in a hairline group.',
@@ -549,7 +507,6 @@ export default defineRegistry({
     {
       name: 'scroll-area',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'ScrollArea',
       description:
@@ -560,7 +517,6 @@ export default defineRegistry({
     {
       name: 'stepper',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Stepper',
       description: 'Steps of a flow, horizontal or vertical, with completed steps you can revisit.',
@@ -570,7 +526,6 @@ export default defineRegistry({
     {
       name: 'textarea',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Textarea',
       description: 'Multi-line text that grows with its content, with an optional character count.',
@@ -580,7 +535,6 @@ export default defineRegistry({
     {
       name: 'input-group',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'InputGroup',
       description: 'An input with text, icon or button addons inside one border.',
@@ -590,7 +544,6 @@ export default defineRegistry({
     {
       name: 'search-input',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'SearchInput',
       description: 'A search field with a clear button, Escape to clear and an optional shortcut.',
@@ -600,7 +553,6 @@ export default defineRegistry({
     {
       name: 'number-field',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'NumberField',
       description: 'Number entry with a stepper and Intl formats such as percent and units.',
@@ -610,7 +562,6 @@ export default defineRegistry({
     {
       name: 'otp-input',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'OtpInput',
       description: 'One-time code and PIN entry, one slot per character, paste fills all.',
@@ -620,7 +571,6 @@ export default defineRegistry({
     {
       name: 'fieldset',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Fieldset and FormSection',
       description:
@@ -631,7 +581,6 @@ export default defineRegistry({
     {
       name: 'switch',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Switch',
       description: 'A switch for settings that apply at once, with a label-beside settings row.',
@@ -641,7 +590,6 @@ export default defineRegistry({
     {
       name: 'radio-group',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Radio group',
       description: 'Radio options as a list or as cards, named by a legend.',
@@ -651,7 +599,6 @@ export default defineRegistry({
     {
       name: 'toggle',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Toggle and toggle group',
       description: 'Pressed-state buttons and a segmented control, single or multiple.',
@@ -661,7 +608,6 @@ export default defineRegistry({
     {
       name: 'slider',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Slider',
       description: 'Single and range slider with Intl-formatted values and marks.',
@@ -671,7 +617,6 @@ export default defineRegistry({
     {
       name: 'file-upload',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'File upload',
       description:
@@ -686,7 +631,6 @@ export default defineRegistry({
     {
       name: 'tag-input',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'TagInput',
       description:
@@ -697,7 +641,6 @@ export default defineRegistry({
     {
       name: 'combobox',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Combobox',
       description:
@@ -708,7 +651,6 @@ export default defineRegistry({
     {
       name: 'multi-select',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'MultiSelect',
       description:
@@ -719,7 +661,6 @@ export default defineRegistry({
     {
       name: 'tooltip',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Tooltip',
       description:
@@ -730,7 +671,6 @@ export default defineRegistry({
     {
       name: 'popover',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Popover',
       description:
@@ -741,7 +681,6 @@ export default defineRegistry({
     {
       name: 'hover-card',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'HoverCard',
       description: 'A link that previews where it goes on hover or focus.',
@@ -751,7 +690,6 @@ export default defineRegistry({
     {
       name: 'menu',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Menu',
       description:
@@ -762,7 +700,6 @@ export default defineRegistry({
     {
       name: 'context-menu',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'ContextMenu',
       description: 'Right click and long press menu that reuses the menu parts.',
@@ -772,7 +709,6 @@ export default defineRegistry({
     {
       name: 'tabs',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Tabs',
       description: 'Line and segmented tabs with an indicator measured by Base UI.',
@@ -782,7 +718,6 @@ export default defineRegistry({
     {
       name: 'sheet',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Sheet',
       description:
@@ -793,7 +728,6 @@ export default defineRegistry({
     {
       name: 'breadcrumb',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Breadcrumb',
       description: 'Where the page sits, with the middle collapsed into a menu when long.',
@@ -803,7 +737,6 @@ export default defineRegistry({
     {
       name: 'pagination',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Pagination',
       description: 'Page numbers with stable gaps, and a compact phone variant.',
@@ -813,7 +746,6 @@ export default defineRegistry({
     {
       name: 'navigation-menu',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'NavigationMenu',
       description:
@@ -824,7 +756,6 @@ export default defineRegistry({
     {
       name: 'command-menu',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'CommandMenu',
       description:
@@ -839,7 +770,6 @@ export default defineRegistry({
     {
       name: 'sidebar',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'Sidebar',
       description:
@@ -850,7 +780,6 @@ export default defineRegistry({
     {
       name: 'app-shell',
       type: 'component',
-      tier: 'free',
       version: '0.1.0',
       title: 'AppShell',
       description: 'Sidebar, sticky header and page wired together, with a skip link.',
@@ -1042,7 +971,6 @@ export default defineRegistry({
         {
           name: 'blocks-core',
           type: 'lib',
-          tier: 'pro',
           version: '0.1.1',
           title: 'Blocks core',
           description:
@@ -1064,7 +992,6 @@ export default defineRegistry({
         {
           name: 'motion-blocks-core',
           type: 'lib',
-          tier: 'pro',
           version: '0.1.0',
           title: 'Motion blocks core',
           description:
@@ -1180,7 +1107,6 @@ export default defineRegistry({
         {
           name: 'marketing-core',
           type: 'lib',
-          tier: 'pro',
           version: '0.1.0',
           title: 'Marketing core',
           // Only the marquee and the parts context's client tree need the browser; the marquee
@@ -1206,7 +1132,6 @@ export default defineRegistry({
         {
           name: 'motion-marketing-core',
           type: 'lib',
-          tier: 'pro',
           version: '0.1.0',
           title: 'Motion marketing core',
           description:
@@ -1328,7 +1253,6 @@ export default defineRegistry({
         {
           name: 'saas-core',
           type: 'lib',
-          tier: 'pro',
           version: '0.1.0',
           title: 'SaaS blocks core',
           description:
@@ -1349,7 +1273,6 @@ export default defineRegistry({
         {
           name: 'motion-saas-core',
           type: 'lib',
-          tier: 'pro',
           version: '0.1.0',
           title: 'Motion SaaS blocks core',
           description: 'List items that arrive with a short rise and leave without a jump.',
@@ -1457,7 +1380,6 @@ export default defineRegistry({
         {
           name: 'docs-core',
           type: 'lib',
-          tier: 'pro',
           version: '0.1.0',
           title: 'Docs core',
           description:
@@ -1476,7 +1398,6 @@ export default defineRegistry({
         {
           name: 'motion-docs-core',
           type: 'lib',
-          tier: 'pro',
           version: '0.1.0',
           title: 'Motion docs core',
           description:

@@ -12,7 +12,4 @@ const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'regi
 const result = buildRegistry(config);
 for (const warning of result.warnings) console.warn(`registry: warning: ${warning}`);
 const written = writeRegistry(outDir, result);
-const pro = result.items.filter((item) => item.tier === 'pro').length;
-console.log(
-  `registry: ${result.items.length} items (${pro} pro), ${written.length} files -> dist/registry`,
-);
+console.log(`registry: ${result.items.length} items, ${written.length} files -> dist/registry`);

@@ -37,7 +37,6 @@ export const FIXTURE_SOURCES: Record<string, string> = {
 const item = (overrides: Partial<SourceItemConfig> & Pick<SourceItemConfig, 'name' | 'files'>) =>
   ({
     type: 'component',
-    tier: 'free',
     version: '1.0.0',
     title: overrides.name,
     description: `The ${overrides.name}.`,
@@ -57,7 +56,6 @@ export function fixtureConfig(dir: string, items?: SourceItemConfig[]): Registry
       item({
         name: 'ledger-card',
         type: 'block',
-        tier: 'pro',
         version: '2.1.0',
         files: ['ledger-card/ledger-card.tsx'],
       }),

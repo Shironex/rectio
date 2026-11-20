@@ -1,4 +1,4 @@
-import type { CssVars, Tier } from '../schema.ts';
+import type { CssVars } from '../schema.ts';
 
 export type SourceItemType = 'component' | 'block' | 'lib' | 'hook';
 
@@ -6,7 +6,6 @@ export type SourceItemType = 'component' | 'block' | 'lib' | 'hook';
 export interface SourceItemConfig {
   name: string;
   type: SourceItemType;
-  tier: Tier;
   version: string;
   title: string;
   description: string;
@@ -26,7 +25,6 @@ export interface SourceItemConfig {
 export interface ThemeItemConfig {
   /** The `data-theme` id in @rectio/tokens. The item is named `theme-<id>`. */
   id: string;
-  tier: Tier;
   version: string;
   title: string;
   description: string;

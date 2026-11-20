@@ -3,7 +3,6 @@
   "title": "SaaS landing",
   "description": "A multi-page marketing site for a team scheduling product: home, features, pricing, customers, blog, about, contact, changelog and legal pages.",
   "category": "marketing",
-  "tier": "pro",
   "pages": [
     "/",
     "/features",

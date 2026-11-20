@@ -19,8 +19,8 @@ export function writeRegistry(outDir: string, result: BuildResult): string[] {
   };
   write(INDEX_PATH, json(result.index));
   for (const item of result.items) {
-    write(itemPath(item.name, item.tier), json(item));
-    write(itemPath(item.name, item.tier, item.version), json(item));
+    write(itemPath(item.name), json(item));
+    write(itemPath(item.name, item.version), json(item));
   }
   const schemas = jsonSchemas();
   write(SCHEMA_PATHS.item, json(schemas.item));

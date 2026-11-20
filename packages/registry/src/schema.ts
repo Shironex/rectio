@@ -77,9 +77,6 @@ export const fileTypeSchema = z.enum([
 ]);
 export type FileType = z.infer<typeof fileTypeSchema>;
 
-export const tierSchema = z.enum(['free', 'pro']);
-export type Tier = z.infer<typeof tierSchema>;
-
 /** A relative POSIX path that cannot climb out of its root. */
 const safeRelativePath = z
   .string()
@@ -161,7 +158,7 @@ export const themeMetaSchema = z.object({
 /**
  * One installable unit. A deliberate superset of shadcn's registry item where the fields overlap
  * (name, type, title, description, dependencies, registryDependencies, files, cssVars, docs,
- * categories, meta), plus tier, version, per-file hashes, an item integrity and requires.
+ * categories, meta), plus version, per-file hashes, an item integrity and requires.
  */
 export const registryItemSchema = z
   .object({
@@ -170,14 +167,13 @@ export const registryItemSchema = z
     name: itemNameSchema,
     version: versionSchema,
     type: itemTypeSchema,
-    tier: tierSchema,
     title: z.string().min(1),
     description: z.string().min(1),
     categories: z.array(z.string()).default([]),
     /** npm packages with semver ranges, merged into the consumer's package.json. */
     dependencies: dependencyMapSchema.default({}),
     devDependencies: dependencyMapSchema.default({}),
-    /** Other registry items by name. A free item never depends on a pro one. */
+    /** Other registry items by name. */
     registryDependencies: z.array(itemNameSchema).default([]),
     requires: requiresSchema.default({}),
     files: z.array(itemFileSchema).min(1),
@@ -223,7 +219,6 @@ export type RegistryItemInput = z.input<typeof registryItemSchema>;
 export const indexEntrySchema = z.object({
   name: itemNameSchema,
   type: itemTypeSchema,
-  tier: tierSchema,
   version: versionSchema,
   /** Every published version, oldest first, so `update` can fetch the exact base of a merge. */
   versions: z.array(versionSchema).min(1),

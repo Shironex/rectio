@@ -18,7 +18,6 @@ const MANIFEST = {
   title: 'Books',
   description: 'A small app.',
   category: 'app',
-  tier: 'pro',
   pages: ['/'],
   uses: ['badge', 'ledger-card'],
   screenshots: ['screenshots/desktop-light.webp'],
@@ -75,13 +74,12 @@ const fileOf = (item: RegistryItem | undefined, path: string) =>
   item?.files.find((f) => f.path === `template/${path}`)?.content;
 
 describe('template items', () => {
-  it('builds a pro template item from template.json and the folder', () => {
+  it('builds a template item from template.json and the folder', () => {
     const result = build().run();
     const item = result.items.find((i) => i.name === 'books');
     expect(item).toBeDefined();
     expect(registryItemSchema.parse(item)).toBeTruthy();
     expect(item?.type).toBe('template');
-    expect(item?.tier).toBe('pro');
     expect(item?.version).toBe('1.2.0');
     expect(item?.categories).toEqual(['template', 'app']);
     expect(item?.registryDependencies).toEqual(['badge', 'ledger-card']);
@@ -99,7 +97,7 @@ describe('template items', () => {
       expect(file.target).toBe(`@project/${file.path.slice('template/'.length)}`);
     }
     const entry = result.index.items.find((i) => i.name === 'books');
-    expect(entry).toMatchObject({ type: 'template', tier: 'pro' });
+    expect(entry).toMatchObject({ type: 'template' });
     expect(JSON.stringify(entry)).not.toContain('content');
   });
 
@@ -134,13 +132,13 @@ describe('template items', () => {
     });
   });
 
-  it('writes the template body under pro/ only', () => {
+  it('writes the template body under items/ like any item', () => {
     const { dir, run } = build();
     const out = join(dir, 'out');
     writeRegistry(out, run());
-    expect(existsSync(join(out, 'pro/items/books.json'))).toBe(true);
-    expect(existsSync(join(out, 'pro/items/books@1.2.0.json'))).toBe(true);
-    expect(existsSync(join(out, 'items/books.json'))).toBe(false);
+    expect(existsSync(join(out, 'items/books.json'))).toBe(true);
+    expect(existsSync(join(out, 'items/books@1.2.0.json'))).toBe(true);
+    expect(existsSync(join(out, 'pro'))).toBe(false);
     expect(readFileSync(join(out, 'index.json'), 'utf8')).not.toContain('@registry/');
   });
 

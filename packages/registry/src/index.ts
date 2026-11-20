@@ -15,7 +15,6 @@ export {
   registryItemSchema,
   templateCategorySchema,
   templateMetaSchema,
-  tierSchema,
   versionSchema,
   type AliasKey,
   type CssVars,
@@ -28,7 +27,6 @@ export {
   type RegistryItemInput,
   type TemplateCategory,
   type TemplateMeta,
-  type Tier,
 } from './schema.ts';
 export { templateManifestSchema, type TemplateManifest } from './template-manifest.ts';
 export {
