@@ -2,6 +2,7 @@ import { FileCodeIcon, TerminalWindowIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 import { useMemo, type ReactNode } from 'react';
 
+import { mergeMessages } from '../lib/messages';
 import { CopyButton } from '../lib/copy-button';
 import {
   copyableText,
@@ -44,6 +45,8 @@ export interface CodeBlockProps {
   /** Show the copy button. Default true. */
   copy?: boolean | undefined;
   copyLabel?: string | undefined;
+  /** The block's words; pass the keys you change. See `CODE_BLOCK_MESSAGES`. */
+  messages?: Partial<CodeBlockMessages> | undefined;
   /** Wrap long lines instead of scrolling sideways. */
   wrap?: boolean | undefined;
   /**
@@ -53,6 +56,30 @@ export interface CodeBlockProps {
   framed?: boolean | undefined;
   className?: string | undefined;
 }
+
+export interface CodeBlockMessages {
+  /** Accessible name of the copy button. */
+  copyCode: string;
+  /** Said once the code is on the clipboard. */
+  copied: string;
+  /** Read before an added line of a diff. */
+  added: string;
+  /** Read before a removed line of a diff. */
+  removed: string;
+  /** Names the scrollable code when it has no title: "TypeScript example". */
+  example: (language: string) => string;
+  /** The language's name when the fence gives none. */
+  code: string;
+}
+
+export const CODE_BLOCK_MESSAGES: CodeBlockMessages = {
+  copyCode: 'Copy code',
+  copied: 'Copied',
+  added: 'Added: ',
+  removed: 'Removed: ',
+  example: (language) => `${language} example`,
+  code: 'Code',
+};
 
 const SHELL = new Set(['sh', 'bash', 'shell', 'zsh', 'console', 'powershell']);
 
@@ -73,11 +100,13 @@ export function CodeBlock({
   diff,
   meta,
   copy = true,
-  copyLabel = 'Copy code',
+  copyLabel,
+  messages,
   wrap = false,
   framed = true,
   className,
 }: CodeBlockProps) {
+  const m = mergeMessages(CODE_BLOCK_MESSAGES, messages);
   const parsed = parseCodeMeta(meta);
   const heading = title ?? parsed.title;
   const isDiff = diff ?? (parsed.diff || lang === 'diff');
@@ -99,7 +128,11 @@ export function CodeBlock({
   const label = languageLabel(lang);
   const Icon = lang !== undefined && SHELL.has(lang) ? TerminalWindowIcon : FileCodeIcon;
   const copyButton = copy ? (
-    <CopyButton value={() => copyableText(lines, marks)} label={copyLabel} />
+    <CopyButton
+      value={() => copyableText(lines, marks)}
+      label={copyLabel ?? m.copyCode}
+      copiedLabel={m.copied}
+    />
   ) : null;
 
   return (
@@ -122,7 +155,7 @@ export function CodeBlock({
       <pre
         // A scroll area must be reachable with the keyboard to scroll it without a pointer.
         tabIndex={0}
-        aria-label={typeof heading === 'string' ? heading : `${label ?? 'Code'} example`}
+        aria-label={typeof heading === 'string' ? heading : m.example(label ?? m.code)}
         className={cn(
           'm-0 overflow-x-auto py-3.5 font-mono text-sm',
           'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
@@ -175,7 +208,7 @@ export function CodeBlock({
                   </span>
                 )}
                 {mark !== null && (
-                  <span className="sr-only">{mark === 'inserted' ? 'Added: ' : 'Removed: '}</span>
+                  <span className="sr-only">{mark === 'inserted' ? m.added : m.removed}</span>
                 )}
                 <span className="min-w-0">
                   {line.length === 0

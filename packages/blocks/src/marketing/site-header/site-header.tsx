@@ -1,3 +1,5 @@
+'use client';
+
 import { Dialog } from '@base-ui/react/dialog';
 import { ListIcon, XIcon } from '@phosphor-icons/react';
 import { cn, usePortalContainer } from '@rectio/ui';

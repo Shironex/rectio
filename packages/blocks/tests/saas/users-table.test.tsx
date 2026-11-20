@@ -5,7 +5,9 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   EMPTY_USER_FILTERS,
   UsersTable,
+  assignableUserRoles,
   bulkUserTargets,
+  canActOnUser,
   filterUsers,
   userCounts,
   userFiltersActive,
@@ -65,7 +67,11 @@ describe('users table logic', () => {
   });
 
   it('leaves owners out of bulk changes', () => {
-    expect(bulkUserTargets(USERS, ['o', 'a', 'g'])).toEqual({ ids: ['a', 'g'], skippedOwners: 1 });
+    expect(bulkUserTargets(USERS, ['o', 'a', 'g'])).toEqual({
+      ids: ['a', 'g'],
+      skippedOwners: 1,
+      skipped: 1,
+    });
   });
 });
 
@@ -145,5 +151,44 @@ describe('UsersTable', () => {
   it('shows an empty state with no users', () => {
     render(<UsersTable users={[]} now={NOW} />);
     expect(screen.getByRole('status')).toHaveTextContent('Bring your team in');
+  });
+});
+
+describe('users table session claims', () => {
+  it('lets the viewer act only below or at their role, never on themselves', () => {
+    const admin = { role: 'admin' as const };
+    const [owner, ines, tomasz, kenji] = USERS as [UserRecord, UserRecord, UserRecord, UserRecord];
+    expect(canActOnUser(owner, admin)).toBe(false);
+    expect(canActOnUser({ ...ines, you: true }, admin)).toBe(false);
+    expect(canActOnUser(ines, admin)).toBe(true);
+    expect(canActOnUser(tomasz, admin)).toBe(true);
+    expect(canActOnUser(kenji, { role: 'member' })).toBe(false);
+    expect(canActOnUser(tomasz)).toBe(true);
+    expect(assignableUserRoles({ role: 'admin' })).toEqual(['admin', 'member', 'guest']);
+    expect(assignableUserRoles({ role: 'guest' })).toEqual([]);
+    expect(bulkUserTargets(USERS, ['o', 'a', 'm'], admin)).toEqual({
+      ids: ['a', 'm'],
+      skippedOwners: 1,
+      skipped: 1,
+    });
+  });
+
+  it('takes the signed-in user and role from your session', () => {
+    render(
+      <UsersTable
+        users={USERS.map((user) => (user.id === 'a' ? { ...user, you: true } : user))}
+        now={NOW}
+        onRemove={vi.fn()}
+        currentRole="admin"
+      />,
+    );
+    expect(screen.queryByRole('button', { name: 'Actions for Inês Duarte' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Actions for Kenji Arakawa' })).toBeInTheDocument();
+  });
+
+  it('gives a member no way to manage anyone', () => {
+    render(<UsersTable users={USERS} now={NOW} onRemove={vi.fn()} currentRole="member" />);
+    expect(screen.queryByRole('button', { name: /^Actions for/ })).toBeNull();
+    expect(screen.queryByRole('checkbox')).toBeNull();
   });
 });

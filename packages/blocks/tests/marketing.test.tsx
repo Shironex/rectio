@@ -8,6 +8,9 @@ import {
   ContactSection,
   CookieConsent,
   Faq,
+  HeroCentered,
+  HeroFloating,
+  HeroSplit,
   HeroWordCycle,
   LegalPage,
   Newsletter,
@@ -219,7 +222,7 @@ describe('CookieConsent', () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
     render(<ConsentHarness onSave={onSave} />);
-    await user.click(screen.getByRole('button', { name: 'Choose cookies' }));
+    await user.click(screen.getByRole('button', { name: 'Manage cookies' }));
     const dialog = await screen.findByRole('dialog');
     const necessary = within(dialog).getByRole('switch', { name: /Necessary/ });
     expect(necessary).toBeChecked();
@@ -274,5 +277,66 @@ describe('motion twins', () => {
     render(<moving.StatRow stats={stats} locale="en-GB" />);
     expect(screen.getAllByText('1,240+').length).toBeGreaterThan(0);
     expect(screen.getByText('teams')).toBeInTheDocument();
+  });
+});
+
+describe('hero wash', () => {
+  const hero = (container: HTMLElement) => container.querySelector('[data-slot="hero"]');
+
+  it('keeps the accent wash by default and turns it off or neutral on request', () => {
+    const { container, rerender } = render(<HeroCentered title="Ship it" />);
+    expect(hero(container)?.className).toContain('from-accent-subtle');
+    rerender(<HeroCentered title="Ship it" wash="none" />);
+    expect(hero(container)?.className).not.toMatch(/from-|bg-linear/);
+    rerender(<HeroCentered title="Ship it" wash="neutral" />);
+    expect(hero(container)?.className).toContain('from-surface-sunken');
+  });
+
+  it('draws your backdrop behind the content, hidden from assistive technology', () => {
+    const { container } = render(
+      <HeroFloating
+        title="Ship it"
+        visual={<div />}
+        cards={[]}
+        wash="none"
+        backdrop={<div data-testid="pattern" />}
+      />,
+    );
+    const layer = screen.getByTestId('pattern').parentElement;
+    expect(layer).toHaveAttribute('aria-hidden', 'true');
+    expect(layer?.className).toContain('-z-10');
+    expect(hero(container)?.className).not.toContain('from-accent-subtle');
+  });
+
+  it('gives the split hero and the cycling headline the same props', () => {
+    const { container } = render(<HeroSplit title="Ship it" visual={<div />} wash="accent" />);
+    expect(hero(container)?.className).toContain('from-accent-subtle');
+    const cycle = render(<HeroWordCycle before="Close" words={['a', 'b']} wash="none" />);
+    expect(hero(cycle.container)?.className).not.toContain('from-accent-subtle');
+  });
+});
+
+describe('CookieConsent on a phone', () => {
+  it('carries a short line for phones beside the full words, and Manage opens every choice', async () => {
+    const user = userEvent.setup();
+    render(
+      <CookieConsent
+        categories={CATEGORIES}
+        version="v1"
+        consent={null}
+        onSave={vi.fn()}
+        shortDescription="Only with your yes."
+      />,
+    );
+    const region = screen.getByRole('region', { name: 'We use cookies' });
+    expect(within(region).getByText('Only with your yes.')).toHaveClass('sm:hidden');
+    expect(within(region).getByText(/Necessary cookies keep the site working/)).toHaveClass(
+      'max-sm:hidden',
+    );
+    const manage = within(region).getByRole('button', { name: 'Manage cookies' });
+    // Manage leads on a phone; reject and accept keep the same weight beside it.
+    expect(manage.parentElement?.firstElementChild).toHaveTextContent('Reject all');
+    await user.click(manage);
+    expect(await screen.findByRole('dialog', { name: 'Cookie settings' })).toBeInTheDocument();
   });
 });

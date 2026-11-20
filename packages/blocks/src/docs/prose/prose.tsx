@@ -2,6 +2,7 @@ import { LinkSimpleIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 import type { ComponentProps, ReactNode } from 'react';
 
+import { mergeMessages } from '../lib/messages';
 import { slugify, textOf } from '../lib/docs';
 
 /**
@@ -92,24 +93,35 @@ export function DocsHeading({
   );
 }
 
+export interface DocsTableMessages {
+  /** Accessible name of the scroll region. */
+  label: string;
+}
+
+export const DOCS_TABLE_MESSAGES: DocsTableMessages = { label: 'Table' };
+
 /**
  * A table that scrolls sideways inside its own frame on a narrow screen, never the page. The frame
  * is a named, focusable region so it scrolls with the keyboard too.
  */
 export function DocsTable({
   label,
+  messages,
   children,
   className,
 }: {
   /** Accessible name of the scroll region. Default "Table". */
   label?: string;
+  /** The block's words; pass the keys you change. See `DOCS_TABLE_MESSAGES`. */
+  messages?: Partial<DocsTableMessages>;
   children: ReactNode;
   className?: string;
 }) {
+  const m = mergeMessages(DOCS_TABLE_MESSAGES, messages);
   return (
     <div
       role="region"
-      aria-label={label ?? 'Table'}
+      aria-label={label ?? m.label}
       tabIndex={0}
       data-slot="docs-table"
       className={cn(

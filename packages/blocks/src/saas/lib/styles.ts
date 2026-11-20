@@ -1,4 +1,4 @@
-import { cn } from '@rectio/ui';
+import { cn, type ProgressTone } from '@rectio/ui';
 
 /**
  * Class strings the SaaS blocks' local pieces share, matching the ones @rectio/ui uses inside its
@@ -21,3 +21,20 @@ export const inlineLink = cn(
   'hover:decoration-fg',
   focusRing,
 );
+
+/** How full an allowance is: room to spare, running short, or used up. */
+export type UsageLevel = 'ok' | 'warning' | 'over';
+
+/** The kit Meter's tone for each usage level. */
+export const USAGE_TONE: Record<UsageLevel, ProgressTone> = {
+  ok: 'accent',
+  warning: 'warning',
+  over: 'negative',
+};
+
+/** The note under a meter takes the level's ink, so a full meter is never red alone. */
+export const USAGE_NOTE: Record<UsageLevel, string> = {
+  ok: 'text-fg-muted',
+  warning: 'text-warning-strong',
+  over: 'text-negative-strong',
+};

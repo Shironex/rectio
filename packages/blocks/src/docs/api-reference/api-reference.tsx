@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { CodeBlock } from '../code-block/code-block';
 import type { CodeLine } from '../code-block/code-block.logic';
+import { mergeMessages } from '../lib/messages';
 import { DocsBadge } from '../lib/badge';
 import { slugify } from '../lib/docs';
 import { useDocsParts } from '../lib/parts';
@@ -23,15 +24,30 @@ export interface PropsTableProps {
   label?: string;
   /** Column headings, for translation. */
   labels?: Partial<Record<'name' | 'type' | 'default' | 'description' | 'required', string>>;
+  /** The block's words; pass the keys you change. See `PROPS_TABLE_MESSAGES`. */
+  messages?: Partial<PropsTableMessages>;
   className?: string;
 }
 
-const DEFAULT_LABELS = {
+export interface PropsTableMessages {
+  name: string;
+  type: string;
+  default: string;
+  description: string;
+  required: string;
+  deprecated: string;
+  /** Read for a prop with no default, where the table shows a dash. */
+  none: string;
+}
+
+export const PROPS_TABLE_MESSAGES: PropsTableMessages = {
   name: 'Prop',
   type: 'Type',
   default: 'Default',
   description: 'Description',
   required: 'Required',
+  deprecated: 'Deprecated',
+  none: 'None',
 };
 
 function TypeText({ children }: { children: string }) {
@@ -43,8 +59,9 @@ function TypeText({ children }: { children: string }) {
  * marked in words. In a narrow column it becomes a stacked list, one entry per prop, so nothing
  * scrolls sideways.
  */
-export function PropsTable({ rows, label, labels, className }: PropsTableProps) {
-  const text = { ...DEFAULT_LABELS, ...labels };
+export function PropsTable({ rows, label, labels, messages, className }: PropsTableProps) {
+  const m = mergeMessages(PROPS_TABLE_MESSAGES, messages);
+  const text = { ...m, ...labels };
   // A table where no row has a default leaves the column out instead of a column of dashes.
   const defaults = rows.some((row) => row.default !== undefined);
   return (
@@ -73,7 +90,7 @@ export function PropsTable({ rows, label, labels, className }: PropsTableProps) 
             {rows.map((row) => (
               <tr key={row.name} className="border-t border-line align-top">
                 <th scope="row" className="px-4 py-3 text-start font-regular">
-                  <PropName row={row} required={text.required} />
+                  <PropName row={row} required={text.required} deprecated={m.deprecated} />
                 </th>
                 <td className="px-4 py-3">
                   <TypeText>{row.type}</TypeText>
@@ -83,7 +100,7 @@ export function PropsTable({ rows, label, labels, className }: PropsTableProps) 
                     {row.default === undefined ? (
                       <span className="text-fg-subtle">
                         <span aria-hidden>-</span>
-                        <span className="sr-only">None</span>
+                        <span className="sr-only">{m.none}</span>
                       </span>
                     ) : (
                       <code className="font-mono text-sm text-fg">{row.default}</code>
@@ -103,7 +120,7 @@ export function PropsTable({ rows, label, labels, className }: PropsTableProps) 
             className="flex flex-col gap-1.5 border-line px-4 py-3 not-first:border-t"
           >
             <dt>
-              <PropName row={row} required={text.required} />
+              <PropName row={row} required={text.required} deprecated={m.deprecated} />
             </dt>
             <dd className="flex flex-col gap-1.5">
               <span className="flex flex-wrap items-baseline gap-x-2 text-sm">
@@ -126,7 +143,15 @@ export function PropsTable({ rows, label, labels, className }: PropsTableProps) 
   );
 }
 
-function PropName({ row, required }: { row: PropRow; required: string }) {
+function PropName({
+  row,
+  required,
+  deprecated,
+}: {
+  row: PropRow;
+  required: string;
+  deprecated: string;
+}) {
   return (
     <span className="flex flex-wrap items-center gap-1.5">
       <code
@@ -138,7 +163,7 @@ function PropName({ row, required }: { row: PropRow; required: string }) {
         {row.name}
       </code>
       {row.required === true && <DocsBadge tone="neutral">{required}</DocsBadge>}
-      {row.deprecated === true && <DocsBadge tone="deprecated">Deprecated</DocsBadge>}
+      {row.deprecated === true && <DocsBadge tone="deprecated">{deprecated}</DocsBadge>}
     </span>
   );
 }
@@ -168,8 +193,31 @@ export interface SignatureCardProps {
   level?: 2 | 3 | 4;
   /** Example code under the parameters. */
   children?: ReactNode;
+  /** The card's words; pass the keys you change. See `SIGNATURE_CARD_MESSAGES`. */
+  messages?: Partial<SignatureCardMessages>;
   className?: string;
 }
+
+export interface SignatureCardMessages {
+  /** The label of each kind of entry. */
+  kinds: Record<NonNullable<SignatureCardProps['kind']>, string>;
+  /** The badge for the version that introduced it: "Since 1.4". */
+  since: (version: string) => string;
+  deprecated: string;
+  parameters: string;
+  /** Read before the description of an optional parameter. */
+  optional: string;
+  returns: string;
+}
+
+export const SIGNATURE_CARD_MESSAGES: SignatureCardMessages = {
+  kinds: { function: 'function', method: 'method', class: 'class', hook: 'hook', type: 'type' },
+  since: (version) => `Since ${version}`,
+  deprecated: 'Deprecated',
+  parameters: 'Parameters',
+  optional: 'Optional. ',
+  returns: 'Returns',
+};
 
 /**
  * One function, method or class: its signature as code, what it does, its parameters and what it
@@ -188,8 +236,10 @@ export function SignatureCard({
   deprecated = false,
   level = 3,
   children,
+  messages,
   className,
 }: SignatureCardProps) {
+  const m = mergeMessages(SIGNATURE_CARD_MESSAGES, messages);
   const Heading = level === 2 ? 'h2' : level === 3 ? 'h3' : 'h4';
   const id = slugify(name);
   return (
@@ -210,9 +260,11 @@ export function SignatureCard({
             {name}
           </a>
         </Heading>
-        <span className="text-xs font-medium tracking-caps text-fg-muted uppercase">{kind}</span>
-        {since !== undefined && <DocsBadge tone="neutral">Since {since}</DocsBadge>}
-        {deprecated && <DocsBadge tone="deprecated">Deprecated</DocsBadge>}
+        <span className="text-xs font-medium tracking-caps text-fg-muted uppercase">
+          {m.kinds[kind]}
+        </span>
+        {since !== undefined && <DocsBadge tone="neutral">{m.since(since)}</DocsBadge>}
+        {deprecated && <DocsBadge tone="deprecated">{m.deprecated}</DocsBadge>}
       </header>
       <CodeBlock code={signature} tokens={tokens} lang="ts" copy={false} wrap />
       {description !== undefined && (
@@ -220,7 +272,7 @@ export function SignatureCard({
       )}
       {params !== undefined && params.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h4 className="text-sm font-strong text-fg">Parameters</h4>
+          <h4 className="text-sm font-strong text-fg">{m.parameters}</h4>
           <dl className="flex flex-col divide-y divide-line border-y border-line">
             {params.map((param) => (
               <div key={param.name} className="flex flex-col gap-1 py-2.5 @lg:flex-row @lg:gap-4">
@@ -232,7 +284,7 @@ export function SignatureCard({
                   <TypeText>{param.type}</TypeText>
                 </dt>
                 <dd className="text-sm text-pretty text-fg-muted">
-                  {param.optional === true && <span className="sr-only">Optional. </span>}
+                  {param.optional === true && <span className="sr-only">{m.optional}</span>}
                   {param.description}
                 </dd>
               </div>
@@ -242,7 +294,7 @@ export function SignatureCard({
       )}
       {returns !== undefined && (
         <p className="flex flex-wrap items-baseline gap-2 text-sm">
-          <span className="font-strong text-fg">Returns</span>
+          <span className="font-strong text-fg">{m.returns}</span>
           <TypeText>{returns.type}</TypeText>
           {returns.description !== undefined && (
             <span className="text-fg-muted">{returns.description}</span>
@@ -306,8 +358,37 @@ export interface EndpointProps {
   request?: { code: string; lang?: string; tokens?: readonly CodeLine[] } | undefined;
   responses?: readonly EndpointResponse[] | undefined;
   level?: 2 | 3;
+  /** The block's words; pass the keys you change. See `ENDPOINT_MESSAGES`. */
+  messages?: Partial<EndpointMessages>;
   className?: string;
 }
+
+export interface EndpointMessages {
+  authorization: string;
+  pathParameters: string;
+  queryParameters: string;
+  body: string;
+  request: string;
+  responses: string;
+  /** Names a parameter table, given the endpoint's title and the group's heading. */
+  tableLabel: (title: string, group: string) => string;
+  /** Names the list of response tabs, given the endpoint's title. */
+  responsesLabel: (title: string) => string;
+  /** The words of the parameter tables. */
+  table: PropsTableMessages;
+}
+
+export const ENDPOINT_MESSAGES: EndpointMessages = {
+  authorization: 'Authorization',
+  pathParameters: 'Path parameters',
+  queryParameters: 'Query parameters',
+  body: 'Body',
+  request: 'Request',
+  responses: 'Responses',
+  tableLabel: (title, group) => `${title}: ${group.toLowerCase()}`,
+  responsesLabel: (title) => `${title} responses`,
+  table: { ...PROPS_TABLE_MESSAGES, name: 'Name' },
+};
 
 /** `/v1/queues/:queue/jobs` with `:queue` set apart, so parameters read at a glance. */
 function PathText({ path }: { path: string }) {
@@ -344,15 +425,17 @@ export function Endpoint({
   request,
   responses,
   level = 3,
+  messages,
   className,
 }: EndpointProps) {
+  const m = mergeMessages(ENDPOINT_MESSAGES, messages);
   const { TabsList } = useDocsParts();
   const Heading = level === 2 ? 'h2' : 'h3';
   const id = slugify(title);
   const groups: [string, readonly PropRow[] | undefined][] = [
-    ['Path parameters', pathParams],
-    ['Query parameters', queryParams],
-    ['Body', body],
+    [m.pathParameters, pathParams],
+    [m.queryParameters, queryParams],
+    [m.body, body],
   ];
   return (
     <section
@@ -383,7 +466,7 @@ export function Endpoint({
         )}
         {auth !== undefined && (
           <p className="text-sm text-fg-muted">
-            <span className="font-strong text-fg">Authorization</span> {auth}
+            <span className="font-strong text-fg">{m.authorization}</span> {auth}
           </p>
         )}
       </div>
@@ -391,28 +474,24 @@ export function Endpoint({
         rows === undefined || rows.length === 0 ? null : (
           <div key={label} className="flex flex-col gap-2">
             <h4 className="text-sm font-strong text-fg">{label}</h4>
-            <PropsTable
-              rows={rows}
-              label={`${title}: ${label.toLowerCase()}`}
-              labels={{ name: 'Name' }}
-            />
+            <PropsTable rows={rows} label={m.tableLabel(title, label)} messages={m.table} />
           </div>
         ),
       )}
       {request !== undefined && (
         <div className="flex flex-col gap-2">
-          <h4 className="text-sm font-strong text-fg">Request</h4>
+          <h4 className="text-sm font-strong text-fg">{m.request}</h4>
           <CodeBlock code={request.code} tokens={request.tokens} lang={request.lang ?? 'sh'} />
         </div>
       )}
       {responses !== undefined && responses.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h4 className="text-sm font-strong text-fg">Responses</h4>
+          <h4 className="text-sm font-strong text-fg">{m.responses}</h4>
           <Tabs
             defaultValue={String(responses[0]?.status)}
             className="min-w-0 overflow-hidden rounded-panel border border-line bg-code-background"
           >
-            <TabsList aria-label={`${title} responses`} className="px-2">
+            <TabsList aria-label={m.responsesLabel(title)} className="px-2">
               {responses.map((response) => (
                 <TabsTab key={response.status} value={String(response.status)}>
                   <span className="font-mono">{response.status}</span>

@@ -41,7 +41,7 @@ import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
-import { useNow } from '../lib/focus';
+import { useNow, useRemovalFocus } from '../lib/focus';
 import { isoDateTime, countLabel, relativeTime } from '../lib/saas';
 import {
   EMPTY_USER_FILTERS,
@@ -49,7 +49,9 @@ import {
   USER_ROLE_LABELS,
   USER_STATUSES,
   USER_STATUS_LABELS,
+  assignableUserRoles,
   bulkUserTargets,
+  canActOnUser,
   filterUsers,
   userCounts,
   userHaystacks,
@@ -77,6 +79,12 @@ export interface UsersTableProps {
   onReactivate?: (ids: string[]) => void;
   /** Asked to confirm first, in a dialog naming who goes. */
   onRemove?: (ids: string[]) => void;
+  /**
+   * The signed-in user's role, from your session: they act only on people at or below it, hand
+   * out only those roles, and as a member or guest manage no one. Leave it out to let your
+   * callbacks alone decide.
+   */
+  currentRole?: UserRole | undefined;
   title?: string;
   className?: string;
 }
@@ -130,6 +138,7 @@ export function UsersTable({
   onSuspend,
   onReactivate,
   onRemove,
+  currentRole,
   title = 'Users',
   className,
 }: UsersTableProps) {
@@ -156,28 +165,38 @@ export function UsersTable({
   const filtering = userFiltersActive(filters);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersId = useId();
-  const bulk = onChangeRole !== undefined || onSuspend !== undefined || onRemove !== undefined;
+  const viewer = { role: currentRole };
+  const grantable = assignableUserRoles(viewer);
+  // A member or guest manages no one: no checkboxes, no bulk bar, no row menus.
+  const bulk =
+    (currentRole === undefined || grantable.length > 0) &&
+    (onChangeRole !== undefined || onSuspend !== undefined || onRemove !== undefined);
   // Only rows still on hand count as selected, so a selection never outlives its users.
   const selectedIds = useMemo(
     () => users.filter((user) => rowSelection[user.id]).map((user) => user.id),
     [users, rowSelection],
   );
-  const targets = useMemo(() => bulkUserTargets(users, selectedIds), [users, selectedIds]);
+  const targets = useMemo(
+    () => bulkUserTargets(users, selectedIds, { role: currentRole }),
+    [users, selectedIds, currentRole],
+  );
   const byId = useMemo(() => new Map(users.map((user) => [user.id, user])), [users]);
 
   const rowActions = (user: UserRecord): MenuAction[] => {
-    if (user.role === 'owner') return [];
+    if (!canActOnUser(user, viewer)) return [];
     const one = [user.id];
     return [
       ...(onChangeRole === undefined
         ? []
-        : USER_ROLES.filter((role) => role !== 'owner' && role !== user.role).map((role) => ({
-            id: `role-${role}`,
-            label: `Make ${USER_ROLE_LABELS[role].toLowerCase()}`,
-            onSelect: () => {
-              onChangeRole(one, role);
-            },
-          }))),
+        : grantable
+            .filter((role) => role !== user.role)
+            .map((role) => ({
+              id: `role-${role}`,
+              label: `Make ${USER_ROLE_LABELS[role].toLowerCase()}`,
+              onSelect: () => {
+                onChangeRole(one, role);
+              },
+            }))),
       ...(user.status === 'suspended' && onReactivate !== undefined
         ? [
             {
@@ -365,7 +384,7 @@ export function UsersTable({
     ],
     // rowActions reads the same callbacks listed here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bulk, onOpenUser, onChangeRole, onSuspend, onReactivate, onRemove, now, locale],
+    [bulk, onOpenUser, onChangeRole, onSuspend, onReactivate, onRemove, now, locale, currentRole],
   );
 
   const table = useDataTable({
@@ -378,7 +397,7 @@ export function UsersTable({
     onRowSelectionChange: (updater) => {
       setRowSelection((current) => (typeof updater === 'function' ? updater(current) : updater));
     },
-    enableRowSelection: (row) => row.original.role !== 'owner',
+    enableRowSelection: (row) => canActOnUser(row.original, viewer),
   });
 
   const setFilter = (next: Partial<UserFilters>) => {
@@ -392,6 +411,12 @@ export function UsersTable({
   const bulkLanding = () =>
     tableArea.current?.querySelector<HTMLElement>('[aria-label="Select all rows"]') ??
     tableArea.current;
+  // A removal hands focus to the next row on the page, else the previous one, else the table.
+  const removal = useRemovalFocus(
+    tableArea,
+    table.getRowModel().rows.map((row) => row.id),
+    () => bulkLanding(),
+  );
   const endBulk = () => {
     clearSelection();
     requestAnimationFrame(() => {
@@ -535,9 +560,13 @@ export function UsersTable({
             >
               <p className="text-sm">
                 <span className="font-medium numeric">{selectedIds.length}</span> selected
-                {targets.skippedOwners > 0 && (
+                {targets.skipped > 0 && (
                   <span className="text-fg-muted">
-                    , {countLabel(targets.skippedOwners, 'owner')} left out of bulk changes
+                    ,{' '}
+                    {targets.skipped === targets.skippedOwners
+                      ? countLabel(targets.skippedOwners, 'owner')
+                      : countLabel(targets.skipped, 'user')}{' '}
+                    left out of bulk changes
                   </span>
                 )}
               </p>
@@ -546,7 +575,7 @@ export function UsersTable({
                   <ActionMenu
                     label="Change role of the selected users"
                     trigger={<span className="text-fg">Change role</span>}
-                    actions={USER_ROLES.filter((role) => role !== 'owner').map((role) => ({
+                    actions={grantable.map((role) => ({
                       id: role,
                       label: USER_ROLE_LABELS[role],
                       disabled: targets.ids.length === 0,
@@ -617,6 +646,7 @@ export function UsersTable({
               <DataTableBody
                 table={table}
                 rowProps={(row) => ({
+                  'data-row-id': row.id,
                   'data-suspended': row.original.status === 'suspended' || undefined,
                 })}
                 empty={
@@ -663,10 +693,15 @@ export function UsersTable({
         onCancel={() => {
           setConfirming(null);
         }}
-        finalFocus={() => bulkLanding() ?? true}
+        finalFocus={() => {
+          const landing = removal.landing();
+          return landing === true ? (bulkLanding() ?? true) : landing;
+        }}
         onConfirm={(action, ids) => {
-          if (action === 'remove') onRemove?.(ids);
-          else onSuspend?.(ids);
+          if (action === 'remove') {
+            removal.prepare(ids);
+            onRemove?.(ids);
+          } else onSuspend?.(ids);
           setConfirming(null);
           clearSelection();
         }}

@@ -25,15 +25,14 @@ export {
   HeroFloating,
   HeroFrame,
   HeroSplit,
-  HeroWordCycle,
-  useWordCycle,
   type FloatingCard,
   type FloatingCardPosition,
   type HeroCenteredProps,
   type HeroFloatingProps,
   type HeroSplitProps,
-  type HeroWordCycleProps,
+  type HeroWash,
 } from './hero/hero';
+export { HeroWordCycle, useWordCycle, type HeroWordCycleProps } from './hero/hero-word-cycle';
 export { LogoStrip, type Logo, type LogoStripProps } from './logo-strip/logo-strip';
 export {
   FeatureBento,

@@ -2,6 +2,8 @@ import { CaretUpDownIcon, CheckIcon, GlobeSimpleIcon } from '@phosphor-icons/rea
 import { Menu, MenuContent, MenuLinkItem, MenuTrigger, cn } from '@rectio/ui';
 import type { ReactNode } from 'react';
 
+import { mergeMessages } from '../lib/messages';
+
 export interface DocsVersion {
   /** Unique, such as "2.x". */
   value: string;
@@ -64,21 +66,38 @@ export interface VersionSwitcherProps {
   current: string;
   /** Accessible name prefix of the button. Default "Version". */
   label?: string;
+  /** The block's words; pass the keys you change. See `VERSION_SWITCHER_MESSAGES`. */
+  messages?: Partial<VersionSwitcherMessages>;
   className?: string;
 }
+
+export interface VersionSwitcherMessages {
+  /** Accessible name of the button, given the version shown: "Version: v2.4". */
+  button: (version: string) => string;
+}
+
+export const VERSION_SWITCHER_MESSAGES: VersionSwitcherMessages = {
+  button: (version) => `Version: ${version}`,
+};
 
 /** Which version of the docs is shown, and links to the others. */
 export function VersionSwitcher({
   versions,
   current,
-  label = 'Version',
+  label,
+  messages,
   className,
 }: VersionSwitcherProps) {
+  const m = mergeMessages(VERSION_SWITCHER_MESSAGES, messages);
   const active = versions.find((version) => version.value === current);
   return (
     <Menu>
       <MenuTrigger
-        aria-label={`${label}: ${active?.label ?? current}`}
+        aria-label={
+          label === undefined
+            ? m.button(active?.label ?? current)
+            : `${label}: ${active?.label ?? current}`
+        }
         data-slot="version-switcher"
         className={cn(TRIGGER, 'font-mono', className)}
       >
@@ -99,8 +118,19 @@ export interface LanguageSwitcherProps {
   label?: string;
   /** Show only the globe on narrow headers. Default false. */
   compact?: boolean;
+  /** The block's words; pass the keys you change. See `LANGUAGE_SWITCHER_MESSAGES`. */
+  messages?: Partial<LanguageSwitcherMessages>;
   className?: string;
 }
+
+export interface LanguageSwitcherMessages {
+  /** Accessible name of the button, given the language shown: "Language: Deutsch". */
+  button: (language: string) => string;
+}
+
+export const LANGUAGE_SWITCHER_MESSAGES: LanguageSwitcherMessages = {
+  button: (language) => `Language: ${language}`,
+};
 
 /**
  * The language of the docs. Each choice is written in its own language and marked with its
@@ -109,15 +139,21 @@ export interface LanguageSwitcherProps {
 export function LanguageSwitcher({
   languages,
   current,
-  label = 'Language',
+  label,
   compact = false,
+  messages,
   className,
 }: LanguageSwitcherProps) {
+  const m = mergeMessages(LANGUAGE_SWITCHER_MESSAGES, messages);
   const active = languages.find((language) => language.value === current);
   return (
     <Menu>
       <MenuTrigger
-        aria-label={`${label}: ${active?.label ?? current}`}
+        aria-label={
+          label === undefined
+            ? m.button(active?.label ?? current)
+            : `${label}: ${active?.label ?? current}`
+        }
         data-slot="language-switcher"
         className={cn(TRIGGER, className)}
       >

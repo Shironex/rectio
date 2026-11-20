@@ -1,3 +1,5 @@
+'use client';
+
 import { Button, usePlainMotion } from '@rectio/motion';
 import { cn } from '@rectio/ui';
 import { useLayoutEffect, useRef, type ComponentType, type ReactNode, type RefObject } from 'react';

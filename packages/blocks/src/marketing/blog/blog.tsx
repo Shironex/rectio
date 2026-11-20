@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from '@phosphor-icons/react';
+import { ArrowLeftIcon } from '@phosphor-icons/react/ssr';
 import { cn } from '@rectio/ui';
 import { useId, type ReactNode } from 'react';
 

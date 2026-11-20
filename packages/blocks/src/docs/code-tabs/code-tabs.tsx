@@ -1,6 +1,7 @@
 import { Tabs, TabsPanel, TabsTab, cn } from '@rectio/ui';
 import type { ReactNode } from 'react';
 
+import { mergeMessages } from '../lib/messages';
 import { CodeBlock } from '../code-block/code-block';
 import type { CodeLine } from '../code-block/code-block.logic';
 import { useDocsParts } from '../lib/parts';
@@ -38,8 +39,17 @@ export interface CodeTabsProps {
   label?: string | undefined;
   /** Something at the end of the tab row, such as a caption. */
   aside?: ReactNode;
+  /** The block's words; pass the keys you change. See `CODE_TABS_MESSAGES`. */
+  messages?: Partial<CodeTabsMessages> | undefined;
   className?: string | undefined;
 }
+
+export interface CodeTabsMessages {
+  /** Accessible name of the tab list. */
+  label: string;
+}
+
+export const CODE_TABS_MESSAGES: CodeTabsMessages = { label: 'Code examples' };
 
 /**
  * The same example in several forms (languages, frameworks, files) as tabs over one code frame.
@@ -49,10 +59,12 @@ export function CodeTabs({
   items,
   storageKey,
   defaultValue,
-  label = 'Code examples',
+  label,
   aside,
+  messages,
   className,
 }: CodeTabsProps) {
+  const m = mergeMessages(CODE_TABS_MESSAGES, messages);
   const { TabsList } = useDocsParts();
   const values = items.map((item) => item.value ?? item.label);
   const [value, setValue] = usePersistentChoice(
@@ -73,7 +85,7 @@ export function CodeTabs({
       )}
     >
       <div className="flex items-end gap-2 border-b border-line ps-2 pe-3">
-        <TabsList aria-label={label} className="min-w-0 flex-1 border-b-0">
+        <TabsList aria-label={label ?? m.label} className="min-w-0 flex-1 border-b-0">
           {items.map((item, index) => (
             <TabsTab key={values[index]} value={values[index]} className="font-mono">
               {item.icon}
@@ -118,8 +130,17 @@ export interface InstallTabsProps {
   /** Shared by every install block, so the reader picks their package manager once. */
   storageKey?: string | undefined;
   label?: string | undefined;
+  /** The block's words; pass the keys you change. See `INSTALL_TABS_MESSAGES`. */
+  messages?: Partial<InstallTabsMessages> | undefined;
   className?: string | undefined;
 }
+
+export interface InstallTabsMessages {
+  /** Accessible name of the tab list. */
+  label: string;
+}
+
+export const INSTALL_TABS_MESSAGES: InstallTabsMessages = { label: 'Package manager' };
 
 /**
  * Package manager tabs: one npm command shown as npm, pnpm, yarn and bun. The reader's pick is
@@ -129,12 +150,14 @@ export function InstallTabs({
   command,
   managers = PACKAGE_MANAGERS,
   storageKey = 'rectio-docs-package-manager',
-  label = 'Package manager',
+  label,
+  messages,
   className,
 }: InstallTabsProps) {
+  const m = mergeMessages(INSTALL_TABS_MESSAGES, messages);
   return (
     <CodeTabs
-      label={label}
+      label={label ?? m.label}
       storageKey={storageKey}
       className={className}
       items={managers.map((pm) => ({

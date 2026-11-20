@@ -35,7 +35,14 @@ Q10), last modified or size. Each row has a menu to open, rename in place, downl
 select rows to download or delete several at once. Deleting always asks first and warns when a
 folder takes its contents with it.
 
-Pass `storage` for a meter that warns from 80 percent. On narrow widths size, owner and date fold
+A folder longer than `pageSize` (50 by default) pages, with a pager and a line such as "1 to 50 of 120
+items" announced politely beside it; pass `Infinity` to turn paging off. The page resets when the
+folder or the sort changes. To page on the server, pass only the current page as `entries`, the
+folder's count as `totalEntries` and fetch in `onPageChange`. Use `canModify` to say which entries may
+be renamed or deleted; bulk delete covers only the entries it allows. After a delete, focus moves to
+the next row, else the previous one, else the heading or the empty state.
+
+Pass `storage` for a usage meter (a bar, with the amount in words) that warns from 80 percent. On narrow widths size, owner and date fold
 under the name.
 
 ## Props
@@ -50,6 +57,25 @@ under the name.
     },
     storage: { type: '{ used: number; total: number }', description: 'In bytes.' },
     onOpen: { type: '(entry: FileEntry) => void', description: 'Names become buttons.' },
+    canModify: {
+      type: '(entry: FileEntry) => boolean',
+      description: 'Gates rename and delete per entry. Leave it out to allow both.',
+    },
+    pageSize: {
+      type: 'number',
+      default: '50',
+      description: 'Rows per page. Infinity turns paging off.',
+    },
+    page: { type: 'number', description: 'The page shown, from 1, to control paging yourself.' },
+    onPageChange: {
+      type: '(page: number) => void',
+      description: 'Called with the page asked for.',
+    },
+    totalEntries: {
+      type: 'number',
+      description:
+        'Server paging: `entries` holds only the current page and this the folder count.',
+    },
     onNavigate: { type: '(folderId: string) => void', description: 'The path becomes buttons.' },
     onUpload: { type: '() => void' },
     onCreateFolder: { type: '() => void' },
@@ -72,13 +98,16 @@ under the name.
 ## Logic
 
 Sorting and checks are exported and tested on their own: `sortFileEntries`, `fileKindOf`,
-`fileNameError`, `fileEntriesSize` and `storageLevel`.
+`fileNameError`, `fileEntriesSize`, `storageLevel` and `filePage` (`filePage(total, pageSize, page)` gives
+the page, the page count and the first and last item).
 
 ## Accessibility
 
+- The storage meter reads as "X of Y" in words.
 - The path is a labelled navigation with the current folder marked.
 - Every checkbox, menu and rename field names the file it acts on; rename errors are tied to the
   field and Escape cancels.
+- The range of items shown is announced politely as the page changes.
 - The selection count is read out as it changes; file kinds are written for screen readers.
 - Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.
 - The motion variant moves only transform and opacity and renders the plain block under reduced motion.

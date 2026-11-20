@@ -23,6 +23,7 @@ import {
   FieldError,
   FieldLabel,
   Input,
+  KbdCombo,
   cn,
 } from '@rectio/ui';
 import {
@@ -32,7 +33,6 @@ import {
   useState,
   useSyncExternalStore,
   type KeyboardEvent,
-  type ReactNode,
   type SyntheticEvent,
 } from 'react';
 
@@ -42,7 +42,7 @@ import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
-import { focusFirstInvalid, useNow } from '../lib/focus';
+import { focusFirstInvalid, useNow, useRemovalFocus } from '../lib/focus';
 import { formatDateTime, isoDateTime, countLabel, relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import {
@@ -63,8 +63,13 @@ export interface CommentThreadProps {
   /** Posts a comment, or a reply when `parentId` is given. Called with trimmed, valid text. */
   onAdd: (body: string, parentId?: string) => void;
   onEdit?: (commentId: string, body: string) => void;
-  /** Asked to confirm first. */
+  /** Asked to confirm first. Offered on your own comments, and on everyone's with `canModerate`. */
   onDelete?: (commentId: string) => void;
+  /**
+   * From your session: the writer may delete anyone's comment (a moderator or an admin). Editing
+   * stays with each comment's author.
+   */
+  canModerate?: boolean;
   /** Adds Copy link to every comment's menu, so each comment has the same menu. */
   onCopyLink?: (commentId: string) => void;
   /** Set when the discussion is resolved: the composer gives way to a Reopen button. */
@@ -91,6 +96,7 @@ export function CommentThread({
   onAdd,
   onEdit,
   onDelete,
+  canModerate = false,
   onCopyLink,
   resolved,
   onResolve,
@@ -140,6 +146,11 @@ export function CommentThread({
   const [showResolved, setShowResolved] = useState(false);
   const listId = useId();
   const tree = commentTree(comments);
+  // Oldest first, replies under their comment: a deleted comment hands focus to the next one.
+  const removal = useRemovalFocus(
+    list,
+    tree.flatMap(({ comment, replies }) => [comment.id, ...replies.map((reply) => reply.id)]),
+  );
   const people = commentParticipants(comments);
 
   const renderComment = (comment: ThreadComment, threadId: string) => {
@@ -157,7 +168,7 @@ export function CommentThread({
             },
           ]
         : []),
-      ...(own && onDelete !== undefined
+      ...((own || canModerate) && onDelete !== undefined
         ? [
             {
               id: 'delete',
@@ -186,6 +197,7 @@ export function CommentThread({
     const when = relativeTime(comment.createdAt, now, locale);
     return (
       <article
+        data-row-id={comment.id}
         className="group/comment flex gap-3"
         aria-label={`${comment.author.name}, ${relativeTime(comment.createdAt, now, locale)}`}
       >
@@ -437,10 +449,12 @@ export function CommentThread({
 
       <DeleteCommentDialog
         comment={deleting}
+        finalFocus={removal.landing}
         onCancel={() => {
           setDeleting(null);
         }}
         onConfirm={(comment) => {
+          removal.prepare([comment.id]);
           onDelete?.(comment.id);
           setDeleting(null);
         }}
@@ -558,18 +572,8 @@ function Composer({
             </Button>
           )}
           <span className="ms-2 hidden items-center gap-1 text-sm text-fg-subtle pointer-fine:inline-flex">
-            <Keycap>
-              {modifier === 'Cmd' ? (
-                <>
-                  <span aria-hidden>⌘</span>
-                  <span className="sr-only">Command</span>
-                </>
-              ) : (
-                'Ctrl'
-              )}
-            </Keycap>
-            <Keycap>Enter</Keycap>
-            <span className="ms-1">to send</span>
+            <KbdCombo keys={[modifier === 'Cmd' ? '⌘' : 'Ctrl', 'Enter']} />
+            <span>to send</span>
           </span>
         </span>
         {onCancel !== undefined && (
@@ -588,21 +592,15 @@ function Composer({
   );
 }
 
-/** A key drawn as a small cap, from the sunken surface and a hairline. */
-function Keycap({ children }: { children: ReactNode }) {
-  return (
-    <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded-badge border border-line bg-surface-sunken px-1.5 font-sans text-xs text-fg-muted">
-      {children}
-    </kbd>
-  );
-}
-
 function DeleteCommentDialog({
   comment,
+  finalFocus,
   onCancel,
   onConfirm,
 }: {
   comment: ThreadComment | null;
+  /** Where focus goes as the dialog closes: the row's neighbour after a confirm. */
+  finalFocus: () => HTMLElement | true;
   onCancel: () => void;
   onConfirm: (comment: ThreadComment) => void;
 }) {
@@ -616,7 +614,7 @@ function DeleteCommentDialog({
         if (!open) onCancel();
       }}
     >
-      <DialogContent>
+      <DialogContent finalFocus={finalFocus}>
         <DialogHeader>
           <DialogTitle>Delete this comment?</DialogTitle>
           <DialogDescription>

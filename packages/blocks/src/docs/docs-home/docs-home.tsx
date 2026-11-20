@@ -2,6 +2,7 @@ import { ArrowRightIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 import type { ReactNode } from 'react';
 
+import { mergeMessages } from '../lib/messages';
 import { DocsBadge, badgeFrom } from '../lib/badge';
 import { CopyButton } from '../lib/copy-button';
 import type { DocsBadgeData } from '../lib/docs';
@@ -62,8 +63,25 @@ export interface DocsHeroProps {
   install?: string | undefined;
   /** The right column: a code sample, install tabs or a screenshot. */
   aside?: ReactNode;
+  /** The block's words; pass the keys you change. See `DOCS_HERO_MESSAGES`. */
+  messages?: Partial<DocsHeroMessages>;
   className?: string;
 }
+
+export interface DocsHeroMessages {
+  /** Names the hero's region. */
+  introduction: string;
+  /** Accessible name of the button that copies the install command. */
+  copyInstall: string;
+  /** Said once the command is on the clipboard. */
+  copied: string;
+}
+
+export const DOCS_HERO_MESSAGES: DocsHeroMessages = {
+  introduction: 'Introduction',
+  copyInstall: 'Copy install command',
+  copied: 'Copied',
+};
 
 /**
  * The top of a docs home page: what the product is, the two ways in, and something to copy or
@@ -77,13 +95,15 @@ export function DocsHero({
   secondary,
   install,
   aside,
+  messages,
   className,
 }: DocsHeroProps) {
+  const m = mergeMessages(DOCS_HERO_MESSAGES, messages);
   const { Reveal } = useDocsParts();
   return (
     <section
       data-slot="docs-hero"
-      aria-label="Introduction"
+      aria-label={m.introduction}
       className={cn('@container border-b border-line pt-10 pb-12 sm:pt-14 sm:pb-16', className)}
     >
       <div
@@ -114,7 +134,7 @@ export function DocsHero({
                 $
               </span>
               <code className="min-w-0 truncate py-2 font-mono">{install}</code>
-              <CopyButton value={install} label="Copy install command" />
+              <CopyButton value={install} label={m.copyInstall} copiedLabel={m.copied} />
             </div>
           )}
         </Reveal>

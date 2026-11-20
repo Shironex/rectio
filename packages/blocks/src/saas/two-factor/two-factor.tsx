@@ -1,6 +1,15 @@
-import { OTPField } from '@base-ui/react/otp-field';
-import { Checkbox, Field, FieldDescription, FieldError, FieldLabel, Input, cn } from '@rectio/ui';
-import { Fragment, useEffect, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
+import {
+  Checkbox,
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  Input,
+  OtpInput,
+  cn,
+  type OtpInputProps,
+} from '@rectio/ui';
+import { useEffect, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { AuthFrame, AuthLink, type LinkTarget } from '../lib/auth';
@@ -17,13 +26,17 @@ import {
   type TwoFactorMethod,
 } from './two-factor.logic';
 
+/** The first slot of the code field, where typing and pasting start. */
+const firstSlotOf = (root: HTMLElement | null) => root?.querySelector('input') ?? null;
+
 export interface TwoFactorProps {
   /** Called with a complete code; `remember` when the person trusts this device. */
   onVerify: (code: string, options: { remember: boolean }) => void;
   method?: TwoFactorMethod;
   /** The phone number or email the code went to; shown masked. */
   destination?: string | undefined;
-  length?: number;
+  /** Digits in the code, from 4 to 8. */
+  length?: OtpInputProps['length'];
   /** Offers "Send a new code" for text and email codes, after the cooldown. */
   onResend?: () => void;
   /** When the last code was sent, for the resend countdown. */
@@ -99,12 +112,17 @@ export function TwoFactor({
   const [tried, setTried] = useState(false);
   const canResend = onResend !== undefined && method !== 'app';
   const hasError = error !== undefined && error !== null && error !== false;
-  const firstSlot = useRef<HTMLInputElement>(null);
+  const slots = useRef<HTMLDivElement>(null);
+  // Opt in, read once: an embedded block must not take focus from the page.
+  const focusOnMount = useRef(autoFocus);
+  useEffect(() => {
+    if (focusOnMount.current) firstSlotOf(slots.current)?.focus();
+  }, []);
   // A refused code sends focus back to the start, ready for the next attempt. Only on the change
   // to refused: a parent re-render with the same error must not pull focus again.
   const hadError = useRef(false);
   useEffect(() => {
-    if (hasError && !hadError.current) firstSlot.current?.focus();
+    if (hasError && !hadError.current) firstSlotOf(slots.current)?.focus();
     hadError.current = hasError;
   }, [hasError]);
 
@@ -161,47 +179,21 @@ export function TwoFactor({
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
         <Field invalid={hasError || incomplete}>
           <FieldLabel>Verification code</FieldLabel>
-          <OTPField.Root
+          <OtpInput
+            ref={slots}
             length={length}
+            groups={[half, length - half]}
             value={code}
             onValueChange={(value) => {
               setCode(value);
               setTried(false);
             }}
-            onValueComplete={verify}
+            onComplete={verify}
+            slotLabel={(position, total) => `Digit ${String(position)} of ${String(total)}`}
             // Read only, not disabled, while checking: disabling drops focus to the page.
             readOnly={pending}
             aria-busy={pending}
-            className="group/otp flex items-center gap-1.5 @sm:gap-2"
-          >
-            {Array.from({ length }, (_, index) => (
-              <Fragment key={index}>
-                {index === half && (
-                  <OTPField.Separator className="mx-0.5 h-0.5 w-3 shrink-0 rounded-full bg-fg-subtle @sm:mx-1" />
-                )}
-                <OTPField.Input
-                  // Opt in: an embedded block must not take focus from the page.
-                  autoFocus={autoFocus && index === 0}
-                  ref={index === 0 ? firstSlot : undefined}
-                  aria-label={
-                    index === 0 ? undefined : `Digit ${String(index + 1)} of ${String(length)}`
-                  }
-                  className={cn(
-                    'aspect-7/8 max-h-14 w-full min-w-0 flex-1 rounded-(--rx-field-radius) border border-(--rx-field-border) bg-(--rx-field-background)',
-                    'text-center font-numeric text-2xl font-medium text-fg tabular-nums caret-accent',
-                    'transition-[border-color,outline-color] duration-fast ease-standard hover:border-fg-subtle',
-                    // The focus ring stands off the slot, so it reads apart from the border.
-                    'outline-0 outline-transparent focus:border-accent focus:outline-2 focus:outline-offset-3 focus:outline-focus',
-                    // A refused code marks every slot, the focused one included: no slot reads as valid.
-                    // Softened outlines: the message under the slots carries the error, six red
-                    // boxes would read as broken.
-                    'group-data-invalid/otp:border-negative/60 group-data-invalid/otp:focus:border-negative/60 group-data-invalid/otp:focus:outline-negative',
-                    'group-data-readonly/otp:text-fg-muted',
-                  )}
-                />
-              </Fragment>
-            ))}
-          </OTPField.Root>
+          />
           {/* The error sits right under the slots; the paste hint follows it. */}
           {hasError ? (
             <FieldError>{error}</FieldError>

@@ -55,6 +55,11 @@ yours to write: the legal page templates are a starting point and are not legal 
 
 ## Usage
 
+On phones (below the `sm` breakpoint) the banner is a short strip: the title, a one-line
+`shortDescription` and one row with Manage, Reject all and Accept all, reject and accept at equal
+weight. The full description shows from `sm` up. The button that opens the per-category dialog is
+labelled "Manage cookies" (it reads "Manage" on a phone, with the full name as its accessible name).
+
 Keep the saved decision in your own storage (`loadConsent` and `saveConsent` read and write
 `localStorage` safely) and pass it back as `consent`. While it covers `version`, the banner stays
 away. Open `CookiePreferences` from a "Cookie settings" link in the footer so visitors can change
@@ -85,7 +90,12 @@ their mind.
     policyHref: { type: 'string', description: 'Your cookie policy, linked from the banner.' },
     policyLabel: { type: 'string', default: "'Cookie policy'" },
     title: { type: 'string', default: "'We use cookies'" },
-    description: { type: 'ReactNode' },
+    description: { type: 'ReactNode', description: 'Shown from the sm breakpoint up.' },
+    shortDescription: {
+      type: 'ReactNode',
+      default: "'Optional cookies run only if you allow them.'",
+      description: 'The one line a phone shows instead of the description.',
+    },
     className: { type: 'string' },
   }}
 />

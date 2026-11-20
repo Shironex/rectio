@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Dialog,
   DialogBody,
@@ -39,6 +41,11 @@ export interface CookieConsentProps extends ConsentCopy {
   consent: ConsentRecord | null | undefined;
   title?: string;
   description?: ReactNode;
+  /**
+   * The line a phone shows in place of `description`, so the banner stays a short strip over the
+   * page; the full words are one press away under Manage.
+   */
+  shortDescription?: ReactNode;
   className?: string;
 }
 
@@ -174,6 +181,7 @@ export function CookieConsent({
   consent,
   title = 'We use cookies',
   description = 'Necessary cookies keep the site working. With your permission we also use analytics and marketing cookies to improve it.',
+  shortDescription = 'Optional cookies run only if you allow them.',
   className,
   ...copy
 }: CookieConsentProps) {
@@ -188,8 +196,10 @@ export function CookieConsent({
           aria-labelledby={titleId}
           data-slot="cookie-consent"
           className={cn(
-            'fixed inset-x-3 bottom-3 z-40 flex flex-col gap-4 rounded-panel border border-line bg-surface-overlay p-5 text-fg shadow-overlay',
-            'sm:inset-x-auto sm:start-6 sm:bottom-6 sm:max-w-md',
+            // Phones: a short strip, one line of words over one row of buttons, so the page stays
+            // in view; the full choice waits behind Manage.
+            'fixed inset-x-2 bottom-2 z-40 flex flex-col gap-3 rounded-panel border border-line bg-surface-overlay p-4 text-fg shadow-overlay',
+            'sm:inset-x-auto sm:start-6 sm:bottom-6 sm:max-w-md sm:gap-4 sm:p-5',
             // Wide screens: one slim bar along the bottom, clear of the content above the fold.
             'lg:end-6 lg:max-w-none lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:py-4',
             'transition-[opacity,translate] duration-slow ease-enter',
@@ -197,12 +207,13 @@ export function CookieConsent({
             className,
           )}
         >
-          <div className="flex max-w-prose flex-col gap-1.5">
-            <h2 id={titleId} className="text-base font-strong text-fg">
+          <div className="flex max-w-prose flex-col gap-1 sm:gap-1.5">
+            <h2 id={titleId} className="text-sm font-strong text-fg sm:text-base">
               {title}
             </h2>
             <p className="text-sm text-pretty text-fg-muted">
-              {description}
+              <span className="sm:hidden">{shortDescription}</span>
+              <span className="max-sm:hidden">{description}</span>
               {copy.policyHref !== undefined && (
                 <>
                   {' '}
@@ -219,9 +230,10 @@ export function CookieConsent({
               )}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-2 lg:flex lg:shrink-0">
+          <div className="flex gap-2 sm:grid sm:grid-cols-2 lg:flex lg:shrink-0">
             <Button
               variant="secondary"
+              className="max-sm:flex-1"
               onClick={() => {
                 copy.onSave(rejectAll(copy.categories, copy.version));
               }}
@@ -230,6 +242,7 @@ export function CookieConsent({
             </Button>
             <Button
               variant="secondary"
+              className="max-sm:flex-1"
               onClick={() => {
                 copy.onSave(acceptAll(copy.categories, copy.version));
               }}
@@ -237,13 +250,17 @@ export function CookieConsent({
               Accept all
             </Button>
             <Button
-              variant="ghost"
-              className="col-span-2 lg:order-first"
+              variant="secondary"
+              // First on a phone and on wide screens, a full row under the two choices between.
+              className="max-sm:order-first max-sm:px-3 sm:col-span-2 lg:order-first"
+              // A phone shows only "Manage"; every width reads the whole name.
+              aria-label="Manage cookies"
               onClick={() => {
                 setCustomising(true);
               }}
             >
-              Choose cookies
+              <span className="sm:hidden">Manage</span>
+              <span className="max-sm:hidden">Manage cookies</span>
             </Button>
           </div>
         </section>

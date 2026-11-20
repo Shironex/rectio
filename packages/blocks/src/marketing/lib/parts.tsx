@@ -1,5 +1,6 @@
-import { Button } from '@rectio/ui';
-import { createContext, use, type ElementType, type ReactNode } from 'react';
+import { Button } from './client-button';
+import * as React from 'react';
+import type { ElementType, ReactNode } from 'react';
 
 /**
  * The pieces of a marketing block that move in the motion variant. A block draws these instead of
@@ -64,7 +65,13 @@ export const PLAIN_MARKETING_PARTS: MarketingParts = {
   Swap: PlainSwap,
 };
 
-const PartsContext = createContext<MarketingParts>(PLAIN_MARKETING_PARTS);
+// A server component has no context (React's server build ships no createContext): a block
+// rendered there draws the plain parts, and only a client tree can swap in the motion ones. The
+// namespace read keeps this module importable from both, so static blocks stay server components.
+const PartsContext =
+  typeof React.createContext === 'function'
+    ? React.createContext<MarketingParts>(PLAIN_MARKETING_PARTS)
+    : undefined;
 
 export function MarketingPartsProvider({
   parts,
@@ -73,9 +80,10 @@ export function MarketingPartsProvider({
   parts: MarketingParts;
   children: ReactNode;
 }) {
+  if (PartsContext === undefined) return children;
   return <PartsContext value={parts}>{children}</PartsContext>;
 }
 
 export function useMarketingParts(): MarketingParts {
-  return use(PartsContext);
+  return PartsContext === undefined ? PLAIN_MARKETING_PARTS : React.use(PartsContext);
 }

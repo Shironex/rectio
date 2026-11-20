@@ -75,6 +75,19 @@ live. Four layouts share the same copy props.
 Pick the layout by component: `HeroCentered`, `HeroSplit`, `HeroFloating` or `HeroWordCycle`. Wrap
 words in `Em` to stress them. The `visual` is any node, ideally a real block in its real state.
 
+The wash is `accent` on `HeroCentered`, `HeroFloating` and `HeroWordCycle`, and `none` on `HeroSplit`.
+To replace it with your own layer, set `wash="none"` and pass a `backdrop`. Draw it with tokens so it
+follows both themes:
+
+```tsx
+<HeroCentered
+  wash="none"
+  backdrop={<div className="absolute inset-0 bg-surface-sunken" />}
+  title="Close the books faster"
+  description="Every ledger, one place."
+/>
+```
+
 ## Props
 
 All four take the shared copy props:
@@ -98,6 +111,16 @@ All four take the shared copy props:
     visual: {
       type: 'ReactNode',
       description: 'Your product, rendered live. Required for HeroSplit and HeroFloating.',
+    },
+    wash: {
+      type: "'accent' | 'neutral' | 'none'",
+      default: "'accent' (Split: 'none')",
+      description: 'The tinted wash behind the hero.',
+    },
+    backdrop: {
+      type: 'ReactNode',
+      description:
+        'Your own layer behind the content, such as a pattern, image or brand shape. It is hidden from assistive technology.',
     },
     className: { type: 'string' },
   }}
@@ -143,6 +166,7 @@ And each layout adds its own:
 ## Accessibility
 
 - Each hero is a section named by its headline.
+- The backdrop sits in an `aria-hidden` layer behind the content.
 - The cycling headline reserves the widest word's width so nothing moves, holds while hovered, settles after a few rounds and reads as one stable sentence to assistive technology.
 - Under reduced motion the cycle holds still and the motion variants render the plain block.
 - On narrow screens the floating cards line up under the visual instead of covering it, and a phone shows two.

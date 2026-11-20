@@ -35,6 +35,8 @@ import {
   FieldError,
   FieldLabel,
   Input,
+  Meter,
+  Pagination,
   Table,
   TableBody,
   TableCaption,
@@ -52,13 +54,21 @@ import { ChoiceSelect, type Choice } from '../../lib/choice-select';
 import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
-import { UsageMeter } from '../lib/meter';
-import { useNow } from '../lib/focus';
-import { formatBytes, formatDateTime, isoDateTime, countLabel, relativeTime } from '../lib/saas';
-import { focusRing } from '../lib/styles';
+import { useNow, useRemovalFocus } from '../lib/focus';
 import {
+  countLabel,
+  formatBytes,
+  formatDateTime,
+  isoDateTime,
+  numberFormat,
+  relativeTime,
+} from '../lib/saas';
+import { USAGE_NOTE, USAGE_TONE, focusRing } from '../lib/styles';
+import {
+  FILE_PAGE_SIZE,
   fileEntriesSize,
   fileKindOf,
+  filePage,
   fileNameError,
   sortFileEntries,
   storageLevel,
@@ -89,8 +99,27 @@ export interface FileManagerProps {
   onDownload?: (entryIds: string[]) => void;
   /** Asked to confirm first. */
   onDelete?: (entryIds: string[]) => void;
+  /**
+   * From your session: whether the signed-in user may rename and delete this entry, such as only
+   * their own files unless they are an admin. Leave it out and every entry may be changed.
+   */
+  canModify?: (entry: FileEntry) => boolean;
   /** Shows an Upgrade link under the storage meter. */
   onUpgrade?: () => void;
+  /**
+   * Rows per page, 50 by default: a long folder pages instead of rendering every row. Pass
+   * `Infinity` to show the whole folder at once.
+   */
+  pageSize?: number;
+  /** The page shown, from 1, to control paging yourself; leave it out and the block keeps it. */
+  page?: number;
+  /** Called with the page asked for, from 1: fetch it when you page on the server. */
+  onPageChange?: (page: number) => void;
+  /**
+   * Every entry in the folder, when you page on the server: `entries` is then only the page shown
+   * and the block does not slice it. Sorting applies within the page you pass.
+   */
+  totalEntries?: number;
   /** Entries selected on first render, such as the files a previous step picked. */
   defaultSelectedIds?: readonly string[];
   /** The moment "modified" is measured from. */
@@ -172,8 +201,13 @@ export function FileManager({
   onRename,
   onDownload,
   onDelete,
+  canModify,
   onUpgrade,
   defaultSelectedIds,
+  pageSize = FILE_PAGE_SIZE,
+  page: requestedPage,
+  onPageChange,
+  totalEntries,
   now: requestedNow,
   locale: requestedLocale,
   title,
@@ -192,7 +226,23 @@ export function FileManager({
   const [dropping, setDropping] = useState(false);
 
   const current = path.at(-1);
-  const sorted = sortFileEntries(entries, sort.key, sort.ascending, locale);
+  const sortedAll = sortFileEntries(entries, sort.key, sort.ascending, locale);
+  // Paging: the block slices the folder unless your server already sent just the page.
+  const server = totalEntries !== undefined;
+  const folderId = current?.id;
+  const [ownPage, setOwnPage] = useState({ folderId, page: 1 });
+  // Another folder starts on its first page.
+  if (ownPage.folderId !== folderId) setOwnPage({ folderId, page: 1 });
+  const paging = filePage(
+    server ? totalEntries : sortedAll.length,
+    pageSize,
+    requestedPage ?? (ownPage.folderId === folderId ? ownPage.page : 1),
+  );
+  const goToPage = (next: number) => {
+    setOwnPage({ folderId, page: next });
+    onPageChange?.(next);
+  };
+  const sorted = server ? sortedAll : sortedAll.slice(paging.first - 1, paging.last);
   // In-place swaps hand focus back: a closed rename to the row's menu, a delete to the table.
   const tableArea = useRef<HTMLDivElement>(null);
   const returnFocus = useRef<string | null>(null);
@@ -208,15 +258,25 @@ export function FileManager({
     returnFocus.current = null;
     tableArea.current?.querySelector<HTMLElement>(selector)?.focus();
   }, [renaming]);
+  // A delete hands focus to the next row's menu, else the previous one, else the empty folder.
+  const removal = useRemovalFocus(
+    tableArea,
+    sorted.map((entry) => entry.id),
+  );
   // Selection never outlives the entries it points at.
   const chosen = sorted.filter((entry) => selected.has(entry.id));
   const all = sorted.length > 0 && chosen.length === sorted.length;
+  const modifiable = (entry: FileEntry) => canModify?.(entry) ?? true;
+  // Only what the signed-in user may change goes into a bulk delete.
+  const deletable = chosen.filter(modifiable);
   const folders = entries.filter((entry) => entry.type === 'folder').length;
   const byId = new Map(entries.map((entry) => [entry.id, entry]));
   const selectable = onDelete !== undefined || onDownload !== undefined;
 
   // A new key starts in its natural order (names A to Z, newest and largest first); the same key flips.
   const sortBy = (key: FileSortKey) => {
+    // A new order starts again from the first page.
+    if (paging.page !== 1) goToPage(1);
     setSort((was) =>
       was.key === key ? { key, ascending: !was.ascending } : { key, ascending: key === 'name' },
     );
@@ -247,7 +307,7 @@ export function FileManager({
             },
           },
         ]),
-    ...(onRename === undefined
+    ...(onRename === undefined || !modifiable(entry)
       ? []
       : [
           {
@@ -271,7 +331,7 @@ export function FileManager({
             },
           },
         ]),
-    ...(onDelete === undefined
+    ...(onDelete === undefined || !modifiable(entry)
       ? []
       : [
           {
@@ -287,7 +347,7 @@ export function FileManager({
   ];
 
   const summary = [
-    countLabel(entries.length, 'item'),
+    countLabel(totalEntries ?? entries.length, 'item'),
     folders > 0 ? countLabel(folders, 'folder') : null,
     fileEntriesSize(entries) > 0 ? formatBytes(fileEntriesSize(entries), locale) : null,
   ]
@@ -473,16 +533,16 @@ export function FileManager({
                   Download
                 </Button>
               )}
-              {chosen.length > 0 && onDelete !== undefined && (
+              {deletable.length > 0 && onDelete !== undefined && (
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={() => {
-                    setDeleting(chosen.map((e) => e.id));
+                    setDeleting(deletable.map((e) => e.id));
                   }}
                 >
                   <TrashIcon aria-hidden weight="bold" className="size-3.5" />
-                  Delete {chosen.length}
+                  Delete {deletable.length}
                 </Button>
               )}
               {chosen.length === 0 && (
@@ -551,7 +611,11 @@ export function FileManager({
                     const KindIcon = KIND_ICONS[kind];
                     const actions = rowActions(entry);
                     return (
-                      <Row key={entry.id} data-selected={selected.has(entry.id) || undefined}>
+                      <Row
+                        key={entry.id}
+                        data-row-id={entry.id}
+                        data-selected={selected.has(entry.id) || undefined}
+                      >
                         {selectable && (
                           <TableCell className="w-0 pe-0">
                             <span className="flex items-center">
@@ -672,17 +736,43 @@ export function FileManager({
               </TableBody>
             </Table>
           </div>
+          {paging.pageCount > 1 && (
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+              <p aria-live="polite" className="text-sm text-fg-muted numeric">
+                {numberFormat(locale).format(paging.first)} to{' '}
+                {numberFormat(locale).format(paging.last)} of{' '}
+                {countLabel(server ? totalEntries : sortedAll.length, 'item')}
+              </p>
+              <Pagination
+                label="Pages of this folder"
+                page={paging.page}
+                pageCount={paging.pageCount}
+                onPageChange={goToPage}
+              />
+            </div>
+          )}
           {storage !== undefined && (
-            <UsageMeter
-              className="w-full"
+            <Meter
+              variant="bar"
+              // A rule and room above, so the meter does not read as part of the pager.
+              className="w-full border-t border-line pt-4"
               label="Storage"
-              value={storage.used}
+              value={Math.min(Math.max(storage.used, 0), storage.total)}
               max={storage.total}
-              valueText={`${formatBytes(storage.used, locale)} of ${formatBytes(storage.total, locale)}`}
-              level={storageLevel(storage)}
-              note={
-                <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                  <span>{storageNote(storage, locale)}</span>
+              tone={USAGE_TONE[storageLevel(storage)]}
+              getAriaValueText={() =>
+                `${formatBytes(storage.used, locale)} of ${formatBytes(storage.total, locale)}`
+              }
+              description={
+                <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm">
+                  <span className="flex flex-wrap items-baseline gap-x-2">
+                    <span className="numeric">
+                      {formatBytes(storage.used, locale)} of {formatBytes(storage.total, locale)}
+                    </span>
+                    <span className={USAGE_NOTE[storageLevel(storage)]}>
+                      {storageNote(storage, locale)}
+                    </span>
+                  </span>
                   {onUpgrade !== undefined &&
                     // A quiet link while there is room; a real button once space runs short.
                     (storageLevel(storage) === 'ok' ? (
@@ -709,12 +799,13 @@ export function FileManager({
       )}
 
       <DeleteEntriesDialog
-        finalFocus={() => tableArea.current ?? true}
+        finalFocus={removal.landing}
         entries={deleting === null ? [] : deleting.flatMap((id) => byId.get(id) ?? [])}
         onCancel={() => {
           setDeleting(null);
         }}
         onConfirm={(ids) => {
+          removal.prepare(ids);
           onDelete?.(ids);
           setSelected((was) => new Set([...was].filter((id) => !ids.includes(id))));
           setDeleting(null);

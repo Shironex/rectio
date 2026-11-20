@@ -2,6 +2,7 @@ import { CheckCircleIcon, ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/r
 import { Field, FieldError, FieldLabel, Textarea, cn } from '@rectio/ui';
 import { useEffect, useId, useReducer, useRef } from 'react';
 
+import { mergeMessages } from '../lib/messages';
 import { useDocsParts } from '../lib/parts';
 import { COMMENT_LIMIT, feedbackReducer, type DocsFeedbackValue } from './feedback.logic';
 
@@ -17,8 +18,41 @@ export interface DocsFeedbackProps {
   /** Prompts above the comment field after a yes and after a no. */
   prompts?: { helpful?: string; unhelpful?: string };
   thanks?: string;
+  /** The block's words; pass the keys you change. See `DOCS_FEEDBACK_MESSAGES`. */
+  messages?: Partial<DocsFeedbackMessages>;
   className?: string;
 }
+
+export interface DocsFeedbackMessages {
+  /** Names the feedback region. */
+  label: string;
+  question: string;
+  yes: string;
+  no: string;
+  /** Above the comment field after a yes. */
+  helpfulPrompt: string;
+  /** Above the comment field after a no. */
+  unhelpfulPrompt: string;
+  send: string;
+  cancel: string;
+  /** Shown when sending failed; the comment is kept. */
+  error: string;
+  /** Said once the feedback is sent. */
+  thanks: string;
+}
+
+export const DOCS_FEEDBACK_MESSAGES: DocsFeedbackMessages = {
+  label: 'Page feedback',
+  question: 'Was this page helpful?',
+  yes: 'Yes',
+  no: 'No',
+  helpfulPrompt: 'What worked well? (optional)',
+  unhelpfulPrompt: 'What was missing or wrong? (optional)',
+  send: 'Send feedback',
+  cancel: 'Cancel',
+  error: 'Your feedback was not sent. Your comment is still here: try again.',
+  thanks: 'Thanks for telling us. It helps us fix the pages that need it.',
+};
 
 /**
  * Was this page helpful? A yes or no, then an optional comment, then thanks. The vote is a pressed
@@ -27,11 +61,13 @@ export interface DocsFeedbackProps {
 export function DocsFeedback({
   onSubmit,
   onVote,
-  question = 'Was this page helpful?',
+  question,
   prompts,
-  thanks = 'Thanks for telling us. It helps us fix the pages that need it.',
+  thanks,
+  messages,
   className,
 }: DocsFeedbackProps) {
+  const m = mergeMessages(DOCS_FEEDBACK_MESSAGES, messages);
   const { Button, Swap } = useDocsParts();
   const [state, dispatch] = useReducer(feedbackReducer, { step: 'ask' });
   const field = useRef<HTMLTextAreaElement>(null);
@@ -82,14 +118,14 @@ export function DocsFeedback({
         )}
       >
         <Icon aria-hidden weight={pressed ? 'fill' : 'bold'} className="size-4" />
-        {value ? 'Yes' : 'No'}
+        {value ? m.yes : m.no}
       </button>
     );
   };
 
   return (
     <section
-      aria-label="Page feedback"
+      aria-label={m.label}
       data-slot="docs-feedback"
       className={cn('flex flex-col gap-3', className)}
     >
@@ -101,13 +137,13 @@ export function DocsFeedback({
               weight="fill"
               className="mt-px size-4 shrink-0 text-positive-strong"
             />
-            {thanks}
+            {thanks ?? m.thanks}
           </p>
         ) : (
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <p id={questionId} className="text-sm font-medium text-fg">
-                {question}
+                {question ?? m.question}
               </p>
               <div role="group" aria-labelledby={questionId} className="flex gap-2">
                 {voteButton(true)}
@@ -125,8 +161,8 @@ export function DocsFeedback({
                 <Field invalid={state.step === 'error'}>
                   <FieldLabel>
                     {state.helpful
-                      ? (prompts?.helpful ?? 'What worked well? (optional)')
-                      : (prompts?.unhelpful ?? 'What was missing or wrong? (optional)')}
+                      ? (prompts?.helpful ?? m.helpfulPrompt)
+                      : (prompts?.unhelpful ?? m.unhelpfulPrompt)}
                   </FieldLabel>
                   <Textarea
                     ref={field}
@@ -140,15 +176,11 @@ export function DocsFeedback({
                     maxRows={6}
                     disabled={state.step === 'sending'}
                   />
-                  {state.step === 'error' && (
-                    <FieldError match>
-                      Your feedback was not sent. Your comment is still here: try again.
-                    </FieldError>
-                  )}
+                  {state.step === 'error' && <FieldError match>{m.error}</FieldError>}
                 </Field>
                 <div className="flex gap-2">
                   <Button type="submit" size="sm" loading={state.step === 'sending'}>
-                    Send feedback
+                    {m.send}
                   </Button>
                   <Button
                     type="button"
@@ -159,7 +191,7 @@ export function DocsFeedback({
                       dispatch({ type: 'reset' });
                     }}
                   >
-                    Cancel
+                    {m.cancel}
                   </Button>
                 </div>
               </form>

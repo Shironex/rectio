@@ -1,3 +1,5 @@
+'use client';
+
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 import { useState, type ReactNode } from 'react';

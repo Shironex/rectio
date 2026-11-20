@@ -1,14 +1,15 @@
+'use client';
+
 import { motioned } from '../lib/motion-parts';
 import {
   HeroCentered as PlainHeroCentered,
   HeroSplit as PlainHeroSplit,
   HeroFloating as PlainHeroFloating,
-  HeroWordCycle as PlainHeroWordCycle,
   type HeroCenteredProps,
   type HeroSplitProps,
   type HeroFloatingProps,
-  type HeroWordCycleProps,
 } from './hero';
+import { HeroWordCycle as PlainHeroWordCycle, type HeroWordCycleProps } from './hero-word-cycle';
 
 export type { HeroCenteredProps, HeroSplitProps, HeroFloatingProps, HeroWordCycleProps };
 
