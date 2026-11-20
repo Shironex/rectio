@@ -2,7 +2,7 @@
   "name": "@rectio/cli",
   "version": "0.0.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "description": "The rectio CLI: init a project, add components, blocks and themes from the rectio registry, diff them against upstream.",
   "engines": {

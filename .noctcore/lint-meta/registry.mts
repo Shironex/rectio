@@ -6,7 +6,7 @@ import {
 } from '@noctcore/harness/rules';
 
 import { uiNoHardcodedDesignValues } from './rules/design-values.mts';
-import { licenseUndecided } from './rules/license-undecided.mts';
+import { licenseMit } from './rules/license-mit.mts';
 
 export const META_RULES: IMetaRule[] = [
   createLockfileRegistryResolutionsRule(),
@@ -15,5 +15,5 @@ export const META_RULES: IMetaRule[] = [
   }),
   createOnlyBuiltDependenciesHaveScriptsRule(),
   uiNoHardcodedDesignValues,
-  licenseUndecided,
+  licenseMit,
 ];

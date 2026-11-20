@@ -2,7 +2,7 @@
   "name": "@rectio/design-rules",
   "version": "0.0.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "exports": {
     ".": "./src/detect.js",

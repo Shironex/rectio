@@ -2,7 +2,7 @@
   "name": "@rectio/site",
   "version": "0.0.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "description": "The rectio docs site and landing page: Fumadocs on Next.js, built as static files.",
   "scripts": {

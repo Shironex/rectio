@@ -2,7 +2,7 @@
   "name": "@rectio/template-product-launch",
   "version": "0.0.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "description": "Product launch: a single long launch and waitlist page for a fictional research tool, built from the rectio marketing blocks.",
   "scripts": {

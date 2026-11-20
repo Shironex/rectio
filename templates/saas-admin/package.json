@@ -2,7 +2,7 @@
   "name": "@rectio/template-saas-admin",
   "version": "0.1.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "description": "SaaS admin template: the back office of a help desk product, with customers, a ticket board, team, billing, API keys, notifications, files and settings.",
   "scripts": {

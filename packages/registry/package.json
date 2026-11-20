@@ -2,7 +2,7 @@
   "name": "@rectio/registry",
   "version": "0.0.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "description": "The rectio registry: item schema, the build that turns @rectio/ui and @rectio/tokens into static registry JSON, and a local dev server.",
   "sideEffects": false,

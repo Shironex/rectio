@@ -2,7 +2,7 @@
   "name": "@rectio/blocks",
   "version": "0.0.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "description": "rectio pro blocks composed from @rectio/ui, with motion variants on @rectio/motion: finance (invoices, ledger, cash flow, KPIs, approvals, aging, budget) and marketing (header, heroes, features, stats, testimonials, FAQ, CTA, newsletter, team, contact, blog, footer, legal pages, cookie consent, announcements) and docs (layout, navigation, table of contents, MDX components, code blocks, API reference, search, feedback, changelog).",
   "sideEffects": false,

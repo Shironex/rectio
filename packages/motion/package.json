@@ -2,7 +2,7 @@
   "name": "@rectio/motion",
   "version": "0.0.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "description": "rectio motion add-on: motioned variants of @rectio/ui components, mixable with the plain ones.",
   "sideEffects": false,

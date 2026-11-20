@@ -2,7 +2,7 @@
   "name": "@rectio/template-saas-landing",
   "version": "0.0.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "description": "SaaS landing: a multi-page marketing site for a fictional team scheduling product, built from the rectio marketing blocks.",
   "scripts": {
