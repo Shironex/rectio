@@ -72,7 +72,8 @@ const COMMANDS: CommandGroup[] = [
   },
 ];
 
-const WIDTHS: SkeletonWidth[] = ['full', '3/4', '1/2', '1/3', '42%', 'xl', 'md'];
+/** Fractions and a percentage of the track, then fixed steps that keep their size on any width. */
+const WIDTHS: SkeletonWidth[] = ['full', '3/4', '1/2', '42%', '1/3', 'xl', 'md'];
 
 function Section({ title, note, children }: { title: string; note: string; children: ReactNode }) {
   return (
