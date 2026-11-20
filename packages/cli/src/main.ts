@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -10,6 +9,7 @@ import { runList, runSearch } from './commands/list.ts';
 import { runMcp } from './commands/mcp.ts';
 import { runUpdate } from './commands/update.ts';
 import { CliError, type CliContext } from './core/context.ts';
+import { CLI_VERSION } from './version.ts';
 
 const HELP = `rectio: finance and back-office components, copied into your project
 
@@ -59,13 +59,6 @@ const OPTIONS = {
   version: { type: 'boolean', short: 'v' },
 } as const;
 
-function version(): string {
-  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
-    version: string;
-  };
-  return pkg.version;
-}
-
 /** Runs one CLI invocation and returns the exit code. Never calls process.exit itself. */
 export async function main(argv: readonly string[], base: CliContext): Promise<number> {
   let parsed;
@@ -78,7 +71,7 @@ export async function main(argv: readonly string[], base: CliContext): Promise<n
   const { values, positionals } = parsed;
   const [command, ...rest] = positionals;
   if (values.version === true) {
-    base.log(version());
+    base.log(CLI_VERSION);
     return 0;
   }
   if (values.help === true || command === undefined) {

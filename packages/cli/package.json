@@ -11,28 +11,23 @@
   "bin": {
     "rectio": "./dist/bin.js"
   },
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./dist/index.js"
-    }
-  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsdown",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
-    "@rectio/registry": "workspace:*",
     "diff": "^9.0.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@rectio/registry": "workspace:*",
     "@types/node": "^22.20.5",
+    "tsdown": "^0.23.7",
     "vitest": "^5.1.0"
   }
 }

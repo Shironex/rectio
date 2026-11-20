@@ -1,17 +1,11 @@
-import { readFileSync } from 'node:fs';
-
 import { readConfig, registryUrl } from '../core/config.ts';
 import type { CliContext } from '../core/context.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
 import { createMcpServer, serveStdio } from '../mcp/server.ts';
+import { CLI_VERSION } from '../version.ts';
 
 export interface McpOptions {
   registry?: string;
-}
-
-function cliVersion(): string {
-  const url = new URL('../../package.json', import.meta.url);
-  return (JSON.parse(readFileSync(url, 'utf8')) as { version: string }).version;
 }
 
 /**
@@ -26,7 +20,7 @@ export async function runMcp(ctx: CliContext, options: McpOptions = {}): Promise
       cwd: ctx.cwd,
       ...(options.registry === undefined ? {} : { registryFlag: options.registry }),
     },
-    cliVersion(),
+    CLI_VERSION,
   );
   await serveStdio(server);
 }
