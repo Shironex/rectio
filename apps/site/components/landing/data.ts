@@ -28,7 +28,7 @@ export const LINES: Line[] = [
   {
     id: 'l1',
     merchant: 'Lufthansa',
-    note: 'FRA to WAW, return',
+    note: 'FRA to DUB, return',
     category: 'Flights',
     amount: 412.8,
     status: 'approved',
@@ -64,7 +64,7 @@ export const ARRIVING: Line[] = [
   {
     id: 'a1',
     merchant: 'Deutsche Bahn',
-    note: 'Warsaw to Berlin',
+    note: 'Dublin to Berlin',
     category: 'Rail',
     amount: 89.9,
     status: 'receipt',

@@ -7,7 +7,7 @@ const RECEIPT_TOTAL = 412.8;
 
 export default function AmountInputDemo() {
   const [amount, setAmount] = useState<number | null>(null);
-  const [zloty, setZloty] = useState<number | null>(1749.5);
+  const [pounds, setPounds] = useState<number | null>(1749.5);
 
   return (
     <div className="flex w-full max-w-sm flex-col gap-5">
@@ -24,14 +24,12 @@ export default function AmountInputDemo() {
             Use receipt
           </Button>
         </div>
-        <FieldDescription>Lufthansa, FRA to WAW. Arrow keys step by one cent.</FieldDescription>
+        <FieldDescription>Lufthansa, FRA to DUB. Arrow keys step by one cent.</FieldDescription>
       </Field>
       <Field>
-        <FieldLabel>Amount, PLN</FieldLabel>
-        <AmountInput currency="PLN" locale="pl-PL" value={zloty} onValueChange={setZloty} />
-        <FieldDescription>
-          Polish grouping and decimals, the symbol after the figure.
-        </FieldDescription>
+        <FieldLabel>Amount, GBP</FieldLabel>
+        <AmountInput currency="GBP" locale="en-GB" value={pounds} onValueChange={setPounds} />
+        <FieldDescription>Grouping, decimals and the symbol follow the locale.</FieldDescription>
       </Field>
     </div>
   );

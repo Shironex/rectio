@@ -10,7 +10,7 @@ export default function SpinnerMotionDemo() {
     <div className="relative w-full max-w-md overflow-hidden rounded-panel border border-line">
       <div className="flex flex-col gap-3 p-5 text-sm">
         <span className="font-medium">Exchange rates</span>
-        <span className="text-fg-muted numeric">EUR to PLN 4.2817</span>
+        <span className="text-fg-muted numeric">EUR to GBP 0.8412</span>
         <Button
           size="sm"
           variant="secondary"

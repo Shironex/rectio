@@ -41,12 +41,12 @@ the repository, under `packages/blocks`.
     },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+      description: 'ISO 4217 code every amount is in, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or en-IE.',
     },
     defaultGranularity: { type: "'month' | 'quarter'", default: "'month'" },
     title: { type: 'string', default: "'Cash flow'" },
@@ -73,14 +73,14 @@ words and choose its plural form with `plural()`.
 ```tsx
 <CashFlowChart
   points={points}
-  currency="PLN"
-  locale="pl-PL"
+  currency="GBP"
+  locale="en-GB"
   messages={{
-    title: 'Przepływy pieniężne',
-    monthly: 'Miesiące',
-    quarterly: 'Kwartały',
-    quarter: (quarter, year) => `${['I', 'II', 'III', 'IV'][quarter - 1]} kw. ${year}`,
-    positiveNote: (positive, total) => `Dodatnie w ${positive} z ${total} okresów`,
+    title: 'Cash movement',
+    monthly: 'By month',
+    quarterly: 'By quarter',
+    quarter: (quarter, year) => `${year} Q${quarter}`,
+    positiveNote: (positive, total) => `Positive in ${positive} of ${total} periods`,
   }}
 />
 ```

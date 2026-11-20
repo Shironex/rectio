@@ -46,12 +46,12 @@ the repository, under `packages/blocks`.
     },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+      description: 'ISO 4217 code every amount is in, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or en-IE.',
     },
     openingBalances: {
       type: 'Record<string, number>',
@@ -98,17 +98,14 @@ import { plural } from '@rectio/blocks';
 <Ledger
   accounts={accounts}
   lines={lines}
-  currency="PLN"
-  locale="pl-PL"
+  currency="GBP"
+  locale="en-GB"
   messages={{
-    title: 'Dziennik księgowy',
-    debit: 'Winien',
-    credit: 'Ma',
+    title: 'Journal',
+    debit: 'Dr',
+    credit: 'Cr',
     journalDescription: (period, entries) =>
-      [
-        period,
-        `${entries} ${plural(entries, { one: 'zapis', few: 'zapisy', many: 'zapisów', other: 'zapisu' }, 'pl-PL')}`,
-      ]
+      [period, `${entries} ${plural(entries, { one: 'entry', other: 'entries' }, 'en-GB')}`]
         .filter(Boolean)
         .join(', '),
   }}

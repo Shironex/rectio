@@ -41,12 +41,12 @@ the repository, under `packages/blocks`.
     },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+      description: 'ISO 4217 code every amount is in, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or en-IE.',
     },
     today: {
       type: 'Date',
@@ -107,18 +107,17 @@ words and choose its plural form with `plural()`.
 ```tsx
 import { plural } from '@rectio/blocks';
 
-const invoices = (count: number) =>
-  plural(count, { one: 'faktura', few: 'faktury', many: 'faktur', other: 'faktury' }, 'pl-PL');
+const invoices = (count: number) => plural(count, { one: 'invoice', other: 'invoices' }, 'en-GB');
 
 <InvoiceList
   invoices={rows}
-  currency="PLN"
-  locale="pl-PL"
+  currency="GBP"
+  locale="en-GB"
   messages={{
-    title: 'Faktury',
-    newInvoice: 'Nowa faktura',
+    title: 'Sales invoices',
+    newInvoice: 'Create invoice',
     description: (period, count) => `${period}, ${count} ${invoices(count)}`,
-    dueText: (due) => (due.kind === 'today' ? 'Termin dzisiaj' : `Termin za ${due.days} dni`),
+    dueText: (due) => (due.kind === 'today' ? 'Due today' : `Due in ${due.days} days`),
   }}
 />;
 ```

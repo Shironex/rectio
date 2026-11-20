@@ -86,13 +86,15 @@ Every word comes from `messages`; the English defaults are `CASH_RUNWAY_MESSAGES
 date itself, so a language that needs another case of the month's name can build it:
 
 ```tsx
+import { plural } from '@rectio/blocks';
+
 <CashRunway
   {...props}
   messages={{
     runwayMonths: (months, count) =>
-      `${months} ${plural(count, { one: 'miesiąc', few: 'miesiące', many: 'miesięcy', other: 'miesiąca' }, 'pl-PL')}`,
+      `${months} ${plural(count, { one: 'month', other: 'months' }, 'en-GB')} left`,
   }}
-/>
+/>;
 ```
 
 ## Logic

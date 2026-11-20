@@ -10,7 +10,7 @@ export const CUSTOMERS: Customer[] = [
   { value: 'contoso', label: 'Contoso Ltd', city: 'Dublin' },
   { value: 'fabrikam', label: 'Fabrikam', city: 'Rotterdam' },
   { value: 'tailspin', label: 'Tailspin Toys', city: 'Lyon' },
-  { value: 'wingtip', label: 'Wingtip Partners', city: 'Kraków' },
+  { value: 'wingtip', label: 'Wingtip Partners', city: 'Leeds' },
   { value: 'adatum', label: 'Adatum Corporation', city: 'Munich' },
   { value: 'litware', label: 'Litware Inc', city: 'Toronto' },
 ];

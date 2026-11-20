@@ -75,12 +75,12 @@ the repository, under `packages/blocks`.
     },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+      description: 'ISO 4217 code every amount is in, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or en-IE.',
     },
     trailLength: { type: 'number', default: '5' },
     title: { type: 'string', default: "'Expense approvals'" },
@@ -110,16 +110,16 @@ import { plural } from '@rectio/blocks';
 <ExpenseApproval
   requests={requests}
   events={events}
-  currency="PLN"
-  locale="pl-PL"
+  currency="GBP"
+  locale="en-GB"
   onApprove={approve}
   onReject={reject}
   messages={{
-    title: 'Akceptacja wydatków',
-    approve: 'Zatwierdź',
-    reject: 'Odrzuć',
+    title: 'Expense claims',
+    approve: 'Accept',
+    reject: 'Decline',
     rejectManyTitle: (count) =>
-      `Odrzuć ${count} ${plural(count, { one: 'wydatek', few: 'wydatki', many: 'wydatków', other: 'wydatku' }, 'pl-PL')}`,
+      `Decline ${count} ${plural(count, { one: 'claim', other: 'claims' }, 'en-GB')}`,
   }}
 />;
 ```

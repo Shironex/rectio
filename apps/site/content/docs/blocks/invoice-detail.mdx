@@ -41,12 +41,12 @@ the repository, under `packages/blocks`.
     },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+      description: 'ISO 4217 code every amount is in, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or en-IE.',
     },
     today: { type: 'Date', default: 'new Date()' },
     onRecordPayment: { type: '() => void', description: 'Shown while a balance is open.' },
@@ -77,14 +77,14 @@ import { plural } from '@rectio/blocks';
 
 <InvoiceDetail
   invoice={invoice}
-  currency="PLN"
-  locale="pl-PL"
+  currency="GBP"
+  locale="en-GB"
   messages={{
-    heading: (number) => <>Faktura {number}</>,
-    billedTo: 'Nabywca',
-    balanceDue: 'Do zapłaty',
+    heading: (number) => <>Invoice no. {number}</>,
+    billedTo: 'Bill to',
+    balanceDue: 'Amount due',
     overdueDescription: (days, due) =>
-      `${days} ${plural(days, { one: 'dzień', other: 'dni' }, 'pl-PL')} po terminie, termin ${due}`,
+      `${days} ${plural(days, { one: 'day', other: 'days' }, 'en-GB')} overdue, due ${due}`,
   }}
 />;
 ```

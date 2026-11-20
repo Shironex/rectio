@@ -6,7 +6,7 @@ import type { MouseEvent } from 'react';
 const ITEMS = [
   { label: 'Receivables', href: '#receivables' },
   { label: 'Customers', href: '#customers' },
-  { label: 'Kowalski & Sons', href: '#kowalski-sons' },
+  { label: 'Hale & Sons', href: '#hale-sons' },
   { label: 'Invoices', href: '#invoices' },
   { label: 'Invoice 2041' },
 ] as const;

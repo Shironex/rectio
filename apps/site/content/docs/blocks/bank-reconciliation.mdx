@@ -67,12 +67,12 @@ nothing is left unmatched on either side.
     bookBalance: { type: 'number', description: 'The closing balance in the books.' },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code of the account, such as EUR or PLN.',
+      description: 'ISO 4217 code of the account, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or en-IE.',
     },
     account: { type: 'string', description: 'The account as you name it, under the title.' },
     period: { type: 'string', description: 'The period as you name it, under the title.' },
@@ -127,13 +127,13 @@ import { plural } from '@rectio/blocks';
 
 <BankReconciliation
   {...props}
-  currency="PLN"
-  locale="pl-PL"
+  currency="GBP"
+  locale="en-GB"
   messages={{
-    title: 'Uzgodnienie bankowe',
-    match: 'Dopasuj',
+    title: 'Statement matching',
+    match: 'Pair',
     statementLines: (count) =>
-      `${count} ${plural(count, { one: 'pozycja', few: 'pozycje', many: 'pozycji', other: 'pozycji' }, 'pl-PL')} na wyciągu`,
+      `${count} statement ${plural(count, { one: 'line', other: 'lines' }, 'en-GB')}`,
   }}
 />;
 ```

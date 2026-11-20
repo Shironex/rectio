@@ -94,7 +94,7 @@ export function HeroWindow() {
         </span>
         <span className="flex flex-col">
           <span className="text-sm font-strong text-fg">Hotel Bristol approved</span>
-          <span className="text-sm text-fg-muted">Marta Zielińska, 16 Mar</span>
+          <span className="text-sm text-fg-muted">Clara Hughes, 16 Mar</span>
         </span>
       </div>
     </figure>

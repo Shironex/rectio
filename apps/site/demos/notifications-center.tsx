@@ -24,7 +24,7 @@ export const NOTIFICATIONS: AppNotification[] = [
   {
     id: 'n2',
     title: 'New sign in from Firefox on Windows',
-    body: 'Warsaw, Poland. If this was not you, reset your password.',
+    body: 'Cork, Ireland. If this was not you, reset your password.',
     at: ago(180),
     read: false,
     kind: 'security',

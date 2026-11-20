@@ -24,7 +24,7 @@ the block enters.
 
 Pass each vendor with its unpaid bills; the block works out the balance, what is overdue, the next
 due date and what falls due in the next `horizonDays`. The list opens sorted by overdue, largest
-first. Search matches every word in the name or contact, folding accents, so "lodz" finds "Łódź".
+first. Search matches every word in the name or contact, folding accents, so "muller" finds "Müller".
 Terms and the last payment get their own columns from a 64rem block; narrower blocks fold terms,
 the next due date and status under the vendor, and a phone sorts with a Sort by control.
 
@@ -40,12 +40,12 @@ The block is data-agnostic: it takes plain records and calls you back; it never 
     },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+      description: 'ISO 4217 code every amount is in, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures, dates and name sorting, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures, dates and name sorting, such as en-GB or en-IE.',
     },
     today: { type: 'Date', default: 'new Date()' },
     defaultFilter: {
@@ -83,14 +83,14 @@ import { plural } from '@rectio/blocks';
 
 <VendorsList
   vendors={vendors}
-  currency="PLN"
-  locale="pl-PL"
+  currency="GBP"
+  locale="en-GB"
   messages={{
-    title: 'Dostawcy',
-    searchLabel: 'Szukaj dostawców',
-    termsValue: (days) => `${days} dni`,
+    title: 'Suppliers',
+    searchLabel: 'Search suppliers',
+    termsValue: (days) => `${days} days`,
     totalRow: (count) =>
-      `Razem, ${count} ${plural(count, { one: 'dostawca', few: 'dostawcy', many: 'dostawców', other: 'dostawcy' }, 'pl-PL')}`,
+      `Total, ${count} ${plural(count, { one: 'supplier', other: 'suppliers' }, 'en-GB')}`,
   }}
 />;
 ```

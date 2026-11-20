@@ -28,7 +28,7 @@ export default function FieldsetDemo() {
       >
         <Field>
           <FieldLabel>Legal name</FieldLabel>
-          <Input defaultValue="Northwind Traders sp. z o.o." />
+          <Input defaultValue="Northwind Traders Ltd" />
         </Field>
         <Field>
           <FieldLabel>VAT number</FieldLabel>

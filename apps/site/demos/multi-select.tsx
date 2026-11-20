@@ -18,7 +18,7 @@ interface Approver {
 }
 
 const APPROVERS: Approver[] = [
-  { value: 'akowalska', label: 'Anna Kowalska', role: 'Finance' },
+  { value: 'ifraser', label: 'Isla Fraser', role: 'Finance' },
   { value: 'bokafor', label: 'Ben Okafor', role: 'Operations' },
   { value: 'cmartin', label: 'Chloe Martin', role: 'Legal' },
   { value: 'dpatel', label: 'Dev Patel', role: 'Engineering' },

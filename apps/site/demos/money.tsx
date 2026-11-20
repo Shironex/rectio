@@ -4,7 +4,7 @@ import { Button, Money } from '@rectio/ui';
 import { useState } from 'react';
 
 const LINES = [
-  { label: 'Lufthansa, FRA to WAW', amount: 412.8 },
+  { label: 'Lufthansa, FRA to DUB', amount: 412.8 },
   { label: 'Hotel Bristol, two nights', amount: 538 },
   { label: 'Hotel Bristol, refund', amount: -61 },
 ];

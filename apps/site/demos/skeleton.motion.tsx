@@ -4,7 +4,7 @@ import { SkeletonSwap } from '@rectio/motion';
 import { Avatar, Button, SkeletonListItem } from '@rectio/ui';
 import { useState } from 'react';
 
-const people = ['Ana Ruiz', 'Tomasz Nowak', 'Lena Fischer'];
+const people = ['Ana Ruiz', 'Ewan Burke', 'Lena Fischer'];
 
 export default function SkeletonMotionDemo() {
   const [loading, setLoading] = useState(true);

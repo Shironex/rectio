@@ -43,12 +43,12 @@ the repository, under `packages/blocks`.
     },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+      description: 'ISO 4217 code every amount is in, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or en-IE.',
     },
     period: { type: 'string', description: 'Such as "Q1 2026, 11 of 13 weeks".' },
     title: { type: 'string', default: "'Budget vs actual'" },
@@ -74,13 +74,13 @@ words and choose its plural form with `plural()`.
 ```tsx
 <BudgetVsActual
   lines={lines}
-  currency="PLN"
-  locale="pl-PL"
+  currency="GBP"
+  locale="en-GB"
   messages={{
-    title: 'Budżet i wykonanie',
-    onBudget: 'Zgodnie z budżetem',
+    title: 'Budget and actuals',
+    onBudget: 'On plan',
     varianceWords: (position, percent) =>
-      `${percent ?? ''} ${position === 'over' ? 'powyżej' : 'poniżej'}`.trim(),
+      `${percent ?? ''} ${position === 'over' ? 'above plan' : 'below plan'}`.trim(),
   }}
 />
 ```

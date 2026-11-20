@@ -71,7 +71,7 @@ export const STATEMENT_BALANCE = 48_310.55 - 38.4 + 760;
 export const PAYOUTS: Payout[] = [
   {
     id: 'p1',
-    payee: 'Borowik Meble sp. z o.o.',
+    payee: 'Barrett Furniture Ltd',
     amount: 4_200,
     method: 'bank-transfer',
     destination: '•• 7730',
@@ -107,7 +107,7 @@ export const PAYOUTS: Payout[] = [
   },
   {
     id: 'p5',
-    payee: 'Studio Mirela Kowal',
+    payee: 'Studio Maren Holt',
     amount: 980,
     method: 'wallet',
     status: 'paid',
@@ -143,8 +143,8 @@ const bill = (id: string, month: number, day: number, amount: number) => ({
 export const VENDORS: Vendor[] = [
   {
     id: 'v1',
-    name: 'Borowik Meble sp. z o.o.',
-    contact: 'Tomasz Borowik',
+    name: 'Barrett Furniture Ltd',
+    contact: 'Conor Barrett',
     termsDays: 30,
     status: 'active',
     bills: [bill('b1', 3, 12, 2_400), bill('b2', 3, 21, 4_200)],
@@ -179,8 +179,8 @@ export const VENDORS: Vendor[] = [
   },
   {
     id: 'v5',
-    name: 'Łódzkie Zakłady Papiernicze',
-    contact: 'Agnieszka Wróbel',
+    name: 'Calder Paper Mills',
+    contact: 'Niall Keane',
     termsDays: 30,
     status: 'active',
     bills: [bill('b6', 4, 2, 1_145.6)],

@@ -45,12 +45,12 @@ the repository, under `packages/blocks`.
     },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+      description: 'ISO 4217 code every amount is in, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or en-IE.',
     },
     label: {
       type: 'string',
@@ -75,14 +75,14 @@ words and choose its plural form with `plural()`.
 ```tsx
 <KpiRow
   kpis={kpis}
-  currency="PLN"
-  locale="pl-PL"
-  comparison="vs luty"
+  currency="GBP"
+  locale="en-GB"
+  comparison="vs last month"
   messages={{
-    label: 'Kluczowe wskaźniki',
-    better: 'korzystnie',
-    worse: 'niekorzystnie',
-    points: (points) => `${points} p.p.`,
+    label: 'Headline figures',
+    better: 'ahead',
+    worse: 'behind',
+    points: (points) => `${points} pp`,
   }}
 />
 ```

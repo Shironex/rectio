@@ -7,7 +7,7 @@ export default function AvatarDemo() {
     <div className="flex flex-col items-center gap-5">
       <div className="flex flex-wrap items-end gap-3">
         <Avatar name="Ana Ruiz" size="xs" />
-        <Avatar name="Tomasz Nowak" size="sm" status="online" />
+        <Avatar name="Ewan Burke" size="sm" status="online" />
         <Avatar name="Lena Fischer" size="md" status="away" />
         <Avatar name="Ivo Petrov" size="lg" status="busy" />
         <Avatar name="Mei Tanaka" size="xl" status="offline" />

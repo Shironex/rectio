@@ -80,7 +80,7 @@ export const INVOICES: InvoiceSummary[] = [
   {
     id: 'i3',
     number: 'INV-0124',
-    customer: 'Borowik Meble sp. z o.o.',
+    customer: 'Barrett Furniture Ltd',
     issued: d(1, 28),
     due: d(2, 27),
     total: 11_872.5,
@@ -130,16 +130,16 @@ export const INVOICE: InvoiceDocument = {
   status: 'sent',
   issued: d(1, 28),
   due: d(2, 27),
-  reference: 'PO 4471-BM',
+  reference: 'PO 4471-BF',
   seller: {
     name: 'Fernhill Systems Ltd',
     address: ['14 Harcourt Street', 'Dublin D02 YX88'],
     taxId: 'IE 3412876LH',
   },
   buyer: {
-    name: 'Borowik Meble sp. z o.o.',
-    address: ['ul. Garbary 48', '61-869 Poznań'],
-    taxId: 'PL 7792471305',
+    name: 'Barrett Furniture Ltd',
+    address: ['Unit 4, Mahon Business Park', 'Cork T12 AB34'],
+    taxId: 'IE 8274915KH',
   },
   lines: [
     {
@@ -164,7 +164,7 @@ export const INVOICE: InvoiceDocument = {
       quantity: 25,
       unit: 'pcs',
       unitPrice: 12.9,
-      taxRate: 0.08,
+      taxRate: 0.135,
     },
   ],
   payments: [{ id: 'p1', date: d(2, 20), amount: 5_000, method: 'Bank transfer' }],
@@ -224,14 +224,14 @@ export const RECEIVABLES: Receivable[] = [
   },
   {
     id: 'r3',
-    customer: 'Borowik Meble sp. z o.o.',
+    customer: 'Barrett Furniture Ltd',
     invoice: 'INV-0124',
     due: d(2, 27),
     outstanding: 6_872.5,
   },
   {
     id: 'r4',
-    customer: 'Borowik Meble sp. z o.o.',
+    customer: 'Barrett Furniture Ltd',
     invoice: 'INV-0102',
     due: d(1, 28),
     outstanding: 4_410,
@@ -264,7 +264,7 @@ export const EXPENSES: ApprovalState = {
   requests: [
     {
       id: 'x1',
-      employee: 'Marta Zielińska',
+      employee: 'Clara Hughes',
       merchant: 'Lufthansa',
       category: 'Travel',
       date: d(3, 16),

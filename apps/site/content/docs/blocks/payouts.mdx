@@ -43,12 +43,12 @@ ids being retried as `retrying` and their Retry shows a spinner and ignores pres
     },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+      description: 'ISO 4217 code every amount is in, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or en-IE.',
     },
     today: { type: 'Date', default: 'new Date()' },
     defaultFilter: {
@@ -89,13 +89,13 @@ import { plural } from '@rectio/blocks';
 
 <Payouts
   payouts={payouts}
-  currency="PLN"
-  locale="pl-PL"
+  currency="GBP"
+  locale="en-GB"
   messages={{
-    title: 'Wypłaty',
-    retry: 'Ponów',
+    title: 'Payments out',
+    retry: 'Try again',
     payoutCount: (count) =>
-      `${count} ${plural(count, { one: 'wypłata', few: 'wypłaty', many: 'wypłat', other: 'wypłaty' }, 'pl-PL')}`,
+      `${count} ${plural(count, { one: 'payout', other: 'payouts' }, 'en-GB')}`,
   }}
 />;
 ```

@@ -122,7 +122,7 @@ export function ExpenseReport() {
     >
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line px-5 pt-5 pb-4">
         <div className="flex flex-col gap-1">
-          <p className="text-sm text-fg-muted">Report 2041, Anna Kowalska</p>
+          <p className="text-sm text-fg-muted">Report 2041, Isla Fraser</p>
           <h2 className="font-display text-xl font-heading tracking-tight text-fg">
             March travel and tools
           </h2>

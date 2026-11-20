@@ -4,7 +4,7 @@ import { AvatarGroup } from '@rectio/ui';
 
 const approvers = [
   { name: 'Ana Ruiz', status: 'online' as const },
-  { name: 'Tomasz Nowak' },
+  { name: 'Ewan Burke' },
   { name: 'Lena Fischer' },
   { name: 'Ivo Petrov' },
   { name: 'Mei Tanaka' },

@@ -40,12 +40,12 @@ the repository, under `packages/blocks`.
     },
     currency: {
       type: 'string',
-      description: 'ISO 4217 code every amount is in, such as EUR or PLN.',
+      description: 'ISO 4217 code every amount is in, such as EUR or GBP.',
     },
     locale: {
       type: 'string',
       default: 'the runtime locale',
-      description: 'BCP 47 locale for figures and dates, such as en-GB or pl-PL.',
+      description: 'BCP 47 locale for figures and dates, such as en-GB or en-IE.',
     },
     today: { type: 'Date', default: 'new Date()' },
     customerLimit: {
@@ -79,13 +79,13 @@ import { plural } from '@rectio/blocks';
 
 <ArAging
   receivables={receivables}
-  currency="PLN"
-  locale="pl-PL"
+  currency="GBP"
+  locale="en-GB"
   messages={{
-    title: 'Wiekowanie należności',
-    customer: 'Klient',
+    title: 'Debtor ageing',
+    customer: 'Debtor',
     oldestPastDue: (days) =>
-      `Najstarsza: ${days} ${plural(days, { one: 'dzień', other: 'dni' }, 'pl-PL')} po terminie`,
+      `Oldest: ${days} ${plural(days, { one: 'day', other: 'days' }, 'en-GB')} overdue`,
   }}
 />;
 ```

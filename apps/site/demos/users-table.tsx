@@ -27,8 +27,8 @@ const USERS: UserRecord[] = [
   },
   {
     id: 'u03',
-    name: 'Tomasz Wierzbicki',
-    email: 'tomasz@fernhill.io',
+    name: 'Callum Ross',
+    email: 'callum@fernhill.io',
     role: 'member',
     status: 'active',
     team: 'Engineering',

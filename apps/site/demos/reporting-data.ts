@@ -80,7 +80,7 @@ export const PL_LINES: PlLine[] = [
 
 export const TAX_ENTRIES: TaxRateEntry[] = [
   { id: 'vat-23', rate: 0.23, outputBase: 284_600, inputBase: 96_450 },
-  { id: 'vat-8', rate: 0.08, outputBase: 18_200, inputBase: 6_300 },
+  { id: 'vat-13-5', rate: 0.135, outputBase: 18_200, inputBase: 6_300 },
   { id: 'vat-0', rate: 0, outputBase: 31_400, inputBase: 0 },
   { id: 'exempt', rate: 'exempt', outputBase: 7_900, inputBase: 2_400 },
 ];

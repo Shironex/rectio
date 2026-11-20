@@ -17,7 +17,6 @@ export default function DocsSwitchersDemo() {
         languages={[
           { value: 'en', label: 'English', href: '/' },
           { value: 'de', label: 'Deutsch', href: '/de' },
-          { value: 'pl', label: 'Polski', href: '/pl' },
         ]}
       />
     </div>

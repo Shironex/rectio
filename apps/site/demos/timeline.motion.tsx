@@ -5,7 +5,7 @@ import { Avatar } from '@rectio/ui';
 
 const activity = [
   { name: 'Ana Ruiz', action: 'approved invoice INV-2041', when: '09:42' },
-  { name: 'Tomasz Nowak', action: 'commented on the March budget', when: '09:15' },
+  { name: 'Ewan Burke', action: 'commented on the March budget', when: '09:15' },
   { name: 'Lena Fischer', action: 'uploaded 3 receipts', when: 'Yesterday' },
 ];
 
