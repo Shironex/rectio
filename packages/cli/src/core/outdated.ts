@@ -1,6 +1,7 @@
 import type { RegistryIndex } from '@rectio/registry';
 
 import type { Lockfile } from './lockfile.ts';
+import { cliCommand } from './runner.ts';
 
 export interface Outdated {
   name: string;
@@ -27,5 +28,5 @@ export function outdatedHint(outdated: readonly Outdated[]): string | undefined 
     outdated.length === 1
       ? '1 installed item has'
       : `${String(outdated.length)} installed items have`;
-  return `${count} a newer version: run \`rectio update\` to list them`;
+  return `${count} a newer version: run \`${cliCommand('update')}\` to list them`;
 }

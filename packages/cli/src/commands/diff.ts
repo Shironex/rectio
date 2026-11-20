@@ -11,6 +11,7 @@ import { createRegistryClient } from '../core/registry-client.ts';
 import { projectContent, resolveTarget } from '../core/transform.ts';
 import { commandRows } from '../ui/layout.ts';
 import { Ui } from '../ui/output.ts';
+import { cliCommand } from '../core/runner.ts';
 
 export interface DiffOptions {
   registry?: string;
@@ -42,11 +43,12 @@ export async function runDiff(
   name: string | undefined,
   options: DiffOptions = {},
 ) {
-  if (name === undefined) throw new CliError('name an item', 'Example: rectio diff button');
+  if (name === undefined)
+    throw new CliError('name an item', `Example: ${cliCommand('diff button')}`);
   const config = requireConfig(ctx.cwd);
   const locked = readLock(ctx.cwd).items[name];
   if (locked === undefined)
-    throw new CliError(`${name} is not installed`, `Add it with \`rectio add ${name}\`.`);
+    throw new CliError(`${name} is not installed`, `Add it with \`${cliCommand(`add ${name}`)}\`.`);
 
   const client = createRegistryClient(registryUrl(ctx, options.registry, config));
   const [entry] = (await resolveItems(client, [name])).filter((e) => e.name === name);
@@ -128,7 +130,11 @@ function printDiff(ui: Ui, result: DiffResult): void {
   if (result.files.every((f) => f.state === 'same')) ui.line('No differences.');
   else {
     ui.lines(
-      commandRows([[`rectio add ${result.item} --overwrite`, 'take the registry version']], s, ''),
+      commandRows(
+        [[cliCommand(`add ${result.item} --overwrite`), 'take the registry version']],
+        s,
+        '',
+      ),
     );
   }
   ui.end();

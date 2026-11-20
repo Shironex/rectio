@@ -28,6 +28,7 @@ import {
 } from '../ui/report.ts';
 import { CLI_VERSION } from '../version.ts';
 import { installSteps, managerFor } from './install-steps.ts';
+import { cliCommand } from '../core/runner.ts';
 
 export interface InitTemplateOptions extends InstallOptions, OutputOptions {
   registry?: string;
@@ -139,7 +140,7 @@ export async function runInitTemplate(
         found === undefined
           ? `unknown template "${name}"`
           : `${name} is a ${found.type}, not a template`,
-        `Templates: ${templateNames(index.items)}. See \`rectio list --templates\`.`,
+        `Templates: ${templateNames(index.items)}. See \`${cliCommand('list --templates')}\`.`,
       );
     }
     if (existsSync(root) && readdirSync(root).length > 0 && options.force !== true) {
@@ -230,8 +231,8 @@ export async function runInitTemplate(
       ? []
       : [[`${manager} install`, 'install the packages'] satisfies [string, string]]),
     [devCommand(manager), 'start the dev server'],
-    ['rectio add <item>', 'add a component or block'],
-    ['rectio list', 'browse every item'],
+    [cliCommand('add <item>'), 'add a component or block'],
+    [cliCommand('list'), 'browse every item'],
   ];
   const lines = [
     dryRun ? `Dry run: nothing was written (${shown} from ${template.title})` : `${shown} is ready`,

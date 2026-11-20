@@ -6,6 +6,7 @@ import { createRegistryClient } from '../core/registry-client.ts';
 import { commandRows, plural } from '../ui/layout.ts';
 import { Ui } from '../ui/output.ts';
 import { pad } from '../ui/style.ts';
+import { cliCommand } from '../core/runner.ts';
 
 /**
  * The designed stub of `update`: it reports which installed items have a newer version. The
@@ -37,12 +38,12 @@ export async function runUpdate(ctx: CliContext, options: { registry?: string } 
     );
   }
   ui.line();
-  ui.tip('`rectio update` does not merge yet. Review and replace by hand:');
+  ui.tip(`\`${cliCommand('update')}\` does not merge yet. Review and replace by hand:`);
   ui.lines(
     commandRows(
       [
-        ['rectio diff <item>', 'see how your copy differs'],
-        ['rectio add <item> --overwrite', 'replace it with the latest'],
+        [cliCommand('diff <item>'), 'see how your copy differs'],
+        [cliCommand('add <item> --overwrite'), 'replace it with the latest'],
       ],
       s,
     ),

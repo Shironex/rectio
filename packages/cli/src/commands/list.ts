@@ -8,6 +8,7 @@ import { createRegistryClient } from '../core/registry-client.ts';
 import { commandRows, plural } from '../ui/layout.ts';
 import { Ui, type OutputOptions } from '../ui/output.ts';
 import { pad } from '../ui/style.ts';
+import { cliCommand } from '../core/runner.ts';
 
 export interface ListOptions extends OutputOptions {
   registry?: string;
@@ -102,7 +103,9 @@ function printTemplates(ui: Ui, entries: readonly IndexEntry[]) {
     );
   }
   ui.line();
-  ui.lines(commandRows([['rectio init --template <name> [folder]', 'start a project']], s, ''));
+  ui.lines(
+    commandRows([[cliCommand('init --template <name> [folder]'), 'start a project']], s, ''),
+  );
 }
 
 export async function runList(ctx: CliContext, options: ListOptions = {}) {
@@ -161,18 +164,18 @@ export async function runSearch(
   options: ListOptions = {},
 ) {
   if (query === undefined || query.trim() === '') {
-    throw new CliError('give a search term', 'Example: rectio search money');
+    throw new CliError('give a search term', `Example: ${cliCommand('search money')}`);
   }
   const ui = new Ui(ctx);
   const entries = rankMatches((await loadIndex(ctx, options.registry)).items, query.trim());
   ui.header('search', `"${query.trim()}", ${plural(entries.length, 'match', 'matches')}`);
   if (entries.length === 0) {
     ui.line('No items match.');
-    ui.tip('Try a shorter word, or browse everything with `rectio list`.');
+    ui.tip(`Try a shorter word, or browse everything with \`${cliCommand('list')}\`.`);
   } else {
     const { row, legend } = entryRows(ui, entries, true);
     for (const entry of entries) ui.line(row(entry));
-    footer(ui, [legend(), 'Add one with `rectio add <name>`.']);
+    footer(ui, [legend(), `Add one with \`${cliCommand('add <name>')}\`.`]);
   }
   ui.end();
   return entries;

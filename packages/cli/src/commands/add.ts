@@ -16,6 +16,7 @@ import {
 } from '../ui/report.ts';
 import { CLI_VERSION } from '../version.ts';
 import { installSteps, managerFor } from './install-steps.ts';
+import { cliCommand } from '../core/runner.ts';
 
 export interface AddOptions extends InstallOptions, OutputOptions {
   registry?: string;
@@ -39,7 +40,7 @@ export async function runAdd(ctx: CliContext, names: readonly string[], options:
   const steps = ui.steps(4);
   const { config, client } = await steps.run('Checking project', (step) => {
     if (names.length === 0)
-      throw new CliError('name at least one item', 'Example: rectio add button');
+      throw new CliError('name at least one item', `Example: ${cliCommand('add button')}`);
     const found = requireConfig(ctx.cwd);
     step.note = `${found.framework}, ${found.css}`;
     return {

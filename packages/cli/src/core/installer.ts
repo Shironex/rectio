@@ -11,6 +11,7 @@ import { lockedFileAt, readLock, writeLock, type LockedFile } from './lockfile.t
 import { readAliasRoots, type PackageManager } from './project.ts';
 import type { RegistryClient } from './registry-client.ts';
 import { cssVarsFile, projectContent, resolveTarget } from './transform.ts';
+import { cliCommand } from './runner.ts';
 
 export interface InstallOptions {
   /** Replace files the user changed (or that rectio did not write). */
@@ -51,7 +52,10 @@ export async function resolveItems(client: RegistryClient, names: readonly strin
   try {
     return resolveGraph(names, (name) => byName.get(name));
   } catch (error) {
-    throw new CliError((error as Error).message, 'See `rectio list` for the available items.');
+    throw new CliError(
+      (error as Error).message,
+      `See \`${cliCommand('list')}\` for the available items.`,
+    );
   }
 }
 
@@ -113,7 +117,7 @@ export async function fetchItems(
   if (templates.length > 0) {
     throw new CliError(
       `${templates.map((t) => t.name).join(', ')} ${templates.length === 1 ? 'is a template' : 'are templates'}`,
-      `Start a new project with \`rectio init --template ${templates[0]?.name ?? '<name>'}\`.`,
+      `Start a new project with \`${cliCommand(`init --template ${templates[0]?.name ?? '<name>'}`)}\`.`,
     );
   }
   return Promise.all(entries.map((entry) => client.item(entry)));
@@ -131,7 +135,7 @@ export function planFiles(
   if (conflicts.length > 0) {
     throw new CliError(
       `${String(conflicts.length)} ${conflicts.length === 1 ? 'file differs' : 'files differ'} from what rectio installed:\n${conflicts.map((f) => `  ${f.path} (${f.item})`).join('\n')}`,
-      'Run `rectio diff <item>` to see the changes, or pass --overwrite to replace them.',
+      `Run \`${cliCommand('diff <item>')}\` to see the changes, or pass --overwrite to replace them.`,
     );
   }
   return files;

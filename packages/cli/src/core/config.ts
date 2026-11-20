@@ -12,6 +12,7 @@ import {
 
 import { CliError, type CliContext } from './context.ts';
 import { readJson, writeJson } from './fs.ts';
+import { cliCommand } from './runner.ts';
 
 export const CONFIG_FILE = 'rectio.json';
 export const CONFIG_SCHEMA_URL = `${REGISTRY_URL}/${SCHEMA_PATHS.config}`;
@@ -34,7 +35,7 @@ export function readConfig(cwd: string): RectioConfig | undefined {
 export function requireConfig(cwd: string): RectioConfig {
   const config = readConfig(cwd);
   if (config === undefined) {
-    throw new CliError(`no ${CONFIG_FILE} in ${cwd}`, 'Run `rectio init` first.');
+    throw new CliError(`no ${CONFIG_FILE} in ${cwd}`, `Run \`${cliCommand('init')}\` first.`);
   }
   return config;
 }

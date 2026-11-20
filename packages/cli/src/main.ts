@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 import { runAdd } from './commands/add.ts';
@@ -13,6 +14,7 @@ import { startUpdateCheck, updateNotice } from './core/update-check.ts';
 import { commandRows } from './ui/layout.ts';
 import { printError, Ui } from './ui/output.ts';
 import { CLI_VERSION } from './version.ts';
+import { cliCommand, detectRunner, setRunner } from './core/runner.ts';
 
 type HelpRows = [string, string][];
 
@@ -59,7 +61,7 @@ function help(ui: Ui): string[] {
     `${s.bold('rectio')}  ${s.dim(CLI_VERSION)}`,
     s.dim('Finance and back-office components, copied into your project.'),
     '',
-    `Usage: ${s.cyan('rectio <command> [options]')}`,
+    `Usage: ${s.cyan(cliCommand('<command> [options]'))}`,
     ...section('Commands', COMMANDS),
     ...section('Options', FLAGS),
     ...section('Environment', ENVIRONMENT),
@@ -80,7 +82,7 @@ function renderNotice(ui: Ui) {
   };
 }
 
-const USAGE_HINT = 'Run `rectio --help` for usage.';
+const usageHint = () => `Run \`${cliCommand('--help')}\` for usage.`;
 
 const OPTIONS = {
   cwd: { type: 'string' },
@@ -105,11 +107,13 @@ type ParsedValues = ReturnType<typeof parseArgs<{ options: typeof OPTIONS }>>['v
 
 /** Runs one CLI invocation and returns the exit code. Never calls process.exit itself. */
 export async function main(argv: readonly string[], base: CliContext): Promise<number> {
+  // Every command printed for the user follows how the CLI was started (pnpm dlx, npx, rectio).
+  setRunner(base.runner ?? detectRunner(fileURLToPath(import.meta.url), base.env));
   let parsed;
   try {
     parsed = parseArgs({ args: [...argv], options: OPTIONS, allowPositionals: true, strict: true });
   } catch (error) {
-    printError(base, new CliError((error as Error).message, USAGE_HINT));
+    printError(base, new CliError((error as Error).message, usageHint()));
     return 1;
   }
   const { values, positionals } = parsed;
@@ -205,7 +209,7 @@ async function runCommand(
         await runMcp(ctx, shared);
         return 0;
       default:
-        throw new CliError(`unknown command "${command}"`, USAGE_HINT);
+        throw new CliError(`unknown command "${command}"`, usageHint());
     }
   } catch (error) {
     if (error instanceof CliError) {

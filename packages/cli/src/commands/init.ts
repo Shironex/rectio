@@ -33,6 +33,7 @@ import {
 } from '../ui/report.ts';
 import { CLI_VERSION } from '../version.ts';
 import { installSteps, managerFor } from './install-steps.ts';
+import { cliCommand } from '../core/runner.ts';
 
 export interface InitOptions extends InstallOptions, OutputOptions {
   registry?: string;
@@ -97,8 +98,8 @@ export async function runInit(ctx: CliContext, options: InitOptions = {}) {
       s.bold('Next'),
       ...commandRows(
         [
-          ['rectio add button', 'add a component and what it needs'],
-          ['rectio list', 'browse every item'],
+          [cliCommand('add button'), 'add a component and what it needs'],
+          [cliCommand('list'), 'browse every item'],
         ],
         s,
       ),

@@ -1,3 +1,5 @@
+import type { Runner } from './runner.ts';
+
 /** Everything a command touches outside its arguments, so tests can run it in-process. */
 export interface CliContext {
   /** The project root the command works in. */
@@ -15,6 +17,8 @@ export interface CliContext {
   columns?: number;
   /** Clock for step durations, in milliseconds. Defaults to performance.now. */
   now?: () => number;
+  /** How the CLI was started, for the commands it prints. Detected from the script path when unset. */
+  runner?: Runner;
 }
 
 /** An expected failure: printed as one message (plus a hint) without a stack trace. */
