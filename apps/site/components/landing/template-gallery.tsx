@@ -32,7 +32,7 @@ function WideTemplate({
   return (
     <article
       aria-labelledby={`template-${template.name}`}
-      className="site-gallery-item group grid items-center gap-8 md:col-span-2 lg:grid-cols-12 lg:gap-12"
+      className="site-gallery-item group grid grid-cols-1 items-center gap-8 md:col-span-2 lg:grid-cols-12 lg:gap-12"
     >
       <Link
         href={template.previewHref}
@@ -143,7 +143,7 @@ export function TemplateGallery({ templates }: { templates: SiteTemplate[] }) {
         {shown.length === 1 ? '1 template' : `${String(shown.length)} templates`}
       </p>
       {/* Keyed by the filter: a new choice replays the short entrance of what it shows. */}
-      <div key={filter} className="grid gap-x-8 gap-y-14 md:grid-cols-2">
+      <div key={filter} className="grid grid-cols-1 gap-x-8 gap-y-14 md:grid-cols-2">
         {first === undefined ? (
           <div className="site-gallery-item flex flex-col items-start gap-4 rounded-panel border border-dashed border-line-strong p-8 md:col-span-2 md:p-12">
             <h3 className="font-display text-2xl font-heading text-fg">
