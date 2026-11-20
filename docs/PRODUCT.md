@@ -4,9 +4,10 @@ register: product
 
 ## Product purpose
 
-rectio is a commercial React design library for finance and back-office software: expense tools,
-ledgers, invoicing, approvals, treasury dashboards. It ships tokens and components that product
-teams theme to their brand and compose into dense, trustworthy working screens.
+rectio is a free, open source (MIT) React design library for finance and back-office software:
+expense tools, ledgers, invoicing, approvals, treasury dashboards, and the SaaS, marketing and docs
+screens around them. It ships tokens, components, blocks and whole templates that product teams
+theme to their brand and compose into dense, trustworthy working screens.
 
 ## Users
 
@@ -29,7 +30,7 @@ Two shipped themes show the range: `default` (warm neutral, cobalt accent, IBM P
 
 - Navy and gold "bank" palettes; neon-on-black crypto dashboards.
 - SaaS hero metrics, gradient accents, glass cards, decorative illustrations.
-- Default shadcn look shipped unchanged.
+- A stock component kit look shipped unchanged.
 
 ## Principles
 
