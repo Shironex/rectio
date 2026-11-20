@@ -8,19 +8,19 @@ import { ThemeScope } from './theme-scope';
 describe('ThemeScope', () => {
   it('sets the theme attributes', () => {
     render(
-      <ThemeScope theme="ledger" mode="dark" density="compact" data-testid="scope">
+      <ThemeScope theme="acme" mode="dark" density="compact" data-testid="scope">
         x
       </ThemeScope>,
     );
     const scope = screen.getByTestId('scope');
-    expect(scope).toHaveAttribute('data-theme', 'ledger');
+    expect(scope).toHaveAttribute('data-theme', 'acme');
     expect(scope).toHaveAttribute('data-mode', 'dark');
     expect(scope).toHaveAttribute('data-density', 'compact');
   });
 
   it('renders popups inside the scope so they inherit its tokens', async () => {
     render(
-      <ThemeScope theme="ledger" data-testid="scope">
+      <ThemeScope mode="dark" data-testid="scope">
         <Dialog>
           <DialogTrigger>Open</DialogTrigger>
           <DialogContent>

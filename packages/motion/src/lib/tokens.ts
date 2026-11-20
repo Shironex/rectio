@@ -1,7 +1,8 @@
 /**
  * Motion values come from the design tokens, read at the moment an animation starts from the
  * element that moves. The element inherits its theme's custom properties, so a dialog inside a
- * `ledger` scope moves with ledger's slower springs while one beside it keeps the default.
+ * scope with a theme of your own moves with that theme's springs while one beside it keeps the
+ * default.
  *
  * Nothing here has a fallback value: without the token stylesheet there is no motion at all,
  * which is the plain behaviour, never a guessed duration.

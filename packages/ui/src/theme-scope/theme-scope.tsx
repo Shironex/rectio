@@ -13,7 +13,7 @@ export function usePortalContainer(): HTMLElement | null | undefined {
 }
 
 export interface ThemeScopeProps extends ComponentProps<'div'> {
-  /** A theme id from @rectio/tokens, such as `default` or `ledger`. */
+  /** A theme id: `default`, the theme @rectio/tokens ships, or one of your own. */
   theme?: string;
   /** Leave unset to follow the system colour scheme. */
   mode?: 'light' | 'dark';
