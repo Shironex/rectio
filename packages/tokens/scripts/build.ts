@@ -5,7 +5,7 @@
  * Style Dictionary reads, merges and resolves the DTCG sources; the value transforms below turn
  * DTCG 2025.10 value objects into CSS, and this script assembles the selectors.
  */
-import { copyFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -145,6 +145,52 @@ function themesCss(resolved: Map<string, TokenMap>, compact: TokenMap, reduced: 
   parts.push(
     `@media (prefers-reduced-motion: reduce) {\n${block([':root', '[data-theme]'], declarations(reduced), '  ')}\n}`,
   );
+  return `${HEADER}\n${parts.join('\n\n')}\n`;
+}
+
+/**
+ * Dark proposals: opt-in alternatives to the default theme's dark mode, one DTCG file each under
+ * src/proposals/default/. They never apply on their own: `data-dark-proposal="<name>"` on <html>
+ * switches the dark mode (set or system) to the proposal, and the shipped dark stays the default.
+ */
+function proposalNames(): string[] {
+  const dir = src('proposals/default');
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => f.slice(0, -'.json'.length))
+    .sort();
+}
+
+function proposalsCss(light: TokenMap, proposals: Map<string, TokenMap>): string {
+  const parts: string[] = [];
+  const auto: string[] = [];
+  for (const [name, dark] of proposals) {
+    const changed = (token: string) => dark.get(token)?.value !== light.get(token)?.value;
+    const decls = ['color-scheme: dark;', ...declarations(dark, changed)];
+    const p = `[data-dark-proposal="${name}"]`;
+    parts.push(
+      block(
+        [
+          `:root${p}:not([data-theme])[data-mode="dark"]`,
+          `:root${p}[data-theme="default"][data-mode="dark"]`,
+          `${p} [data-theme="default"][data-mode="dark"]`,
+        ],
+        decls,
+      ),
+    );
+    auto.push(
+      block(
+        [
+          `:root${p}:not([data-theme]):not([data-mode])`,
+          `:root${p}[data-theme="default"]:not([data-mode])`,
+        ],
+        decls,
+        '  ',
+      ),
+    );
+  }
+  if (auto.length > 0) parts.push(`@media (prefers-color-scheme: dark) {\n${auto.join('\n')}\n}`);
   return `${HEADER}\n${parts.join('\n\n')}\n`;
 }
 
@@ -376,7 +422,16 @@ async function main() {
     for (const mode of MODES)
       resolved.set(`${theme}/${mode}`, await resolve(themeSources(theme, mode)));
   }
-  const contract = checkContract(resolved);
+  const proposals = new Map<string, TokenMap>();
+  for (const name of proposalNames()) {
+    const sources = themeSources('default', 'dark').map((path) =>
+      path === src('themes/default/dark.json') ? src(`proposals/default/${name}.json`) : path,
+    );
+    proposals.set(name, await resolve(sources));
+  }
+  const contract = checkContract(
+    new Map([...resolved, ...[...proposals].map(([k, v]) => [`proposal/${k}`, v] as const)]),
+  );
   const modeSources = (file: string) => [...themeSources('default', 'light'), src(`modes/${file}`)];
   const compact = await resolve(modeSources('compact.json'), src('modes/compact.json'));
   const reduced = await resolve(
@@ -389,6 +444,10 @@ async function main() {
   writeFileSync(join(dist, 'themes.css'), themesCss(resolved, compact, reduced));
   writeFileSync(join(dist, 'tailwind.css'), tailwindCss(contract, contractTypes));
   copyFileSync(src('fonts.css'), join(dist, 'fonts.css'));
+  writeFileSync(
+    join(dist, 'proposals.css'),
+    proposalsCss(resolved.get('default/light') ?? emptyTokens(), proposals),
+  );
 
   const json = {
     contract: contract.map((name) => ({ name, type: contractTypes.get(name)?.type })),
@@ -406,9 +465,17 @@ async function main() {
         ),
       ]),
     ),
+    proposals: Object.fromEntries(
+      [...proposals].map(([name, tokens]) => [
+        name,
+        { default: Object.fromEntries([...tokens].map(([n, { value }]) => [n, value])) },
+      ]),
+    ),
   };
   writeFileSync(join(dist, 'tokens.json'), `${JSON.stringify(json, null, 2)}\n`);
-  console.log(`tokens: ${contract.length} tokens x ${resolved.size} theme modes -> dist/`);
+  console.log(
+    `tokens: ${contract.length} tokens x ${resolved.size} theme modes, ${proposals.size} dark proposals -> dist/`,
+  );
 }
 
 await main();
