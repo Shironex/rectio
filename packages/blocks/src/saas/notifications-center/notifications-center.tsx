@@ -246,7 +246,13 @@ function NotificationsBody({
       </ul>
     );
     // In the popover the list scrolls on its own, and its edges fade where more rows wait.
-    content = inline ? list : <ScrollArea className="max-h-96">{list}</ScrollArea>;
+    content = inline ? (
+      list
+    ) : (
+      <ScrollArea className="max-h-112" scrollbar="always">
+        {list}
+      </ScrollArea>
+    );
   }
 
   return (
