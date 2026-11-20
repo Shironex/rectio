@@ -121,6 +121,8 @@ export function FileManagerDemo({ motion, empty, locale }: DemoProps) {
       onDownload={() => undefined}
       onUpgrade={() => undefined}
       defaultSelectedIds={['f3']}
+      // A small page, so the pager under the table shows in the gallery.
+      pageSize={6}
       onDelete={(ids) => {
         setEntries(entries.filter((e) => !ids.includes(e.id)));
       }}
