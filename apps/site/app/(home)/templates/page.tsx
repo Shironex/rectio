@@ -27,8 +27,8 @@ export default function TemplatesPage() {
             Templates
           </h1>
           <p className="site-enter site-step-1 text-lg text-pretty text-fg-muted">
-            Whole apps built only from the kit, free and MIT licensed like the rest. Open one to use
-            it as it ships: every page, at desktop, tablet or phone width, in both themes.
+            Whole apps built only from the kit, MIT licensed like the rest. Open one to see how it
+            ships: every page at desktop, tablet and phone width, in both themes.
           </p>
         </header>
 
@@ -66,7 +66,10 @@ export default function TemplatesPage() {
                   <TemplateActions template={template} size="lg" className="mt-2" />
                   <div className="mt-2 flex w-full flex-col items-start gap-2 border-t border-line pt-5">
                     <p className="text-sm text-fg-muted">Start a project from it</p>
-                    <CopyCommand command={template.command} />
+                    <CopyCommand
+                      command={template.command}
+                      className="max-w-full overflow-x-auto"
+                    />
                   </div>
                 </div>
               </li>
