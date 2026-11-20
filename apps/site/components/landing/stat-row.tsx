@@ -6,7 +6,11 @@ import type { KitFacts } from './kit-facts';
  */
 export function StatRow({ kit }: { kit: KitFacts }) {
   const stats: { value: string; unit?: string; label: string; note: string }[] = [
-    { value: String(kit.components), label: 'components', note: 'With both themes, MIT licensed' },
+    {
+      value: String(kit.components),
+      label: 'components',
+      note: 'With both themes, light and dark',
+    },
     {
       value: String(kit.blocks),
       label: 'blocks',

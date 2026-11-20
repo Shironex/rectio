@@ -163,14 +163,14 @@ export default function Home() {
               }
             />
             <p className="site-reveal text-base text-fg-muted">
-              Still unsure?{' '}
+              Still unsure? The{' '}
               <Link
                 href="/docs"
                 className="font-medium text-fg underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-fg"
               >
-                Read the docs
+                docs
               </Link>{' '}
-              or try every component there first.
+              run every component live.
             </p>
           </div>
           <div className="lg:col-span-8">
