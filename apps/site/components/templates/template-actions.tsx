@@ -25,7 +25,12 @@ export function TemplateActions({
 }) {
   return (
     <div className={cn('flex w-full flex-wrap items-center gap-2', className)}>
-      <Button size={size} render={<Link href={template.previewHref} />} className="max-sm:flex-1">
+      <Button
+        size={size}
+        nativeButton={false}
+        render={<Link href={template.previewHref} />}
+        className="max-sm:flex-1"
+      >
         Live preview
         <ArrowRightIcon aria-hidden weight="bold" className="size-4 rtl:-scale-x-100" />
       </Button>
@@ -33,6 +38,7 @@ export function TemplateActions({
         <Button
           size={size}
           variant="secondary"
+          nativeButton={false}
           render={<Link href={template.href} />}
           className="max-sm:flex-1"
         >
@@ -43,6 +49,7 @@ export function TemplateActions({
         <Button
           size={size}
           variant="secondary"
+          nativeButton={false}
           render={
             <a href={`${previewBase(template.name)}/`} target="_blank" rel="noopener noreferrer" />
           }
