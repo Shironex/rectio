@@ -65,14 +65,14 @@ export interface HeroFloatingProps extends HeroCopy, HeroBackground {
 
 // Tokens only: each wash fades from a soft surface into the page canvas.
 const WASH: Record<HeroWash, string> = {
-  accent: 'bg-linear-to-b from-accent-subtle via-surface-canvas to-surface-canvas',
+  accent: 'bg-linear-to-b from-accent-subtle/50 via-surface-canvas to-surface-canvas',
   neutral: 'bg-linear-to-b from-surface-sunken via-surface-canvas to-surface-canvas',
   none: '',
 };
 
 // The floating layout's fade ends higher: its cards hang over the bare page.
 const FLOATING_WASH: Record<HeroWash, string> = {
-  accent: 'bg-linear-to-b from-accent-subtle to-surface-canvas to-60%',
+  accent: 'bg-linear-to-b from-accent-subtle/50 to-surface-canvas to-60%',
   neutral: 'bg-linear-to-b from-surface-sunken to-surface-canvas to-60%',
   none: '',
 };

@@ -23,7 +23,7 @@ import {
   FieldError,
   FieldLabel,
   Input,
-  Kbd,
+  KbdCombo,
   cn,
 } from '@rectio/ui';
 import {
@@ -572,9 +572,8 @@ function Composer({
             </Button>
           )}
           <span className="ms-2 hidden items-center gap-1 text-sm text-fg-subtle pointer-fine:inline-flex">
-            <Kbd>{modifier === 'Cmd' ? '⌘' : 'Ctrl'}</Kbd>
-            <Kbd>Enter</Kbd>
-            <span className="ms-1">to send</span>
+            <KbdCombo keys={[modifier === 'Cmd' ? '⌘' : 'Ctrl', 'Enter']} />
+            <span>to send</span>
           </span>
         </span>
         {onCancel !== undefined && (

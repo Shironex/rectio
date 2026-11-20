@@ -754,7 +754,8 @@ export function FileManager({
           {storage !== undefined && (
             <Meter
               variant="bar"
-              className="w-full"
+              // A rule and room above, so the meter does not read as part of the pager.
+              className="w-full border-t border-line pt-4"
               label="Storage"
               value={Math.min(Math.max(storage.used, 0), storage.total)}
               max={storage.total}

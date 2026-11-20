@@ -323,7 +323,7 @@ function NotificationRow({
       className={cn(
         'flex w-full cursor-pointer gap-3 px-5 py-3 text-start',
         'transition-colors duration-fast ease-standard hover:bg-surface-hover',
-        !notification.read && 'bg-accent-subtle/40',
+        !notification.read && 'bg-accent-subtle/20',
         '-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
       )}
     >

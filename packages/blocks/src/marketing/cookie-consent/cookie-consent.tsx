@@ -259,7 +259,8 @@ export function CookieConsent({
                 setCustomising(true);
               }}
             >
-              Manage<span className="max-sm:hidden">&nbsp;cookies</span>
+              <span className="sm:hidden">Manage</span>
+              <span className="max-sm:hidden">Manage cookies</span>
             </Button>
           </div>
         </section>
