@@ -2,7 +2,7 @@ import {
   ArrowClockwiseIcon,
   BellRingingIcon,
   FileTextIcon,
-  GearIcon,
+  LightningIcon,
   PaperPlaneTiltIcon,
 } from '@phosphor-icons/react';
 import { Button as MotionButton } from '@rectio/motion';
@@ -66,7 +66,7 @@ const COMMANDS: CommandGroup[] = [
     ].map((label) => ({
       id: `do-${label}`,
       label,
-      icon: <GearIcon aria-hidden className="size-4" />,
+      icon: <LightningIcon aria-hidden className="size-4" />,
       onSelect: () => undefined,
     })),
   },
