@@ -82,6 +82,12 @@ Backdrop, viewport and panel in one. Every prop of Base UI's `Drawer.Popup` is a
 <TypeTable
   type={{
     children: { type: 'ReactNode', required: true },
+    size: {
+      type: "'sm' | 'md' | 'lg'",
+      default: "'md'",
+      description:
+        'Width of a sheet on the start or end edge: 20rem, 25rem or 35rem, from the sheet width tokens. A top or bottom sheet spans the screen.',
+    },
     closeLabel: {
       type: 'string',
       default: "'Close'",

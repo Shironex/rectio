@@ -220,7 +220,17 @@
       "width": {
         "$type": "dimension",
         "$value": "{size.400}",
-        "$description": "Width of a sheet that slides in from the start or end edge."
+        "$description": "Width of a sheet that slides in from the start or end edge: the medium size."
+      },
+      "width-sm": {
+        "$type": "dimension",
+        "$value": "{size.320}",
+        "$description": "Width of a small side sheet, such as a short filter list."
+      },
+      "width-lg": {
+        "$type": "dimension",
+        "$value": "{size.560}",
+        "$description": "Width of a large side sheet, such as a record with a conversation."
       },
       "radius": {
         "$type": "dimension",

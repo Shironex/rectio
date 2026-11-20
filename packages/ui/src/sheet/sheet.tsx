@@ -42,13 +42,13 @@ export const SheetClose = Drawer.Close;
 
 const popupBySide: Record<SheetSide, string> = {
   right: cn(
-    'inset-y-0 end-0 h-full w-(--rx-sheet-width) max-w-5/6 border-s',
+    'inset-y-0 end-0 h-full max-w-5/6 border-s',
     'translate-x-(--drawer-swipe-movement-x)',
     'data-starting-style:translate-x-full data-ending-style:translate-x-full',
     'rtl:data-starting-style:-translate-x-full rtl:data-ending-style:-translate-x-full',
   ),
   left: cn(
-    'inset-y-0 start-0 h-full w-(--rx-sheet-width) max-w-5/6 border-e',
+    'inset-y-0 start-0 h-full max-w-5/6 border-e',
     'translate-x-(--drawer-swipe-movement-x)',
     'data-starting-style:-translate-x-full data-ending-style:-translate-x-full',
     'rtl:data-starting-style:translate-x-full rtl:data-ending-style:translate-x-full',
@@ -65,7 +65,18 @@ const popupBySide: Record<SheetSide, string> = {
   ),
 };
 
+export type SheetSize = 'sm' | 'md' | 'lg';
+
+/** The width of a side sheet; a top or bottom sheet spans the screen. */
+const WIDTHS: Record<SheetSize, string> = {
+  sm: 'w-(--rx-sheet-width-sm)',
+  md: 'w-(--rx-sheet-width)',
+  lg: 'w-(--rx-sheet-width-lg)',
+};
+
 export type SheetContentProps = WithClassName<ComponentProps<typeof Drawer.Popup>> & {
+  /** Width of a sheet on the start or end edge: small for a short list, large for a full record. */
+  size?: SheetSize;
   /** Label of the corner close button. Hide it with `showClose={false}` if the footer has one. */
   closeLabel?: string;
   showClose?: boolean;
@@ -78,6 +89,7 @@ export function SheetContent({
   children,
   closeLabel = 'Close',
   showClose = true,
+  size = 'md',
   ...props
 }: SheetContentProps) {
   const side = use(SideContext);
@@ -105,6 +117,7 @@ export function SheetContent({
             'data-swiping:transition-none data-swiping:select-none',
             'data-ending-style:duration-fast data-ending-style:ease-exit',
             popupBySide[side],
+            !vertical && WIDTHS[size],
             className,
           )}
           {...props}

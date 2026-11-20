@@ -70,4 +70,16 @@ describe('Sheet', () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
   });
+
+  it('takes the width of its size on a side edge', async () => {
+    render(
+      <Sheet side="right" defaultOpen>
+        <SheetContent size="lg">
+          <SheetTitle>Ticket</SheetTitle>
+        </SheetContent>
+      </Sheet>,
+    );
+    const panel = await screen.findByRole('dialog');
+    expect(panel.className).toContain('w-(--rx-sheet-width-lg)');
+  });
 });

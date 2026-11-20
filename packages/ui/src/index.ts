@@ -437,6 +437,7 @@ export {
   type SheetDescriptionProps,
   type SheetProps,
   type SheetSide,
+  type SheetSize,
   type SheetTitleProps,
 } from './sheet/sheet';
 export {
