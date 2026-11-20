@@ -300,7 +300,8 @@ export function InvoiceList({
                   <span
                     className={cn('@3xl:hidden', state === 'overdue' && 'text-negative-strong')}
                   >
-                    , {m.dueText(due)}
+                    {/* "19 days overdue" stays one phrase: it wraps whole, never mid-way. */},{' '}
+                    <span className="whitespace-nowrap">{m.dueText(due)}</span>
                   </span>
                 )}
               </span>
