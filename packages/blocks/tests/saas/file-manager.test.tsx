@@ -7,6 +7,7 @@ import {
   fileEntriesSize,
   fileKindOf,
   fileNameError,
+  filePage,
   sortFileEntries,
   storageLevel,
   storageNeedsAttention,
@@ -161,5 +162,75 @@ describe('FileManager', () => {
     render(<FileManager path={PATH} entries={[]} now={NOW} onUpload={vi.fn()} />);
     expect(screen.getByText('Nothing in Q1 yet')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Upload' })).toBeInTheDocument();
+  });
+});
+
+describe('FileManager paging', () => {
+  const MANY: FileEntry[] = Array.from({ length: 23 }, (_, index) => ({
+    id: `f${String(index)}`,
+    name: `File ${String(index + 1).padStart(2, '0')}.txt`,
+    type: 'file' as const,
+    size: 10,
+    modified: at(index),
+  }));
+  const rowNames = () =>
+    screen
+      .getAllByRole('button', { name: /^Actions for / })
+      .map((button) => button.getAttribute('aria-label'));
+
+  it('knows which rows a page shows', () => {
+    expect(filePage(23, 10, 1)).toEqual({ page: 1, pageCount: 3, first: 1, last: 10 });
+    expect(filePage(23, 10, 3)).toEqual({ page: 3, pageCount: 3, first: 21, last: 23 });
+    expect(filePage(23, 10, 9).page).toBe(3);
+    expect(filePage(0, 10, 1)).toEqual({ page: 1, pageCount: 1, first: 0, last: 0 });
+    expect(filePage(23, Infinity, 2)).toEqual({ page: 1, pageCount: 1, first: 1, last: 23 });
+  });
+
+  it('pages a long folder and says which rows are shown', async () => {
+    const onPageChange = vi.fn();
+    render(
+      <FileManager
+        path={PATH}
+        entries={MANY}
+        now={NOW}
+        onDelete={vi.fn()}
+        pageSize={10}
+        onPageChange={onPageChange}
+      />,
+    );
+    expect(rowNames()).toHaveLength(10);
+    expect(screen.getByText(/1 to 10 of 23 items/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Page 3' }));
+    expect(onPageChange).toHaveBeenCalledWith(3);
+    expect(rowNames()).toEqual([
+      'Actions for File 21.txt',
+      'Actions for File 22.txt',
+      'Actions for File 23.txt',
+    ]);
+  });
+
+  it('shows the whole folder when paging is turned off', () => {
+    render(
+      <FileManager path={PATH} entries={MANY} now={NOW} onDelete={vi.fn()} pageSize={Infinity} />,
+    );
+    expect(rowNames()).toHaveLength(23);
+    expect(screen.queryByRole('navigation', { name: 'Pages of this folder' })).toBeNull();
+  });
+
+  it('takes one page from your server with the total', () => {
+    render(
+      <FileManager
+        path={PATH}
+        entries={MANY.slice(0, 5)}
+        now={NOW}
+        onDelete={vi.fn()}
+        pageSize={5}
+        page={2}
+        totalEntries={23}
+      />,
+    );
+    expect(rowNames()).toHaveLength(5);
+    expect(screen.getByText(/6 to 10 of 23 items/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Page 2' })).toHaveAttribute('aria-current', 'page');
   });
 });

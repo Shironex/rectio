@@ -149,3 +149,28 @@ export function storageLevel(usage: StorageUsage): 'ok' | 'warning' | 'over' {
 export function storageNeedsAttention(usage: StorageUsage): boolean {
   return usage.total <= 0 || usage.used / usage.total >= 0.9;
 }
+
+/** Rows on one page of a folder unless you pass another `pageSize`. */
+export const FILE_PAGE_SIZE = 50;
+
+export interface FilePage {
+  /** The page shown, from 1, kept inside the folder's pages. */
+  page: number;
+  pageCount: number;
+  /** Position of the first and last row shown, from 1; both 0 for an empty folder. */
+  first: number;
+  last: number;
+}
+
+/**
+ * Which rows of a folder one page shows. `total` is every entry in the folder; a `pageSize` of
+ * Infinity (or 0) shows them all on one page.
+ */
+export function filePage(total: number, pageSize: number, page: number): FilePage {
+  const size =
+    pageSize > 0 && Number.isFinite(pageSize) ? Math.floor(pageSize) : Math.max(total, 1);
+  const pageCount = Math.max(1, Math.ceil(total / size));
+  const current = Math.min(Math.max(1, Math.floor(page)), pageCount);
+  const first = total === 0 ? 0 : (current - 1) * size + 1;
+  return { page: current, pageCount, first, last: Math.min(total, current * size) };
+}

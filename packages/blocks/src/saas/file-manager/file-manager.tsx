@@ -36,6 +36,7 @@ import {
   FieldLabel,
   Input,
   Meter,
+  Pagination,
   Table,
   TableBody,
   TableCaption,
@@ -54,11 +55,20 @@ import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
 import { useNow, useRemovalFocus } from '../lib/focus';
-import { formatBytes, formatDateTime, isoDateTime, countLabel, relativeTime } from '../lib/saas';
+import {
+  countLabel,
+  formatBytes,
+  formatDateTime,
+  isoDateTime,
+  numberFormat,
+  relativeTime,
+} from '../lib/saas';
 import { USAGE_NOTE, USAGE_TONE, focusRing } from '../lib/styles';
 import {
+  FILE_PAGE_SIZE,
   fileEntriesSize,
   fileKindOf,
+  filePage,
   fileNameError,
   sortFileEntries,
   storageLevel,
@@ -91,6 +101,20 @@ export interface FileManagerProps {
   onDelete?: (entryIds: string[]) => void;
   /** Shows an Upgrade link under the storage meter. */
   onUpgrade?: () => void;
+  /**
+   * Rows per page, 50 by default: a long folder pages instead of rendering every row. Pass
+   * `Infinity` to show the whole folder at once.
+   */
+  pageSize?: number;
+  /** The page shown, from 1, to control paging yourself; leave it out and the block keeps it. */
+  page?: number;
+  /** Called with the page asked for, from 1: fetch it when you page on the server. */
+  onPageChange?: (page: number) => void;
+  /**
+   * Every entry in the folder, when you page on the server: `entries` is then only the page shown
+   * and the block does not slice it. Sorting applies within the page you pass.
+   */
+  totalEntries?: number;
   /** Entries selected on first render, such as the files a previous step picked. */
   defaultSelectedIds?: readonly string[];
   /** The moment "modified" is measured from. */
@@ -174,6 +198,10 @@ export function FileManager({
   onDelete,
   onUpgrade,
   defaultSelectedIds,
+  pageSize = FILE_PAGE_SIZE,
+  page: requestedPage,
+  onPageChange,
+  totalEntries,
   now: requestedNow,
   locale: requestedLocale,
   title,
@@ -192,7 +220,23 @@ export function FileManager({
   const [dropping, setDropping] = useState(false);
 
   const current = path.at(-1);
-  const sorted = sortFileEntries(entries, sort.key, sort.ascending, locale);
+  const sortedAll = sortFileEntries(entries, sort.key, sort.ascending, locale);
+  // Paging: the block slices the folder unless your server already sent just the page.
+  const server = totalEntries !== undefined;
+  const folderId = current?.id;
+  const [ownPage, setOwnPage] = useState({ folderId, page: 1 });
+  // Another folder starts on its first page.
+  if (ownPage.folderId !== folderId) setOwnPage({ folderId, page: 1 });
+  const paging = filePage(
+    server ? totalEntries : sortedAll.length,
+    pageSize,
+    requestedPage ?? (ownPage.folderId === folderId ? ownPage.page : 1),
+  );
+  const goToPage = (next: number) => {
+    setOwnPage({ folderId, page: next });
+    onPageChange?.(next);
+  };
+  const sorted = server ? sortedAll : sortedAll.slice(paging.first - 1, paging.last);
   // In-place swaps hand focus back: a closed rename to the row's menu, a delete to the table.
   const tableArea = useRef<HTMLDivElement>(null);
   const returnFocus = useRef<string | null>(null);
@@ -222,6 +266,8 @@ export function FileManager({
 
   // A new key starts in its natural order (names A to Z, newest and largest first); the same key flips.
   const sortBy = (key: FileSortKey) => {
+    // A new order starts again from the first page.
+    if (paging.page !== 1) goToPage(1);
     setSort((was) =>
       was.key === key ? { key, ascending: !was.ascending } : { key, ascending: key === 'name' },
     );
@@ -292,7 +338,7 @@ export function FileManager({
   ];
 
   const summary = [
-    countLabel(entries.length, 'item'),
+    countLabel(totalEntries ?? entries.length, 'item'),
     folders > 0 ? countLabel(folders, 'folder') : null,
     fileEntriesSize(entries) > 0 ? formatBytes(fileEntriesSize(entries), locale) : null,
   ]
@@ -681,6 +727,21 @@ export function FileManager({
               </TableBody>
             </Table>
           </div>
+          {paging.pageCount > 1 && (
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+              <p aria-live="polite" className="text-sm text-fg-muted numeric">
+                {numberFormat(locale).format(paging.first)} to{' '}
+                {numberFormat(locale).format(paging.last)} of{' '}
+                {countLabel(server ? totalEntries : sortedAll.length, 'item')}
+              </p>
+              <Pagination
+                label="Pages of this folder"
+                page={paging.page}
+                pageCount={paging.pageCount}
+                onPageChange={goToPage}
+              />
+            </div>
+          )}
           {storage !== undefined && (
             <Meter
               variant="bar"
