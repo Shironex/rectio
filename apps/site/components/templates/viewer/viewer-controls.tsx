@@ -54,7 +54,7 @@ export function ViewerControls({
           if (page !== undefined) onRoute(page);
         }}
       >
-        <SelectTrigger aria-label="Page" className="w-full sm:w-64">
+        <SelectTrigger aria-label="Page" className="w-full sm:w-56">
           <span className="truncate">
             {title !== '' ? title : (pages.find((p) => p.route === route)?.label ?? 'Another page')}
           </span>
@@ -72,6 +72,7 @@ export function ViewerControls({
         </SelectContent>
       </Select>
       <Segmented
+        touch
         label="Width"
         value={device}
         onChange={onDevice}
@@ -83,7 +84,7 @@ export function ViewerControls({
             label: (
               <>
                 <Icon aria-hidden weight="bold" className="size-3.5" />
-                <span className="max-lg:sr-only">{d.label}</span>
+                <span className="max-2xl:sr-only">{d.label}</span>
               </>
             ),
           };
@@ -92,9 +93,10 @@ export function ViewerControls({
       <div className="flex items-center gap-3 sm:ms-auto">
         {/* The site's own theme switch sits in the bar above: say which one this is. */}
         <span aria-hidden className="text-sm text-fg-muted max-md:hidden">
-          Template theme
+          Template
         </span>
         <Segmented
+          touch
           label="Template theme"
           value={look.theme}
           onChange={(theme) => {
@@ -103,6 +105,7 @@ export function ViewerControls({
           options={THEMES.map((t) => ({ value: t.id, label: t.name }))}
         />
         <Segmented
+          touch
           label="Template mode"
           value={look.mode}
           onChange={(mode) => {

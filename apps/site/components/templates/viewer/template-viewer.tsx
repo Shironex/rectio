@@ -82,51 +82,28 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
 
   return (
     <div className="site-viewer flex flex-col">
-      <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-4 px-4 pt-5 pb-4 sm:px-6">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <Link
-              href="/templates"
-              className="site-press inline-flex size-11 shrink-0 items-center justify-center rounded-control border border-line text-fg-muted pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:size-9"
-            >
-              <ArrowLeftIcon aria-hidden weight="bold" className="size-4 rtl:-scale-x-100" />
-              <span className="sr-only">All templates</span>
-            </Link>
-            <div className="flex min-w-0 flex-col">
-              <h1 className="truncate font-display text-xl font-heading tracking-tight text-fg">
-                {template.title}
-              </h1>
-              <p className="flex items-center gap-2 text-sm text-fg-muted">
-                <span>{template.category}</span>
-                <span aria-hidden>/</span>
-                <span className="numeric">
-                  {pages.length} {pages.length === 1 ? 'page' : 'pages'}
-                </span>
-              </p>
-            </div>
-            <ProBadge />
-          </div>
-          <div className="flex w-full flex-wrap items-center gap-2 sm:ms-auto sm:w-auto">
-            <CopyCommand command={template.command} className="max-xl:hidden" />
-            <Button
-              variant="ghost"
-              render={<Link href={template.docsHref} />}
-              className="max-sm:flex-1"
-            >
-              <BookOpenTextIcon aria-hidden weight="bold" className="size-4" />
-              Docs
-            </Button>
-            <Button
-              render={<a href={urlOf(base, path)} target="_blank" rel="noopener noreferrer" />}
-              className="max-sm:flex-1"
-            >
-              <ArrowSquareOutIcon aria-hidden weight="bold" className="size-4" />
-              Open full screen
-              <span className="sr-only"> (opens in a new tab)</span>
-            </Button>
+      <div className="mx-auto flex w-full max-w-screen-2xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3 sm:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <Link
+            href="/templates"
+            className="site-press inline-flex size-11 shrink-0 items-center justify-center rounded-control border border-line text-fg-muted pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:size-9"
+          >
+            <ArrowLeftIcon aria-hidden weight="bold" className="size-4 rtl:-scale-x-100" />
+            <span className="sr-only">All templates</span>
+          </Link>
+          <div className="flex min-w-0 flex-col">
+            <h1 className="flex items-center gap-2 font-display text-xl font-heading tracking-tight text-fg">
+              <span className="truncate">{template.title}</span>
+              <ProBadge />
+            </h1>
+            <p className="text-sm text-fg-muted">
+              {template.category}, <span className="numeric">{pages.length}</span>{' '}
+              {pages.length === 1 ? 'page' : 'pages'}
+            </p>
           </div>
         </div>
         <ViewerControls
+          className="min-w-0 flex-1 max-sm:order-last max-sm:basis-full"
           pages={pages}
           route={routeFor(routes, path)}
           title={path === '/' ? 'Home' : pageTitle}
@@ -139,12 +116,34 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
           look={look}
           onLook={setLook}
         />
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <Button
+            variant="secondary"
+            render={<Link href={template.docsHref} />}
+            className="max-sm:flex-1"
+          >
+            <BookOpenTextIcon aria-hidden weight="bold" className="size-4" />
+            Docs
+          </Button>
+          <Button
+            render={<a href={urlOf(base, path)} target="_blank" rel="noopener noreferrer" />}
+            className="max-sm:flex-1"
+          >
+            <ArrowSquareOutIcon aria-hidden weight="bold" className="size-4" />
+            Open full screen
+            <span className="sr-only"> (opens in a new tab)</span>
+          </Button>
+        </div>
       </div>
       <div className="site-panel flex min-h-0 flex-1 flex-col border-t border-line">
-        <div ref={stageRef} className="site-viewer-stage flex justify-center px-4 py-4 sm:px-6">
+        <div
+          ref={stageRef}
+          className="site-viewer-stage flex justify-center px-4 pt-4 pb-3 sm:px-6"
+        >
           <PreviewFrame
             key={opened?.n ?? 0}
             src={src}
+            fullScreen={urlOf(base, path)}
             width={deviceWidth(device)}
             stage={stage}
             look={look}
@@ -153,8 +152,11 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
             onLookChange={setLook}
           />
         </div>
-        <div className="flex flex-col items-start gap-2 px-4 pb-6 xl:hidden sm:px-6">
+        <div className="mx-auto flex w-full max-w-screen-2xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 pb-4 sm:px-6">
           <CopyCommand command={template.command} className="max-w-full overflow-x-auto" />
+          <p className="text-sm text-fg-muted">
+            Templates are Pro: the command asks for your license key.
+          </p>
         </div>
       </div>
     </div>

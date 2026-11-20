@@ -11,6 +11,9 @@ export interface Look {
   mode: Mode;
 }
 
+/** After this long without a page, the veil offers the preview in a tab of its own. */
+const SLOW_MS = 8000;
+
 /** How often the viewer checks where the template has routed to on the client. */
 const FOLLOW_MS = 250;
 
@@ -48,6 +51,7 @@ function documentOf(frame: HTMLIFrameElement | null): Document | null {
  */
 export function PreviewFrame({
   src,
+  fullScreen,
   width,
   stage,
   look,
@@ -56,6 +60,8 @@ export function PreviewFrame({
   onLookChange,
 }: {
   src: string;
+  /** The page on show as a URL of its own, offered when the frame is slow to load. */
+  fullScreen: string;
   /** The device width the template lays out at, in CSS pixels. */
   width: number;
   /** The room the frame has. */
@@ -71,6 +77,16 @@ export function PreviewFrame({
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
   const [doc, setDoc] = useState<Document | null>(null);
   const loaded = loadedSrc === src;
+  const [slowSrc, setSlowSrc] = useState<string | null>(null);
+  useEffect(() => {
+    if (loaded) return;
+    const timer = setTimeout(() => {
+      setSlowSrc(src);
+    }, SLOW_MS);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [loaded, src]);
   const latest = useRef({ look, onNavigate, onLookChange });
   useEffect(() => {
     latest.current = { look, onNavigate, onLookChange };
@@ -132,17 +148,32 @@ export function PreviewFrame({
         }}
         className={cn(
           'absolute start-0 top-0 block origin-top-left border-0 bg-surface-canvas transition-opacity duration-fast ease-standard rtl:origin-top-right',
+          'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
           loaded ? 'opacity-100' : 'opacity-0',
         )}
         style={{ width, height: stage.height / scale, scale: String(scale) }}
       />
       {!loaded && (
-        <p
+        <div
           role="status"
-          className="absolute inset-0 flex items-center justify-center text-sm text-fg-muted"
+          className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center text-sm text-fg-muted"
         >
-          Loading the preview
-        </p>
+          {slowSrc === src ? (
+            <>
+              <p>The preview is taking longer than usual.</p>
+              <a
+                href={fullScreen}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center font-medium text-fg underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              >
+                Open it in a new tab
+              </a>
+            </>
+          ) : (
+            <p>Loading the preview</p>
+          )}
+        </div>
       )}
     </div>
   );

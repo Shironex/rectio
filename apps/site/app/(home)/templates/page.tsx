@@ -43,7 +43,7 @@ export default function TemplatesPage() {
             {templates.map((template, i) => (
               <li
                 key={template.name}
-                className="site-reveal group grid items-center gap-8 border-t border-line py-12 first:border-t-0 first:pt-0 md:py-16 lg:grid-cols-12 lg:gap-12"
+                className="site-reveal group grid grid-cols-1 items-center gap-8 border-t border-line py-12 first:border-t-0 first:pt-0 md:py-16 lg:grid-cols-12 lg:gap-12"
               >
                 <Link
                   href={template.previewHref}
@@ -53,7 +53,7 @@ export default function TemplatesPage() {
                 >
                   <TemplateFrame template={template} phone eager={i === 0} />
                 </Link>
-                <div className="flex flex-col items-start gap-4 lg:col-span-5">
+                <div className="flex min-w-0 flex-col items-start gap-4 lg:col-span-5">
                   <p className="flex items-center gap-2 text-sm text-fg-muted">
                     <ProBadge />
                     {CATEGORY_LABELS[template.category]}, {template.pages.length}{' '}
