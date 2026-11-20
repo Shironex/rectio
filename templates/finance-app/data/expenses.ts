@@ -30,7 +30,7 @@ type Row = [
 
 const ROWS: Row[] = [
   // Waiting for a decision, newest first.
-  ['Marta Zielińska', 'Aer Lingus', 'Travel', day(2026, 11, 17), 318.4, 'pending'],
+  ['Clara Hughes', 'Aer Lingus', 'Travel', day(2026, 11, 17), 318.4, 'pending'],
   [
     'Tom Avery',
     'The Westbury',
@@ -40,7 +40,7 @@ const ROWS: Row[] = [
     'pending',
     ['Over the nightly hotel limit of €220'],
   ],
-  ['Marta Zielińska', 'FreeNow', 'Travel', day(2026, 11, 17), 23.4, 'pending'],
+  ['Clara Hughes', 'FreeNow', 'Travel', day(2026, 11, 17), 23.4, 'pending'],
   ['Jonas Berg', 'JetBrains', 'Software', day(2026, 11, 14), 289, 'pending'],
   [
     'Aoife Byrne',
@@ -65,17 +65,17 @@ const ROWS: Row[] = [
   ['Aoife Byrne', 'Circle K', 'Travel', day(2026, 11, 11), 71.2, 'pending'],
   // Decided.
   ['Jonas Berg', 'Figma', 'Software', day(2026, 11, 9), 540, 'approved'],
-  ['Marta Zielińska', 'Hotel Bristol, Warsaw', 'Accommodation', day(2026, 11, 5), 412, 'approved'],
-  ['Marta Zielińska', 'LOT Polish Airlines', 'Travel', day(2026, 11, 3), 286.75, 'approved'],
+  ['Clara Hughes', 'Hotel Bristol, Dublin', 'Accommodation', day(2026, 11, 5), 412, 'approved'],
+  ['Clara Hughes', 'KLM', 'Travel', day(2026, 11, 3), 286.75, 'approved'],
   ['Tom Avery', 'Avis', 'Travel', day(2026, 11, 6), 164.3, 'approved'],
   ['Sofia Lindqvist', 'GitHub', 'Software', day(2026, 11, 2), 84, 'approved'],
-  ['Piotr Nowak', 'Chartered Accountants Ireland', 'Training', day(2026, 10, 30), 395, 'approved'],
+  ['Rory Quinn', 'Chartered Accountants Ireland', 'Training', day(2026, 10, 30), 395, 'approved'],
   ['Aoife Byrne', 'Lufthansa', 'Travel', day(2026, 10, 28), 498.6, 'approved'],
   ['Aoife Byrne', 'Motel One, Hamburg', 'Accommodation', day(2026, 10, 28), 268, 'approved'],
   ['Jonas Berg', 'Officeworks', 'Office', day(2026, 10, 27), 46.8, 'approved'],
   ['Tom Avery', 'Chapter One', 'Client entertainment', day(2026, 10, 23), 186, 'approved'],
   ['Cian Doherty', 'Bus Éireann', 'Travel', day(2026, 10, 21), 22.5, 'approved'],
-  ['Marta Zielińska', 'Notion', 'Software', day(2026, 10, 20), 96, 'approved'],
+  ['Clara Hughes', 'Notion', 'Software', day(2026, 10, 20), 96, 'approved'],
   ['Sofia Lindqvist', 'Apple', 'Equipment', day(2026, 10, 15), 2_349, 'approved'],
   ['Aoife Byrne', 'Ryanair', 'Travel', day(2026, 11, 4), 186.2, 'rejected'],
   ['Tom Avery', 'The Shelbourne', 'Meals', day(2026, 10, 29), 342, 'rejected'],
@@ -90,7 +90,7 @@ const REASONS: Record<string, string> = {
   Uber: 'Duplicate of a claim from 17 October',
 };
 
-const DECIDERS = ['Niamh Walsh', 'Piotr Nowak', 'Sofia Lindqvist'];
+const DECIDERS = ['Niamh Walsh', 'Rory Quinn', 'Sofia Lindqvist'];
 
 function at(date: Date, days: number, hour: number, minute: number): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days, hour, minute);

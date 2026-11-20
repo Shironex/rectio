@@ -83,7 +83,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
   {
     id: 't2',
     quote: 'Swaps sort themselves out. I approve them on the bus.',
-    name: 'Tomasz Wrona',
+    name: 'Luke Hartley',
     role: 'Floor lead',
     company: 'Copperleaf',
   },

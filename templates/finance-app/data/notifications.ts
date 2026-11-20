@@ -35,7 +35,7 @@ export const NOTIFICATIONS: readonly Notification[] = [
   {
     id: 'n4',
     unread: false,
-    title: 'October closed by Piotr Nowak',
+    title: 'October closed by Rory Quinn',
     detail: 'Journal locked, reports ready',
     time: '12 Nov',
     href: '/reports',

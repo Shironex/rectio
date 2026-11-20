@@ -51,7 +51,7 @@ const CURRENCIES = [
   { value: 'EUR', label: 'Euro' },
   { value: 'GBP', label: 'Pound sterling' },
   { value: 'USD', label: 'US dollar' },
-  { value: 'PLN', label: 'Polish zloty' },
+  { value: 'CHF', label: 'Swiss franc' },
   { value: 'SEK', label: 'Swedish krona' },
 ];
 

@@ -145,7 +145,7 @@ const ROWS: Row[] = [
     'Pinewood Joinery',
     'Team',
     9,
-    'Marta Kowalska',
+    'Maeve Kelly',
     'Chicago, IL',
     at(11, 18, 9, 0, 2023),
     0,
