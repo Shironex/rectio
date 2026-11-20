@@ -29,6 +29,28 @@ unchanged, so a page can import every block from one place.
 Navigation, headings, releases and search results are props. Nothing here fetches: feedback takes
 an `onSubmit`, search takes a provider, and you decide where each goes.
 
+## Every word is a message
+
+Each block takes a `messages` prop for the words it prints itself, including what screen readers
+hear: the search dialog, the table of contents heading, the copy button, the pager, the feedback
+question and the rest. The English defaults are exported beside each block (`DOCS_SEARCH_MESSAGES`,
+typed `DocsSearchMessages`, and so on). Pass only the keys you change; a message that counts or
+names a value is a small function, so a language can order the words and pick its plural form.
+
+```tsx
+<DocsSearch
+  search={search}
+  locale="pl-PL"
+  messages={{
+    placeholder: 'Szukaj w dokumentacji',
+    results: (count) => `Wyniki: ${String(count)}`,
+  }}
+/>
+```
+
+Label props the blocks already had, such as `tocLabel` or `copyLabel`, still win when you pass
+them.
+
 ## Syntax highlighting is token driven
 
 The code block does not bundle a highlighter. It takes `tokens` from any build-time highlighter
