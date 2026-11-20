@@ -8,7 +8,8 @@ const DOT: Record<TimelineTone, string> = {
   neutral: 'bg-surface border-2 border-line-strong',
   accent: 'bg-accent',
   positive: 'bg-positive',
-  warning: 'bg-warning',
+  // Amber is too light for 3:1 on a light surface by itself: a hairline of the strong step holds it.
+  warning: 'border border-warning-strong bg-warning',
   negative: 'bg-negative',
 };
 

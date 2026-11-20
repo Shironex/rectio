@@ -25,11 +25,13 @@ const DOT_SIZES: Record<AvatarSize, string> = {
 
 /**
  * Each status differs in shape as well as colour: online is solid, away has a hollow centre, busy
- * carries a bar, offline is an outline. The words are always in the accessible name.
+ * carries a bar, offline is an outline. The words are always in the accessible name. Amber is too
+ * light to hold 3:1 on a light surface by itself, so the away dot keeps a hairline of the strong
+ * warning step around it.
  */
 const STATUS: Record<AvatarStatus, string> = {
   online: 'bg-positive',
-  away: 'bg-warning after:absolute after:inset-1/4 after:rounded-full after:bg-surface',
+  away: 'border border-warning-strong bg-warning after:absolute after:inset-1/4 after:rounded-full after:bg-surface',
   busy: 'bg-negative after:absolute after:inset-x-1/5 after:top-1/2 after:h-px after:-translate-y-1/2 after:bg-negative-contrast',
   offline: 'border-2 border-fg-subtle bg-surface',
 };
