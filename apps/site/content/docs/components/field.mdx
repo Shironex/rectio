@@ -30,7 +30,8 @@ same way `Input` does.
 
 Errors show in two cases. Base UI shows `FieldError` when a native check or a `validate` function
 fails. When the app sets `<Field invalid>` itself, for a server message or a form library, the error
-shows too, so an invalid field is never only a red border.
+shows too, so an invalid field is never only a red border. An empty `FieldError` (`null`, `false`
+or `''`) shows the check's own message, or nothing: the warning icon never appears without words.
 
 Mark the minority. When most fields of a form are required, give the optional ones
 `<FieldLabel optional>` and leave the rest unmarked.
@@ -68,8 +69,8 @@ Every prop of Base UI's `Field.Error`, including `match` to show it for one vali
   type={{
     children: {
       type: 'ReactNode',
-      required: true,
-      description: 'The message. Say what to enter, not only that it is wrong.',
+      description:
+        'The message. Say what to enter, not only that it is wrong. Leave it empty to show the native or validate message instead; with no message at all nothing renders.',
     },
   }}
 />

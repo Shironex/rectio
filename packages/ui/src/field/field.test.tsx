@@ -59,6 +59,50 @@ describe('Field invalid set by the app', () => {
   });
 });
 
+describe('FieldError never shows a bare icon', () => {
+  it('renders nothing when the app marks the field invalid without a message', () => {
+    const { container } = render(
+      <Field invalid>
+        <FieldLabel>Email</FieldLabel>
+        <Input />
+        <FieldError>{null}</FieldError>
+      </Field>,
+    );
+    expect(container.querySelector('svg')).toBeNull();
+    expect(container.querySelector('[data-slot="field-error"]:not([hidden])')).toBeNull();
+  });
+
+  it('shows the check message with the icon when it is left empty', async () => {
+    const { container } = render(
+      <Field validate={() => 'Enter a work email.'} validationMode="onBlur">
+        <FieldLabel>Email</FieldLabel>
+        <Input />
+        <FieldError />
+      </Field>,
+    );
+    const input = screen.getByRole('textbox', { name: 'Email' });
+    await userEvent.type(input, 'a');
+    await userEvent.tab();
+    const error = await screen.findByText('Enter a work email.');
+    expect(error).toBeVisible();
+    expect(container.querySelector('[data-slot="field-error"] svg')).not.toBeNull();
+    expect(input).toHaveAccessibleDescription('Enter a work email.');
+  });
+
+  it('keeps the icon out of the accessible description', () => {
+    render(
+      <Field invalid>
+        <FieldLabel>Email</FieldLabel>
+        <Input />
+        <FieldError>Enter a work email.</FieldError>
+      </Field>,
+    );
+    expect(screen.getByRole('textbox', { name: 'Email' })).toHaveAccessibleDescription(
+      'Enter a work email.',
+    );
+  });
+});
+
 describe('FieldLabel optional', () => {
   it('adds the word to the accessible name, not only a visual marker', () => {
     render(
