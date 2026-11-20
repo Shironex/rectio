@@ -35,11 +35,12 @@ const blockItems = (
   description: string,
   folder: string,
   file: string,
+  version = '0.1.0',
 ) => [
   {
     name,
     type: 'block' as const,
-    version: '0.1.0',
+    version,
     title,
     description,
     categories: ['finance', 'blocks'],
@@ -257,7 +258,7 @@ export default defineRegistry({
     {
       name: 'amount-input',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'AmountInput',
       description: 'Locale-aware money entry with the currency symbol in place.',
       categories: ['forms', 'finance'],
@@ -365,7 +366,7 @@ export default defineRegistry({
     {
       name: 'avatar-group',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'AvatarGroup',
       description: 'Overlapping or spaced avatars with a +N chip; names appear on hover and focus.',
       categories: ['people'],
@@ -626,7 +627,7 @@ export default defineRegistry({
     {
       name: 'file-upload',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'File upload',
       description:
         'Dropzone or compact trigger with accept, size and count rules, and a list of uploads with progress, retry and remove.',
@@ -1105,6 +1106,7 @@ export default defineRegistry({
           'Suppliers with what is owed and overdue, terms, next due date, search, status filter and sorting.',
           'vendors-list',
           'vendors-list',
+          '0.1.1',
         ),
       ],
     },
@@ -1298,6 +1300,7 @@ export default defineRegistry({
           'team-members',
           'Team members',
           'Members and roles, pending invites with resend and revoke, and an invite form.',
+          { version: '0.1.1' },
         ),
         ...saasItems(
           'sign-up',
