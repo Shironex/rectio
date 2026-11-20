@@ -108,7 +108,8 @@ export default function Home() {
             }
           >
             The motion add-on has the same names and props as the plain components and costs{' '}
-            {kit.motionKb} kB gzip. Choose per component by import path, and mix both on one screen.
+            <span className="whitespace-nowrap">{kit.motionKb} kB gzip</span>. Choose per component
+            by import path, and mix both on one screen.
           </SectionIntro>
           <PlainVsMotion />
         </Section>
@@ -163,7 +164,7 @@ export default function Home() {
               }
             />
             <p className="site-reveal text-base text-fg-muted">
-              Still unsure? The{' '}
+              Not covered here? The{' '}
               <Link
                 href="/docs"
                 className="font-medium text-fg underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-fg"
