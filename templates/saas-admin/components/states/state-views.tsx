@@ -37,6 +37,7 @@ function SkeletonFigures({
           <SkeletonLine size="xs" width="w-2/5" index={i} />
           {detailed && <SkeletonLine size="sm" width="w-3/5" index={i} />}
           {detailed && <SkeletonLine size="xs" width="w-1/2" index={i} />}
+          {detailed && <SkeletonLine size="sm" width="w-1/3" index={i} />}
         </div>
       ))}
     </div>

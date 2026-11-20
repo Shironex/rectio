@@ -17,7 +17,7 @@ export const HEALTH_TONES: Record<CustomerHealth, BadgeTone> = {
 export const PLAN_TONES: Record<CustomerPlan, BadgeTone> = {
   Starter: 'neutral',
   Team: 'neutral',
-  Business: 'info',
+  Business: 'neutral',
 };
 
 /** The health badge, with what it means one hover or focus away. */

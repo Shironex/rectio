@@ -90,10 +90,10 @@ export const NOTIFICATION_EVENTS: readonly NotificationEvent[] = [
   {
     id: 'assigned',
     label: 'A ticket is assigned to me',
-    group: 'Tickets',
+    group: 'Your tickets',
     required: ['app'],
   },
-  { id: 'mention', label: 'Someone mentions me', group: 'Tickets', required: ['app'] },
+  { id: 'mention', label: 'Someone mentions me', group: 'Your tickets', required: ['app'] },
   {
     id: 'reply',
     label: 'A customer replies on my ticket',
@@ -116,7 +116,7 @@ export const NOTIFICATION_EVENTS: readonly NotificationEvent[] = [
   {
     id: 'security',
     label: 'Blocked sign-ins and new devices',
-    group: 'Workspace',
+    group: 'Security',
     required: ['email'],
   },
   { id: 'billing', label: 'Invoices and payment problems', group: 'Workspace' },

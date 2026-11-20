@@ -116,7 +116,7 @@ function PlanUsage({ className }: { className?: string }) {
   return (
     <BlockPanel
       title="Plan usage"
-      description="Business plan, resets 1 December. Marks sit at 80% and 95%."
+      description="Business plan, resets 1 December. Marks show 80% and 95% of each allowance."
       bodyClassName="gap-5"
       actions={
         <Button variant="ghost" size="sm" render={<Link href="/billing" />} nativeButton={false}>
@@ -292,7 +292,7 @@ export function OverviewPage() {
                 {...(f.unit === undefined ? {} : { unit: f.unit })}
                 change={{
                   ...f.change,
-                  comparison: range === '14d' ? 'vs prior 14 days' : 'vs prior 30 days',
+                  comparison: 'vs prior',
                 }}
                 description={f.description}
                 trend={<Sparkline values={f.series} favourable={f.change.favourable} />}

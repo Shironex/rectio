@@ -228,7 +228,7 @@ export function CustomersPage() {
             : undefined
         }
         actions={
-          state === 'empty' ? undefined : (
+          state === 'empty' || state === 'error' || state === 'loading' ? undefined : (
             <>
               <Menu>
                 <MenuTrigger render={<Button variant="secondary" />}>
