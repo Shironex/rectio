@@ -156,7 +156,7 @@ export const themeMetaSchema = z.object({
 });
 
 /**
- * One installable unit. A deliberate superset of shadcn's registry item where the fields overlap
+ * One installable unit. A superset of the common registry item shape where the fields overlap
  * (name, type, title, description, dependencies, registryDependencies, files, cssVars, docs,
  * categories, meta), plus version, per-file hashes, an item integrity and requires.
  */

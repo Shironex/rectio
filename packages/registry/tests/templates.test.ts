@@ -32,7 +32,7 @@ const TEMPLATE: Record<string, string> = {
     name: '@fixture/template-books',
     version: '1.2.0',
     private: true,
-    license: 'UNLICENSED',
+    license: 'MIT',
     scripts: {
       dev: 'next dev',
       build: 'next build',
