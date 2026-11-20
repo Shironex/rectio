@@ -489,11 +489,13 @@ export function customerById(id: string): Customer | undefined {
 function seeded(seed: string) {
   let h = 2166136261;
   for (const ch of seed) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  // A small, well-mixed generator (mulberry32): the same seed gives the same data every build.
+  let state = h >>> 0;
   return () => {
-    h = Math.imul(h ^ (h >>> 15), 2246822507);
-    h = Math.imul(h ^ (h >>> 13), 3266489909);
-    h ^= h >>> 16;
-    return (h >>> 0) / 4294967296;
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
 
@@ -604,6 +606,10 @@ const SUBJECTS = [
   'Quote template lost its logo',
   'Two-factor codes not reaching a new phone',
   'Booking page shows slots on a public holiday',
+  'Crew calendar is blank on Monday mornings',
+  'Can a customer sign a quote on their phone?',
+  'Photos attached to a job do not upload',
+  'Change the reply-to address on invoices',
 ];
 
 /** The customer's recent tickets, newest first, as many as its open count plus some resolved. */
@@ -612,9 +618,11 @@ export function customerTickets(
   people: readonly UserRecord[],
 ): CustomerTicket[] {
   const random = seeded(`${customer.id}-tickets`);
-  const total = customer.openTickets + 4 + Math.floor(random() * 4);
+  const total = Math.min(SUBJECTS.length, customer.openTickets + 4 + Math.floor(random() * 4));
   const list: CustomerTicket[] = [];
   let minutes = Math.max(20, Math.floor(random() * 240));
+  // Step through the subjects by 5 (coprime with 16), so no subject repeats within a customer.
+  const first = Math.floor(random() * SUBJECTS.length);
   for (let i = 0; i < total; i += 1) {
     const open = i < customer.openTickets;
     const status: TicketStatus = open ? (random() > 0.6 ? 'waiting' : 'open') : 'resolved';
@@ -622,7 +630,7 @@ export function customerTickets(
     list.push({
       id: `${customer.id}-t${String(i)}`,
       reference: `CPL-${String(2140 - Math.floor(random() * 30) - i * 37)}`,
-      subject: SUBJECTS[Math.floor(random() * SUBJECTS.length)] ?? 'Question about the app',
+      subject: SUBJECTS[(first + i * 5) % SUBJECTS.length] ?? 'Question about the app',
       status,
       requester,
       updated: new Date(NOW.getTime() - minutes * 60_000),

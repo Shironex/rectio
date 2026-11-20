@@ -51,10 +51,10 @@ export const FIGURES: Record<Range, readonly Figure[]> = {
     {
       id: 'open',
       label: 'Open tickets',
-      value: '38',
-      change: { value: '6', direction: 'down', favourable: true },
-      description: '9 past their first-response target',
-      series: [52, 49, 47, 51, 46, 44, 45, 43, 41, 44, 42, 40, 39, 38],
+      value: '12',
+      change: { value: '5', direction: 'down', favourable: true },
+      description: '1 past its first-response target',
+      series: [17, 16, 18, 15, 16, 14, 15, 13, 14, 15, 13, 12, 13, 12],
     },
     {
       id: 'first-response',
@@ -86,10 +86,10 @@ export const FIGURES: Record<Range, readonly Figure[]> = {
     {
       id: 'open',
       label: 'Open tickets',
-      value: '38',
-      change: { value: '11', direction: 'down', favourable: true },
-      description: '9 past their first-response target',
-      series: [61, 58, 63, 57, 55, 66, 59, 54, 52, 49, 46, 44, 41, 38],
+      value: '12',
+      change: { value: '7', direction: 'down', favourable: true },
+      description: '1 past its first-response target',
+      series: [19, 18, 20, 17, 18, 21, 18, 16, 17, 15, 14, 14, 13, 12],
     },
     {
       id: 'first-response',

@@ -27,7 +27,7 @@ export function BillingPage() {
   // A new workspace is on a trial with nothing used and nothing invoiced yet.
   const trial = state === 'empty';
   const shownPlan: BillingPlan = trial
-    ? { ...PLAN, id: 'team', name: 'Team', price: 49, status: 'trialing', seats: 3 }
+    ? { ...PLAN, id: 'team', name: 'Team', price: 147, status: 'trialing', seats: 3 }
     : plan;
 
   return (
@@ -83,7 +83,7 @@ export function BillingPage() {
           <TabsPanel value="plans">
             <PricingTable
               title="Plans"
-              description="Prices per agent. Yearly billing saves two months."
+              description="Prices per agent. Paying yearly saves about a fifth."
               plans={PLANS}
               features={PLAN_FEATURES}
               currency={CURRENCY}

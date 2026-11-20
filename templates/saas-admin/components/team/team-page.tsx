@@ -77,13 +77,12 @@ export function TeamPage() {
   const [invites, setInvites] = useState<readonly PendingInvite[]>(INVITES);
   const shownMembers = state === 'empty' ? members.filter((m) => m.you === true) : members;
   const shownInvites = state === 'empty' ? [] : invites;
-  const taken = shownMembers.length + shownInvites.length;
 
   return (
     <>
       <PageHeader
         title="Team and roles"
-        description={`${plural(shownMembers.length, 'member')}, ${String(SEATS - taken)} of ${String(SEATS)} seats free`}
+        description={`${plural(shownMembers.length, 'member')}, ${plural(shownInvites.length, 'invite')} pending, ${String(SEATS - shownMembers.length)} of ${String(SEATS)} seats free`}
       />
       {state === 'loading' ? (
         <LoadingRegion label="Loading the team">

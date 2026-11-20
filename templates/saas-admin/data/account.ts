@@ -145,7 +145,8 @@ export const NOTIFICATION_RECOMMENDED: NotificationMatrix = {
 export const PLAN: BillingPlan = {
   id: 'business',
   name: 'Business',
-  price: 99,
+  // 12 seats at $99.
+  price: 1_188,
   interval: 'month',
   status: 'active',
   renewsOn: at(12, 1),
@@ -153,7 +154,7 @@ export const PLAN: BillingPlan = {
 };
 
 export const USAGE: readonly BillingUsage[] = [
-  { id: 'seats', label: 'Agent seats', used: 11, limit: 12, unit: 'seats' },
+  { id: 'seats', label: 'Agent seats', used: 9, limit: 12, unit: 'seats' },
   {
     id: 'ai',
     label: 'AI-drafted replies',
@@ -187,8 +188,8 @@ export const PLANS: readonly PricingPlan[] = [
     name: 'Starter',
     description: 'A shared inbox for a small team.',
     monthly: 19,
-    yearly: 15,
-    unit: 'per agent / month',
+    yearly: 180,
+    unit: 'per agent',
     highlights: ['Email and chat', 'Help center', '500 AI replies a month'],
   },
   {
@@ -196,8 +197,8 @@ export const PLANS: readonly PricingPlan[] = [
     name: 'Team',
     description: 'Queues, targets and reports for a growing desk.',
     monthly: 49,
-    yearly: 39,
-    unit: 'per agent / month',
+    yearly: 468,
+    unit: 'per agent',
     highlights: ['Everything in Starter', 'First-response targets', '2,000 AI replies a month'],
   },
   {
@@ -205,8 +206,8 @@ export const PLANS: readonly PricingPlan[] = [
     name: 'Business',
     description: 'Single sign-on, audit log and an API for the whole company.',
     monthly: 99,
-    yearly: 79,
-    unit: 'per agent / month',
+    yearly: 948,
+    unit: 'per agent',
     highlights: ['Everything in Team', 'SSO and audit log', '5,000 AI replies a month'],
     recommended: true,
   },
