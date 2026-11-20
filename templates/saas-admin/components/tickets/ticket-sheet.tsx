@@ -4,8 +4,11 @@ import { ArrowRightIcon } from '@phosphor-icons/react';
 import { type CommentThreadResolution, type ThreadComment } from '@rectio/blocks';
 import { CommentThread } from '@rectio/blocks/motion';
 import {
-  Avatar,
   Badge,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
   Sheet,
   SheetBody,
   SheetContent,
@@ -18,9 +21,32 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import { customerById } from '@/data/customers';
+import { AGENTS } from '@/data/team';
 import { TICKET_COLUMNS, ticketThread, type Ticket } from '@/data/tickets';
 import { CURRENT_USER, LOCALE, NOW, formatShortDate, formatTime } from '@/data/workspace';
 import { PRIORITY_LABELS, PRIORITY_TONES } from './ticket-format';
+
+/** What the sheet can change on a ticket. */
+export interface TicketChange {
+  columnId?: string;
+  assignee?: Ticket['assignee'] | undefined;
+}
+
+/** The ticket with a sheet change applied; an `assignee` of undefined unassigns it. */
+export function applyTicketChange(ticket: Ticket, change: TicketChange): Ticket {
+  const columnId = change.columnId ?? ticket.columnId;
+  const assignee = 'assignee' in change ? change.assignee : ticket.assignee;
+  const next: Ticket = { ...ticket, columnId };
+  if (assignee === undefined) delete next.assignee;
+  else next.assignee = assignee;
+  return next;
+}
+
+const STATUS_ITEMS = TICKET_COLUMNS.map((c) => ({ value: c.id, label: c.title }));
+const ASSIGNEE_ITEMS = [
+  { value: 'none', label: 'Unassigned' },
+  ...AGENTS.filter((a) => a.role !== 'viewer').map((a) => ({ value: a.id, label: a.name })),
+];
 
 const WRITER = { id: CURRENT_USER.id, name: CURRENT_USER.name, role: CURRENT_USER.role };
 
@@ -28,10 +54,13 @@ const WRITER = { id: CURRENT_USER.id, name: CURRENT_USER.name, role: CURRENT_USE
 export function TicketSheet({
   ticket,
   onOpenChange,
+  onChange,
 }: {
   /** The ticket to show; undefined keeps the sheet closed. */
   ticket: Ticket | undefined;
   onOpenChange: (open: boolean) => void;
+  /** A triage change from the sheet: the column or the assignee. */
+  onChange: (id: string, change: TicketChange) => void;
 }) {
   return (
     <Sheet open={ticket !== undefined} onOpenChange={onOpenChange}>
@@ -40,6 +69,9 @@ export function TicketSheet({
           <TicketDetail
             key={ticket.id}
             ticket={ticket}
+            onChange={(change) => {
+              onChange(ticket.id, change);
+            }}
             onClose={() => {
               onOpenChange(false);
             }}
@@ -50,16 +82,42 @@ export function TicketSheet({
   );
 }
 
-function TicketDetail({ ticket, onClose }: { ticket: Ticket; onClose: () => void }) {
+function TicketDetail({
+  ticket,
+  onChange,
+  onClose,
+}: {
+  ticket: Ticket;
+  onChange: (change: TicketChange) => void;
+  onClose: () => void;
+}) {
   const toast = useToast();
   const [comments, setComments] = useState<ThreadComment[]>(() => ticketThread(ticket));
   const [resolved, setResolved] = useState<CommentThreadResolution | undefined>(undefined);
   const customer = customerById(ticket.customerId);
-  const column = TICKET_COLUMNS.find((c) => c.id === ticket.columnId);
   const priority = ticket.priority ?? 'medium';
 
   const facts: [string, React.ReactNode][] = [
-    ['Status', column?.title ?? 'New'],
+    [
+      'Status',
+      <Select
+        key="s"
+        items={STATUS_ITEMS}
+        value={ticket.columnId}
+        onValueChange={(value) => {
+          if (value !== null) onChange({ columnId: value });
+        }}
+      >
+        <SelectTrigger aria-label="Status" />
+        <SelectContent>
+          {STATUS_ITEMS.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>,
+    ],
     [
       'Priority',
       <Badge key="p" tone={PRIORITY_TONES[priority]}>
@@ -68,14 +126,24 @@ function TicketDetail({ ticket, onClose }: { ticket: Ticket; onClose: () => void
     ],
     [
       'Assignee',
-      ticket.assignee === undefined ? (
-        <span className="text-fg-muted">Unassigned</span>
-      ) : (
-        <span className="inline-flex items-center gap-2">
-          <Avatar name={ticket.assignee.name} size="xs" />
-          {ticket.assignee.name}
-        </span>
-      ),
+      <Select
+        key="a"
+        items={ASSIGNEE_ITEMS}
+        value={AGENTS.find((agent) => agent.name === ticket.assignee?.name)?.id ?? 'none'}
+        onValueChange={(value) => {
+          const agent = AGENTS.find((a) => a.id === value);
+          onChange({ assignee: agent === undefined ? undefined : { name: agent.name } });
+        }}
+      >
+        <SelectTrigger aria-label="Assignee" />
+        <SelectContent>
+          {ASSIGNEE_ITEMS.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>,
     ],
     ['Requester', ticket.requester],
     ['Channel', ticket.channel],

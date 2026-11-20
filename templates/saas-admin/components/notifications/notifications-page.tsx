@@ -15,13 +15,12 @@ export function NotificationsPage() {
   const router = useRouter();
   const { notifications, markRead, markAllRead, openTicket } = useAppData();
   const shown = state === 'empty' ? [] : notifications;
-  const unread = shown.filter((n) => !n.read).length;
 
   return (
     <>
       <PageHeader
         title="Notifications"
-        description={unread === 0 ? 'You are all caught up' : `${String(unread)} unread`}
+        description="Assignments, mentions, billing and security, newest first"
       />
       {state === 'loading' ? (
         <LoadingRegion label="Loading notifications">

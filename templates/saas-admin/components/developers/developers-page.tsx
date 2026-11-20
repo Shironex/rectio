@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircleIcon, PlusIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { BookOpenIcon, CheckCircleIcon, PlusIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { BlockPanel, type ApiKey } from '@rectio/blocks';
 import { ApiKeys } from '@rectio/blocks/motion';
 import { Badge, Button, useToast } from '@rectio/ui';
@@ -55,6 +55,9 @@ function Webhooks() {
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <code className="truncate font-mono text-sm text-fg">{hook.url}</code>
                 <span className="truncate text-sm text-fg-muted">{hook.events}</span>
+                {hook.lastError !== undefined && (
+                  <span className="text-sm text-negative-strong">{hook.lastError}</span>
+                )}
               </span>
               <span className="flex shrink-0 items-center gap-3 text-sm">
                 <span className="text-fg-muted">
@@ -103,6 +106,17 @@ export function DevelopersPage() {
       <PageHeader
         title="API keys"
         description="Connect your own app, a data warehouse or an automation to the help desk"
+        actions={
+          <Button
+            variant="secondary"
+            onClick={() => {
+              toast.add({ title: 'API reference', description: 'Point this at your own docs.' });
+            }}
+          >
+            <BookOpenIcon aria-hidden weight="bold" className="size-4" />
+            API reference
+          </Button>
+        }
       />
       {state === 'loading' ? (
         <LoadingRegion label="Loading API keys">

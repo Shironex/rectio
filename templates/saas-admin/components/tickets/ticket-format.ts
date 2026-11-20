@@ -18,12 +18,14 @@ export const PRIORITY_TONES: Record<KanbanPriority, BadgeTone> = {
 };
 
 export const STATUS_LABELS: Record<TicketStatus, string> = {
-  open: 'Open',
+  new: 'New',
+  open: 'In progress',
   waiting: 'Waiting on customer',
   resolved: 'Resolved',
 };
 
 export const STATUS_TONES: Record<TicketStatus, BadgeTone> = {
+  new: 'neutral',
   open: 'info',
   waiting: 'warning',
   resolved: 'positive',

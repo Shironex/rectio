@@ -232,6 +232,8 @@ export function OverviewPage() {
   const state = usePageState();
   const { openNewTicket } = useAppData();
   const [range, setRange] = useState<Range>('14d');
+  // The feed opens on the latest few events; the rest load on request, as a paged API would.
+  const [allActivity, setAllActivity] = useState(false);
   const figures = FIGURES[range];
   const days = VOLUME.slice(range === '14d' ? -14 : 0);
   const firstName = CURRENT_USER.name.split(' ')[0] ?? '';
@@ -320,7 +322,11 @@ export function OverviewPage() {
               </BlockPanel>
               <ActivityFeed
                 title="Recent activity"
-                events={ACTIVITY}
+                events={allActivity ? ACTIVITY : ACTIVITY.slice(0, 5)}
+                hasMore={!allActivity}
+                onLoadMore={() => {
+                  setAllActivity(true);
+                }}
                 now={NOW}
                 locale={LOCALE}
                 className="max-lg:order-4"

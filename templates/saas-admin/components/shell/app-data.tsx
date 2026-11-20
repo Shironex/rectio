@@ -7,7 +7,7 @@ import { createContext, use, useCallback, useMemo, useState, type ReactNode } fr
 import { NOTIFICATIONS } from '@/data/account';
 import { TICKETS, type Ticket } from '@/data/tickets';
 import { NewTicketSheet, type TicketDraft } from '../tickets/new-ticket-sheet';
-import { TicketSheet } from '../tickets/ticket-sheet';
+import { TicketSheet, applyTicketChange } from '../tickets/ticket-sheet';
 
 interface AppData {
   tickets: readonly Ticket[];
@@ -106,6 +106,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         ticket={openTicket}
         onOpenChange={(open) => {
           if (!open) setOpenId(null);
+        }}
+        onChange={(id, change) => {
+          setTickets((list) => list.map((t) => (t.id === id ? applyTicketChange(t, change) : t)));
         }}
       />
     </AppDataContext>

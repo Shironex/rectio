@@ -1,7 +1,9 @@
 'use client';
 
+import { WarningCircleIcon } from '@phosphor-icons/react';
 import type { KanbanPriority } from '@rectio/blocks';
 import {
+  Alert,
   Button,
   Combobox,
   ComboboxContent,
@@ -123,6 +125,7 @@ function TicketForm({
     summary: summary.trim() === '' ? 'Write down what the customer said.' : null,
   };
   const show = (key: keyof typeof errors) => (tried ? errors[key] : null);
+  const failures = tried ? Object.values(errors).filter((e) => e !== null).length : 0;
 
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -153,6 +156,17 @@ function TicketForm({
         </SheetDescription>
       </SheetHeader>
       <SheetBody className="gap-5">
+        {failures > 0 && (
+          <Alert
+            tone="danger"
+            icon={<WarningCircleIcon aria-hidden weight="bold" />}
+            title={
+              failures === 1 ? 'One field needs a fix' : `${String(failures)} fields need a fix`
+            }
+          >
+            The ticket was not created. The fields are marked below.
+          </Alert>
+        )}
         <Field invalid={show('title') !== null}>
           <FieldLabel>Subject</FieldLabel>
           <Input
@@ -160,7 +174,7 @@ function TicketForm({
             onChange={(event) => {
               setTitle(event.target.value);
             }}
-            placeholder="Invoices not syncing to QuickBooks"
+            placeholder="Such as: invoices stopped syncing"
             autoComplete="off"
           />
           <FieldError>{show('title')}</FieldError>

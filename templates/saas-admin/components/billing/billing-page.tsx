@@ -86,6 +86,7 @@ export function BillingPage() {
               title="Plans"
               description="Prices per agent. Paying yearly saves about a fifth."
               plans={PLANS}
+              defaultCycle="monthly"
               features={PLAN_FEATURES}
               currency={CURRENCY}
               locale={LOCALE}
