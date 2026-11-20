@@ -250,7 +250,7 @@ export function CookieConsent({
               Accept all
             </Button>
             <Button
-              variant="ghost"
+              variant="secondary"
               // First on a phone and on wide screens, a full row under the two choices between.
               className="max-sm:order-first max-sm:px-3 sm:col-span-2 lg:order-first"
               // A phone shows only "Manage"; every width reads the whole name.

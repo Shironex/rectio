@@ -448,7 +448,7 @@ function KeyRow({
               data-row-focus
               variant="ghost"
               size="sm"
-              className="text-fg-muted hover:bg-negative-subtle hover:text-negative-strong"
+              className="text-negative-strong hover:bg-negative-subtle"
               aria-label={`Revoke, ${key.name}`}
               onClick={onRevoke}
             >
