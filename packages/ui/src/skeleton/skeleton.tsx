@@ -60,9 +60,77 @@ export function Skeleton({
   );
 }
 
+/** Shares of the container a line can take, written as Tailwind fractions. */
+export type SkeletonFraction =
+  | 'full'
+  | '11/12'
+  | '10/12'
+  | '9/12'
+  | '4/5'
+  | '3/4'
+  | '2/3'
+  | '3/5'
+  | '7/12'
+  | '1/2'
+  | '2/5'
+  | '1/3'
+  | '1/4'
+  | '1/5';
+
+/** Fixed widths from the spacing scale, for short words such as a tab, a date or a figure. */
+export type SkeletonFixedWidth = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+
+/**
+ * How wide a line is: a share of its container (`'3/4'`), a fixed preset from the spacing scale
+ * (`'md'`), a percentage (`'60%'`), or any Tailwind width class (`'w-18'`).
+ */
+export type SkeletonWidth = SkeletonFraction | SkeletonFixedWidth | `${number}%` | `w-${string}`;
+
+/** Written out in full so Tailwind sees every class. */
+const FRACTION: Record<SkeletonFraction, string> = {
+  full: 'w-full',
+  '11/12': 'w-11/12',
+  '10/12': 'w-10/12',
+  '9/12': 'w-9/12',
+  '4/5': 'w-4/5',
+  '3/4': 'w-3/4',
+  '2/3': 'w-2/3',
+  '3/5': 'w-3/5',
+  '7/12': 'w-7/12',
+  '1/2': 'w-1/2',
+  '2/5': 'w-2/5',
+  '1/3': 'w-1/3',
+  '1/4': 'w-1/4',
+  '1/5': 'w-1/5',
+};
+
+/** A word, a short label, a date, a figure, a heading, a long title. */
+const FIXED: Record<SkeletonFixedWidth, string> = {
+  xs: 'w-8',
+  sm: 'w-14',
+  md: 'w-20',
+  lg: 'w-32',
+  xl: 'w-48',
+  '2xl': 'w-64',
+};
+
+/** The class and style a width becomes. Percentages are geometry, not a design value. */
+export function skeletonWidth(width: SkeletonWidth): { className?: string; style?: CSSProperties } {
+  if (width in FRACTION) return { className: FRACTION[width as SkeletonFraction] };
+  if (width in FIXED) return { className: FIXED[width as SkeletonFixedWidth] };
+  if (width.endsWith('%')) {
+    const share = Math.min(100, Math.max(0, Number.parseFloat(width)));
+    return Number.isFinite(share) ? { style: { width: `${String(share)}%` } } : {};
+  }
+  return { className: width };
+}
+
 export interface SkeletonLineProps extends SkeletonProps {
-  /** Width of the line as a share of its container, such as `w-3/4`. */
-  width?: string | undefined;
+  /**
+   * Width of the line: `'3/4'` of its container, a fixed `'md'`, `'60%'`, or a Tailwind width
+   * class such as `'w-18'`. Default `'full'`.
+   */
+  width?: SkeletonWidth | undefined;
   /** Text size the line stands in for, so its height matches a real line. */
   size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | undefined;
 }
@@ -78,12 +146,21 @@ const LINE: Record<NonNullable<SkeletonLineProps['size']>, string> = {
 
 /** One line of text: the height of the type's x-height, with a line's worth of space around it. */
 export function SkeletonLine({
-  width = 'w-full',
+  width = 'full',
   size = 'base',
   className,
+  style,
   ...props
 }: SkeletonLineProps) {
-  return <Skeleton className={cn('rounded-badge', LINE[size], width, className)} {...props} />;
+  const resolved = skeletonWidth(width);
+  return (
+    <Skeleton
+      data-width={width}
+      className={cn('max-w-full rounded-badge', LINE[size], resolved.className, className)}
+      style={resolved.style === undefined ? style : { ...resolved.style, ...style }}
+      {...props}
+    />
+  );
 }
 
 export interface SkeletonCircleProps extends SkeletonProps {
@@ -125,7 +202,7 @@ function Preset({
 }
 
 /** Widths that read as prose: long lines of slightly different length, a short last line. */
-const PROSE = ['w-full', 'w-11/12', 'w-full', 'w-10/12', 'w-full', 'w-9/12'];
+const PROSE: readonly SkeletonFraction[] = ['full', '11/12', 'full', '10/12', 'full', '9/12'];
 
 export interface SkeletonTextProps extends PresetProps {
   lines?: number | undefined;
@@ -144,14 +221,14 @@ export function SkeletonText({
 }: SkeletonTextProps) {
   return (
     <Preset className={cn('gap-2.5', className)} {...props}>
-      {heading && <SkeletonLine size="xl" width="w-2/5" animation={animation} className="mb-1.5" />}
+      {heading && <SkeletonLine size="xl" width="2/5" animation={animation} className="mb-1.5" />}
       {Array.from({ length: lines }, (_, i) => (
         <SkeletonLine
           key={i}
           size={size}
           index={i + (heading ? 1 : 0)}
           animation={animation}
-          width={i === lines - 1 && lines > 1 ? 'w-7/12' : PROSE[i % PROSE.length]}
+          width={i === lines - 1 && lines > 1 ? '7/12' : PROSE[i % PROSE.length]}
         />
       ))}
     </Preset>
@@ -172,13 +249,13 @@ export function SkeletonCard({ media = true, animation, className, ...props }: S
     >
       {media && <Skeleton animation={animation} className="aspect-video rounded-none" />}
       <div className="flex flex-col gap-2.5 px-5 py-4">
-        <SkeletonLine size="lg" width="w-3/5" index={1} animation={animation} />
+        <SkeletonLine size="lg" width="3/5" index={1} animation={animation} />
         <SkeletonLine size="sm" index={2} animation={animation} />
-        <SkeletonLine size="sm" width="w-4/5" index={3} animation={animation} />
+        <SkeletonLine size="sm" width="4/5" index={3} animation={animation} />
       </div>
       <div className="flex items-center gap-3 border-t border-line px-5 py-3">
         <SkeletonCircle size="sm" index={4} animation={animation} />
-        <SkeletonLine size="sm" width="w-1/3" index={4} animation={animation} />
+        <SkeletonLine size="sm" width="1/3" index={4} animation={animation} />
         <SkeletonLine size="sm" width="w-12" index={5} animation={animation} className="ms-auto" />
       </div>
     </Preset>
@@ -193,7 +270,7 @@ export interface SkeletonTableProps extends PresetProps {
 }
 
 /** Column widths that vary like real data, never a grid of equal bars. */
-const CELL = ['w-4/5', 'w-3/5', 'w-2/3', 'w-1/2', 'w-3/4', 'w-2/5'];
+const CELL: readonly SkeletonFraction[] = ['4/5', '3/5', '2/3', '1/2', '3/4', '2/5'];
 
 /** Rows of a table on their way, with a header band, under the real column count. */
 export function SkeletonTable({
@@ -219,7 +296,7 @@ export function SkeletonTable({
             key={c}
             size="xs"
             animation="none"
-            width={c === columns - 1 && numeric ? 'w-1/3' : 'w-2/5'}
+            width={c === columns - 1 && numeric ? '1/3' : '2/5'}
             className={cn(c === columns - 1 && numeric && 'ms-auto', 'bg-line')}
           />
         ))}
@@ -238,7 +315,7 @@ export function SkeletonTable({
                 size="sm"
                 index={r}
                 animation={animation}
-                width={figure ? 'w-1/2' : CELL[(r * 3 + c * 2) % CELL.length]}
+                width={figure ? '1/2' : CELL[(r * 3 + c * 2) % CELL.length]}
                 className={cn(figure && 'ms-auto')}
               />
             );
@@ -274,16 +351,16 @@ export function SkeletonListItem({
               size="sm"
               index={i}
               animation={animation}
-              width={i % 2 === 0 ? 'w-2/5' : 'w-1/2'}
+              width={i % 2 === 0 ? '2/5' : '1/2'}
             />
             <SkeletonLine
               size="xs"
               index={i}
               animation={animation}
-              width={i % 2 === 0 ? 'w-3/5' : 'w-2/5'}
+              width={i % 2 === 0 ? '3/5' : '2/5'}
             />
           </div>
-          {meta && <SkeletonLine size="sm" width="w-14" index={i} animation={animation} />}
+          {meta && <SkeletonLine size="sm" width="sm" index={i} animation={animation} />}
         </div>
       ))}
     </Preset>
@@ -323,8 +400,8 @@ export function SkeletonChart({
   return (
     <Preset className={cn('gap-3', className)} {...props}>
       <div className="flex items-end justify-between">
-        <SkeletonLine size="lg" width="w-1/3" animation={animation} />
-        <SkeletonLine size="sm" width="w-20" animation={animation} index={1} />
+        <SkeletonLine size="lg" width="1/3" animation={animation} />
+        <SkeletonLine size="sm" width="md" animation={animation} index={1} />
       </div>
       <div className="relative h-48">
         {/* Gridlines are drawn still: only the data placeholders move. */}
@@ -374,7 +451,7 @@ export function SkeletonChart({
       </div>
       <div className="flex justify-between px-2">
         {Array.from({ length: Math.min(points, 6) }, (_, i) => (
-          <SkeletonLine key={i} size="xs" width="w-8" animation="none" />
+          <SkeletonLine key={i} size="xs" width="xs" animation="none" />
         ))}
       </div>
     </Preset>

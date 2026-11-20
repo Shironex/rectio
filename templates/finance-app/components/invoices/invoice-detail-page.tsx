@@ -179,7 +179,7 @@ function DetailLoading() {
   return (
     <LoadingRegion label="Loading the invoice">
       <div className="flex flex-col gap-2">
-        <SkeletonLine size="2xl" width="w-64" />
+        <SkeletonLine size="2xl" width="2xl" />
         <SkeletonLine size="sm" width="w-40" />
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-3">

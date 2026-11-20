@@ -123,12 +123,15 @@ export {
   type SkeletonCardProps,
   type SkeletonChartProps,
   type SkeletonCircleProps,
+  type SkeletonFixedWidth,
+  type SkeletonFraction,
   type SkeletonLineProps,
   type SkeletonListItemProps,
   type SkeletonProps,
   type SkeletonSwapProps,
   type SkeletonTableProps,
   type SkeletonTextProps,
+  type SkeletonWidth,
 } from './skeleton/skeleton';
 export {
   LoadingOverlay,

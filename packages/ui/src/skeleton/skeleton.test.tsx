@@ -5,6 +5,7 @@ import {
   Skeleton,
   SkeletonCard,
   SkeletonChart,
+  SkeletonLine,
   SkeletonListItem,
   SkeletonSwap,
   SkeletonTable,
@@ -73,5 +74,37 @@ describe('SkeletonSwap', () => {
     );
     expect(screen.getByText('Paid in full')).toBeInTheDocument();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+});
+
+describe('SkeletonLine width', () => {
+  const line = (node: HTMLElement) => node.querySelector<HTMLElement>('[data-slot="skeleton"]');
+
+  it('fills its container by default', () => {
+    const { container } = render(<SkeletonLine />);
+    expect(line(container)).toHaveClass('w-full');
+  });
+
+  it('takes a share of its container or a fixed preset', () => {
+    const { container: share } = render(<SkeletonLine width="3/4" />);
+    expect(line(share)).toHaveClass('w-3/4');
+    const { container: fixed } = render(<SkeletonLine width="md" />);
+    expect(line(fixed)).toHaveClass('w-20');
+  });
+
+  it('turns a percentage into a real width instead of a dead class', () => {
+    const { container } = render(<SkeletonLine width="60%" />);
+    expect(line(container)?.style.width).toBe('60%');
+    expect(line(container)?.className).not.toContain('60%');
+  });
+
+  it('clamps a percentage to the container', () => {
+    const { container } = render(<SkeletonLine width="140%" />);
+    expect(line(container)?.style.width).toBe('100%');
+  });
+
+  it('still takes a Tailwind width class', () => {
+    const { container } = render(<SkeletonLine width="w-18" />);
+    expect(line(container)).toHaveClass('w-18');
   });
 });
