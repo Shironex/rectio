@@ -1,0 +1,40 @@
+name: ci
+
+# The same gate as `pnpm gate` locally: format, lint, typecheck, test, build and the repo rules
+# (@noctcore/harness). One job: the steps share one install and one Turborepo cache.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or pull request replaces the run in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # The pnpm version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Turborepo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-ci-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-ci-${{ runner.os }}-
+      - run: pnpm gate

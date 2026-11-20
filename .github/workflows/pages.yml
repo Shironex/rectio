@@ -1,0 +1,62 @@
+name: pages
+
+# Builds the docs site with every live template preview and the static registry, and deploys it
+# to GitHub Pages at https://shironex.github.io/rectio/ (the site, /preview/<name>/ and /r/ all
+# under the /rectio base path). Pages must use "GitHub Actions" as its source.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+# One deploy at a time; never cancel one halfway through.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build site
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      SITE_BASE_PATH: /rectio
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Turborepo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-pages-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-pages-${{ runner.os }}-
+      # Builds the kit, the registry, the template previews and the site, then copies the registry
+      # into out/r and writes out/.nojekyll (apps/site/scripts/static-extras.ts).
+      - run: pnpm turbo run build --filter=@rectio/site
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/site/out
+
+  deploy:
+    name: deploy to Pages
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,42 @@
+# Weekly updates for the npm packages (pnpm lockfile) and the GitHub Actions. A 7-day cooldown
+# keeps a release out of the proposals the week it lands. Minor and patch updates come grouped;
+# a major version comes alone, because it usually needs its own migration.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 10
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+      dependencies:
+        dependency-type: production
+        update-types: [minor, patch]
+    ignore:
+      # @types/node follows the oldest Node the repo supports (engines), not the newest release.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
+      # TypeScript is pinned to ~6.0 until the lint plugins support 7.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major, version-update:semver-minor]
+    # commitlint's scope-enum has no `deps`: the repo scope keeps these messages valid.
+    commit-message:
+      prefix: chore(repo)
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ['*']
+        update-types: [minor, patch]
+    commit-message:
+      prefix: ci(ci)
