@@ -32,13 +32,12 @@ export function StatRow({ kit }: { kit: KitFacts }) {
         {stats.map((stat, i) => (
           <div
             key={stat.label}
-            className={`site-reveal ${i === 0 ? '' : `site-step-${String(Math.min(i, 3))}`} flex items-baseline justify-between gap-6 border-b border-line py-4 last:border-b-0`}
+            className={`site-reveal ${i === 0 ? '' : `site-step-${String(Math.min(i, 3))}`} grid grid-flow-col grid-rows-2 items-center justify-between gap-x-6 border-b border-line py-4 last:border-b-0`}
           >
-            <div className="flex min-w-0 flex-col">
-              <dt className="text-base font-strong text-fg">{stat.label}</dt>
-              <dd className="text-sm text-fg-muted">{stat.note}</dd>
-            </div>
-            <dd className="shrink-0 font-display text-3xl font-heading text-fg tabular-nums md:text-4xl">
+            {/* dt and both dd sit straight in the row, as a definition list wants; the grid sets them. */}
+            <dt className="text-base font-strong text-fg">{stat.label}</dt>
+            <dd className="text-sm text-fg-muted">{stat.note}</dd>
+            <dd className="row-span-2 font-display text-3xl font-heading text-fg tabular-nums md:text-4xl">
               {stat.value}
               {stat.unit !== undefined && (
                 <span className="ms-1 text-lg font-strong text-fg-muted md:text-xl">
