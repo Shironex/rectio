@@ -1329,6 +1329,7 @@ export default defineRegistry({
           'api-keys',
           'API keys',
           'Keys with scope, last use and expiry, a create form that shows the new secret once, and revoke behind a confirm.',
+          { version: '0.1.1' },
         ),
         ...saasItems(
           'notification-preferences',

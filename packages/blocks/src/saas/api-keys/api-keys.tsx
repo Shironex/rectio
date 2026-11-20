@@ -304,9 +304,12 @@ export function ApiKeys({
                   weight="bold"
                   className="size-3.5 transition-transform duration-fast ease-standard group-open:rotate-90"
                 />
-                <span className="group-open:hidden">Show</span>
-                <span className="hidden group-open:inline">Hide</span>
-                <span>{countLabel(revokedKeys.length, 'revoked key')}</span>
+                {/* One phrase with a plain word space, not two items held apart by the gap. */}
+                <span>
+                  <span className="group-open:hidden">Show</span>
+                  <span className="hidden group-open:inline">Hide</span>{' '}
+                  {countLabel(revokedKeys.length, 'revoked key')}
+                </span>
               </summary>
               {renderKeys(revokedKeys, 'Revoked API keys', false)}
             </details>
