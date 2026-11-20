@@ -9,6 +9,7 @@ import { runList, runSearch } from './commands/list.ts';
 import { runMcp } from './commands/mcp.ts';
 import { runUpdate } from './commands/update.ts';
 import { CliError, type CliContext } from './core/context.ts';
+import { startUpdateCheck } from './core/update-check.ts';
 import { CLI_VERSION } from './version.ts';
 
 const HELP = `rectio: finance and back-office components, copied into your project
@@ -59,6 +60,8 @@ const OPTIONS = {
   version: { type: 'boolean', short: 'v' },
 } as const;
 
+type ParsedValues = ReturnType<typeof parseArgs<{ options: typeof OPTIONS }>>['values'];
+
 /** Runs one CLI invocation and returns the exit code. Never calls process.exit itself. */
 export async function main(argv: readonly string[], base: CliContext): Promise<number> {
   let parsed;
@@ -79,6 +82,25 @@ export async function main(argv: readonly string[], base: CliContext): Promise<n
     return command === undefined && values.help !== true ? 1 : 0;
   }
 
+  // Runs beside the command and adds at most its timeout to the end of it. Off in `mcp`.
+  const notice = startUpdateCheck({
+    current: CLI_VERSION,
+    command,
+    env: base.env,
+    isTTY: base.stdoutIsTTY === true,
+  });
+  const code = await runCommand(command, rest, values, base);
+  const text = await notice;
+  if (text !== undefined) base.warn(text);
+  return code;
+}
+
+async function runCommand(
+  command: string,
+  rest: readonly string[],
+  values: ParsedValues,
+  base: CliContext,
+): Promise<number> {
   const ctx: CliContext = { ...base, cwd: resolve(base.cwd, values.cwd ?? '.') };
   const shared = {
     ...(values.registry === undefined ? {} : { registry: values.registry }),

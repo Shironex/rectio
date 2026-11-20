@@ -1,4 +1,5 @@
 /** `rectio mcp` as a user's editor runs it: the built bin as a child process, a real SDK client. */
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -88,5 +89,36 @@ describe('rectio mcp over stdio', () => {
   it('rejects bad input through the schema', async () => {
     const result = await client.callTool({ name: 'list_items', arguments: { type: 'gold' } });
     expect(result.isError).toBe(true);
+  });
+});
+
+describe('rectio mcp and the update check', () => {
+  it('keeps stdout to the protocol and prints no notice, even with a newer version cached', async () => {
+    const xdg = tempDir('rectio-mcp-xdg-');
+    mkdirSync(join(xdg.dir, 'rectio'), { recursive: true });
+    writeFileSync(
+      join(xdg.dir, 'rectio', 'update-check.json'),
+      JSON.stringify({ checkedAt: Date.now(), latest: '99.0.0' }),
+    );
+    const env = childEnvironment();
+    delete env.CI;
+    const transport = new StdioClientTransport({
+      command: process.execPath,
+      args: [cliBin, 'mcp', '--registry', registry.dir],
+      cwd: cwd.dir,
+      env: { ...env, XDG_CACHE_HOME: xdg.dir },
+      stderr: 'pipe',
+    });
+    let stderr = '';
+    transport.stderr?.on('data', (chunk: Buffer) => (stderr += chunk.toString()));
+    const second = new Client({ name: 'rectio-test-update', version: '0.0.0' });
+    // The SDK client rejects any stdout line that is not JSON-RPC, so a working round trip means
+    // stdout stayed clean.
+    await second.connect(transport);
+    const { tools } = await second.listTools();
+    expect(tools).toHaveLength(TOOLS.length);
+    await second.close();
+    xdg.cleanup();
+    expect(stderr).not.toContain('is available');
   });
 });

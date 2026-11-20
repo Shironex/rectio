@@ -5,6 +5,8 @@ export interface CliContext {
   env: Readonly<Record<string, string | undefined>>;
   log: (line: string) => void;
   warn: (line: string) => void;
+  /** Whether stdout is a terminal. Unset (in tests and embedders) counts as not a terminal. */
+  stdoutIsTTY?: boolean;
 }
 
 /** An expected failure: printed as one message (plus a hint) without a stack trace. */
@@ -22,6 +24,7 @@ export function processContext(cwd: string): CliContext {
   return {
     cwd,
     env: process.env,
+    stdoutIsTTY: process.stdout.isTTY,
     log: (line) => {
       process.stdout.write(`${line}\n`);
     },
