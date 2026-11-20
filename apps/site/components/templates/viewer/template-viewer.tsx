@@ -106,7 +106,7 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
         </div>
         <ViewerControls
           action={
-            <Button render={fullScreenLink} className="shrink-0 sm:hidden">
+            <Button nativeButton={false} render={fullScreenLink} className="shrink-0 sm:hidden">
               <ArrowSquareOutIcon aria-hidden weight="bold" className="size-4" />
               Full screen
               <span className="sr-only"> (opens in a new tab)</span>
@@ -128,13 +128,14 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
         <div className="flex items-center gap-2 max-sm:ms-auto">
           <Button
             variant="secondary"
+            nativeButton={false}
             render={<Link href={template.docsHref} />}
             className="max-sm:size-11 max-sm:px-0"
           >
             <BookOpenTextIcon aria-hidden weight="bold" className="size-4" />
             <span className="max-sm:sr-only">Docs</span>
           </Button>
-          <Button render={fullScreenLink} className="max-sm:hidden">
+          <Button nativeButton={false} render={fullScreenLink} className="max-sm:hidden">
             <ArrowSquareOutIcon aria-hidden weight="bold" className="size-4" />
             Open full screen
             <span className="sr-only"> (opens in a new tab)</span>
