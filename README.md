@@ -127,11 +127,9 @@ pnpm dlx @rectio/cli add invoice-list motion-kpi-row     # blocks, plain or with
 pnpm dlx @rectio/cli init --template finance-app my-app  # a whole app in a new folder
 ```
 
-> [!NOTE]
-> The CLI is not on npm yet. Until the first release, build it from this repository
-> (`pnpm install`, then `pnpm --filter @rectio/cli build`) and run
-> `node <path-to-rectio>/packages/cli/dist/bin.js` in place of `pnpm dlx @rectio/cli`. It reads
-> the registry published with the docs at `https://shironex.github.io/rectio/r`.
+The CLI is published on npm as [`@rectio/cli`](https://www.npmjs.com/package/@rectio/cli).
+`npx @rectio/cli` works as well, and `pnpm add -g @rectio/cli` gives you a plain `rectio` command.
+It reads the registry published with the docs at `https://shironex.github.io/rectio/r`.
 
 The [installation guide](https://shironex.github.io/rectio/docs/installation) covers the flags, the
 lockfile and the CSS entry the CLI manages.
@@ -154,9 +152,11 @@ token files; [theming](https://shironex.github.io/rectio/docs/theming) shows how
 
 `rectio mcp` runs a read-only MCP server over stdio for Claude Code, Cursor or VS Code. It lists and
 searches items, returns source with your aliases, gives token values per theme and mode, and prints
-the exact `rectio add` command. It never writes files.
+the exact `rectio add` command. It never writes files. The editor starts it as `rectio mcp`, so
+install the CLI globally first.
 
 ```sh
+pnpm add -g @rectio/cli
 claude mcp add rectio --scope project -- rectio mcp
 ```
 

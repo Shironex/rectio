@@ -142,6 +142,13 @@ The playground also has `shoot:forms`, `shoot:nav`, `shoot:display`, `shoot:mark
 `shoot:docs`. Playwright needs Chromium once: `pnpm --filter @rectio/playground exec playwright
 install chromium`.
 
+## Releasing
+
+Only `@rectio/cli` is published to npm; every other package is private. A change to the CLI that
+should ship carries a changeset: run `pnpm changeset`, pick the bump and write one line for the
+changelog. On main, the release workflow collects changesets into a "Version Packages" pull request,
+and merging it publishes the new version to npm with provenance.
+
 ## Pull requests
 
 Fill in the PR template: what changed, the checklist, and screenshots in light and dark, both themes,
