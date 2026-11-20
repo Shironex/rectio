@@ -675,13 +675,10 @@ describe('the rectio registry', () => {
     ]);
     for (const template of templates) {
       expect(template.registryDependencies).toEqual(
-        expect.arrayContaining([
-          'tokens',
-          'theme-default',
-          'theme-ledger',
-          ...(template.template?.uses ?? []),
-        ]),
+        expect.arrayContaining(['tokens', 'theme-default', ...(template.template?.uses ?? [])]),
       );
+      // A deprecated theme is not brought into new projects.
+      expect(template.registryDependencies).not.toContain('theme-ledger');
       for (const file of template.files) {
         expect(file.target, file.path).toMatch(/^@project\//);
         expect(file.content, file.path).not.toContain('@rectio/');
@@ -702,6 +699,7 @@ describe('the rectio registry', () => {
   });
 
   it('gives each theme its own selectors and fonts, and the base layer to tokens', () => {
+    // The retired ledger theme is published from its last stylesheet, marked deprecated.
     const ledger = byName.get('theme-ledger');
     const css = ledger?.files[0]?.content ?? '';
     expect(css).toContain('[data-theme="ledger"]');
@@ -709,6 +707,10 @@ describe('the rectio registry', () => {
     expect(css).toContain("@import '@fontsource-variable/source-serif-4/opsz.css';");
     expect(ledger?.dependencies).toHaveProperty('@fontsource-variable/schibsted-grotesk');
     expect(ledger?.registryDependencies).toEqual(['tokens']);
+    expect(ledger?.deprecated).toContain('/docs/theming/generator');
+    const entry = result.index.items.find((i) => i.name === 'theme-ledger');
+    expect(entry?.deprecated).toBe(ledger?.deprecated);
+    expect(byName.get('theme-default')?.deprecated).toBeUndefined();
 
     const defaults = byName.get('theme-default')?.files[0]?.content ?? '';
     expect(defaults).toContain(':root,\n[data-theme="default"] {');

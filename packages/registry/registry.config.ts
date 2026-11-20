@@ -206,16 +206,27 @@ export default defineRegistry({
     themes: [
       {
         id: 'default',
-        version: '0.2.3',
+        version: '0.3.0',
         title: 'Default theme',
         description: 'Warm stone neutrals, cobalt accent, 4px controls, IBM Plex. Light and dark.',
       },
       {
+        // No longer a built-in theme: published from its last stylesheet for one more release.
         id: 'ledger',
-        version: '0.2.3',
+        version: '0.2.4',
         title: 'Ledger theme',
         description:
-          'Green-black ink, citron accent, 2px corners, slower motion, Source Serif 4 headings.',
+          'Deprecated: build your own from the ledger look in the theme generator. Green-black ink, citron accent, 2px corners, Source Serif 4 headings.',
+        deprecated: `The ledger theme is no longer built in and will be removed in the next release. Make your own from the ledger look in the theme generator: ${SITE_URL}/docs/theming/generator`,
+        frozen: {
+          css: join(packages, 'registry', 'legacy', 'theme-ledger.css'),
+          dependencies: {
+            '@fontsource-variable/ibm-plex-sans': '^5.3.0',
+            '@fontsource/ibm-plex-mono': '^5.3.0',
+            '@fontsource-variable/schibsted-grotesk': '^5.3.0',
+            '@fontsource-variable/source-serif-4': '^5.3.1',
+          },
+        },
       },
     ],
   },
@@ -356,7 +367,7 @@ export default defineRegistry({
     {
       name: 'avatar',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Avatar',
       description:
         'A person or team as a photo or initials on a stable identity tint, with a status dot.',
@@ -499,7 +510,7 @@ export default defineRegistry({
     {
       name: 'timeline',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Timeline',
       description: 'Events in order with dots, icons or avatars: audit trails and activity feeds.',
       categories: ['data'],
@@ -1358,7 +1369,7 @@ export default defineRegistry({
           'notifications-center',
           'Notifications center',
           'A bell with the unread count, and the list behind it with All and Unread and mark as read.',
-          { version: '0.1.1' },
+          { version: '0.1.2' },
         ),
         ...saasItems(
           'changelog',
