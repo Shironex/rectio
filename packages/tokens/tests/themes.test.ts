@@ -204,3 +204,16 @@ describe('code colours', () => {
     expect(failures).toEqual([]);
   });
 });
+
+describe('selected fill', () => {
+  const darkModes = themeModes.filter(({ key }) => key.endsWith('/dark'));
+
+  // The current page in a sidebar sits on surface-selected. In dark mode it has to read as a step
+  // above hover and clearly off the canvas, or the active item looks like a hovered one.
+  it.each(darkModes)('$key selected sits above hover and off the canvas', ({ tokens }) => {
+    const selected = parse(tokens['--rx-surface-selected']);
+    const hover = parse(tokens['--rx-surface-hover']);
+    expect(selected.l).toBeGreaterThan(hover.l);
+    expect(contrast(selected, parse(tokens['--rx-surface-canvas']))).toBeGreaterThanOrEqual(1.25);
+  });
+});
