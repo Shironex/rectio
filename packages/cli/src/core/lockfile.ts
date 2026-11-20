@@ -24,6 +24,8 @@ const lockedItemSchema = z.object({
   type: itemTypeSchema,
   /** Integrity of the registry item as fetched, the base of a future three-way merge. */
   integrity: z.string(),
+  /** A theme from the theme generator: its code, so diff and update can rebuild it. */
+  themeCode: z.string().optional(),
   files: z.array(lockedFileSchema),
 });
 export type LockedItem = z.infer<typeof lockedItemSchema>;

@@ -10,6 +10,7 @@ import { mergeDependencies, missingDependencies, type DependencyChanges } from '
 import { lockedFileAt, readLock, writeLock, type LockedFile } from './lockfile.ts';
 import { readAliasRoots, type PackageManager } from './project.ts';
 import type { RegistryClient } from './registry-client.ts';
+import { codeOf } from './theme-link.ts';
 import { cssVarsFile, projectContent, resolveTarget } from './transform.ts';
 import { cliCommand } from './runner.ts';
 
@@ -174,10 +175,12 @@ export function writeItems(
 
   const lock = readLock(ctx.cwd);
   for (const item of items) {
+    const themeCode = codeOf(item);
     lock.items[item.name] = {
       version: item.version,
       type: item.type,
       integrity: item.integrity,
+      ...(themeCode === undefined ? {} : { themeCode }),
       files: files
         .filter((f) => f.item === item.name)
         .map((f) => ({

@@ -7,6 +7,8 @@ export interface Outdated {
   name: string;
   installed: string;
   latest: string;
+  /** The theme code of a generated theme, which regenerates instead of updating. */
+  code?: string | undefined;
 }
 
 /** Installed items whose locked version differs from the registry index. No extra requests. */

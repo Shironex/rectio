@@ -25,6 +25,7 @@ pnpm dlx @rectio/cli init --yes                          # tokens, a theme and t
 pnpm dlx @rectio/cli add button dialog data-table        # components, with what they depend on
 pnpm dlx @rectio/cli add invoice-list                    # blocks work the same way
 pnpm dlx @rectio/cli init --template finance-app my-app  # a whole Next.js app in a new folder
+pnpm dlx @rectio/cli add '<theme generator link>'        # a theme made on the docs site
 ```
 
 `npx @rectio/cli ...` works too. To type `rectio` on its own, install it globally with

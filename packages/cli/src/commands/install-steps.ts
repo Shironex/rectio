@@ -1,7 +1,7 @@
 import type { RegistryItem } from '@rectio/registry';
 
 import type { RectioConfig } from '../core/config.ts';
-import type { CliContext } from '../core/context.ts';
+import { CliError, type CliContext } from '../core/context.ts';
 import { countDependencies, runInstall, type DependencyChanges } from '../core/install.ts';
 import {
   fetchItems,
@@ -14,6 +14,7 @@ import {
 } from '../core/installer.ts';
 import { detectPackageManager, type PackageManager } from '../core/project.ts';
 import type { RegistryClient } from '../core/registry-client.ts';
+import { fetchTemplate, themeItem } from '../core/theme-link.ts';
 import { plural } from '../ui/layout.ts';
 import type { Steps } from '../ui/output.ts';
 
@@ -24,6 +25,27 @@ export interface InstallStepsHooks {
   planWhenWriting?: boolean;
   /** How the resolving step counts what it found: `88 kit items` for a template. */
   itemsLabel?: string;
+  /** Theme generator links: each becomes a theme item built locally (see core/theme-link.ts). */
+  themeLinks?: readonly string[];
+}
+
+/** The items for theme links, built on the registry's default theme, plus what they rest on. */
+async function themeItems(
+  client: RegistryClient,
+  links: readonly string[],
+): Promise<RegistryItem[]> {
+  if (links.length === 0) return [];
+  const template = await fetchTemplate(client);
+  const items = links.map((link) => themeItem(link, template));
+  const index = await client.index();
+  for (const item of items) {
+    if (index.items.some((entry) => entry.name === item.name))
+      throw new CliError(
+        `the registry already has an item called ${item.name}`,
+        'Give the theme another name in the theme generator.',
+      );
+  }
+  return items;
 }
 
 function itemsNote(items: readonly RegistryItem[], requested: readonly string[]): string {
@@ -53,12 +75,19 @@ export async function installSteps(
 ): Promise<InstallReport> {
   const dryRun = options.dryRun === true;
   let files: PlannedFile[] = [];
+  let requested = [...names];
   const items = await steps.run('Resolving items', async (step) => {
-    const fetched = await fetchItems(client, names);
+    const generated = await themeItems(client, hooks.themeLinks ?? []);
+    requested = [...names, ...generated.map((item) => item.name)];
+    const wanted = [...names, ...generated.flatMap((item) => item.registryDependencies)];
+    const fetched = [
+      ...(wanted.length === 0 ? [] : await fetchItems(client, wanted)),
+      ...generated,
+    ];
     if (hooks.planWhenWriting !== true) files = planFiles(ctx, config, fetched, options.overwrite);
     step.note =
       hooks.itemsLabel === undefined
-        ? itemsNote(fetched, names)
+        ? itemsNote(fetched, requested)
         : plural(fetched.length, hooks.itemsLabel);
     return fetched;
   });
@@ -100,5 +129,5 @@ export async function installSteps(
     });
     manager = chosen;
   }
-  return { requested: [...names], items, files, added, dryRun, manager };
+  return { requested, items, files, added, dryRun, manager };
 }

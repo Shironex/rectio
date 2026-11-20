@@ -4,6 +4,7 @@ import type { InstallOptions, InstallReport } from '../core/installer.ts';
 import { readLock } from '../core/lockfile.ts';
 import { outdatedHint, outdatedItems } from '../core/outdated.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
+import { splitThemeLinks } from '../core/theme-link.ts';
 import { plural } from '../ui/layout.ts';
 import { Ui, type OutputOptions } from '../ui/output.ts';
 import {
@@ -41,6 +42,8 @@ export async function runAdd(ctx: CliContext, names: readonly string[], options:
   const { config, client } = await steps.run('Checking project', (step) => {
     if (names.length === 0)
       throw new CliError('name at least one item', `Example: ${cliCommand('add button')}`);
+    // Checked here, so a link without a code fails before anything is fetched.
+    splitThemeLinks(names);
     const found = requireConfig(ctx.cwd);
     step.note = `${found.framework}, ${found.css}`;
     return {
@@ -48,7 +51,10 @@ export async function runAdd(ctx: CliContext, names: readonly string[], options:
       client: createRegistryClient(registryUrl(ctx, options.registry, found)),
     };
   });
-  const report = await installSteps(steps, ctx, config, client, names, options);
+  const { names: items, links } = splitThemeLinks(names);
+  const report = await installSteps(steps, ctx, config, client, items, options, {
+    themeLinks: links,
+  });
   printVerbose(ui, report);
 
   const { s } = ui;

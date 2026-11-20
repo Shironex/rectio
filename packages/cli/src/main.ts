@@ -28,6 +28,7 @@ const COMMANDS: HelpRows = [
   ['init --yes', 'set up rectio here with the defaults: rectio.json, tokens, theme, cn'],
   ['init --template <name> [folder]', 'start a new project from a template'],
   ['add <items...>', 'add items and everything they depend on'],
+  ['add <theme link>', 'add a theme made in the docs theme generator'],
   ['diff <item>', 'compare an installed item with the registry'],
   ['list', 'list registry items (--type, --templates)'],
   ['search <query>', 'search registry items'],

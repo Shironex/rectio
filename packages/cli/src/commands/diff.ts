@@ -7,7 +7,8 @@ import { isInside, readNormalized, toProjectPath } from '../core/fs.ts';
 import { resolveItems } from '../core/installer.ts';
 import { readLock } from '../core/lockfile.ts';
 import { readAliasRoots } from '../core/project.ts';
-import { createRegistryClient } from '../core/registry-client.ts';
+import { createRegistryClient, type RegistryClient } from '../core/registry-client.ts';
+import { fetchTemplate, themeItem } from '../core/theme-link.ts';
 import { projectContent, resolveTarget } from '../core/transform.ts';
 import { commandRows } from '../ui/layout.ts';
 import { Ui } from '../ui/output.ts';
@@ -32,6 +33,8 @@ export interface DiffResult {
   installed: string;
   latest: string;
   files: FileDiff[];
+  /** The theme code of a generated theme. */
+  code?: string;
 }
 
 /**
@@ -51,9 +54,11 @@ export async function runDiff(
     throw new CliError(`${name} is not installed`, `Add it with \`${cliCommand(`add ${name}`)}\`.`);
 
   const client = createRegistryClient(registryUrl(ctx, options.registry, config));
-  const [entry] = (await resolveItems(client, [name])).filter((e) => e.name === name);
-  if (entry === undefined) throw new CliError(`${name} is not in the registry`);
-  const item = await client.item(entry);
+  const item =
+    locked.themeCode === undefined
+      ? await registryItem(client, name)
+      : // A generated theme is rebuilt from its code over today's default theme.
+        themeItem(locked.themeCode, await fetchTemplate(client));
   const roots = readAliasRoots(ctx.cwd);
 
   const files: FileDiff[] = [];
@@ -83,9 +88,21 @@ export async function runDiff(
     files.push({ path, state, editedLocally, patch });
   }
 
-  const result: DiffResult = { item: name, installed: locked.version, latest: item.version, files };
+  const result: DiffResult = {
+    item: name,
+    installed: locked.version,
+    latest: item.version,
+    files,
+    ...(locked.themeCode === undefined ? {} : { code: locked.themeCode }),
+  };
   printDiff(new Ui(ctx), result);
   return result;
+}
+
+async function registryItem(client: RegistryClient, name: string) {
+  const [entry] = (await resolveItems(client, [name])).filter((e) => e.name === name);
+  if (entry === undefined) throw new CliError(`${name} is not in the registry`);
+  return client.item(entry);
 }
 
 function colorPatch(ui: Ui, patch: string): string[] {
@@ -131,7 +148,12 @@ function printDiff(ui: Ui, result: DiffResult): void {
   else {
     ui.lines(
       commandRows(
-        [[cliCommand(`add ${result.item} --overwrite`), 'take the registry version']],
+        [
+          [
+            cliCommand(`add ${result.code ?? result.item} --overwrite`),
+            result.code === undefined ? 'take the registry version' : 'regenerate the theme',
+          ],
+        ],
         s,
         '',
       ),
