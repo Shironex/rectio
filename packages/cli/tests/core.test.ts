@@ -168,6 +168,30 @@ describe('project detection', () => {
     expect(detectPackageManager(join(workspace, 'apps/web'))).toBe('pnpm');
   });
 
+  it('falls back to the manager that launched the CLI when the project has no lockfile', () => {
+    const agent = (value: string) => ({ npm_config_user_agent: value });
+    const bare = project({ 'package.json': '{}' });
+    expect(detectPackageManager(bare, agent('pnpm/10.34.5 npm/? node/v22.18.0 darwin arm64'))).toBe(
+      'pnpm',
+    );
+    expect(detectPackageManager(bare, agent('npm/11.5.1 node/v24.0.0 linux x64'))).toBe('npm');
+    expect(detectPackageManager(bare, agent('bun/1.3.0 npm/? node/v24.3.0 linux x64'))).toBe('bun');
+    expect(detectPackageManager(bare, agent('yarn/4.9.1 npm/? node/v22.18.0 win32 x64'))).toBe(
+      'yarn',
+    );
+    expect(detectPackageManager(bare, agent('deno/2.0.0'))).toBe('npm');
+    expect(detectPackageManager(bare, {})).toBe('npm');
+    // A lockfile or packageManager in the project still wins.
+    const pnpmAgent = agent('pnpm/10.34.5 npm/? node/v22.18.0 darwin arm64');
+    expect(detectPackageManager(project({ 'package-lock.json': '' }), pnpmAgent)).toBe('npm');
+    expect(
+      detectPackageManager(
+        project({ 'package.json': '{"packageManager":"bun@1.3.0"}' }),
+        pnpmAgent,
+      ),
+    ).toBe('bun');
+  });
+
   it('reads path aliases through references, extends and baseUrl', () => {
     const cwd = project({
       'tsconfig.json': '{ "files": [], "references": [{ "path": "./tsconfig.app.json" }] }',

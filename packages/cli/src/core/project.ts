@@ -137,16 +137,34 @@ const LOCKFILES: [string, PackageManager][] = [
   ['package-lock.json', 'npm'],
 ];
 
-/** From the nearest lockfile (walking up for workspaces), then `packageManager`, then npm. */
-export function detectPackageManager(cwd: string): PackageManager {
+const MANAGERS: readonly PackageManager[] = ['pnpm', 'npm', 'yarn', 'bun'];
+const asManager = (name: string | undefined): PackageManager | undefined =>
+  MANAGERS.find((manager) => manager === name);
+
+/**
+ * The manager that launched the CLI, from npm_config_user_agent: `pnpm dlx` and `pnpm exec` set
+ * `pnpm/10.x ...`, npx sets `npm/11.x ...`, bunx `bun/1.x ...` and `yarn dlx` `yarn/4.x ...`.
+ */
+export function managerFromUserAgent(userAgent: string | undefined): PackageManager | undefined {
+  return asManager(userAgent?.trim().split('/')[0]?.toLowerCase());
+}
+
+/**
+ * From the nearest lockfile (walking up for workspaces), then `packageManager`, then the manager
+ * that launched the CLI, then npm. The project always wins over how the CLI was started.
+ */
+export function detectPackageManager(
+  cwd: string,
+  env: Readonly<Record<string, string | undefined>> = {},
+): PackageManager {
   let dir = resolve(cwd);
   for (;;) {
     for (const [file, manager] of LOCKFILES) if (existsSync(join(dir, file))) return manager;
     const field = (readJson(join(dir, 'package.json')) as PackageJson | undefined)?.packageManager;
-    const named = field?.split('@')[0];
-    if (named === 'pnpm' || named === 'npm' || named === 'yarn' || named === 'bun') return named;
+    const named = asManager(field?.split('@')[0]);
+    if (named !== undefined) return named;
     const parent = dirname(dir);
-    if (parent === dir) return 'npm';
+    if (parent === dir) return managerFromUserAgent(env.npm_config_user_agent) ?? 'npm';
     dir = parent;
   }
 }
