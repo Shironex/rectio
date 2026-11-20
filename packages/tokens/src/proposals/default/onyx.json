@@ -11,13 +11,13 @@
     "default": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.16, 0.003, 75]
+        "components": [0.165, 0.003, 75]
       }
     },
     "raised": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.19, 0.003, 75]
+        "components": [0.2, 0.003, 75]
       }
     },
     "sunken": {
@@ -29,39 +29,39 @@
     "overlay": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.22, 0.003, 75]
+        "components": [0.235, 0.003, 75]
       }
     },
     "hover": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.26, 0.003, 75]
+        "components": [0.27, 0.003, 75]
       }
     },
     "selected": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.285, 0.018, 263]
+        "components": [0.295, 0.045, 263]
       }
     },
     "inset": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.255, 0.003, 75]
+        "components": [0.265, 0.003, 75]
       },
       "$description": "A band inside an overlay, such as a dialog footer. Sits above the overlay in dark mode, below it in light."
     },
     "placeholder": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.28, 0.003, 75]
+        "components": [0.29, 0.003, 75]
       },
       "$description": "A skeleton shape or the empty track of a bar, ring or gauge: one step off the surface it sits on, lighter in dark mode, darker in light."
     },
     "placeholder-shine": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.39, 0.003, 75]
+        "components": [0.4, 0.003, 75]
       },
       "$description": "The light that sweeps across a skeleton shape."
     }
@@ -98,7 +98,7 @@
     "default": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.265, 0.003, 75]
+        "components": [0.275, 0.003, 75]
       }
     },
     "strong": {
@@ -113,25 +113,25 @@
     "default": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.74, 0.13, 263]
+        "components": [0.68, 0.13, 263]
       }
     },
     "hover": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.79, 0.1058, 263]
+        "components": [0.73, 0.12, 263]
       }
     },
     "active": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.7, 0.13, 263]
+        "components": [0.64, 0.13, 263]
       }
     },
     "subtle": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.255, 0.045, 263]
+        "components": [0.265, 0.065, 263]
       }
     },
     "strong": {
@@ -266,7 +266,7 @@
     "default": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.74, 0.13, 263]
+        "components": [0.68, 0.13, 263]
       }
     }
   },
@@ -390,14 +390,14 @@
       "1": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.7, 0.13, 263]
+          "components": [0.64, 0.13, 263]
         },
         "$description": "First series, such as inflow or actual."
       },
       "2": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.8, 0.1249, 48]
+          "components": [0.745, 0.14, 48]
         },
         "$description": "Second series, such as outflow. Blue against orange stays apart for every common colour vision type."
       },
@@ -413,7 +413,7 @@
       "1": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.72, 0.13, 263]
+          "components": [0.66, 0.13, 263]
         },
         "$description": "Ordered steps, such as aging buckets from current to 90+ days. Step 1 is the calm state."
       },
@@ -446,7 +446,7 @@
     "grid": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.25, 0.003, 75]
+        "components": [0.26, 0.003, 75]
       },
       "$description": "Gridlines: quiet, behind the data."
     },
@@ -474,20 +474,20 @@
     "tooltip": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.22, 0.003, 75]
+        "components": [0.235, 0.003, 75]
       },
       "$description": "Tooltip background."
     },
     "tooltip-border": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.32, 0.003, 75]
+        "components": [0.33, 0.003, 75]
       }
     },
     "halo": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.16, 0.003, 75]
+        "components": [0.165, 0.003, 75]
       },
       "$description": "Outline under a line or label so it stays readable over marks; the surface colour."
     }
@@ -600,7 +600,7 @@
     "highlight": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.25, 0.003, 75]
+        "components": [0.26, 0.003, 75]
       },
       "$description": "A highlighted line."
     },

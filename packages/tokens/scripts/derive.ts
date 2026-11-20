@@ -38,6 +38,8 @@ export interface Preset {
    * (a ledger style), light mode only.
    */
   solids: { light: 'light' | 'ink'; dark: 'light' | 'dark' };
+  /** Lightness of the dark accent solid; defaults to 0.56 (white ink) or the hue's cusp (dark ink). */
+  accentL?: number;
   /** Chroma of the selected fill in dark mode: a tint, never a block. */
   selectedChroma?: number;
 }
@@ -204,20 +206,23 @@ export function derive(p: Preset, mode: Mode): TokenSet {
   const solidInk = darkInk ? ink(0.19) : n(0.985, 0.6);
   // A light solid sits near its hue's cusp so it keeps its colour (a citron at 0.74 turns mustard),
   // held between 0.72 and 0.88 so dark ink always reads on it.
-  const solidL = Math.min(0.88, Math.max(0.74, cuspLightness(bh)));
+  const solidL = darkInk
+    ? (p.accentL ?? Math.min(0.88, Math.max(0.74, cuspLightness(bh))))
+    : Math.max(0.74, p.accentL ?? 0);
   if (darkInk) {
     set('accent', brand(solidL, 0.13));
     set('accent-hover', brand(solidL + 0.05, 0.12));
     set('accent-active', brand(solidL - 0.04, 0.13));
   } else {
     // Near-white ink on a mid solid, as in light mode; hover and press darken, as there.
-    set('accent', brand(0.56, 0.15));
-    set('accent-hover', brand(0.52, 0.15));
-    set('accent-active', brand(0.48, 0.14));
+    const midL = p.accentL ?? 0.56;
+    set('accent', brand(midL, 0.17));
+    set('accent-hover', brand(midL - 0.04, 0.16));
+    set('accent-active', brand(midL - 0.08, 0.15));
   }
   set('accent-contrast', solidInk);
   set('accent-strong', brand(Math.max(0.8, solidL), 0.11));
-  set('accent-subtle', o(D + s4 - 0.005, 0.045, bh));
+  set('accent-subtle', o(D + s4 - 0.005, 0.065, bh));
   set('focus', brand(solidL, 0.13));
   const solid = {
     positive: [0.72, 0.14],
@@ -241,7 +246,7 @@ export function derive(p: Preset, mode: Mode): TokenSet {
   // colour vision type, not by hue alone.
   const series1 = solidL - 0.04;
   set('chart-series-1', brand(series1, 0.13));
-  set('chart-series-2', o(series1 >= 0.8 ? series1 - 0.14 : series1 + 0.1, 0.14, 48));
+  set('chart-series-2', o(series1 >= 0.8 ? series1 - 0.14 : series1 + 0.105, 0.14, 48));
   set('chart-series-3', ink(0.92));
   set('chart-sequence-1', brand(solidL - 0.02, 0.13));
   SEQUENCE.forEach(([h, , , l, c], i) => set(`chart-sequence-${String(i + 2)}`, o(l, c, h)));
@@ -351,21 +356,23 @@ export const PRESETS: Preset[] = [
     brand: { hue: 263, chroma: 0.19 },
     neutral: { hue: 75, chroma: 0.006 },
     depth: 0.175,
-    steps: [0.025, 0.05, 0.075, 0.1],
+    steps: [0.025, 0.05, 0.075, 0.085],
     text: 0.93,
     solids: { light: 'light', dark: 'light' },
-    selectedChroma: 0.02,
+    accentL: 0.545,
+    selectedChroma: 0.045,
   },
   {
     name: 'ink',
     label: 'Ink',
     brand: { hue: 263, chroma: 0.19 },
-    neutral: { hue: 258, chroma: 0.014 },
-    ink: { hue: 255, chroma: 0.008 },
+    neutral: { hue: 255, chroma: 0.011 },
+    ink: { hue: 255, chroma: 0.007 },
     depth: 0.19,
+    steps: [0.03, 0.055, 0.085, 0.12],
     text: 0.94,
     solids: { light: 'light', dark: 'dark' },
-    selectedChroma: 0.03,
+    selectedChroma: 0.05,
   },
   {
     name: 'onyx',
@@ -373,10 +380,11 @@ export const PRESETS: Preset[] = [
     brand: { hue: 263, chroma: 0.19 },
     neutral: { hue: 75, chroma: 0.003 },
     depth: 0.13,
-    steps: [0.03, 0.06, 0.09, 0.13],
+    steps: [0.035, 0.07, 0.105, 0.14],
     text: 0.95,
     solids: { light: 'light', dark: 'dark' },
-    selectedChroma: 0.018,
+    accentL: 0.68,
+    selectedChroma: 0.045,
   },
 ];
 
