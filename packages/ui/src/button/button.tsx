@@ -144,7 +144,7 @@ export function Button({
         'transition-[background-color,color,box-shadow,scale] duration-fast ease-standard',
         'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         'active:scale-(--rx-motion-scale-press)',
-        'data-disabled:cursor-not-allowed data-disabled:shadow-none',
+        'data-disabled:cursor-not-allowed data-disabled:shadow-none data-loading:cursor-progress',
         '[&_svg]:pointer-events-none [&_svg]:shrink-0',
         touchHitArea,
         VARIANTS[variant],
