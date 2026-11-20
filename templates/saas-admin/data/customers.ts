@@ -1,5 +1,6 @@
 import type { UserRecord } from '@rectio/blocks';
 
+import { TICKETS } from './tickets';
 import { NOW, at, minutesAgo } from './workspace';
 
 export type CustomerPlan = 'Starter' | 'Team' | 'Business';
@@ -456,10 +457,7 @@ const emailFor = (name: string, company: string) => {
 };
 
 export const CUSTOMERS: readonly Customer[] = ROWS.map(
-  (
-    [id, name, plan, seats, contact, city, since, open, csat, fr, health, last, ownerId, tags],
-    i,
-  ) => ({
+  ([id, name, plan, seats, contact, city, since, , csat, fr, health, last, ownerId, tags], i) => ({
     id,
     name,
     plan,
@@ -471,7 +469,8 @@ export const CUSTOMERS: readonly Customer[] = ROWS.map(
     },
     city,
     since,
-    openTickets: open,
+    // Counted from the board, so a customer's open tickets match the tickets page.
+    openTickets: TICKETS.filter((t) => t.customerId === id && t.columnId !== 'resolved').length,
     csat,
     firstResponse: fr,
     health,
@@ -618,25 +617,38 @@ export function customerTickets(
   people: readonly UserRecord[],
 ): CustomerTicket[] {
   const random = seeded(`${customer.id}-tickets`);
-  const total = Math.min(SUBJECTS.length, customer.openTickets + 4 + Math.floor(random() * 4));
-  const list: CustomerTicket[] = [];
-  let minutes = Math.max(20, Math.floor(random() * 240));
-  // Step through the subjects by 5 (coprime with 16), so no subject repeats within a customer.
-  const first = Math.floor(random() * SUBJECTS.length);
-  for (let i = 0; i < total; i += 1) {
-    const open = i < customer.openTickets;
-    const status: TicketStatus = open ? (random() > 0.6 ? 'waiting' : 'open') : 'resolved';
-    const requester = people[Math.floor(random() * people.length)]?.name ?? customer.contact.name;
+  // The board's tickets first, as the board shows them, then older resolved history.
+  const board: CustomerTicket[] = TICKETS.filter((t) => t.customerId === customer.id).map((t) => ({
+    id: t.id,
+    reference: t.reference ?? t.id,
+    subject: t.title,
+    status: t.columnId === 'waiting' ? 'waiting' : t.columnId === 'resolved' ? 'resolved' : 'open',
+    requester: t.requester,
+    updated: t.opened,
+    firstResponse: customer.firstResponse,
+  }));
+  const taken = new Set(board.map((t) => t.subject));
+  const subjects = SUBJECTS.filter((subject) => !taken.has(subject));
+  const history = Math.min(subjects.length, 4 + Math.floor(random() * 5));
+  const list = [...board];
+  const oldest = Math.min(...board.map((t) => t.updated.getTime()), NOW.getTime());
+  let minutes =
+    Math.round((NOW.getTime() - oldest) / 60_000) + 60 * 24 + Math.floor(random() * 600);
+  let reference = 2100 - Math.floor(random() * 20);
+  // Walk the subjects in order from a seeded start, so none repeats within a customer.
+  const first = Math.floor(random() * subjects.length);
+  for (let i = 0; i < history; i += 1) {
     list.push({
       id: `${customer.id}-t${String(i)}`,
-      reference: `CPL-${String(2140 - Math.floor(random() * 30) - i * 37)}`,
-      subject: SUBJECTS[(first + i * 5) % SUBJECTS.length] ?? 'Question about the app',
-      status,
-      requester,
+      reference: `CPL-${String(reference)}`,
+      subject: subjects[(first + i) % subjects.length] ?? 'Question about the app',
+      status: 'resolved',
+      requester: people[Math.floor(random() * people.length)]?.name ?? customer.contact.name,
       updated: new Date(NOW.getTime() - minutes * 60_000),
       firstResponse: Math.round(customer.firstResponse * (0.5 + random())),
     });
     minutes += 180 + Math.floor(random() * 60 * 24 * 4);
+    reference -= 30 + Math.floor(random() * 40);
   }
   return list;
 }

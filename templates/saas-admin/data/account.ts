@@ -154,7 +154,7 @@ export const PLAN: BillingPlan = {
 };
 
 export const USAGE: readonly BillingUsage[] = [
-  { id: 'seats', label: 'Agent seats', used: 9, limit: 12, unit: 'seats' },
+  { id: 'seats', label: 'Agent seats', used: 10, limit: 12, unit: 'seats' },
   {
     id: 'ai',
     label: 'AI-drafted replies',

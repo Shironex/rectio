@@ -89,17 +89,9 @@ export const INVITES: readonly PendingInvite[] = [
     id: 'inv-1',
     email: 'mateo.alvarez@copperline.app',
     role: 'member',
-    invitedAt: at(11, 17, 15, 10),
+    invitedAt: at(11, 19, 9, 37),
     invitedBy: 'Tomás Rivera',
-    expiresAt: at(11, 24, 15, 10),
-  },
-  {
-    id: 'inv-2',
-    email: 'freya.lund@copperline.app',
-    role: 'member',
-    invitedAt: at(11, 18, 9, 30),
-    invitedBy: CURRENT_USER.name,
-    expiresAt: at(11, 25, 9, 30),
+    expiresAt: at(11, 26, 9, 37),
   },
 ];
 

@@ -82,7 +82,7 @@ export function TeamPage() {
     <>
       <PageHeader
         title="Team and roles"
-        description={`${plural(shownMembers.length, 'member')}, ${plural(shownInvites.length, 'invite')} pending, ${String(SEATS - shownMembers.length)} of ${String(SEATS)} seats free`}
+        description={`${plural(shownMembers.length, 'member')} and ${plural(shownInvites.length, 'invite')}, ${String(SEATS - shownMembers.length - shownInvites.length)} of ${String(SEATS)} seats free`}
       />
       {state === 'loading' ? (
         <LoadingRegion label="Loading the team">

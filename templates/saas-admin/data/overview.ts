@@ -164,7 +164,7 @@ export const ACTIVITY: readonly ActivityEvent[] = [
     kind: 'security',
     verb: 'blocked a sign-in to',
     target: 'yuki@copperline.app',
-    detail: 'From a new country, without two-factor',
+    detail: 'from a new country, without two-factor',
   },
   {
     id: 'a6',
@@ -177,12 +177,12 @@ export const ACTIVITY: readonly ActivityEvent[] = [
   },
   {
     id: 'a7',
-    at: minutesAgo(60 * 22),
+    at: minutesAgo(60 * 9),
     actor: { name: 'Lindwell', system: true },
-    kind: 'billing',
-    verb: 'charged',
-    target: 'invoice LW-2026-0311',
-    detail: '$1,188.00 to the Visa ending 4242',
+    kind: 'update',
+    verb: 'paused deliveries to',
+    target: 'bi.copperline.app/ingest/csat',
+    detail: 'after 5 failed attempts in a row',
   },
   {
     id: 'a8',
