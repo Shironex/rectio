@@ -1,8 +1,7 @@
 /**
  * Contrast audit from real usage. Scans the class names in the kit's components, blocks, templates
  * and site, pairs every colour utility with the fill it is drawn on, and checks the pair in every
- * built theme and mode (and every dark proposal): WCAG 2.2 ratios as the gate, APCA Lc as a second
- * opinion.
+ * built theme and mode: WCAG 2.2 ratios as the gate, APCA Lc as a second opinion.
  *
  *   node scripts/contrast.ts            summary per theme and mode, failures listed
  *   node scripts/contrast.ts --json f   every pair with its numbers, written to f
@@ -423,18 +422,14 @@ export function evaluate(tokens: Record<string, string>, pairs: Pair[]): Result[
 
 interface Built {
   themes: Record<string, Record<string, Record<string, string>>>;
-  proposals?: Record<string, Record<string, Record<string, string>>>;
 }
 
-/** Every resolved token set in dist/tokens.json: shipped theme modes, then dark proposals. */
+/** Every resolved token set in dist/tokens.json, one per shipped theme and mode. */
 export function tokenSets(): { key: string; tokens: Record<string, string> }[] {
   const built = JSON.parse(readFileSync(join(here, '..', 'dist', 'tokens.json'), 'utf8')) as Built;
   const sets = Object.entries(built.themes).flatMap(([theme, modes]) =>
     Object.entries(modes).map(([mode, tokens]) => ({ key: `${theme}/${mode}`, tokens })),
   );
-  for (const [name, themes] of Object.entries(built.proposals ?? {}))
-    for (const [theme, tokens] of Object.entries(themes))
-      sets.push({ key: `${theme}/dark-${name}`, tokens });
   return sets;
 }
 

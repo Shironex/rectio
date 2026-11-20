@@ -3,11 +3,13 @@
  * depth, how ink sits on solid fills) to every colour token, in OKLCH, then corrected until every
  * pair from scripts/contrast.ts passes WCAG 2.2 AA.
  *
- *   node scripts/derive.ts    writes the dark proposals to src/proposals/default/<name>.json
+ *   node scripts/derive.ts    writes the default theme's dark mode (src/themes/default/dark.json)
+ *                             from the Graphite preset
  *
  * The same functions back the theme generator: derive(), then correct() against derivePairs().
+ * The other presets (ink, onyx, the ledger look) are starting points for it, not shipped themes.
  */
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -42,6 +44,13 @@ export interface Preset {
   accentL?: number;
   /** Chroma of the selected fill in dark mode: a tint, never a block. */
   selectedChroma?: number;
+  /** Lightness of the selected fill above hover in dark mode; defaults to 0.025. */
+  selectedStep?: number;
+  /**
+   * Chroma of the accent tint (accent-subtle) in dark mode: unread rows, a highlighted option, a
+   * drop target. Defaults to 0.065; lower reads warmer on a warm neutral.
+   */
+  subtleChroma?: number;
 }
 
 export type Mode = 'light' | 'dark';
@@ -194,7 +203,7 @@ export function derive(p: Preset, mode: Mode): TokenSet {
   set('surface-overlay', n(D + s3));
   set('surface-hover', n(D + s4));
   set('surface-inset', n(D + s4 - 0.005));
-  set('surface-selected', o(D + s4 + 0.025, selC, bh));
+  set('surface-selected', o(D + s4 + (p.selectedStep ?? 0.025), selC, bh));
   set('surface-placeholder', n(D + s4 + 0.02));
   set('surface-placeholder-shine', n(D + s4 + 0.13));
   set('text', ink(text));
@@ -214,15 +223,17 @@ export function derive(p: Preset, mode: Mode): TokenSet {
     set('accent-hover', brand(solidL + 0.05, 0.12));
     set('accent-active', brand(solidL - 0.04, 0.13));
   } else {
-    // Near-white ink on a mid solid, as in light mode; hover and press darken, as there.
+    // Near-white ink on a mid solid, as in light mode; hover and press darken, as there. Hover only
+    // a little, with more chroma: the kit draws it as a mark too (a switch thumb track on an
+    // overlay), which must keep 3:1 against the lifted overlay.
     const midL = p.accentL ?? 0.56;
     set('accent', brand(midL, 0.17));
-    set('accent-hover', brand(midL - 0.04, 0.16));
+    set('accent-hover', brand(midL - 0.01, 0.18));
     set('accent-active', brand(midL - 0.08, 0.15));
   }
   set('accent-contrast', solidInk);
   set('accent-strong', brand(Math.max(0.8, solidL), 0.11));
-  set('accent-subtle', o(D + s4 - 0.005, 0.065, bh));
+  set('accent-subtle', o(D + s4 - 0.005, p.subtleChroma ?? 0.065, bh));
   set('focus', brand(solidL, 0.13));
   const solid = {
     positive: [0.72, 0.14],
@@ -348,20 +359,31 @@ export function correct(t: TokenSet, mode: Mode, pairs: Pair[], limit = 400): Co
   return log;
 }
 
-/** The dark directions proposed for the default theme. */
+/**
+ * The default theme's dark mode. Warm graphite: the light theme's stone neutrals carried into dark,
+ * cobalt kept as a mid solid under near-white ink, as in light. Tuned after review: the overlay tier
+ * sits a full step above raised so popovers, menus and toasts float; hover sits above it; the accent
+ * tint is low in chroma so unread rows and highlighted options do not turn cool on warm surfaces;
+ * the solid is a touch lighter so marks hold 3:1 on the lifted fills while white ink keeps 4.5:1.
+ */
+export const GRAPHITE: Preset = {
+  name: 'graphite',
+  label: 'Graphite',
+  brand: { hue: 263, chroma: 0.19 },
+  neutral: { hue: 75, chroma: 0.006 },
+  depth: 0.175,
+  steps: [0.025, 0.05, 0.09, 0.1],
+  text: 0.93,
+  solids: { light: 'light', dark: 'light' },
+  accentL: 0.56,
+  selectedChroma: 0.04,
+  selectedStep: 0.005,
+  subtleChroma: 0.035,
+};
+
+/** Starting points for the theme generator: the default (Graphite), a cool dark and a near black. */
 export const PRESETS: Preset[] = [
-  {
-    name: 'graphite',
-    label: 'Graphite',
-    brand: { hue: 263, chroma: 0.19 },
-    neutral: { hue: 75, chroma: 0.006 },
-    depth: 0.175,
-    steps: [0.025, 0.05, 0.075, 0.085],
-    text: 0.93,
-    solids: { light: 'light', dark: 'light' },
-    accentL: 0.545,
-    selectedChroma: 0.045,
-  },
+  GRAPHITE,
   {
     name: 'ink',
     label: 'Ink',
@@ -403,11 +425,14 @@ export const LEDGER_LOOK: Preset = {
 
 type Json = Record<string, unknown>;
 
-/** Writes one dark proposal as DTCG, shaped exactly like themes/default/dark.json. */
-function toDtcg(p: Preset, t: TokenSet, log: Correction[]): Json {
-  const template = JSON.parse(
-    readFileSync(join(here, '..', 'src', 'themes', 'default', 'dark.json'), 'utf8'),
-  ) as Json;
+const DARK_JSON = join(here, '..', 'src', 'themes', 'default', 'dark.json');
+
+/**
+ * One derived dark mode as DTCG, shaped exactly like themes/default/dark.json (that file is the
+ * template: its groups, descriptions and non-colour values are kept, its colours replaced).
+ */
+export function toDtcg(p: Preset, t: TokenSet, log: Correction[] = []): Json {
+  const template = JSON.parse(readFileSync(DARK_JSON, 'utf8')) as Json;
   const walk = (node: Json, path: string[], type: string | undefined): Json => {
     const out: Json = {};
     const ownType = typeof node.$type === 'string' ? node.$type : type;
@@ -425,8 +450,9 @@ function toDtcg(p: Preset, t: TokenSet, log: Correction[]): Json {
         } else if (ownType === 'shadow') {
           out.$value = shadowFor(p, path.at(-1) ?? 'raised', value);
         } else out.$value = value;
-      } else if (key.startsWith('$')) out[key] = value;
-      else if (typeof value === 'object' && value !== null)
+      } else if (key.startsWith('$')) {
+        if (path.length > 0 || key !== '$description') out[key] = value;
+      } else if (typeof value === 'object' && value !== null)
         out[key] = walk(value as Json, [...path, key], ownType);
     }
     return out;
@@ -436,7 +462,7 @@ function toDtcg(p: Preset, t: TokenSet, log: Correction[]): Json {
     (l) => `${l.token} ${l.from.toFixed(3)} to ${l.to.toFixed(3)} (${l.because})`,
   );
   return {
-    $description: `Dark proposal "${p.label}" for the default theme. Generated by scripts/derive.ts from the preset inputs: brand hue ${String(p.brand.hue)}, neutral hue ${String(p.neutral.hue)} at chroma ${String(p.neutral.chroma)}, depth ${String(p.depth)}. Opt in with data-dark-proposal="${p.name}" on <html>. Corrections: ${notes.length > 0 ? notes.join('; ') : 'none'}.`,
+    $description: `Dark mode of the default theme, preset "${p.label}". Generated by scripts/derive.ts (node scripts/derive.ts): edit the preset there, not this file. Contrast corrections: ${notes.length > 0 ? notes.join('; ') : 'none'}.`,
     ...body,
   };
 }
@@ -471,25 +497,20 @@ export function build(p: Preset, mode: Mode, pairs = derivePairs()) {
 }
 
 function main() {
-  const pairs = derivePairs();
-  const dir = join(here, '..', 'src', 'proposals', 'default');
-  mkdirSync(dir, { recursive: true });
-  for (const p of PRESETS) {
-    const { tokens, log, fails } = build(p, 'dark', pairs);
-    if (fails.length > 0)
-      throw new Error(
-        `${p.name}: ${fails.map((f) => `${f.fg} on ${f.bg} ${f.ratio.toFixed(2)}`).join(', ')}`,
-      );
-    // Number arrays on one line, as the formatter keeps them.
-    const json = JSON.stringify(toDtcg(p, tokens, log), null, 2).replace(
-      /\[\s+([-\d.,\s]+?)\s+\]/g,
-      (_: string, inner: string) => `[${inner.split(/,\s*/).join(', ')}]`,
+  const { tokens, log, fails } = build(GRAPHITE, 'dark');
+  if (fails.length > 0)
+    throw new Error(
+      `${GRAPHITE.name}: ${fails.map((f) => `${f.fg} on ${f.bg} ${f.ratio.toFixed(2)}`).join(', ')}`,
     );
-    writeFileSync(join(dir, `${p.name}.json`), `${json}\n`);
-    console.log(`${p.name}: ${String(tokens.size)} colours, ${String(log.length)} corrected`);
-    for (const l of log)
-      console.log(`  ${l.token} ${l.from.toFixed(3)} -> ${l.to.toFixed(3)} (${l.because})`);
-  }
+  // Number arrays on one line, as the formatter keeps them.
+  const json = JSON.stringify(toDtcg(GRAPHITE, tokens, log), null, 2).replace(
+    /\[\s+([-\d.,\s]+?)\s+\]/g,
+    (_: string, inner: string) => `[${inner.split(/,\s*/).join(', ')}]`,
+  );
+  writeFileSync(DARK_JSON, `${json}\n`);
+  console.log(`default/dark: ${String(tokens.size)} colours, ${String(log.length)} corrected`);
+  for (const l of log)
+    console.log(`  ${l.token} ${l.from.toFixed(3)} -> ${l.to.toFixed(3)} (${l.because})`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();

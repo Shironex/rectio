@@ -22,7 +22,6 @@
     "./themes.css": "./dist/themes.css",
     "./tailwind.css": "./dist/tailwind.css",
     "./fonts.css": "./dist/fonts.css",
-    "./proposals.css": "./dist/proposals.css",
     "./tokens.json": "./dist/tokens.json"
   },
   "scripts": {

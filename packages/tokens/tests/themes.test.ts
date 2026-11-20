@@ -2,7 +2,15 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { contrast, difference, type ColorVision, type Oklch } from '../scripts/color.ts';
+import {
+  contrast,
+  difference,
+  formatOklch,
+  type ColorVision,
+  type Oklch,
+} from '../scripts/color.ts';
+import { derivePairs, evaluate } from '../scripts/contrast.ts';
+import { build, GRAPHITE } from '../scripts/derive.ts';
 
 interface Built {
   contract: { name: string; type: string }[];
@@ -23,71 +31,6 @@ function parse(value: string | undefined): Oklch {
   return { l: Number(m[1]) / 100, c: Number(m[2]), h: Number(m[3]), alpha: Number(m[4] ?? 1) };
 }
 
-/** [foreground, background, minimum ratio]. 4.5 for text (WCAG 1.4.3), 3 for UI edges (1.4.11). */
-const PAIRS: [string, string, number][] = [
-  ['text', 'surface', 4.5],
-  ['text', 'surface-canvas', 4.5],
-  ['text', 'surface-overlay', 4.5],
-  ['text', 'surface-sunken', 4.5],
-  ['text-muted', 'surface', 4.5],
-  ['text-muted', 'surface-canvas', 4.5],
-  ['text-muted', 'surface-sunken', 4.5],
-  ['text-subtle', 'surface', 4.5],
-  ['text-subtle', 'surface-canvas', 4.5],
-  ['text-subtle', 'surface-overlay', 4.5],
-  ['text-subtle', 'surface-inset', 4.5],
-  // Hints and meta lines inside a well, a hovered row and a selected row.
-  ['text-subtle', 'surface-sunken', 4.5],
-  ['text-subtle', 'surface-hover', 4.5],
-  ['text-subtle', 'surface-selected', 4.5],
-  ['text', 'surface-inset', 4.5],
-  // Popovers and toasts: the calendar's today marker, a toast's description and status icon.
-  ['text-muted', 'surface-overlay', 4.5],
-  ['accent-strong', 'surface-overlay', 4.5],
-  ['positive-strong', 'surface-overlay', 3],
-  ['negative-strong', 'surface-overlay', 3],
-  // The docs sidebar's current page and a highlighted search result sit on the hover fill.
-  ['accent-strong', 'surface-hover', 4.5],
-  ['text', 'surface-hover', 4.5],
-  ['text-muted', 'surface-hover', 4.5],
-  // A selected table row keeps its secondary text readable.
-  ['text-muted', 'surface-selected', 4.5],
-  ['accent-contrast', 'accent', 4.5],
-  ['accent-contrast', 'accent-hover', 4.5],
-  ['accent-strong', 'surface', 4.5],
-  ['accent-strong', 'accent-subtle', 4.5],
-  ['text', 'surface-selected', 4.5],
-  // The highlighted option in a Select list.
-  ['text', 'accent-subtle', 4.5],
-  ['positive-contrast', 'positive', 4.5],
-  ['positive-strong', 'surface', 4.5],
-  ['positive-strong', 'positive-subtle', 4.5],
-  ['negative-contrast', 'negative', 4.5],
-  ['negative-contrast', 'negative-hover', 4.5],
-  ['negative-strong', 'surface', 4.5],
-  ['negative-strong', 'negative-subtle', 4.5],
-  ['warning-contrast', 'warning', 4.5],
-  ['warning-strong', 'surface', 4.5],
-  ['warning-strong', 'warning-subtle', 4.5],
-  ['info-contrast', 'info', 4.5],
-  ['info-strong', 'surface', 4.5],
-  ['info-strong', 'info-subtle', 4.5],
-  // Disabled values a user may still need to read (a limit, an approver): 3:1, beyond WCAG's exemption.
-  ['text-disabled', 'surface', 3],
-  ['text-disabled', 'surface-sunken', 3],
-  ['border-strong', 'surface', 3],
-  ['border-strong', 'surface-canvas', 3],
-  ['focus', 'surface', 3],
-  ['focus', 'surface-canvas', 3],
-  ['focus', 'surface-overlay', 3],
-  // Initials on an avatar's identity tint.
-  ...[1, 2, 3, 4, 5, 6].map((n): [string, string, number] => [
-    `identity-${n}-strong`,
-    `identity-${n}-subtle`,
-    4.5,
-  ]),
-];
-
 describe('token contract', () => {
   it.each(themeModes)('$key defines every contract token', ({ tokens }) => {
     const missing = built.contract.map((t) => t.name).filter((name) => !(name in tokens));
@@ -104,13 +47,41 @@ describe('token contract', () => {
   });
 });
 
+// Every pair the kit draws, read from the class names in its components, blocks, templates and
+// site (scripts/contrast.ts): WCAG 2.2 AA, 4.5:1 for text and 3:1 for control edges and marks.
+const pairs = derivePairs();
+
 describe('contrast', () => {
-  it.each(themeModes)('$key meets WCAG AA for its semantic pairs', ({ tokens }) => {
-    const failures = PAIRS.flatMap(([fg, bg, min]) => {
-      const ratio = contrast(parse(tokens[`--rx-${fg}`]), parse(tokens[`--rx-${bg}`]));
-      return ratio >= min ? [] : [`${fg} on ${bg}: ${ratio.toFixed(2)} < ${min}`];
+  it('finds the pairs the kit draws', () => {
+    expect(pairs.filter((p) => p.gate !== 'info').length).toBeGreaterThan(150);
+  });
+
+  it.each(themeModes)('$key passes every pair the kit draws', ({ tokens }) => {
+    const failures = evaluate(tokens, pairs)
+      .filter((r) => !r.pass)
+      .map(
+        (r) => `${r.fg} on ${r.bg}: ${r.ratio.toFixed(2)} < ${String(r.min)} (${r.where[0] ?? ''})`,
+      );
+    expect([...new Set(failures)]).toEqual([]);
+  });
+});
+
+describe('default dark', () => {
+  // dark.json is generated from the Graphite preset; the theme generator starts from the same
+  // inputs, so the shipped file must be exactly what the derivation gives.
+  it('is what derive.ts gives for the Graphite preset', () => {
+    const { tokens, fails } = build(GRAPHITE, 'dark', pairs);
+    expect(fails).toEqual([]);
+    const shipped = built.themes.default?.dark ?? {};
+    const drift = [...tokens].flatMap(([name, c]) => {
+      const s = parse(shipped[name]);
+      const gap =
+        Math.abs(s.l - c.l) +
+        Math.abs(s.c - c.c) +
+        Math.min(Math.abs(s.h - c.h), 360 - Math.abs(s.h - c.h)) / 360;
+      return gap < 0.002 ? [] : [`${name}: ${String(shipped[name])} vs ${formatOklch(c)}`];
     });
-    expect(failures).toEqual([]);
+    expect(drift, 'run node scripts/derive.ts').toEqual([]);
   });
 });
 
@@ -209,8 +180,26 @@ describe('code colours', () => {
   });
 });
 
+describe('dark elevation', () => {
+  const darkModes = themeModes.filter(({ key }) => key.endsWith('/dark'));
+
+  // Popovers, menus and toasts float: the overlay is clearly above a card, and a hovered row still
+  // shows inside a menu.
+  it.each(darkModes)('$key overlay floats and hover shows inside it', ({ tokens }) => {
+    const l = (name: string) => parse(tokens[`--rx-${name}`]).l;
+    expect(l('surface-overlay') - l('surface-raised')).toBeGreaterThanOrEqual(0.03);
+    expect(l('surface-hover')).toBeGreaterThan(l('surface-overlay'));
+    expect(l('accent-subtle')).toBeGreaterThan(l('surface-overlay'));
+  });
+});
+
 describe('selected fill', () => {
   const darkModes = themeModes.filter(({ key }) => key.endsWith('/dark'));
+
+  // The selected fill is a tint, never a saturated block.
+  it.each(darkModes)('$key selected fill is a quiet tint', ({ tokens }) => {
+    expect(parse(tokens['--rx-surface-selected']).c).toBeLessThanOrEqual(0.05);
+  });
 
   // The current page in a sidebar sits on surface-selected. In dark mode it has to read as a step
   // above hover and clearly off the canvas, or the active item looks like a hovered one.
