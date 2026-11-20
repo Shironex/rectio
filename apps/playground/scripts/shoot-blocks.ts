@@ -22,7 +22,6 @@ const only = process.argv[3];
 const out = join(here, '..', '..', '..', '.rounds', `round-${round}`, 'blocks');
 mkdirSync(out, { recursive: true });
 
-const THEMES = ['default', 'ledger'] as const;
 const MODES = ['light', 'dark'] as const;
 const BLOCKS = [
   'kpi-row',
@@ -125,29 +124,16 @@ if (base === undefined) throw new Error('vite did not report a local url');
 
 const browser = await chromium.launch();
 try {
-  for (const theme of THEMES) {
-    for (const mode of MODES) {
-      const page = await shoot(
-        browser,
-        base,
-        `dashboard-${theme}-${mode}`,
-        `theme=${theme}&mode=${mode}`,
-      );
-      await page?.close();
-    }
+  for (const mode of MODES) {
+    const page = await shoot(browser, base, `dashboard-${mode}`, `mode=${mode}`);
+    await page?.close();
   }
   for (const block of BLOCKS) {
-    for (const theme of THEMES) {
-      for (const mode of MODES) {
-        const page = await shoot(
-          browser,
-          base,
-          `${block}-${theme}-${mode}`,
-          `block=${block}&theme=${theme}&mode=${mode}`,
-          { width: 1180 },
-        );
-        await page?.close();
-      }
+    for (const mode of MODES) {
+      const page = await shoot(browser, base, `${block}-${mode}`, `block=${block}&mode=${mode}`, {
+        width: 1180,
+      });
+      await page?.close();
     }
   }
 
@@ -172,17 +158,15 @@ try {
   }
 
   for (const block of SAAS_BLOCKS) {
-    for (const theme of THEMES) {
-      for (const mode of MODES) {
-        const page = await shoot(
-          browser,
-          base,
-          `saas-${block}-${theme}-${mode}`,
-          `block=${block}&theme=${theme}&mode=${mode}`,
-          { width: 1180 },
-        );
-        await page?.close();
-      }
+    for (const mode of MODES) {
+      const page = await shoot(
+        browser,
+        base,
+        `saas-${block}-${mode}`,
+        `block=${block}&mode=${mode}`,
+        { width: 1180 },
+      );
+      await page?.close();
     }
     const empty = await shoot(browser, base, `saas-${block}-empty`, `block=${block}&empty=1`, {
       width: 1180,
@@ -192,7 +176,7 @@ try {
       browser,
       base,
       `saas-${block}-phone-ledger-dark`,
-      `block=${block}&theme=ledger&mode=dark`,
+      `block=${block}&mode=dark`,
       { width: 390, phone: true },
     );
     if (phone !== null) {
@@ -205,16 +189,9 @@ try {
       await phone.close();
     }
   }
-  for (const theme of THEMES) {
-    for (const mode of MODES) {
-      const page = await shoot(
-        browser,
-        base,
-        `saas-all-${theme}-${mode}`,
-        `set=saas&theme=${theme}&mode=${mode}`,
-      );
-      await page?.close();
-    }
+  for (const mode of MODES) {
+    const page = await shoot(browser, base, `saas-all-${mode}`, `set=saas&mode=${mode}`);
+    await page?.close();
   }
 
   const compact = await shoot(browser, base, 'dashboard-compact', 'density=compact');
@@ -224,7 +201,7 @@ try {
   });
   await calm?.close();
 
-  const phone = await shoot(browser, base, 'phone-dashboard', 'theme=ledger&mode=dark', {
+  const phone = await shoot(browser, base, 'phone-dashboard', 'mode=dark', {
     width: 390,
     phone: true,
   });

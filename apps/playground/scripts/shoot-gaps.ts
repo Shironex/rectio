@@ -23,7 +23,6 @@ const only = process.argv[3];
 const out = join(here, '..', '..', '..', '.rounds', `round-${round}`, 'gaps');
 mkdirSync(out, { recursive: true });
 
-const THEMES = ['default', 'ledger'] as const;
 const MODES = ['light', 'dark'] as const;
 const WIDTHS = [
   ['desktop', false],
@@ -84,61 +83,59 @@ if (base === undefined) throw new Error('vite did not report a local url');
 
 const browser = await chromium.launch();
 try {
-  for (const theme of THEMES) {
-    for (const mode of MODES) {
-      const scope = `theme=${theme}&mode=${mode}`;
-      for (const [width, phone] of WIDTHS) {
-        const name = `${width}-${theme}-${mode}`;
+  for (const mode of MODES) {
+    const scope = `mode=${mode}`;
+    for (const [width, phone] of WIDTHS) {
+      const name = `${width}-${mode}`;
 
-        if (wanted(`fixes-${name}`)) {
-          const page = await open(browser, base, `view=gaps&${scope}`, phone);
-          if (phone && theme === 'default' && mode === 'light') {
-            const overflow = await page.evaluate(
-              () => document.documentElement.scrollWidth - window.innerWidth,
-            );
-            console.log('fixes phone horizontal overflow px', overflow);
-            console.log('fixes phone smallest touch target', await smallestTouchTarget(page));
-          }
-          await tall(page, `fixes-${name}.png`);
-          await page.close();
+      if (wanted(`fixes-${name}`)) {
+        const page = await open(browser, base, `view=gaps&${scope}`, phone);
+        if (phone && mode === 'light') {
+          const overflow = await page.evaluate(
+            () => document.documentElement.scrollWidth - window.innerWidth,
+          );
+          console.log('fixes phone horizontal overflow px', overflow);
+          console.log('fixes phone smallest touch target', await smallestTouchTarget(page));
         }
+        await tall(page, `fixes-${name}.png`);
+        await page.close();
+      }
 
-        if (wanted(`command-${name}`)) {
-          const page = await open(browser, base, `view=gaps&open=command&${scope}`, phone);
-          await page.getByRole('dialog').waitFor();
-          await settle(page);
-          await page.screenshot({ path: join(out, `command-top-${name}.png`) });
-          await page.evaluate(() => {
-            const list = document.querySelector('[data-slot="command-list"]');
-            if (list !== null) list.scrollTop = (list.scrollHeight - list.clientHeight) / 2;
-          });
-          await settle(page);
-          await page.screenshot({ path: join(out, `command-middle-${name}.png`) });
-          await page.close();
-        }
+      if (wanted(`command-${name}`)) {
+        const page = await open(browser, base, `view=gaps&open=command&${scope}`, phone);
+        await page.getByRole('dialog').waitFor();
+        await settle(page);
+        await page.screenshot({ path: join(out, `command-top-${name}.png`) });
+        await page.evaluate(() => {
+          const list = document.querySelector('[data-slot="command-list"]');
+          if (list !== null) list.scrollTop = (list.scrollHeight - list.clientHeight) / 2;
+        });
+        await settle(page);
+        await page.screenshot({ path: join(out, `command-middle-${name}.png`) });
+        await page.close();
+      }
 
-        if (!phone && wanted(`sidebar-${name}`)) {
-          const page = await open(browser, base, `view=shell&${scope}`, phone);
-          await page.screenshot({ path: join(out, `sidebar-${name}.png`) });
-          await page.close();
-        }
+      if (!phone && wanted(`sidebar-${name}`)) {
+        const page = await open(browser, base, `view=shell&${scope}`, phone);
+        await page.screenshot({ path: join(out, `sidebar-${name}.png`) });
+        await page.close();
+      }
 
-        for (const [block, query] of BLOCKS) {
-          if (!wanted(`${block}-${name}`)) continue;
-          // The extra status views once per width, in the default light look.
-          if (block.startsWith('expense-approval-') && `${theme}-${mode}` !== 'default-light') {
-            continue;
-          }
-          const page = await open(browser, base, `view=blocks&${query}&${scope}`, phone);
-          if (phone && theme === 'default' && mode === 'light') {
-            const overflow = await page.evaluate(
-              () => document.documentElement.scrollWidth - window.innerWidth,
-            );
-            console.log(`${block} phone horizontal overflow px`, overflow);
-          }
-          await tall(page, `${block}-${name}.png`);
-          await page.close();
+      for (const [block, query] of BLOCKS) {
+        if (!wanted(`${block}-${name}`)) continue;
+        // The extra status views once per width, in the default light look.
+        if (block.startsWith('expense-approval-') && mode !== 'light') {
+          continue;
         }
+        const page = await open(browser, base, `view=blocks&${query}&${scope}`, phone);
+        if (phone && mode === 'light') {
+          const overflow = await page.evaluate(
+            () => document.documentElement.scrollWidth - window.innerWidth,
+          );
+          console.log(`${block} phone horizontal overflow px`, overflow);
+        }
+        await tall(page, `${block}-${name}.png`);
+        await page.close();
       }
     }
   }

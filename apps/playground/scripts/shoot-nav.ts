@@ -18,7 +18,6 @@ const only = process.argv[3];
 const out = join(here, '..', '..', '..', '.rounds', `round-${round}`, 'nav');
 mkdirSync(out, { recursive: true });
 
-const THEMES = ['default', 'ledger'] as const;
 const MODES = ['light', 'dark'] as const;
 const wanted = (name: string) => only === undefined || name.includes(only);
 
@@ -102,29 +101,27 @@ if (base === undefined) throw new Error('vite did not report a local url');
 const browser = await chromium.launch();
 try {
   // At rest: the shell and the gallery, every theme and mode, desktop and phone.
-  for (const theme of THEMES) {
-    for (const mode of MODES) {
-      const q = `theme=${theme}&mode=${mode}`;
-      for (const phone of [false, true]) {
-        const device = phone ? 'phone' : 'desktop';
-        if (wanted(`shell-${theme}-${mode}-${device}`)) {
-          const page = await open(browser, base, `view=shell&${q}`, { phone });
-          await snap(page, `shell-${theme}-${mode}-${device}`);
-          if (phone) {
-            console.log(`shell ${theme} ${mode} phone overflow px`, await overflow(page));
-            console.log(`shell ${theme} ${mode} phone smallest target`, await smallestTarget(page));
-          }
-          await page.close();
+  for (const mode of MODES) {
+    const q = `mode=${mode}`;
+    for (const phone of [false, true]) {
+      const device = phone ? 'phone' : 'desktop';
+      if (wanted(`shell-${mode}-${device}`)) {
+        const page = await open(browser, base, `view=shell&${q}`, { phone });
+        await snap(page, `shell-${mode}-${device}`);
+        if (phone) {
+          console.log(`shell ${mode} phone overflow px`, await overflow(page));
+          console.log(`shell ${mode} phone smallest target`, await smallestTarget(page));
         }
-        if (wanted(`nav-${theme}-${mode}-${device}`)) {
-          const page = await open(browser, base, `view=nav&${q}`, { phone });
-          await snap(page, `nav-${theme}-${mode}-${device}`, true);
-          if (phone) {
-            console.log(`nav ${theme} ${mode} phone overflow px`, await overflow(page));
-            console.log(`nav ${theme} ${mode} phone smallest target`, await smallestTarget(page));
-          }
-          await page.close();
+        await page.close();
+      }
+      if (wanted(`nav-${mode}-${device}`)) {
+        const page = await open(browser, base, `view=nav&${q}`, { phone });
+        await snap(page, `nav-${mode}-${device}`, true);
+        if (phone) {
+          console.log(`nav ${mode} phone overflow px`, await overflow(page));
+          console.log(`nav ${mode} phone smallest target`, await smallestTarget(page));
         }
+        await page.close();
       }
     }
   }
@@ -134,8 +131,8 @@ try {
     ['default', 'light'],
     ['ledger', 'dark'],
   ] as const) {
-    const q = `theme=${theme}&mode=${mode}`;
-    const tag = `${theme}-${mode}`;
+    const q = `mode=${mode}`;
+    const tag = `${mode}`;
 
     if (wanted(`open-command-${tag}`)) {
       const page = await open(browser, base, `view=shell&${q}`);

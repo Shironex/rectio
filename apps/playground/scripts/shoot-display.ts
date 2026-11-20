@@ -23,7 +23,6 @@ const only = process.argv[3];
 const out = join(here, '..', '..', '..', '.rounds', `round-${round}`, 'display');
 mkdirSync(out, { recursive: true });
 
-const THEMES = ['default', 'ledger'] as const;
 const MODES = ['light', 'dark'] as const;
 /** Where looping animations are frozen, in ms: mid-cycle, so every loader shows its shape. */
 const FREEZE_AT = 420;
@@ -102,34 +101,21 @@ if (base === undefined) throw new Error('vite did not report a local url');
 
 const browser = await chromium.launch();
 try {
-  for (const theme of THEMES) {
-    for (const mode of MODES) {
-      const desk = await shoot(
-        browser,
-        base,
-        `desktop-${theme}-${mode}`,
-        `theme=${theme}&mode=${mode}`,
+  for (const mode of MODES) {
+    const desk = await shoot(browser, base, `desktop-${mode}`, `mode=${mode}`);
+    await desk?.close();
+    const phone = await shoot(browser, base, `phone-${mode}`, `mode=${mode}`, {
+      phone: true,
+    });
+    if (phone !== null) {
+      await phone.setViewportSize({ width: 390, height: 844 });
+      console.log(
+        `phone ${mode}: overflow px`,
+        await phone.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
+        'smallest touch target',
+        await smallestTouchTarget(phone),
       );
-      await desk?.close();
-      const phone = await shoot(
-        browser,
-        base,
-        `phone-${theme}-${mode}`,
-        `theme=${theme}&mode=${mode}`,
-        {
-          phone: true,
-        },
-      );
-      if (phone !== null) {
-        await phone.setViewportSize({ width: 390, height: 844 });
-        console.log(
-          `phone ${theme} ${mode}: overflow px`,
-          await phone.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
-          'smallest touch target',
-          await smallestTouchTarget(phone),
-        );
-        await phone.close();
-      }
+      await phone.close();
     }
   }
   for (const section of ['loaders', 'skeletons', 'progress'] as const) {
@@ -144,7 +130,7 @@ try {
       await page?.close();
     }
   }
-  const moving = await shoot(browser, base, 'desktop-motion', 'motion=on&theme=ledger');
+  const moving = await shoot(browser, base, 'desktop-motion', 'motion=on');
   await moving?.close();
   const calm = await shoot(browser, base, 'desktop-reduced-motion', 'motion=on', {
     reducedMotion: true,

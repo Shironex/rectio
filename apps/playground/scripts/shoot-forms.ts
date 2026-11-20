@@ -22,7 +22,6 @@ const only = process.argv[3];
 const out = join(here, '..', '..', '..', '.rounds', `round-${round}`, 'forms');
 mkdirSync(out, { recursive: true });
 
-const THEMES = ['default', 'ledger'] as const;
 const MODES = ['light', 'dark'] as const;
 
 const wanted = (name: string) => only === undefined || name.includes(only);
@@ -78,26 +77,24 @@ if (base === undefined) throw new Error('vite did not report a local url');
 
 const browser = await chromium.launch();
 try {
-  for (const theme of THEMES) {
-    for (const mode of MODES) {
-      const name = `${theme}-${mode}`;
-      if (wanted(`desktop-${name}`)) {
-        const page = await open(browser, base, `theme=${theme}&mode=${mode}`);
-        await tall(page, `desktop-${name}.png`);
-        await page.close();
+  for (const mode of MODES) {
+    const name = `${mode}`;
+    if (wanted(`desktop-${name}`)) {
+      const page = await open(browser, base, `mode=${mode}`);
+      await tall(page, `desktop-${name}.png`);
+      await page.close();
+    }
+    if (wanted(`phone-${name}`)) {
+      const page = await open(browser, base, `mode=${mode}`, { phone: true });
+      if (mode === 'light') {
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - window.innerWidth,
+        );
+        console.log('phone horizontal overflow px', overflow);
+        console.log('phone smallest touch target', await smallestTouchTarget(page));
       }
-      if (wanted(`phone-${name}`)) {
-        const page = await open(browser, base, `theme=${theme}&mode=${mode}`, { phone: true });
-        if (theme === 'default' && mode === 'light') {
-          const overflow = await page.evaluate(
-            () => document.documentElement.scrollWidth - window.innerWidth,
-          );
-          console.log('phone horizontal overflow px', overflow);
-          console.log('phone smallest touch target', await smallestTouchTarget(page));
-        }
-        await tall(page, `phone-${name}.png`);
-        await page.close();
-      }
+      await tall(page, `phone-${name}.png`);
+      await page.close();
     }
   }
 
@@ -106,9 +103,9 @@ try {
     ['default', 'light'],
     ['ledger', 'dark'],
   ] as const) {
-    const name = `${theme}-${mode}`;
+    const name = `${mode}`;
     if (wanted(`popups-${name}`)) {
-      const page = await open(browser, base, `theme=${theme}&mode=${mode}`);
+      const page = await open(browser, base, `mode=${mode}`);
       const timezone = page.getByRole('combobox', { name: 'Time zone' });
       // Centre the field first, so the list opens below it as it would mid-page.
       await timezone.evaluate((node) => {
@@ -135,7 +132,7 @@ try {
       await page.close();
     }
     if (wanted(`invalid-${name}`)) {
-      const page = await open(browser, base, `theme=${theme}&mode=${mode}&invalid=1`);
+      const page = await open(browser, base, `mode=${mode}&invalid=1`);
       await tall(page, `invalid-${name}.png`);
       await page.close();
     }
@@ -147,7 +144,7 @@ try {
     await page.close();
   }
   if (wanted('motion')) {
-    const page = await open(browser, base, 'theme=ledger&mode=light&motion=on');
+    const page = await open(browser, base, 'mode=light&motion=on');
     await tall(page, 'motion-ledger-light.png');
     await page.close();
   }

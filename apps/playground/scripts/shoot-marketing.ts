@@ -20,7 +20,6 @@ const only = process.argv[3];
 const out = join(here, '..', '..', '..', '.rounds', `round-${round}`, 'marketing');
 mkdirSync(out, { recursive: true });
 
-const THEMES = ['default', 'ledger'] as const;
 const MODES = ['light', 'dark'] as const;
 const BLOCKS = [
   'announcement-bar',
@@ -142,29 +141,27 @@ if (base === undefined) throw new Error('vite did not report a local url');
 
 const browser = await chromium.launch();
 try {
-  for (const theme of THEMES) {
-    for (const mode of MODES) {
-      const query = `theme=${theme}&mode=${mode}`;
-      const fold = await shoot(browser, base, `landing-fold-${theme}-${mode}`, query, {
-        fold: true,
-      });
-      await fold?.close();
-      const page = await shoot(browser, base, `landing-${theme}-${mode}`, query);
-      await page?.close();
-      const phone = await shoot(browser, base, `phone-landing-${theme}-${mode}`, query, {
-        width: 390,
-        phone: true,
-      });
-      if (phone !== null) {
-        await phone.setViewportSize({ width: 390, height: 844 });
-        console.log(
-          `phone ${theme} ${mode}: overflow`,
-          await phone.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
-          'px, smallest target',
-          await smallestTarget(phone),
-        );
-        await phone.close();
-      }
+  for (const mode of MODES) {
+    const query = `mode=${mode}`;
+    const fold = await shoot(browser, base, `landing-fold-${mode}`, query, {
+      fold: true,
+    });
+    await fold?.close();
+    const page = await shoot(browser, base, `landing-${mode}`, query);
+    await page?.close();
+    const phone = await shoot(browser, base, `phone-landing-${mode}`, query, {
+      width: 390,
+      phone: true,
+    });
+    if (phone !== null) {
+      await phone.setViewportSize({ width: 390, height: 844 });
+      console.log(
+        `phone ${mode}: overflow`,
+        await phone.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
+        'px, smallest target',
+        await smallestTarget(phone),
+      );
+      await phone.close();
     }
   }
 
@@ -176,8 +173,8 @@ try {
       const page = await shoot(
         browser,
         base,
-        `block-${block}-${theme}-${mode}`,
-        `block=${block}&theme=${theme}&mode=${mode}`,
+        `block-${block}-${mode}`,
+        `block=${block}&mode=${mode}`,
       );
       await page?.close();
     }
@@ -188,7 +185,7 @@ try {
   }
   const article = await shoot(browser, base, 'block-blog-article', 'block=blog&doc=article');
   await article?.close();
-  const phoneArticle = await shoot(browser, base, 'phone-block-legal', 'block=legal&theme=ledger', {
+  const phoneArticle = await shoot(browser, base, 'phone-block-legal', 'block=legal', {
     width: 390,
     phone: true,
   });
@@ -217,7 +214,7 @@ try {
   }
   if (wanted('cookie-preferences')) {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    await page.goto(`${base}?view=marketing&theme=ledger&mode=light`);
+    await page.goto(`${base}?view=marketing&mode=light`);
     await settle(page);
     await page.getByRole('button', { name: 'Choose cookies' }).click();
     await settle(page);
@@ -233,7 +230,7 @@ try {
     await page.getByRole('button', { name: 'Send message' }).click();
     await settle(page);
     await page.screenshot({ path: join(out, 'states-contact-errors.png'), fullPage: true });
-    await page.goto(`${base}?view=marketing&block=newsletter&theme=ledger&mode=dark`);
+    await page.goto(`${base}?view=marketing&block=newsletter&mode=dark`);
     await settle(page);
     await page.getByLabel('Email address').first().fill('ingrid@halden.example');
     await page.getByRole('button', { name: 'Subscribe' }).first().click();

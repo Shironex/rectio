@@ -63,16 +63,14 @@ if (base === undefined) throw new Error('vite did not report a local url');
 const browser = await chromium.launch();
 try {
   for (const pageName of ['article', 'home', 'changelog']) {
-    for (const theme of ['default', 'ledger']) {
-      for (const mode of ['light', 'dark']) {
-        for (const phone of [false, true]) {
-          for (const motion of phone ? ['off'] : ['off', 'on']) {
-            const query = `page=${pageName}&theme=${theme}&mode=${mode}&motion=${motion}`;
-            const page = await open(browser, base, query, phone);
-            const file = `${pageName}-${theme}-${mode}-${phone ? 'phone' : 'desktop'}${motion === 'on' ? '-motion' : ''}.png`;
-            await full(page, file);
-            await page.close();
-          }
+    for (const mode of ['light', 'dark']) {
+      for (const phone of [false, true]) {
+        for (const motion of phone ? ['off'] : ['off', 'on']) {
+          const query = `page=${pageName}&mode=${mode}&motion=${motion}`;
+          const page = await open(browser, base, query, phone);
+          const file = `${pageName}-${mode}-${phone ? 'phone' : 'desktop'}${motion === 'on' ? '-motion' : ''}.png`;
+          await full(page, file);
+          await page.close();
         }
       }
     }
@@ -86,23 +84,21 @@ try {
   await searchPage.close();
   // Phones in the dark: search and the navigation sheet, in both themes, since the pages above
   // show neither open.
-  for (const theme of ['default', 'ledger']) {
-    const phoneSearch = await open(browser, base, `theme=${theme}&mode=dark`, true);
-    await phoneSearch
-      .getByRole('button', { name: /search/i })
-      .first()
-      .click();
-    await phoneSearch.waitForTimeout(250);
-    await phoneSearch.keyboard.type('retry');
-    await phoneSearch.waitForTimeout(500);
-    await phoneSearch.screenshot({ path: join(out, `search-${theme}-dark-phone.png`) });
-    await phoneSearch.close();
-    const nav = await open(browser, base, `theme=${theme}&mode=dark`, true);
-    await nav.getByRole('button', { name: 'Navigation' }).click();
-    await nav.waitForTimeout(500);
-    await nav.screenshot({ path: join(out, `phone-nav-${theme}-dark.png`) });
-    await nav.close();
-  }
+  const phoneSearch = await open(browser, base, `mode=dark`, true);
+  await phoneSearch
+    .getByRole('button', { name: /search/i })
+    .first()
+    .click();
+  await phoneSearch.waitForTimeout(250);
+  await phoneSearch.keyboard.type('retry');
+  await phoneSearch.waitForTimeout(500);
+  await phoneSearch.screenshot({ path: join(out, `search-dark-phone.png`) });
+  await phoneSearch.close();
+  const nav = await open(browser, base, `mode=dark`, true);
+  await nav.getByRole('button', { name: 'Navigation' }).click();
+  await nav.waitForTimeout(500);
+  await nav.screenshot({ path: join(out, `phone-nav-dark.png`) });
+  await nav.close();
   console.log(`docs blocks shots in ${out}`);
 } finally {
   await browser.close();
