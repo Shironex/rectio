@@ -1,0 +1,67 @@
+name: Bug report
+description: A component, block, template, the CLI or the MCP server does something wrong.
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. The fastest fix comes from a small reproduction: the item, the props or steps, and what you saw. Visual bugs are much easier with a screenshot.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where is it?
+      options:
+        - A component (@rectio/ui)
+        - The motion add-on (@rectio/motion)
+        - A block (@rectio/blocks)
+        - A template
+        - Tokens or themes
+        - The CLI (rectio init, add, diff, list, update)
+        - The MCP server (rectio mcp)
+        - The docs site or a live preview
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: item
+    attributes:
+      label: Item name
+      description: The registry name, as in `rectio add <name>` or the docs URL.
+      placeholder: date-picker
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: Steps, or the smallest code that shows it. A link to a repo or a sandbox works too.
+      render: tsx
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser and OS, theme (default or ledger), light or dark, React, Tailwind, Node and package manager versions where relevant. For the CLI, the output with the command you ran.
+      placeholder: |
+        Chrome 142 on macOS, ledger theme, dark
+        React 19.3, Tailwind 4.3, Node 22.18, pnpm 10
+    validations:
+      required: true
+  - type: dropdown
+    id: a11y
+    attributes:
+      label: Does it affect keyboard or screen reader users?
+      options:
+        - 'No'
+        - 'Yes'
+        - Not sure
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recordings
+      description: Drag images or a short video in here.

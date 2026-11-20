@@ -1,0 +1,49 @@
+name: Component request
+description: Ask for a component (a single building block, such as a color picker or a tree view).
+labels: ['enhancement', 'component']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Components live in `packages/ui`, built on Base UI primitives and styled only through tokens. A good request says what problem it solves in a real screen, not only what it looks like. A PR is welcome too: see CONTRIBUTING.md.
+  - type: input
+    id: name
+    attributes:
+      label: Component name
+      placeholder: Tree view
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Where would you use it?
+      description: The screen and the job it does there. What do you use today instead?
+    validations:
+      required: true
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Behaviour and states
+      description: Interaction, keyboard support, empty, loading, disabled and error states, anything you know it must do.
+    validations:
+      required: true
+  - type: dropdown
+    id: motion
+    attributes:
+      label: Should it have a motion twin?
+      description: A motion variant in @rectio/motion, for components where movement helps (opening, reordering, value changes).
+      options:
+        - Not sure
+        - 'Yes'
+        - 'No'
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Screenshots or links to the behaviour you have in mind, if any.
+  - type: checkboxes
+    id: offer
+    attributes:
+      label: Contributing
+      options:
+        - label: I would like to build this myself and open a PR.

@@ -1,0 +1,49 @@
+name: Template request
+description: Ask for a template (a complete starter app, such as a CRM, a store admin or a portfolio).
+labels: ['enhancement', 'template']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Templates live in `templates/`: each is a complete Next.js app built from the kit, with a live preview on the docs site and `rectio init --template <name>` to start from it.
+  - type: input
+    id: name
+    attributes:
+      label: Template idea
+      placeholder: CRM
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - App
+        - Dashboard
+        - Marketing
+        - Docs
+    validations:
+      required: true
+  - type: textarea
+    id: pages
+    attributes:
+      label: Pages
+      description: The pages it should have and what each one shows.
+    validations:
+      required: true
+  - type: textarea
+    id: missing
+    attributes:
+      label: Components or blocks it needs that rectio does not have yet
+      description: Leave empty if you are not sure.
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Screenshots or links, if any.
+  - type: checkboxes
+    id: offer
+    attributes:
+      label: Contributing
+      options:
+        - label: I would like to build this myself and open a PR.

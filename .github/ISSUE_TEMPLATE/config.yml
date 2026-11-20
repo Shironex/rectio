@@ -1,0 +1,13 @@
+# Template chooser for github.com/Shironex/rectio/issues/new/choose. Every issue starts from a
+# form; questions and ideas that are not yet a request go to Discussions.
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/Shironex/rectio/discussions
+    about: How do I do X with rectio, is this a bug or my setup, or an idea that is not a concrete request yet.
+  - name: Documentation
+    url: https://shironex.github.io/rectio/docs
+    about: Every component, block and template, with live previews, the CLI and the MCP server.
+  - name: Security issue
+    url: https://github.com/Shironex/rectio/security/advisories/new
+    about: Report a vulnerability privately. Never in a public issue.

@@ -1,0 +1,52 @@
+name: Block request
+description: Ask for a block (a composed section such as a billing page, a kanban board or a pricing table).
+labels: ['enhancement', 'block']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Blocks live in `packages/blocks`: composed from the kit components, data agnostic (typed props in, callbacks out), with an empty state and a motion twin. Tell me the job the block does and the data it shows.
+  - type: input
+    id: name
+    attributes:
+      label: Block name
+      placeholder: Subscription usage
+    validations:
+      required: true
+  - type: dropdown
+    id: family
+    attributes:
+      label: Family
+      options:
+        - Finance
+        - SaaS and app
+        - Marketing
+        - Docs
+        - Something new
+    validations:
+      required: true
+  - type: textarea
+    id: job
+    attributes:
+      label: What does it do?
+      description: Who uses it, on which screen, and what they get done with it.
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: The data and actions
+      description: What it shows (fields, lists, figures) and what a user can do (filter, approve, edit...). These become its props and callbacks.
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Screenshots or sketches, if any.
+  - type: checkboxes
+    id: offer
+    attributes:
+      label: Contributing
+      options:
+        - label: I would like to build this myself and open a PR.
