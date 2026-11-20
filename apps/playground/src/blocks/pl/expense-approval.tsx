@@ -83,8 +83,8 @@ export const expenseApprovalPl: ExpenseApprovalMessages = {
     </>
   ),
   reasonLine: (reason) => `Powód: ${reason}`,
-  undo: 'Cofnij',
-  undoLabel: (merchant) => `Cofnij, przywróć ${merchant} do oczekujących`,
+  undo: 'Wznów',
+  undoLabel: (merchant) => `Wznów ${merchant}, z powrotem do oczekujących`,
   rejectManyTitle: (count) => `Odrzuć ${String(count)} ${expenses(count)}`,
   rejectOneTitle: (merchant) => `Odrzuć ${merchant}`,
   rejectManyNote: (total) => <>Łącznie {total}. Każdy pracownik dostanie ten sam powód.</>,

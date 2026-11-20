@@ -60,7 +60,7 @@ export interface ExpenseApprovalProps {
   locale?: string;
   onApprove: (ids: string[]) => void;
   onReject: (ids: string[], reason: string) => void;
-  /** Offers Undo on decided requests in the trail, and Reopen on decided rows. */
+  /** Offers Reopen on decided requests, in the trail and on decided rows. */
   onReopen?: (id: string) => void;
   /**
    * Which requests are listed, controlled: the pending queue, the approved or rejected ones, or
@@ -219,8 +219,9 @@ export const EXPENSE_APPROVAL_MESSAGES: ExpenseApprovalMessages = {
     </>
   ),
   reasonLine: (reason) => `Reason: ${reason}`,
-  undo: 'Undo',
-  undoLabel: (merchant) => `Undo, return ${merchant} to pending`,
+  // The same word as on decided rows: one action, one name.
+  undo: 'Reopen',
+  undoLabel: (merchant) => `Reopen ${merchant}, back to waiting`,
   rejectManyTitle: (count) => `Reject ${String(count)} expenses`,
   rejectOneTitle: (merchant) => `Reject ${merchant}`,
   rejectManyNote: (total) => <>{total} in total. Every employee gets the same reason.</>,
