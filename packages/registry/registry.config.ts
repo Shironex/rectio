@@ -972,7 +972,7 @@ export default defineRegistry({
         {
           name: 'blocks-core',
           type: 'lib',
-          version: '0.1.1',
+          version: '0.1.2',
           title: 'Blocks core',
           description:
             'Money maths in minor units, the panel, chart theming with a table fallback, and the parts every finance block shares.',

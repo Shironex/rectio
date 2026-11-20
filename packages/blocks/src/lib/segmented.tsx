@@ -59,8 +59,9 @@ export function Segmented<Value extends string>({
             'max-sm:last:odd:col-span-2',
             'text-sm font-medium whitespace-nowrap text-fg-muted',
             'transition-[background-color,color,box-shadow] duration-fast ease-standard',
-            'hover:text-fg data-pressed:bg-surface-selected data-pressed:text-fg data-pressed:shadow-raised',
-            // A hairline as well as the fill, so the chosen option holds in dark mode too.
+            // The raised chip on the sunken track, as the kit's segmented tabs and toggle group.
+            'hover:text-fg data-pressed:bg-surface-raised data-pressed:text-fg data-pressed:shadow-raised',
+            // A hairline as well as the lift, so the chosen option holds in dark mode too.
             'data-pressed:ring-1 data-pressed:ring-line-strong',
             '-outline-offset-1 focus-visible:outline-2 focus-visible:outline-focus',
           )}
