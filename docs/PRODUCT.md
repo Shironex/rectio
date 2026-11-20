@@ -23,8 +23,8 @@ Calm, exact, unshowy. The interface should feel like good stationery and a well-
 quiet surfaces, confident type, figures that line up. Personality comes from typography and
 restraint, not decoration.
 
-Two shipped themes show the range: `default` (warm neutral, cobalt accent, IBM Plex) and
-`ledger` (green-black ink, citron accent, Source Serif numerals, sharper corners).
+One theme ships, `default` (warm neutral, cobalt accent, IBM Plex), in light and dark. Teams
+theme to their brand by writing one more set of token files.
 
 ## Anti-references
 

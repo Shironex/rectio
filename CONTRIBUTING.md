@@ -22,16 +22,16 @@ pnpm dev          # builds the tokens, starts the playground
 pnpm gate         # format, lint, typecheck, test, build and the repo rules, as CI runs them
 ```
 
-| Command                                     | What it does                                                                 |
-| ------------------------------------------- | ---------------------------------------------------------------------------- |
-| `pnpm dev`                                  | The playground (Vite): every component in every state, light and dark        |
-| `pnpm --filter @rectio/site dev`            | The docs site with the live template previews (a first run builds them)      |
-| `pnpm --filter @rectio/site previews`       | Rebuilds the template previews after you changed a template or the kit       |
-| `pnpm --filter @rectio/site build`          | The static site in `apps/site/out`, previews and registry included           |
-| `pnpm --filter @rectio/site walk-previews`  | Opens every page of every preview headless after a build and reports errors  |
-| `pnpm --filter @rectio/registry build`      | The static registry in `packages/registry/dist/registry`                     |
-| `pnpm --filter @rectio/template-<name> dev` | One template as a normal Next.js app                                         |
-| `pnpm gate`                                 | The full local gate: run it before you open a PR                             |
+| Command                                     | What it does                                                                |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
+| `pnpm dev`                                  | The playground (Vite): every component in every state, light and dark       |
+| `pnpm --filter @rectio/site dev`            | The docs site with the live template previews (a first run builds them)     |
+| `pnpm --filter @rectio/site previews`       | Rebuilds the template previews after you changed a template or the kit      |
+| `pnpm --filter @rectio/site build`          | The static site in `apps/site/out`, previews and registry included          |
+| `pnpm --filter @rectio/site walk-previews`  | Opens every page of every preview headless after a build and reports errors |
+| `pnpm --filter @rectio/registry build`      | The static registry in `packages/registry/dist/registry`                    |
+| `pnpm --filter @rectio/template-<name> dev` | One template as a normal Next.js app                                        |
+| `pnpm gate`                                 | The full local gate: run it before you open a PR                            |
 
 While you work, a filtered check is enough:
 `pnpm turbo run typecheck test --filter=@rectio/ui` (or the package you touched).
@@ -98,8 +98,7 @@ as the template:
 - keeps the `basePath: process.env.PREVIEW_BASE_PATH ?? ''` line in its `next.config`, marked
   `rectio:workspace` (the copy a user installs drops it);
 - imports the kit from package roots and documented subpaths only;
-- routes through `next/link` or the router, and keeps its look on `<html>` as `data-theme` and
-  `data-mode`;
+- routes through `next/link` or the router, and keeps its look on `<html>` as `data-mode`;
 - lists in `uses` exactly the kit items it imports (the registry build checks it).
 
 Then run `pnpm --filter @rectio/site build` and `pnpm --filter @rectio/site walk-previews`.
@@ -151,7 +150,7 @@ and merging it publishes the new version to npm with provenance.
 
 ## Pull requests
 
-Fill in the PR template: what changed, the checklist, and screenshots in light and dark, both themes,
+Fill in the PR template: what changed, the checklist, and screenshots in light and dark,
 desktop and phone. `pnpm gate` must pass; CI runs the same gate. I review every PR myself, so it may
 take a few days.
 

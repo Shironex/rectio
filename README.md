@@ -97,8 +97,8 @@ and from then on the code is yours. Everything is free and MIT licensed.
   </tr>
 </table>
 
-Every template runs live on the docs site, page by page, at desktop, tablet and phone width, in both
-themes: [open the templates gallery](https://shironex.github.io/rectio/templates).
+Every template runs live on the docs site, page by page, at desktop, tablet and phone width, in light
+and dark: [open the templates gallery](https://shironex.github.io/rectio/templates).
 
 ## What is in it
 
@@ -108,7 +108,7 @@ themes: [open the templates gallery](https://shironex.github.io/rectio/templates
 | **61 blocks**     | 14 finance, 18 SaaS and app, 16 marketing and 13 docs blocks: data agnostic, typed props in and callbacks out                                         |
 | **5 templates**   | Whole Next.js apps: a finance back office, a help desk admin, a SaaS marketing site, a product launch page and a docs site                            |
 | **Motion add-on** | 73 motion twins (24 components, 49 blocks) with the same names and props as the plain ones, about 13 kB gzip, plain under reduced motion              |
-| **2 themes**      | `default` and `ledger`, each in light and dark, with a compact density; 208 tokens per theme and mode                                                 |
+| **1 theme**       | `default`, in light and dark, with a compact density; 208 tokens per mode                                                                             |
 | **CLI**           | `rectio init`, `add`, `diff`, `list`, `search` and `update`, with integrity checks and a lockfile that respects your edits                            |
 | **MCP server**    | `rectio mcp`: seven read-only tools, so a coding agent can look up items, tokens, docs and source instead of guessing                                 |
 
@@ -141,12 +141,11 @@ CSS variables generated from DTCG token files. A theme is one set of those value
 attributes:
 
 ```html
-<html data-theme="ledger" data-mode="dark" data-density="compact"></html>
+<html data-theme="default" data-mode="dark" data-density="compact"></html>
 ```
 
-`default` is warm stone neutrals with a cobalt accent and IBM Plex; `ledger` is green-black ink with
-a citron accent, serif headings, sharper corners and slower motion. A new theme is one more set of
-token files; [theming](https://shironex.github.io/rectio/docs/theming) shows how.
+`default` is warm stone neutrals with a cobalt accent and IBM Plex, in light and dark. A new theme is
+one more set of token files; [theming](https://shironex.github.io/rectio/docs/theming) shows how.
 
 ## For coding agents
 

@@ -14,7 +14,7 @@ Three tiers, all in `packages/tokens/src`:
 3. **Component**: button, field, popover, dialog, money, table, calendar, badge and toast values,
    mostly aliases of semantic tokens.
 
-Themes apply with attributes: `data-theme="default" | "ledger"`, `data-mode="light" | "dark"`
+Themes apply with attributes: `data-theme="default"`, `data-mode="light" | "dark"`
 (no `data-mode` follows the system), `data-density="compact"`. Reduced motion drops movement and
 keeps fades. `ThemeScope` sets these on a subtree and makes popups render inside it.
 
@@ -22,10 +22,9 @@ Tests check the token contract and WCAG contrast of every semantic pair in every
 
 ### Themes and fonts
 
-| Theme     | Character                                                  | Fonts (all SIL OFL 1.1)                                                    |
-| --------- | ---------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `default` | Warm stone neutrals, cobalt accent, 4px controls           | IBM Plex Sans, IBM Plex Mono                                               |
-| `ledger`  | Green-black ink, citron accent, 2px corners, slower motion | Source Serif 4 (headings), Schibsted Grotesk (UI), IBM Plex Sans (figures) |
+| Theme     | Character                                        | Fonts (all SIL OFL 1.1)      |
+| --------- | ------------------------------------------------ | ---------------------------- |
+| `default` | Warm stone neutrals, cobalt accent, 4px controls | IBM Plex Sans, IBM Plex Mono |
 
 Figures are always tabular and lining (`numeric` utility, `Money`). Money uses the true minus sign.
 
@@ -63,7 +62,7 @@ vision; every chart has a table of the same figures and keyboard-reachable toolt
 
 The playground's `/?view=blocks` shows a finance dashboard (`&motion=on` for the motioned blocks,
 `&block=<name>` for one block, `&density=compact`);
-`pnpm --filter @rectio/playground shoot:blocks 3` writes every theme, mode, phone, compact,
+`pnpm --filter @rectio/playground shoot:blocks 3` writes every mode, phone, compact,
 reduced motion and keyboard shot to `.rounds/round-3/blocks/`.
 
 The playground's `/?view=motion` puts each plain component beside its motioned one;
@@ -72,8 +71,8 @@ interaction to `.rounds/round-3/motion/`.
 
 The playground's `/?view=forms` shows a workspace settings form built from the form components
 (`&motion=on`, `&invalid=1` for the error states, `&density=compact`);
-`pnpm --filter @rectio/playground shoot:forms 3` writes desktop and phone shots in every theme and
-mode, open popups and the invalid state to `.rounds/round-3/forms/`.
+`pnpm --filter @rectio/playground shoot:forms 3` writes desktop and phone shots in every mode,
+open popups and the invalid state to `.rounds/round-3/forms/`.
 
 ## Templates
 
@@ -97,14 +96,14 @@ are named imports from package roots; repo-only lines end in `rectio:workspace`.
 
 **Live previews.** The site serves every template as its real static build under
 `/preview/<name>/`, and `/templates/<name>` frames it in a viewer (page picker, desktop, tablet and
-phone widths, both themes and modes). The site's `previews` task (`apps/site/scripts/previews.ts`,
+phone widths, light and dark). The site's `previews` task (`apps/site/scripts/previews.ts`,
 cached by Turborepo on the templates and the kit) builds each template in a scratch copy with
 `PREVIEW_BASE_PATH=/preview/<name>`, which the one `basePath` line in its `next.config` reads
 (marked `rectio:workspace`, so a user's copy has no trace of it); the site build copies the result
 into `out/preview/`, marks every page noindex and keeps root-relative `<a>` links inside the
 preview. A new template folder gets its preview with no site change, provided it keeps that
 `basePath` line, routes through `next/link` or the router (never `location.pathname` into the
-router), and keeps its look on `<html>` as `data-theme` and `data-mode` (the viewer sets those).
+router), and keeps its look on `<html>` as `data-mode` (the viewer sets it).
 `pnpm --filter @rectio/site walk-previews` opens every page of every preview and every viewer
 headless after a build (`WALK_URL=http://localhost:4350` walks a running dev server instead).
 
@@ -207,9 +206,9 @@ imports as for any item.
 `diff`).
 
 ```sh
-rectio init [--theme ledger] [--css src/index.css] [--framework vite|next|tanstack-start]
+rectio init [--theme <id>] [--css src/index.css] [--framework vite|next|tanstack-start]
             [--force] [--dry-run] [--no-install] [--registry <url|folder>]
-rectio init --template finance-app [folder] [--theme ledger] [--force] [--dry-run] [--no-install]
+rectio init --template finance-app [folder] [--theme <id>] [--force] [--dry-run] [--no-install]
 rectio add button dialog money [--overwrite] [--dry-run] [--no-install]
 rectio diff dialog
 rectio list [--type theme] [--templates]
