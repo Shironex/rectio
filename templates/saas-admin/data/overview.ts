@@ -136,7 +136,7 @@ export const ACTIVITY: readonly ActivityEvent[] = [
     actor: { name: 'Luis Ferreira' },
     kind: 'create',
     verb: 'opened',
-    target: 'CPL-2147 Apple Pay payments fail',
+    target: 'CPL-2147 Apple Pay payments fail at checkout',
     detail: 'Tern Bay Pools, by chat',
   },
   {
@@ -214,7 +214,7 @@ export const AT_RISK: readonly {
   {
     id: 'cpl-2147',
     reference: 'CPL-2147',
-    title: 'Apple Pay payments fail',
+    title: 'Apple Pay payments fail at checkout',
     customer: 'Tern Bay Pools',
     remaining: 12,
   },

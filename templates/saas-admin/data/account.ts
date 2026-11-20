@@ -48,9 +48,9 @@ export const NOTIFICATIONS: readonly AppNotification[] = [
   {
     id: 'n4',
     kind: 'invite',
-    title: 'Freya Lund has not accepted her invite',
-    body: 'It expires in 6 days. Resend it from the team page.',
-    at: minutesAgo(60 * 4),
+    title: 'Mateo Alvarez has not accepted his invite',
+    body: 'Tomás sent it an hour ago and it expires on November 26. Resend it from the team page.',
+    at: minutesAgo(30),
     read: true,
   },
   {
@@ -187,8 +187,8 @@ export const PLANS: readonly PricingPlan[] = [
     id: 'starter',
     name: 'Starter',
     description: 'A shared inbox for a small team.',
-    monthly: 19,
-    yearly: 180,
+    monthly: 20,
+    yearly: 192,
     unit: 'per agent',
     highlights: ['Email and chat', 'Help center', '500 AI replies a month'],
   },
@@ -313,6 +313,8 @@ export const WEBHOOKS: readonly {
   events: string;
   status: 'healthy' | 'failing';
   lastDelivery: Date;
+  /** Why the last deliveries failed, for a failing endpoint. */
+  lastError?: string;
 }[] = [
   {
     id: 'w1',
@@ -334,6 +336,7 @@ export const WEBHOOKS: readonly {
     events: 'rating.created',
     status: 'failing',
     lastDelivery: minutesAgo(60 * 9),
+    lastError: 'Timed out 5 times in a row, last answer HTTP 504. Deliveries are paused.',
   },
 ];
 

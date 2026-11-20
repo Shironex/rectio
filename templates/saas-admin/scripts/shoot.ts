@@ -218,7 +218,7 @@ function roundShots(): Shot[] {
   };
   const openTicket = async (page: Page) => {
     await page
-      .getByRole('button', { name: /^Card payments fail/ })
+      .getByRole('button', { name: /^Apple Pay payments fail/ })
       .first()
       .click();
     await page.waitForTimeout(500);

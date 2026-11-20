@@ -578,7 +578,7 @@ export function portalUsers(customer: Customer): UserRecord[] {
   return users;
 }
 
-export type TicketStatus = 'open' | 'waiting' | 'resolved';
+export type TicketStatus = 'new' | 'open' | 'waiting' | 'resolved';
 
 /** One line of a customer's ticket history. */
 export interface CustomerTicket {
@@ -622,7 +622,10 @@ export function customerTickets(
     id: t.id,
     reference: t.reference ?? t.id,
     subject: t.title,
-    status: t.columnId === 'waiting' ? 'waiting' : t.columnId === 'resolved' ? 'resolved' : 'open',
+    status:
+      t.columnId === 'new' || t.columnId === 'waiting' || t.columnId === 'resolved'
+        ? t.columnId
+        : 'open',
     requester: t.requester,
     updated: t.opened,
     firstResponse: customer.firstResponse,
