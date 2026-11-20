@@ -116,6 +116,15 @@ export interface ButtonProps extends Omit<ComponentProps<typeof BaseButton>, 'cl
   children?: ReactNode;
 }
 
+/**
+ * Whether `render` draws a native <button>: an element tells by its type, so a link or a router
+ * link is not one; a render function cannot tell, so it stays native unless `nativeButton` says.
+ */
+export function inferNativeButton(render: ButtonProps['render']): boolean {
+  if (render === undefined || typeof render === 'function') return true;
+  return isValidElement(render) && render.type === 'button';
+}
+
 export function Button({
   variant = 'primary',
   size = 'md',
@@ -126,11 +135,21 @@ export function Button({
   className,
   renderContent,
   children,
+  render,
+  nativeButton,
   ...props
 }: ButtonProps) {
+  // Rendered as something other than a <button>, such as a router link: Base UI must not treat it
+  // as a native button, and `type` would be the link's media type, so it is left off.
+  const native = nativeButton ?? inferNativeButton(render);
+  // A link keeps its link role: Base UI would call any non-native element a button.
+  const link = !native && isValidElement(render) && 'href' in (render.props as object);
   return (
     <BaseButton
-      type={type}
+      {...(render === undefined ? {} : { render })}
+      nativeButton={native}
+      type={native ? type : undefined}
+      {...(link ? { role: undefined } : {})}
       disabled={disabled || loading}
       focusableWhenDisabled={loading}
       aria-busy={loading || undefined}

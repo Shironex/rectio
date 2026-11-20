@@ -30,6 +30,10 @@ readable, keeps the focus, blocks presses and sets `aria-busy`. A leading icon g
 the spinner, so the button keeps its exact width; a text-only button grows by the spinner. Under
 reduced motion the spinner breathes in place instead of turning.
 
+To make a link look like a button, render it as one: `<Button render={<Link href="/billing" />}>`.
+A link keeps its link role and gets no `type`; `nativeButton` is inferred from `render`, so set it
+yourself only for a render function.
+
 ## Props
 
 Every prop of Base UI's `Button` is accepted as well.
@@ -56,6 +60,11 @@ Every prop of Base UI's `Button` is accepted as well.
     renderContent: {
       type: '(content: { children: ReactNode; loading: boolean; iconOnly: boolean }) => ReactNode',
       description: 'Draws the label and loading indicator, as the motion add-on does.',
+    },
+    nativeButton: {
+      type: 'boolean',
+      description:
+        'Whether render draws a native button. Inferred: true for a button element or a render function, false for any other element, such as a link.',
     },
   }}
 />

@@ -122,4 +122,17 @@ describe('Button', () => {
     expect(button).toHaveAttribute('data-variant', 'danger');
     expect(button).toHaveAttribute('data-size', 'sm');
   });
+
+  it('renders as a link without a button role or a type when given a link', () => {
+    render(<Button render={<a href="/billing" />}>Billing</Button>);
+    const link = screen.getByRole('link', { name: 'Billing' });
+    expect(link).not.toHaveAttribute('type');
+    expect(link).not.toHaveAttribute('role');
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('stays a native button with its type when rendered as a button', () => {
+    render(<Button render={<button />}>Send</Button>);
+    expect(screen.getByRole('button', { name: 'Send' })).toHaveAttribute('type', 'button');
+  });
 });

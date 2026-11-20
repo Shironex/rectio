@@ -239,7 +239,7 @@ export default defineRegistry({
     {
       name: 'button',
       type: 'component',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'Button',
       description: 'Primary, secondary, ghost and danger buttons with a loading state.',
       categories: ['actions'],
