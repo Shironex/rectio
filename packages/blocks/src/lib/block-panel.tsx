@@ -51,7 +51,9 @@ export function BlockPanel({
           !bare && 'px-5 pt-4',
         )}
       >
-        <div className="flex min-w-0 flex-col gap-0.5">
+        {/* The title column takes the spare width and wraps its own text first, so a long
+            description does not push the actions under it while there is room beside it. */}
+        <div className="flex min-w-0 flex-1 basis-48 flex-col gap-0.5">
           <Heading
             id={headingId}
             className="font-display text-lg font-heading tracking-tight text-balance"
