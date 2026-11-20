@@ -2,12 +2,12 @@ import { CaretDownIcon } from '@phosphor-icons/react/dist/ssr';
 
 const QUESTIONS = [
   {
-    q: 'Is this another restyled component kit?',
-    a: 'No. rectio is its own library on Base UI primitives, with its own registry and CLI. It installs as source you own, and components are styled only through design tokens, so a theme restyles everything without a fork.',
-  },
-  {
     q: 'Is all of it free?',
     a: 'Yes. Everything is MIT licensed and in one public repository: the components, the motion add-on, the blocks, the templates, both themes, the CLI, the registry and the MCP server. Use it in client and commercial work, change it, ship it.',
+  },
+  {
+    q: 'Is this another restyled component kit?',
+    a: 'No. rectio is its own library on Base UI primitives, with its own registry and CLI. It installs as source you own, and components are styled only through design tokens, so a theme restyles everything without a fork.',
   },
   {
     q: 'Which stacks does it support?',
