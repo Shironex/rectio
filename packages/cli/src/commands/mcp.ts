@@ -15,15 +15,14 @@ function cliVersion(): string {
 }
 
 /**
- * `rectio mcp`: a read-only MCP server on stdio, over the same registry client, config lookup
- * and license key as the other commands. Never write to stdout here: it is the protocol channel.
+ * `rectio mcp`: a read-only MCP server on stdio, over the same registry client and config lookup
+ * as the other commands. Never write to stdout here: it is the protocol channel.
  */
 export async function runMcp(ctx: CliContext, options: McpOptions = {}): Promise<void> {
   const client = createRegistryClient(registryUrl(ctx, options.registry, readConfig(ctx.cwd)));
   const server = createMcpServer(
     {
       client,
-      env: ctx.env,
       cwd: ctx.cwd,
       ...(options.registry === undefined ? {} : { registryFlag: options.registry }),
     },

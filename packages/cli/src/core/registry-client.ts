@@ -21,44 +21,30 @@ const FETCH_TIMEOUT_MS = 30_000;
 export interface RegistryClient {
   url: string;
   index: () => Promise<RegistryIndex>;
-  /** Fetches, validates and verifies one item. Pro items need `licenseKey`. */
-  item: (entry: IndexEntry, licenseKey?: string) => Promise<RegistryItem>;
+  /** Fetches, validates and verifies one item. */
+  item: (entry: IndexEntry) => Promise<RegistryItem>;
 }
 
 function describe(status: number, path: string, url: string): CliError {
-  if (status === 401) {
-    return new CliError(
-      `the registry refused the license key for ${path} (401)`,
-      'Check the key, or that it has not been revoked. Nothing was written.',
-    );
-  }
-  if (status === 403) {
-    return new CliError(
-      `the license key is valid but does not include ${path} (403)`,
-      'Nothing was written.',
-    );
-  }
   if (status === 404) return new CliError(`${path} was not found in the registry at ${url}`);
   return new CliError(`the registry at ${url} answered ${status} for ${path}`);
 }
 
-async function readRaw(base: string, path: string, licenseKey?: string): Promise<string> {
+async function readRaw(base: string, path: string): Promise<string> {
   if (base.startsWith('file:')) {
-    // A local registry has no gate: it serves development builds only.
+    // A local registry folder, such as a development build.
     try {
       return await readFile(fileURLToPath(`${base}/${path}`), 'utf8');
     } catch {
       throw describe(404, path, base);
     }
   }
-  const headers: Record<string, string> = { accept: 'application/json' };
-  if (licenseKey !== undefined) headers.authorization = `Bearer ${licenseKey}`;
   let response: Response;
   try {
     // The registry origin is the user's own configuration (rectio.json, --registry or env).
     // eslint-disable-next-line noctcore-security/no-user-controlled-fetch-url
     response = await fetch(`${base}/${path}`, {
-      headers,
+      headers: { accept: 'application/json' },
       redirect: 'error',
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
@@ -91,13 +77,9 @@ export function createRegistryClient(url: string): RegistryClient {
   let cached: Promise<RegistryIndex> | undefined;
   // One fetch per item per run: `init --template` checks every item before writing, then installs.
   const items = new Map<string, Promise<RegistryItem>>();
-  const fetchItem = async (entry: IndexEntry, licenseKey?: string): Promise<RegistryItem> => {
+  const fetchItem = async (entry: IndexEntry): Promise<RegistryItem> => {
     const path = itemPath(entry.name, entry.tier);
-    const item = parse(
-      registryItemSchema,
-      await readRaw(url, path, entry.tier === 'pro' ? licenseKey : undefined),
-      path,
-    );
+    const item = parse(registryItemSchema, await readRaw(url, path), path);
     if (item.name !== entry.name || item.tier !== entry.tier) {
       throw new CliError(`${path} holds "${item.name}" (${item.tier}), not "${entry.name}"`);
     }
@@ -118,12 +100,12 @@ export function createRegistryClient(url: string): RegistryClient {
       );
       return cached;
     },
-    item: (entry, licenseKey) => {
-      const id = `${entry.tier}/${entry.name}@${entry.version}`;
+    item: (entry) => {
+      const id = `${entry.name}@${entry.version}`;
       let item = items.get(id);
       if (item === undefined) {
-        item = fetchItem(entry, licenseKey);
-        // A failed fetch is not remembered: a retry with a key, or after a network error, refetches.
+        item = fetchItem(entry);
+        // A failed fetch is not remembered: a retry after a network error refetches.
         void item.catch(() => items.delete(id));
         items.set(id, item);
       }

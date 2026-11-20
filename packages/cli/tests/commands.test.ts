@@ -195,36 +195,9 @@ describe('add', () => {
     expect(out.join('\n')).toContain('already up to date');
   });
 
-  it('refuses a pro item without a key and writes nothing', async () => {
+  it('installs a finance block with no key, on the components it renders', async () => {
     const cwd = await initialised();
-    const before = snapshot(cwd);
-    await expect(runAdd(capture(cwd).ctx, ['ledger-summary'], noInstall)).rejects.toThrow(
-      'ledger-summary is a pro item and no license key was found',
-    );
-    expect(snapshot(cwd)).toEqual(before);
-  });
-
-  it('refuses a motion item without a key and writes nothing', async () => {
-    const cwd = await initialised();
-    const before = snapshot(cwd);
-    await expect(runAdd(capture(cwd).ctx, ['motion-dialog'], noInstall)).rejects.toThrow(
-      'motion-core, motion-dialog are pro items and no license key was found',
-    );
-    expect(snapshot(cwd)).toEqual(before);
-  });
-
-  it('refuses a finance block without a key and writes nothing', async () => {
-    const cwd = await initialised();
-    const before = snapshot(cwd);
-    await expect(runAdd(capture(cwd).ctx, ['invoice-list'], noInstall)).rejects.toThrow(
-      'blocks-core, invoice-list are pro items and no license key was found',
-    );
-    expect(snapshot(cwd)).toEqual(before);
-  });
-
-  it('installs a finance block with a key, on the free components it renders', async () => {
-    const cwd = await initialised();
-    await runAdd(capture(cwd, { RECTIO_LICENSE_KEY: 'any-key' }).ctx, ['invoice-list'], noInstall);
+    await runAdd(capture(cwd).ctx, ['invoice-list'], noInstall);
     const list = read(cwd, 'src/components/blocks/finance/invoice-list.tsx');
     expect(list).toContain("from '@/components/ui/data-table'");
     expect(list).toContain("from '@/lib/finance/finance'");
@@ -233,9 +206,9 @@ describe('add', () => {
     expect(readLock(cwd).items['data-table']?.tier).toBe('free');
   });
 
-  it('installs a motion item with a key beside the plain component it builds on', async () => {
+  it('installs a motion item with no key beside the plain component it builds on', async () => {
     const cwd = await initialised();
-    await runAdd(capture(cwd, { RECTIO_LICENSE_KEY: 'any-key' }).ctx, ['motion-dialog'], noInstall);
+    await runAdd(capture(cwd).ctx, ['motion-dialog'], noInstall);
     const dialog = read(cwd, 'src/components/ui/motion/dialog.tsx');
     expect(dialog).toContain("from '@/components/ui/dialog'");
     expect(dialog).toContain("from '@/lib/motion/animate'");
@@ -246,13 +219,9 @@ describe('add', () => {
     expect(readLock(cwd).items['motion-dialog']?.tier).toBe('pro');
   });
 
-  it('installs a pro item with a key, its free dependencies and its token additions', async () => {
+  it('installs a block with no key, its dependencies and its token additions', async () => {
     const cwd = await initialised();
-    await runAdd(
-      capture(cwd, { RECTIO_LICENSE_KEY: 'any-key' }).ctx,
-      ['ledger-summary'],
-      noInstall,
-    );
+    await runAdd(capture(cwd).ctx, ['ledger-summary'], noInstall);
     expect(read(cwd, 'src/components/blocks/ledger-summary.tsx')).toContain(
       "from '@/components/ui/money'",
     );

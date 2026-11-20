@@ -18,7 +18,7 @@ Usage: rectio <command> [options]
 Commands
   init                 Set up rectio: rectio.json, tokens, a theme and the cn helper
   init --template <name> [folder]
-                       Start a new project from a template (pro: needs the license key)
+                       Start a new project from a template
   add <items...>       Add items and everything they depend on
   diff <item>          Compare an installed item with the registry
   list                 List registry items (--type, --tier, --templates)
@@ -41,10 +41,7 @@ Options
   --tier <tier>        list: free or pro
   --templates          list: templates only
   -h, --help           Show this help
-  -v, --version        Show the version
-
-Pro items read the license key from RECTIO_LICENSE_KEY or the auth.json file in your user
-config folder. It is never stored in the project.`;
+  -v, --version        Show the version`;
 
 const OPTIONS = {
   cwd: { type: 'string' },

@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { cssImports, updateCssEntry } from '../src/core/css-entry.ts';
 import { parseJsonc, readText } from '../src/core/fs.ts';
 import { mergeDependencies } from '../src/core/install.ts';
-import { authFile, findLicenseKey, userConfigDir } from '../src/core/license.ts';
 import type { Lockfile } from '../src/core/lockfile.ts';
 import {
   checkTailwind,
@@ -247,31 +246,6 @@ describe('the CSS entry block', () => {
     // A second run finds the CRLF block and replaces it instead of adding another.
     const twice = updateCssEntry(once, 'src/index.css', ['src/styles/rectio/tokens.css']);
     expect(twice).toBe(once);
-  });
-});
-
-describe('license key lookup', () => {
-  it('prefers the env var, then auth.json in the user config dir', () => {
-    const home = project({ 'rectio/auth.json': '{"licenseKey":" file-key "}' });
-    expect(findLicenseKey({ RECTIO_LICENSE_KEY: 'env-key', XDG_CONFIG_HOME: home })?.key).toBe(
-      'env-key',
-    );
-    expect(findLicenseKey({ XDG_CONFIG_HOME: home })).toEqual({
-      key: 'file-key',
-      source: join(home, 'rectio', 'auth.json'),
-    });
-    expect(
-      findLicenseKey({ RECTIO_LICENSE_KEY: '  ', XDG_CONFIG_HOME: join(home, 'none') }),
-    ).toBeUndefined();
-  });
-
-  it('uses APPDATA on Windows', () => {
-    expect(userConfigDir({ APPDATA: 'C:\\Users\\x\\AppData\\Roaming' }, 'win32')).toContain(
-      'rectio',
-    );
-    expect(authFile({ XDG_CONFIG_HOME: '/cfg' }, 'darwin')).toBe(
-      join('/cfg', 'rectio', 'auth.json'),
-    );
   });
 });
 

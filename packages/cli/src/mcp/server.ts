@@ -78,7 +78,7 @@ export function createMcpServer(deps: McpDeps, version: string): McpServer {
     {
       title: 'Get a rectio item',
       description:
-        'Details of one item: description, versions, items installed with it, npm packages, requirements, and its file list with install targets and sizes. Pro items show metadata only unless a license key is configured. Does not return source: use get_item_source for that.',
+        'Details of one item: description, versions, items installed with it, npm packages, requirements, and its file list with install targets and sizes. Does not return source: use get_item_source for that.',
       inputSchema: { name: itemName },
       annotations: READ_ONLY,
     },
@@ -90,7 +90,7 @@ export function createMcpServer(deps: McpDeps, version: string): McpServer {
     {
       title: 'Get rectio item source',
       description:
-        'The source code of an item, so you can read how a component is built and which props it takes before using or extending it. Optionally one file. Pro items need a valid license key; without one this returns a message saying how to get a key and no source. Source can be long: pass file to read one file.',
+        'The source code of an item, so you can read how a component is built and which props it takes before using or extending it. Optionally one file. Source can be long: pass file to read one file.',
       inputSchema: {
         name: itemName,
         file: z
@@ -130,7 +130,7 @@ export function createMcpServer(deps: McpDeps, version: string): McpServer {
     {
       title: 'Get rectio usage docs',
       description:
-        'Usage notes. With an item name: the registry notes for it plus its exports, requirements and dependencies. Without: the general rules for using rectio (workflow, token-only styling, theming, license).',
+        'Usage notes. With an item name: the registry notes for it plus its exports, requirements and dependencies. Without: the general rules for using rectio (workflow, token-only styling, theming).',
       inputSchema: { item: itemName.optional() },
       annotations: READ_ONLY,
     },
@@ -142,7 +142,7 @@ export function createMcpServer(deps: McpDeps, version: string): McpServer {
     {
       title: 'Get the rectio add command',
       description:
-        'The exact `rectio add` command that installs the given items (dependencies are added automatically), plus what else it installs and whether a license key is needed. This server never writes files: show the command to the user or run it yourself in the project folder.',
+        'The exact `rectio add` command that installs the given items (dependencies are added automatically), plus what else it installs. This server never writes files: show the command to the user or run it yourself in the project folder.',
       inputSchema: {
         items: z.array(itemName).min(1).describe('Item names to add'),
         overwrite: z

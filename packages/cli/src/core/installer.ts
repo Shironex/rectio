@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { resolveGraph, sha256Hex, type IndexEntry, type RegistryItem } from '@rectio/registry';
+import { resolveGraph, sha256Hex, type RegistryItem } from '@rectio/registry';
 
 import type { RectioConfig } from './config.ts';
 import { CliError, type CliContext } from './context.ts';
@@ -13,7 +13,6 @@ import {
   runInstall,
   type DependencyChanges,
 } from './install.ts';
-import { findLicenseKey, missingKeyHint } from './license.ts';
 import { lockedFileAt, readLock, writeLock, type LockedFile } from './lockfile.ts';
 import { detectPackageManager, readAliasRoots } from './project.ts';
 import type { RegistryClient } from './registry-client.ts';
@@ -56,20 +55,6 @@ export async function resolveItems(client: RegistryClient, names: readonly strin
   } catch (error) {
     throw new CliError((error as Error).message, 'See `rectio list` for the available items.');
   }
-}
-
-/** Pro items need a key before anything is fetched or written. */
-export function requireKeyFor(ctx: CliContext, entries: readonly IndexEntry[]): string | undefined {
-  const pro = entries.filter((e) => e.tier === 'pro');
-  if (pro.length === 0) return undefined;
-  const key = findLicenseKey(ctx.env);
-  if (key === undefined) {
-    throw new CliError(
-      `${pro.map((e) => e.name).join(', ')} ${pro.length === 1 ? 'is a pro item' : 'are pro items'} and no license key was found`,
-      missingKeyHint(ctx.env),
-    );
-  }
-  return key.key;
 }
 
 function plan(
@@ -119,7 +104,7 @@ function plan(
 
 /**
  * Resolves, fetches and verifies every item first, checks every target, and only then writes:
- * a missing key, a failed download or a locally edited file leaves the project untouched.
+ * a failed download or a locally edited file leaves the project untouched.
  */
 export async function installItems(
   ctx: CliContext,
@@ -137,8 +122,7 @@ export async function installItems(
       `Start a new project with \`rectio init --template ${templates[0]?.name ?? '<name>'}\`.`,
     );
   }
-  const key = requireKeyFor(ctx, entries);
-  const items = await Promise.all(entries.map((entry) => client.item(entry, key)));
+  const items = await Promise.all(entries.map((entry) => client.item(entry)));
   const files = plan(ctx, config, items, options.overwrite ?? false);
 
   const conflicts = files.filter((f) => f.action === 'conflict');

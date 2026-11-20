@@ -14,7 +14,7 @@ beforeAll(async () => {
   cleanup = tree.cleanup;
   const out = join(tree.dir, 'out');
   writeRegistry(out, buildRegistry(fixtureConfig(tree.dir)));
-  registry = await serveRegistry({ dir: out, licenseKeys: ['good-key'] });
+  registry = await serveRegistry({ dir: out });
 });
 
 afterAll(async () => {
@@ -22,28 +22,19 @@ afterAll(async () => {
   cleanup();
 });
 
-function get(path: string, key?: string) {
-  const init = key === undefined ? {} : { headers: { authorization: `Bearer ${key}` } };
+function get(path: string) {
   // The server listens on a random loopback port, so the origin cannot be a literal.
   // eslint-disable-next-line noctcore-security/no-user-controlled-fetch-url
-  return fetch(`${registry.url}/${path}`, init);
+  return fetch(`${registry.url}/${path}`, { signal: AbortSignal.timeout(10_000) });
 }
 
 describe('the dev registry server', () => {
-  it('serves the index and free items to anyone', async () => {
+  it('serves the index and every item to anyone, without a key', async () => {
     expect((await get('index.json')).status).toBe(200);
     expect((await get('items/badge.json')).status).toBe(200);
-  });
-
-  it('refuses pro items without a key or with a wrong one', async () => {
-    expect((await get('pro/items/ledger-card.json')).status).toBe(401);
-    expect((await get('pro/items/ledger-card.json', 'bad-key')).status).toBe(401);
-  });
-
-  it('serves pro items with a valid key', async () => {
-    const res = await get('pro/items/ledger-card.json', 'good-key');
+    const res = await get('pro/items/ledger-card.json');
     expect(res.status).toBe(200);
-    expect(((await res.json()) as { tier: string }).tier).toBe('pro');
+    expect(((await res.json()) as { name: string }).name).toBe('ledger-card');
   });
 
   it('does not serve files outside the folder or that are not JSON', async () => {

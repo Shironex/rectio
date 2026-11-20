@@ -9,8 +9,7 @@ import {
 
 import { rankMatches } from '../commands/list.ts';
 import { readConfig, type RectioConfig } from '../core/config.ts';
-import { CliError, type CliContext } from '../core/context.ts';
-import { authFile, findLicenseKey, LICENSE_ENV } from '../core/license.ts';
+import { CliError } from '../core/context.ts';
 import type { RegistryClient } from '../core/registry-client.ts';
 import { projectContent } from '../core/transform.ts';
 import { themeValues, tailwindUtilities } from './tokens.ts';
@@ -18,7 +17,6 @@ import { themeValues, tailwindUtilities } from './tokens.ts';
 /** What the tools read from. Nothing here writes: the MCP server is read-only. */
 export interface McpDeps {
   client: RegistryClient;
-  env: CliContext['env'];
   /** The project folder, to read rectio.json (aliases, registry) from. */
   cwd: string;
   /** Set only when `rectio mcp --registry` was given: repeated in the add commands it returns. */
@@ -96,26 +94,6 @@ function findEntry(index: RegistryIndex, name: string): IndexEntry {
       ? `Did you mean: ${close.join(', ')}? Use list_items to see all.`
       : 'Use list_items to see all.',
   );
-}
-
-function noKeyMessage(deps: McpDeps, entry: IndexEntry, homepage: string | undefined): ToolResult {
-  return fail(
-    [
-      `"${entry.name}" is a pro item. Its source and file details are only available with a valid license key, so none is shown.`,
-      `Get a key${homepage === undefined ? '' : ` at ${homepage}`}, then set ${LICENSE_ENV} in the "env" of this MCP server's config, or save {"licenseKey": "<key>"} to ${authFile(deps.env)}.`,
-      `Metadata is still available through get_item.`,
-    ].join('\n'),
-  );
-}
-
-type Loaded = { item: RegistryItem } | { blocked: ToolResult };
-
-/** A free item, or a pro item when a license key exists. Never returns pro content without one. */
-async function loadItem(deps: McpDeps, index: RegistryIndex, entry: IndexEntry): Promise<Loaded> {
-  if (entry.tier === 'free') return { item: await deps.client.item(entry) };
-  const key = findLicenseKey(deps.env);
-  if (key === undefined) return { blocked: noKeyMessage(deps, entry, index.homepage) };
-  return { item: await deps.client.item(entry, key.key) };
 }
 
 function safeConfig(cwd: string): RectioConfig | undefined {
@@ -210,23 +188,16 @@ export async function getItem(deps: McpDeps, args: { name: string }): Promise<To
     .filter((n) => n !== entry.name);
   lines.push(`Registry dependencies (installed with it): ${withDeps.join(', ') || 'none'}`);
 
-  const loaded = await loadItem(deps, index, entry);
-  if ('blocked' in loaded) {
-    lines.push(
-      'Files, npm packages and requirements: pro item, a license key is needed to see them.',
-    );
-  } else {
-    const { item } = loaded;
-    const npm = Object.entries(item.dependencies).map(([n, v]) => `${n}@${v}`);
-    const requires = Object.entries(item.requires).map(([n, v]) => `${n} ${String(v)}`);
-    lines.push(
-      `npm packages: ${npm.join(', ') || 'none'}`,
-      `Requires: ${requires.join(', ') || 'none'}`,
-      `Files (${item.files.length}):`,
-      ...listFiles(item),
-    );
-    if (item.docs !== undefined) lines.push(`Notes: ${item.docs}`);
-  }
+  const item = await deps.client.item(entry);
+  const npm = Object.entries(item.dependencies).map(([n, v]) => `${n}@${v}`);
+  const requires = Object.entries(item.requires).map(([n, v]) => `${n} ${String(v)}`);
+  lines.push(
+    `npm packages: ${npm.join(', ') || 'none'}`,
+    `Requires: ${requires.join(', ') || 'none'}`,
+    `Files (${item.files.length}):`,
+    ...listFiles(item),
+  );
+  if (item.docs !== undefined) lines.push(`Notes: ${item.docs}`);
   lines.push(`Add: rectio add ${entry.name}`);
   return { text: lines.join('\n') };
 }
@@ -237,9 +208,7 @@ export async function getItemSource(
 ): Promise<ToolResult> {
   const index = await deps.client.index();
   const entry = findEntry(index, args.name);
-  const loaded = await loadItem(deps, index, entry);
-  if ('blocked' in loaded) return loaded.blocked;
-  const { item } = loaded;
+  const item = await deps.client.item(entry);
   const wanted = args.file?.replace(/\\/g, '/');
   const files =
     wanted === undefined
@@ -283,19 +252,16 @@ export async function getTokens(deps: McpDeps, args: TokenArgs): Promise<ToolRes
       `no theme "${id}". Themes: ${themes.map((e) => e.name.slice(THEME_PREFIX.length)).join(', ')}`,
     );
   }
-  const loaded = await loadItem(deps, index, entry);
-  if ('blocked' in loaded) return loaded.blocked;
-  const css = loaded.item.files.find((f) => f.type === 'theme')?.content ?? '';
+  const theme = await deps.client.item(entry);
+  const css = theme.files.find((f) => f.type === 'theme')?.content ?? '';
   const mode = args.mode ?? 'light';
   const values = themeValues(css, id, mode);
 
   let utilities = new Map<string, string>();
   const tokensEntry = index.items.find((e) => e.name === TOKENS_ITEM);
   if (tokensEntry !== undefined) {
-    const tokens = await loadItem(deps, index, tokensEntry);
-    if ('item' in tokens) {
-      utilities = tailwindUtilities(tokens.item.files.map((f) => f.content).join('\n'));
-    }
+    const tokens = await deps.client.item(tokensEntry);
+    utilities = tailwindUtilities(tokens.files.map((f) => f.content).join('\n'));
   }
 
   const needle = args.filter?.toLowerCase();
@@ -330,7 +296,6 @@ const GENERAL_DOCS = [
   'Styling: components read semantic tokens only. Use Tailwind utilities such as bg-surface, text-fg, border-line, bg-accent; never hex or the default Tailwind palette (it is removed). get_tokens lists them with values.',
   'Theming: data-theme="<id>" on <html> (or a ThemeScope component for a subtree) picks a theme; data-mode="dark" picks dark (without it the system setting decides); data-density="compact" tightens controls.',
   'Money and quantities: the `numeric` utility gives tabular lining figures.',
-  'Pro items need a license key (RECTIO_LICENSE_KEY or auth.json in the user config folder). Without one this server shows metadata only.',
   'This MCP server is read-only: get_add_command returns the command, you run it.',
   'Per-item notes: call get_docs with an item name.',
 ].join('\n');
@@ -362,9 +327,7 @@ export async function getDocs(
   if (args.item === undefined) return { text: GENERAL_DOCS };
   const index = await deps.client.index();
   const entry = findEntry(index, args.item);
-  const loaded = await loadItem(deps, index, entry);
-  if ('blocked' in loaded) return loaded.blocked;
-  const { item } = loaded;
+  const item = await deps.client.item(entry);
   const lines = [`${item.name}@${item.version}: ${item.title}`, item.description];
   if (item.docs === undefined) {
     lines.push(
@@ -411,7 +374,7 @@ export async function getAddCommand(deps: McpDeps, args: AddArgs): Promise<ToolR
           (t) =>
             `rectio init --template ${t.name} ${t.name}${deps.registryFlag === undefined ? '' : ` --registry ${JSON.stringify(deps.registryFlag)}`}`,
         ),
-        `${templates.map((t) => t.name).join(', ')} ${templates.length === 1 ? 'is a template' : 'are templates'}: the command creates a new project folder (the last argument). Templates are pro: a license key is needed (${LICENSE_ENV} or ${authFile(deps.env)}).`,
+        `${templates.map((t) => t.name).join(', ')} ${templates.length === 1 ? 'is a template' : 'are templates'}: the command creates a new project folder (the last argument).`,
         'Run it in the parent folder of the new project. This server does not write files.',
       ].join('\n'),
     };
@@ -426,12 +389,6 @@ export async function getAddCommand(deps: McpDeps, args: AddArgs): Promise<ToolR
   const lines = [command];
   const extra = set.map((e) => e.name).filter((n) => !args.items.includes(n));
   if (extra.length > 0) lines.push(`Also installs: ${extra.join(', ')}`);
-  const pro = set.filter((e) => e.tier === 'pro').map((e) => e.name);
-  if (pro.length > 0) {
-    lines.push(
-      `Pro items: ${pro.join(', ')}. ${findLicenseKey(deps.env) === undefined ? `No license key found: set ${LICENSE_ENV} or save it to ${authFile(deps.env)} first.` : 'A license key was found.'}`,
-    );
-  }
   if (safeConfig(deps.cwd) === undefined) {
     lines.push('No valid rectio.json here: run `rectio init` first.');
   }

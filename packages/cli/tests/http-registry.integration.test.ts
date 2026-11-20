@@ -1,5 +1,5 @@
 /** The CLI against the dev registry server over HTTP, the way it will talk to the hosted one. */
-import { existsSync } from 'node:fs';
+import { existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { serveRegistry, type RunningRegistry } from '@rectio/registry/serve';
@@ -15,7 +15,7 @@ let app: ReturnType<typeof tempDir>;
 
 beforeAll(async () => {
   registry = buildTestRegistry();
-  server = await serveRegistry({ dir: registry.dir, licenseKeys: ['valid-key'] });
+  server = await serveRegistry({ dir: registry.dir });
   app = tempDir('rectio-cli-http-');
   writeTree(app.dir, VITE_APP);
   await runInit(capture(app.dir).ctx, { registry: server.url, install: false });
@@ -30,24 +30,23 @@ afterAll(async () => {
 const summary = () => join(app.dir, 'src/components/blocks/ledger-summary.tsx');
 
 describe('an HTTP registry', () => {
-  it('serves free items without a key', async () => {
+  it('serves a component without a key', async () => {
     await runAdd(capture(app.dir).ctx, ['button'], { install: false });
     expect(existsSync(join(app.dir, 'src/components/ui/button.tsx'))).toBe(true);
   });
 
-  it('turns a refused key into a clear error and writes nothing', async () => {
-    const { ctx } = capture(app.dir, { RECTIO_LICENSE_KEY: 'revoked-key' });
-    await expect(runAdd(ctx, ['ledger-summary'], { install: false })).rejects.toThrow(
-      'the registry refused the license key for pro/items/ledger-summary.json (401)',
-    );
-    expect(existsSync(summary())).toBe(false);
-    expect(existsSync(join(app.dir, 'src/components/ui/money.tsx'))).toBe(false);
+  it('installs a block and its dependencies without a key', async () => {
+    await runAdd(capture(app.dir).ctx, ['ledger-summary'], { install: false });
+    expect(existsSync(summary())).toBe(true);
+    expect(existsSync(join(app.dir, 'src/components/ui/money.tsx'))).toBe(true);
   });
 
-  it('installs a pro item with a valid key', async () => {
-    const { ctx } = capture(app.dir, { RECTIO_LICENSE_KEY: 'valid-key' });
-    await runAdd(ctx, ['ledger-summary'], { install: false });
-    expect(existsSync(summary())).toBe(true);
+  it('turns a missing item file into a clear error and writes nothing', async () => {
+    rmSync(join(registry.dir, 'items/toast.json'));
+    await expect(runAdd(capture(app.dir).ctx, ['toast'], { install: false })).rejects.toThrow(
+      `items/toast.json was not found in the registry at ${server.url}`,
+    );
+    expect(existsSync(join(app.dir, 'src/components/ui/toast.tsx'))).toBe(false);
   });
 
   it('reports an unreachable registry', async () => {

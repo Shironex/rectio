@@ -31,22 +31,12 @@ function parent() {
   return temp.dir;
 }
 
-const KEY = { RECTIO_LICENSE_KEY: 'test-key' };
 const noInstall = { install: false } as const;
 
 describe('init --template', () => {
-  it('refuses without a license key and writes nothing', async () => {
+  it('creates the project with no key, rewrites kit imports to its own paths and installs the kit items', async () => {
     const cwd = parent();
-    const { ctx } = capture(cwd);
-    await expect(
-      runInitTemplate(ctx, 'books', { registry: registry.url, ...noInstall }),
-    ).rejects.toThrow('books is a pro item and no license key was found');
-    expect(existsSync(join(cwd, 'books'))).toBe(false);
-  });
-
-  it('creates the project, rewrites kit imports to its own paths and installs the kit items', async () => {
-    const cwd = parent();
-    const { ctx, out } = capture(cwd, KEY);
+    const { ctx, out } = capture(cwd);
     const result = await runInitTemplate(ctx, 'books', {
       registry: registry.url,
       dir: 'My Books',
@@ -93,7 +83,7 @@ describe('init --template', () => {
     const cwd = parent();
     mkdirSync(join(cwd, 'books'));
     writeFileSync(join(cwd, 'books', 'notes.txt'), 'mine\n');
-    const { ctx } = capture(cwd, KEY);
+    const { ctx } = capture(cwd);
     await expect(
       runInitTemplate(ctx, 'books', { registry: registry.url, ...noInstall }),
     ).rejects.toThrow('books is not empty');
@@ -104,7 +94,7 @@ describe('init --template', () => {
   });
 
   it('names the templates when the name is unknown or not a template', async () => {
-    const { ctx } = capture(parent(), KEY);
+    const { ctx } = capture(parent());
     await expect(runInitTemplate(ctx, 'bookz', { registry: registry.url })).rejects.toThrow(
       'unknown template "bookz"',
     );
@@ -118,7 +108,7 @@ describe('init --template', () => {
 
   it('prints the plan with --dry-run and writes nothing', async () => {
     const cwd = parent();
-    const run = capture(cwd, KEY);
+    const run = capture(cwd);
     expect(
       await main(
         ['init', '--template', 'books', 'shop', '--registry', registry.dir, '--dry-run'],
@@ -131,7 +121,7 @@ describe('init --template', () => {
 
   it('runs from arguments, with the folder as the one positional', async () => {
     const cwd = parent();
-    const run = capture(cwd, KEY);
+    const run = capture(cwd);
     expect(
       await main(
         ['init', '--template', 'books', 'apps/shop', '--registry', registry.dir, '--no-install'],
@@ -139,7 +129,7 @@ describe('init --template', () => {
       ),
     ).toBe(0);
     expect(existsSync(join(cwd, 'apps', 'shop', 'components', 'ui', 'button.tsx'))).toBe(true);
-    expect(await main(['init', '--template', 'books', 'a', 'b'], capture(cwd, KEY).ctx)).toBe(1);
+    expect(await main(['init', '--template', 'books', 'a', 'b'], capture(cwd).ctx)).toBe(1);
     expect(await main(['init', 'shop'], capture(cwd).ctx)).toBe(1);
   });
 
@@ -161,10 +151,10 @@ describe('templates elsewhere in the CLI', () => {
 
   it('never adds a template to an existing project', async () => {
     const cwd = parent();
-    const { ctx } = capture(cwd, KEY);
+    const { ctx } = capture(cwd);
     await runInitTemplate(ctx, 'books', { registry: registry.url, ...noInstall });
-    await expect(
-      runAdd(capture(join(cwd, 'books'), KEY).ctx, ['books'], noInstall),
-    ).rejects.toThrow('books is a template');
+    await expect(runAdd(capture(join(cwd, 'books')).ctx, ['books'], noInstall)).rejects.toThrow(
+      'books is a template',
+    );
   });
 });

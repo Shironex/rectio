@@ -13,7 +13,6 @@ import { CliError, type CliContext } from '../core/context.ts';
 import { isInside, toProjectPath, writeText } from '../core/fs.ts';
 import {
   installItems,
-  requireKeyFor,
   resolveItems,
   type InstallOptions,
   type InstallReport,
@@ -90,9 +89,9 @@ function templateFiles(root: string, template: RegistryItem, folder: string): Te
 
 /**
  * `rectio init --template <name> [dir]`: a new project from a template. Resolves, fetches and
- * verifies the template and every kit item it uses first (a pro template needs the license key
- * like any pro item), then writes the template, `rectio.json`, and installs the kit items through
- * the same path as `rectio add`, so the lockfile, the CSS entry and package.json are kept the same.
+ * verifies the template and every kit item it uses first, then writes the template, `rectio.json`,
+ * and installs the kit items through the same path as `rectio add`, so the lockfile, the CSS entry
+ * and package.json are kept the same.
  */
 export async function runInitTemplate(
   ctx: CliContext,
@@ -120,11 +119,10 @@ export async function runInitTemplate(
     );
   }
 
-  // Everything is fetched and checked before the first write: a missing key, a failed download or
-  // a broken item leaves the disk untouched.
+  // Everything is fetched and checked before the first write: a failed download or a broken item
+  // leaves the disk untouched.
   const entries = await resolveItems(client, [name]);
-  const key = requireKeyFor(ctx, entries);
-  const items = await Promise.all(entries.map((e) => client.item(e, key)));
+  const items = await Promise.all(entries.map((e) => client.item(e)));
   const template = items.find((item) => item.name === name);
   if (template === undefined) throw new CliError(`${name} was not fetched`);
 

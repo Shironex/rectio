@@ -23,6 +23,5 @@ export {
   type RectioConfig,
 } from './core/config.ts';
 export { LOCK_FILE, readLock, type Lockfile } from './core/lockfile.ts';
-export { LICENSE_ENV, authFile, findLicenseKey } from './core/license.ts';
 export { createRegistryClient, type RegistryClient } from './core/registry-client.ts';
 export { installItems, type InstallOptions, type InstallReport } from './core/installer.ts';

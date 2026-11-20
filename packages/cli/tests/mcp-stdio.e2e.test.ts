@@ -42,14 +42,12 @@ beforeAll(async () => {
   registry = buildTestRegistry();
   cwd = tempDir('rectio-mcp-stdio-');
   client = new Client({ name: 'rectio-test', version: '0.0.0' });
-  const noConfig = join(cwd.dir, '.no-config');
   await client.connect(
     new StdioClientTransport({
       command: process.execPath,
       args: [cliBin, 'mcp', '--registry', registry.dir],
       cwd: cwd.dir,
-      // An empty config home keeps a real license key on this machine out of the test.
-      env: { ...childEnvironment(), XDG_CONFIG_HOME: noConfig, APPDATA: noConfig },
+      env: childEnvironment(),
       stderr: 'pipe',
     }),
   );
@@ -78,14 +76,13 @@ describe('rectio mcp over stdio', () => {
     expect(textOf(result)).toMatch(/\nmoney \| component \| free/);
   });
 
-  it('withholds pro source without a key', async () => {
+  it('returns the source of a block without a key', async () => {
     const result = await client.callTool({
       name: 'get_item_source',
       arguments: { name: 'ledger-summary' },
     });
-    expect(result.isError).toBe(true);
-    expect(textOf(result)).toContain('RECTIO_LICENSE_KEY');
-    expect(textOf(result)).not.toContain('LedgerSummary');
+    expect(result.isError).toBeFalsy();
+    expect(textOf(result)).toContain('export function LedgerSummary');
   });
 
   it('rejects bad input through the schema', async () => {

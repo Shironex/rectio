@@ -1,4 +1,4 @@
-/** The MCP tools against the locally built registry, with and without a license key. */
+/** The MCP tools against the locally built registry. */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { createRegistryClient } from '../src/core/registry-client.ts';
@@ -14,7 +14,7 @@ import {
   searchItems,
   type McpDeps,
 } from '../src/mcp/tools.ts';
-import { VITE_APP, buildTestRegistry, capture, tempDir, writeTree } from './helpers.ts';
+import { VITE_APP, buildTestRegistry, tempDir, writeTree } from './helpers.ts';
 
 let registry: ReturnType<typeof buildTestRegistry>;
 let project: ReturnType<typeof tempDir>;
@@ -28,12 +28,9 @@ afterAll(() => {
   project.cleanup();
 });
 
-const KEY = 'sk-test-secret-key';
-
-function deps(vars: Record<string, string> = {}, cwd = project.dir): McpDeps {
-  return { client: createRegistryClient(registry.url), env: capture(cwd, vars).ctx.env, cwd };
+function deps(cwd = project.dir): McpDeps {
+  return { client: createRegistryClient(registry.url), cwd };
 }
-const withKey = () => deps({ RECTIO_LICENSE_KEY: KEY });
 
 describe('list_items', () => {
   it('lists every item with its tier and never any source', async () => {
@@ -106,18 +103,12 @@ describe('get_item', () => {
     expect(result.text).toContain('button');
   });
 
-  it('shows pro metadata without a key but hides files', async () => {
+  it('shows the files of a block with no key', async () => {
     const { text, isError } = await getItem(deps(), { name: 'ledger-summary' });
     expect(isError).toBeUndefined();
-    expect(text).toContain('ledger-summary | block | pro');
     expect(text).toMatch(/installed with it\): .*money/);
-    expect(text).toContain('a license key is needed');
-    expect(text).not.toContain('blocks/ledger-summary.tsx');
-  });
-
-  it('shows pro files with a key', async () => {
-    const { text } = await getItem(withKey(), { name: 'ledger-summary' });
     expect(text).toContain('blocks/ledger-summary.tsx -> @blocks/ledger-summary.tsx');
+    expect(text).not.toContain('license');
   });
 });
 
@@ -157,7 +148,7 @@ describe('get_item_source', () => {
           },
         }),
       });
-      const { text } = await getItemSource(deps({}, app.dir), { name: 'money' });
+      const { text } = await getItemSource(deps(app.dir), { name: 'money' });
       expect(text).toContain('rewritten to the aliases');
       expect(text).not.toContain("'@registry/");
       expect(text).toContain('@/lib/cn');
@@ -166,43 +157,13 @@ describe('get_item_source', () => {
     }
   });
 
-  it('refuses a pro item without a key: how to get one, and no source', async () => {
-    const { text, isError } = await getItemSource(deps(), { name: 'ledger-summary' });
-    expect(isError).toBe(true);
-    expect(text).toContain('pro item');
-    expect(text).toContain('RECTIO_LICENSE_KEY');
-    expect(text).toContain('auth.json');
-    expect(text).not.toContain('LedgerSummary');
-    expect(text).not.toContain('export function');
-  });
-
-  it('returns pro source with a key and never echoes the key', async () => {
-    const { text, isError } = await getItemSource(withKey(), { name: 'ledger-summary' });
-    expect(isError).toBeUndefined();
-    expect(text).toContain('export function LedgerSummary');
-    expect(text).not.toContain(KEY);
-  });
-
-  it('gates the motion add-on source like any pro item', async () => {
-    const without = await getItemSource(deps(), { name: 'motion-dialog' });
-    expect(without.isError).toBe(true);
-    expect(without.text).not.toContain('export function');
-    const withIt = await getItemSource(withKey(), { name: 'motion-dialog' });
-    expect(withIt.isError).toBeUndefined();
-    expect(withIt.text).toContain('export function DialogContent');
-  });
-
-  it('reads the key from auth.json in the config folder too', async () => {
-    const home = tempDir('rectio-mcp-home-');
-    try {
-      writeTree(home.dir, { 'rectio/auth.json': JSON.stringify({ licenseKey: KEY }) });
-      const { text } = await getItemSource(deps({ XDG_CONFIG_HOME: home.dir, APPDATA: home.dir }), {
-        name: 'ledger-summary',
-      });
-      expect(text).toContain('export function LedgerSummary');
-    } finally {
-      home.cleanup();
-    }
+  it('returns the source of a block and of a motion item with no key', async () => {
+    const block = await getItemSource(deps(), { name: 'ledger-summary' });
+    expect(block.isError).toBeUndefined();
+    expect(block.text).toContain('export function LedgerSummary');
+    const motion = await getItemSource(deps(), { name: 'motion-dialog' });
+    expect(motion.isError).toBeUndefined();
+    expect(motion.text).toContain('export function DialogContent');
   });
 });
 
@@ -265,9 +226,14 @@ describe('get_docs', () => {
     expect(text).toMatch(/Exports of .*money.*: .*Money/);
   });
 
-  it('gates pro docs behind the key', async () => {
-    expect((await getDocs(deps(), { item: 'ledger-summary' })).isError).toBe(true);
-    expect((await getDocs(withKey(), { item: 'ledger-summary' })).text).toContain('LedgerSummary');
+  it('gives the docs of a block with no key', async () => {
+    const { text, isError } = await getDocs(deps(), { item: 'ledger-summary' });
+    expect(isError).toBeUndefined();
+    expect(text).toContain('LedgerSummary');
+  });
+
+  it('says nothing about a license in the general rules', async () => {
+    expect((await getDocs(deps(), {})).text).not.toMatch(/licen[cs]e|pro item/i);
   });
 });
 
@@ -296,13 +262,11 @@ describe('get_add_command', () => {
     );
   });
 
-  it('flags pro items, a missing key and a missing rectio.json', async () => {
-    const noKey = await getAddCommand(deps(), { items: ['ledger-summary'] });
-    expect(noKey.text).toContain('Pro items: ledger-summary. No license key found');
-    expect(noKey.text).toContain('rectio init');
-    const keyed = await getAddCommand(withKey(), { items: ['ledger-summary'] });
-    expect(keyed.text).toContain('A license key was found');
-    expect(keyed.text).not.toContain(KEY);
+  it('flags a missing rectio.json and needs no key for a block', async () => {
+    const { text } = await getAddCommand(deps(), { items: ['ledger-summary'] });
+    expect(text.split('\n')[0]).toBe('rectio add ledger-summary');
+    expect(text).toContain('rectio init');
+    expect(text).not.toMatch(/licen[cs]e|pro item/i);
   });
 
   it('rejects an unknown item', async () => {

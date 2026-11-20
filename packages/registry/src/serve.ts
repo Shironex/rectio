@@ -5,8 +5,6 @@ import { join, normalize, sep } from 'node:path';
 export interface ServeOptions {
   /** The built registry folder (dist/registry). */
   dir: string;
-  /** Keys accepted for pro items. Empty: every pro request is refused. */
-  licenseKeys: readonly string[];
   port?: number;
   host?: string;
 }
@@ -24,18 +22,15 @@ const send = (res: ServerResponse, status: number, body: string, type = 'applica
 const errorBody = (message: string) => JSON.stringify({ error: message });
 
 /**
- * A local registry for development: serves the static folder as the hosted registry will, and
- * gates `pro/` the way the license server will (401 without or with an unknown key). It is not
- * the license server: keys are a plain allow list, there are no seats or entitlements.
+ * A local registry for development: serves the static folder as the hosted registry does, a plain
+ * static server for the `.json` files under `dir`.
  */
 export function serveRegistry({
   dir,
-  licenseKeys,
   port = 0,
   host = '127.0.0.1',
 }: ServeOptions): Promise<RunningRegistry> {
   const root = normalize(dir);
-  const keys = new Set(licenseKeys);
   const server: Server = createServer((req, res) => {
     void (async () => {
       if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -47,14 +42,6 @@ export function serveRegistry({
       if (!file.startsWith(root + sep) || !file.endsWith('.json')) {
         send(res, 404, errorBody('not found'));
         return;
-      }
-      if (pathname.startsWith('/pro/')) {
-        const header = req.headers.authorization ?? '';
-        const key = /^Bearer\s+(.+)$/i.exec(header)?.[1]?.trim();
-        if (key === undefined || !keys.has(key)) {
-          send(res, 401, errorBody('a valid license key is required for pro items'));
-          return;
-        }
       }
       try {
         send(res, 200, await readFile(file, 'utf8'));

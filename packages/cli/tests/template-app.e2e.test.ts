@@ -24,9 +24,7 @@ const TIMEOUT = 600_000;
 function cleanEnv(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
   return {
     ...Object.fromEntries(
-      Object.entries(process.env).filter(
-        ([key]) => !/^npm_/i.test(key) && key !== 'INIT_CWD' && key !== 'RECTIO_LICENSE_KEY',
-      ),
+      Object.entries(process.env).filter(([key]) => !/^npm_/i.test(key) && key !== 'INIT_CWD'),
     ),
     ...extra,
   };
@@ -72,12 +70,6 @@ const templates = index?.items.filter((item) => item.type === 'template') ?? [];
 
 describe('a project from each template', () => {
   let parent: ReturnType<typeof tempDir>;
-  // Never read a real key, and never let one from the machine reach the run.
-  const noConfig = (dir: string) => ({
-    XDG_CONFIG_HOME: join(dir, '.no-config'),
-    APPDATA: join(dir, '.no-config'),
-  });
-
   beforeAll(() => {
     if (!existsSync(cliBin) || index === undefined) {
       throw new Error('build first: pnpm --filter @rectio/registry --filter @rectio/cli build');
@@ -95,23 +87,14 @@ describe('a project from each template', () => {
 
   for (const template of templates) {
     it(
-      `${template.name}: needs a key, then creates a project that installs, typechecks and builds`,
+      `${template.name}: creates a project with no key that installs, typechecks and builds`,
       () => {
         const registry = pathToFileURL(registryDir).href;
         const folder = `${template.name} app`;
         const root = join(parent.dir, folder);
-        const env = noConfig(parent.dir);
         const args = [cliBin, 'init', '--template', template.name, folder, '--registry', registry];
 
-        const refused = run(parent.dir, process.execPath, [...args, '--no-install'], env);
-        expect(refused.status).toBe(1);
-        expect(refused.output).toContain('no license key was found');
-        expect(existsSync(root)).toBe(false);
-
-        const created = ok(parent.dir, process.execPath, [...args, '--no-install'], {
-          ...env,
-          RECTIO_LICENSE_KEY: 'e2e-key',
-        });
+        const created = ok(parent.dir, process.execPath, [...args, '--no-install']);
         expect(created).toContain(`Created ${folder}`);
 
         const files = projectFiles(root);

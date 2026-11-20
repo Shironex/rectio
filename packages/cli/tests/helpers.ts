@@ -179,8 +179,7 @@ export function capture(cwd: string, env: Record<string, string | undefined> = {
     err,
     ctx: {
       cwd,
-      // An empty config home, so a real key on the machine never leaks into a test.
-      env: { XDG_CONFIG_HOME: join(cwd, '.no-config'), APPDATA: join(cwd, '.no-config'), ...env },
+      env,
       log: (line) => out.push(line),
       warn: (line) => err.push(line),
     },

@@ -5,7 +5,6 @@ import { requireConfig, registryUrl } from '../core/config.ts';
 import { CliError, type CliContext } from '../core/context.ts';
 import { isInside, readNormalized, toProjectPath } from '../core/fs.ts';
 import { resolveItems } from '../core/installer.ts';
-import { findLicenseKey, missingKeyHint } from '../core/license.ts';
 import { readLock } from '../core/lockfile.ts';
 import { readAliasRoots } from '../core/project.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
@@ -50,14 +49,7 @@ export async function runDiff(
   const client = createRegistryClient(registryUrl(ctx, options.registry, config));
   const [entry] = (await resolveItems(client, [name])).filter((e) => e.name === name);
   if (entry === undefined) throw new CliError(`${name} is not in the registry`);
-  const key = findLicenseKey(ctx.env)?.key;
-  if (entry.tier === 'pro' && key === undefined) {
-    throw new CliError(
-      `${name} is a pro item and no license key was found`,
-      missingKeyHint(ctx.env),
-    );
-  }
-  const item = await client.item(entry, key);
+  const item = await client.item(entry);
   const roots = readAliasRoots(ctx.cwd);
 
   const files: FileDiff[] = [];
