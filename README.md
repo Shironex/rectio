@@ -98,6 +98,7 @@ while in the repo and becomes the buyer's own project with `rectio init --templa
 | Template         | Category  | What it is                                                                                      |
 | ---------------- | --------- | ----------------------------------------------------------------------------------------------- |
 | `finance-app`    | app       | A finance back office: overview, invoices, expenses and approvals, journal, reports, settings   |
+| `saas-admin`     | app       | A help desk back office: overview, ticket board, customers, team, billing, API keys, settings   |
 | `saas-landing`   | marketing | A multi-page marketing site: home, features, pricing, customers, blog, about, contact, legal    |
 | `product-launch` | marketing | A single long launch page with a live product board, feature bento, waitlist and FAQ            |
 | `docs`           | marketing | A static documentation site from MDX: folder navigation, local search, API reference, changelog |
