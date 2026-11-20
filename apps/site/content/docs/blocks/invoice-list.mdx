@@ -64,6 +64,22 @@ tab shows the preview's usage. The block's own source comes with the license.
     defaultFilter: {
       type: "'all' | 'outstanding' | 'overdue' | 'paid' | 'draft'",
       default: "'all'",
+      description: 'The status filter the list opens on when `filter` is not set.',
+    },
+    filter: {
+      type: "'all' | 'outstanding' | 'overdue' | 'paid' | 'draft'",
+      description:
+        'The status filter, controlled, for example from the address. Pair it with `onFilterChange`.',
+    },
+    onFilterChange: {
+      type: '(filter: StatusFilter) => void',
+      description: 'Called with the status the user picks, or `all` from Show all.',
+    },
+    defaultSort: {
+      type: "{ column: 'number' | 'customer' | 'issued' | 'due' | 'state' | 'amount'; desc?: boolean }",
+      default: "{ column: 'due' }",
+      description:
+        'The order the list opens in. Due date, soonest first, by default, so what needs chasing leads.',
     },
     onOpenInvoice: {
       type: '(invoice: InvoiceSummary) => void',
