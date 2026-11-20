@@ -1,0 +1,76 @@
+name: release
+
+# Changesets, two phases. @rectio/cli is the only published package; everything else is private and
+# ignored in .changeset/config.json.
+#   - A change to the CLI lands on main with a changeset (`pnpm changeset`).
+#   - On push to main with changesets pending, the action opens or updates a "Version Packages" pull
+#     request that bumps the version and writes the changelog.
+#   - Merging that pull request (no changesets left) publishes the new version to npm. A version
+#     that is already on npm is skipped, so a run with nothing new publishes nothing.
+# Publishing uses npm trusted publishing only: OIDC (`id-token: write`), npm 11.5.1 or later, and a
+# trusted publisher for @rectio/cli on npmjs.com naming this file. There is no npm token. npm adds
+# provenance to a trusted publish from a public repository.
+# `changeset publish` runs `pnpm publish`, which packs with the .pnpmfile.cjs hook (no
+# devDependencies in the published manifest) and hands the tarball to the npm CLI.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+# Nothing at the top level: the job asks for exactly what it uses.
+permissions: {}
+
+jobs:
+  release:
+    name: version or publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write # the version commit, release tags and GitHub releases (through the API)
+      pull-requests: write # open and update the "Version Packages" pull request
+      id-token: write # npm trusted publishing and provenance (OIDC)
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          # changesets/action v2 pushes through the GitHub API with `github-token`, never with the
+          # git credentials a checkout would leave behind.
+          persist-credentials: false
+      # The pnpm version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@v6
+      # Node 24 ships npm 11, which trusted publishing needs. No dependency cache in a release job.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+      - name: Require npm with trusted publishing support
+        run: |
+          npm --version
+          node -e "const [a,b,c]=process.argv[1].split('.').map(Number); if (a<11 || (a===11 && (b<5 || (b===5 && c<1)))) { console.error('npm ' + process.argv[1] + ' is older than 11.5.1, which trusted publishing needs'); process.exit(1) }" "$(npm --version)"
+      - run: pnpm install --frozen-lockfile
+      # Builds @rectio/registry first (turbo ^build), then bundles the CLI and runs its tests.
+      - run: pnpm turbo run build test --filter=@rectio/cli
+      - name: Create the Version Packages pull request or publish to npm
+        id: changesets
+        uses: changesets/action@v2.1.2
+        with:
+          version-script: pnpm exec changeset version
+          publish-script: pnpm exec changeset publish
+          commit-message: 'chore(cli): version packages'
+          pr-title: 'chore(cli): version packages'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NPM_CONFIG_PROVENANCE: 'true'
+
+      # changesets/action cannot assign the pull request it opens. `pr-number` is set only on a
+      # versioning run. A failure here must not fail a run that may already have published.
+      - name: Assign the Version Packages pull request
+        if: steps.changesets.outputs.pr-number != ''
+        continue-on-error: true
+        run: gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/assignees" -f 'assignees[]=Shironex' --silent
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.changesets.outputs.pr-number }}
