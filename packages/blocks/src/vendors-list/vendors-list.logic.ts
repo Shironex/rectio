@@ -123,8 +123,7 @@ export function vendorTotals(
 }
 
 /**
- * Text for search: lower case, accents and the Polish ł folded away, so "lodz" finds "Łódź" and
- * "muller" finds "Müller".
+ * Text for search: lower case, accents and the stroked l folded away, so "muller" finds "Müller".
  */
 export function foldSearchText(text: string): string {
   return text

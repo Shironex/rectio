@@ -26,7 +26,7 @@ const requests: ExpenseRequest[] = [
   },
   {
     id: 'r2',
-    employee: 'Tomasz Nowak',
+    employee: 'Ewan Burke',
     merchant: 'Hotel Bristol',
     category: 'Accommodation',
     date: d(3, 4),
@@ -92,7 +92,7 @@ describe('ExpenseApproval status views', () => {
     expect(within(row).getByText('Approved by Niamh Walsh, 5 Mar')).toBeInTheDocument();
     expect(within(row).queryByRole('checkbox')).toBeNull();
     await user.click(
-      first(within(row).getAllByRole('button', { name: 'Reopen Hotel Bristol, Tomasz Nowak' })),
+      first(within(row).getAllByRole('button', { name: 'Reopen Hotel Bristol, Ewan Burke' })),
     );
     expect(onReopen).toHaveBeenCalledWith('r2');
   });

@@ -197,8 +197,8 @@ function VendorName({
 
 /**
  * Accounts payable by supplier: what you owe, what is overdue and what falls due this week, then
- * every vendor with terms, next due date, last payment and status. Search folds accents, so "lodz"
- * finds "Łódź". Data-agnostic: pass vendors with their unpaid bills, the currency and today.
+ * every vendor with terms, next due date, last payment and status. Search folds accents, so
+ * "muller" finds "Müller". Data-agnostic: pass vendors with their unpaid bills, the currency and today.
  */
 export function VendorsList({
   vendors,

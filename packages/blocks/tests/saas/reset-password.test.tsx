@@ -9,8 +9,8 @@ const noop = () => undefined;
 describe('reset rules', () => {
   it('checks the email of the request', () => {
     expect(resetRequestError('')).toBe('Enter the email address of your account.');
-    expect(resetRequestError('tomasz@')).toBe('Enter an email address like name@company.com.');
-    expect(resetRequestError(' tomasz@fernhill.io ')).toBeNull();
+    expect(resetRequestError('callum@')).toBe('Enter an email address like name@company.com.');
+    expect(resetRequestError(' callum@fernhill.io ')).toBeNull();
   });
 
   it('wants an accepted password typed the same twice', () => {
@@ -29,17 +29,17 @@ describe('ResetPassword', () => {
   it('requests a link for a valid email', async () => {
     const onRequest = vi.fn();
     render(<ResetPassword step="request" onRequest={onRequest} onReset={noop} />);
-    await userEvent.type(screen.getByLabelText('Email'), 'tomasz@fernhill.io');
+    await userEvent.type(screen.getByLabelText('Email'), 'callum@fernhill.io');
     await userEvent.click(screen.getByRole('button', { name: 'Email me a reset link' }));
-    expect(onRequest).toHaveBeenCalledWith('tomasz@fernhill.io');
+    expect(onRequest).toHaveBeenCalledWith('callum@fernhill.io');
   });
 
   it('says where the link went', () => {
     render(
-      <ResetPassword step="sent" sentTo="tomasz@fernhill.io" onRequest={noop} onReset={noop} />,
+      <ResetPassword step="sent" sentTo="callum@fernhill.io" onRequest={noop} onReset={noop} />,
     );
     expect(screen.getByRole('heading', { name: 'Check your email' })).toBeInTheDocument();
-    expect(screen.getByText('tomasz@fernhill.io')).toBeInTheDocument();
+    expect(screen.getByText('callum@fernhill.io')).toBeInTheDocument();
   });
 
   it('saves only a matching, accepted password', async () => {

@@ -35,7 +35,7 @@ const payouts: Payout[] = [
   { id: 'p3', payee: 'Atelier Lune', amount: 2_000, method: 'card', status: 'paid', date: d(3, 3) },
   {
     id: 'p4',
-    payee: 'Borowik Meble',
+    payee: 'Barrett Furniture',
     amount: 640.05,
     method: 'bank-transfer',
     destination: '•• 4821',
@@ -59,14 +59,18 @@ describe('Payouts', () => {
     const user = userEvent.setup();
     const onRetry = vi.fn();
     render(<Payouts {...base} onRetry={onRetry} />);
-    const retry = first(screen.getAllByRole('button', { name: 'Retry €640.05 to Borowik Meble' }));
+    const retry = first(
+      screen.getAllByRole('button', { name: 'Retry €640.05 to Barrett Furniture' }),
+    );
     await user.click(retry);
     expect(onRetry).toHaveBeenCalledWith(payouts[3]);
   });
 
   it('blocks Retry while it runs', () => {
     render(<Payouts {...base} onRetry={vi.fn()} retrying={['p4']} />);
-    const retry = first(screen.getAllByRole('button', { name: 'Retry €640.05 to Borowik Meble' }));
+    const retry = first(
+      screen.getAllByRole('button', { name: 'Retry €640.05 to Barrett Furniture' }),
+    );
     expect(retry).toHaveAttribute('aria-busy', 'true');
   });
 
@@ -97,10 +101,10 @@ describe('Payouts', () => {
     render(
       <Payouts
         {...base}
-        messages={{ title: 'Wypłaty', failureLine: (reason) => `Bank: ${reason}` }}
+        messages={{ title: 'Payments out', failureLine: (reason) => `Bank: ${reason}` }}
       />,
     );
-    expect(screen.getByRole('heading', { name: 'Wypłaty' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Payments out' })).toBeInTheDocument();
     expect(screen.getByText('Bank: Account closed')).toBeInTheDocument();
   });
 

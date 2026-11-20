@@ -29,7 +29,7 @@ const invoices: InvoiceSummary[] = [
   {
     id: 'c',
     number: 'INV-3',
-    customer: 'Borowik',
+    customer: 'Barrett',
     issued: d(2, 2),
     due: d(3, 20),
     total: 300,

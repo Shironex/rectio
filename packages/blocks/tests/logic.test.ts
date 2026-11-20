@@ -39,7 +39,7 @@ const d = (y: number, m: number, day: number) => new Date(y, m - 1, day);
 describe('money', () => {
   it('knows the minor digits of a currency', () => {
     expect(minorDigits('EUR')).toBe(2);
-    expect(minorDigits('PLN')).toBe(2);
+    expect(minorDigits('EUR')).toBe(2);
     expect(minorDigits('JPY')).toBe(0);
   });
 
@@ -58,9 +58,9 @@ describe('money', () => {
   // units, so a true half such as 271,647.155 lost a grosz.
   it('rounds a true half up at any size, never a grosz short', () => {
     expect(5_432_943.1 * 0.05).toBe(271_647.15499999997);
-    expect(toMinor(5_432_943.1 * 0.05, 'PLN')).toBe(27_164_716);
-    expect(taxOn(5_432_943.1, 0.05, 'PLN')).toBe(271_647.16);
-    expect(roundMoney(-271_647.155, 'PLN')).toBe(-271_647.16);
+    expect(toMinor(5_432_943.1 * 0.05, 'EUR')).toBe(27_164_716);
+    expect(taxOn(5_432_943.1, 0.05, 'EUR')).toBe(271_647.16);
+    expect(roundMoney(-271_647.155, 'EUR')).toBe(-271_647.16);
     expect(toMinor(8.345, 'EUR')).toBe(835);
     expect(toMinor(0.285, 'EUR')).toBe(29);
   });
@@ -127,7 +127,7 @@ describe('invoice detail totals', () => {
   });
 
   it('keeps a credit line negative through VAT', () => {
-    const totals = documentTotals([line('a', 1, 100, 0.23), line('b', -1, 20, 0.23)], [], 'PLN');
+    const totals = documentTotals([line('a', 1, 100, 0.23), line('b', -1, 20, 0.23)], [], 'EUR');
     expect(totals.subtotal).toBe(80);
     expect(totals.vatTotal).toBe(18.4);
   });

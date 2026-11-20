@@ -22,8 +22,8 @@ const TODAY = d(3, 19);
 const vendors: Vendor[] = [
   {
     id: 'v1',
-    name: 'Łódź Print Works',
-    contact: 'Agnieszka Wróbel',
+    name: 'Éclair Print Works',
+    contact: 'Niall Keane',
     termsDays: 30,
     status: 'active',
     bills: [
@@ -74,11 +74,12 @@ describe('vendor figures', () => {
 });
 
 describe('vendor search and sort', () => {
-  it('folds accents and the Polish ł', () => {
-    expect(foldSearchText('Łódź')).toBe('lodz');
-    expect(searchVendors(vendors, 'lodz').map((v) => v.id)).toEqual(['v1']);
+  it('folds accents and the stroked l', () => {
+    expect(foldSearchText('\u0141\u00f3d\u017a')).toBe('lodz');
+    expect(foldSearchText('Éclair')).toBe('eclair');
+    expect(searchVendors(vendors, 'eclair').map((v) => v.id)).toEqual(['v1']);
     expect(searchVendors(vendors, 'muller').map((v) => v.id)).toEqual(['v2']);
-    expect(searchVendors(vendors, 'wrobel print').map((v) => v.id)).toEqual(['v1']);
+    expect(searchVendors(vendors, 'keane print').map((v) => v.id)).toEqual(['v1']);
     expect(searchVendors(vendors, '  ')).toHaveLength(3);
   });
 

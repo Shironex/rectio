@@ -72,9 +72,9 @@ describe('InvoiceDetail send reminder', () => {
         {...base}
         invoice={invoice()}
         onSendReminder={() => undefined}
-        messages={{ sendReminder: 'Wyślij przypomnienie' }}
+        messages={{ sendReminder: 'Nudge the customer' }}
       />,
     );
-    expect(screen.getByRole('button', { name: 'Wyślij przypomnienie' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Nudge the customer' })).toBeInTheDocument();
   });
 });

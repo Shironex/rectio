@@ -59,10 +59,10 @@ describe('copy button and code', () => {
   it('names the copy button and says when it copied', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn() } });
-    render(<CopyButton value="x" messages={{ copy: 'Kopiuj', copied: 'Skopiowano' }} />);
+    render(<CopyButton value="x" messages={{ copy: 'Duplicate', copied: 'Duplicated' }} />);
     expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();
-    await user.click(screen.getByRole('button', { name: 'Kopiuj' }));
-    expect(await screen.findByRole('button', { name: 'Skopiowano' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Duplicate' }));
+    expect(await screen.findByRole('button', { name: 'Duplicated' })).toBeInTheDocument();
   });
 
   it('words the code block: copy name, diff marks and the unnamed example', () => {
@@ -71,17 +71,17 @@ describe('copy button and code', () => {
         code={'+ added\n- removed'}
         lang="diff"
         messages={{
-          copyCode: 'Kopiuj kod',
-          added: 'Dodano: ',
-          removed: 'Usunięto: ',
-          example: (language) => `przykład: ${language}`,
+          copyCode: 'Copy the code',
+          added: 'Newly added: ',
+          removed: 'Dropped: ',
+          example: (language) => `sample: ${language}`,
         }}
       />,
     );
-    expect(screen.getByRole('button', { name: 'Kopiuj kod' })).toBeInTheDocument();
-    expect(screen.getByText('Dodano:')).toBeInTheDocument();
-    expect(screen.getByText('Usunięto:')).toBeInTheDocument();
-    expect(screen.getByLabelText('przykład: Diff')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy the code' })).toBeInTheDocument();
+    expect(screen.getByText('Newly added:')).toBeInTheDocument();
+    expect(screen.getByText('Dropped:')).toBeInTheDocument();
+    expect(screen.getByLabelText('sample: Diff')).toBeInTheDocument();
     expect(screen.queryByText('Added:')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();
   });
@@ -89,12 +89,12 @@ describe('copy button and code', () => {
   it('names the tab lists of code tabs and install tabs', () => {
     render(
       <>
-        <CodeTabs items={[{ label: 'a.ts', code: 'a' }]} messages={{ label: 'Przykłady' }} />
-        <InstallTabs command="npm install x" messages={{ label: 'Menedżer pakietów' }} />
+        <CodeTabs items={[{ label: 'a.ts', code: 'a' }]} messages={{ label: 'Samples' }} />
+        <InstallTabs command="npm install x" messages={{ label: 'Installer' }} />
       </>,
     );
-    expect(screen.getByRole('tablist', { name: 'Przykłady' })).toBeInTheDocument();
-    expect(screen.getByRole('tablist', { name: 'Menedżer pakietów' })).toBeInTheDocument();
+    expect(screen.getByRole('tablist', { name: 'Samples' })).toBeInTheDocument();
+    expect(screen.getByRole('tablist', { name: 'Installer' })).toBeInTheDocument();
     expect(screen.queryByRole('tablist', { name: 'Code examples' })).toBeNull();
     expect(screen.queryByRole('tablist', { name: 'Package manager' })).toBeNull();
   });
@@ -105,11 +105,11 @@ describe('navigation words', () => {
     render(
       <DocsToc
         headings={[{ id: 'a', title: 'Alpha', level: 2 }]}
-        messages={{ title: 'Na tej stronie', label: 'Spis treści' }}
+        messages={{ title: 'In this article', label: 'Contents' }}
       />,
     );
-    expect(screen.getByRole('navigation', { name: 'Spis treści' })).toBeInTheDocument();
-    expect(screen.getByText('Na tej stronie')).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Contents' })).toBeInTheDocument();
+    expect(screen.getByText('In this article')).toBeInTheDocument();
     expect(screen.queryByText('On this page')).toBeNull();
   });
 
@@ -119,15 +119,15 @@ describe('navigation words', () => {
         sections={NAV}
         currentHref="/docs"
         messages={{
-          label: 'Dokumentacja',
-          opensInNewTab: '(otwiera się w nowej karcie)',
-          groupPages: (title) => `Strony: ${title}`,
+          label: 'Handbook',
+          opensInNewTab: '(opens in a new window)',
+          groupPages: (title) => `Pages in ${title}`,
         }}
       />,
     );
-    expect(screen.getByRole('navigation', { name: 'Dokumentacja' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Strony: Queues' })).toBeInTheDocument();
-    expect(screen.getByText('(otwiera się w nowej karcie)')).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Handbook' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Pages in Queues' })).toBeInTheDocument();
+    expect(screen.getByText('(opens in a new window)')).toBeInTheDocument();
     expect(screen.queryByText('(opens in a new tab)')).toBeNull();
   });
 
@@ -137,31 +137,31 @@ describe('navigation words', () => {
         <DocsPager
           prev={{ title: 'One', href: '/one' }}
           next={{ title: 'Three', href: '/three' }}
-          messages={{ label: 'Poprzednia i następna', previous: 'Wstecz', next: 'Dalej' }}
+          messages={{ label: 'Earlier and later', previous: 'Wstecz', next: 'Dalej' }}
         />
         <DocsBreadcrumb
           items={[{ label: 'Docs', href: '/docs' }, { label: 'Page' }]}
-          messages={{ label: 'Ścieżka' }}
+          messages={{ label: 'Trail' }}
         />
         <DocsPageMeta
           editHref="https://example.com/edit"
           lastUpdated="2026-03-01"
           locale="en-GB"
           messages={{
-            edit: 'Edytuj stronę',
-            lastUpdated: 'Ostatnia zmiana',
-            opensInNewTab: '(nowa karta)',
+            edit: 'Suggest an edit',
+            lastUpdated: 'Revised',
+            opensInNewTab: '(new window)',
           }}
         />
       </>,
     );
-    expect(screen.getByRole('navigation', { name: 'Poprzednia i następna' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Earlier and later' })).toBeInTheDocument();
     expect(screen.getByText('Wstecz')).toBeInTheDocument();
     expect(screen.getByText('Dalej')).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: 'Ścieżka' })).toBeInTheDocument();
-    expect(screen.getByText('Edytuj stronę')).toBeInTheDocument();
-    expect(screen.getByText('Ostatnia zmiana', { exact: false })).toBeInTheDocument();
-    expect(screen.getByText('(nowa karta)')).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Trail' })).toBeInTheDocument();
+    expect(screen.getByText('Suggest an edit')).toBeInTheDocument();
+    expect(screen.getByText('Revised', { exact: false })).toBeInTheDocument();
+    expect(screen.getByText('(new window)')).toBeInTheDocument();
     expect(screen.queryByText('Previous')).toBeNull();
     expect(screen.queryByText('Edit this page')).toBeNull();
   });
@@ -172,17 +172,17 @@ describe('navigation words', () => {
         <VersionSwitcher
           versions={[{ value: '2', label: 'v2', href: '/v2' }]}
           current="2"
-          messages={{ button: (version) => `Wersja ${version}` }}
+          messages={{ button: (version) => `Release ${version}` }}
         />
         <LanguageSwitcher
           languages={[{ value: 'de', label: 'Deutsch', href: '/de' }]}
           current="de"
-          messages={{ button: (language) => `Język ${language}` }}
+          messages={{ button: (language) => `Switch language, ${language}` }}
         />
       </>,
     );
-    expect(screen.getByRole('button', { name: 'Wersja v2' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Język Deutsch' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Release v2' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Switch language, Deutsch' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Version: v2' })).toBeNull();
   });
 
@@ -195,19 +195,19 @@ describe('navigation words', () => {
             brandLabel="Home"
             links={[{ label: 'Docs', href: '/docs' }]}
             mobileNav={<p>nav</p>}
-            messages={{ navigation: 'Nawigacja', main: 'Główna' }}
+            messages={{ navigation: 'Site menu', main: 'Primary' }}
           />
         }
         toc={<p>toc</p>}
-        messages={{ skipToContent: 'Przejdź do treści', tocLabel: 'Na stronie' }}
+        messages={{ skipToContent: 'Jump to content', tocLabel: 'Here' }}
       >
         <p>body</p>
       </DocsLayout>,
     );
-    expect(screen.getByRole('button', { name: 'Nawigacja' })).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: 'Główna' })).toBeInTheDocument();
-    expect(screen.getByText('Przejdź do treści')).toBeInTheDocument();
-    expect(screen.getByText('Na stronie')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Site menu' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
+    expect(screen.getByText('Jump to content')).toBeInTheDocument();
+    expect(screen.getByText('Here')).toBeInTheDocument();
     expect(screen.queryByText('Skip to content')).toBeNull();
     expect(screen.queryByRole('navigation', { name: 'Main' })).toBeNull();
   });
@@ -221,7 +221,7 @@ describe('search words', () => {
 
   it('words the field, the empty state, the keys and the result count', async () => {
     const user = userEvent.setup();
-    const results = vi.fn((count: number) => `${String(count)} trafienia`);
+    const results = vi.fn((count: number) => `${String(count)} matches`);
     render(
       <DocsSearch
         search={search}
@@ -229,28 +229,28 @@ describe('search words', () => {
         debounce={0}
         trigger={false}
         messages={{
-          label: 'Szukaj',
-          placeholder: 'Szukaj w dokumentacji',
-          emptyTitle: 'Szukaj w dokumentach',
-          hints: 'Strzałki, Enter, Escape.',
-          toMove: 'ruch',
+          label: 'Find',
+          placeholder: 'Search the handbook',
+          emptyTitle: 'Search the documents',
+          hints: 'Arrows, Return, Esc.',
+          toMove: 'navigate',
           results,
-          noResultsTitle: (query) => `Brak wyników: ${query}`,
+          noResultsTitle: (query) => `Nothing for ${query}`,
         }}
       />,
     );
-    const input = screen.getByRole('combobox', { name: 'Szukaj' });
-    expect(input).toHaveAttribute('placeholder', 'Szukaj w dokumentacji');
-    expect(screen.getByText('Szukaj w dokumentach')).toBeInTheDocument();
-    expect(screen.getByText('ruch')).toBeInTheDocument();
-    expect(screen.getByText('Strzałki, Enter, Escape.')).toBeInTheDocument();
+    const input = screen.getByRole('combobox', { name: 'Find' });
+    expect(input).toHaveAttribute('placeholder', 'Search the handbook');
+    expect(screen.getByText('Search the documents')).toBeInTheDocument();
+    expect(screen.getByText('navigate')).toBeInTheDocument();
+    expect(screen.getByText('Arrows, Return, Esc.')).toBeInTheDocument();
     expect(screen.queryByText('to move')).toBeNull();
     await user.type(input, 'queue');
-    expect(await screen.findByText('2 trafienia')).toBeInTheDocument();
+    expect(await screen.findByText('2 matches')).toBeInTheDocument();
     expect(results).toHaveBeenCalledWith(2, expect.any(String));
     await user.clear(input);
     await user.type(input, 'zzz');
-    expect(await screen.findByText('Brak wyników: zzz')).toBeInTheDocument();
+    expect(await screen.findByText('Nothing for zzz')).toBeInTheDocument();
     expect(screen.queryByText(/No results for/)).toBeNull();
   });
 
@@ -260,13 +260,13 @@ describe('search words', () => {
       <DocsSearch
         search={() => Promise.reject(new Error('offline'))}
         debounce={0}
-        messages={{ triggerLabel: 'Szukaj docs', errorTitle: 'Brak wyszukiwarki' }}
+        messages={{ triggerLabel: 'Search handbook', errorTitle: 'Search is down' }}
       />,
     );
-    await user.click(screen.getByRole('button', { name: /Szukaj docs/ }));
+    await user.click(screen.getByRole('button', { name: /Search handbook/ }));
     expect(screen.queryByRole('button', { name: /Search docs/ })).toBeNull();
     await user.type(screen.getByRole('combobox'), 'queue');
-    expect(await screen.findByText('Brak wyszukiwarki')).toBeInTheDocument();
+    expect(await screen.findByText('Search is down')).toBeInTheDocument();
   });
 
   it('formats the count in English by default', async () => {
@@ -285,25 +285,25 @@ describe('feedback words', () => {
       <DocsFeedback
         onSubmit={onSubmit}
         messages={{
-          label: 'Opinia',
-          question: 'Czy ta strona pomogła?',
-          yes: 'Tak',
-          no: 'Nie',
-          helpfulPrompt: 'Co zadziałało?',
-          send: 'Wyślij',
-          cancel: 'Anuluj',
-          thanks: 'Dziękujemy.',
+          label: 'Feedback form',
+          question: 'Did this page help?',
+          yes: 'Yep',
+          no: 'Nope',
+          helpfulPrompt: 'What worked?',
+          send: 'Submit',
+          cancel: 'Back out',
+          thanks: 'Much appreciated.',
         }}
       />,
     );
-    expect(screen.getByRole('region', { name: 'Opinia' })).toBeInTheDocument();
-    expect(screen.getByText('Czy ta strona pomogła?')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Feedback form' })).toBeInTheDocument();
+    expect(screen.getByText('Did this page help?')).toBeInTheDocument();
     expect(screen.queryByText('Was this page helpful?')).toBeNull();
-    await user.click(screen.getByRole('button', { name: 'Tak' }));
-    expect(screen.getByText('Co zadziałało?')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Anuluj' })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Wyślij' }));
-    expect(await screen.findByText('Dziękujemy.')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Yep' }));
+    expect(screen.getByText('What worked?')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Back out' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    expect(await screen.findByText('Much appreciated.')).toBeInTheDocument();
   });
 
   it('words the failure', async () => {
@@ -311,12 +311,12 @@ describe('feedback words', () => {
     render(
       <DocsFeedback
         onSubmit={() => Promise.reject(new Error('down'))}
-        messages={{ yes: 'Tak', send: 'Wyślij', error: 'Nie wysłano.' }}
+        messages={{ yes: 'Yep', send: 'Submit', error: 'Not sent.' }}
       />,
     );
-    await user.click(screen.getByRole('button', { name: 'Tak' }));
-    await user.click(screen.getByRole('button', { name: 'Wyślij' }));
-    expect(await screen.findByText('Nie wysłano.')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Yep' }));
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    expect(await screen.findByText('Not sent.')).toBeInTheDocument();
   });
 });
 
@@ -326,50 +326,50 @@ describe('prose words', () => {
       <>
         <Callout
           type="tip"
-          messages={{ types: { note: 'N', tip: 'Wskazówka', warning: 'W', danger: 'D' } }}
+          messages={{ types: { note: 'N', tip: 'Pointer', warning: 'W', danger: 'D' } }}
         >
           body
         </Callout>
-        <Steps messages={{ step: (number) => `Krok ${String(number)}:` }}>
+        <Steps messages={{ step: (number) => `Phase ${String(number)}:` }}>
           <Step title="First" />
           <Step title="Second" />
         </Steps>
         <FileTree
           entries={[{ name: 'a.ts', highlight: true }]}
-          messages={{ label: 'Pliki', highlighted: '(wyróżniony)' }}
+          messages={{ label: 'Documents', highlighted: '(marked)' }}
         />
-        <DocsTable messages={{ label: 'Tabela' }}>
+        <DocsTable messages={{ label: 'Grid' }}>
           <table />
         </DocsTable>
       </>,
     );
-    expect(screen.getByRole('note', { name: 'Wskazówka' })).toBeInTheDocument();
-    expect(screen.getByText('Krok 2:')).toBeInTheDocument();
+    expect(screen.getByRole('note', { name: 'Pointer' })).toBeInTheDocument();
+    expect(screen.getByText('Phase 2:')).toBeInTheDocument();
     expect(screen.queryByText('Step 2:')).toBeNull();
-    expect(screen.getByRole('list', { name: 'Pliki' })).toBeInTheDocument();
-    expect(screen.getByText('(wyróżniony)')).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Tabela' })).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Documents' })).toBeInTheDocument();
+    expect(screen.getByText('(marked)')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Grid' })).toBeInTheDocument();
   });
 
   it('lets one step carry its own words', () => {
     render(
-      <Steps messages={{ step: (number) => `Krok ${String(number)}:` }}>
-        <Step title="Own" messages={{ step: (number) => `Etap ${String(number)}:` }} />
+      <Steps messages={{ step: (number) => `Phase ${String(number)}:` }}>
+        <Step title="Own" messages={{ step: (number) => `Stage ${String(number)}:` }} />
       </Steps>,
     );
-    expect(screen.getByText('Etap 1:')).toBeInTheDocument();
+    expect(screen.getByText('Stage 1:')).toBeInTheDocument();
   });
 });
 
 describe('content block words', () => {
   it('words the changelog and gives the link its version', () => {
     const changes = {
-      breaking: 'Przełomowe',
-      security: 'Bezpieczeństwo',
-      feature: 'Dodano',
-      improvement: 'Ulepszono',
-      fix: 'Naprawiono',
-      deprecation: 'Wycofano',
+      breaking: 'Major',
+      security: 'Safety',
+      feature: 'New',
+      improvement: 'Improved',
+      fix: 'Repaired',
+      deprecation: 'Retired',
     };
     render(
       <Changelog
@@ -382,15 +382,15 @@ describe('content block words', () => {
           },
         ]}
         messages={{
-          latest: 'Najnowsza',
+          latest: 'Newest',
           changes,
-          fullNotes: (version) => `Pełne notatki ${version}`,
+          fullNotes: (version) => `Release notes for ${version}`,
         }}
       />,
     );
-    expect(screen.getByText('Najnowsza')).toBeInTheDocument();
-    expect(screen.getAllByText('Przełomowe').length).toBeGreaterThan(0);
-    expect(screen.getByText('Pełne notatki 2.0.0')).toBeInTheDocument();
+    expect(screen.getByText('Newest')).toBeInTheDocument();
+    expect(screen.getAllByText('Major').length).toBeGreaterThan(0);
+    expect(screen.getByText('Release notes for 2.0.0')).toBeInTheDocument();
     expect(screen.queryByText('Latest')).toBeNull();
     expect(screen.queryByText('Breaking')).toBeNull();
   });
@@ -400,23 +400,23 @@ describe('content block words', () => {
       <DocsHero
         title="Halyard"
         install="npm i halyard"
-        messages={{ introduction: 'Wstęp', copyInstall: 'Kopiuj komendę' }}
+        messages={{ introduction: 'Overview', copyInstall: 'Copy the command' }}
       />,
     );
-    expect(screen.getByRole('region', { name: 'Wstęp' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Kopiuj komendę' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy the command' })).toBeInTheDocument();
   });
 
   it('words the props table, signature card and endpoint', async () => {
     const user = userEvent.setup();
     const tableMessages = {
-      name: 'Nazwa',
-      type: 'Typ',
-      default: 'Domyślnie',
-      description: 'Opis',
-      required: 'Wymagane',
-      deprecated: 'Wycofane',
-      none: 'Brak',
+      name: 'Label',
+      type: 'Kind',
+      default: 'Initial',
+      description: 'Summary',
+      required: 'Compulsory',
+      deprecated: 'Obsolete',
+      none: 'Nil',
     };
     render(
       <>
@@ -438,17 +438,17 @@ describe('content block words', () => {
           returns={{ type: 'Job' }}
           messages={{
             kinds: {
-              function: 'funkcja',
-              method: 'metoda',
-              class: 'klasa',
-              hook: 'hak',
-              type: 'typ',
+              function: 'proc',
+              method: 'routine',
+              class: 'blueprint',
+              hook: 'handle',
+              type: 'shape',
             },
-            since: (version) => `Od ${version}`,
-            deprecated: 'Wycofane',
-            parameters: 'Parametry',
-            optional: 'Opcjonalny. ',
-            returns: 'Zwraca',
+            since: (version) => `Since ${version}`,
+            deprecated: 'Obsolete',
+            parameters: 'Inputs',
+            optional: 'Optional. ',
+            returns: 'Yields',
           }}
         />
         <Endpoint
@@ -460,26 +460,26 @@ describe('content block words', () => {
           request={{ code: 'curl' }}
           responses={[{ status: 200, description: 'ok' }]}
           messages={{
-            authorization: 'Autoryzacja',
-            body: 'Treść',
-            request: 'Żądanie',
-            responses: 'Odpowiedzi',
-            responsesLabel: (title) => `Odpowiedzi: ${title}`,
+            authorization: 'Credentials',
+            body: 'Payload',
+            request: 'Call',
+            responses: 'Replies',
+            responsesLabel: (title) => `Replies: ${title}`,
           }}
         />
       </>,
     );
-    expect(screen.getAllByText('Nazwa').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Wymagane').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Label').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Compulsory').length).toBeGreaterThan(0);
     expect(screen.queryByText('Required')).toBeNull();
     expect(screen.queryByText('Prop')).toBeNull();
-    expect(screen.getByText('metoda')).toBeInTheDocument();
-    expect(screen.getByText('Od 1.4')).toBeInTheDocument();
-    expect(screen.getByText('Parametry')).toBeInTheDocument();
-    expect(screen.getByText('Zwraca')).toBeInTheDocument();
-    expect(screen.getByText('Autoryzacja')).toBeInTheDocument();
-    expect(screen.getByText('Żądanie')).toBeInTheDocument();
-    expect(screen.getByRole('tablist', { name: 'Odpowiedzi: Enqueue' })).toBeInTheDocument();
+    expect(screen.getByText('routine')).toBeInTheDocument();
+    expect(screen.getByText('Since 1.4')).toBeInTheDocument();
+    expect(screen.getByText('Inputs')).toBeInTheDocument();
+    expect(screen.getByText('Yields')).toBeInTheDocument();
+    expect(screen.getByText('Credentials')).toBeInTheDocument();
+    expect(screen.getByText('Call')).toBeInTheDocument();
+    expect(screen.getByRole('tablist', { name: 'Replies: Enqueue' })).toBeInTheDocument();
     expect(screen.queryByText('Authorization')).toBeNull();
     await user.click(screen.getByRole('tab', { name: '200' }));
     expect(within(screen.getByRole('tabpanel')).getByText('ok')).toBeInTheDocument();

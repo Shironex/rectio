@@ -5,7 +5,7 @@
 
 const digitsCache = new Map<string, number>();
 
-/** Decimal places of a currency: 2 for EUR and PLN, 0 for JPY, 3 for KWD. */
+/** Decimal places of a currency: 2 for EUR and GBP, 0 for JPY, 3 for KWD. */
 export function minorDigits(currency: string): number {
   const cached = digitsCache.get(currency);
   if (cached !== undefined) return cached;
@@ -82,7 +82,7 @@ export function formatPercent(
     .replace('-', MINUS);
 }
 
-/** A compact amount for chart axes: €12k, 1,2 mln zł. */
+/** A compact amount for chart axes: €12k, £1.2m. */
 export function formatCompactMoney(
   amount: number,
   currency: string,

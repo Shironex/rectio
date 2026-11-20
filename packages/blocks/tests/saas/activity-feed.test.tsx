@@ -32,7 +32,7 @@ const EVENTS: ActivityEvent[] = [
   {
     id: 'mid',
     at: new Date(2026, 2, 18, 11),
-    actor: { name: 'Tomasz Wierzbicki' },
+    actor: { name: 'Callum Ross' },
     kind: 'update',
     verb: 'moved',
     target: 'Renewals',

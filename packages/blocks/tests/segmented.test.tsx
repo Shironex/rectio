@@ -5,9 +5,9 @@ import { Segmented } from '../src/lib/segmented';
 
 const options = [
   { value: 'all', label: 'Wszystkie', hint: 16 },
-  { value: 'outstanding', label: 'Nieopłacone', hint: 11 },
+  { value: 'outstanding', label: 'Unpaid', hint: 11 },
   { value: 'overdue', label: 'Po terminie', hint: 7 },
-  { value: 'paid', label: 'Opłacone', hint: 3 },
+  { value: 'paid', label: 'Settled', hint: 3 },
   { value: 'draft', label: 'Szkice', hint: 1 },
 ] as const;
 

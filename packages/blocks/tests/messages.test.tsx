@@ -26,7 +26,7 @@ import {
 const d = (m: number, day: number, y = 2026) => new Date(y, m - 1, day);
 const TODAY = d(3, 19);
 const base = { currency: 'EUR', locale: 'en-GB' };
-const action = <button type="button">Zrób to</button>;
+const action = <button type="button">Do it</button>;
 
 const invoice: InvoiceSummary = {
   id: 'i1',
@@ -98,16 +98,16 @@ function approvals(extra: Partial<Parameters<typeof ExpenseApproval>[0]> = {}): 
   );
 }
 
-describe('messages: a Polish override renders in each block', () => {
+describe('messages: a custom override renders in each block', () => {
   it('KpiRow', () => {
     render(
       <KpiRow
         {...base}
-        comparison="vs luty"
+        comparison="vs last month"
         kpis={[
           {
             id: 'r',
-            label: 'Przychody',
+            label: 'Sales',
             format: 'money',
             better: 'up',
             value: 120,
@@ -115,11 +115,11 @@ describe('messages: a Polish override renders in each block', () => {
             series: [100, 120],
           },
         ]}
-        messages={{ label: 'Kluczowe wskaźniki', better: 'korzystnie' }}
+        messages={{ label: 'Headline figures', better: 'ahead' }}
       />,
     );
-    expect(screen.getByRole('region', { name: 'Kluczowe wskaźniki' })).toBeInTheDocument();
-    expect(screen.getByText('korzystnie')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Headline figures' })).toBeInTheDocument();
+    expect(screen.getByText('ahead')).toBeInTheDocument();
   });
 
   it('CashFlowChart', () => {
@@ -128,16 +128,16 @@ describe('messages: a Polish override renders in each block', () => {
         {...base}
         points={[{ month: d(1, 1), inflow: 10, outflow: 4 }]}
         messages={{
-          title: 'Przepływy pieniężne',
-          monthly: 'Miesiące',
-          showTable: 'Pokaż tabelę',
-          positiveNote: (positive, total) => `Dodatnie w ${String(positive)} z ${String(total)}`,
+          title: 'Cash movement',
+          monthly: 'By month',
+          showTable: 'Show the grid',
+          positiveNote: (positive, total) => `Positive in ${String(positive)} of ${String(total)}`,
         }}
       />,
     );
-    expect(screen.getByRole('heading', { name: 'Przepływy pieniężne' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Pokaż tabelę' })).toBeInTheDocument();
-    expect(screen.getByText('Dodatnie w 1 z 1')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Cash movement' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show the grid' })).toBeInTheDocument();
+    expect(screen.getByText('Positive in 1 of 1')).toBeInTheDocument();
   });
 
   it('InvoiceList, including its due words from a code', () => {
@@ -148,19 +148,19 @@ describe('messages: a Polish override renders in each block', () => {
         today={TODAY}
         defaultPeriod="all"
         messages={{
-          title: 'Faktury',
-          newInvoice: 'Nowa faktura',
+          title: 'Sales invoices',
+          newInvoice: 'Create invoice',
           dueText: (info) =>
             info.kind === 'overdue'
-              ? `${String(info.days)} ${plural(info.days, { one: 'dzień', other: 'dni' }, 'pl-PL')} po terminie`
+              ? `${String(info.days)} ${plural(info.days, { one: 'day', other: 'days' }, 'en-GB')} overdue`
               : '',
         }}
         onCreateInvoice={() => undefined}
       />,
     );
-    expect(screen.getByRole('heading', { name: 'Faktury' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Nowa faktura' })).toBeInTheDocument();
-    expect(screen.getAllByText('7 dni po terminie').length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: 'Sales invoices' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create invoice' })).toBeInTheDocument();
+    expect(screen.getAllByText('7 days overdue').length).toBeGreaterThan(0);
   });
 
   it('InvoiceDetail', () => {
@@ -170,15 +170,15 @@ describe('messages: a Polish override renders in each block', () => {
         invoice={document}
         today={TODAY}
         messages={{
-          balanceDue: 'Do zapłaty',
-          billedTo: 'Nabywca',
-          heading: (n) => <>Faktura {n}</>,
+          balanceDue: 'Amount due',
+          billedTo: 'Bill to',
+          heading: (n) => <>Invoice no. {n}</>,
         }}
       />,
     );
-    expect(screen.getByText('Do zapłaty')).toBeInTheDocument();
-    expect(screen.getByText('Nabywca')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /Faktura INV-7/ })).toBeInTheDocument();
+    expect(screen.getByText('Amount due')).toBeInTheDocument();
+    expect(screen.getByText('Bill to')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Invoice no. INV-7/ })).toBeInTheDocument();
   });
 
   it('Ledger', () => {
@@ -187,28 +187,28 @@ describe('messages: a Polish override renders in each block', () => {
         {...base}
         accounts={accounts}
         lines={lines}
-        messages={{ title: 'Dziennik księgowy', balanced: 'Zbilansowany', debit: 'Winien' }}
+        messages={{ title: 'Journal', balanced: 'In balance', debit: 'Dr' }}
       />,
     );
-    expect(screen.getByRole('heading', { name: 'Dziennik księgowy' })).toBeInTheDocument();
-    expect(screen.getByText('Zbilansowany')).toBeInTheDocument();
-    expect(screen.getAllByText('Winien').length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: 'Journal' })).toBeInTheDocument();
+    expect(screen.getByText('In balance')).toBeInTheDocument();
+    expect(screen.getAllByText('Dr').length).toBeGreaterThan(0);
   });
 
   it('ExpenseApproval, with a plural function', () => {
     render(
       approvals({
         messages: {
-          title: 'Akceptacja wydatków',
-          approve: 'Zatwierdź',
+          title: 'Expense claims',
+          approve: 'Accept',
           approveMany: (count) =>
-            `Zatwierdź ${String(count)} ${plural(count, { one: 'wydatek', few: 'wydatki', many: 'wydatków', other: 'wydatku' }, 'pl-PL')}`,
+            `Accept ${String(count)} ${plural(count, { one: 'claim', other: 'claims' }, 'en-GB')}`,
         },
       }),
     );
-    expect(screen.getByRole('heading', { name: 'Akceptacja wydatków' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Expense claims' })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /^Approve Aaa/ }).length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Zatwierdź').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Accept').length).toBeGreaterThan(0);
   });
 
   it('ArAging', () => {
@@ -219,11 +219,11 @@ describe('messages: a Polish override renders in each block', () => {
         receivables={[
           { id: 'r', customer: 'Kestrel', invoice: 'INV-1', due: d(3, 1), outstanding: 50 },
         ]}
-        messages={{ title: 'Wiekowanie należności', customer: 'Klient', total: 'Razem' }}
+        messages={{ title: 'Debtor ageing', customer: 'Debtor', total: 'Sum' }}
       />,
     );
-    expect(screen.getByRole('heading', { name: 'Wiekowanie należności' })).toBeInTheDocument();
-    expect(screen.getByText('Klient')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Debtor ageing' })).toBeInTheDocument();
+    expect(screen.getByText('Debtor')).toBeInTheDocument();
   });
 
   it('BudgetVsActual', () => {
@@ -232,14 +232,14 @@ describe('messages: a Polish override renders in each block', () => {
         {...base}
         lines={[{ id: 'b', category: 'Travel', budget: 100, actual: 140 }]}
         messages={{
-          title: 'Budżet i wykonanie',
+          title: 'Budget and actuals',
           varianceWords: (position, percent) =>
-            `${percent ?? ''} ${position === 'over' ? 'powyżej' : 'poniżej'}`,
+            `${percent ?? ''} ${position === 'over' ? 'above plan' : 'below plan'}`,
         }}
       />,
     );
-    expect(screen.getByRole('heading', { name: 'Budżet i wykonanie' })).toBeInTheDocument();
-    expect(screen.getAllByText(/powyżej/).length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: 'Budget and actuals' })).toBeInTheDocument();
+    expect(screen.getAllByText(/above plan/).length).toBeGreaterThan(0);
   });
 });
 
@@ -255,13 +255,13 @@ describe('messages: the empty state action', () => {
     ['BudgetVsActual', <BudgetVsActual key="f" {...none} lines={[]} />],
   ])('%s shows it under the note', (_name, element) => {
     render(element);
-    expect(screen.getByRole('button', { name: 'Zrób to' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Do it' })).toBeInTheDocument();
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('shows none when no action is given', () => {
     render(<Ledger {...base} accounts={accounts} lines={[]} />);
-    expect(screen.queryByRole('button', { name: 'Zrób to' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Do it' })).not.toBeInTheDocument();
   });
 });
 

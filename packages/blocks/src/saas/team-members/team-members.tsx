@@ -501,7 +501,7 @@ function InviteForm({
           <Input
             autoFocus
             value={text}
-            placeholder="ines@fernhill.io, tomasz@fernhill.io"
+            placeholder="ines@fernhill.io, callum@fernhill.io"
             onChange={(event) => {
               setText(event.target.value);
             }}

@@ -183,11 +183,11 @@ describe('BankReconciliation', () => {
         matches={[]}
         onMatch={vi.fn()}
         onUnmatch={vi.fn()}
-        messages={{ title: 'Uzgodnienie bankowe', statementBalance: 'Saldo wyciągu' }}
+        messages={{ title: 'Statement matching', statementBalance: 'Closing balance' }}
       />,
     );
-    expect(screen.getByRole('heading', { name: 'Uzgodnienie bankowe' })).toBeInTheDocument();
-    expect(screen.getByText('Saldo wyciągu')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Statement matching' })).toBeInTheDocument();
+    expect(screen.getByText('Closing balance')).toBeInTheDocument();
   });
 
   it('shows an empty state with its action', () => {

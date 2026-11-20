@@ -175,8 +175,8 @@ describe('focus after a delete', () => {
       { id: 'a', name: 'Ines Duarte', email: 'ines@x.io', role: 'admin', status: 'active' },
       {
         id: 'm',
-        name: 'Tomasz Wierzbicki',
-        email: 'tomasz@x.io',
+        name: 'Callum Ross',
+        email: 'callum@x.io',
         role: 'member',
         status: 'active',
       },

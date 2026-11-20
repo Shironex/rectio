@@ -34,8 +34,8 @@ const USERS: UserRecord[] = [
   },
   {
     id: 'm',
-    name: 'Tomasz Wierzbicki',
-    email: 'tomasz@fernhill.io',
+    name: 'Callum Ross',
+    email: 'callum@fernhill.io',
     role: 'member',
     status: 'suspended',
     team: 'Engineering',
@@ -49,7 +49,7 @@ describe('users table logic', () => {
       'a',
     ]);
     expect(
-      filterUsers(USERS, { ...EMPTY_USER_FILTERS, query: 'ENGINEERING tomasz' }).map((u) => u.id),
+      filterUsers(USERS, { ...EMPTY_USER_FILTERS, query: 'ENGINEERING callum' }).map((u) => u.id),
     ).toEqual(['m']);
     expect(
       filterUsers(USERS, { query: '', role: 'guest', status: 'invited' }).map((u) => u.id),
@@ -157,13 +157,13 @@ describe('UsersTable', () => {
 describe('users table session claims', () => {
   it('lets the viewer act only below or at their role, never on themselves', () => {
     const admin = { role: 'admin' as const };
-    const [owner, ines, tomasz, kenji] = USERS as [UserRecord, UserRecord, UserRecord, UserRecord];
+    const [owner, ines, callum, kenji] = USERS as [UserRecord, UserRecord, UserRecord, UserRecord];
     expect(canActOnUser(owner, admin)).toBe(false);
     expect(canActOnUser({ ...ines, you: true }, admin)).toBe(false);
     expect(canActOnUser(ines, admin)).toBe(true);
-    expect(canActOnUser(tomasz, admin)).toBe(true);
+    expect(canActOnUser(callum, admin)).toBe(true);
     expect(canActOnUser(kenji, { role: 'member' })).toBe(false);
-    expect(canActOnUser(tomasz)).toBe(true);
+    expect(canActOnUser(callum)).toBe(true);
     expect(assignableUserRoles({ role: 'admin' })).toEqual(['admin', 'member', 'guest']);
     expect(assignableUserRoles({ role: 'guest' })).toEqual([]);
     expect(bulkUserTargets(USERS, ['o', 'a', 'm'], admin)).toEqual({

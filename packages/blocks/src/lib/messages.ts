@@ -50,8 +50,8 @@ export function mergeMessages<T extends object>(defaults: T, overrides: Partial<
 export type PluralForms = Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
 
 /**
- * The form of a word for a count in a locale: `plural(3, { one: 'faktura', few: 'faktury',
- * many: 'faktur', other: 'faktury' }, 'pl-PL')` is "faktury". For use inside message functions.
+ * The form of a word for a count in a locale: `plural(3, { one: 'invoice', other: 'invoices' },
+ * 'en-GB')` is "invoices". For use inside message functions.
  */
 export function plural(count: number, forms: PluralForms, locale: string): string {
   const category = new Intl.PluralRules(locale).select(count);

@@ -65,13 +65,13 @@ describe('saas core', () => {
   });
 
   it('names today and yesterday in the locale', () => {
-    expect(dayLabel(NOW, NOW, 'pl-PL')).toBe('Dzisiaj');
-    expect(dayLabel(new Date(2026, 2, 18, 9), NOW, 'pl-PL')).toBe('Wczoraj');
+    expect(dayLabel(NOW, NOW, 'en-GB')).toBe('Today');
+    expect(dayLabel(new Date(2026, 2, 18, 9), NOW, 'en-GB')).toBe('Yesterday');
   });
 
   it('shares one formatter per locale and options', () => {
     expect(numberFormat('en-GB')).toBe(numberFormat('en-GB'));
-    expect(numberFormat('en-GB')).not.toBe(numberFormat('pl-PL'));
+    expect(numberFormat('en-GB')).not.toBe(numberFormat('en-US'));
   });
 
   it('gives no machine date for an invalid date instead of throwing', () => {

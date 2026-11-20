@@ -11,8 +11,8 @@ const TODAY = d(3, 19);
 const vendors: Vendor[] = [
   {
     id: 'v1',
-    name: 'Łódź Print Works',
-    contact: 'Agnieszka Wróbel',
+    name: 'Éclair Print Works',
+    contact: 'Niall Keane',
     termsDays: 30,
     status: 'active',
     bills: [
@@ -53,9 +53,9 @@ describe('VendorsList', () => {
     const user = userEvent.setup();
     render(<VendorsList {...base} />);
     const search = screen.getByRole('searchbox', { name: 'Search vendors' });
-    await user.type(search, 'lodz');
+    await user.type(search, 'eclair');
     expect(names()).toHaveLength(2); // the vendor and the footer
-    expect(names()[0]).toMatch(/Łódź Print Works/);
+    expect(names()[0]).toMatch(/Éclair Print Works/);
     await user.clear(search);
     await user.type(search, 'zzz');
     expect(screen.getByText('No vendors match "zzz"')).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe('VendorsList', () => {
     const user = userEvent.setup();
     render(<VendorsList {...base} />);
     // Overdue first by default.
-    expect(names()[0]).toMatch(/Łódź/);
+    expect(names()[0]).toMatch(/Éclair/);
     await user.click(screen.getByRole('button', { name: /^Vendor/ }));
     expect(names()[0]).toMatch(/Atlas Cloud/);
   });
@@ -100,10 +100,10 @@ describe('VendorsList', () => {
 
   it('takes its words from messages', () => {
     render(
-      <VendorsList {...base} messages={{ title: 'Dostawcy', searchLabel: 'Szukaj dostawców' }} />,
+      <VendorsList {...base} messages={{ title: 'Suppliers', searchLabel: 'Search suppliers' }} />,
     );
-    expect(screen.getByRole('heading', { name: 'Dostawcy' })).toBeInTheDocument();
-    expect(screen.getByRole('searchbox', { name: 'Szukaj dostawców' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Suppliers' })).toBeInTheDocument();
+    expect(screen.getByRole('searchbox', { name: 'Search suppliers' })).toBeInTheDocument();
   });
 
   it('shows an empty state with its action', () => {

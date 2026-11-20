@@ -19,7 +19,7 @@ const ME: CommentAuthor = { id: 'me', name: 'Niamh Walsh' };
 const INES: CommentAuthor = { id: 'ines', name: 'Ines Duarte' };
 const COMMENTS: ThreadComment[] = [
   { id: 'c3', author: ME, body: 'Agreed.', createdAt: at(10), parentId: 'c2' },
-  { id: 'c1', author: INES, body: 'Can @Tomasz look at this?', createdAt: at(60) },
+  { id: 'c1', author: INES, body: 'Can @Callum look at this?', createdAt: at(60) },
   { id: 'c2', author: ME, body: 'On it.', createdAt: at(30), parentId: 'c1' },
   { id: 'c4', author: ME, body: 'Orphan reply', createdAt: at(5), parentId: 'gone' },
 ];
@@ -45,9 +45,9 @@ describe('comment thread logic', () => {
     expect(commentSendModifier('MacIntel')).toBe('Cmd');
     expect(commentSendModifier('Win32')).toBe('Ctrl');
     expect(commentSendModifier(undefined)).toBe('Ctrl');
-    expect(commentParts('Ask @Tomasz.W and mail a@b.io')).toEqual([
+    expect(commentParts('Ask @Callum.W and mail a@b.io')).toEqual([
       { kind: 'text', text: 'Ask ' },
-      { kind: 'mention', text: '@Tomasz.W' },
+      { kind: 'mention', text: '@Callum.W' },
       { kind: 'text', text: ' and mail a@b.io' },
     ]);
   });
