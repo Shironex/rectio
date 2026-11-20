@@ -106,7 +106,7 @@ describe('ToggleGroup', () => {
         <>
           <ToggleGroup aria-label="Currency" value={value} onValueChange={setValue}>
             <Toggle value="eur">EUR</Toggle>
-            <Toggle value="pln">PLN</Toggle>
+            <Toggle value="chf">CHF</Toggle>
           </ToggleGroup>
           <output>{value.join(',')}</output>
         </>
@@ -115,8 +115,8 @@ describe('ToggleGroup', () => {
     render(<Controlled />);
     await userEvent.click(pressed('EUR'));
     expect(screen.getByText('eur')).toBeInTheDocument();
-    await userEvent.click(pressed('PLN'));
-    expect(screen.getByText('pln')).toBeInTheDocument();
+    await userEvent.click(pressed('CHF'));
+    expect(screen.getByText('chf')).toBeInTheDocument();
   });
 
   it('presses several toggles when multiple', async () => {

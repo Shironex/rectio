@@ -51,7 +51,7 @@ export function AmountInput({
     maximumFractionDigits: digits,
   }).format(0);
   // Decorative: the symbol is outside the input, so screen readers would not tie it to the value.
-  // Name the currency in the label or description instead ("Amount, PLN").
+  // Name the currency in the label or description instead ("Amount, GBP").
   const affix = (
     <span aria-hidden className="shrink-0 text-fg-subtle select-none">
       {symbol}

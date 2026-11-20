@@ -22,9 +22,9 @@ describe('identityTint', () => {
 
 describe('Avatar', () => {
   it('is one image named by the person, with initials when there is no photo', () => {
-    render(<Avatar name="Tomasz Nowak" />);
-    const avatar = screen.getByRole('img', { name: 'Tomasz Nowak' });
-    expect(avatar).toHaveTextContent('TN');
+    render(<Avatar name="Ewan Burke" />);
+    const avatar = screen.getByRole('img', { name: 'Ewan Burke' });
+    expect(avatar).toHaveTextContent('EB');
   });
 
   it('says the status in the name, not only with the dot', () => {

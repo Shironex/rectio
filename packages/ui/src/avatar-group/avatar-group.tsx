@@ -38,7 +38,7 @@ const FAN = cn(
 const spread = (index: number) =>
   ({ '--rx-avatar-spread': `calc(${String(index)} * var(--rx-space-unit))` }) as CSSProperties;
 
-/** `Ana, Tomasz and Lena`, in the language's own list style. */
+/** `Ana, Callum and Lena`, in the language's own list style. */
 function listNames(names: readonly string[], locale?: string): string {
   return new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' }).format(names);
 }

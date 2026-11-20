@@ -90,7 +90,7 @@ export const defaultFileUploadMessages: FileUploadMessages = {
 const UNITS = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte'] as const;
 
 /**
- * A byte count in words, with Intl: `12.4 MB`, `512 bytes`, `12,4 MB` in Polish. Steps of 1024,
+ * A byte count in words, with Intl: `12.4 MB`, `512 bytes`, `12,4 MB` where the locale writes a decimal comma. Steps of 1024,
  * the way limits are usually written in code (`10 * 1024 * 1024` reads as `10 MB`), with at most
  * one decimal.
  */

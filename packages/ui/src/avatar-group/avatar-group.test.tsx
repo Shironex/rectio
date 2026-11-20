@@ -5,7 +5,7 @@ import { AvatarGroup } from './avatar-group';
 
 const people = [
   'Ana Ruiz',
-  'Tomasz Nowak',
+  'Ewan Burke',
   'Lena Fischer',
   'Ivo Petrov',
   'Mei Tanaka',
@@ -34,7 +34,7 @@ describe('AvatarGroup', () => {
     render(<AvatarGroup label="Approvers" items={people.slice(0, 2)} locale="en" />);
     const group = screen.getByRole('group', { name: 'Approvers' });
     expect(group).toHaveAttribute('tabindex', '0');
-    expect(screen.getByText('Ana Ruiz and Tomasz Nowak')).toBeInTheDocument();
+    expect(screen.getByText('Ana Ruiz and Ewan Burke')).toBeInTheDocument();
   });
 
   it('leaves the names to assistive technology with names="none", and is not focusable', () => {

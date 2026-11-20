@@ -114,11 +114,11 @@ describe('motioned components', () => {
         <DialogContent>{children}</DialogContent>
       </Dialog>
     );
-    render(dialog(<p>Report 2041 goes to Piotr Nowak.</p>));
+    render(dialog(<p>Report 2041 goes to Rory Quinn.</p>));
     await userEvent.click(screen.getByRole('button', { name: 'Submit for approval' }));
     const popup = screen.getByRole('dialog');
     expect(popup).not.toHaveAttribute('data-motion');
-    expect(popup).toHaveTextContent('Report 2041 goes to Piotr Nowak.');
+    expect(popup).toHaveTextContent('Report 2041 goes to Rory Quinn.');
   });
 
   describe('toast', () => {

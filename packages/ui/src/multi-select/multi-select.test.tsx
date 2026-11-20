@@ -17,7 +17,7 @@ interface Person {
   label: string;
 }
 
-const anna: Person = { value: 'anna', label: 'Anna Kowalska' };
+const anna: Person = { value: 'isla', label: 'Isla Fraser' };
 const ben: Person = { value: 'ben', label: 'Ben Okafor' };
 const dev: Person = { value: 'dev', label: 'Dev Patel' };
 const people: Person[] = [
@@ -88,7 +88,7 @@ describe('MultiSelect', () => {
 
   it('removes a chip with its named button', async () => {
     const { onValueChange } = renderMulti({ defaultValue: [anna, ben] });
-    await userEvent.click(screen.getByRole('button', { name: 'Remove Anna Kowalska' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Isla Fraser' }));
     expect(onValueChange).toHaveBeenLastCalledWith([ben], expect.anything());
     expect(chipNames()).toEqual(['Ben Okafor']);
   });
@@ -97,7 +97,7 @@ describe('MultiSelect', () => {
     const { input } = renderMulti({ defaultValue: [anna, ben] });
     await userEvent.click(input);
     await userEvent.keyboard('{Escape}{Backspace}');
-    expect(chipNames()).toEqual(['Anna Kowalska']);
+    expect(chipNames()).toEqual(['Isla Fraser']);
   });
 
   it('walks into the chips with Arrow Left and removes the focused one', async () => {
@@ -133,7 +133,7 @@ describe('MultiSelect', () => {
 
   it('shows a named overflow chip at rest and every chip on focus', async () => {
     const { input } = renderMulti({ defaultValue: people }, { maxChips: 2 });
-    expect(chipNames()).toEqual(['Anna Kowalska', 'Ben Okafor']);
+    expect(chipNames()).toEqual(['Isla Fraser', 'Ben Okafor']);
     const more = screen.getByRole('button', { name: '3 more selected' });
     expect(more).toHaveTextContent('+3');
     await userEvent.click(more);

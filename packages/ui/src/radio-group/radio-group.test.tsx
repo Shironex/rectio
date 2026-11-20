@@ -85,8 +85,8 @@ describe('RadioGroup and Radio', () => {
     render(
       <Field invalid>
         <RadioGroup legend="Approver">
-          <Radio value="anna">Anna Kowalska</Radio>
-          <Radio value="piotr">Piotr Nowak</Radio>
+          <Radio value="isla">Isla Fraser</Radio>
+          <Radio value="rory">Rory Quinn</Radio>
         </RadioGroup>
         <FieldError>Pick who approves this report.</FieldError>
       </Field>,
