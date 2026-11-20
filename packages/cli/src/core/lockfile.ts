@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { fileTypeSchema, itemTypeSchema, tierSchema } from '@rectio/registry';
+import { fileTypeSchema, itemTypeSchema } from '@rectio/registry';
 import * as z from 'zod';
 
 import { CliError } from './context.ts';
@@ -22,7 +22,6 @@ export type LockedFile = z.infer<typeof lockedFileSchema>;
 const lockedItemSchema = z.object({
   version: z.string(),
   type: itemTypeSchema,
-  tier: tierSchema,
   /** Integrity of the registry item as fetched, the base of a future three-way merge. */
   integrity: z.string(),
   files: z.array(lockedFileSchema),

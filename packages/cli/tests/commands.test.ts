@@ -145,7 +145,8 @@ describe('add', () => {
     expect(existsSync(join(cwd, 'src/components/ui/theme-scope.tsx'))).toBe(true);
 
     const lock = readLock(cwd);
-    expect(lock.items.dialog).toMatchObject({ version: '0.2.0', tier: 'free', type: 'component' });
+    expect(lock.items.dialog).toMatchObject({ version: '0.2.0', type: 'component' });
+    expect(lock.items.dialog).not.toHaveProperty('tier');
     expect(lock.items.dialog?.files[0]).toMatchObject({
       path: 'src/components/ui/dialog.tsx',
       source: 'ui/dialog.tsx',
@@ -202,8 +203,6 @@ describe('add', () => {
     expect(list).toContain("from '@/components/ui/data-table'");
     expect(list).toContain("from '@/lib/finance/finance'");
     expect(read(cwd, 'src/components/ui/data-table.tsx')).toContain('export function DataTable');
-    expect(readLock(cwd).items['invoice-list']?.tier).toBe('pro');
-    expect(readLock(cwd).items['data-table']?.tier).toBe('free');
   });
 
   it('installs a motion item with no key beside the plain component it builds on', async () => {
@@ -216,7 +215,6 @@ describe('add', () => {
     expect(read(cwd, 'src/lib/motion/animate.ts')).toContain("from 'motion/mini'");
     const pkg = JSON.parse(read(cwd, 'package.json')) as { dependencies: Record<string, string> };
     expect(pkg.dependencies.motion).toBe('^14.12.0');
-    expect(readLock(cwd).items['motion-dialog']?.tier).toBe('pro');
   });
 
   it('installs a block with no key, its dependencies and its token additions', async () => {
@@ -231,7 +229,6 @@ describe('add', () => {
     expect(read(cwd, 'src/index.css')).toContain(
       "@import './styles/rectio/vars/ledger-summary.css';",
     );
-    expect(readLock(cwd).items['ledger-summary']?.tier).toBe('pro');
   });
 
   it('refuses a tampered item', async () => {
@@ -298,14 +295,13 @@ describe('diff, list, search and update', () => {
     const themes = await runList(ctx, { type: 'theme' });
     expect(themes.map((t) => t.name)).toEqual(['theme-default', 'theme-ledger']);
     expect(out[0]).toMatch(/^\* theme-default/);
-    const pro = (await runList(capture(cwd).ctx, { tier: 'pro' })).map((t) => t.name);
-    expect(pro).toContain('ledger-summary');
-    expect(pro).toContain('motion-dialog');
-    expect(pro).toContain('invoice-list');
-    // Every pro item is the test's own block, a motion add-on item or a finance block.
-    const free = (await runList(capture(cwd).ctx, { tier: 'free' })).map((t) => t.name);
-    expect(free).toContain('button');
-    expect(pro.some((name) => free.includes(name))).toBe(false);
+    const all = capture(cwd);
+    const names = (await runList(all.ctx)).map((t) => t.name);
+    expect(names).toEqual(expect.arrayContaining(['button', 'ledger-summary', 'motion-dialog']));
+    // name, type, version, title: no tier column.
+    expect(all.out).toContainEqual(
+      expect.stringMatching(/^\s+button\s+component\s+\d+\.\d+\.\d+\s+Button$/),
+    );
   });
 
   it('searches names first, then titles, categories and descriptions', async () => {

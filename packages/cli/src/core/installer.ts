@@ -152,7 +152,6 @@ export async function installItems(
     lock.items[item.name] = {
       version: item.version,
       type: item.type,
-      tier: item.tier,
       integrity: item.integrity,
       files: files
         .filter((f) => f.item === item.name)

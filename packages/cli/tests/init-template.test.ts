@@ -146,7 +146,7 @@ describe('templates elsewhere in the CLI', () => {
     const templates = await runList(ctx, { registry: registry.url, templates: true });
     expect(templates.map((t) => t.name)).toContain('books');
     expect(templates.every((t) => t.type === 'template')).toBe(true);
-    expect(out.join('\n')).toMatch(/books\s+app\s+pro\s+Books: A small bookkeeping app\./);
+    expect(out.join('\n')).toMatch(/books\s+app\s+Books: A small bookkeeping app\./);
   });
 
   it('never adds a template to an existing project', async () => {

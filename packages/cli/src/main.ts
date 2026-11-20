@@ -21,7 +21,7 @@ Commands
                        Start a new project from a template
   add <items...>       Add items and everything they depend on
   diff <item>          Compare an installed item with the registry
-  list                 List registry items (--type, --tier, --templates)
+  list                 List registry items (--type, --templates)
   search <query>       Search registry items
   update               Show items with a newer version (merging is not built yet)
   mcp                  Run the read-only MCP server on stdio (for Claude Code, Cursor, VS Code)
@@ -38,7 +38,6 @@ Options
   --dry-run            init, add: show the plan, write nothing
   --no-install         init, add: do not run the package manager
   --type <type>        list: component, block, theme, lib, hook or style
-  --tier <tier>        list: free or pro
   --templates          list: templates only
   -h, --help           Show this help
   -v, --version        Show the version`;
@@ -50,7 +49,6 @@ const OPTIONS = {
   css: { type: 'string' },
   framework: { type: 'string' },
   type: { type: 'string' },
-  tier: { type: 'string' },
   template: { type: 'string' },
   templates: { type: 'boolean' },
   force: { type: 'boolean' },
@@ -134,7 +132,6 @@ export async function main(argv: readonly string[], base: CliContext): Promise<n
         await runList(ctx, {
           ...shared,
           ...(values.type === undefined ? {} : { type: values.type }),
-          ...(values.tier === undefined ? {} : { tier: values.tier }),
           templates: values.templates === true,
         });
         return 0;

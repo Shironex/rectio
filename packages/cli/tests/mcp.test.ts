@@ -33,26 +33,24 @@ function deps(cwd = project.dir): McpDeps {
 }
 
 describe('list_items', () => {
-  it('lists every item with its tier and never any source', async () => {
+  it('lists every item with its type and version and never any source', async () => {
     const { text, isError } = await listItems(deps(), { limit: 500 });
     expect(isError).toBeUndefined();
-    expect(text).toContain('button | component | free |');
-    expect(text).toContain('ledger-summary | block | pro |');
-    expect(text).toContain('invoice-list | block | pro |');
+    expect(text).toContain('name | type | version | title');
+    expect(text).toMatch(/\nbutton \| component \| \d+\.\d+\.\d+ \| Button\n/);
+    expect(text).toContain('ledger-summary | block |');
+    expect(text).toContain('invoice-list | block |');
+    expect(text).not.toMatch(/\| (?:free|pro) \|/);
     expect(text).not.toContain('export ');
   });
 
-  it('filters by type and tier', async () => {
+  it('filters by type', async () => {
     const themes = await listItems(deps(), { type: 'theme' });
     expect(themes.text).toContain('theme-ledger');
     expect(themes.text).not.toContain('button |');
-    // Pro items outnumber the default page, so ask for all of them.
-    const pro = await listItems(deps(), { tier: 'pro', limit: 500 });
-    expect(pro.text).toContain('ledger-summary');
-    // The motion add-on is pro too, every item of it.
-    expect(pro.text).toContain('motion-toast | component | pro |');
-    expect(pro.text).toContain('motion-core | lib | pro |');
-    expect(pro.text).not.toContain('| free |');
+    const libs = await listItems(deps(), { type: 'lib' });
+    expect(libs.text).toContain('motion-core | lib |');
+    expect(libs.text).not.toContain('| component |');
   });
 
   it('lists the whole registry by default, with nothing cut off', async () => {
@@ -82,16 +80,16 @@ describe('search_items', () => {
     expect((await searchItems(deps(), { query: 'date picker' })).text).toContain('date-picker');
     expect((await searchItems(deps(), { query: 'money zzzz' })).text).toContain('0 match(es)');
     expect(
-      (await searchItems(deps(), { query: 'finance', tier: 'pro', limit: 100 })).text,
+      (await searchItems(deps(), { query: 'finance', type: 'block', limit: 100 })).text,
     ).toContain('ledger-summary');
     expect((await searchItems(deps(), { query: '   ' })).isError).toBe(true);
   });
 });
 
 describe('get_item', () => {
-  it('shows metadata, files and what installs with a free item', async () => {
+  it('shows metadata, files and what installs with an item', async () => {
     const { text } = await getItem(deps(), { name: 'data-table' });
-    expect(text).toContain('data-table | component | free');
+    expect(text).toMatch(/^data-table \| component \| \d+\.\d+\.\d+\n/);
     expect(text).toMatch(/Registry dependencies \(installed with it\): .*cn/);
     expect(text).toContain('Add: rectio add data-table');
   });
@@ -113,7 +111,7 @@ describe('get_item', () => {
 });
 
 describe('get_item_source', () => {
-  it('returns free source, one file or all', async () => {
+  it('returns source, one file or all', async () => {
     const all = await getItemSource(deps(), { name: 'cn' });
     expect(all.text).toContain('--- lib/cn.ts (installs as @lib/cn.ts)');
     const one = await getItemSource(deps(), { name: 'cn', file: 'lib/cn.ts' });

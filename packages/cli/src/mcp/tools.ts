@@ -1,7 +1,6 @@
 import {
   itemTypeSchema,
   resolveGraph,
-  tierSchema,
   type IndexEntry,
   type RegistryIndex,
   type RegistryItem,
@@ -29,7 +28,6 @@ export interface ToolResult {
 }
 
 export const ITEM_TYPES = itemTypeSchema.options;
-export const TIERS = tierSchema.options;
 
 /**
  * The most rows a list or search returns. A list row is one short line, so listing defaults to the
@@ -58,7 +56,7 @@ export async function guard(run: () => Promise<ToolResult>): Promise<ToolResult>
 const fail = (text: string): ToolResult => ({ text, isError: true });
 
 function line(entry: IndexEntry, withDescription: boolean): string {
-  const head = `${entry.name} | ${entry.type} | ${entry.tier} | ${entry.version} | ${entry.title}`;
+  const head = `${entry.name} | ${entry.type} | ${entry.version} | ${entry.title}`;
   return withDescription ? `${head}\n  ${entry.description}` : head;
 }
 
@@ -104,23 +102,14 @@ function safeConfig(cwd: string): RectioConfig | undefined {
   }
 }
 
-function filtered(
-  entries: readonly IndexEntry[],
-  type: string | undefined,
-  tier: string | undefined,
-): IndexEntry[] {
-  return entries.filter(
-    (e) => (type === undefined || e.type === type) && (tier === undefined || e.tier === tier),
-  );
+function filtered(entries: readonly IndexEntry[], type: string | undefined): IndexEntry[] {
+  return entries.filter((e) => type === undefined || e.type === type);
 }
 
 function render(entries: readonly IndexEntry[], limit: number, withDescription: boolean): string {
   if (entries.length === 0) return 'No items match.';
   const shown = entries.slice(0, limit);
-  const rows = [
-    'name | type | tier | version | title',
-    ...shown.map((e) => line(e, withDescription)),
-  ];
+  const rows = ['name | type | version | title', ...shown.map((e) => line(e, withDescription))];
   if (entries.length > shown.length) {
     rows.push(`... ${entries.length - shown.length} more; narrow the filters or raise limit.`);
   }
@@ -129,13 +118,12 @@ function render(entries: readonly IndexEntry[], limit: number, withDescription: 
 
 export interface ListArgs {
   type?: string | undefined;
-  tier?: string | undefined;
   limit?: number | undefined;
 }
 
 export async function listItems(deps: McpDeps, args: ListArgs): Promise<ToolResult> {
   const { items } = await deps.client.index();
-  const matches = filtered(items, args.type, args.tier);
+  const matches = filtered(items, args.type);
   return {
     text: `${matches.length} item(s)\n${render(matches, args.limit ?? DEFAULT_LIMIT, false)}`,
   };
@@ -149,7 +137,7 @@ export async function searchItems(deps: McpDeps, args: SearchArgs): Promise<Tool
   const words = args.query.toLowerCase().split(/\s+/).filter(Boolean);
   if (words.length === 0) return fail('give a query, for example "money" or "date picker"');
   const { items } = await deps.client.index();
-  const pool = filtered(items, args.type, args.tier);
+  const pool = filtered(items, args.type);
   // Every word must match somewhere (name, title, categories, description); the first word ranks.
   const all = pool.filter((e) => words.every((w) => rankMatches([e], w).length > 0));
   const matches = rankMatches(all, words[0] ?? '');
@@ -177,7 +165,7 @@ export async function getItem(deps: McpDeps, args: { name: string }): Promise<To
   const index = await deps.client.index();
   const entry = findEntry(index, args.name);
   const lines = [
-    `${entry.name} | ${entry.type} | ${entry.tier} | ${entry.version}`,
+    `${entry.name} | ${entry.type} | ${entry.version}`,
     entry.title,
     entry.description,
     `Categories: ${entry.categories.join(', ') || 'none'}`,

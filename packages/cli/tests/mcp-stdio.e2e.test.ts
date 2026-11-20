@@ -70,10 +70,10 @@ describe('rectio mcp over stdio', () => {
     }
   });
 
-  it('answers a free call end to end', async () => {
+  it('answers a call end to end', async () => {
     const result = await client.callTool({ name: 'search_items', arguments: { query: 'money' } });
     expect(result.isError).toBeFalsy();
-    expect(textOf(result)).toMatch(/\nmoney \| component \| free/);
+    expect(textOf(result)).toMatch(/\nmoney \| component \| \d+\.\d+\.\d+ \|/);
   });
 
   it('returns the source of a block without a key', async () => {
@@ -86,7 +86,7 @@ describe('rectio mcp over stdio', () => {
   });
 
   it('rejects bad input through the schema', async () => {
-    const result = await client.callTool({ name: 'list_items', arguments: { tier: 'gold' } });
+    const result = await client.callTool({ name: 'list_items', arguments: { type: 'gold' } });
     expect(result.isError).toBe(true);
   });
 });

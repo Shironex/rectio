@@ -8,7 +8,6 @@ import { createRegistryClient } from '../core/registry-client.ts';
 export interface ListOptions {
   registry?: string;
   type?: string;
-  tier?: string;
   /** Templates only, with their category: `rectio list --templates`. */
   templates?: boolean;
 }
@@ -23,9 +22,8 @@ function printEntries(ctx: CliContext, entries: readonly IndexEntry[]) {
   for (const entry of entries) {
     const local = installed[entry.name];
     const mark = local === undefined ? ' ' : local.version === entry.version ? '*' : '^';
-    const tier = entry.tier === 'pro' ? 'pro ' : 'free';
     ctx.log(
-      `${mark} ${entry.name.padEnd(width)}  ${entry.type.padEnd(9)} ${tier} ${entry.version.padEnd(8)} ${entry.title}`,
+      `${mark} ${entry.name.padEnd(width)}  ${entry.type.padEnd(9)} ${entry.version.padEnd(8)} ${entry.title}`,
     );
   }
   ctx.log('\n* installed, ^ installed with an update available');
@@ -44,9 +42,8 @@ function printTemplates(ctx: CliContext, entries: readonly IndexEntry[]) {
   const width = Math.max(...entries.map((e) => e.name.length));
   for (const entry of entries) {
     const category = entry.categories.find((c) => c !== 'template') ?? '';
-    const tier = entry.tier === 'pro' ? 'pro ' : 'free';
     ctx.log(
-      `  ${entry.name.padEnd(width)}  ${category.padEnd(9)} ${tier} ${entry.title}: ${entry.description}`,
+      `  ${entry.name.padEnd(width)}  ${category.padEnd(9)} ${entry.title}: ${entry.description}`,
     );
   }
   ctx.log('\nStart a project: rectio init --template <name> [folder]');
@@ -54,16 +51,12 @@ function printTemplates(ctx: CliContext, entries: readonly IndexEntry[]) {
 
 export async function runList(ctx: CliContext, options: ListOptions = {}) {
   if (options.templates === true) {
-    const templates = (await loadIndex(ctx, options.registry)).filter(
-      (e) => e.type === 'template' && (options.tier === undefined || e.tier === options.tier),
-    );
+    const templates = (await loadIndex(ctx, options.registry)).filter((e) => e.type === 'template');
     printTemplates(ctx, templates);
     return templates;
   }
   const entries = (await loadIndex(ctx, options.registry)).filter(
-    (e) =>
-      (options.type === undefined || e.type === options.type) &&
-      (options.tier === undefined || e.tier === options.tier),
+    (e) => options.type === undefined || e.type === options.type,
   );
   printEntries(ctx, entries);
   return entries;

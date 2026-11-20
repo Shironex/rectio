@@ -186,7 +186,6 @@ describe('the CSS entry block', () => {
         {
           version: '1.0.0',
           type: 'style',
-          tier: 'free',
           integrity: '',
           files: [{ path, source: path, type, sha256: '' }],
         },

@@ -6,7 +6,6 @@ import * as z from 'zod';
 import {
   ITEM_TYPES,
   MAX_LIMIT,
-  TIERS,
   getAddCommand,
   getDocs,
   getItem,
@@ -45,10 +44,9 @@ export function createMcpServer(deps: McpDeps, version: string): McpServer {
     {
       title: 'List rectio items',
       description:
-        'List items in the rectio registry (components, blocks, themes, libs, hooks, styles), one line each: name, type, tier (free or pro), version, title. Use this to see what exists; use search_items when you know what you need. Never returns source.',
+        'List items in the rectio registry (components, blocks, themes, libs, hooks, styles), one line each: name, type, version, title. Use this to see what exists; use search_items when you know what you need. Never returns source.',
       inputSchema: {
         type: z.enum(ITEM_TYPES).optional().describe('Only items of this type'),
-        tier: z.enum(TIERS).optional().describe('Only free or only pro items'),
         limit,
       },
       annotations: READ_ONLY,
@@ -65,7 +63,6 @@ export function createMcpServer(deps: McpDeps, version: string): McpServer {
       inputSchema: {
         query: z.string().min(1).describe('One or more words'),
         type: z.enum(ITEM_TYPES).optional().describe('Only items of this type'),
-        tier: z.enum(TIERS).optional().describe('Only free or only pro items'),
         limit,
       },
       annotations: READ_ONLY,
