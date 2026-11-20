@@ -22,9 +22,9 @@ export interface SegmentedProps<Value extends string> {
 /**
  * One choice from a few, always visible: a status filter or a period switch. Arrow keys move
  * between options and the pressed one is announced; pressing the chosen option again keeps it.
- * One row, never wrapped inside the track. In a narrow block (under 28rem) and on a phone the
- * options sit in two even columns, so every label stays whole and every option stays in sight;
- * outside a block, a row that still cannot fit scrolls sideways instead of breaking.
+ * One row while it fits. In a narrow block (under 28rem) and on a phone the options sit in two even
+ * columns instead of a ragged wrap, so every label stays whole and every option stays in sight;
+ * only a row that still cannot fit on a wider block wraps, and nothing ever scrolls out of view.
  */
 export function Segmented<Value extends string>({
   label,
@@ -43,7 +43,7 @@ export function Segmented<Value extends string>({
       }}
       data-slot="segmented"
       className={cn(
-        'flex w-fit max-w-full gap-0.5 overflow-x-auto rounded-control border border-line bg-surface-sunken p-0.5 scrollbar-none',
+        'flex w-fit max-w-full flex-wrap gap-0.5 rounded-control border border-line bg-surface-sunken p-0.5',
         // In a narrow block or on a phone, two even columns instead of a row that breaks unevenly.
         '@max-md:grid @max-md:w-full @max-md:grid-cols-2',
         'max-sm:grid max-sm:w-full max-sm:grid-cols-2',

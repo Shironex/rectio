@@ -12,12 +12,13 @@ const options = [
 ] as const;
 
 describe('Segmented on a narrow block', () => {
-  it('wraps onto more rows instead of scrolling labels out of sight', () => {
+  it('sits in two even columns on a narrow block or a phone, never scrolling labels out of sight', () => {
     render(<Segmented label="Status" value="all" onValueChange={vi.fn()} options={options} />);
     const group = screen.getByRole('group', { name: 'Status' });
     const classes = group.className.split(/\s+/);
     expect(classes).toContain('flex-wrap');
     expect(classes).toContain('max-sm:grid-cols-2');
+    expect(classes).toContain('@max-md:grid-cols-2');
     expect(group.className).not.toMatch(/overflow-x-auto|mask-|snap-/);
     expect(group).not.toHaveAttribute('data-overflow');
   });
