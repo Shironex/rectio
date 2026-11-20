@@ -157,7 +157,7 @@ function OverviewLoading() {
   );
 }
 
-/** The first steps of a new workspace: what the empty overview offers instead of figures. */
+/** The first steps of a new workspace, shown on the empty overview instead of figures. */
 function Setup() {
   const router = useRouter();
   const [steps, setSteps] = useState<OnboardingStep[]>(() => [

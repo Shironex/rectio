@@ -7,7 +7,7 @@ export const PRODUCT = {
   tagline: 'The help desk for teams that answer every customer by name.',
 } as const;
 
-/** The workspace: the support team of Copperline, a scheduling app for trades businesses. */
+/** The workspace is the support team of Copperline, a scheduling app for trades businesses. */
 export const WORKSPACE = {
   name: 'Copperline',
   initial: 'C',

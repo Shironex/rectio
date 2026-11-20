@@ -1,6 +1,7 @@
 /**
  * A tiny static server for the exported app in out/, so captures and previews need no extra
- * package. Serves `/x` from `x.html` or `x/index.html`, as a CDN does.
+ * package. Serves `/x` from `x.html` or `x/index.html`, as a CDN does. With a `prefix` (the
+ * basePath of a build made with BASE_PATH set) it serves only under that prefix, as the previews do.
  */
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
@@ -26,9 +27,15 @@ function resolveFile(root: string, url: string): string | null {
   return candidates.find((file) => existsSync(file) && statSync(file).isFile()) ?? null;
 }
 
-export function serveStatic(root: string, port = 0): Promise<{ server: Server; url: string }> {
+export function serveStatic(
+  root: string,
+  port = 0,
+  prefix = '',
+): Promise<{ server: Server; url: string }> {
   const server = createServer((req, res) => {
-    const file = resolveFile(root, req.url ?? '/');
+    const url = req.url ?? '/';
+    const inside = prefix === '' || url === prefix || url.startsWith(`${prefix}/`);
+    const file = inside ? resolveFile(root, url.slice(prefix.length) || '/') : null;
     if (file === null) {
       res.writeHead(404, { 'content-type': 'text/html; charset=utf-8' });
       const missing = resolveFile(root, '/404');
@@ -43,7 +50,7 @@ export function serveStatic(root: string, port = 0): Promise<{ server: Server; u
     server.listen(port, '127.0.0.1', () => {
       const address = server.address();
       const actual = typeof address === 'object' && address !== null ? address.port : port;
-      resolve({ server, url: `http://127.0.0.1:${String(actual)}` });
+      resolve({ server, url: `http://127.0.0.1:${String(actual)}${prefix}` });
     });
   });
 }
