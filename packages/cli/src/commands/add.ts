@@ -1,48 +1,65 @@
 import { requireConfig, registryUrl } from '../core/config.ts';
 import { CliError, type CliContext } from '../core/context.ts';
-import { countDependencies } from '../core/install.ts';
-import { installItems, type InstallOptions, type InstallReport } from '../core/installer.ts';
+import type { InstallOptions, InstallReport } from '../core/installer.ts';
 import { readLock } from '../core/lockfile.ts';
-import { outdatedItems, printOutdatedHint } from '../core/outdated.ts';
+import { outdatedHint, outdatedItems } from '../core/outdated.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
+import { plural } from '../ui/layout.ts';
+import { Ui, type OutputOptions } from '../ui/output.ts';
+import { installRows, printVerbose, rowLines, tipLines, type Rows } from '../ui/report.ts';
+import { CLI_VERSION } from '../version.ts';
+import { installSteps, managerFor } from './install-steps.ts';
 
-export interface AddOptions extends InstallOptions {
+export interface AddOptions extends InstallOptions, OutputOptions {
   registry?: string;
 }
 
-/** Prints what an install did, or would do with --dry-run. */
-export function printReport(ctx: CliContext, report: InstallReport): void {
-  const verb = report.dryRun ? 'Would install' : 'Installed';
-  ctx.log(`${verb} ${report.items.map((i) => `${i.name}@${i.version}`).join(', ')}`);
-  for (const file of report.files) {
-    if (file.action === 'unchanged') continue;
-    ctx.log(`  ${file.action === 'create' ? '+' : '~'} ${file.path}`);
+/** `Added dialog and 3 dependencies`, or what a dry run would do. */
+function resultLine(report: InstallReport): string {
+  const asked = report.requested.join(', ');
+  const deps = report.items.length - report.requested.length;
+  const tail = deps > 0 ? ` and ${plural(deps, 'dependency', 'dependencies')}` : '';
+  if (report.dryRun) return `Dry run: nothing was written (${asked}${tail})`;
+  if (report.files.every((f) => f.action === 'unchanged') && report.manager === undefined) {
+    return `${asked} ${report.requested.length === 1 ? 'is' : 'are'} already up to date`;
   }
-  const unchanged = report.files.filter((f) => f.action === 'unchanged').length;
-  if (unchanged > 0) ctx.log(`  ${unchanged} file(s) already up to date`);
-  const deps = { ...report.added.dependencies, ...report.added.devDependencies };
-  if (countDependencies(report.added) > 0) {
-    ctx.log(`  ${report.dryRun ? 'would add' : 'added'} packages: ${Object.keys(deps).join(', ')}`);
-  }
-  if (!report.dryRun) {
-    for (const item of report.items)
-      if (item.docs !== undefined) ctx.log(`\n${item.name}: ${item.docs}`);
-  }
+  return `Added ${asked}${tail}`;
 }
 
 export async function runAdd(ctx: CliContext, names: readonly string[], options: AddOptions = {}) {
-  if (names.length === 0)
-    throw new CliError('name at least one item', 'Example: rectio add button');
-  const config = requireConfig(ctx.cwd);
-  const client = createRegistryClient(registryUrl(ctx, options.registry, config));
-  const report = await installItems(ctx, config, client, names, options);
-  printReport(ctx, report);
-  if (!report.dryRun && options.install === false && countDependencies(report.added) > 0) {
-    ctx.log('\nPackages were added to package.json: run your package manager install.');
-  }
-  // The index is already fetched for the install, so this costs no request.
+  const ui = new Ui(ctx, options);
+  ui.header('add', CLI_VERSION);
+  const steps = ui.steps(4);
+  const { config, client } = await steps.run('Checking project', (step) => {
+    if (names.length === 0)
+      throw new CliError('name at least one item', 'Example: rectio add button');
+    const found = requireConfig(ctx.cwd);
+    step.note = `${found.framework}, ${found.css}`;
+    return {
+      config: found,
+      client: createRegistryClient(registryUrl(ctx, options.registry, found)),
+    };
+  });
+  const report = await installSteps(steps, ctx, config, client, names, options);
+  printVerbose(ui, report);
+
+  const { s } = ui;
+  const versions = report.items
+    .filter((item) => report.requested.includes(item.name))
+    .map((item) => `${item.name} ${s.dim(item.version)}`);
+  const deps = report.items.length - report.requested.length;
+  const rows: Rows = [['Items', versions.join(', ')]];
+  if (deps > 0) rows.push(['', s.dim(`+ ${plural(deps, 'dependency', 'dependencies')}`)]);
+  rows.push(...installRows(report, s, { manager: managerFor(ctx) }));
+  const lines = [resultLine(report), '', ...rowLines(rows, s)];
   if (!report.dryRun) {
-    printOutdatedHint(ctx, outdatedItems(await client.index(), readLock(ctx.cwd)));
+    const tips = tipLines(report, s);
+    // The index is already fetched for the install, so this costs no request.
+    const hint = outdatedHint(outdatedItems(await client.index(), readLock(ctx.cwd)));
+    if (tips.length > 0 || hint !== undefined) lines.push('');
+    lines.push(...tips);
+    if (hint !== undefined) lines.push(s.dim(`${ui.g.warn} ${hint}`));
   }
+  ui.summary(lines);
   return report;
 }

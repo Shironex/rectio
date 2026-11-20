@@ -1,0 +1,12 @@
+$ rectio add does-not-exist --no-install
+exit 1
+
+--- stdout
+rectio add  x.y.z
+[1/4] Checking project ... ok (0.0s) vite, src/index.css
+[2/4] Resolving items ... FAILED
+--- stderr
+error: unknown item "does-not-exist"
+step: Resolving items (2 of 4)
+See `rectio list` for the available items.
+Nothing was written.

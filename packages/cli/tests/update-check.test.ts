@@ -1,5 +1,6 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { stripVTControlCharacters } from 'node:util';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -215,7 +216,10 @@ describe('the notice in a real run', () => {
     run.ctx.stdoutIsTTY = true;
     expect(await main(['nope'], run.ctx)).toBe(1);
     expect(run.out).toEqual([]);
-    expect(run.err.at(-1)).toMatch(/^\nrectio 99\.0\.0 is available \(you have \d+\.\d+\.\d+\)\./);
+    // A terminal gets the styled notice: the same words, with color.
+    expect(stripVTControlCharacters(run.err.at(-1) ?? '')).toMatch(
+      /^ {2}! rectio 99\.0\.0 is available \(you have \d+\.\d+\.\d+\)\n {4}Update with {2}\S+/,
+    );
   });
 
   it('stays quiet when stdout is not a terminal', async () => {

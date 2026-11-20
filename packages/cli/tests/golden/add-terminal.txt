@@ -1,0 +1,25 @@
+$ rectio add dialog --no-install
+exit 0
+
+--- stdout
+
+  rectio add  x.y.z
+
+  ✓ [1/4] Checking project     0.0s  vite, src/index.css
+  ✓ [2/4] Resolving items      0.0s  5 items (1 asked)
+  ✓ [3/4] Writing files        0.0s  2 files, 3 up to date
+  - [4/4] Installing packages        --no-install
+
+  ╭────────────────────────────────────────────────────╮
+  │ Added dialog and 4 dependencies                    │
+  │                                                    │
+  │ Items     dialog x.y.z                             │
+  │           + 4 dependencies                         │
+  │ Files     src/components/ui  2 files               │
+  │           3 files already up to date               │
+  │ Packages  @base-ui/react, @phosphor-icons/react    │
+  │           added to package.json, run `npm install` │
+  ╰────────────────────────────────────────────────────╯
+
+--- stderr
+

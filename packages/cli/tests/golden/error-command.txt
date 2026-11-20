@@ -1,0 +1,8 @@
+$ rectio launch
+exit 1
+
+--- stdout
+
+--- stderr
+error: unknown command "launch"
+Run `rectio --help` for usage.

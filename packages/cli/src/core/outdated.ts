@@ -1,6 +1,5 @@
 import type { RegistryIndex } from '@rectio/registry';
 
-import type { CliContext } from './context.ts';
 import type { Lockfile } from './lockfile.ts';
 
 export interface Outdated {
@@ -21,12 +20,12 @@ export function outdatedItems(index: RegistryIndex, lock: Lockfile): Outdated[] 
   return outdated;
 }
 
-/** One line after `add` and `list` when installed items have moved on upstream. */
-export function printOutdatedHint(ctx: CliContext, outdated: readonly Outdated[]): void {
-  if (outdated.length === 0) return;
+/** The one line after `add` and `list` when installed items have moved on upstream. */
+export function outdatedHint(outdated: readonly Outdated[]): string | undefined {
+  if (outdated.length === 0) return undefined;
   const count =
-    outdated.length === 1 ? '1 installed item has' : `${outdated.length} installed items have`;
-  ctx.log(
-    `\n${count} a newer version in the registry: run \`rectio update\` to list them, or \`rectio diff <item>\` to review one.`,
-  );
+    outdated.length === 1
+      ? '1 installed item has'
+      : `${String(outdated.length)} installed items have`;
+  return `${count} a newer version: run \`rectio update\` to list them`;
 }

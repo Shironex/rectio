@@ -1,0 +1,11 @@
+$ rectio add button
+exit 1
+
+--- stdout
+rectio add  x.y.z
+[1/4] Checking project ... FAILED
+--- stderr
+error: no rectio.json in <cwd>
+step: Checking project (1 of 4)
+Run `rectio init` first.
+Nothing was written.

@@ -182,7 +182,9 @@ describe('a fresh Vite app', () => {
     () => {
       const registry = pathToFileURL(registryDir).href;
       expect(rectio(app.dir, 'init', '--registry', registry)).toContain('Set up rectio for vite');
-      expect(rectio(app.dir, 'add', 'button', 'dialog', 'money')).toContain('Installed');
+      expect(rectio(app.dir, 'add', 'button', 'dialog', 'money')).toContain(
+        'Added button, dialog, money',
+      );
 
       for (const file of ['button', 'dialog', 'money', 'theme-scope']) {
         expect(existsSync(join(app.dir, `src/components/ui/${file}.tsx`)), file).toBe(true);

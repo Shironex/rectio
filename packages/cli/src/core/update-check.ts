@@ -26,6 +26,8 @@ export interface UpdateCheckOptions {
   home?: string;
   /** Where the running CLI lives, to tell dlx and npx runs from global installs. */
   scriptPath?: string;
+  /** Formats the notice; the plain updateNotice by default. */
+  render?: (current: string, latest: string, how: string) => string;
 }
 
 interface CacheRecord {
@@ -158,7 +160,8 @@ export function startUpdateCheck(options: UpdateCheckOptions): Promise<string | 
     const latest = await checkForUpdate({ ...options, timeoutMs });
     if (latest === undefined) return undefined;
     const script = options.scriptPath ?? fileURLToPath(import.meta.url);
-    return updateNotice(options.current, latest, updateCommand(script, options.command));
+    const render = options.render ?? updateNotice;
+    return render(options.current, latest, updateCommand(script, options.command));
   })().catch(() => undefined);
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<undefined>((resolve) => {

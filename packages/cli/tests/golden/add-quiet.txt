@@ -1,0 +1,7 @@
+$ rectio add ledger-summary --no-install --quiet
+exit 0
+
+--- stdout
+Added ledger-summary and 4 dependencies
+--- stderr
+

@@ -1,0 +1,12 @@
+$ rectio list --type theme
+exit 0
+
+--- stdout
+rectio list  2 items, type theme
+-- Themes (2) ----------------------------------------------------------
++ theme-default  x.y.z  Default theme
+  theme-ledger   x.y.z  Ledger theme
+
++ installed   ^ update available
+--- stderr
+

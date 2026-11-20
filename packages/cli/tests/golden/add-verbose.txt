@@ -1,0 +1,35 @@
+$ rectio add ledger-summary --no-install --verbose
+exit 0
+
+--- stdout
+rectio add  x.y.z
+[1/4] Checking project ... ok (0.0s) vite, src/index.css
+[2/4] Resolving items ... ok (0.0s) 5 items (1 asked)
+[3/4] Writing files ... ok (0.0s) 3 files, 3 up to date
+[4/4] Installing packages ... skipped (nothing new)
+
+-- Items (5) -----------------------------------------------------------
+theme-default   x.y.z    dependency
+tokens          x.y.z    dependency
+cn              x.y.z    dependency
+money           x.y.z    dependency
+ledger-summary  x.y.z    asked
+
+-- Files (6) -----------------------------------------------------------
+= src/styles/rectio/themes/default.css
+= src/styles/rectio/tokens.css
+= src/lib/cn.ts
++ src/components/ui/money.tsx
++ src/components/blocks/ledger-summary.tsx
++ src/styles/rectio/vars/ledger-summary.css
+
+Added ledger-summary and 4 dependencies
+
+Items  ledger-summary x.y.z
+       + 4 dependencies
+Files  src/components/blocks   1 file
+       src/components/ui       1 file
+       src/styles/rectio/vars  1 file
+       3 files already up to date
+--- stderr
+

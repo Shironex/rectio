@@ -76,7 +76,7 @@ describe('init --template', () => {
     expect(pkg.name).toBe('my-books');
     expect(pkg.dependencies.next).toBe('16.4.6');
     expect(pkg.dependencies).toHaveProperty('@base-ui/react');
-    expect(out.join('\n')).toContain('Created My Books from Books');
+    expect(out.join('\n')).toContain('My Books is ready');
   });
 
   it('refuses a folder that is not empty unless --force', async () => {
@@ -115,7 +115,7 @@ describe('init --template', () => {
         run.ctx,
       ),
     ).toBe(0);
-    expect(run.out.join('\n')).toContain('Would create shop from Books');
+    expect(run.out.join('\n')).toContain('Dry run: nothing was written (shop from Books)');
     expect(existsSync(join(cwd, 'shop'))).toBe(false);
   });
 

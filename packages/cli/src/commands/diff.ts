@@ -9,6 +9,8 @@ import { readLock } from '../core/lockfile.ts';
 import { readAliasRoots } from '../core/project.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
 import { projectContent, resolveTarget } from '../core/transform.ts';
+import { commandRows } from '../ui/layout.ts';
+import { Ui } from '../ui/output.ts';
 
 export interface DiffOptions {
   registry?: string;
@@ -80,16 +82,54 @@ export async function runDiff(
   }
 
   const result: DiffResult = { item: name, installed: locked.version, latest: item.version, files };
+  printDiff(new Ui(ctx), result);
+  return result;
+}
+
+function colorPatch(ui: Ui, patch: string): string[] {
+  const { s } = ui;
+  return patch
+    .trimEnd()
+    .split('\n')
+    .map((line) => {
+      if (line.startsWith('+++') || line.startsWith('---') || line.startsWith('==='))
+        return s.bold(line);
+      if (line.startsWith('@@')) return s.cyan(line);
+      if (line.startsWith('+')) return s.green(line);
+      if (line.startsWith('-')) return s.red(line);
+      return line;
+    });
+}
+
+function printDiff(ui: Ui, result: DiffResult): void {
+  const { s, g } = ui;
   const upgrade =
-    locked.version === item.version ? item.version : `${locked.version} -> ${item.version}`;
-  ctx.log(`${name} ${upgrade}`);
-  for (const file of files) {
-    const note = file.editedLocally ? ' (edited locally)' : '';
-    ctx.log(
-      `  ${file.state === 'same' ? '=' : file.state === 'missing' ? '!' : '~'} ${file.path}${note}`,
+    result.installed === result.latest
+      ? result.latest
+      : `${result.installed} ${g.arrow} ${result.latest}`;
+  ui.header('diff', `${result.item} ${upgrade}`);
+  const marks: Record<FileState, string> = {
+    same: s.dim('='),
+    changed: s.yellow('~'),
+    missing: s.red(g.fail),
+  };
+  for (const file of result.files) {
+    const note = file.editedLocally ? s.dim('  edited locally') : '';
+    const path = file.state === 'same' ? s.dim(file.path) : file.path;
+    ui.line(`${marks[file.state]} ${path}${note}`);
+  }
+  for (const file of result.files) {
+    if (file.patch === '') continue;
+    // Patches stay flush left, so they can be copied and applied.
+    ui.ctx.log('');
+    for (const line of colorPatch(ui, file.patch)) ui.ctx.log(line);
+  }
+  ui.line();
+  if (result.files.every((f) => f.state === 'same')) ui.line('No differences.');
+  else {
+    ui.lines(
+      commandRows([[`rectio add ${result.item} --overwrite`, 'take the registry version']], s, ''),
     );
   }
-  for (const file of files) if (file.patch !== '') ctx.log(`\n${file.patch.trimEnd()}`);
-  if (files.every((f) => f.state === 'same')) ctx.log('No differences.');
-  return result;
+  ui.end();
 }

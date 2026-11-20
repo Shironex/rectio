@@ -1,0 +1,12 @@
+$ rectio update
+exit 0
+
+--- stdout
+rectio update  1 newer version
+cn  x.y.z -> x.y.z
+
+`rectio update` does not merge yet. Review and replace by hand:
+  rectio diff <item>             see how your copy differs
+  rectio add <item> --overwrite  replace it with the latest
+--- stderr
+

@@ -1,0 +1,10 @@
+$ rectio list --templates
+exit 0
+
+--- stdout
+rectio list --templates  1 template
+books  app  Books: A small bookkeeping app.
+
+rectio init --template <name> [folder]  start a project
+--- stderr
+

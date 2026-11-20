@@ -11,18 +11,25 @@ import {
 import { registryUrl, writeConfig, type RectioConfig } from '../core/config.ts';
 import { CliError, type CliContext } from '../core/context.ts';
 import { isInside, toProjectPath, writeText } from '../core/fs.ts';
-import {
-  installItems,
-  resolveItems,
-  type InstallOptions,
-  type InstallReport,
-} from '../core/installer.ts';
+import { countDependencies } from '../core/install.ts';
+import type { InstallOptions, InstallReport } from '../core/installer.ts';
 import { importsTailwind } from '../core/project.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
 import { projectContent } from '../core/transform.ts';
-import { printReport } from './add.ts';
+import { commandRows, plural, wrap } from '../ui/layout.ts';
+import { Ui, type OutputOptions } from '../ui/output.ts';
+import {
+  devCommand,
+  kindCounts,
+  printVerbose,
+  rowLines,
+  tipParagraph,
+  type Rows,
+} from '../ui/report.ts';
+import { CLI_VERSION } from '../version.ts';
+import { installSteps, managerFor } from './install-steps.ts';
 
-export interface InitTemplateOptions extends InstallOptions {
+export interface InitTemplateOptions extends InstallOptions, OutputOptions {
   registry?: string;
   /** Folder of the new project, relative to the cwd. Default: the template name. */
   dir?: string;
@@ -87,10 +94,19 @@ function templateFiles(root: string, template: RegistryItem, folder: string): Te
   });
 }
 
+/** Pages as one dim wrapped list, at most `max` of them, the rest counted. */
+function pageLines(pages: readonly string[], ui: Ui, max = 12): string[] {
+  const shown =
+    pages.length > max ? [...pages.slice(0, max), `${String(pages.length - max)} more`] : pages;
+  return wrap(shown, 56).map(
+    (line, i) => `${ui.s.dim(i === 0 ? 'Pages' : '     ')}  ${ui.s.dim(line)}`,
+  );
+}
+
 /**
  * `rectio init --template <name> [dir]`: a new project from a template. Resolves, fetches and
  * verifies the template and every kit item it uses first, then writes the template, `rectio.json`,
- * and installs the kit items through the same path as `rectio add`, so the lockfile, the CSS entry
+ * and installs the kit items through the same steps as `rectio add`, so the lockfile, the CSS entry
  * and package.json are kept the same.
  */
 export async function runInitTemplate(
@@ -98,84 +114,141 @@ export async function runInitTemplate(
   name: string,
   options: InitTemplateOptions = {},
 ): Promise<InitTemplateResult> {
-  const client = createRegistryClient(registryUrl(ctx, options.registry, undefined));
-  const index = await client.index();
-  const entry = index.items.find((item) => item.name === name);
-  if (entry?.type !== 'template') {
-    throw new CliError(
-      entry === undefined
-        ? `unknown template "${name}"`
-        : `${name} is a ${entry.type}, not a template`,
-      `Templates: ${templateNames(index.items)}. See \`rectio list --templates\`.`,
-    );
-  }
-
+  const ui = new Ui(ctx, options);
   const root = resolve(ctx.cwd, options.dir ?? name);
   const shown = toProjectPath(ctx.cwd, root) || '.';
-  if (existsSync(root) && readdirSync(root).length > 0 && options.force !== true) {
-    throw new CliError(
-      `${shown} is not empty`,
-      'Pick a new folder name, or pass --force to write the template into it.',
-    );
-  }
+  const project: CliContext = { ...ctx, cwd: root };
+  const manager = managerFor(project);
+  const theme = options.theme ?? 'default';
+  ui.header('init', CLI_VERSION);
+  ui.rows([
+    ['template', name],
+    ['folder', shown],
+    ['theme', theme],
+    ['package manager', manager],
+  ]);
+  const dryRun = options.dryRun === true;
+  const steps = ui.steps(5);
+
+  const { client, entry } = await steps.run('Checking project', async (step) => {
+    const registry = createRegistryClient(registryUrl(ctx, options.registry, undefined));
+    const index = await registry.index();
+    const found = index.items.find((item) => item.name === name);
+    if (found?.type !== 'template') {
+      throw new CliError(
+        found === undefined
+          ? `unknown template "${name}"`
+          : `${name} is a ${found.type}, not a template`,
+        `Templates: ${templateNames(index.items)}. See \`rectio list --templates\`.`,
+      );
+    }
+    if (existsSync(root) && readdirSync(root).length > 0 && options.force !== true) {
+      throw new CliError(
+        `${shown} is not empty`,
+        'Pick a new folder name, or pass --force to write the template into it.',
+      );
+    }
+    step.note = existsSync(root) ? `${shown} (not empty, --force)` : `${shown} is free`;
+    return { client: registry, entry: found };
+  });
 
   // Everything is fetched and checked before the first write: a failed download or a broken item
   // leaves the disk untouched.
-  const entries = await resolveItems(client, [name]);
-  const items = await Promise.all(entries.map((e) => client.item(e)));
-  const template = items.find((item) => item.name === name);
-  if (template === undefined) throw new CliError(`${name} was not fetched`);
+  const { template, files, config } = await steps.run('Fetching template', async (step) => {
+    const item = await client.item(entry);
+    const written = templateFiles(root, item, basename(root));
+    const css = written.find((f) => f.path.endsWith('.css') && importsTailwind(f.content));
+    if (css === undefined) throw new CliError(`${name} has no CSS file that imports Tailwind`);
+    if (!item.registryDependencies.includes(`theme-${theme}`)) {
+      const themes = item.registryDependencies.filter((d) => d.startsWith('theme-'));
+      throw new CliError(
+        `unknown theme "${theme}"`,
+        `Available: ${themes.map((t) => t.slice(6)).join(', ')}.`,
+      );
+    }
+    const made: RectioConfig = {
+      schemaVersion: 1,
+      registry: client.url,
+      framework: item.template?.framework ?? 'next',
+      css: css.path,
+      theme,
+      aliases: TEMPLATE_ALIASES,
+    };
+    step.note = `${item.name} ${item.version}, ${plural(written.length, 'file')}`;
+    return { template: item, files: written, config: made };
+  });
 
-  const files = templateFiles(root, template, basename(root));
-  const css = files.find((f) => f.path.endsWith('.css') && importsTailwind(f.content));
-  if (css === undefined) throw new CliError(`${name} has no CSS file that imports Tailwind`);
-  const theme = options.theme ?? 'default';
-  if (!template.registryDependencies.includes(`theme-${theme}`)) {
-    const themes = template.registryDependencies.filter((d) => d.startsWith('theme-'));
-    throw new CliError(
-      `unknown theme "${theme}"`,
-      `Available: ${themes.map((t) => t.slice(6)).join(', ')}.`,
-    );
-  }
-  const config: RectioConfig = {
-    schemaVersion: 1,
-    registry: client.url,
-    framework: template.template?.framework ?? 'next',
-    css: css.path,
-    theme,
-    aliases: TEMPLATE_ALIASES,
-  };
-
-  const kit = items.filter((item) => item.name !== name);
-  if (options.dryRun === true) {
-    ctx.log(`Would create ${shown} from ${template.title} (${template.name}@${template.version}):`);
-    ctx.log(`  ${String(files.length)} template files`);
-    ctx.log(`  kit items: ${kit.map((i) => i.name).join(', ')}`);
-    return { root, config, template, files, report: undefined };
-  }
-
-  for (const file of files) writeText(file.absolute, file.content);
-  writeConfig(root, config);
-  const report = await installItems(
-    { ...ctx, cwd: root },
+  const report = await installSteps(
+    steps,
+    project,
     config,
     client,
     template.registryDependencies,
     options,
+    {
+      planWhenWriting: true,
+      itemsLabel: 'kit item',
+      beforeWrite: () => {
+        for (const file of files) writeText(file.absolute, file.content);
+        writeConfig(root, config);
+        return files.length + 1;
+      },
+    },
   );
+  printVerbose(ui, report);
 
-  ctx.log(`Created ${shown} from ${template.title} (${String(files.length)} files).`);
-  printReport(ctx, report);
-  const pages = template.template?.pages.join(', ');
-  ctx.log(
+  const { s } = ui;
+  const installed = report.manager !== undefined;
+  const rows: Rows = [
+    ['Template', `${template.title} ${s.dim(`${template.version}, ${config.framework}`)}`],
+    ...wrap(kindCounts(report.items), 52).map((line, i): [string, string] => [
+      i === 0 ? 'Kit' : '',
+      line,
+    ]),
     [
+      'Files',
+      `${String(files.length)} from the template, ${String(dryRun ? report.items.reduce((n, i) => n + i.files.length, 0) : report.files.length)} kit files`,
+    ],
+  ];
+  const count = countDependencies(report.added);
+  if (count > 0) {
+    rows.push([
+      'Packages',
+      dryRun
+        ? `${plural(count, 'package')} to install`
+        : installed
+          ? `${plural(count, 'package')} installed with ${manager}`
+          : `${plural(count, 'package')} in package.json, not installed yet`,
+    ]);
+  }
+  const themes = template.registryDependencies
+    .filter((d) => d.startsWith('theme-'))
+    .map((d) => d.slice(6));
+  const next: [string, string][] = [
+    [`cd ${shown}`, 'go to the new project'],
+    ...(installed || count === 0
+      ? []
+      : [[`${manager} install`, 'install the packages'] satisfies [string, string]]),
+    [devCommand(manager), 'start the dev server'],
+    ['rectio add <item>', 'add a component or block'],
+    ['rectio list', 'browse every item'],
+  ];
+  const lines = [
+    dryRun ? `Dry run: nothing was written (${shown} from ${template.title})` : `${shown} is ready`,
+    '',
+    ...rowLines(rows, s),
+  ];
+  if (!dryRun) {
+    lines.push('', s.bold('Next'), ...commandRows(next, s));
+  }
+  const pages = template.template?.pages ?? [];
+  if (pages.length > 0) lines.push('', ...pageLines(pages, ui));
+  if (!dryRun && themes.length > 1) {
+    lines.push(
       '',
-      'Next:',
-      `  cd ${shown}`,
-      ...(options.install === false ? ['  install the packages with your package manager'] : []),
-      '  run the dev script (for example `pnpm dev`)',
-      ...(pages === undefined ? [] : [`Pages: ${pages}`]),
-    ].join('\n'),
-  );
-  return { root, config, template, files, report };
+      ...tipParagraph(`switch themes with data-theme on <html> (${themes.join(', ')})`, s),
+    );
+  }
+  ui.summary(lines);
+  return { root, config, template, files, report: dryRun ? undefined : report };
 }

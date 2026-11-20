@@ -6,15 +6,9 @@ import type { RectioConfig } from './config.ts';
 import { CliError, type CliContext } from './context.ts';
 import { cssImports, updateCssEntry } from './css-entry.ts';
 import { isInside, readNormalized, readText, toProjectPath, writeText } from './fs.ts';
-import {
-  countDependencies,
-  mergeDependencies,
-  missingDependencies,
-  runInstall,
-  type DependencyChanges,
-} from './install.ts';
+import { mergeDependencies, missingDependencies, type DependencyChanges } from './install.ts';
 import { lockedFileAt, readLock, writeLock, type LockedFile } from './lockfile.ts';
-import { detectPackageManager, readAliasRoots } from './project.ts';
+import { readAliasRoots, type PackageManager } from './project.ts';
 import type { RegistryClient } from './registry-client.ts';
 import { cssVarsFile, projectContent, resolveTarget } from './transform.ts';
 
@@ -40,10 +34,14 @@ export interface PlannedFile {
 }
 
 export interface InstallReport {
+  /** The names that were asked for; every other item came in as a dependency. */
+  requested: string[];
   items: RegistryItem[];
   files: PlannedFile[];
   added: DependencyChanges;
   dryRun: boolean;
+  /** The manager that installed the added packages; unset when nothing was installed. */
+  manager: PackageManager | undefined;
 }
 
 /** The requested items plus their dependencies, in install order, from the public index. */
@@ -103,45 +101,66 @@ function plan(
 }
 
 /**
- * Resolves, fetches and verifies every item first, checks every target, and only then writes:
- * a failed download or a locally edited file leaves the project untouched.
+ * The requested items and everything they depend on, fetched and verified. Templates are refused:
+ * a template is a whole project, not files to add to this one.
  */
-export async function installItems(
-  ctx: CliContext,
-  config: RectioConfig,
+export async function fetchItems(
   client: RegistryClient,
   names: readonly string[],
-  options: InstallOptions = {},
-): Promise<InstallReport> {
+): Promise<RegistryItem[]> {
   const entries = await resolveItems(client, names);
   const templates = entries.filter((entry) => entry.type === 'template');
   if (templates.length > 0) {
-    // A template is a whole project, not files to add to this one.
     throw new CliError(
       `${templates.map((t) => t.name).join(', ')} ${templates.length === 1 ? 'is a template' : 'are templates'}`,
       `Start a new project with \`rectio init --template ${templates[0]?.name ?? '<name>'}\`.`,
     );
   }
-  const items = await Promise.all(entries.map((entry) => client.item(entry)));
-  const files = plan(ctx, config, items, options.overwrite ?? false);
+  return Promise.all(entries.map((entry) => client.item(entry)));
+}
 
+/** Where every file goes and what happens to it. Throws, writing nothing, on edited files. */
+export function planFiles(
+  ctx: CliContext,
+  config: RectioConfig,
+  items: readonly RegistryItem[],
+  overwrite = false,
+): PlannedFile[] {
+  const files = plan(ctx, config, items, overwrite);
   const conflicts = files.filter((f) => f.action === 'conflict');
   if (conflicts.length > 0) {
     throw new CliError(
-      `${conflicts.length} file(s) differ from what rectio installed:\n${conflicts.map((f) => `  ${f.path} (${f.item})`).join('\n')}`,
-      'Run `rectio diff <item>` to see the changes, or pass --overwrite to replace them. Nothing was written.',
+      `${String(conflicts.length)} ${conflicts.length === 1 ? 'file differs' : 'files differ'} from what rectio installed:\n${conflicts.map((f) => `  ${f.path} (${f.item})`).join('\n')}`,
+      'Run `rectio diff <item>` to see the changes, or pass --overwrite to replace them.',
     );
   }
+  return files;
+}
 
+/** Every package the items ask for, before the project's own ranges are taken into account. */
+export function wantedDependencies(items: readonly RegistryItem[]): DependencyChanges {
   const wanted: DependencyChanges = { dependencies: {}, devDependencies: {} };
   for (const item of items) {
     Object.assign(wanted.dependencies, item.dependencies);
     Object.assign(wanted.devDependencies, item.devDependencies);
   }
-  if (options.dryRun === true) {
-    return { items, files, added: missingDependencies(ctx.cwd, wanted), dryRun: true };
-  }
+  return wanted;
+}
 
+/** Packages that would be added to package.json, without writing anything. */
+export const pendingDependencies = (cwd: string, items: readonly RegistryItem[]) =>
+  missingDependencies(cwd, wantedDependencies(items));
+
+/**
+ * Writes the planned files, the lockfile, the CSS entry and package.json. Returns the packages it
+ * added to package.json; running the package manager is the caller's step.
+ */
+export function writeItems(
+  ctx: CliContext,
+  config: RectioConfig,
+  items: readonly RegistryItem[],
+  files: readonly PlannedFile[],
+): DependencyChanges {
   for (const file of files) {
     if (file.action === 'create' || file.action === 'update')
       writeText(file.absolute, file.content);
@@ -171,12 +190,5 @@ export async function installItems(
   const next = updateCssEntry(css, config.css, cssImports(lock));
   if (next !== css) writeText(entry, next);
 
-  const added = mergeDependencies(ctx.cwd, wanted);
-  const count = countDependencies(added);
-  if (count > 0 && options.install !== false) {
-    const manager = detectPackageManager(ctx.cwd);
-    ctx.log(`Installing ${count} package(s) with ${manager}...`);
-    await runInstall(ctx.cwd, manager);
-  }
-  return { items, files, added, dryRun: false };
+  return mergeDependencies(ctx.cwd, wantedDependencies(items));
 }

@@ -179,6 +179,8 @@ export function capture(cwd: string, env: Record<string, string | undefined> = {
       env,
       log: (line) => out.push(line),
       warn: (line) => err.push(line),
+      // A stopped clock: step durations read 0.0s, so the output is stable.
+      now: () => 0,
     },
   };
 }

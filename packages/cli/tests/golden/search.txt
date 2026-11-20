@@ -1,0 +1,13 @@
+$ rectio search ledger
+exit 0
+
+--- stdout
+rectio search  "ledger", 4 matches
+  ledger          x.y.z  block  General journal
+  ledger-summary  x.y.z  block  Ledger summary
+  motion-ledger   x.y.z  block  Motion General journal
+  theme-ledger    x.y.z  theme  Ledger theme
+
+Add one with `rectio add <name>`.
+--- stderr
+

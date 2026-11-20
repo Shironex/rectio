@@ -1,4 +1,3 @@
-import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
@@ -12,7 +11,7 @@ import {
 } from '../core/config.ts';
 import { CliError, type CliContext } from '../core/context.ts';
 import { readText } from '../core/fs.ts';
-import { installItems, type InstallOptions } from '../core/installer.ts';
+import type { InstallOptions } from '../core/installer.ts';
 import {
   checkTailwind,
   detectFramework,
@@ -22,9 +21,13 @@ import {
   readPackageJson,
 } from '../core/project.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
-import { printReport } from './add.ts';
+import { commandRows } from '../ui/layout.ts';
+import { Ui, type OutputOptions, type StepHandle } from '../ui/output.ts';
+import { installRows, printVerbose, rowLines, tipLines, type Rows } from '../ui/report.ts';
+import { CLI_VERSION } from '../version.ts';
+import { installSteps, managerFor } from './install-steps.ts';
 
-export interface InitOptions extends InstallOptions {
+export interface InitOptions extends InstallOptions, OutputOptions {
   registry?: string;
   theme?: string;
   css?: string;
@@ -45,6 +48,61 @@ function aliasHint(framework: Framework): string {
 }
 
 export async function runInit(ctx: CliContext, options: InitOptions = {}) {
+  const ui = new Ui(ctx, options);
+  ui.header('init', CLI_VERSION);
+  const steps = ui.steps(4);
+  const checked = await steps.run('Checking project', (step) => checkProject(ctx, options, step));
+  const { existing, framework, tailwind, client } = checked;
+  const final = checked.config;
+
+  const writeConfigFile =
+    existing === undefined || options.force === true || existing.theme !== final.theme;
+  const report = await installSteps(steps, ctx, final, client, baseItems(final.theme), options, {
+    itemsLabel: 'item',
+    beforeWrite: () => {
+      if (!writeConfigFile) return 0;
+      writeConfig(ctx.cwd, final);
+      return 1;
+    },
+  });
+  printVerbose(ui, report);
+
+  const { s } = ui;
+  const rows: Rows = [
+    ['Config', `${CONFIG_FILE}${writeConfigFile ? '' : s.dim(' (kept)')}`],
+    ['Theme', final.theme],
+    ['Tailwind', tailwind.version],
+    ...installRows(report, s, { manager: managerFor(ctx) }),
+  ];
+  const lines = [
+    report.dryRun
+      ? `Dry run: nothing was written (rectio for ${framework})`
+      : `Set up rectio for ${framework}`,
+    '',
+    ...rowLines(rows, s),
+  ];
+  if (!report.dryRun) {
+    // A non-default theme's usage note (data-theme) comes from its item.
+    const tips = tipLines(report, s);
+    if (tips.length > 0) lines.push('', ...tips);
+    lines.push(
+      '',
+      s.bold('Next'),
+      ...commandRows(
+        [
+          ['rectio add button', 'add a component and what it needs'],
+          ['rectio list', 'browse every item'],
+        ],
+        s,
+      ),
+    );
+  }
+  ui.summary(lines);
+  return { config: final, report };
+}
+
+/** The Checking project step: framework, Tailwind, the CSS entry, the alias and the theme. */
+async function checkProject(ctx: CliContext, options: InitOptions, step: StepHandle) {
   const pkg = readPackageJson(ctx.cwd);
   const existing = readConfig(ctx.cwd);
 
@@ -68,7 +126,7 @@ export async function runInit(ctx: CliContext, options: InitOptions = {}) {
     );
   }
   const tailwind = checkTailwind(ctx.cwd, pkg, framework);
-  for (const warning of tailwind.warnings) ctx.warn(`warning: ${warning}`);
+  step.warnings.push(...tailwind.warnings);
 
   const css = options.css ?? existing?.css ?? findCssEntry(ctx.cwd);
   if (css === undefined) {
@@ -113,23 +171,6 @@ export async function runInit(ctx: CliContext, options: InitOptions = {}) {
     const themes = index.items.filter((i) => i.type === 'theme').map((i) => i.name.slice(6));
     throw new CliError(`unknown theme "${theme}"`, `Available: ${themes.join(', ')}.`);
   }
-  const final = { ...config, theme };
-
-  const report = await installItems(ctx, final, client, baseItems(theme), options);
-  if (
-    !report.dryRun &&
-    (existing === undefined || options.force === true || existing.theme !== theme)
-  ) {
-    writeConfig(ctx.cwd, final);
-  }
-  const wrote = existsSync(join(ctx.cwd, CONFIG_FILE));
-  ctx.log(
-    `${report.dryRun ? 'Would set up' : 'Set up'} rectio for ${framework} (Tailwind ${tailwind.version}).`,
-  );
-  printReport(ctx, report);
-  if (!report.dryRun && wrote) {
-    // A non-default theme's usage note (data-theme) is printed with the report, from its item.
-    ctx.log(`\nConfig: ${CONFIG_FILE}. Add components with \`rectio add button\`.`);
-  }
-  return { config: final, report };
+  step.note = `${framework}, Tailwind ${tailwind.version}, ${css}`;
+  return { existing, framework, tailwind, client, config: { ...config, theme } };
 }

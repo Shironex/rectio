@@ -9,44 +9,77 @@ import { runList, runSearch } from './commands/list.ts';
 import { runMcp } from './commands/mcp.ts';
 import { runUpdate } from './commands/update.ts';
 import { CliError, type CliContext } from './core/context.ts';
-import { startUpdateCheck } from './core/update-check.ts';
+import { startUpdateCheck, updateNotice } from './core/update-check.ts';
+import { commandRows } from './ui/layout.ts';
+import { printError, Ui } from './ui/output.ts';
 import { CLI_VERSION } from './version.ts';
 
-const HELP = `rectio: finance and back-office components, copied into your project
+type HelpRows = [string, string][];
 
-Usage: rectio <command> [options]
+const COMMANDS: HelpRows = [
+  ['init', 'set up rectio: rectio.json, tokens, a theme and the cn helper'],
+  ['init --template <name> [folder]', 'start a new project from a template'],
+  ['add <items...>', 'add items and everything they depend on'],
+  ['diff <item>', 'compare an installed item with the registry'],
+  ['list', 'list registry items (--type, --templates)'],
+  ['search <query>', 'search registry items'],
+  ['update', 'show items with a newer version (merging is not built yet)'],
+  ['mcp', 'run the read-only MCP server on stdio, for coding agents'],
+];
 
-Commands
-  init                 Set up rectio: rectio.json, tokens, a theme and the cn helper
-  init --template <name> [folder]
-                       Start a new project from a template
-  add <items...>       Add items and everything they depend on
-  diff <item>          Compare an installed item with the registry
-  list                 List registry items (--type, --templates)
-  search <query>       Search registry items
-  update               Show items with a newer version (merging is not built yet)
-  mcp                  Run the read-only MCP server on stdio (for Claude Code, Cursor, VS Code)
+const FLAGS: HelpRows = [
+  ['--cwd <dir>', 'project folder (default: the current folder)'],
+  ['--registry <url>', 'registry URL or folder (also RECTIO_REGISTRY_URL)'],
+  ['--theme <id>', 'init: theme to install (default: default)'],
+  ['--css <path>', 'init: CSS file that imports Tailwind'],
+  ['--framework <name>', 'init: vite, next or tanstack-start, when detection fails'],
+  ['--template <name>', 'init: create a new project from this template, in [folder]'],
+  ['--force', 'init: rewrite rectio.json, or use a folder that is not empty'],
+  ['--overwrite', 'add: replace files you changed'],
+  ['--dry-run', 'init, add: show the plan, write nothing'],
+  ['--no-install', 'init, add: do not run the package manager'],
+  ['--verbose', 'init, add: list every item, file and package'],
+  ['-q, --quiet', 'init, add: print only the result line and errors'],
+  ['--type <type>', 'list: component, block, theme, lib, hook or style'],
+  ['--templates', 'list: templates only'],
+  ['-h, --help', 'show this help'],
+  ['-v, --version', 'show the version'],
+];
 
-Options
-  --cwd <dir>          Project folder (default: the current folder)
-  --registry <url>     Registry URL or folder (also RECTIO_REGISTRY_URL)
-  --theme <id>         init: theme to install (default: default)
-  --css <path>         init: CSS file that imports Tailwind
-  --framework <name>   init: vite, next or tanstack-start, when detection fails
-  --template <name>    init: create a new project from this template, in [folder]
-  --force              init: rewrite rectio.json; with --template, write into a folder that is not empty
-  --overwrite          add: replace files you changed
-  --dry-run            init, add: show the plan, write nothing
-  --no-install         init, add: do not run the package manager
-  --type <type>        list: component, block, theme, lib, hook or style
-  --templates          list: templates only
-  -h, --help           Show this help
-  -v, --version        Show the version
+const ENVIRONMENT: HelpRows = [
+  ['RECTIO_REGISTRY_URL', 'registry URL or folder, when --registry is not given'],
+  ['RECTIO_NO_UPDATE_CHECK=1', 'do not check npm for a newer rectio'],
+  ['NO_COLOR, FORCE_COLOR', 'turn colors off or on'],
+];
 
-Environment
-  RECTIO_REGISTRY_URL  Registry URL or folder, when --registry is not given
-  RECTIO_NO_UPDATE_CHECK=1
-                       Do not check npm for a newer rectio`;
+function help(ui: Ui): string[] {
+  const { s } = ui;
+  const section = (title: string, rows: HelpRows) => ['', s.bold(title), ...commandRows(rows, s)];
+  return [
+    `${s.bold('rectio')}  ${s.dim(CLI_VERSION)}`,
+    s.dim('Finance and back-office components, copied into your project.'),
+    '',
+    `Usage: ${s.cyan('rectio <command> [options]')}`,
+    ...section('Commands', COMMANDS),
+    ...section('Options', FLAGS),
+    ...section('Environment', ENVIRONMENT),
+  ];
+}
+
+/** The update notice in the same language as the rest: a dim box-free block on stderr. */
+function renderNotice(ui: Ui) {
+  return (current: string, latest: string, how: string): string => {
+    if (!ui.term.fancy) return updateNotice(current, latest, how);
+    const { s } = ui;
+    return [
+      `  ${s.yellow(ui.g.warn)} rectio ${s.bold(latest)} is available ${s.dim(`(you have ${current})`)}`,
+      `    ${s.dim('Update with')}  ${s.cyan(how)}`,
+      '',
+    ].join('\n');
+  };
+}
+
+const USAGE_HINT = 'Run `rectio --help` for usage.';
 
 const OPTIONS = {
   cwd: { type: 'string' },
@@ -61,6 +94,8 @@ const OPTIONS = {
   overwrite: { type: 'boolean' },
   'dry-run': { type: 'boolean' },
   'no-install': { type: 'boolean' },
+  verbose: { type: 'boolean' },
+  quiet: { type: 'boolean', short: 'q' },
   help: { type: 'boolean', short: 'h' },
   version: { type: 'boolean', short: 'v' },
 } as const;
@@ -73,7 +108,7 @@ export async function main(argv: readonly string[], base: CliContext): Promise<n
   try {
     parsed = parseArgs({ args: [...argv], options: OPTIONS, allowPositionals: true, strict: true });
   } catch (error) {
-    base.warn(`error: ${(error as Error).message}\n\nRun \`rectio --help\` for usage.`);
+    printError(base, new CliError((error as Error).message, USAGE_HINT));
     return 1;
   }
   const { values, positionals } = parsed;
@@ -82,8 +117,9 @@ export async function main(argv: readonly string[], base: CliContext): Promise<n
     base.log(CLI_VERSION);
     return 0;
   }
+  const ui = new Ui(base);
   if (values.help === true || command === undefined) {
-    base.log(HELP);
+    for (const line of help(ui)) base.log(line);
     return command === undefined && values.help !== true ? 1 : 0;
   }
 
@@ -93,6 +129,7 @@ export async function main(argv: readonly string[], base: CliContext): Promise<n
     command,
     env: base.env,
     isTTY: base.stdoutIsTTY === true,
+    render: renderNotice(ui),
   });
   const code = await runCommand(command, rest, values, base);
   const text = await notice;
@@ -110,8 +147,10 @@ async function runCommand(
   const shared = {
     ...(values.registry === undefined ? {} : { registry: values.registry }),
   };
+  const output = { quiet: values.quiet === true, verbose: values.verbose === true };
   const install = {
     ...shared,
+    ...output,
     dryRun: values['dry-run'] === true,
     install: values['no-install'] !== true,
   };
@@ -165,13 +204,11 @@ async function runCommand(
         await runMcp(ctx, shared);
         return 0;
       default:
-        base.warn(`error: unknown command "${command}"\n\nRun \`rectio --help\` for usage.`);
-        return 1;
+        throw new CliError(`unknown command "${command}"`, USAGE_HINT);
     }
   } catch (error) {
     if (error instanceof CliError) {
-      base.warn(`error: ${error.message}`);
-      if (error.hint !== undefined) base.warn(error.hint);
+      printError(base, error);
       return 1;
     }
     throw error;

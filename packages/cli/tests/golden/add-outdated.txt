@@ -1,0 +1,25 @@
+$ rectio add theme-ledger --no-install
+exit 0
+
+--- stdout
+rectio add  x.y.z
+[1/4] Checking project ... ok (0.0s) vite, src/index.css
+[2/4] Resolving items ... ok (0.0s) 3 items (1 asked)
+[3/4] Writing files ... ok (0.0s) 1 file, 2 up to date
+[4/4] Installing packages ... skipped (--no-install)
+
+Added theme-ledger and 2 dependencies
+
+Items     theme-ledger x.y.z
+          + 2 dependencies
+Files     src/styles/rectio/themes  1 file
+          2 files already up to date
+Packages  @fontsource-variable/schibsted-grotesk,
+          @fontsource-variable/source-serif-4
+          added to package.json, run `npm install`
+
+Tip: Set data-theme="ledger" on <html> (or wrap a subtree in
+ThemeScope) to use it.
+! 1 installed item has a newer version: run `rectio update` to list them
+--- stderr
+

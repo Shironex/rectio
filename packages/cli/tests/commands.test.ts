@@ -153,7 +153,9 @@ describe('add', () => {
     });
     const pkg = JSON.parse(read(cwd, 'package.json')) as { dependencies: Record<string, string> };
     expect(pkg.dependencies['@base-ui/react']).toBe('^1.9.0');
-    expect(out.join('\n')).toContain('+ src/components/ui/dialog.tsx');
+    // Files are summarised by folder; --verbose lists each one.
+    expect(out).toContainEqual(expect.stringMatching(/src\/components\/ui\s+\d+ files?$/));
+    expect(out.join('\n')).not.toContain('+ src/components/ui/dialog.tsx');
   });
 
   it('keeps a range the project already has', async () => {
@@ -178,7 +180,7 @@ describe('add', () => {
     const before = snapshot(cwd);
 
     await expect(runAdd(capture(cwd).ctx, ['button', 'money'], noInstall)).rejects.toThrow(
-      '1 file(s) differ from what rectio installed',
+      '1 file differs from what rectio installed',
     );
     expect(snapshot(cwd)).toEqual(before);
 
@@ -250,9 +252,10 @@ describe('add', () => {
     const cwd = await initialised();
     const before = snapshot(cwd);
     const { ctx, out } = capture(cwd);
-    await runAdd(ctx, ['select'], { ...noInstall, dryRun: true });
+    await runAdd(ctx, ['select'], { ...noInstall, dryRun: true, verbose: true });
     expect(snapshot(cwd)).toEqual(before);
-    expect(out.join('\n')).toContain('Would install');
+    expect(out.join('\n')).toContain('[3/4] Writing files ... skipped (dry run)');
+    expect(out.join('\n')).toContain('Dry run: nothing was written');
     expect(out.join('\n')).toContain('+ src/components/ui/select.tsx');
   });
 
@@ -294,14 +297,13 @@ describe('diff, list, search and update', () => {
     const { ctx, out } = capture(cwd);
     const themes = await runList(ctx, { type: 'theme' });
     expect(themes.map((t) => t.name)).toEqual(['theme-default', 'theme-ledger']);
-    expect(out[0]).toMatch(/^\* theme-default/);
+    expect(out).toContainEqual(expect.stringMatching(/^\+ theme-default\s/));
+    expect(out).toContainEqual(expect.stringMatching(/^-- Themes \(2\) -+$/));
     const all = capture(cwd);
     const names = (await runList(all.ctx)).map((t) => t.name);
     expect(names).toEqual(expect.arrayContaining(['button', 'ledger-summary', 'motion-dialog']));
-    // name, type, version, title: no tier column.
-    expect(all.out).toContainEqual(
-      expect.stringMatching(/^\s+button\s+component\s+\d+\.\d+\.\d+\s+Button$/),
-    );
+    // Grouped by kind: name, version, title; no tier column.
+    expect(all.out).toContainEqual(expect.stringMatching(/^\s+button\s+\d+\.\d+\.\d+\s+Button$/));
   });
 
   it('searches names first, then titles, categories and descriptions', async () => {
@@ -323,11 +325,11 @@ describe('diff, list, search and update', () => {
     );
     const { ctx, out } = capture(cwd);
     expect(await runUpdate(ctx)).toHaveLength(1);
-    expect(out.join('\n')).toContain('-> 0.2.0');
+    expect(out).toContainEqual(expect.stringMatching(/^\S+\s+0\.0\.9 -> 0\.2\.0$/));
 
     // list and add say so in one line, from the index they already fetched. theme-ledger does not
     // reinstall cn, the outdated item.
-    const hint = /^\n1 installed item has a newer version in the registry: run `rectio update`/;
+    const hint = /^! 1 installed item has a newer version: run `rectio update`/;
     const listed = capture(cwd);
     await runList(listed.ctx, { type: 'theme' });
     expect(listed.out.at(-1)).toMatch(hint);
@@ -340,7 +342,7 @@ describe('diff, list, search and update', () => {
     const cwd = await initialised();
     const { ctx, out } = capture(cwd);
     await runList(ctx);
-    expect(out.join('\n')).not.toContain('newer version in the registry');
+    expect(out.join('\n')).not.toContain('a newer version');
   });
 });
 
@@ -350,6 +352,7 @@ describe('main', () => {
     const help = capture(cwd);
     expect(await main(['--help'], help.ctx)).toBe(0);
     expect(help.out.join('\n')).toContain('Usage: rectio <command>');
+    expect(help.out.join('\n')).toMatch(/--verbose\s+init, add: list every item/);
 
     const version = capture(cwd);
     expect(await main(['--version'], version.ctx)).toBe(0);

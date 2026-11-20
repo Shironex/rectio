@@ -95,7 +95,7 @@ describe('a project from each template', () => {
         const args = [cliBin, 'init', '--template', template.name, folder, '--registry', registry];
 
         const created = ok(parent.dir, process.execPath, [...args, '--no-install']);
-        expect(created).toContain(`Created ${folder}`);
+        expect(created).toContain(`${folder} is ready`);
 
         const files = projectFiles(root);
         expect(files).toContain('rectio.json');

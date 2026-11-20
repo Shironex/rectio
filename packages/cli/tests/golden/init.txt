@@ -1,0 +1,27 @@
+$ rectio init --no-install
+exit 0
+
+--- stdout
+rectio init  x.y.z
+[1/4] Checking project ... ok (0.0s) vite, Tailwind ^x.y.z, src/index.css
+[2/4] Resolving items ... ok (0.0s) 3 items
+[3/4] Writing files ... ok (0.0s) 4 files
+[4/4] Installing packages ... skipped (--no-install)
+
+Set up rectio for vite
+
+Config    rectio.json
+Theme     default
+Tailwind  ^x.y.z
+Files     src/lib                   1 file
+          src/styles/rectio         1 file
+          src/styles/rectio/themes  1 file
+Packages  @fontsource-variable/ibm-plex-sans,
+          @fontsource/ibm-plex-mono, clsx, tailwind-merge
+          added to package.json, run `npm install`
+
+Next
+  rectio add button  add a component and what it needs
+  rectio list        browse every item
+--- stderr
+
