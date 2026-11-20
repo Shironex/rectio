@@ -144,9 +144,10 @@ export function Meter({
                 className={cn(RING_TONE[resolved], ringMotion)}
               />
               {ticks.map((t) => {
-                // A notch just outside the track, like the marks on a dial.
-                const inner = arcPoint(t, 48.5);
-                const outer = arcPoint(t, 53);
+                // A mark across the track, a little past both edges, as the bar's ticks: drawn
+                // outside it, a notch floats loose from the ring and past the box on the right.
+                const inner = arcPoint(t, 36.5);
+                const outer = arcPoint(t, 47.5);
                 return (
                   <line
                     key={t}
@@ -204,7 +205,7 @@ export function Meter({
               <span
                 key={t}
                 aria-hidden
-                className="absolute -inset-y-1 w-0.5 -translate-x-1/2 rounded-full bg-fg-subtle"
+                className="absolute -inset-y-1 w-0.5 -translate-x-1/2 rounded-full bg-fg-subtle rtl:translate-x-1/2"
                 style={{ insetInlineStart: `${String(t * 100)}%` }}
               />
             ))}

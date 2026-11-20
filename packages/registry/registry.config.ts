@@ -413,7 +413,7 @@ export default defineRegistry({
     {
       name: 'meter',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Meter',
       description:
         'A measurement in a known range as a gauge or a bar, with warning and critical thresholds.',
