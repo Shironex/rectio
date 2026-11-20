@@ -128,6 +128,27 @@ rectio add button dialog money [--overwrite] [--dry-run] [--no-install]
 | `--dry-run`    | Show what would be installed and written, write nothing.  |
 | `--no-install` | Update `package.json` but do not run the package manager. |
 
+#### A theme from the theme generator
+
+The [theme generator](/docs/theming/generator) ends with a command that holds the whole theme in
+its link:
+
+```sh
+rectio add 'https://shironex.github.io/rectio/docs/theming/generator?theme=1.eyJi...'
+```
+
+Quote the link: most shells read `?` as a pattern. The CLI decodes the theme locally (nothing is
+fetched from the link), derives and checks its colours with the same code the page runs, and writes
+`styles/rectio/themes/<name>.css` in the shape of the shipped default theme, exactly the CSS the page
+shows. The theme installs as `theme-<name>` (`theme-custom` unless you named it) with the font
+packages it uses, and `rectio.lock.json` keeps its theme code. A bare code (`rectio add 1.eyJi...`)
+works too.
+
+The theme also takes over `:root`, so the app uses it at once; set `data-theme="<name>"` to name it
+on a subtree. `rectio diff theme-<name>` compares your file with a rebuild of the theme, and
+`rectio update` lists it when a rebuild would differ (a newer default theme or a newer CLI), with
+the command that regenerates it.
+
 ### diff
 
 Compares an installed item with the latest registry version.
