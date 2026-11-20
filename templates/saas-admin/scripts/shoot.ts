@@ -240,7 +240,7 @@ function roundShots(): Shot[] {
   overlay('phone-sidebar', '/', click(/^Open navigation$/), PHONE);
   overlay('phone-sidebar', '/', click(/^Open navigation$/), PHONE, 'dark');
   overlay('rail-collapsed', '/', press('ControlOrMeta+b'));
-  overlay('plans', '/billing', click(/^Compare plans$/, 'tab'));
+  overlay('plans', '/billing', click(/^Change plan$/, 'tab'));
   overlay('create-key', '/developers', click(/^Create key$/));
   overlay('password', '/settings/security', click(/^Change password$/));
   add({
