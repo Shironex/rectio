@@ -158,8 +158,8 @@ export function Billing({
             <p className="text-sm text-fg-muted">{renewalText}</p>
           </div>
           {(onChangePlan !== undefined || onCancelPlan !== undefined) && (
-            // On a wide block the actions sit at the column foot, level with the last meter.
-            <div className="flex flex-wrap gap-2 pt-1 pointer-coarse:gap-3 @3xl:mt-auto">
+            // The actions follow the plan they act on, not the foot of the usage column beside it.
+            <div className="flex flex-wrap gap-2 pt-1 pointer-coarse:gap-3">
               {onChangePlan !== undefined && (
                 <Button variant="secondary" onClick={onChangePlan}>
                   <ArrowsClockwiseIcon aria-hidden weight="bold" className="size-4" />
