@@ -16,6 +16,31 @@ const PAST = {
 export const expenseApprovalPl: ExpenseApprovalMessages = {
   ...commonPl,
   title: 'Akceptacja wydatków',
+  statusLabel: 'Status',
+  views: {
+    pending: 'Oczekujące',
+    approved: 'Zatwierdzone',
+    rejected: 'Odrzucone',
+    all: 'Wszystkie',
+  },
+  viewSummary: (view, count, total) => (
+    <>
+      {view === 'approved' ? 'Zatwierdzone' : view === 'rejected' ? 'Odrzucone' : 'Wszystkie'}:{' '}
+      {count} {expenses(count)}, łącznie {total}
+    </>
+  ),
+  viewEmptyTitle: (view) =>
+    view === 'approved'
+      ? 'Nic jeszcze nie zatwierdzono'
+      : view === 'rejected'
+        ? 'Nic nie odrzucono'
+        : 'Brak wydatków',
+  viewEmptyNote: 'Tu trafiają rozpatrzone wydatki, z informacją, kto i kiedy zdecydował.',
+  viewCaption: (view, currency) => `${view} wydatki, kwoty w ${currency}`,
+  decisionLine: (action, actor, date) =>
+    `${action === 'approved' ? 'Zatwierdził(a)' : 'Odrzucił(a)'}: ${actor}, ${date}`,
+  reopen: 'Wznów',
+  reopenOne: (merchant, employee) => `Wznów ${merchant}, ${employee}`,
   summary: (count, total) => (
     <>
       Oczekuje: {count}, łącznie {total}

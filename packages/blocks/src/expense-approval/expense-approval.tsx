@@ -35,12 +35,18 @@ import { useState, type KeyboardEvent, type ReactNode, type SyntheticEvent } fro
 import { useBlockParts } from '../lib/block-parts';
 import { BlockPanel } from '../lib/block-panel';
 import { EmptyNote } from '../lib/empty-note';
+import { Segmented } from '../lib/segmented';
 import { formatShortDate, resolveLocale, sumMoney } from '../lib/finance';
 import { COMMON_MESSAGES, mergeMessages, type CommonMessages } from '../lib/messages';
 import { StateBadge } from '../lib/state-badge';
 import {
+  APPROVAL_VIEWS,
   MIN_REASON_LENGTH,
   reasonProblem,
+  requestsInView,
+  standingDecisions,
+  viewCounts,
+  type ApprovalView,
   type AuditAction,
   type AuditEvent,
   type ExpenseRequest,
@@ -54,8 +60,19 @@ export interface ExpenseApprovalProps {
   locale?: string;
   onApprove: (ids: string[]) => void;
   onReject: (ids: string[], reason: string) => void;
-  /** Offers Undo on decided requests in the trail. */
+  /** Offers Undo on decided requests in the trail, and Reopen on decided rows. */
   onReopen?: (id: string) => void;
+  /**
+   * Which requests are listed, controlled: the pending queue, the approved or rejected ones, or
+   * all. Pair it with `onStatusChange`.
+   */
+  status?: ApprovalView;
+  /** The view the block opens on when `status` is not set. Default `pending`, the queue. */
+  defaultStatus?: ApprovalView;
+  /** Called with the view the user picks in the filter. */
+  onStatusChange?: (status: ApprovalView) => void;
+  /** Shows the status filter above the list. Default true. */
+  statusFilter?: boolean;
   /** How many decisions the trail shows. */
   trailLength?: number;
   title?: string;
@@ -68,6 +85,25 @@ export interface ExpenseApprovalProps {
 
 export interface ExpenseApprovalMessages extends CommonMessages {
   title: string;
+  /** Names the status filter. */
+  statusLabel: string;
+  /** The filter's word for each view. */
+  views: Record<ApprovalView, string>;
+  /** Under the title outside the queue: "4 approved, €1,230 in total". */
+  viewSummary: (
+    view: Exclude<ApprovalView, 'pending'>,
+    count: number,
+    total: ReactNode,
+  ) => ReactNode;
+  /** The empty state of a view other than the queue: "Nothing approved yet". */
+  viewEmptyTitle: (view: Exclude<ApprovalView, 'pending'>) => string;
+  viewEmptyNote: string;
+  /** The table caption outside the queue; `view` is the view's word. */
+  viewCaption: (view: string, currency: string) => string;
+  /** Under a decided expense: "Approved by Aoife Byrne, 3 Mar". */
+  decisionLine: (action: 'approved' | 'rejected', actor: string, date: string) => string;
+  reopen: string;
+  reopenOne: (merchant: string, employee: string) => string;
   /** Under the title: "6 waiting, €2,140 in total". */
   summary: (count: number, total: ReactNode) => ReactNode;
   nothingWaiting: string;
@@ -127,6 +163,25 @@ const PAST: Record<AuditAction, string> = {
 export const EXPENSE_APPROVAL_MESSAGES: ExpenseApprovalMessages = {
   ...COMMON_MESSAGES,
   title: 'Expense approvals',
+  statusLabel: 'Status',
+  views: { pending: 'Waiting', approved: 'Approved', rejected: 'Rejected', all: 'All' },
+  viewSummary: (view, count, total) => (
+    <>
+      {count} {view === 'all' ? (count === 1 ? 'expense' : 'expenses') : view}, {total} in total
+    </>
+  ),
+  viewEmptyTitle: (view) =>
+    view === 'approved'
+      ? 'Nothing approved yet'
+      : view === 'rejected'
+        ? 'Nothing rejected'
+        : 'No expenses yet',
+  viewEmptyNote: 'Decided expenses are listed here with who decided them and when.',
+  viewCaption: (view, currency) => `${view} expenses, amounts in ${currency}`,
+  decisionLine: (action, actor, date) =>
+    `${action === 'approved' ? 'Approved' : 'Rejected'} by ${actor}, ${date}`,
+  reopen: 'Reopen',
+  reopenOne: (merchant, employee) => `Reopen ${merchant}, ${employee}`,
   summary: (count, total) => (
     <>
       {count} waiting, {total} in total
@@ -197,6 +252,10 @@ export function ExpenseApproval({
   onApprove,
   onReject,
   onReopen,
+  status,
+  defaultStatus = 'pending',
+  onStatusChange,
+  statusFilter = true,
   trailLength = 5,
   title,
   emptyAction,
@@ -206,7 +265,18 @@ export function ExpenseApproval({
   const locale = resolveLocale(requestedLocale);
   const m = mergeMessages(EXPENSE_APPROVAL_MESSAGES, messages);
   const { Button, Money, Rows, Row } = useBlockParts();
-  const pending = requests.filter((r) => r.status === 'pending');
+  const [viewState, setViewState] = useState<ApprovalView>(defaultStatus);
+  const view = status ?? viewState;
+  const setView = (next: ApprovalView) => {
+    if (status === undefined) setViewState(next);
+    onStatusChange?.(next);
+  };
+  const counts = viewCounts(requests);
+  const shown = requestsInView(requests, view);
+  // The rows that can still be decided, in this view: the whole queue, or none of a decided view.
+  const pending = shown.filter((r) => r.status === 'pending');
+  const decisions = standingDecisions(events);
+  const day = (date: Date) => formatShortDate(date, locale);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [rejecting, setRejecting] = useState<string[] | null>(null);
   /**
@@ -227,7 +297,8 @@ export function ExpenseApproval({
     currency,
   );
   const byId = new Map(requests.map((r) => [r.id, r]));
-  const trail = [...events].reverse().slice(0, trailLength);
+  // The trail sits under the queue; a decided view already shows each decision on its row.
+  const trail = view === 'pending' ? [...events].reverse().slice(0, trailLength) : [];
 
   const toggle = (id: string, on: boolean) => {
     setSelected((current) => {
@@ -246,13 +317,44 @@ export function ExpenseApproval({
     <BlockPanel
       title={title ?? m.title}
       description={
-        pending.length === 0
-          ? m.nothingWaiting
-          : m.summary(pending.length, <Money amount={total} currency={currency} locale={locale} />)
+        view !== 'pending'
+          ? m.viewSummary(
+              view,
+              shown.length,
+              <Money
+                amount={sumMoney(
+                  shown.map((r) => r.amount),
+                  currency,
+                )}
+                currency={currency}
+                locale={locale}
+              />,
+            )
+          : pending.length === 0
+            ? m.nothingWaiting
+            : m.summary(
+                pending.length,
+                <Money amount={total} currency={currency} locale={locale} />,
+              )
       }
       className={className}
       bodyClassName="gap-5"
     >
+      {statusFilter && (
+        <Segmented<ApprovalView>
+          label={m.statusLabel}
+          value={view}
+          onValueChange={(next) => {
+            setView(next);
+            setSelected(new Set());
+          }}
+          options={APPROVAL_VIEWS.map((value) => ({
+            value,
+            label: m.views[value],
+            hint: counts[value],
+          }))}
+        />
+      )}
       {/* Bulk actions sit where the eye already is: on top of the list they act on. */}
       <div
         className={cn(
@@ -314,18 +416,28 @@ export function ExpenseApproval({
         )}
       </div>
 
-      {pending.length === 0 ? (
-        <EmptyNote title={m.emptyTitle} action={emptyAction} icon={CheckCircleIcon}>
-          {m.emptyNote}
-        </EmptyNote>
+      {shown.length === 0 ? (
+        view === 'pending' ? (
+          <EmptyNote title={m.emptyTitle} action={emptyAction} icon={CheckCircleIcon}>
+            {m.emptyNote}
+          </EmptyNote>
+        ) : (
+          <EmptyNote title={m.viewEmptyTitle(view)} icon={ClockCounterClockwiseIcon}>
+            {m.viewEmptyNote}
+          </EmptyNote>
+        )
       ) : (
         <Table>
-          <TableCaption className="sr-only">{m.tableCaption(currency)}</TableCaption>
+          <TableCaption className="sr-only">
+            {view === 'pending' ? m.tableCaption(currency) : m.viewCaption(m.views[view], currency)}
+          </TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-0 pe-0">
-                <span className="sr-only">{m.select}</span>
-              </TableHead>
+              {pending.length > 0 && (
+                <TableHead className="w-0 pe-0">
+                  <span className="sr-only">{m.select}</span>
+                </TableHead>
+              )}
               <TableHead>{m.expense}</TableHead>
               <TableHead className="hidden @2xl:table-cell">{m.category}</TableHead>
               <TableHead align="end" className="hidden @xl:table-cell">
@@ -338,98 +450,139 @@ export function ExpenseApproval({
           </TableHeader>
           <TableBody>
             <Rows>
-              {pending.map((request) => (
-                <Row
-                  key={request.id}
-                  data-selected={selected.has(request.id) || undefined}
-                  onPointerEnter={() => {
-                    setHovered(request.id);
-                  }}
-                  onPointerLeave={() => {
-                    setHovered((id) => (id === request.id ? null : id));
-                  }}
-                  onFocus={() => {
-                    setFocused(request.id);
-                  }}
-                  onBlur={(event) => {
-                    if (event.currentTarget.contains(event.relatedTarget)) return;
-                    setFocused((id) => (id === request.id ? null : id));
-                  }}
-                >
-                  <TableCell className="w-0 pe-0">
-                    <span className="flex items-center">
-                      <Checkbox
-                        aria-label={m.selectOne(request.merchant, request.employee)}
-                        checked={selected.has(request.id)}
-                        onCheckedChange={(checked) => {
-                          toggle(request.id, checked);
-                        }}
-                      />
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {/* Narrow: the amount joins the merchant's line, leaving the row's width to the decision. */}
-                    <span className="flex items-baseline justify-between gap-3 font-medium">
-                      {request.merchant}
-                      <Money
-                        amount={request.amount}
-                        currency={currency}
-                        locale={locale}
-                        className="@xl:hidden"
-                      />
-                    </span>
-                    <span className="block text-sm text-fg-muted">
-                      {request.employee},{' '}
-                      <span className="numeric">{formatShortDate(request.date, locale)}</span>
-                      <span className="@2xl:hidden">, {request.category}</span>
-                    </span>
-                    {request.flags !== undefined && request.flags.length > 0 && (
-                      <span className="mt-1 flex flex-wrap gap-1">
-                        {request.flags.map((flag) => (
-                          <Badge key={flag} tone="warning">
-                            <FlagIcon aria-hidden weight="bold" />
-                            {flag}
-                          </Badge>
-                        ))}
-                      </span>
+              {shown.map((request) => {
+                const open = request.status === 'pending';
+                const decision = decisions.get(request.id);
+                const verdict = !open && (
+                  <DecidedActions
+                    request={request}
+                    messages={m}
+                    onReopen={
+                      onReopen === undefined
+                        ? undefined
+                        : () => {
+                            onReopen(request.id);
+                          }
+                    }
+                  />
+                );
+                return (
+                  <Row
+                    key={request.id}
+                    data-selected={selected.has(request.id) || undefined}
+                    onPointerEnter={() => {
+                      setHovered(request.id);
+                    }}
+                    onPointerLeave={() => {
+                      setHovered((id) => (id === request.id ? null : id));
+                    }}
+                    onFocus={() => {
+                      setFocused(request.id);
+                    }}
+                    onBlur={(event) => {
+                      if (event.currentTarget.contains(event.relatedTarget)) return;
+                      setFocused((id) => (id === request.id ? null : id));
+                    }}
+                  >
+                    {pending.length > 0 && (
+                      <TableCell className="w-0 pe-0">
+                        {open && (
+                          <span className="flex items-center">
+                            <Checkbox
+                              aria-label={m.selectOne(request.merchant, request.employee)}
+                              checked={selected.has(request.id)}
+                              onCheckedChange={(checked) => {
+                                toggle(request.id, checked);
+                              }}
+                            />
+                          </span>
+                        )}
+                      </TableCell>
                     )}
-                    {/* Narrow: the decision sits under the expense, where the thumb reaches it. */}
-                    <span className="mt-2 flex @xl:hidden">
-                      <Decide
-                        wide
-                        lead={request.id === lead}
-                        messages={m}
-                        request={request}
-                        onApprove={() => {
-                          approve([request.id]);
-                        }}
-                        onReject={() => {
-                          setRejecting([request.id]);
-                        }}
-                      />
-                    </span>
-                  </TableCell>
-                  <TableCell className="hidden text-fg-muted @2xl:table-cell">
-                    {request.category}
-                  </TableCell>
-                  <TableCell align="end" className="hidden @xl:table-cell">
-                    <Money amount={request.amount} currency={currency} locale={locale} />
-                  </TableCell>
-                  <TableCell align="end" className="hidden w-0 @xl:table-cell">
-                    <Decide
-                      lead={request.id === lead}
-                      messages={m}
-                      request={request}
-                      onApprove={() => {
-                        approve([request.id]);
-                      }}
-                      onReject={() => {
-                        setRejecting([request.id]);
-                      }}
-                    />
-                  </TableCell>
-                </Row>
-              ))}
+                    <TableCell>
+                      {/* Narrow: the amount joins the merchant's line, leaving the row's width to the decision. */}
+                      <span className="flex items-baseline justify-between gap-3 font-medium">
+                        {request.merchant}
+                        <Money
+                          amount={request.amount}
+                          currency={currency}
+                          locale={locale}
+                          className="@xl:hidden"
+                        />
+                      </span>
+                      <span className="block text-sm text-fg-muted">
+                        {request.employee},{' '}
+                        <span className="numeric">{formatShortDate(request.date, locale)}</span>
+                        <span className="@2xl:hidden">, {request.category}</span>
+                      </span>
+                      {decision !== undefined && !open && (
+                        <span className="block text-sm text-fg-muted">
+                          {m.decisionLine(
+                            decision.action === 'approved' ? 'approved' : 'rejected',
+                            decision.actor,
+                            day(decision.at),
+                          )}
+                          {decision.reason !== undefined && (
+                            <span className="block">{m.reasonLine(decision.reason)}</span>
+                          )}
+                        </span>
+                      )}
+                      {open && request.flags !== undefined && request.flags.length > 0 && (
+                        <span className="mt-1 flex flex-wrap gap-1">
+                          {request.flags.map((flag) => (
+                            <Badge key={flag} tone="warning">
+                              <FlagIcon aria-hidden weight="bold" />
+                              {flag}
+                            </Badge>
+                          ))}
+                        </span>
+                      )}
+                      {/* Narrow: the decision sits under the expense, where the thumb reaches it. */}
+                      <span className="mt-2 flex @xl:hidden">
+                        {open ? (
+                          <Decide
+                            wide
+                            lead={request.id === lead}
+                            messages={m}
+                            request={request}
+                            onApprove={() => {
+                              approve([request.id]);
+                            }}
+                            onReject={() => {
+                              setRejecting([request.id]);
+                            }}
+                          />
+                        ) : (
+                          verdict
+                        )}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden text-fg-muted @2xl:table-cell">
+                      {request.category}
+                    </TableCell>
+                    <TableCell align="end" className="hidden @xl:table-cell">
+                      <Money amount={request.amount} currency={currency} locale={locale} />
+                    </TableCell>
+                    <TableCell align="end" className="hidden w-0 @xl:table-cell">
+                      {open ? (
+                        <Decide
+                          lead={request.id === lead}
+                          messages={m}
+                          request={request}
+                          onApprove={() => {
+                            approve([request.id]);
+                          }}
+                          onReject={() => {
+                            setRejecting([request.id]);
+                          }}
+                        />
+                      ) : (
+                        verdict
+                      )}
+                    </TableCell>
+                  </Row>
+                );
+              })}
             </Rows>
           </TableBody>
         </Table>
@@ -520,6 +673,36 @@ export function ExpenseApproval({
         }}
       />
     </BlockPanel>
+  );
+}
+
+/** A decided request's standing: its badge, and Reopen when the app allows it. */
+function DecidedActions({
+  request,
+  messages: m,
+  onReopen,
+}: {
+  request: ExpenseRequest;
+  messages: ExpenseApprovalMessages;
+  onReopen: (() => void) | undefined;
+}) {
+  const { Button } = useBlockParts();
+  const state = request.status === 'approved' ? 'approved' : 'rejected';
+  return (
+    <span className="flex w-full items-center justify-between gap-2 @xl:w-auto @xl:justify-end">
+      <StateBadge state={state} label={m.states[state]} />
+      {onReopen !== undefined && (
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label={m.reopenOne(request.merchant, request.employee)}
+          onClick={onReopen}
+        >
+          <ArrowCounterClockwiseIcon aria-hidden weight="bold" className="size-3.5" />
+          {m.reopen}
+        </Button>
+      )}
+    </span>
   );
 }
 

@@ -32,17 +32,6 @@ function SkeletonFigures({ count, className }: { count: number; className: strin
   );
 }
 
-/** A row of tabs while the page loads: short labels over a rule. */
-export function LoadingTabs({ count }: { count: number }) {
-  return (
-    <div aria-hidden className="flex gap-6 border-b border-line pb-3">
-      {Array.from({ length: count }, (_, i) => (
-        <SkeletonLine key={i} size="sm" width="w-18" index={i} />
-      ))}
-    </div>
-  );
-}
-
 /**
  * The frame of a panel while it loads, laid out like the block it stands in for: the title, then
  * optionally a figure strip, a toolbar control and a row of filter tabs, then the body.
