@@ -88,7 +88,7 @@ export function NewTicketSheet({
 }) {
   return (
     <Sheet open={columnId !== null} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:w-lg">
+      <SheetContent size="lg">
         {columnId !== null && (
           <TicketForm
             key={columnId}

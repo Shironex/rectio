@@ -77,7 +77,7 @@ export function TicketSheet({
 }) {
   return (
     <Sheet open={ticket !== undefined} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:w-xl">
+      <SheetContent size="lg">
         {ticket !== undefined && (
           <TicketDetail
             key={ticket.id}

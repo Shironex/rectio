@@ -122,7 +122,7 @@ export function SubmitExpenseSheet({
         else close();
       }}
     >
-      <SheetContent className="sm:max-w-md">
+      <SheetContent>
         <form noValidate onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
           <SheetHeader>
             <SheetTitle>Submit an expense</SheetTitle>
