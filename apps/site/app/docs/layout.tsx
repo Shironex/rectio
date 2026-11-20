@@ -21,6 +21,8 @@ export default function Layout({ children }: { children: ReactNode }) {
           label: 'rectio home',
           url: '/',
         },
+        // The live templates sit outside the docs tree, so they keep a link of their own.
+        { text: 'Templates', url: '/templates', active: 'nested-url' },
       ]}
       sidebar={{ banner: <ThemeSwitch /> }}
     >

@@ -5,6 +5,7 @@ import { Wordmark } from '@/components/wordmark';
 const LINKS = [
   { href: '/docs', label: 'Docs' },
   { href: '/docs/components/button', label: 'Components' },
+  { href: '/templates', label: 'Templates' },
   { href: '/docs/cli', label: 'CLI' },
   { href: '/docs/mcp', label: 'MCP' },
   { href: '/#pricing', label: 'Pricing' },

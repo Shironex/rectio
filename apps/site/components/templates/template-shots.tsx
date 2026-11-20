@@ -1,5 +1,6 @@
 import { readTemplate } from '@/lib/templates';
 
+import { TemplateActions } from './template-actions';
 import { TemplateFrame } from './template-frame';
 
 /** The top of a template's docs page: its desktop capture with the phone capture beside it. */
@@ -9,9 +10,10 @@ export function TemplateShots({ name }: { name: string }) {
     <figure className="not-prose my-8">
       <TemplateFrame template={template} phone eager />
       <figcaption className="mt-3 text-sm text-fg-muted">
-        The first page of the template on desktop and on a phone. Switch this page to light or dark
-        to see both.
+        The first page of the template on desktop and on a phone. Open the live preview to use every
+        page, in both themes.
       </figcaption>
+      <TemplateActions template={template} secondary="full-screen" className="mt-5" />
     </figure>
   );
 }

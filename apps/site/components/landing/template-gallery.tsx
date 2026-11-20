@@ -19,6 +19,9 @@ import { CopyCommand } from './copy-command';
 
 type Filter = 'all' | TemplateCategory;
 
+const actionLink =
+  'site-press inline-flex min-h-11 items-center gap-2 rounded-control text-base font-medium text-fg underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
+
 /** A template given the room of a whole row: capture on one side, what it is on the other. */
 function WideTemplate({
   template,
@@ -33,7 +36,7 @@ function WideTemplate({
       className="site-gallery-item group grid items-center gap-8 md:col-span-2 lg:grid-cols-12 lg:gap-12"
     >
       <Link
-        href={template.href}
+        href={template.previewHref}
         tabIndex={-1}
         aria-hidden
         className={cn('site-gallery-frame lg:col-span-8', reverse && 'lg:order-last')}
@@ -52,7 +55,7 @@ function TemplateCard({ template }: { template: SiteTemplate }) {
       aria-labelledby={`template-${template.name}`}
       className="site-gallery-item group flex flex-col gap-6"
     >
-      <Link href={template.href} tabIndex={-1} aria-hidden className="site-gallery-frame">
+      <Link href={template.previewHref} tabIndex={-1} aria-hidden className="site-gallery-frame">
         <TemplateFrame template={template} />
       </Link>
       <TemplateText template={template} className="flex-1" />
@@ -101,13 +104,15 @@ function TemplateText({
             .
           </p>
         </div>
-        <Link
-          href={template.href}
-          className="site-press inline-flex min-h-11 items-center gap-2 rounded-control text-base font-medium text-fg underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-        >
-          See the {template.title.toLowerCase()} template
-          <ArrowRightIcon aria-hidden weight="bold" className="size-4 rtl:-scale-x-100" />
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-6">
+          <Link href={template.previewHref} className={actionLink}>
+            Live preview
+            <ArrowRightIcon aria-hidden weight="bold" className="size-4 rtl:-scale-x-100" />
+          </Link>
+          <Link href={template.href} className={actionLink}>
+            See the {template.title.toLowerCase()} template
+          </Link>
+        </div>
       </div>
     </div>
   );
