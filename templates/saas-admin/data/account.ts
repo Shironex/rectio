@@ -209,7 +209,6 @@ export const PLANS: readonly PricingPlan[] = [
     yearly: 948,
     unit: 'per agent',
     highlights: ['Everything in Team', 'SSO and audit log', '5,000 AI replies a month'],
-    recommended: true,
   },
 ];
 

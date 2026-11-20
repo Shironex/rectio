@@ -85,7 +85,7 @@ function TargetQueue({ className }: { className?: string }) {
                 className="flex w-full cursor-pointer items-center gap-3 px-5 py-3 text-start transition-colors duration-fast ease-standard hover:bg-surface-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
               >
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-sm font-medium text-fg">{t.title}</span>
+                  <span className="line-clamp-2 text-sm font-medium text-fg">{t.title}</span>
                   <span className="truncate text-sm text-fg-muted">
                     <span className="numeric">{t.reference}</span>, {t.customer}
                   </span>
@@ -116,7 +116,7 @@ function PlanUsage({ className }: { className?: string }) {
   return (
     <BlockPanel
       title="Plan usage"
-      description="Business plan, resets 1 December"
+      description="Business plan, resets 1 December. Marks sit at 80% and 95%."
       bodyClassName="gap-5"
       actions={
         <Button variant="ghost" size="sm" render={<Link href="/billing" />} nativeButton={false}>
@@ -290,7 +290,10 @@ export function OverviewPage() {
                 icon={STAT_ICONS[f.id]}
                 value={f.value}
                 {...(f.unit === undefined ? {} : { unit: f.unit })}
-                change={{ ...f.change, comparison: 'vs the period before' }}
+                change={{
+                  ...f.change,
+                  comparison: range === '14d' ? 'vs prior 14 days' : 'vs prior 30 days',
+                }}
                 description={f.description}
                 trend={<Sparkline values={f.series} favourable={f.change.favourable} />}
               />

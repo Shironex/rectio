@@ -6,7 +6,7 @@ export const SECTIONS: Record<string, string> = {
   files: 'Files',
   notifications: 'Notifications',
   billing: 'Billing',
-  developers: 'API keys',
+  developers: 'Developers',
   settings: 'Settings',
   'whats-new': 'What’s new',
 };

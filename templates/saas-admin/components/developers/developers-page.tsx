@@ -104,8 +104,8 @@ export function DevelopersPage() {
   return (
     <>
       <PageHeader
-        title="API keys"
-        description="Connect your own app, a data warehouse or an automation to the help desk"
+        title="Developers"
+        description="API keys and webhooks connect your own app, a data warehouse or an automation"
         actions={
           <Button
             variant="secondary"

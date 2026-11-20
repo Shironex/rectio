@@ -49,7 +49,7 @@ export function BillingPage() {
         >
           <TabsList>
             <TabsTab value="overview">Plan and invoices</TabsTab>
-            <TabsTab value="plans">Compare plans</TabsTab>
+            <TabsTab value="plans">Change plan</TabsTab>
           </TabsList>
           <TabsPanel value="overview">
             <Billing

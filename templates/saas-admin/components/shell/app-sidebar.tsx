@@ -96,6 +96,14 @@ export function AppSidebar() {
           >
             Customers
           </SidebarItem>
+          <SidebarItem
+            render={<Link href="/notifications" />}
+            icon={icon(BellIcon)}
+            active={on('/notifications')}
+            {...(unread > 0 ? { badge: <CountBadge count={unread} label="unread" /> } : {})}
+          >
+            Notifications
+          </SidebarItem>
         </SidebarGroup>
         <SidebarGroup label="Workspace">
           <SidebarItem
@@ -113,16 +121,6 @@ export function AppSidebar() {
             Files
           </SidebarItem>
           <SidebarItem
-            render={<Link href="/notifications" />}
-            icon={icon(BellIcon)}
-            active={on('/notifications')}
-            {...(unread > 0 ? { badge: <CountBadge count={unread} label="unread" /> } : {})}
-          >
-            Notifications
-          </SidebarItem>
-        </SidebarGroup>
-        <SidebarGroup label="Account">
-          <SidebarItem
             render={<Link href="/billing" />}
             icon={icon(CreditCardIcon)}
             active={on('/billing')}
@@ -134,7 +132,7 @@ export function AppSidebar() {
             icon={icon(CodeIcon)}
             active={on('/developers')}
           >
-            API keys
+            Developers
           </SidebarItem>
         </SidebarGroup>
       </SidebarContent>
