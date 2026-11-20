@@ -62,8 +62,8 @@ Recharts 3, themed through the `chart` token group (series, sequence, grid, axis
 vision; every chart has a table of the same figures and keyboard-reachable tooltips.
 
 The playground's `/?view=blocks` shows a finance dashboard (`&motion=on` for the motioned blocks,
-`&block=<name>` for one block, `&locale=pl-PL`, `&density=compact`);
-`pnpm --filter @rectio/playground shoot:blocks 3` writes every theme, mode, locale, phone, compact,
+`&block=<name>` for one block, `&density=compact`);
+`pnpm --filter @rectio/playground shoot:blocks 3` writes every theme, mode, phone, compact,
 reduced motion and keyboard shot to `.rounds/round-3/blocks/`.
 
 The playground's `/?view=motion` puts each plain component beside its motioned one;

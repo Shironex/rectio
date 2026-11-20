@@ -132,7 +132,7 @@ The screenshot scripts write to `.rounds/` (gitignored) and never touch your scr
 
 ```sh
 pnpm --filter @rectio/playground shoot 1          # the component matrix
-pnpm --filter @rectio/playground shoot:blocks 1   # the blocks dashboard, every theme and locale
+pnpm --filter @rectio/playground shoot:blocks 1   # the blocks dashboard, every theme and mode
 pnpm --filter @rectio/playground shoot:motion 1   # frame sheets of every motioned interaction
 pnpm --filter @rectio/site shoot 1                # the site, after a site build
 pnpm --filter @rectio/template-<name> shoot 1     # a template's design round
