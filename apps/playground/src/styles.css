@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import '@rectio/tokens/tailwind.css';
 @import '@rectio/tokens/fonts.css';
+/* Opt-in dark proposals (?dark=<name>); inert without the data-dark-proposal attribute. */
+@import '@rectio/tokens/proposals.css';
 
 /* Components live in another package: tell Tailwind to read their class names too. */
 @source '../../../packages/ui/src';

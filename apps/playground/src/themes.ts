@@ -30,3 +30,14 @@ export function readView(search: string) {
   const motion = params.get('motion') === 'on';
   return { theme, mode, view, motion } as const;
 }
+
+/**
+ * Dark proposals from @rectio/tokens/proposals.css, opt in with `?dark=<name>`: the default
+ * theme's dark mode switches to the proposal. Without the parameter nothing changes.
+ */
+export const DARK_PROPOSALS = ['graphite', 'ink', 'onyx'] as const;
+
+export function readDarkProposal(search: string) {
+  const name = new URLSearchParams(search).get('dark');
+  return DARK_PROPOSALS.find((p) => p === name);
+}
