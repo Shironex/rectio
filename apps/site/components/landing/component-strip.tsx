@@ -213,7 +213,7 @@ function DialogSpecimen() {
 }
 
 /**
- * The free components themselves, rendered live from @rectio/ui in a ruled specimen sheet: every
+ * The components themselves, rendered live from @rectio/ui in a ruled specimen sheet: every
  * cell is the real component, with its name linking to its page. Nothing here is a picture.
  */
 export function ComponentStrip({ total }: { total: number }) {
@@ -229,7 +229,7 @@ export function ComponentStrip({ total }: { total: number }) {
       <div className="flex flex-col gap-5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
           <h2 className="font-display text-2xl font-heading text-fg">
-            <span className="font-regular">The free components,</span> running.
+            <span className="font-regular">The components,</span> running.
           </h2>
           <Link
             href="/docs"

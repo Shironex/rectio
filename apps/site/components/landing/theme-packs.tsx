@@ -44,7 +44,7 @@ export function ThemePacks({ intro }: { intro: ReactNode }) {
             >
               <div className="flex items-center gap-3">
                 <h3 className="text-lg font-strong text-fg">{pack.name}</h3>
-                <Badge tone="info">Coming</Badge>
+                <Badge tone="info">Planned</Badge>
               </div>
               <p className="max-w-prose text-base text-fg-muted">{pack.text}</p>
             </li>

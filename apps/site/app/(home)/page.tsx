@@ -146,8 +146,8 @@ export default function Home() {
                   </>
                 }
               >
-                Two ship with the kit, each in light and dark. Packs for charts and printed
-                statements are next.
+                Two ship with the kit, each in light and dark. I plan two more, for charts and
+                printed statements, MIT licensed like the rest.
               </SectionIntro>
             }
           />
