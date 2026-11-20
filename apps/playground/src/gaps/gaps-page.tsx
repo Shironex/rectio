@@ -219,7 +219,6 @@ export function GapsPage({ theme, mode, motion }: { theme: ThemeId; mode: Mode; 
               value={range}
               onValueChange={setRange}
               locale="en-GB"
-              displayFormat="d MMM"
             />
           </div>
         </Section>
