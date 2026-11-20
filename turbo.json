@@ -6,7 +6,8 @@
       "outputs": ["dist/**"]
     },
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": [".next/types/**", "next-env.d.ts"]
     },
     "test": {
       "dependsOn": ["^build", "build"]
