@@ -46,9 +46,9 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Browser and OS, theme (default or ledger), light or dark, React, Tailwind, Node and package manager versions where relevant. For the CLI, the output with the command you ran.
+      description: Browser and OS, light or dark, React, Tailwind, Node and package manager versions where relevant. For the CLI, the output with the command you ran.
       placeholder: |
-        Chrome 142 on macOS, ledger theme, dark
+        Chrome 142 on macOS, dark
         React 19.3, Tailwind 4.3, Node 22.18, pnpm 10
     validations:
       required: true

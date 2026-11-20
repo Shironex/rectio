@@ -23,7 +23,14 @@ import {
 import { createRegistryClient } from '../core/registry-client.ts';
 import { commandRows } from '../ui/layout.ts';
 import { Ui, type OutputOptions, type StepHandle } from '../ui/output.ts';
-import { installRows, printVerbose, rowLines, tipLines, type Rows } from '../ui/report.ts';
+import {
+  deprecationWarnings,
+  installRows,
+  printVerbose,
+  rowLines,
+  tipLines,
+  type Rows,
+} from '../ui/report.ts';
 import { CLI_VERSION } from '../version.ts';
 import { installSteps, managerFor } from './install-steps.ts';
 
@@ -98,6 +105,7 @@ export async function runInit(ctx: CliContext, options: InitOptions = {}) {
     );
   }
   ui.summary(lines);
+  for (const warning of deprecationWarnings(report)) ui.warning(warning);
   return { config: final, report };
 }
 

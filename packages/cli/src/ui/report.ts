@@ -122,3 +122,10 @@ export function tipLines(report: InstallReport, s: Styles): string[] {
     .filter((item) => asked.has(item.name))
     .flatMap((item) => (item.docs === undefined ? [] : tipParagraph(item.docs, s)));
 }
+
+/** One warning per installed item that is going away, with what to use instead. */
+export function deprecationWarnings(report: InstallReport): string[] {
+  return report.items.flatMap((item) =>
+    item.deprecated === undefined ? [] : [`${item.name} is deprecated. ${item.deprecated}`],
+  );
+}

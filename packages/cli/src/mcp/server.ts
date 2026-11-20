@@ -107,10 +107,7 @@ export function createMcpServer(deps: McpDeps, version: string): McpServer {
       description:
         'Design token names and values of a theme in one mode, each with the Tailwind utility that reads it. Call this before writing styles so generated code uses semantic utilities such as bg-surface and text-fg, not hex values. Filter to a family (surface, text, accent, radius, motion, font, ...) to keep the answer short.',
       inputSchema: {
-        theme: z
-          .string()
-          .optional()
-          .describe('Theme id such as "default" or "ledger" (default: "default")'),
+        theme: z.string().optional().describe('Theme id, such as "default" (the default)'),
         mode: z.enum(['light', 'dark']).optional().describe('Color mode (default: light)'),
         filter: z
           .string()

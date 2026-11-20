@@ -6,7 +6,14 @@ import { outdatedHint, outdatedItems } from '../core/outdated.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
 import { plural } from '../ui/layout.ts';
 import { Ui, type OutputOptions } from '../ui/output.ts';
-import { installRows, printVerbose, rowLines, tipLines, type Rows } from '../ui/report.ts';
+import {
+  deprecationWarnings,
+  installRows,
+  printVerbose,
+  rowLines,
+  tipLines,
+  type Rows,
+} from '../ui/report.ts';
 import { CLI_VERSION } from '../version.ts';
 import { installSteps, managerFor } from './install-steps.ts';
 
@@ -61,5 +68,6 @@ export async function runAdd(ctx: CliContext, names: readonly string[], options:
     if (hint !== undefined) lines.push(s.dim(`${ui.g.warn} ${hint}`));
   }
   ui.summary(lines);
+  for (const warning of deprecationWarnings(report)) ui.warning(warning);
   return report;
 }

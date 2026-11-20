@@ -186,6 +186,7 @@ export async function getItem(deps: McpDeps, args: { name: string }): Promise<To
     ...listFiles(item),
   );
   if (item.docs !== undefined) lines.push(`Notes: ${item.docs}`);
+  if (item.deprecated !== undefined) lines.push(`Deprecated: ${item.deprecated}`);
   lines.push(`Add: rectio add ${entry.name}`);
   return { text: lines.join('\n') };
 }

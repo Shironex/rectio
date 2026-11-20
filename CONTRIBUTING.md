@@ -24,7 +24,7 @@ pnpm gate         # format, lint, typecheck, test, build and the repo rules, as 
 
 | Command                                     | What it does                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------- |
-| `pnpm dev`                                  | The playground (Vite): every component in every state, both themes and modes |
+| `pnpm dev`                                  | The playground (Vite): every component in every state, light and dark        |
 | `pnpm --filter @rectio/site dev`            | The docs site with the live template previews (a first run builds them)      |
 | `pnpm --filter @rectio/site previews`       | Rebuilds the template previews after you changed a template or the kit       |
 | `pnpm --filter @rectio/site build`          | The static site in `apps/site/out`, previews and registry included           |
@@ -125,14 +125,14 @@ Then run `pnpm --filter @rectio/site build` and `pnpm --filter @rectio/site walk
 ## The design bar
 
 Every visual change goes through design rounds before it lands: fresh headless screenshots at
-desktop (1440) and phone (390) width, light and dark, in both themes, then a scored critique (out of 40) and an audit (out of 20), fix, and capture again. The bar is 32/40 and 18/20. Put the scores and
+desktop (1440) and phone (390) width, light and dark, then a scored critique (out of 40) and an audit (out of 20), fix, and capture again. The bar is 32/40 and 18/20. Put the scores and
 the final screenshots in your PR.
 
 The screenshot scripts write to `.rounds/` (gitignored) and never touch your screen:
 
 ```sh
 pnpm --filter @rectio/playground shoot 1          # the component matrix
-pnpm --filter @rectio/playground shoot:blocks 1   # the blocks dashboard, every theme and mode
+pnpm --filter @rectio/playground shoot:blocks 1   # the blocks dashboard, every mode
 pnpm --filter @rectio/playground shoot:motion 1   # frame sheets of every motioned interaction
 pnpm --filter @rectio/site shoot 1                # the site, after a site build
 pnpm --filter @rectio/template-<name> shoot 1     # a template's design round

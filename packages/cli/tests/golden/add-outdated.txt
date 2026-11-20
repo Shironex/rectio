@@ -22,4 +22,4 @@ Tip: Set data-theme="ledger" on <html> (or wrap a subtree in
 ThemeScope) to use it.
 ! 1 installed item has a newer version: run `rectio update` to list them
 --- stderr
-
+! theme-ledger is deprecated. The ledger theme is no longer built in and will be removed in the next release. Make your own from the ledger look in the theme generator: https://shironex.github.io/rectio/docs/theming/generator

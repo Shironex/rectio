@@ -126,7 +126,9 @@ describe('a project from each template', () => {
           .map((f) => readFileSync(join(assets, f), 'utf8'))
           .join('\n');
         expect(css).toContain('--rx-accent');
-        expect(css).toMatch(/data-theme=["']?ledger/);
+        // The one default theme, light and dark; the retired ledger theme is not installed.
+        expect(css).toMatch(/data-mode=["']?dark/);
+        expect(css).not.toMatch(/data-theme=["']?ledger/);
       },
       TIMEOUT,
     );
