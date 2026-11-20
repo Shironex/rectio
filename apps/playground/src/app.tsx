@@ -20,6 +20,7 @@ const DocsPage = lazy(() => import('./docs/docs-page').then((m) => ({ default: m
 const FormsPage = lazy(() => import('./forms/forms-page').then((m) => ({ default: m.FormsPage })));
 const ShellPage = lazy(() => import('./shell/shell-page').then((m) => ({ default: m.ShellPage })));
 const NavPage = lazy(() => import('./shell/nav-page').then((m) => ({ default: m.NavPage })));
+const GapsPage = lazy(() => import('./gaps/gaps-page').then((m) => ({ default: m.GapsPage })));
 const MotionPage = lazy(() =>
   import('./motion/motion-page').then((m) => ({ default: m.MotionPage })),
 );
@@ -44,6 +45,8 @@ export function App() {
         <ShellPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'nav' ? (
         <NavPage theme={theme} mode={mode} motion={motion} />
+      ) : view === 'gaps' ? (
+        <GapsPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'motion' ? (
         <MotionPage theme={theme} mode={mode} />
       ) : (
