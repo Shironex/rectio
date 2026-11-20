@@ -1,7 +1,8 @@
 /** Where a template's live preview is served: safe to import from client components. */
+import { BASE_PATH } from './base-path.ts';
 
-/** The base path a template's preview is built under and served from. */
-export const previewBase = (name: string) => `/preview/${name}`;
+/** The base path a template's preview is built under and served from, site base path included. */
+export const previewBase = (name: string) => `${BASE_PATH}/preview/${name}`;
 
 /** The URL of a template page inside its preview. */
 export const previewUrl = (name: string, path: string) =>

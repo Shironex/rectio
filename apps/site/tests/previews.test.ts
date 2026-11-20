@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { test } from 'node:test';
 
-import { prepareHtml } from '../lib/previews.ts';
+import { prepareHtml, previewBase } from '../lib/previews.ts';
 import { fitScale, initialDevice, pathInPreview, routeFor, routeMatches } from '../lib/viewer.ts';
 
 const SITE = join(import.meta.dirname, '..');
@@ -37,7 +37,8 @@ void test('every template has a live preview and a viewer page', () => {
 void test('nothing in a preview points at the site root instead of the preview', () => {
   for (const name of names) {
     const root = join(OUT, 'preview', name);
-    const base = `/preview/${name}`;
+    // Under SITE_BASE_PATH (GitHub Pages) the preview's base path carries the site's too.
+    const base = previewBase(name);
     const inside = (url: string) =>
       url.startsWith('//') || url === base || url.startsWith(`${base}/`);
     const problems: string[] = [];
@@ -89,6 +90,14 @@ void test('a preview page is prepared once: noindex, links moved under the base 
   assert.match(notFound, /new MutationObserver/);
 });
 
+void test('a preview under the site base path keeps its links under both', () => {
+  const page =
+    '<html><head></head><body><a href="/pricing">p</a><a href="/rectio/preview/x/a">a</a></body></html>';
+  const prepared = prepareHtml(page, '/rectio/preview/x');
+  assert.match(prepared, /<a href="\/rectio\/preview\/x\/pricing">/);
+  assert.match(prepared, /<a href="\/rectio\/preview\/x\/a">/);
+});
+
 void test('the viewer resolves routes and widths', () => {
   assert.ok(routeMatches('/invoices/[id]', '/invoices/inv-2026-0216'));
   assert.ok(!routeMatches('/invoices/[id]', '/invoices'));
@@ -103,6 +112,7 @@ void test('the viewer resolves routes and widths', () => {
   assert.equal(routeFor(routes, '/settings'), undefined);
   assert.equal(pathInPreview('/preview/x', '/preview/x/'), '/');
   assert.equal(pathInPreview('/preview/x', '/preview/x/pricing/'), '/pricing');
+  assert.equal(pathInPreview('/rectio/preview/x', '/rectio/preview/x/pricing/'), '/pricing');
   assert.equal(fitScale(640, 1280), 0.5);
   assert.equal(fitScale(1600, 1280), 1);
   assert.equal(initialDevice(1392), 'desktop');

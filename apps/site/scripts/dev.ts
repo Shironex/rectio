@@ -2,18 +2,19 @@
  * `pnpm dev`: next dev with the live template previews served beside it. The previews are static
  * builds (scripts/previews.ts), not routes of the site, so next dev cannot serve them itself: this
  * serves .previews/ on a free local port and hands that address to next.config, which proxies
- * /preview/* to it in development only. Arguments pass through to next dev (`pnpm dev -p 4350`).
+ * /preview/* to it in development only (SITE_BASE_PATH moves both under the same base path). Arguments pass through to next dev (`pnpm dev -p 4350`).
  */
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 
+import { BASE_PATH } from '../lib/base-path.ts';
 import { PREVIEWS_DIR } from '../lib/previews.ts';
 import { serveStatic } from './static-server.ts';
 
 const site = join(import.meta.dirname, '..');
-const { server, url } = await serveStatic(PREVIEWS_DIR, 0, '/preview');
+const { server, url } = await serveStatic(PREVIEWS_DIR, 0, `${BASE_PATH}/preview`);
 console.log(
-  `previews: /preview/* proxied to ${url} (next dev then warns that rewrites do not work with output: export; that is about the static build, which copies the previews instead)`,
+  `previews: ${BASE_PATH}/preview/* proxied to ${url} (next dev then warns that rewrites do not work with output: export; that is about the static build, which copies the previews instead)`,
 );
 
 const next = spawn(

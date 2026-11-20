@@ -13,6 +13,7 @@ import { gzipSync } from 'node:zlib';
 
 import { chromium, type Browser, type Page } from 'playwright';
 
+import { BASE_PATH } from '../lib/base-path.ts';
 import { serveStatic } from './static-server.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -25,6 +26,7 @@ mkdirSync(out, { recursive: true });
 
 const PAGES = [
   { name: 'landing', path: '/' },
+  { name: 'templates', path: '/templates' },
   { name: 'docs-intro', path: '/docs' },
   { name: 'docs-theming', path: '/docs/theming' },
   { name: 'docs-button', path: '/docs/components/button' },
@@ -104,7 +106,10 @@ async function openPage(
   return { context, page };
 }
 
-const { server, url: base } = await serveStatic(join(site, 'out'));
+const served = await serveStatic(join(site, 'out'), 0, BASE_PATH);
+const { server } = served;
+/** Under SITE_BASE_PATH the site is served, and captured, at its base path. */
+const base = served.url + BASE_PATH;
 const browser = await chromium.launch();
 const shots: string[] = [];
 

@@ -1,10 +1,14 @@
 /**
  * Live template previews: every templates/<name> with a template.json, built as its real static app
- * under the base path /preview/<name>, so the site can serve it whole and the viewer can frame it.
+ * under the base path /preview/<name> (behind the site's own base path, SITE_BASE_PATH, so on
+ * GitHub Pages it is /rectio/preview/<name>), so the site can serve it whole and the viewer can frame it.
  *
  *   node scripts/previews.ts build   build every template into apps/site/.previews/<name>/
  *   node scripts/previews.ts copy    copy .previews/* into out/preview/ (builds what is missing)
  *   node scripts/previews.ts missing build only the templates with no preview yet (`pnpm dev`)
+ *
+ * Each build records the base path it was made for, and `copy` and `missing` rebuild a preview made
+ * for another one, so a local build never ships into a Pages build or the other way round.
  *
  * Turborepo runs `build` as the site's `previews` task (cached on the templates and the kit), and the
  * site build runs `copy` after `next build`. A template reads the base path from one line in its
@@ -81,6 +85,14 @@ function htmlFiles(dir: string): string[] {
     .map((entry) => join(entry.parentPath, entry.name));
 }
 
+/** Written beside each preview: the base path it was built under. Never copied into out/. */
+const BUILT_FOR = '.rectio-preview-base';
+
+const builtFor = (name: string) => {
+  const file = join(PREVIEWS_DIR, name, BUILT_FOR);
+  return existsSync(file) ? readFileSync(file, 'utf8') : undefined;
+};
+
 async function buildOne(name: string): Promise<void> {
   const started = Date.now();
   const work = stage(name);
@@ -96,6 +108,7 @@ async function buildOne(name: string): Promise<void> {
   for (const file of htmlFiles(target)) {
     writeFileSync(file, prepareHtml(readFileSync(file, 'utf8'), previewBase(name)));
   }
+  writeFileSync(join(target, BUILT_FOR), previewBase(name));
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
   console.log(`previews: ${name} built under ${previewBase(name)} in ${seconds}s`);
 }
@@ -115,7 +128,12 @@ async function buildAll(names: string[]): Promise<void> {
 
 const names = readTemplates().map((t) => t.name);
 const mode = process.argv[2];
-const missing = () => names.filter((name) => !existsSync(join(PREVIEWS_DIR, name, 'index.html')));
+/** No preview yet, or one built under another base path. */
+const missing = () =>
+  names.filter(
+    (name) =>
+      !existsSync(join(PREVIEWS_DIR, name, 'index.html')) || builtFor(name) !== previewBase(name),
+  );
 
 if (mode === 'build') {
   // A template that is gone leaves no stale preview behind.
@@ -141,7 +159,12 @@ if (mode === 'build') {
   await buildAll(missing());
   const out = join(site, 'out', 'preview');
   rmSync(out, { recursive: true, force: true });
-  for (const name of names) cpSync(join(PREVIEWS_DIR, name), join(out, name), { recursive: true });
+  for (const name of names) {
+    cpSync(join(PREVIEWS_DIR, name), join(out, name), {
+      recursive: true,
+      filter: (source) => !source.endsWith(BUILT_FOR),
+    });
+  }
   console.log(`previews: ${String(names.length)} template(s) copied to ${relative(site, out)}/`);
 } else {
   throw new Error('usage: node scripts/previews.ts build|copy|missing');

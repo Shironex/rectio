@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import { templateManifestSchema } from '@rectio/registry';
 
+import { withBase } from './base-path.ts';
 import { CATEGORY_LABELS, TEMPLATE_CATEGORIES, type SiteTemplate } from './template-types.ts';
 
 /** The repo's templates folder, read at build time; the site runs from apps/site. */
@@ -10,9 +11,12 @@ export const TEMPLATES_DIR = join(process.cwd(), '..', '..', 'templates');
 
 export { CATEGORY_LABELS, type SiteTemplate };
 
-/** `screenshots/desktop-light.webp` -> `/templates/<name>/desktop-light.webp` (copied by the sync). */
+/**
+ * `screenshots/desktop-light.webp` -> `/templates/<name>/desktop-light.webp` (copied by the sync),
+ * under the site base path: the gallery shows them in plain `<img>` tags.
+ */
 const served = (name: string, path: string) =>
-  `/templates/${name}/${path.slice('screenshots/'.length)}`;
+  withBase(`/templates/${name}/${path.slice('screenshots/'.length)}`);
 
 /**
  * Every template with a template.json, by category (apps first, the kit's home ground), then by

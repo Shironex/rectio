@@ -6,8 +6,11 @@
  * it opens the gallery and every viewer and checks that each frame shows its template. It serves
  * out/ itself (PORT, default 4310) and never touches the screen.
  *
+ * A site built with SITE_BASE_PATH (GitHub Pages: /rectio) is walked under that base path; run
+ * the walk with the same SITE_BASE_PATH.
+ *
  * WALK_URL walks a running site instead, such as `pnpm dev -p 4350` with WALK_URL set to
- * http://localhost:4350 (next dev blocks its dev resources on 127.0.0.1, so the viewer would never
+ * http://localhost:4350, or http://localhost:4350/rectio with the base path (next dev blocks its dev resources on 127.0.0.1, so the viewer would never
  * hydrate there). WALK_SHOTS names a folder for a screenshot of every viewer.
  */
 import { mkdirSync } from 'node:fs';
@@ -15,15 +18,17 @@ import { join } from 'node:path';
 
 import { chromium, type Page } from 'playwright';
 
-import { previewPages, previewUrl } from '../lib/previews.ts';
+import { BASE_PATH, withBase } from '../lib/base-path.ts';
+import { previewBase, previewPages, previewUrl } from '../lib/previews.ts';
 import { readTemplates } from '../lib/templates.ts';
 import { serveStatic } from './static-server.ts';
 
 const site = join(import.meta.dirname, '..');
-const running = process.env.WALK_URL?.replace(/\/+$/, '');
+/** The running site's origin: every path below already carries the base path. */
+const running = process.env.WALK_URL?.replace(/\/+$/, '').replace(new RegExp(`${BASE_PATH}$`), '');
 const served =
   running === undefined
-    ? await serveStatic(join(site, 'out'), Number(process.env.PORT ?? 4310))
+    ? await serveStatic(join(site, 'out'), Number(process.env.PORT ?? 4310), BASE_PATH)
     : undefined;
 const origin = running ?? served?.url ?? '';
 const shots = process.env.WALK_SHOTS;
@@ -59,7 +64,7 @@ function watch(page: Page, where: () => string) {
 
 try {
   for (const template of readTemplates()) {
-    const base = `/preview/${template.name}`;
+    const base = previewBase(template.name);
     const pages = previewPages(template.name, template.pages);
     const skipped = template.pages.filter((route) => !pages.some((p) => p.route === route));
     for (const route of skipped) problems.push(`${template.name}: no built page for ${route}`);
@@ -138,16 +143,18 @@ async function walkViewers() {
   const page = await context.newPage();
   let at = '/templates';
   watch(page, () => `site ${at}`);
-  await page.goto(`${origin}/templates`, { waitUntil: 'load' });
+  await page.goto(origin + withBase(at), { waitUntil: 'load' });
   for (const template of readTemplates()) {
-    if ((await page.locator(`a[href="/templates/${template.name}"]`).count()) === 0) {
+    if (
+      (await page.locator(`a[href="${withBase(`/templates/${template.name}`)}"]`).count()) === 0
+    ) {
       problems.push(`site /templates: no link to the ${template.name} viewer`);
     }
   }
   if (shots !== undefined) await page.screenshot({ path: join(shots, 'templates.png') });
   for (const template of readTemplates()) {
     at = `/templates/${template.name}`;
-    await page.goto(origin + at, { waitUntil: 'load' });
+    await page.goto(origin + withBase(at), { waitUntil: 'load' });
     const frame = page.locator('iframe[title]').first().contentFrame();
     // The viewer reveals the frame once its page has loaded and its look is set.
     const shown = await page
@@ -162,7 +169,7 @@ async function walkViewers() {
     const handle = await page.locator('iframe[title]').first().elementHandle();
     const content = await handle.contentFrame();
     const framed = content ? new URL(content.url()).pathname : '';
-    if (!framed.startsWith(`/preview/${template.name}`)) {
+    if (!framed.startsWith(previewBase(template.name))) {
       problems.push(`site ${at}: the frame shows ${framed}`);
     }
     if ((await frame.getByText('This page could not be found').count()) > 0) {
@@ -180,7 +187,7 @@ async function walkViewers() {
 }
 
 console.log(
-  `walk-previews: ${String(visited)} pages, ${String(followed)} links followed, ${String(viewed)} viewers on ${origin}`,
+  `walk-previews: ${String(visited)} pages, ${String(followed)} links followed, ${String(viewed)} viewers on ${origin}${BASE_PATH}`,
 );
 if (problems.length > 0) {
   console.error(problems.join('\n'));

@@ -13,9 +13,14 @@ import {
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
 
-/** Search over the prebuilt index at /api/search: no server, the site is static. */
+import { withBase } from '@/lib/base-path';
+
+/**
+ * Search over the prebuilt index at /api/search: no server, the site is static. The index URL is
+ * given in full, since the client only knows a Vite base path, never Next's.
+ */
 export function SearchDialog(props: SharedProps) {
-  const search = useStaticSearch();
+  const search = useStaticSearch({ from: withBase('/api/search') });
   return (
     <Dialog {...search} {...props}>
       <SearchDialogOverlay />

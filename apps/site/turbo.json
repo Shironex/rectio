@@ -11,14 +11,16 @@
         "$TURBO_ROOT$/templates/*/template.json",
         "$TURBO_ROOT$/templates/*/screenshots/**"
       ],
-      "dependsOn": ["^build", "previews"]
+      "dependsOn": ["^build", "previews"],
+      "env": ["SITE_BASE_PATH"]
     },
     "test": {
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/packages/motion/src/**",
         "$TURBO_ROOT$/templates/*/{app,components,data}/**"
-      ]
+      ],
+      "env": ["SITE_BASE_PATH"]
     },
     "typecheck": {
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/templates/*/template.json"]
@@ -41,7 +43,8 @@
         "$TURBO_ROOT$/packages/motion/src/**",
         "$TURBO_ROOT$/packages/blocks/src/**",
         "$TURBO_ROOT$/packages/tokens/src/**"
-      ]
+      ],
+      "env": ["SITE_BASE_PATH"]
     }
   }
 }
