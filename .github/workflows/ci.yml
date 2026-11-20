@@ -1,7 +1,9 @@
 name: ci
 
-# The same gate as `pnpm gate` locally: format, lint, typecheck, test, build and the repo rules
-# (@noctcore/harness). One job: the steps share one install and one Turborepo cache.
+# The checks of `pnpm gate` (format, typecheck, lint, test, build, repo rules), run one after
+# another. `pnpm gate` runs them in parallel, which on a fresh runner races: lint needs the route
+# types that `next typegen` writes during typecheck, and test and build both build the template
+# previews into the same folders. One job: the steps share one install and one Turborepo cache.
 on:
   push:
     branches: [main]
@@ -37,4 +39,9 @@ jobs:
           path: .turbo/cache
           key: turbo-ci-${{ runner.os }}-${{ github.sha }}
           restore-keys: turbo-ci-${{ runner.os }}-
-      - run: pnpm gate
+      - run: pnpm run format:check
+      - run: pnpm run typecheck
+      - run: pnpm run lint
+      - run: pnpm run build
+      - run: pnpm run test
+      - run: pnpm exec harness lint-meta
