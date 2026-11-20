@@ -51,7 +51,7 @@ export function ProfilePage() {
         <ErrorPanel title="Your profile did not load" />
       ) : (
         <ProfileSettings
-          title="Your profile"
+          title="Name and contact"
           profile={profile}
           timeZones={TIME_ZONES}
           now={NOW}

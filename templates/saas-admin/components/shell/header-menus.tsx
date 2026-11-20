@@ -1,10 +1,12 @@
 'use client';
 
 import {
+  ChatCircleTextIcon,
   GearSixIcon,
   KeyboardIcon,
   MoonIcon,
   PaletteIcon,
+  QuestionIcon,
   SignOutIcon,
   SparkleIcon,
   SunIcon,
@@ -25,6 +27,7 @@ import {
   MenuSubContent,
   MenuSubTrigger,
   MenuTrigger,
+  useToast,
 } from '@rectio/ui';
 import Link from 'next/link';
 
@@ -92,6 +95,7 @@ export function AppearanceMenu({ className }: { className?: string }) {
 /** The account: initials on the trigger, the profile, settings, appearance and sign out. */
 export function AccountMenu({ onShowShortcuts }: { onShowShortcuts: () => void }) {
   const { theme, mode } = useAppearance();
+  const toast = useToast();
   const summary = `${THEMES.find((t) => t.value === theme)?.label ?? ''}, ${MODES.find((m) => m.value === mode)?.label.toLowerCase() ?? ''}`;
   return (
     <Menu>
@@ -129,6 +133,23 @@ export function AccountMenu({ onShowShortcuts }: { onShowShortcuts: () => void }
         <MenuLinkItem icon={icon(SparkleIcon)} render={<Link href="/whats-new" />}>
           What’s new
         </MenuLinkItem>
+        <MenuSeparator />
+        <MenuItem
+          icon={icon(QuestionIcon)}
+          onClick={() => {
+            toast.add({ title: 'Help center', description: 'Point this at your own guides.' });
+          }}
+        >
+          Help center
+        </MenuItem>
+        <MenuItem
+          icon={icon(ChatCircleTextIcon)}
+          onClick={() => {
+            toast.add({ title: 'Contact support', description: 'We reply within a business day.' });
+          }}
+        >
+          Contact support
+        </MenuItem>
         <MenuSeparator />
         <MenuLinkItem icon={icon(SignOutIcon)} render={<Link href="/sign-in" />}>
           Sign out

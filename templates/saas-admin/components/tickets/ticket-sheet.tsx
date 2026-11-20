@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowSquareOutIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon } from '@phosphor-icons/react';
 import { type CommentThreadResolution, type ThreadComment } from '@rectio/blocks';
 import { CommentThread } from '@rectio/blocks/motion';
 import {
@@ -35,7 +35,7 @@ export function TicketSheet({
 }) {
   return (
     <Sheet open={ticket !== undefined} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-xl">
+      <SheetContent className="sm:w-xl">
         {ticket !== undefined && (
           <TicketDetail
             key={ticket.id}
@@ -97,7 +97,7 @@ function TicketDetail({ ticket, onClose }: { ticket: Ticket; onClose: () => void
               className="inline-flex items-center gap-1 text-accent-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
               {customer.name}
-              <ArrowSquareOutIcon aria-hidden weight="bold" className="size-3.5" />
+              <ArrowRightIcon aria-hidden weight="bold" className="size-3.5" />
             </Link>
           )}
         </SheetDescription>

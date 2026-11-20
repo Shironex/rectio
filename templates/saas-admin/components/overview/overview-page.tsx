@@ -145,10 +145,10 @@ function PlanUsage({ className }: { className?: string }) {
 function OverviewLoading() {
   return (
     <LoadingRegion label="Loading the overview">
-      <LoadingPanel kind="figures" />
+      <LoadingPanel kind="figures" detailed />
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-start">
         <div className="flex flex-col gap-6 lg:col-span-2">
-          <LoadingPanel kind="chart" />
+          <LoadingPanel kind="chart" points={14} />
           <LoadingPanel kind="list" rows={5} className="max-lg:hidden" />
         </div>
         <div className="flex flex-col gap-6">
@@ -236,9 +236,9 @@ export function OverviewPage() {
   const days = VOLUME.slice(range === '14d' ? -14 : 0);
   const firstName = CURRENT_USER.name.split(' ')[0] ?? '';
 
-  const actions =
-    state === 'empty' ? undefined : (
-      <>
+  const actions = (
+    <>
+      {state !== 'empty' && (
         <ToggleGroup
           aria-label="Range"
           value={[range]}
@@ -253,23 +253,24 @@ export function OverviewPage() {
             </Toggle>
           ))}
         </ToggleGroup>
-        <Button
-          onClick={() => {
-            openNewTicket();
-          }}
-        >
-          <PlusIcon aria-hidden weight="bold" className="size-4" />
-          New ticket
-        </Button>
-      </>
-    );
+      )}
+      <Button
+        onClick={() => {
+          openNewTicket();
+        }}
+      >
+        <PlusIcon aria-hidden weight="bold" className="size-4" />
+        New ticket
+      </Button>
+    </>
+  );
 
   return (
     <>
       <PageHeader
         title={`Good morning, ${firstName}`}
         description={`${formatLongDate(NOW)}. The last ${range === '14d' ? '14' : '30'} days against the ${range === '14d' ? '14' : '30'} before.`}
-        {...(actions === undefined ? {} : { actions })}
+        actions={actions}
       />
       {state === 'loading' ? (
         <OverviewLoading />

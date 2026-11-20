@@ -47,11 +47,11 @@ export function AuthAside() {
       </div>
       <figure className="flex flex-col gap-3 border-t border-line pt-6">
         <blockquote className="text-sm text-pretty text-fg">
-          “We answer 900 tickets a week with six people, and our customers still get a name, not a
+          “We answer 900 tickets a week with nine people, and our customers still get a name, not a
           number.”
         </blockquote>
         <figcaption className="text-sm text-fg-muted">
-          Inês Carvalho, Head of support at Copperline
+          Dara Whitfield, Support lead at Northgate Glazing
         </figcaption>
       </figure>
     </div>

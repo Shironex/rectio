@@ -280,7 +280,19 @@ export function CustomersPage() {
           icon={<BuildingsIcon aria-hidden weight="bold" />}
           title="No customers yet"
           description="Import a CSV from your CRM, or let them arrive with their first ticket. Each customer collects its tickets, people and notes."
-          actions={<Button>Import a CSV</Button>}
+          actions={
+            <>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  toast.add({ title: 'Add a customer', description: 'Name, plan and a contact.' });
+                }}
+              >
+                Add one by hand
+              </Button>
+              <Button>Import a CSV</Button>
+            </>
+          }
         />
       ) : (
         <>

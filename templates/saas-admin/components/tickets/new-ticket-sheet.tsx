@@ -79,7 +79,7 @@ export function NewTicketSheet({
 }) {
   return (
     <Sheet open={columnId !== null} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-lg">
+      <SheetContent className="sm:w-lg">
         {columnId !== null && (
           <TicketForm
             key={columnId}

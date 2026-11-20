@@ -25,6 +25,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { customerById } from '@/data/customers';
 import { LOCALE, NOW, WORKSPACE } from '@/data/workspace';
 import { setAppearance, useAppearance, useDarkMode } from '../use-appearance';
+import { usePageState } from '../use-page-state';
 import { AppDataProvider, useAppData } from './app-data';
 import { AppSidebar } from './app-sidebar';
 import { buildCommands } from './commands';
@@ -54,9 +55,11 @@ const SHORTCUTS = [
 function HeaderNotifications() {
   const router = useRouter();
   const { notifications, markRead, markAllRead } = useAppData();
+  // An empty workspace has nothing unread, as the sidebar shows.
+  const empty = usePageState() === 'empty';
   return (
     <NotificationsCenter
-      notifications={notifications}
+      notifications={empty ? [] : notifications}
       onMarkRead={markRead}
       onMarkAllRead={markAllRead}
       onOpen={() => {

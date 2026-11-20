@@ -60,6 +60,20 @@ function Webhooks() {
                 <span className="text-fg-muted">
                   Last sent {formatDuration(Math.max(ago, 1))} ago
                 </span>
+                {failing && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      toast.add({
+                        title: 'Retrying the last 5 deliveries',
+                        description: hook.url,
+                      });
+                    }}
+                  >
+                    Retry
+                  </Button>
+                )}
                 <Badge tone={failing ? 'negative' : 'positive'}>
                   {failing ? (
                     <WarningCircleIcon aria-hidden weight="bold" className="size-3.5" />

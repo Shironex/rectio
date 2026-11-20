@@ -25,7 +25,7 @@ export function HealthBadge({ health }: { health: CustomerHealth }) {
   return (
     <Tooltip>
       <TooltipTrigger
-        className="cursor-default rounded-badge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        className="relative cursor-default rounded-badge after:absolute after:-inset-x-1 after:-inset-y-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         aria-label={`${HEALTH_LABELS[health]}: ${HEALTH_HINTS[health]}`}
       >
         <Badge tone={HEALTH_TONES[health]}>{HEALTH_LABELS[health]}</Badge>

@@ -53,6 +53,7 @@ export function BillingPage() {
           </TabsList>
           <TabsPanel value="overview">
             <Billing
+              title="Your plan"
               plan={shownPlan}
               usage={trial ? USAGE.map((u) => ({ ...u, used: 0 })) : USAGE}
               paymentMethod={trial ? undefined : PAYMENT_METHOD}

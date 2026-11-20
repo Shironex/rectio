@@ -12,7 +12,16 @@ const STRIP_COLUMNS: Record<number, string> = {
   4: 'sm:grid-cols-4',
 };
 
-function SkeletonFigures({ count, className }: { count: number; className: string }) {
+function SkeletonFigures({
+  count,
+  className,
+  detailed = false,
+}: {
+  count: number;
+  className: string;
+  /** A change and a description under each figure, as a full stat shows. */
+  detailed?: boolean;
+}) {
   return (
     <div
       className={cn(
@@ -22,10 +31,12 @@ function SkeletonFigures({ count, className }: { count: number; className: strin
       )}
     >
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="flex flex-col gap-2 p-4">
+        <div key={i} className={cn('flex flex-col gap-2', detailed ? 'px-5 py-4' : 'p-4')}>
           <SkeletonLine size="sm" width="w-1/2" index={i} />
           <SkeletonLine size="2xl" width="w-3/4" index={i} />
           <SkeletonLine size="xs" width="w-2/5" index={i} />
+          {detailed && <SkeletonLine size="sm" width="w-3/5" index={i} />}
+          {detailed && <SkeletonLine size="xs" width="w-1/2" index={i} />}
         </div>
       ))}
     </div>
@@ -54,6 +65,8 @@ export function LoadingPanel({
   strip = 0,
   tabs = 0,
   toolbar = false,
+  detailed = false,
+  points,
   className,
 }: {
   kind?: 'table' | 'chart' | 'figures' | 'list';
@@ -65,12 +78,20 @@ export function LoadingPanel({
   tabs?: number;
   /** One control, such as an account or period select, beside the title. */
   toolbar?: boolean;
+  /** Figures with a change and a description, as full stats show. */
+  detailed?: boolean;
+  /** Bars along the chart's axis, to match the loaded chart. */
+  points?: number;
   className?: string;
 }) {
   if (kind === 'figures') {
     return (
       <div aria-hidden className={className}>
-        <SkeletonFigures count={4} className="rounded-panel border border-line bg-surface" />
+        <SkeletonFigures
+          count={4}
+          detailed={detailed}
+          className="rounded-panel border border-line bg-surface"
+        />
       </div>
     );
   }
@@ -99,7 +120,9 @@ export function LoadingPanel({
           ))}
         </div>
       )}
-      {kind === 'chart' && <SkeletonChart className="h-56" />}
+      {kind === 'chart' && (
+        <SkeletonChart className={points === undefined ? 'h-56' : 'h-72'} points={points} />
+      )}
       {kind === 'table' && <SkeletonTable rows={rows} columns={columns} numeric />}
       {kind === 'list' && (
         <div className="flex flex-col gap-4">
