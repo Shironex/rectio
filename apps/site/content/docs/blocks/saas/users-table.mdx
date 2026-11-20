@@ -49,11 +49,13 @@ select replaces the column headers. Past `pageSize` rows, the table pages.
   type={{
     users: {
       type: 'readonly UserRecord[]',
-      description: "id, name, email, role, status, optional avatarUrl, lastSeen, team and `you` for the viewer's own row.",
+      description:
+        "id, name, email, role, status, optional avatarUrl, lastSeen, team and `you` for the viewer's own row.",
     },
     currentRole: {
       type: 'UserRole',
-      description: "The signed-in viewer's role. Limits the roles they can assign and whom they can act on.",
+      description:
+        "The signed-in viewer's role. Limits the roles they can assign and whom they can act on.",
     },
     pageSize: { type: 'number', default: '10' },
     onInvite: { type: '() => void', description: 'Shows an Invite users button.' },
