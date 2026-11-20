@@ -154,3 +154,16 @@ export function invoiceTotals(
     counts,
   };
 }
+
+/** The columns the invoice list sorts by. */
+export type InvoiceSortColumn = 'number' | 'customer' | 'issued' | 'due' | 'state' | 'amount';
+
+/** A column and a direction: `{ column: 'issued', desc: true }` is newest first. */
+export interface InvoiceSort {
+  column: InvoiceSortColumn;
+  /** Largest, latest or last first. Default false. */
+  desc?: boolean;
+}
+
+/** Due date, soonest first: what needs chasing leads. */
+export const DEFAULT_INVOICE_SORT: InvoiceSort = { column: 'due', desc: false };

@@ -80,14 +80,16 @@ export function InvoicesPage() {
         />
       ) : (
         <InvoiceList
-          key={filter}
           title="All invoices"
           invoices={INVOICES}
           currency={CURRENCY}
           locale={LOCALE}
           today={TODAY}
           defaultPeriod="year"
-          defaultFilter={filter}
+          filter={filter}
+          onFilterChange={(next) => {
+            router.replace(`/invoices?filter=${next}`, { scroll: false });
+          }}
           onOpenInvoice={(invoice) => {
             router.push(`/invoices/${invoice.id}`);
           }}
