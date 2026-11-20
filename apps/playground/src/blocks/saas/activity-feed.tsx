@@ -16,7 +16,7 @@ const EVENTS: ActivityEvent[] = [
   {
     id: 'e2',
     at: ago(47),
-    actor: { name: 'Tomasz Wierzbicki' },
+    actor: { name: 'Callum Ross' },
     kind: 'update',
     verb: 'moved',
     target: 'Vendor contract renewals',

@@ -202,7 +202,7 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
           <Field>
             <FieldLabel optional>About</FieldLabel>
             <Textarea
-              defaultValue="Wholesale food distribution across Poland and the Baltics."
+              defaultValue="Wholesale food distribution across Ireland and the UK."
               maxLength={160}
               showCount
               minRows={2}

@@ -37,7 +37,7 @@ const ENTRIES: FileEntry[] = [
     type: 'file',
     size: 812_000,
     modified: ago(60 * 5),
-    owner: 'Tomasz Wierzbicki',
+    owner: 'Callum Ross',
   },
   {
     id: 'f5',
@@ -45,7 +45,7 @@ const ENTRIES: FileEntry[] = [
     type: 'file',
     size: 96_000,
     modified: ago(60 * 24 * 40),
-    owner: 'Tomasz Wierzbicki',
+    owner: 'Callum Ross',
   },
   {
     id: 'f6',

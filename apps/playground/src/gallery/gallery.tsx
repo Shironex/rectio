@@ -146,8 +146,8 @@ export function Gallery() {
         </Row>
         <Row label="Invalid, disabled">
           <Field className="w-56" invalid>
-            <FieldLabel>Amount, PLN</FieldLabel>
-            <AmountInput currency="PLN" locale="pl-PL" defaultValue={0} />
+            <FieldLabel>Amount, CAD</FieldLabel>
+            <AmountInput currency="CAD" locale="en-CA" defaultValue={0} />
             <FieldError>Enter an amount above zero.</FieldError>
           </Field>
           <Field className="w-56" disabled>
@@ -170,7 +170,7 @@ export function Gallery() {
 
       <Section
         title="Money"
-        note="Locale rules decide grouping and the symbol side (pl-PL groups from five digits). Debits use the true minus; parentheses are opt-in."
+        note="Locale rules decide grouping and the symbol side. Debits use the true minus; parentheses are opt-in."
       >
         <Row label="Statement">
           <dl className="grid w-80 grid-cols-2 gap-y-1.5 text-base">
@@ -224,9 +224,9 @@ export function Gallery() {
             <dd className="text-end">
               <Money amount={98765.4} currency="CHF" locale="de-CH" quietCurrency />
             </dd>
-            <dt className="text-fg-muted">pl-PL</dt>
+            <dt className="text-fg-muted">en-GB, debit</dt>
             <dd className="text-end">
-              <Money amount={-2500} currency="PLN" locale="pl-PL" tone="auto" />
+              <Money amount={-2500} currency="GBP" locale="en-GB" tone="auto" />
             </dd>
           </dl>
         </Row>

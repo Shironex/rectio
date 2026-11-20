@@ -2,7 +2,7 @@
  * Headless screenshots of the pro blocks for a design round: `pnpm shoot:blocks <round>`.
  * Writes to .rounds/round-<n>/blocks/ at the repo root (gitignored). Starts its own Vite server and
  * never touches the screen. Shots: the dashboard in every theme and mode, each block alone in every
- * theme, mode and both locales, compact density, phone width, reduced motion and the motion
+ * theme, mode and compact density, phone width, reduced motion and the motion
  * variant's entrance, plus browser checks (overflow, touch targets, chart keyboard tooltips).
  */
 import { mkdirSync } from 'node:fs';
@@ -139,12 +139,11 @@ try {
   for (const block of BLOCKS) {
     for (const theme of THEMES) {
       for (const mode of MODES) {
-        const locale = mode === 'dark' ? 'pl-PL' : 'en-GB';
         const page = await shoot(
           browser,
           base,
-          `${block}-${theme}-${mode}-${locale}`,
-          `block=${block}&theme=${theme}&mode=${mode}&locale=${locale}`,
+          `${block}-${theme}-${mode}`,
+          `block=${block}&theme=${theme}&mode=${mode}`,
           { width: 1180 },
         );
         await page?.close();
@@ -175,12 +174,11 @@ try {
   for (const block of SAAS_BLOCKS) {
     for (const theme of THEMES) {
       for (const mode of MODES) {
-        const locale = mode === 'dark' ? 'pl-PL' : 'en-GB';
         const page = await shoot(
           browser,
           base,
-          `saas-${block}-${theme}-${mode}-${locale}`,
-          `block=${block}&theme=${theme}&mode=${mode}&locale=${locale}`,
+          `saas-${block}-${theme}-${mode}`,
+          `block=${block}&theme=${theme}&mode=${mode}`,
           { width: 1180 },
         );
         await page?.close();
@@ -219,7 +217,7 @@ try {
     }
   }
 
-  const compact = await shoot(browser, base, 'dashboard-compact', 'density=compact&locale=pl-PL');
+  const compact = await shoot(browser, base, 'dashboard-compact', 'density=compact');
   await compact?.close();
   const calm = await shoot(browser, base, 'dashboard-reduced-motion', 'motion=on', {
     reducedMotion: true,
@@ -250,7 +248,7 @@ try {
     'payouts',
     'vendors-list',
   ]) {
-    const page = await shoot(browser, base, `phone-${block}`, `block=${block}&locale=pl-PL`, {
+    const page = await shoot(browser, base, `phone-${block}`, `block=${block}`, {
       width: 390,
       phone: true,
     });
@@ -288,7 +286,7 @@ try {
     }
     await page.close();
   }
-  const phoneLight = await shoot(browser, base, 'phone-dashboard-default', 'locale=pl-PL', {
+  const phoneLight = await shoot(browser, base, 'phone-dashboard-default', '', {
     width: 390,
     phone: true,
   });

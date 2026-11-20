@@ -204,7 +204,7 @@ function Loaders({ ui }: { ui: Moving }) {
           >
             <div className="flex flex-col gap-2 p-4">
               <p className="text-sm font-medium">Exchange rates</p>
-              <p className="text-sm text-fg-muted numeric">EUR to PLN 4.2817</p>
+              <p className="text-sm text-fg-muted numeric">EUR to GBP 0.8412</p>
               <p className="text-sm text-fg-muted numeric">EUR to USD 1.0842</p>
             </div>
             <ui.LoadingOverlay visible={busy} label="Refreshing rates" />

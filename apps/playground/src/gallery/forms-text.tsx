@@ -290,7 +290,7 @@ export function FieldsetSection() {
           <FieldsetLegend>Address</FieldsetLegend>
           <Field>
             <FieldLabel>Street</FieldLabel>
-            <Input defaultValue="ul. Prosta 51" />
+            <Input defaultValue="51 Station Road" />
           </Field>
         </Fieldset>
       </Row>
@@ -303,7 +303,7 @@ export function FieldsetSection() {
         >
           <Field>
             <FieldLabel>Legal name</FieldLabel>
-            <Input defaultValue="Northwind Traders sp. z o.o." />
+            <Input defaultValue="Northwind Traders Ltd" />
           </Field>
           <Field>
             <FieldLabel>VAT number</FieldLabel>
@@ -324,7 +324,7 @@ export function FieldsetSection() {
         >
           <Field>
             <FieldLabel>Legal name</FieldLabel>
-            <Input defaultValue="Northwind Traders sp. z o.o." />
+            <Input defaultValue="Northwind Traders Ltd" />
           </Field>
           <FormActions align="between">
             <Button variant="ghost">Discard</Button>

@@ -58,7 +58,7 @@ const CARDS: KanbanCard[] = [
     reference: 'FER-224',
     title: 'Bank feed reconnect flow',
     tags: ['Banking'],
-    assignee: { name: 'Tomasz Wierzbicki' },
+    assignee: { name: 'Callum Ross' },
     due: d(3, 19),
     priority: 'high',
   },

@@ -17,7 +17,7 @@ interface Props {
   selection: SaasSelection;
   motion: boolean;
   empty: boolean;
-  locale: 'en-GB' | 'pl-PL';
+  locale: 'en-GB';
 }
 
 function One({ name, ...props }: Omit<Props, 'selection'> & { name: SaasBlockName }) {

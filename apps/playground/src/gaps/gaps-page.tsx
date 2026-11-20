@@ -204,11 +204,11 @@ export function GapsPage({ theme, mode, motion }: { theme: ThemeId; mode: Mode; 
               />
             </Field>
             <Field>
-              <FieldLabel>Data wystawienia</FieldLabel>
+              <FieldLabel>Issued, medium date</FieldLabel>
               <DatePicker
                 value={issued}
                 onValueChange={setIssued}
-                locale="pl-PL"
+                locale="en-GB"
                 displayFormat="PP"
               />
             </Field>

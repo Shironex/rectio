@@ -316,7 +316,7 @@ function DialogSpecimen() {
           <DialogHeader>
             <DialogTitle>Submit report 2041?</DialogTitle>
             <DialogDescription>
-              Anna Kowalska's March report goes to Piotr Nowak for approval.
+              Isla Fraser's March report goes to Rory Quinn for approval.
             </DialogDescription>
           </DialogHeader>
           <DialogBody>

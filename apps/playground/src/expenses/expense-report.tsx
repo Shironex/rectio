@@ -275,7 +275,7 @@ function Report({ back }: { back: string | null }) {
       </a>
       <header className="flex flex-wrap items-end justify-between gap-6">
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-fg-muted">Report 2041 · Anna Kowalska · In draft</p>
+          <p className="text-sm text-fg-muted">Report 2041 · Isla Fraser · In draft</p>
           <h1 className="font-display text-3xl font-heading tracking-tight">
             March travel and tools
           </h1>

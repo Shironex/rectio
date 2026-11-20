@@ -45,7 +45,7 @@ export const EXPENSES: Expense[] = [
     date: march(3),
     merchant: 'Lufthansa',
     category: 'flights',
-    note: 'FRA to WAW, return',
+    note: 'FRA to DUB, return',
     amount: 412.8,
     status: 'approved',
   },

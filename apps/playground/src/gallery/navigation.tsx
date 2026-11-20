@@ -372,11 +372,11 @@ export function OverlaySection() {
         <p className="text-sm text-fg-muted">
           Issued to{' '}
           <HoverCard>
-            <HoverCardTrigger href="#customer">Borowik Meble sp. z o.o.</HoverCardTrigger>
+            <HoverCardTrigger href="#customer">Barrett Furniture Ltd</HoverCardTrigger>
             <HoverCardContent>
               <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium text-fg">Borowik Meble sp. z o.o.</p>
-                <p className="text-sm text-fg-muted">NIP 525-000-11-22, Poznań</p>
+                <p className="text-sm font-medium text-fg">Barrett Furniture Ltd</p>
+                <p className="text-sm text-fg-muted">VAT IE 8274915KH, Cork</p>
                 <p className="text-sm text-fg-muted">6 invoices, 1 overdue</p>
               </div>
             </HoverCardContent>
@@ -417,7 +417,7 @@ function SheetDemo({ side, label }: { side: 'left' | 'right' | 'top' | 'bottom';
       <SheetContent>
         <SheetHeader>
           <SheetTitle>INV-2026-0124</SheetTitle>
-          <SheetDescription>Borowik Meble sp. z o.o., due 27 February.</SheetDescription>
+          <SheetDescription>Barrett Furniture Ltd, due 27 February.</SheetDescription>
         </SheetHeader>
         <SheetBody>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">

@@ -11,19 +11,19 @@ import { NOW, ago, type DemoProps } from './demo';
 
 const NIAMH: CommentAuthor = { id: 'niamh', name: 'Niamh Walsh', role: 'Owner' };
 const INES: CommentAuthor = { id: 'ines', name: 'Ines Duarte', role: 'Finance' };
-const TOMASZ: CommentAuthor = { id: 'tomasz', name: 'Tomasz Wierzbicki', role: 'Engineering' };
+const CALLUM: CommentAuthor = { id: 'callum', name: 'Callum Ross', role: 'Engineering' };
 const AIYANA: CommentAuthor = { id: 'aiyana', name: 'Aiyana Brooks' };
 
 const COMMENTS: ThreadComment[] = [
   {
     id: 'k1',
     author: INES,
-    body: 'The approval rule fires twice when a cost centre has two approvers on the same level. @Tomasz can you check whether it is the rule or the queue?',
+    body: 'The approval rule fires twice when a cost centre has two approvers on the same level. @Callum can you check whether it is the rule or the queue?',
     createdAt: ago(60 * 26),
   },
   {
     id: 'k2',
-    author: TOMASZ,
+    author: CALLUM,
     parentId: 'k1',
     body: 'It is the queue. Both approvers get their own job and neither sees the other one finish. Fix is up for review.',
     createdAt: ago(60 * 20),

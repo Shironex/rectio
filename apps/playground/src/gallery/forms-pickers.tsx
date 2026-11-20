@@ -32,7 +32,7 @@ const CUSTOMERS: Option[] = [
 ];
 
 const APPROVERS: Option[] = [
-  { value: 'anna', label: 'Anna Kowalska' },
+  { value: 'isla', label: 'Isla Fraser' },
   { value: 'ben', label: 'Ben Okafor' },
   { value: 'chloe', label: 'Chloe Martin' },
   { value: 'dev', label: 'Dev Patel' },

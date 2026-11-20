@@ -104,7 +104,7 @@ const INVOICES: Invoice[] = [
   {
     id: 'i1',
     number: 'INV-2041',
-    customer: 'Kowalski & Syn',
+    customer: 'Hale & Son',
     due: new Date(2026, 2, 4),
     state: 'overdue',
     amount: 4820,
@@ -262,7 +262,7 @@ const FIXED_TODAY = new Date(2026, 2, 19);
 
 export function DateSection() {
   const [gb, setGb] = useState<Date | null>(new Date(2026, 2, 19));
-  const [pl, setPl] = useState<Date | null>(new Date(2026, 2, 19));
+  const [us, setUs] = useState<Date | null>(new Date(2026, 2, 19));
   const [period, setPeriod] = useState<DateRange | undefined>({
     from: new Date(2026, 2, 2),
     to: new Date(2026, 2, 13),
@@ -279,14 +279,9 @@ export function DateSection() {
           <FieldDescription>en-GB</FieldDescription>
         </Field>
         <Field className="w-56">
-          <FieldLabel>Data faktury</FieldLabel>
-          <DatePicker
-            locale="pl-PL"
-            value={pl}
-            onValueChange={setPl}
-            calendarLabel="Wybierz datę"
-          />
-          <FieldDescription>pl-PL</FieldDescription>
+          <FieldLabel>Invoice date</FieldLabel>
+          <DatePicker locale="en-US" value={us} onValueChange={setUs} />
+          <FieldDescription>en-US</FieldDescription>
         </Field>
       </Row>
       <Row label="Period">

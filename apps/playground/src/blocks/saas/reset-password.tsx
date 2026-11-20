@@ -15,7 +15,7 @@ function firstStep(empty: boolean): ResetPasswordStep {
 export function ResetPasswordDemo({ motion, empty }: DemoProps) {
   const ResetPassword = motion ? MotionResetPassword : PlainResetPassword;
   const [step, setStep] = useState(() => firstStep(empty));
-  const [sentTo, setSentTo] = useState('tomasz@fernhill.io');
+  const [sentTo, setSentTo] = useState('callum@fernhill.io');
   return (
     <ResetPassword
       step={step}

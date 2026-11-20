@@ -73,7 +73,7 @@ function readParams(search: string) {
   const params = new URLSearchParams(search);
   return {
     collapsed: params.get('collapsed') === '1',
-    locale: data.LOCALES[params.get('locale') === 'pl-PL' ? 'pl-PL' : 'en-GB'],
+    locale: data.LOCALES['en-GB'],
   };
 }
 
@@ -92,7 +92,7 @@ function buildCommands(run: (message: string) => void): CommandGroup[] {
     {
       label: 'Recent',
       items: [
-        go('inv-0124', 'INV-2026-0124, Borowik Meble', ClockCounterClockwiseIcon, ['invoice']),
+        go('inv-0124', 'INV-2026-0124, Barrett Furniture', ClockCounterClockwiseIcon, ['invoice']),
         go('bill-nordwind', 'Bill 4471, Nordwind Logistik', ClockCounterClockwiseIcon, ['bill']),
       ],
     },
@@ -271,14 +271,14 @@ export function ShellPage({
               <blocks.KpiRow
                 currency={locale.currency}
                 locale={locale.locale}
-                kpis={data.kpis(locale.rate)}
+                kpis={data.kpis()}
                 comparison="vs February"
                 label="Key figures, March 2026"
               />
               <blocks.InvoiceList
                 currency={locale.currency}
                 locale={locale.locale}
-                invoices={data.invoices(locale.rate)}
+                invoices={data.invoices()}
                 today={data.TODAY}
                 onOpenInvoice={(invoice) => {
                   setLog(`Opened ${invoice.number}`);
@@ -318,7 +318,7 @@ const NOTIFICATIONS = [
   {
     id: 'n3',
     unread: false,
-    title: 'February closed by Piotr Nowak',
+    title: 'February closed by Rory Quinn',
     detail: 'Journal locked, reports ready',
     time: 'Yesterday',
     href: '#reports',

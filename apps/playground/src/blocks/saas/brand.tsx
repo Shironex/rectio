@@ -49,7 +49,7 @@ export function AuthAside() {
           “We closed March four days early, and nobody opened a spreadsheet.”
         </blockquote>
         <figcaption className="text-sm text-fg-muted">
-          Marta Kowalczyk, Controller at Nordwind Logistik
+          Greta Lindner, Controller at Nordwind Logistik
         </figcaption>
       </figure>
     </div>

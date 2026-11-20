@@ -85,8 +85,8 @@ export function RadioGroupSection() {
         </Field>
         <Field className="w-56">
           <RadioGroup legend="Approver">
-            <Radio value="anna">Anna Kowalska</Radio>
-            <Radio value="piotr">Piotr Nowak</Radio>
+            <Radio value="isla">Isla Fraser</Radio>
+            <Radio value="rory">Rory Quinn</Radio>
           </RadioGroup>
           <FieldDescription>Nothing picked yet.</FieldDescription>
         </Field>
@@ -102,7 +102,7 @@ export function RadioGroupSection() {
         <Field className="w-56" disabled>
           <RadioGroup legend="Currency" defaultValue="eur">
             <Radio value="eur">Euro</Radio>
-            <Radio value="pln">Polish zloty</Radio>
+            <Radio value="chf">Swiss franc</Radio>
           </RadioGroup>
           <FieldDescription>Set by the entity.</FieldDescription>
         </Field>
@@ -177,7 +177,7 @@ export function ToggleSection() {
         </ToggleGroup>
         <ToggleGroup aria-label="Currency" disabled defaultValue={['eur']}>
           <Toggle value="eur">EUR</Toggle>
-          <Toggle value="pln">PLN</Toggle>
+          <Toggle value="chf">CHF</Toggle>
         </ToggleGroup>
       </Row>
     </Section>

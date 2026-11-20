@@ -57,7 +57,7 @@ function cashFlowVisual() {
     <CashFlowChart
       currency={EN.currency}
       locale={EN.locale}
-      points={financeData.cashFlow(EN.rate)}
+      points={financeData.cashFlow()}
       className="border-0"
     />
   );
@@ -160,7 +160,7 @@ function Landing({ blocks }: { blocks: Blocks }) {
                 <KpiRow
                   currency={EN.currency}
                   locale={EN.locale}
-                  kpis={financeData.kpis(EN.rate).slice(0, 2)}
+                  kpis={financeData.kpis().slice(0, 2)}
                   comparison="vs February"
                 />
               ),
@@ -203,7 +203,7 @@ function Landing({ blocks }: { blocks: Blocks }) {
                 <ArAging
                   currency={EN.currency}
                   locale={EN.locale}
-                  receivables={financeData.receivables(EN.rate)}
+                  receivables={financeData.receivables()}
                   today={financeData.TODAY}
                   customerLimit={3}
                 />
@@ -386,7 +386,7 @@ function Gallery({
                 <KpiRow
                   currency={EN.currency}
                   locale={EN.locale}
-                  kpis={financeData.kpis(EN.rate)}
+                  kpis={financeData.kpis()}
                   comparison="vs February"
                 />
               }
@@ -407,7 +407,7 @@ function Gallery({
                 <ArAging
                   currency={EN.currency}
                   locale={EN.locale}
-                  receivables={financeData.receivables(EN.rate)}
+                  receivables={financeData.receivables()}
                   today={financeData.TODAY}
                 />
               }

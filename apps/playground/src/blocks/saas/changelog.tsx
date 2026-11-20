@@ -26,7 +26,7 @@ const RELEASES: ChangelogRelease[] = [
     changes: [
       { kind: 'improved', text: 'Bank transactions match invoices twice as often without a rule.' },
       { kind: 'new', text: 'Split one transaction across several invoices.' },
-      { kind: 'fixed', text: 'Polish currency amounts show the correct thousands separator.' },
+      { kind: 'fixed', text: 'Currency amounts show the correct thousands separator.' },
     ],
   },
   {

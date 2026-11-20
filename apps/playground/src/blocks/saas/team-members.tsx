@@ -27,8 +27,8 @@ const MEMBERS: TeamMember[] = [
   },
   {
     id: 'm3',
-    name: 'Tomasz Wierzbicki',
-    email: 'tomasz@fernhill.io',
+    name: 'Callum Ross',
+    email: 'callum@fernhill.io',
     role: 'member',
     lastActive: ago(60 * 26),
   },

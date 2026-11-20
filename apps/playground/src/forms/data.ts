@@ -23,7 +23,7 @@ export const TIME_ZONES: TimeZone[] = [
 
 export const CURRENCIES = [
   { value: 'EUR', label: 'Euro', name: 'Euro' },
-  { value: 'PLN', label: 'Polish zloty', name: 'Polish zloty' },
+  { value: 'CHF', label: 'Swiss franc', name: 'Swiss franc' },
   { value: 'GBP', label: 'Pound sterling', name: 'Pound sterling' },
   { value: 'SEK', label: 'Swedish krona', name: 'Swedish krona' },
   { value: 'USD', label: 'US dollar', name: 'US dollar' },
@@ -35,7 +35,7 @@ export interface Member {
 }
 
 export const MEMBERS: Member[] = [
-  { value: 'anna', label: 'Anna Kowalska' },
+  { value: 'isla', label: 'Isla Fraser' },
   { value: 'ben', label: 'Ben Okafor' },
   { value: 'chloe', label: 'Chloe Martin' },
   { value: 'dev', label: 'Dev Patel' },

@@ -219,7 +219,7 @@ try {
       });
       await snap(page, `open-popover-${tag}`);
       await page.keyboard.press('Escape');
-      await page.getByRole('link', { name: 'Borowik Meble sp. z o.o.' }).hover();
+      await page.getByRole('link', { name: 'Barrett Furniture Ltd' }).hover();
       await page.waitForTimeout(700);
       await snap(page, `open-hover-card-${tag}`);
       await page.getByRole('button', { name: 'Duplicate' }).first().hover();

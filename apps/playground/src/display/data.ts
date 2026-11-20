@@ -1,6 +1,6 @@
 export const PEOPLE = [
   { name: 'Ana Ruiz', status: 'online' as const },
-  { name: 'Tomasz Nowak', status: 'away' as const },
+  { name: 'Ewan Burke', status: 'away' as const },
   { name: 'Lena Fischer', status: 'busy' as const },
   { name: 'Ivo Petrov' },
   { name: 'Mei Tanaka', status: 'offline' as const },
@@ -40,7 +40,7 @@ export const FAQ = [
 export const ACTIVITY = [
   { name: 'Ana Ruiz', action: 'approved invoice INV-2041', when: '09:42', iso: '2026-03-14T09:42' },
   {
-    name: 'Tomasz Nowak',
+    name: 'Ewan Burke',
     action: 'commented on the March budget',
     when: '09:15',
     iso: '2026-03-14T09:15',
