@@ -22,8 +22,8 @@ export interface SegmentedProps<Value extends string> {
 /**
  * One choice from a few, always visible: a status filter or a period switch. Arrow keys move
  * between options and the pressed one is announced; pressing the chosen option again keeps it.
- * One row while it fits; on a narrow block, such as a phone, the options wrap onto a second row
- * and share each row's width, so every label stays whole and every option stays in sight.
+ * One row while it fits; on a narrow block the options wrap, and on a phone they sit in two even
+ * columns, so every label stays whole and every option stays in sight.
  */
 export function Segmented<Value extends string>({
   label,
@@ -43,6 +43,8 @@ export function Segmented<Value extends string>({
       data-slot="segmented"
       className={cn(
         'flex w-fit max-w-full flex-wrap gap-0.5 rounded-control border border-line bg-surface-sunken p-0.5',
+        // On a phone, two even columns: wrapped rows line up instead of stretching unevenly.
+        'max-sm:grid max-sm:w-full max-sm:grid-cols-2',
         className,
       )}
     >

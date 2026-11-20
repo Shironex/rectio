@@ -17,6 +17,7 @@ describe('Segmented on a narrow block', () => {
     const group = screen.getByRole('group', { name: 'Status' });
     const classes = group.className.split(/\s+/);
     expect(classes).toContain('flex-wrap');
+    expect(classes).toContain('max-sm:grid-cols-2');
     expect(group.className).not.toMatch(/overflow-x-auto|mask-|snap-/);
     expect(group).not.toHaveAttribute('data-overflow');
   });
