@@ -295,7 +295,9 @@ export function ticketThread(ticket: Ticket): ThreadComment[] {
   const opened = ticket.opened.getTime();
   // Replies never sit in the future of the sample's clock, however fresh the ticket is.
   const after = (minutes: number) => new Date(Math.min(opened + minutes * 60_000, NOW.getTime()));
-  const assignee = ticket.assignee?.name ?? 'Tomás Rivera';
+  // The agent working it; when that is you, a teammate reproduced it first.
+  const named = ticket.assignee?.name;
+  const assignee = named === undefined || named === CURRENT_USER.name ? 'Tomás Rivera' : named;
   return [
     {
       id: `${ticket.id}-c1`,
