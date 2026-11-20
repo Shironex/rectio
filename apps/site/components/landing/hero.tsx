@@ -13,13 +13,14 @@ const NOUNS = ['invoices,', 'payouts,', 'approvals,', 'money,'] as const;
 
 function facts(kit: KitFacts) {
   return [
-    `${String(kit.components)} components, free`,
-    `${String(kit.blocks)} pro finance blocks`,
+    `${String(kit.components)} components`,
+    `${String(kit.blocks)} blocks`,
+    `${String(kit.templates)} templates`,
     `${String(kit.themes)} themes, light and dark`,
     `${String(kit.tokens)} tokens per theme`,
     `motion add-on +${kit.motionKb} kB gzip`,
     'keyboard complete',
-    'true minus signs',
+    'MIT licensed',
     'MCP server for coding agents',
   ];
 }
@@ -45,7 +46,7 @@ export function Hero({ kit }: { kit: KitFacts }) {
         </h1>
         <div className="flex flex-col gap-6 lg:col-span-4 lg:pb-3">
           <p className="site-enter site-step-1 max-w-md text-lg text-pretty text-fg-muted">
-            React components, tokens and finance blocks for expense tools, ledgers and approvals.
+            Open source React components, blocks and templates for finance and back-office apps.
             Figures align, signs stay explicit, themes are token files.
           </p>
           <div className="site-enter site-step-2 flex flex-wrap items-center gap-3">

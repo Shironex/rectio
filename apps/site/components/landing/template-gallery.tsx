@@ -5,7 +5,6 @@ import { cn } from '@rectio/ui';
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { ProBadge } from '@/components/pro-badge';
 import { Segmented } from '@/components/segmented';
 import { TemplateFrame } from '@/components/templates/template-frame';
 import {
@@ -75,7 +74,6 @@ function TemplateText({
   return (
     <div className={cn('flex flex-col items-start gap-4', className)}>
       <p className="flex items-center gap-2 text-sm text-fg-muted">
-        <ProBadge />
         {CATEGORY_LABELS[template.category]}, {template.pages.length}{' '}
         {template.pages.length === 1 ? 'page' : 'pages'}
       </p>
@@ -91,19 +89,7 @@ function TemplateText({
       <p className="max-w-prose text-base text-pretty text-fg-muted">{template.description}</p>
       {/* The command and the link sit at the foot, so cards side by side line up. */}
       <div className="mt-auto flex max-w-full flex-col items-start gap-4">
-        <div className="flex max-w-full flex-col gap-2">
-          <CopyCommand command={template.command} className="max-w-full overflow-x-auto" />
-          <p className="text-sm text-fg-muted">
-            Needs a{' '}
-            <Link
-              href="/#pricing"
-              className="text-fg underline decoration-line-strong underline-offset-4 pointer-fine:hover:decoration-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-            >
-              rectio Pro license
-            </Link>
-            .
-          </p>
-        </div>
+        <CopyCommand command={template.command} className="max-w-full overflow-x-auto" />
         <div className="flex flex-wrap items-center gap-x-6">
           <Link href={template.previewHref} className={actionLink}>
             Live preview

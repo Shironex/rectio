@@ -3,7 +3,6 @@ import Link from 'next/link';
 
 import { CopyCommand } from '@/components/landing/copy-command';
 import { Footer } from '@/components/landing/footer';
-import { ProBadge } from '@/components/pro-badge';
 import { TemplateActions } from '@/components/templates/template-actions';
 import { TemplateFrame } from '@/components/templates/template-frame';
 import { CATEGORY_LABELS, readTemplates } from '@/lib/templates';
@@ -28,8 +27,8 @@ export default function TemplatesPage() {
             Templates
           </h1>
           <p className="site-enter site-step-1 text-lg text-pretty text-fg-muted">
-            Whole apps built only from the kit. Open one to use it as it ships: every page, at
-            desktop, tablet or phone width, in both themes.
+            Whole apps built only from the kit, free and MIT licensed like the rest. Open one to use
+            it as it ships: every page, at desktop, tablet or phone width, in both themes.
           </p>
         </header>
 
@@ -55,7 +54,6 @@ export default function TemplatesPage() {
                 </Link>
                 <div className="flex min-w-0 flex-col items-start gap-4 lg:col-span-5">
                   <p className="flex items-center gap-2 text-base text-fg-muted">
-                    <ProBadge />
                     {CATEGORY_LABELS[template.category]}, {template.pages.length}{' '}
                     {template.pages.length === 1 ? 'page' : 'pages'}
                   </p>
@@ -69,9 +67,6 @@ export default function TemplatesPage() {
                   <div className="mt-2 flex w-full flex-col items-start gap-2 border-t border-line pt-5">
                     <p className="text-sm text-fg-muted">Start a project from it</p>
                     <CopyCommand command={template.command} />
-                    <p className="text-sm text-fg-muted">
-                      The command asks for your Pro license key.
-                    </p>
                   </div>
                 </div>
               </li>

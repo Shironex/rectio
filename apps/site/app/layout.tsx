@@ -7,7 +7,7 @@ import { Provider } from '@/components/provider';
 import { THEME_STORAGE_KEY, siteDescription, siteName } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: { default: `${siteName}: finance UI for React`, template: `%s | ${siteName}` },
+  title: { default: `${siteName}: open source finance UI for React`, template: `%s | ${siteName}` },
   description: siteDescription,
 };
 

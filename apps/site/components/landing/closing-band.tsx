@@ -13,7 +13,8 @@ export function ClosingBand() {
             <span className="font-regular">Set your figures</span> right today.
           </h2>
           <p className="site-reveal site-step-1 text-lg text-pretty text-fg-muted">
-            The components and both themes are free. One command adds them to your project.
+            Every component, block and template is free and open source. One command adds them to
+            your project.
           </p>
         </div>
         <div className="site-reveal site-step-2 flex flex-wrap items-center gap-3">

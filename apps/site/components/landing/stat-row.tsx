@@ -6,8 +6,13 @@ import type { KitFacts } from './kit-facts';
  */
 export function StatRow({ kit }: { kit: KitFacts }) {
   const stats: { value: string; unit?: string; label: string; note: string }[] = [
-    { value: String(kit.components), label: 'components', note: 'Free, with both themes' },
-    { value: String(kit.blocks), label: 'finance blocks', note: 'Pro, installed as source' },
+    { value: String(kit.components), label: 'components', note: 'With both themes, MIT licensed' },
+    {
+      value: String(kit.blocks),
+      label: 'blocks',
+      note: 'Finance, SaaS, marketing and docs, installed as source',
+    },
+    { value: String(kit.templates), label: 'templates', note: 'Whole apps, live on this site' },
     { value: String(kit.tokens), label: 'tokens per theme mode', note: 'Every value a theme sets' },
     {
       value: kit.motionKb,

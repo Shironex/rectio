@@ -11,7 +11,6 @@ import { Footer } from '@/components/landing/footer';
 import { Hero } from '@/components/landing/hero';
 import { kitFacts } from '@/components/landing/kit-facts';
 import { PlainVsMotion } from '@/components/landing/plain-vs-motion';
-import { Pricing } from '@/components/landing/pricing';
 import { RegistryDemo } from '@/components/landing/registry-demo';
 import { StatRow } from '@/components/landing/stat-row';
 import { Section, SectionIntro } from '@/components/landing/section';
@@ -62,8 +61,8 @@ export default function Home() {
                 </>
               }
             >
-              Four of the {kit.blocks} pro finance blocks, running. Sort, filter, approve, add a
-              line: what you try here is what you install.
+              Four of the {kit.blocks} blocks, running. Sort, filter, approve, add a line: what you
+              try here is what you install.
             </SectionIntro>
             <Bench />
           </div>
@@ -147,26 +146,11 @@ export default function Home() {
                   </>
                 }
               >
-                Two ship free with every component. Packs for charts and printed statements are
-                next.
+                Two ship with the kit, each in light and dark. Packs for charts and printed
+                statements are next.
               </SectionIntro>
             }
           />
-        </Section>
-
-        <Section id="pricing" className="flex flex-col gap-10 py-16 md:py-24">
-          <SectionIntro
-            eyebrow="Pricing"
-            title={
-              <>
-                <span className="font-regular">Pay once.</span> Keep the source.
-              </>
-            }
-          >
-            The free tier is the whole component library. Pro adds motion, the finance blocks and
-            theme packs.
-          </SectionIntro>
-          <Pricing blocks={kit.blocks} />
         </Section>
 
         <Section className="grid gap-10 py-16 md:py-24 lg:grid-cols-12">

@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * Real output of the rectio CLI adding a pro block against the local registry (the license key
- * comes from the user config file), trimmed of the package install step. Long lines wrap.
+ * Real output of the rectio CLI adding a block against the local registry, trimmed of the package
+ * install step. Long lines wrap.
  */
 const SCRIPT = [
   { command: 'npx rectio add invoice-list' },

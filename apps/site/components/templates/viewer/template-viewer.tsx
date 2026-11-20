@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useRef, useState, useSyncExternalStore } from 'react';
 
 import { CopyCommand } from '@/components/landing/copy-command';
-import { ProBadge } from '@/components/pro-badge';
 import type { PreviewPage } from '@/lib/previews-url';
 import { useSiteTheme } from '@/lib/use-site-theme';
 import { deviceWidth, initialDevice, pathInPreview, routeFor, type DeviceId } from '@/lib/viewer';
@@ -96,7 +95,6 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
           <div className="flex min-w-0 flex-col">
             <h1 className="flex items-center gap-2 font-display text-xl font-heading tracking-tight text-fg">
               <span className="truncate">{template.title}</span>
-              <ProBadge />
             </h1>
             <p className="text-sm text-fg-muted">
               {template.category}, <span className="numeric">{pages.length}</span>{' '}
@@ -162,7 +160,7 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
         <div className="mx-auto flex w-full max-w-screen-2xl flex-wrap items-center gap-x-4 gap-y-2 px-4 pb-4 sm:px-6">
           <CopyCommand command={template.command} />
           <p className="text-sm text-fg-muted">
-            Templates are Pro: the command asks for your license key.
+            The command writes the whole app into a new folder, as your own source.
           </p>
         </div>
       </div>

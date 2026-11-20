@@ -6,8 +6,8 @@ const QUESTIONS = [
     a: 'No. rectio is its own library on Base UI primitives, with its own registry and CLI. It installs as source you own, and components are styled only through design tokens, so a theme restyles everything without a fork.',
   },
   {
-    q: 'What does the free tier include?',
-    a: 'Every component in these docs, the default and ledger themes, the rectio CLI, the registry and the MCP server. Pro adds the motion add-on, theme packs and the Pro finance blocks as they ship.',
+    q: 'Is all of it free?',
+    a: 'Yes. Everything is MIT licensed and in one public repository: the components, the motion add-on, the blocks, the templates, both themes, the CLI, the registry and the MCP server. Use it in client and commercial work, change it, ship it.',
   },
   {
     q: 'Which stacks does it support?',
@@ -24,6 +24,10 @@ const QUESTIONS = [
   {
     q: 'Can my coding agent use rectio?',
     a: 'Yes. rectio mcp runs a read-only MCP server with tools to list, search and read items, tokens and docs, and to get the exact add command. It works with Claude Code, Cursor and VS Code.',
+  },
+  {
+    q: 'Can I contribute?',
+    a: 'Please do. Bug reports, requests for components, blocks and templates, and pull requests for new components are all welcome. CONTRIBUTING.md in the repository covers the setup, the rules and the design bar I hold every item to.',
   },
 ] as const;
 

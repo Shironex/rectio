@@ -1,6 +1,6 @@
 export const siteName = 'rectio';
 export const siteDescription =
-  'Accessible React components and tokens for finance and back-office software: amounts, ledgers, approvals.';
+  'Open source React components, blocks and templates for finance and back-office software: amounts, ledgers, approvals. MIT licensed.';
 
 /** The two shipped themes. The site itself switches between them. */
 export const THEMES = [

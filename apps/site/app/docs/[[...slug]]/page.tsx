@@ -4,7 +4,6 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { getMDXComponents } from '@/components/mdx';
-import { ProBadge } from '@/components/pro-badge';
 import { source } from '@/lib/source';
 
 interface Props {
@@ -19,10 +18,7 @@ export default async function Page({ params }: Props) {
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
-      <div className="flex flex-wrap items-center gap-3">
-        <DocsTitle>{page.data.title}</DocsTitle>
-        {page.data.pro === true && <ProBadge />}
-      </div>
+      <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
       <DocsBody>
         <MDX components={getMDXComponents({ a: createRelativeLink(source, page) })} />

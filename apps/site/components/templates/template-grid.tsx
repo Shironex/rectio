@@ -4,8 +4,6 @@ import Link from 'next/link';
 
 import { CATEGORY_LABELS, readTemplates } from '@/lib/templates';
 
-import { ProBadge } from '../pro-badge';
-
 import { TemplateFrame } from './template-frame';
 
 /** Every template on the docs index: capture, name, category and one sentence each. */
@@ -34,7 +32,6 @@ export function TemplateGrid() {
                 </Link>
               </h2>
               <Badge>{CATEGORY_LABELS[template.category]}</Badge>
-              <ProBadge />
             </div>
             <p className="max-w-prose text-sm text-pretty text-fg-muted">{template.description}</p>
             {/* Positioned after the title's stretched link, so it sits above it and stays its own target. */}

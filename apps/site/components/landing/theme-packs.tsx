@@ -75,7 +75,7 @@ export function ThemePacks({ intro }: { intro: ReactNode }) {
                 >
                   {pack.name}
                 </h3>
-                <Badge tone="positive">Free, shipped</Badge>
+                <Badge tone="positive">Shipped</Badge>
               </div>
               <Money
                 amount={-61}

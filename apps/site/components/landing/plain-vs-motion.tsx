@@ -19,8 +19,6 @@ import {
 } from '@rectio/ui';
 import { useState } from 'react';
 
-import { ProBadge } from '@/components/pro-badge';
-
 // Named imports, not namespaces: a namespace import keeps every export of both packages.
 const KITS = {
   plain: { Button, Money, SelectContent, SelectItem },
@@ -68,7 +66,6 @@ function Panel({ kind }: { kind: keyof typeof KITS }) {
             <span className="text-accent-strong">{`'${source}'`}</span>
           </span>
         </code>
-        {kind === 'motion' && <ProBadge />}
       </div>
       <div className="flex flex-col gap-6 p-5 sm:p-6">
         <Field>

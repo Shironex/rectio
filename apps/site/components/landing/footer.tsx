@@ -8,7 +8,7 @@ const LINKS = [
   { href: '/templates', label: 'Templates' },
   { href: '/docs/cli', label: 'CLI' },
   { href: '/docs/mcp', label: 'MCP' },
-  { href: '/#pricing', label: 'Pricing' },
+  { href: 'https://github.com/Shironex/rectio', label: 'GitHub' },
 ] as const;
 
 export function Footer() {
@@ -17,7 +17,7 @@ export function Footer() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div className="flex flex-col gap-1">
           <Wordmark />
-          <p className="text-sm text-fg-muted">Made by noctcore.</p>
+          <p className="text-sm text-fg-muted">Made by noctcore. Free and MIT licensed.</p>
         </div>
         <nav aria-label="Footer">
           <ul className="grid grid-cols-2 gap-x-6 gap-y-2 sm:flex sm:flex-wrap">
