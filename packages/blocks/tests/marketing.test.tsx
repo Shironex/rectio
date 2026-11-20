@@ -222,7 +222,7 @@ describe('CookieConsent', () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
     render(<ConsentHarness onSave={onSave} />);
-    await user.click(screen.getByRole('button', { name: 'Choose cookies' }));
+    await user.click(screen.getByRole('button', { name: 'Manage cookies' }));
     const dialog = await screen.findByRole('dialog');
     const necessary = within(dialog).getByRole('switch', { name: /Necessary/ });
     expect(necessary).toBeChecked();
@@ -313,5 +313,30 @@ describe('hero wash', () => {
     expect(hero(container)?.className).toContain('from-accent-subtle');
     const cycle = render(<HeroWordCycle before="Close" words={['a', 'b']} wash="none" />);
     expect(hero(cycle.container)?.className).not.toContain('from-accent-subtle');
+  });
+});
+
+describe('CookieConsent on a phone', () => {
+  it('carries a short line for phones beside the full words, and Manage opens every choice', async () => {
+    const user = userEvent.setup();
+    render(
+      <CookieConsent
+        categories={CATEGORIES}
+        version="v1"
+        consent={null}
+        onSave={vi.fn()}
+        shortDescription="Only with your yes."
+      />,
+    );
+    const region = screen.getByRole('region', { name: 'We use cookies' });
+    expect(within(region).getByText('Only with your yes.')).toHaveClass('sm:hidden');
+    expect(within(region).getByText(/Necessary cookies keep the site working/)).toHaveClass(
+      'max-sm:hidden',
+    );
+    const manage = within(region).getByRole('button', { name: 'Manage cookies' });
+    // Manage leads on a phone; reject and accept keep the same weight beside it.
+    expect(manage.parentElement?.firstElementChild).toHaveTextContent('Reject all');
+    await user.click(manage);
+    expect(await screen.findByRole('dialog', { name: 'Cookie settings' })).toBeInTheDocument();
   });
 });
