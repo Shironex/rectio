@@ -56,12 +56,20 @@ const blockItems = (
   },
 ];
 
-/** A SaaS or app block, installed under `@blocks/saas/`, with its motioned twin beside it. */
-const saasItems = (name: string, title: string, description: string) => [
+/**
+ * A SaaS or app block, installed under `@blocks/saas/`, with its motioned twin beside it. `version`
+ * is the plain item's and `motionVersion` the twin's; bump each when its files change.
+ */
+const saasItems = (
+  name: string,
+  title: string,
+  description: string,
+  { version = '0.1.0', motionVersion = '0.1.0' }: { version?: string; motionVersion?: string } = {},
+) => [
   {
     name,
     type: 'block' as const,
-    version: '0.1.0',
+    version,
     title,
     description,
     categories: ['saas', 'blocks'],
@@ -70,7 +78,7 @@ const saasItems = (name: string, title: string, description: string) => [
   {
     name: `motion-${name}`,
     type: 'block' as const,
-    version: '0.1.0',
+    version: motionVersion,
     title: `Motion ${title}`,
     description: `${title} with entrances that play once and list items that arrive and leave in place.`,
     categories: ['saas', 'blocks', 'motion'],
@@ -1345,6 +1353,7 @@ export default defineRegistry({
           'notifications-center',
           'Notifications center',
           'A bell with the unread count, and the list behind it with All and Unread and mark as read.',
+          { version: '0.1.1' },
         ),
         ...saasItems(
           'changelog',

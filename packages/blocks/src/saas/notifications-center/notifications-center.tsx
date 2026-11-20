@@ -14,7 +14,7 @@ import {
   UserFocusIcon,
   type Icon,
 } from '@phosphor-icons/react';
-import { EmptyState, cn } from '@rectio/ui';
+import { EmptyState, ScrollArea, cn } from '@rectio/ui';
 import { useState, type ReactNode } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
@@ -127,7 +127,7 @@ export function NotificationsCenter({
         </button>
       }
     >
-      <div className="flex items-center justify-between gap-3 px-5 pt-3 pb-2">
+      <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-3">
         {/* The popup is named by its own title; this line only shows it. */}
         <p aria-hidden className="font-display text-lg font-heading tracking-tight">
           {title}
@@ -226,11 +226,8 @@ function NotificationsBody({
       />
     );
   } else {
-    content = (
-      <ul
-        aria-label="Notifications"
-        className={cn('flex flex-col', !inline && 'max-h-96 overflow-y-auto')}
-      >
+    const list = (
+      <ul aria-label="Notifications" className="flex flex-col">
         <Items>
           {shown.map((notification) => (
             <Item key={notification.id} className="border-t border-line first:border-t-0">
@@ -248,13 +245,16 @@ function NotificationsBody({
         </Items>
       </ul>
     );
+    // In the popover the list scrolls on its own, and its edges fade where more rows wait.
+    content = inline ? list : <ScrollArea className="max-h-96">{list}</ScrollArea>;
   }
 
   return (
     <div className="flex min-h-0 flex-col">
       {notifications.length > 0 && (
-        // Sticks under the panel title on a long page, so the filter stays in reach.
-        <div className="sticky top-0 z-10 bg-surface px-5 pb-3">
+        // Inline, it sticks under the panel title on a long page, so the filter stays in reach. In
+        // the popover it sits on the popup's own surface, under the title, with no band of its own.
+        <div className={cn('px-5 pb-3', inline && 'sticky top-0 z-10 bg-surface')}>
           <Segmented
             label="Show"
             value={filter}
@@ -351,9 +351,7 @@ function NotificationRow({
         {notification.body !== undefined && (
           <span className="line-clamp-2 text-sm text-fg-muted">{notification.body}</span>
         )}
-        {/* The meta line: the unread dot beside the moment, said once by the title's prefix. */}
-        <span className="flex items-center gap-1.5 text-xs text-fg-muted">
-          {!notification.read && <span aria-hidden className="size-2 rounded-full bg-accent" />}
+        <span className="text-xs text-fg-muted">
           <time
             dateTime={isoDateTime(notification.at)}
             title={formatDateTime(notification.at, locale)}
@@ -361,6 +359,11 @@ function NotificationRow({
             {relativeTime(notification.at, now, locale)}
           </time>
         </span>
+      </span>
+      {/* The unread dot, level with the title at the row's end so a scan down the edge finds every
+          unread row; said once by the title's prefix. */}
+      <span aria-hidden className="flex h-5 w-2 shrink-0 items-center">
+        {!notification.read && <span className="size-2 rounded-full bg-accent" />}
       </span>
     </button>
   );
