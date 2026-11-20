@@ -23,11 +23,14 @@ export function CopyCommand({ command, className }: { command: string; className
         className,
       )}
     >
-      <span aria-hidden className="self-start pt-2 text-fg-muted select-none pointer-coarse:pt-2.5">
-        $
+      {/* The prompt sits in the same line box as the command, so both share a baseline when a long
+          command wraps on a narrow screen instead of hiding behind a scroll. */}
+      <span className="min-w-0 break-words">
+        <span aria-hidden className="me-1.5 text-fg-muted select-none">
+          $
+        </span>
+        <code>{command}</code>
       </span>
-      {/* A long command wraps on a narrow screen rather than hiding behind a scroll. */}
-      <code className="ms-1.5 min-w-0 break-words">{command}</code>
       <button
         type="button"
         onClick={() => {
