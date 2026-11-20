@@ -16,7 +16,7 @@ pnpm dlx @rectio/cli add theme-scope
 ```tsx
 import { ThemeScope } from '@/components/ui/theme-scope';
 
-<ThemeScope theme="ledger" mode="dark" density="compact">
+<ThemeScope mode="dark" density="compact">
   <Ledger />
 </ThemeScope>;
 ```
@@ -25,11 +25,11 @@ import { ThemeScope } from '@/components/ui/theme-scope';
 background, the theme's sans face and its text colour. Every token below it follows.
 
 Popups opened inside it (select lists, dialogs, date picker popups, toasts) portal into the scope
-instead of the document body, so they keep its tokens. One page can show several themes side by
-side, or one theme per tenant.
+instead of the document body, so they keep its tokens. One page can show both modes side by side,
+a dark panel in a light page, or a theme of your own per tenant.
 
 Without `mode`, the scope follows the system colour scheme. See [Theming](/docs/theming) for the
-attributes and what each theme changes.
+attributes and what the theme sets.
 
 ## Props
 
@@ -40,7 +40,7 @@ Every prop of a `div` is accepted as well.
     theme: {
       type: 'string',
       default: "'default'",
-      description: 'A theme id, such as default or ledger.',
+      description: 'A theme id: default, or the id of a theme of your own.',
     },
     mode: {
       type: "'light' | 'dark'",

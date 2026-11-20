@@ -3,7 +3,7 @@ import { CaretDownIcon } from '@phosphor-icons/react/dist/ssr';
 const QUESTIONS = [
   {
     q: 'Is all of it free?',
-    a: 'Yes. Everything is MIT licensed and in one public repository: the components, the motion add-on, the blocks, the templates, both themes, the CLI, the registry and the MCP server. Use it in client and commercial work, change it, ship it.',
+    a: 'Yes. Everything is MIT licensed and in one public repository: the components, the motion add-on, the blocks, the templates, the theme, the CLI, the registry and the MCP server. Use it in client and commercial work, change it, ship it.',
   },
   {
     q: 'Is this another restyled component kit?',

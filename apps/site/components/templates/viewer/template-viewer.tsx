@@ -7,7 +7,7 @@ import { useRef, useState, useSyncExternalStore } from 'react';
 
 import { CopyCommand } from '@/components/landing/copy-command';
 import type { PreviewPage } from '@/lib/previews-url';
-import { useSiteTheme } from '@/lib/use-site-theme';
+import { useSiteMode } from '@/lib/use-site-mode';
 import { deviceWidth, initialDevice, pathInPreview, routeFor, type DeviceId } from '@/lib/viewer';
 
 import { PreviewFrame, type Look } from './preview-frame';
@@ -46,16 +46,16 @@ const urlOf = (base: string, path: string) => (path === '/' ? `${base}/` : `${ba
 
 /**
  * A template, live: the real static build in a frame at desktop, tablet or phone width, any of its
- * pages, in either theme and mode, with the way to open it whole, its docs and its install command.
+ * pages, in light and dark, with the way to open it whole, its docs and its install command.
  * The page on show is kept in the address (`?page=/invoices`), so a view can be shared.
  */
 export function TemplateViewer({ template }: { template: ViewerTemplate }) {
   const { base, pages } = template;
   const routes = pages.map((p) => p.route);
   const first = pages[0]?.path ?? '/';
-  const site = useSiteTheme();
+  const siteMode = useSiteMode();
   const [chosenLook, setLook] = useState<Look | null>(null);
-  const look = chosenLook ?? site;
+  const look = chosenLook ?? { mode: siteMode };
   const stageRef = useRef<HTMLDivElement>(null);
   const stage = useElementSize(stageRef);
   const [chosenDevice, setDevice] = useState<DeviceId | null>(null);

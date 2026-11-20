@@ -1,11 +1,12 @@
-/** The tokens the theme showcase reads out, as authored in @rectio/tokens. */
+/** The tokens the light and dark showcase reads out, as authored in @rectio/tokens. */
 export const READOUT = [
-  { token: '--rx-font-family-display', label: 'Headings', format: 'family' },
-  { token: '--rx-radius-control', label: 'Corners', format: 'raw' },
-  { token: '--rx-accent', label: 'Accent', format: 'colour', swatch: 'bg-accent' },
-  { token: '--rx-surface-canvas', label: 'Canvas', format: 'colour', swatch: 'bg-surface-canvas' },
-  { token: '--rx-motion-duration-count', label: 'Count-up', format: 'raw' },
+  { token: '--rx-surface-canvas', label: 'Canvas', swatch: 'bg-surface-canvas' },
+  { token: '--rx-surface-raised', label: 'Raised surface', swatch: 'bg-surface-raised' },
+  { token: '--rx-text', label: 'Text', swatch: 'bg-fg' },
+  { token: '--rx-border', label: 'Lines', swatch: 'bg-line' },
+  { token: '--rx-accent-strong', label: 'Accent text', swatch: 'bg-accent-strong' },
 ] as const;
 
 export type ReadoutToken = (typeof READOUT)[number]['token'];
-export type Readout = Record<string, Record<string, Record<ReadoutToken, string>>>;
+/** The readout values of the default theme, per mode. */
+export type Readout = Record<string, Record<ReadoutToken, string>>;

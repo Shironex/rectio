@@ -6,7 +6,7 @@
 }
 
 /*
- * The theme morph. The new theme opens as a circle from the switch that was pressed; with reduced
+ * The mode morph. The new mode opens as a circle from the switch that was pressed; with reduced
  * motion it crossfades instead, gentler but still a transition.
  */
 ::view-transition-old(root),

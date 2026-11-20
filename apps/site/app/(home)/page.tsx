@@ -147,8 +147,8 @@ export default function Home() {
                   </>
                 }
               >
-                Two ship with the kit, each in light and dark. I plan two more, for charts and
-                printed statements. All of them MIT licensed.
+                One ships with the kit, in light and dark, and a theme of your own is one more file.
+                I plan two packs, for charts and printed statements. All of them MIT licensed.
               </SectionIntro>
             }
           />

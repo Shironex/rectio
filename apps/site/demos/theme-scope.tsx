@@ -3,25 +3,25 @@
 import { Badge, Button, Money, ThemeScope } from '@rectio/ui';
 
 const SCOPES = [
-  { theme: 'default', mode: 'light' },
-  { theme: 'ledger', mode: 'light' },
-  { theme: 'default', mode: 'dark' },
-  { theme: 'ledger', mode: 'dark' },
+  { mode: 'light', density: 'comfortable' },
+  { mode: 'dark', density: 'comfortable' },
+  { mode: 'light', density: 'compact' },
+  { mode: 'dark', density: 'compact' },
 ] as const;
 
 export default function ThemeScopeDemo() {
   return (
     <div className="grid w-full gap-3 sm:grid-cols-2">
-      {SCOPES.map(({ theme, mode }) => (
+      {SCOPES.map(({ mode, density }) => (
         <ThemeScope
-          key={`${theme}-${mode}`}
-          theme={theme}
+          key={`${mode}-${density}`}
           mode={mode}
+          density={density}
           className="flex flex-col gap-4 rounded-panel border border-line p-5"
         >
           <div className="flex items-center justify-between gap-3">
             <span className="font-mono text-xs text-fg-subtle">
-              {theme}, {mode}
+              {mode}, {density}
             </span>
             <Badge tone="positive">Approved</Badge>
           </div>

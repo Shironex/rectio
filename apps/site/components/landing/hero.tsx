@@ -17,7 +17,7 @@ function facts(kit: KitFacts) {
     `${String(kit.components)} components`,
     `${String(kit.blocks)} blocks`,
     `${String(kit.templates)} templates`,
-    `${String(kit.themes)} themes, light and dark`,
+    'light and dark modes',
     `${String(kit.tokens)} tokens per theme`,
     `motion add-on, ${kit.motionKb} kB gzip`,
     'keyboard complete',

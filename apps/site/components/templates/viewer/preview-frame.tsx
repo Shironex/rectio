@@ -3,11 +3,10 @@
 import { Skeleton, cn } from '@rectio/ui';
 import { useEffect, useRef, useState } from 'react';
 
-import type { Mode, ThemeId } from '@/lib/site';
+import type { Mode } from '@/lib/site';
 import { fitScale } from '@/lib/viewer';
 
 export interface Look {
-  theme: ThemeId;
   mode: Mode;
 }
 
@@ -18,21 +17,20 @@ const SLOW_MS = 8000;
 const FOLLOW_MS = 250;
 
 /**
- * Every template keeps its look on <html> as `data-theme` and `data-mode`, and follows changes to
- * them. The preview is served from the site's own origin, so the viewer sets the same attributes
- * the template's own switch would: tokens only, nothing in the template changes.
+ * Every template keeps its mode on <html> as `data-mode`, and follows changes to it. The preview is
+ * served from the site's own origin, so the viewer sets the same attribute the template's own
+ * switch would: tokens only, nothing in the template changes.
  */
 function applyLook(doc: Document, look: Look) {
   const root = doc.documentElement;
-  if (root.dataset.theme !== look.theme) root.dataset.theme = look.theme;
   if (root.dataset.mode !== look.mode) root.dataset.mode = look.mode;
 }
 
 function readLook(win: Window): Look {
-  const { theme, mode } = win.document.documentElement.dataset;
+  const { mode } = win.document.documentElement.dataset;
   const dark =
     mode === undefined ? win.matchMedia('(prefers-color-scheme: dark)').matches : mode === 'dark';
-  return { theme: theme === 'ledger' ? 'ledger' : 'default', mode: dark ? 'dark' : 'light' };
+  return { mode: dark ? 'dark' : 'light' };
 }
 
 /** The frame's document, or null when it is not on the site's origin (nothing to drive then). */
@@ -114,13 +112,13 @@ export function PreviewFrame({
     const observer = new MutationObserver(() => {
       const next = readLook(win);
       const current = latest.current.look;
-      if (next.theme !== current.theme || next.mode !== current.mode) {
+      if (next.mode !== current.mode) {
         latest.current.onLookChange(next);
       }
     });
     observer.observe(doc.documentElement, {
       attributes: true,
-      attributeFilter: ['data-theme', 'data-mode'],
+      attributeFilter: ['data-mode'],
     });
     return () => {
       clearInterval(timer);

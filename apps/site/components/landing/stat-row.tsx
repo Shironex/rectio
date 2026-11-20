@@ -9,7 +9,7 @@ export function StatRow({ kit }: { kit: KitFacts }) {
     {
       value: String(kit.components),
       label: 'components',
-      note: 'With both themes, light and dark',
+      note: 'Each in light and dark',
     },
     {
       value: String(kit.blocks),

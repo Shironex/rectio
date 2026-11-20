@@ -57,7 +57,6 @@ export interface KitFacts {
   families: Record<string, number>;
   templates: number;
   motionTwins: number;
-  themes: number;
   modes: number;
   tokens: number;
   motionKb: string;
@@ -77,7 +76,6 @@ export function kitFacts(): KitFacts {
     families,
     templates: templateCount(),
     motionTwins: motionTwins(),
-    themes: themes.length,
     modes: Object.keys(first).length,
     tokens: Object.keys(Object.values(first)[0] ?? {}).length,
     motionKb: motionGzipKb(),

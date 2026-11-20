@@ -18,7 +18,7 @@ function setup(overrides: Partial<Parameters<typeof ViewerControls>[0]> = {}) {
     onRoute: vi.fn(),
     device: 'desktop' as const,
     onDevice: vi.fn(),
-    look: { theme: 'default' as const, mode: 'light' as const },
+    look: { mode: 'light' as const },
     onLook: vi.fn(),
     ...overrides,
   };
@@ -45,18 +45,15 @@ describe('ViewerControls', () => {
     expect(props.onDevice).toHaveBeenCalledWith('phone', expect.anything());
   });
 
-  it('changes theme and mode separately, keeping the other', async () => {
+  it('changes the mode', async () => {
     const props = setup();
-    await userEvent.click(screen.getByRole('button', { name: 'Ledger' }));
-    expect(props.onLook).toHaveBeenLastCalledWith({ theme: 'ledger', mode: 'light' });
     await userEvent.click(screen.getByRole('button', { name: 'Dark' }));
-    expect(props.onLook).toHaveBeenLastCalledWith({ theme: 'default', mode: 'dark' });
+    expect(props.onLook).toHaveBeenLastCalledWith({ mode: 'dark' });
   });
 
   it('marks the current choices as pressed', () => {
-    setup({ device: 'tablet', look: { theme: 'ledger', mode: 'dark' } });
+    setup({ device: 'tablet', look: { mode: 'dark' } });
     expect(screen.getByRole('button', { name: 'Tablet' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Ledger' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'true');
   });
 });

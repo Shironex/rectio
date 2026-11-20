@@ -5,30 +5,22 @@ import { useTheme } from 'next-themes';
 import { useRef, type KeyboardEvent, type PointerEvent } from 'react';
 
 import { Segmented } from '@/components/segmented';
-import { setSiteLook, useSiteTheme } from '@/lib/use-site-theme';
+import type { Mode } from '@/lib/site';
+import { setSiteMode, useSiteMode } from '@/lib/use-site-mode';
 
 import { READOUT, type Readout } from './readout';
 
-const LOOKS = {
-  calm: { theme: 'default', mode: 'light' },
-  ledger: { theme: 'ledger', mode: 'dark' },
-} as const;
-type Look = keyof typeof LOOKS;
-
-/** One themed copy of the statement: the same markup, its own theme scope and token values. */
-function Statement({ look, values }: { look: Look; values: Readout }) {
-  const { theme, mode } = LOOKS[look];
-  const shown = values[theme]?.[mode];
+/** One copy of the statement per mode: the same markup, its own scope and token values. */
+function Statement({ mode, values }: { mode: Mode; values: Readout }) {
+  const shown = values[mode];
   return (
-    <ThemeScope theme={theme} mode={mode} className="flex h-full flex-col">
+    <ThemeScope mode={mode} className="flex h-full flex-col">
       <div className="flex flex-col gap-3 border-b border-line px-6 pt-7 pb-6 sm:px-8">
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-fg-muted">Quarter close, Q1 2026</p>
-          <code className="font-mono text-xs text-fg-muted">
-            {theme}, {mode}
-          </code>
+          <code className="font-mono text-xs text-fg-muted">{mode}</code>
         </div>
-        {/* Title on the left, figure on the right: at the default split each theme shows one. */}
+        {/* Title on the left, figure on the right: at the default split each mode shows one. */}
         <div className="flex items-end justify-between gap-4">
           <p className="font-display text-xl font-heading tracking-tight text-fg sm:text-3xl">
             Net position
@@ -49,16 +41,12 @@ function Statement({ look, values }: { look: Look; values: Readout }) {
           >
             <dt className="truncate text-sm text-fg">{item.label}</dt>
             <dd className="flex max-w-1/2 min-w-0 items-center justify-end gap-2 font-mono text-xs text-fg sm:text-sm">
-              {'swatch' in item && (
-                <span
-                  aria-hidden
-                  className={`size-4 shrink-0 rounded-badge border border-line-strong ${item.swatch}`}
-                />
-              )}
+              <span
+                aria-hidden
+                className={`size-4 shrink-0 rounded-badge border border-line-strong ${item.swatch}`}
+              />
               {/* On a phone a colour shows as its swatch alone; the value would cross the split. */}
-              <span className={`truncate ${'swatch' in item ? 'hidden sm:inline' : ''}`}>
-                {shown?.[item.token] ?? ''}
-              </span>
+              <span className="hidden truncate sm:inline">{shown?.[item.token] ?? ''}</span>
             </dd>
           </div>
         ))}
@@ -70,7 +58,7 @@ function Statement({ look, values }: { look: Look; values: Readout }) {
 const STEP = 5;
 
 /**
- * Both shipped themes stacked: calm below, ledger on top, clipped from the left at `--site-split`.
+ * Both modes of the theme stacked: light below, dark on top, clipped from the left at `--site-split`.
  * Drag anywhere on it (pointer capture keeps the drag when the pointer leaves), or focus the handle
  * and use the arrow keys, Home and End. The split moves through a CSS variable, not React state.
  */
@@ -86,7 +74,7 @@ function CompareSlider({ values }: { values: Readout }) {
     handle.current?.setAttribute('aria-valuenow', String(Math.round(next)));
     handle.current?.setAttribute(
       'aria-valuetext',
-      `${String(Math.round(100 - next))}% ledger, ${String(Math.round(next))}% calm`,
+      `${String(Math.round(100 - next))}% dark, ${String(Math.round(next))}% light`,
     );
   };
   const fromPointer = (event: PointerEvent<HTMLDivElement>) => {
@@ -125,20 +113,20 @@ function CompareSlider({ values }: { values: Readout }) {
       }}
     >
       <div className="col-start-1 row-start-1 min-w-0">
-        <Statement look="calm" values={values} />
+        <Statement mode="light" values={values} />
       </div>
       <div aria-hidden className="site-split col-start-1 row-start-1 min-w-0">
-        <Statement look="ledger" values={values} />
+        <Statement mode="dark" values={values} />
       </div>
       <div
         ref={handle}
         role="slider"
         tabIndex={0}
-        aria-label="Split between the calm and ledger themes"
+        aria-label="Split between the light and dark modes"
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={50}
-        aria-valuetext="50% ledger, 50% calm"
+        aria-valuetext="50% dark, 50% light"
         onKeyDown={onKey}
         // Physical left, like the clip it follows.
         style={{ left: 'var(--site-split, 50%)' }}
@@ -158,43 +146,40 @@ function CompareSlider({ values }: { values: Readout }) {
 }
 
 /**
- * The theme curtain: a persistent Default or Ledger switch for the whole page, opening the new look
- * as a circle from the pressed option, and the two themes side by side under a draggable split.
+ * The mode curtain: a persistent Light or Dark switch for the whole page, opening the new mode as
+ * a circle from the pressed option, and the two modes side by side under a draggable split.
  */
 export function ThemeCurtain({ values }: { values: Readout }) {
-  const { theme, mode } = useSiteTheme();
+  const mode = useSiteMode();
   const { setTheme } = useTheme();
-  const look: Look = theme === 'ledger' ? 'ledger' : 'calm';
 
   return (
     <div className="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-16">
       <div className="flex flex-col gap-8 lg:col-span-5">
         <div className="flex flex-col gap-4">
           <h2 className="site-reveal site-headline text-fg">
-            <span className="font-regular">Calm by day.</span> Ledger at close.
+            <span className="font-regular">Light by day.</span> Dark at close.
           </h2>
           <p className="site-reveal site-step-1 max-w-md text-lg text-pretty text-fg-muted">
-            A theme is a token file. Switch this page between the two that ship: type, corners,
-            colour and the pace of motion follow, and no component changes.
+            Every colour token has a light and a dark value. Switch this page between them:
+            surfaces, text, lines and shadows follow, and no component changes.
           </p>
         </div>
         <div className="site-reveal site-step-2 flex flex-col items-start gap-3">
           <Segmented
-            label="Page look"
+            label="Page mode"
             size="md"
-            value={look}
+            value={mode}
             options={[
-              { value: 'calm', label: 'Default' },
-              { value: 'ledger', label: 'Ledger' },
+              { value: 'light', label: 'Light' },
+              { value: 'dark', label: 'Dark' },
             ]}
             onChange={(next, origin) => {
-              setSiteLook(LOOKS[next], setTheme, origin);
+              setSiteMode(next, setTheme, origin);
             }}
           />
           <code className="font-mono text-sm text-fg-muted">
-            {'<html data-theme="'}
-            <span className="text-fg">{theme}</span>
-            {'" data-mode="'}
+            {'<html data-mode="'}
             <span className="text-fg">{mode}</span>
             {'">'}
           </code>

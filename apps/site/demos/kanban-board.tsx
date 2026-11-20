@@ -102,7 +102,7 @@ const CARDS: KanbanCard[] = [
     id: 'c10',
     columnId: 'done',
     reference: 'FER-201',
-    title: 'Dark mode for the ledger theme',
+    title: 'Dark mode for the reports page',
     tags: ['Design'],
     assignee: { name: 'Aiyana Brooks' },
   },

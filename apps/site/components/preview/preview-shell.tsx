@@ -4,8 +4,8 @@ import { Tabs } from '@base-ui/react/tabs';
 import { ThemeScope, cn } from '@rectio/ui';
 import { useState, type ReactNode } from 'react';
 
-import { MODES, THEMES, type Mode, type ThemeId } from '@/lib/site';
-import { useSiteTheme } from '@/lib/use-site-theme';
+import { MODES, type Mode } from '@/lib/site';
+import { useSiteMode } from '@/lib/use-site-mode';
 
 import { Segmented } from '../segmented';
 
@@ -15,8 +15,8 @@ const TAB =
   'h-8 cursor-pointer border-b-2 border-transparent px-1 text-sm font-medium text-fg-muted transition-colors duration-fast ease-standard pointer-fine:hover:text-fg data-active:border-accent data-active:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
 
 /**
- * A live preview with its code. The preview sits in its own theme scope, so its theme and mode
- * switch without touching the page; it starts on the page's own.
+ * A live preview with its code. The preview sits in its own theme scope, so its mode switches
+ * without touching the page; it starts on the page's own.
  */
 export function PreviewShell({
   plain,
@@ -36,12 +36,10 @@ export function PreviewShell({
   importLine?: string | undefined;
   align?: 'center' | 'start' | undefined;
 }) {
-  const site = useSiteTheme();
-  const [theme, setTheme] = useState<ThemeId | null>(null);
+  const siteMode = useSiteMode();
   const [mode, setMode] = useState<Mode | null>(null);
   const [variant, setVariant] = useState<Variant>('plain');
-  const shownTheme = theme ?? site.theme;
-  const shownMode = mode ?? site.mode;
+  const shownMode = mode ?? siteMode;
   const isMotion = variant === 'motion' && motion !== undefined;
 
   return (
@@ -71,12 +69,6 @@ export function PreviewShell({
           />
         )}
         <Segmented
-          label="Preview theme"
-          value={shownTheme}
-          onChange={setTheme}
-          options={THEMES.map((t) => ({ value: t.id, label: t.name }))}
-        />
-        <Segmented
           label="Preview mode"
           value={shownMode}
           onChange={setMode}
@@ -85,7 +77,6 @@ export function PreviewShell({
       </div>
       <Tabs.Panel value="preview" keepMounted>
         <ThemeScope
-          theme={shownTheme}
           mode={shownMode}
           className={cn(
             'flex min-h-44 flex-wrap gap-4 overflow-x-auto bg-surface-canvas p-4 text-fg *:max-w-full *:min-w-0 sm:p-8',

@@ -4,7 +4,7 @@ description: React components and design tokens for finance and back-office scre
 ---
 
 rectio is a React design library for the screens finance teams work in: expense reports, ledgers,
-invoices, approvals. It ships tokens, two themes and accessible components on
+invoices, approvals. It ships tokens, a theme and accessible components on
 [Base UI](https://base-ui.com), styled only through the tokens.
 
 It is for product engineers who build those screens, and for the people who use them all day:
@@ -20,7 +20,7 @@ your edits from its own updates.
 | Part                                  | What it is                                                                                                                                                     |
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Tokens                                | Colour, type, radius, shadow, density and motion values as CSS variables, with a Tailwind v4 theme that maps utilities onto them.                              |
-| Themes                                | `default` and `ledger`, each in light and dark, with a compact density.                                                                                        |
+| Themes                                | `default`, in light and dark, with a compact density. A theme of your own is one more token file.                                                              |
 | [Components](/docs/components/button) | Forms, overlays, navigation, data display and finance primitives: Button, Field, Select, DataTable, DatePicker, Money, Dialog, Sidebar, Command menu and more. |
 | [Blocks](/docs/blocks)                | Composed sections for finance, SaaS, marketing and docs screens, most with a motion twin.                                                                      |
 | [Templates](/docs/templates)          | Whole Next.js apps built from the kit, with a live preview of every page.                                                                                      |
@@ -30,7 +30,7 @@ your edits from its own updates.
 
 ### Free and open source
 
-Everything here is free and MIT licensed: the components, the tokens and both themes, the
+Everything here is free and MIT licensed: the components, the tokens and the theme, the
 [motion add-on](/docs/motion), the blocks, the templates, the CLI, the registry and the MCP server.
 The source lives at [github.com/Shironex/rectio](https://github.com/Shironex/rectio), where bug
 reports, requests and pull requests are welcome.
@@ -51,7 +51,7 @@ reports, requests and pull requests are welcome.
     Set up a project with `rectio init` and add your first component.
   </Card>
   <Card title="Theming" href="/docs/theming">
-    The token tiers, the two themes, modes and density.
+    The token tiers, the theme, modes and density.
   </Card>
   <Card title="Components" href="/docs/components/button">
     Every component with a live preview, its props and its keyboard behaviour.

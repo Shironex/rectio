@@ -10,7 +10,7 @@ import { CATEGORY_LABELS, readTemplates } from '@/lib/templates';
 export const metadata: Metadata = {
   title: 'Templates',
   description:
-    'Complete Next.js apps built from the rectio kit. Open any of them live, page by page, in both themes.',
+    'Complete Next.js apps built from the rectio kit. Open any of them live, page by page, in light and dark.',
 };
 
 /**
@@ -28,7 +28,7 @@ export default function TemplatesPage() {
           </h1>
           <p className="site-enter site-step-1 text-lg text-pretty text-fg-muted">
             Whole apps built only from the kit, MIT licensed like the rest. Open one to see how it
-            ships: every page at desktop, tablet and phone width, in both themes.
+            ships: every page at desktop, tablet and phone width, in light and dark.
           </p>
         </header>
 

@@ -1,8 +1,7 @@
 /**
  * Headless captures of the built site for a design round: `pnpm --filter @rectio/site shoot 3`.
  * Build first (`pnpm --filter @rectio/site build`). Writes to .rounds/site-round-<n>/ at the repo
- * root (gitignored): every page on desktop and phone, light and dark, both site themes for the
- * landing, frame strips of the landing's scroll-driven parts, a scroll video of the landing, and
+ * root (gitignored): every page on desktop and phone, light and dark, frame strips of the landing's scroll-driven parts, a scroll video of the landing, and
  * metrics.json (LCP, CLS, JS by page). `shoot 3 landing` captures the landing only. It serves out/
  * itself and never touches the screen.
  */
@@ -85,7 +84,7 @@ async function openPage(
   browser: Browser,
   base: string,
   path: string,
-  options: { width: number; height: number; mobile: boolean; mode: string; theme: string },
+  options: { width: number; height: number; mobile: boolean; mode: string },
 ) {
   const context = await browser.newContext({
     viewport: { width: options.width, height: options.height },
@@ -94,13 +93,6 @@ async function openPage(
     hasTouch: options.mobile,
     colorScheme: options.mode as 'light' | 'dark',
   });
-  await context.addInitScript((theme) => {
-    try {
-      localStorage.setItem('rectio-site-theme', theme);
-    } catch {
-      // A capture without storage shows the default theme.
-    }
-  }, options.theme);
   const page = await context.newPage();
   await page.goto(base + path, { waitUntil: 'networkidle' });
   return { context, page };
@@ -117,37 +109,26 @@ try {
   for (const view of VIEWPORTS) {
     for (const mode of MODES) {
       for (const entry of PAGES.filter((p) => only === undefined || p.name === only)) {
-        const themes = entry.name === 'landing' ? ['default', 'ledger'] : ['default'];
-        for (const theme of themes) {
-          const { context, page } = await openPage(browser, base, entry.path, {
-            ...view,
-            mode,
-            theme,
-          });
-          await walk(page);
-          await settle(page);
-          const file = `${entry.name}-${theme}-${view.name}-${mode}.png`;
-          await page.screenshot({ path: join(out, `fold-${file}`) });
-          // A full-page still is taken in one frame, so scroll-linked reveals below the fold have
-          // not run in it. Show them at rest for this still; the fold shot and video keep motion.
-          await page.addStyleTag({ content: '.site-reveal { animation: none !important; }' });
-          await page.screenshot({ path: join(out, file), fullPage: true });
-          shots.push(file);
-          await context.close();
-        }
+        const { context, page } = await openPage(browser, base, entry.path, { ...view, mode });
+        await walk(page);
+        await settle(page);
+        const file = `${entry.name}-${view.name}-${mode}.png`;
+        await page.screenshot({ path: join(out, `fold-${file}`) });
+        // A full-page still is taken in one frame, so scroll-linked reveals below the fold have
+        // not run in it. Show them at rest for this still; the fold shot and video keep motion.
+        await page.addStyleTag({ content: '.site-reveal { animation: none !important; }' });
+        await page.screenshot({ path: join(out, file), fullPage: true });
+        shots.push(file);
+        await context.close();
       }
     }
   }
 
   // Frame strips: the landing at fixed scroll positions through its scroll-driven parts (the hero
-  // window settling, the pinned sequence, the theme curtain), one still each, then a contact sheet.
+  // window settling, the pinned sequence, the mode curtain), one still each, then a contact sheet.
   for (const view of VIEWPORTS) {
     for (const mode of MODES) {
-      const { context, page } = await openPage(browser, base, '/', {
-        ...view,
-        mode,
-        theme: 'default',
-      });
+      const { context, page } = await openPage(browser, base, '/', { ...view, mode });
       await walk(page);
       await settle(page);
       const frames: string[] = [];
@@ -292,7 +273,7 @@ try {
   writeFileSync(join(out, 'metrics.json'), `${JSON.stringify(metrics, null, 2)}\n`);
   console.log(JSON.stringify(metrics, null, 2));
 
-  // A scroll video of the landing page, desktop light, with the theme switched halfway.
+  // A scroll video of the landing page, desktop light, switched to dark halfway.
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },
     colorScheme: 'light',
@@ -302,18 +283,18 @@ try {
   await page.goto(base, { waitUntil: 'networkidle' });
   await page.waitForTimeout(3200);
   const total = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
-  // The look switch of the theme curtain is pressed once it is well inside the viewport.
-  const ledger = page.getByRole('group', { name: 'Page look' }).getByRole('button', {
-    name: 'Ledger',
+  // The mode switch of the curtain is pressed once it is well inside the viewport.
+  const dark = page.getByRole('group', { name: 'Page mode' }).getByRole('button', {
+    name: 'Dark',
   });
   let switched = false;
   for (let y = 0; y <= total; y += 14) {
     await page.mouse.wheel(0, 14);
     await page.waitForTimeout(16);
-    if (!switched && (await ledger.count()) > 0) {
-      const box = await ledger.boundingBox();
+    if (!switched && (await dark.count()) > 0) {
+      const box = await dark.boundingBox();
       if (box !== null && box.y > 200 && box.y < 600) {
-        await ledger.click();
+        await dark.click();
         await page.waitForTimeout(1400);
         switched = true;
       }

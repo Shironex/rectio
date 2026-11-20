@@ -1,7 +1,6 @@
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import type { ReactNode } from 'react';
 
-import { ThemeSwitch } from '@/components/theme-switch';
 import { baseOptions } from '@/lib/layout.shared';
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -14,25 +13,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      <HomeLayout
-        {...base}
-        links={[
-          ...(base.links ?? []),
-          {
-            type: 'custom',
-            on: 'all',
-            secondary: true,
-            children: (
-              // The secondary nav is a list: its custom item must be a list item.
-              <li className="list-none">
-                <ThemeSwitch />
-              </li>
-            ),
-          },
-        ]}
-      >
-        {children}
-      </HomeLayout>
+      <HomeLayout {...base}>{children}</HomeLayout>
     </>
   );
 }

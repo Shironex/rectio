@@ -22,7 +22,7 @@ alias, writes `rectio.json`, and installs `tokens`, a theme and `cn`.
 [Installation](/docs/installation) walks through it.
 
 ```sh
-rectio init [--theme ledger] [--css src/index.css] [--framework vite|next|tanstack-start]
+rectio init [--theme <id>] [--css src/index.css] [--framework vite|next|tanstack-start]
             [--registry <url|folder>] [--force] [--dry-run] [--no-install]
 ```
 
@@ -43,7 +43,7 @@ Starts a new project from a [template](/docs/templates): a complete Next.js app 
 first commit.
 
 ```sh
-rectio init --template finance-app [folder] [--theme ledger] [--registry <url|folder>]
+rectio init --template finance-app [folder] [--theme <id>] [--registry <url|folder>]
             [--force] [--dry-run] [--no-install]
 ```
 
@@ -53,7 +53,7 @@ rectio init --template finance-app [folder] [--theme ledger] [--registry <url|fo
    pass `--force`. The package name follows the folder name.
 3. Writes `rectio.json` with `@/` aliases (the template's `tsconfig.json` maps `@/*` to the project
    root), then installs the kit items as `add` does: components under `components/ui`, blocks under
-   `components/blocks`, helpers under `lib`, tokens and both themes under `styles/rectio`. The
+   `components/blocks`, helpers under `lib`, tokens and the theme under `styles/rectio`. The
    template's imports already point at those paths.
 4. Records the kit items in `rectio.lock.json`, so `diff` and later updates work on them. The
    template's own files are yours and are not tracked.

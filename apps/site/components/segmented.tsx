@@ -12,7 +12,7 @@ export interface SegmentedOption<T extends string> {
 
 /**
  * One choice from a few, as a row of pressed buttons. Arrow keys move between options; the
- * pressed one is the value. Used for theme, mode and variant switches on the site.
+ * pressed one is the value. Used for mode, width and variant switches on the site.
  */
 export function Segmented<T extends string>({
   value,

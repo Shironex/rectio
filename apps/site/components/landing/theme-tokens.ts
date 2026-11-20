@@ -11,27 +11,16 @@ const tokens = JSON.parse(
   ),
 ) as { themes: Record<string, Record<string, Record<string, string>>> };
 
-/** Picks the readout tokens from every theme and mode, at build time, on the server. */
+/** Picks the readout tokens of the default theme in every mode, at build time, on the server. */
 export function readoutValues(): Readout {
-  const themes = tokens.themes;
+  const modes = tokens.themes.default ?? {};
   return Object.fromEntries(
-    Object.entries(themes).map(([theme, modes]) => [
-      theme,
-      Object.fromEntries(
-        Object.entries(modes).map(([mode, values]) => [
-          mode,
-          Object.fromEntries(
-            READOUT.map(({ token, format }) => {
-              const value = values[token] ?? '';
-              const shown =
-                format === 'family'
-                  ? (value.split(',')[0] ?? '').replaceAll('"', '').replace(/ Variable$/, '')
-                  : value;
-              return [token, shown];
-            }),
-          ) as Record<ReadoutToken, string>,
-        ]),
-      ),
+    Object.entries(modes).map(([mode, values]) => [
+      mode,
+      Object.fromEntries(READOUT.map(({ token }) => [token, values[token] ?? ''])) as Record<
+        ReadoutToken,
+        string
+      >,
     ]),
   );
 }

@@ -66,8 +66,8 @@ your own code whether motion is off for any of these reasons.
 ## Tokens only
 
 Durations, easings, distances and springs come from the theme, read from the element at the moment
-an animation starts. A dialog inside a `ledger` scope moves with ledger's slower timing while one
-beside it keeps the default. The springs (`--rx-motion-spring-press-*`, `--rx-motion-spring-overlay-*`)
+an animation starts. A dialog inside a scope with a theme of your own moves with that theme's timing
+while one beside it keeps the default. The springs (`--rx-motion-spring-press-*`, `--rx-motion-spring-overlay-*`)
 have a damping ratio at or near 1, so nothing bounces. Without the token stylesheet there is no
 motion at all, never a guessed duration.
 

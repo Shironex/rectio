@@ -11,7 +11,7 @@ export function TemplateShots({ name }: { name: string }) {
       <TemplateFrame template={template} phone eager />
       <figcaption className="mt-3 text-sm text-fg-muted">
         The first page of the template on desktop and on a phone. Open the live preview to use every
-        page, in both themes.
+        page, in light and dark.
       </figcaption>
       <TemplateActions template={template} secondary="full-screen" className="mt-5" />
     </figure>

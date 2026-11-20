@@ -12,7 +12,7 @@ import type { ReactNode } from 'react';
 
 import { Segmented } from '@/components/segmented';
 import type { PreviewPage } from '@/lib/previews-url';
-import { MODES, THEMES, type Mode } from '@/lib/site';
+import { MODES, type Mode } from '@/lib/site';
 import { DEVICES, type DeviceId } from '@/lib/viewer';
 
 import type { Look } from './preview-frame';
@@ -104,7 +104,7 @@ export function ViewerControls({
           };
         })}
       />
-      {/* The site's own theme switch sits in the bar above: a tinted, named group says this one
+      {/* The site's own mode switch sits in the bar above: a tinted, named group says this one
           changes the preview only. */}
       <div
         role="group"
@@ -116,19 +116,10 @@ export function ViewerControls({
         </span>
         <Segmented
           touch
-          label="Template theme"
-          value={look.theme}
-          onChange={(theme) => {
-            onLook({ ...look, theme });
-          }}
-          options={THEMES.map((t) => ({ value: t.id, label: t.name }))}
-        />
-        <Segmented
-          touch
           label="Template mode"
           value={look.mode}
           onChange={(mode) => {
-            onLook({ ...look, mode });
+            onLook({ mode });
           }}
           options={MODES.map((m) => {
             const Icon = MODE_ICON[m];

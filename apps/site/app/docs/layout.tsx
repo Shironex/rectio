@@ -2,7 +2,6 @@ import { AppWindowIcon, HouseIcon } from '@phosphor-icons/react/dist/ssr';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
 
-import { ThemeSwitch } from '@/components/theme-switch';
 import { baseOptions } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
 
@@ -30,7 +29,6 @@ export default function Layout({ children }: { children: ReactNode }) {
           url: '/templates',
         },
       ]}
-      sidebar={{ banner: <ThemeSwitch /> }}
     >
       {children}
     </DocsLayout>
