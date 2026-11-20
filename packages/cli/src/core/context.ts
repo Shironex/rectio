@@ -3,15 +3,25 @@ export interface CliContext {
   /** The project root the command works in. */
   cwd: string;
   env: Readonly<Record<string, string | undefined>>;
+  /** One line of output on stdout: progress and results. */
   log: (line: string) => void;
+  /** One line on stderr: errors, warnings and the update notice. */
   warn: (line: string) => void;
+  /** Raw text on stdout, for the spinner. Unset means no spinner. */
+  write?: (text: string) => void;
   /** Whether stdout is a terminal. Unset (in tests and embedders) counts as not a terminal. */
   stdoutIsTTY?: boolean;
+  /** Width of the terminal; 80 when unset. */
+  columns?: number;
+  /** Clock for step durations, in milliseconds. Defaults to performance.now. */
+  now?: () => number;
 }
 
 /** An expected failure: printed as one message (plus a hint) without a stack trace. */
 export class CliError extends Error {
   readonly hint: string | undefined;
+  /** Already printed, with the step it failed in: main only sets the exit code. */
+  reported = false;
 
   constructor(message: string, hint?: string) {
     super(message);
@@ -25,11 +35,15 @@ export function processContext(cwd: string): CliContext {
     cwd,
     env: process.env,
     stdoutIsTTY: process.stdout.isTTY,
+    columns: process.stdout.columns,
     log: (line) => {
       process.stdout.write(`${line}\n`);
     },
     warn: (line) => {
       process.stderr.write(`${line}\n`);
+    },
+    write: (text) => {
+      process.stdout.write(text);
     },
   };
 }
