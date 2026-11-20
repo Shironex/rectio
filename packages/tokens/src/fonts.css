@@ -1,11 +1,7 @@
 /*
- * Font faces for the shipped themes, all under the SIL Open Font License 1.1 (free to bundle,
- * embed and redistribute, including in commercial products).
- * Default theme: IBM Plex Sans + IBM Plex Mono. Ledger theme: Schibsted Grotesk + Source Serif 4.
+ * Font faces for the default theme, under the SIL Open Font License 1.1 (free to bundle, embed
+ * and redistribute, including in commercial products): IBM Plex Sans and IBM Plex Mono.
  */
 @import '@fontsource-variable/ibm-plex-sans/wght.css';
 @import '@fontsource/ibm-plex-mono/400.css';
 @import '@fontsource/ibm-plex-mono/500.css';
-@import '@fontsource-variable/schibsted-grotesk/wght.css';
-@import '@fontsource-variable/source-serif-4/opsz.css';
-@import '@fontsource-variable/source-serif-4/opsz-italic.css';

@@ -192,20 +192,6 @@
     "plex-mono": {
       "$value": ["IBM Plex Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       "$description": "IBM Plex Mono, SIL OFL 1.1."
-    },
-    "schibsted-grotesk": {
-      "$value": [
-        "Schibsted Grotesk Variable",
-        "Schibsted Grotesk",
-        "ui-sans-serif",
-        "system-ui",
-        "sans-serif"
-      ],
-      "$description": "Schibsted Grotesk, SIL OFL 1.1."
-    },
-    "source-serif": {
-      "$value": ["Source Serif 4 Variable", "Source Serif 4", "ui-serif", "Georgia", "serif"],
-      "$description": "Source Serif 4, SIL OFL 1.1."
     }
   },
   "font-size": {

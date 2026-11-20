@@ -1,8 +1,9 @@
 /** Token names: DTCG paths to CSS custom properties and Tailwind utility names. */
 
-export const THEMES = ['default', 'ledger'] as const;
+/** Shipped themes. A theme is a folder in src/themes; more can be added beside default. */
+export const THEMES: readonly string[] = ['default'];
 export const MODES = ['light', 'dark'] as const;
-export type Theme = (typeof THEMES)[number];
+export type Theme = string;
 export type Mode = (typeof MODES)[number];
 
 /** Tier 1 groups. They feed the semantic tier and are never emitted as CSS. */
