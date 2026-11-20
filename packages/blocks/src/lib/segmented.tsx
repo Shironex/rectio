@@ -55,9 +55,11 @@ export function Segmented<Value extends string>({
           className={cn(
             'inline-flex h-(--rx-control-height-sm) shrink-0 grow cursor-pointer items-center justify-center gap-1.5 rounded-control px-2.5',
             'pointer-coarse:h-(--rx-control-height-touch) pointer-coarse:px-3.5',
+            // An odd last option takes the whole row on a phone, so no empty cell sits beside it.
+            'max-sm:last:odd:col-span-2',
             'text-sm font-medium whitespace-nowrap text-fg-muted',
             'transition-[background-color,color,box-shadow] duration-fast ease-standard',
-            'hover:text-fg data-pressed:bg-surface-raised data-pressed:text-fg data-pressed:shadow-raised',
+            'hover:text-fg data-pressed:bg-surface-selected data-pressed:text-fg data-pressed:shadow-raised',
             // A hairline as well as the fill, so the chosen option holds in dark mode too.
             'data-pressed:ring-1 data-pressed:ring-line-strong',
             '-outline-offset-1 focus-visible:outline-2 focus-visible:outline-focus',
