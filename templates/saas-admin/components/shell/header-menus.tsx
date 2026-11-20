@@ -32,48 +32,31 @@ import {
 import Link from 'next/link';
 
 import { CURRENT_USER } from '@/data/workspace';
-import { MODES, THEMES, type ModeId, type ThemeId } from '../appearance-script';
+import { MODES, type ModeId } from '../appearance-script';
 import { setAppearance, useAppearance } from '../use-appearance';
 import { icon } from './icon';
 
 function AppearanceRadios() {
-  const { theme, mode } = useAppearance();
+  const { mode } = useAppearance();
   return (
-    <>
-      <MenuGroup label="Theme">
-        <MenuRadioGroup
-          value={theme}
-          onValueChange={(value: ThemeId) => {
-            setAppearance({ theme: value });
-          }}
-        >
-          {THEMES.map((t) => (
-            <MenuRadioItem key={t.value} value={t.value} closeOnClick={false}>
-              {t.label}
-            </MenuRadioItem>
-          ))}
-        </MenuRadioGroup>
-      </MenuGroup>
-      <MenuSeparator />
-      <MenuGroup label="Mode">
-        <MenuRadioGroup
-          value={mode}
-          onValueChange={(value: ModeId) => {
-            setAppearance({ mode: value });
-          }}
-        >
-          {MODES.map((m) => (
-            <MenuRadioItem key={m.value} value={m.value} closeOnClick={false}>
-              {m.label}
-            </MenuRadioItem>
-          ))}
-        </MenuRadioGroup>
-      </MenuGroup>
-    </>
+    <MenuGroup label="Mode">
+      <MenuRadioGroup
+        value={mode}
+        onValueChange={(value: ModeId) => {
+          setAppearance({ mode: value });
+        }}
+      >
+        {MODES.map((m) => (
+          <MenuRadioItem key={m.value} value={m.value} closeOnClick={false}>
+            {m.label}
+          </MenuRadioItem>
+        ))}
+      </MenuRadioGroup>
+    </MenuGroup>
   );
 }
 
-/** The small appearance control in the header: theme and mode in one menu. */
+/** The small appearance control in the header: the mode in one menu. */
 export function AppearanceMenu({ className }: { className?: string }) {
   const { mode } = useAppearance();
   return (
@@ -94,9 +77,9 @@ export function AppearanceMenu({ className }: { className?: string }) {
 
 /** The account: initials on the trigger, the profile, settings, appearance and sign out. */
 export function AccountMenu({ onShowShortcuts }: { onShowShortcuts: () => void }) {
-  const { theme, mode } = useAppearance();
+  const { mode } = useAppearance();
   const toast = useToast();
-  const summary = `${THEMES.find((t) => t.value === theme)?.label ?? ''}, ${MODES.find((m) => m.value === mode)?.label.toLowerCase() ?? ''}`;
+  const summary = MODES.find((m) => m.value === mode)?.label ?? '';
   return (
     <Menu>
       <MenuTrigger

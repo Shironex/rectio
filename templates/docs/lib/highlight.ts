@@ -1,7 +1,7 @@
 /**
  * Syntax highlighting at build time. shiki's CSS variables theme names every colour as a variable
- * (`var(--rx-code-token-keyword)`), and the rectio themes define those variables for light and
- * dark, so the colours follow the theme switch and no highlighter runs in the browser.
+ * (`var(--rx-code-token-keyword)`), and the rectio theme defines those variables for light and
+ * dark, so the colours follow the mode switch and no highlighter runs in the browser.
  */
 import type { CodeLine } from '@rectio/blocks/docs';
 import {

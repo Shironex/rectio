@@ -1,6 +1,6 @@
 # Docs template
 
-A documentation site built from MDX files: a home page, docs pages with navigation from the folders, local search, code highlighted at build time, API reference pages, a changelog, and a theme switch. It is a plain Next.js app with a static export, so it deploys to any static host.
+A documentation site built from MDX files: a home page, docs pages with navigation from the folders, local search, code highlighted at build time, API reference pages, a changelog, and a light and dark switch. It is a plain Next.js app with a static export, so it deploys to any static host.
 
 ```bash
 pnpm install
@@ -94,10 +94,8 @@ To add your own, export it from a client module (see `components/blocks.ts`) and
 
 ## Change the theme
 
-The template ships with both rectio themes, default and ledger, each in light and dark. Readers switch with the menu in the header, and their choice is remembered.
+The template ships with the rectio default theme in light and dark. Readers switch the mode with the menu in the header, and their choice is remembered.
 
-- **Default theme for new readers:** change `data-theme="default"` on `<html>` in `app/layout.tsx` to `ledger`.
-- **Only one theme:** remove the theme group from `components/theme-menu.tsx`.
 - **Your own colours, type and corners:** every colour, size and radius is a design token in `styles/rectio/`. Edit or add a theme there, or override the variables in `app/globals.css`:
 
 ```css
@@ -106,7 +104,7 @@ The template ships with both rectio themes, default and ledger, each in light an
 }
 ```
 
-- **Code colours** come from the `code` token group (`--rx-code-token-keyword`, `--rx-code-token-string` and so on), defined for every theme and mode, so code follows the theme switch with no highlighter in the browser.
+- **Code colours** come from the `code` token group (`--rx-code-token-keyword`, `--rx-code-token-string` and so on), defined for both modes, so code follows the mode switch with no highlighter in the browser.
 
 ## Search
 

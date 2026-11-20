@@ -17,7 +17,6 @@ import {
   InputGroupInput,
   NumberField,
   Radio,
-  RadioCard,
   RadioGroup,
   Select,
   SelectContent,
@@ -33,7 +32,7 @@ import {
 import { useEffect, useState, type SubmitEvent } from 'react';
 
 import { COMPANY, LOCALE } from '@/data/company';
-import { MODES, THEMES } from '../appearance-script';
+import { MODES } from '../appearance-script';
 import { PageHeader } from '../page-header';
 import { setAppearance, useAppearance } from '../use-appearance';
 import { usePageState } from '../use-page-state';
@@ -129,7 +128,7 @@ function focusFirstInvalid(form: HTMLFormElement) {
 }
 
 function AppearanceSection() {
-  const { theme, mode } = useAppearance();
+  const { mode } = useAppearance();
   return (
     <FormSection
       id="appearance"
@@ -137,19 +136,6 @@ function AppearanceSection() {
       title="Appearance"
       description="Only for you, on this device. Applied as soon as you choose."
     >
-      <RadioGroup
-        legend="Theme"
-        value={theme}
-        onValueChange={(value) => {
-          const next = THEMES.find((t) => t.value === value);
-          if (next !== undefined) setAppearance({ theme: next.value });
-        }}
-        className="grid gap-3 sm:grid-cols-2"
-      >
-        {THEMES.map((t) => (
-          <RadioCard key={t.value} value={t.value} title={t.label} description={t.description} />
-        ))}
-      </RadioGroup>
       <ToggleGroup
         legend="Mode"
         value={[mode]}

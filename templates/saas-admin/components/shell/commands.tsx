@@ -9,7 +9,6 @@ import {
   HouseIcon,
   KanbanIcon,
   MoonIcon,
-  PaletteIcon,
   PlusCircleIcon,
   ShieldCheckIcon,
   SignOutIcon,
@@ -26,12 +25,9 @@ import { icon } from './icon';
 export interface CommandActions {
   go: (href: string) => void;
   newTicket: () => void;
-  toggleTheme: () => void;
   setMode: (mode: 'light' | 'dark') => void;
   /** Whether the app shows dark right now, so only the switch to the other mode is offered. */
   dark: boolean;
-  /** The theme shown now, so the theme command names the one it switches to. */
-  ledger: boolean;
 }
 
 /** Customers the team is likely to want again: the at-risk accounts first. */
@@ -74,13 +70,6 @@ export function buildCommands(run: CommandActions): CommandGroup[] {
           'seat',
         ]),
         page('api-key', 'Create an API key', '/developers', CodeIcon, ['token', 'integration']),
-        {
-          id: 'theme',
-          label: run.ledger ? 'Use the Default theme' : 'Use the Ledger theme',
-          icon: icon(PaletteIcon),
-          keywords: ['ledger', 'default', 'appearance'],
-          onSelect: run.toggleTheme,
-        },
         run.dark
           ? {
               id: 'light',

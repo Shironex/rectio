@@ -6,8 +6,8 @@
  *   (1440 by 900, the overview) and phone.webp (390 by 844 at 2x, the overview, light), each WebP
  *   encoded in the browser and kept under 300 KB.
  * - `shoot <n>` writes a design round to .rounds/saas-admin-round-<n>/ at the repo root
- *   (gitignored): every page on desktop and phone, light and dark, the ledger theme on desktop,
- *   the empty, loading and error states, and the open overlays.
+ *   (gitignored): every page on desktop and phone, light and dark, the empty, loading and error
+ *   states, and the open overlays.
  *
  * It serves out/ itself on port 4340 and never touches the screen.
  */
@@ -29,7 +29,6 @@ if (round !== undefined && !/^\d+$/.test(round))
 const STORAGE_KEY = 'lindwell-appearance';
 const CUSTOMER = '/customers/halden-roofing';
 
-type Theme = 'default' | 'ledger';
 type Mode = 'light' | 'dark';
 interface View {
   name: 'desktop' | 'phone';
@@ -45,7 +44,6 @@ interface Shot {
   file: string;
   path: string;
   view: View;
-  theme: Theme;
   mode: Mode;
   fullPage: boolean;
   /** Opens an overlay or otherwise sets the page up before the capture. */
@@ -69,7 +67,7 @@ async function open(browser: Browser, base: string, shot: Shot) {
         // Without storage the capture shows the default look.
       }
     },
-    [STORAGE_KEY, JSON.stringify({ theme: shot.theme, mode: shot.mode })] as const,
+    [STORAGE_KEY, JSON.stringify({ mode: shot.mode })] as const,
   );
   const page = await context.newPage();
   await page.goto(base + shot.path, { waitUntil: 'networkidle' });
@@ -175,24 +173,14 @@ function roundShots(): Shot[] {
     const { name, ...rest } = shot;
     shots.push({
       ...rest,
-      file: `${name}-${shot.theme}-${shot.view.name}-${shot.mode}.png`,
+      file: `${name}-${shot.view.name}-${shot.mode}.png`,
     });
   };
   for (const entry of PAGES) {
     for (const view of [DESKTOP, PHONE]) {
       for (const mode of ['light', 'dark'] as const) {
-        add({ name: entry.name, path: entry.path, view, theme: 'default', mode, fullPage: true });
+        add({ name: entry.name, path: entry.path, view, mode, fullPage: true });
       }
-    }
-    for (const mode of ['light', 'dark'] as const) {
-      add({
-        name: entry.name,
-        path: entry.path,
-        view: DESKTOP,
-        theme: 'ledger',
-        mode,
-        fullPage: true,
-      });
     }
     if (entry.states) {
       for (const state of ['empty', 'loading', 'error'] as const) {
@@ -200,7 +188,7 @@ function roundShots(): Shot[] {
           name: `${entry.name}-${state}`,
           path: `${entry.path}${entry.path.includes('?') ? '&' : '?'}state=${state}`,
           view: DESKTOP,
-          theme: 'default',
+
           mode: 'light',
           fullPage: false,
         });
@@ -214,7 +202,7 @@ function roundShots(): Shot[] {
     view = DESKTOP,
     mode: Mode = 'light',
   ) => {
-    add({ name: `overlay-${name}`, path, view, theme: 'default', mode, fullPage: false, prepare });
+    add({ name: `overlay-${name}`, path, view, mode, fullPage: false, prepare });
   };
   const openTicket = async (page: Page) => {
     await page
@@ -247,7 +235,7 @@ function roundShots(): Shot[] {
     name: 'settings-workspace-invalid',
     path: '/settings/workspace?state=invalid',
     view: DESKTOP,
-    theme: 'default',
+
     mode: 'light',
     fullPage: true,
   });
@@ -256,7 +244,7 @@ function roundShots(): Shot[] {
       name: `${name}-error`,
       path: `/${name}?state=error`,
       view: DESKTOP,
-      theme: 'default',
+
       mode: 'light',
       fullPage: false,
     });
@@ -290,7 +278,7 @@ try {
         file: '',
         path: '/',
         view: DESKTOP,
-        theme: 'default',
+
         mode: 'light',
         fullPage: false,
       },
@@ -299,7 +287,7 @@ try {
         file: '',
         path: '/',
         view: DESKTOP,
-        theme: 'default',
+
         mode: 'dark',
         fullPage: false,
       },
@@ -308,7 +296,7 @@ try {
         file: '',
         path: '/',
         view: PHONE,
-        theme: 'default',
+
         mode: 'light',
         fullPage: false,
       },

@@ -6,8 +6,8 @@
  *   (1440 by 900, a docs page) and phone.webp (390 by 844 at 2x, the same page, light), each WebP
  *   encoded in the browser and kept under 300 KB.
  * - `shoot <n>` writes a design round to .rounds/docs-kit-round-<n>/docs/ at the repo root
- *   (gitignored): every page on desktop and phone, light and dark, the ledger theme on desktop,
- *   search with results, no results and a failed index, and the open overlays.
+ *   (gitignored): every page on desktop and phone, light and dark, search with results, no
+ *   results and a failed index, and the open overlays.
  *
  * It serves out/ itself and never touches the screen.
  */
@@ -29,7 +29,6 @@ if (round !== undefined && !/^\d+$/.test(round))
 const STORAGE_KEY = 'halyard-docs-appearance';
 const GALLERY = '/docs/retries';
 
-type Theme = 'default' | 'ledger';
 type Mode = 'light' | 'dark';
 interface View {
   name: 'desktop' | 'phone';
@@ -45,7 +44,6 @@ interface Shot {
   file: string;
   path: string;
   view: View;
-  theme: Theme;
   mode: Mode;
   fullPage: boolean;
   /** Opens an overlay or otherwise sets the page up before the capture. */
@@ -69,7 +67,7 @@ async function open(browser: Browser, base: string, shot: Shot) {
         // Without storage the capture shows the default look.
       }
     },
-    [STORAGE_KEY, JSON.stringify({ theme: shot.theme, mode: shot.mode })] as const,
+    [STORAGE_KEY, JSON.stringify({ mode: shot.mode })] as const,
   );
   const page = await context.newPage();
   await page.goto(base + shot.path, { waitUntil: 'networkidle' });
@@ -176,24 +174,14 @@ function roundShots(): Shot[] {
     const { name, ...rest } = shot;
     shots.push({
       ...rest,
-      file: `${name}-${shot.theme}-${shot.view.name}-${shot.mode}.png`,
+      file: `${name}-${shot.view.name}-${shot.mode}.png`,
     });
   };
   for (const entry of PAGES) {
     for (const view of [DESKTOP, PHONE]) {
       for (const mode of ['light', 'dark'] as const) {
-        add({ name: entry.name, path: entry.path, view, theme: 'default', mode, fullPage: true });
+        add({ name: entry.name, path: entry.path, view, mode, fullPage: true });
       }
-    }
-    for (const mode of ['light', 'dark'] as const) {
-      add({
-        name: entry.name,
-        path: entry.path,
-        view: DESKTOP,
-        theme: 'ledger',
-        mode,
-        fullPage: true,
-      });
     }
   }
   const overlay = (
@@ -202,14 +190,12 @@ function roundShots(): Shot[] {
     prepare: (page: Page) => Promise<void>,
     view = DESKTOP,
     mode: Mode = 'light',
-    theme: Theme = 'default',
   ) => {
-    add({ name: `overlay-${name}`, path, view, theme, mode, fullPage: false, prepare });
+    add({ name: `overlay-${name}`, path, view, mode, fullPage: false, prepare });
   };
   overlay('search-empty', GALLERY, search(''));
   overlay('search-results', GALLERY, search('retry'));
   overlay('search-results', GALLERY, search('retry'), DESKTOP, 'dark');
-  overlay('search-results', GALLERY, search('backoff'), DESKTOP, 'light', 'ledger');
   overlay('search-results', GALLERY, search('queue'), PHONE);
   overlay('search-none', GALLERY, search('kubernetes operator'));
   overlay('search-recent', GALLERY, async (page) => {
@@ -270,7 +256,7 @@ try {
         file: '',
         path: GALLERY,
         view: DESKTOP,
-        theme: 'default',
+
         mode: 'light',
         fullPage: false,
       },
@@ -279,7 +265,7 @@ try {
         file: '',
         path: GALLERY,
         view: DESKTOP,
-        theme: 'default',
+
         mode: 'dark',
         fullPage: false,
       },
@@ -288,7 +274,7 @@ try {
         file: '',
         path: GALLERY,
         view: PHONE,
-        theme: 'default',
+
         mode: 'light',
         fullPage: false,
       },

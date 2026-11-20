@@ -36,11 +36,9 @@ Every data page renders loading, empty and error states. Open them with `?state=
 
 ## Change the theme
 
-The template ships with both rectio themes, default and ledger, each in light and dark. People switch with the menu in the header, and their choice is remembered in the browser.
+The template ships with the rectio default theme in light and dark. People switch the mode with the menu in the header, and their choice is remembered in the browser.
 
-- **Default theme for new visitors:** change `data-theme="default"` on `<html>` in `app/layout.tsx` to `ledger`.
-- **Only one theme:** remove the theme group from `components/shell/header-menus.tsx`.
-- **Your own colours, type and corners:** every colour, size and radius is a design token in `styles/rectio/`. Edit a theme there, or override the variables in `app/globals.css`.
+- **Your own colours, type and corners:** every colour, size and radius is a design token in `styles/rectio/`. Edit the theme there, or override the variables in `app/globals.css`.
 
 ## Rename the product
 

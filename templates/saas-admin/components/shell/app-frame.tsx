@@ -24,7 +24,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 
 import { customerById } from '@/data/customers';
 import { LOCALE, NOW, WORKSPACE } from '@/data/workspace';
-import { setAppearance, useAppearance, useDarkMode } from '../use-appearance';
+import { setAppearance, useDarkMode } from '../use-appearance';
 import { usePageState } from '../use-page-state';
 import { AppDataProvider, useAppData } from './app-data';
 import { AppSidebar } from './app-sidebar';
@@ -80,7 +80,6 @@ function Frame({ children }: { children: ReactNode }) {
   const { openNewTicket } = useAppData();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const dark = useDarkMode();
-  const ledger = useAppearance().theme === 'ledger';
 
   const commands = useMemo(
     () =>
@@ -91,18 +90,12 @@ function Frame({ children }: { children: ReactNode }) {
         newTicket: () => {
           openNewTicket();
         },
-        toggleTheme: () => {
-          setAppearance({
-            theme: document.documentElement.dataset.theme === 'ledger' ? 'default' : 'ledger',
-          });
-        },
         setMode: (mode) => {
           setAppearance({ mode });
         },
         dark,
-        ledger,
       }),
-    [router, openNewTicket, dark, ledger],
+    [router, openNewTicket, dark],
   );
 
   // The shortcut the command menu advertises is the app's to bind.
