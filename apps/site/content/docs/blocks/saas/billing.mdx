@@ -29,8 +29,10 @@ The motion variant is `motion-billing`. It installs the plain block too; invoice
 ## Usage
 
 Pass the plan, the usage this period, the card on file and the invoices, all in one currency. The
-plan tile says what it costs and when it renews; meters say in words how much is left, stay calm at the allowance exactly,
-warn from 90 per cent and turn red past it. A card that expires this month or next says so, and a
+plan tile says what it costs and when it renews; usage meters say in words how much is left, stay calm at the allowance exactly,
+warn from 90 per cent and turn red past it. The figure beside each label is a percentage; the "X of Y"
+text sits in the description and is the meter's spoken value. The bar is accent while there is room,
+warning near the limit and danger over it. A card that expires this month or next says so, and a
 past due plan opens with an alert naming the amount owed. Every action is a callback: the block
 never moves money itself.
 
@@ -81,7 +83,7 @@ owed never drift by a cent.
 
 ## Accessibility
 
-- Usage meters carry their value and level in words, not only in colour.
+- Usage meters are real meters: the "X of Y" text is their spoken value, and the level is in words, not only in colour.
 - Each download button names its invoice; void amounts are struck through and say Void.
 - A past due plan is announced as an alert.
 - Works in both themes, light and dark, at compact density and down to phone width with 44px touch targets.

@@ -35,6 +35,11 @@ has a menu to change the role, suspend or reactivate, and remove. Select rows fo
 change role, suspend, or remove after a confirmation that names how many. Owners are never part of
 a bulk action and have no row menu, so a workspace cannot lose its owner from here.
 
+Pass `currentRole` (the signed-in viewer's role) to limit which roles they can assign and whom they can
+act on: nobody above their own role, and members and guests manage no one. Mark the viewer's own
+row with `you` on its `UserRecord` so they cannot change themselves. A bulk action skips the rows it
+may not touch. After a removal, focus moves to the next row.
+
 On narrow widths the team column folds away, role and status move under the name, and a sort
 select replaces the column headers. Past `pageSize` rows, the table pages.
 
@@ -44,7 +49,11 @@ select replaces the column headers. Past `pageSize` rows, the table pages.
   type={{
     users: {
       type: 'readonly UserRecord[]',
-      description: 'id, name, email, role, status, optional avatarUrl, lastSeen and team.',
+      description: 'id, name, email, role, status, optional avatarUrl, lastSeen, team and `you` for the viewer's own row.',
+    },
+    currentRole: {
+      type: 'UserRole',
+      description: "The signed-in viewer's role. Limits the roles they can assign and whom they can act on.",
     },
     pageSize: { type: 'number', default: '10' },
     onInvite: { type: '() => void', description: 'Shows an Invite users button.' },
@@ -63,7 +72,8 @@ select replaces the column headers. Past `pageSize` rows, the table pages.
 ## Logic
 
 Filtering and the owner rule are exported and tested on their own: `filterUsers`,
-`matchesUserFilters`, `userFiltersActive`, `userCounts` and `bulkUserTargets`.
+`matchesUserFilters`, `userFiltersActive`, `userCounts`, `assignableUserRoles(viewer)`, `canActOnUser(target, viewer)` and
+`bulkUserTargets(users, ids, viewer)`, which also returns how many it `skipped`.
 
 ## Accessibility
 

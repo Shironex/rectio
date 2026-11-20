@@ -24,6 +24,14 @@ cycling headline slides its words. Reduced motion renders the plain block. The h
 legal page and announcement bar have nothing to animate, so they have no twin; the motion path
 exports them unchanged, so a page can import every block from one place.
 
+## Server and client components
+
+The static blocks are server components, so a React Server Component page can render them with no
+client JavaScript of their own. The interactive ones (contact, newsletter, cookie consent, site header,
+legal and the word-cycle hero) and every motion twin are client components. React does not let a
+server component pass event handlers down, so props such as the announcement bar's `onDismiss` need a
+client parent.
+
 ## Content is data
 
 Every headline, link, list and quote is a prop. Blocks never fetch, never send and hold no list:

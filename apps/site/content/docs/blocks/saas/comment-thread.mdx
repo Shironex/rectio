@@ -31,8 +31,10 @@ leave in place.
 
 Pass the comments and the person writing. Comments show oldest first with their replies one level
 deep; a reply to a reply joins the same thread. The writer gets Edit and Delete on their own
-comments, and delete asks first. `@mentions` are picked out. The composer sends with Ctrl or Cmd and
-Enter, and refuses an empty comment with a reason.
+comments, and delete asks first; pass `canModerate` to let the viewer delete anyone's comment (editing
+stays with the author). After a delete, focus moves to the next comment, else the previous one, else
+the block heading. `@mentions` are picked out. The composer shows its send shortcut as keys and sends
+with Ctrl or Cmd and Enter, and refuses an empty comment with a reason.
 
 Pass `resolved` to close the discussion: a banner says who resolved it and when, the composer and
 Reply buttons give way, and `onReopen` adds a Reopen button.
@@ -52,6 +54,11 @@ Reply buttons give way, and `onReopen` adds a Reopen button.
     onAdd: { type: '(body: string, parentId?: string) => void' },
     onEdit: { type: '(commentId: string, body: string) => void' },
     onDelete: { type: '(commentId: string) => void', description: 'Asked to confirm first.' },
+    canModerate: {
+      type: 'boolean',
+      default: 'false',
+      description: "Offers Delete on everyone's comments, not only your own.",
+    },
     onCopyLink: {
       type: '(commentId: string) => void',
       description: 'Gives every comment a menu with Copy link.',
