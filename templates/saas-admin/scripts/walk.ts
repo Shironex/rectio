@@ -1,7 +1,7 @@
 /**
  * Walks every page of the built template in a headless browser and fails on a console error, an
  * uncaught exception, a failed request or a link that leaves the base path. Build first, then
- * `walk`; for the preview build, `BASE_PATH=/preview/saas-admin pnpm build` and
+ * `walk`; for the preview build, `PREVIEW_BASE_PATH=/preview/saas-admin pnpm build` and
  * `walk /preview/saas-admin`, which serves out/ under that prefix only, as the previews do.
  *
  * It serves out/ itself on port 4341 and never touches the screen.

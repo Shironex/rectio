@@ -48,7 +48,7 @@ The product, workspace and signed-in person are in `data/workspace.ts` (`PRODUCT
 
 ## Deploy under a path
 
-Set `BASE_PATH` when you build to serve the app from a sub-path, such as `BASE_PATH=/admin pnpm build`. Links and navigation follow it.
+Add `basePath: '/admin'` to `next.config.ts` to serve the app from a sub-path. Every link goes through `next/link` or the router, so links and navigation follow it.
 
 ## In the rectio repo
 

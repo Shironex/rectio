@@ -1,7 +1,7 @@
 /**
  * A tiny static server for the exported app in out/, so captures and previews need no extra
  * package. Serves `/x` from `x.html` or `x/index.html`, as a CDN does. With a `prefix` (the
- * basePath of a build made with BASE_PATH set) it serves only under that prefix, as the previews do.
+ * basePath of a build made with PREVIEW_BASE_PATH set) it serves only under that prefix, as the previews do.
  */
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
