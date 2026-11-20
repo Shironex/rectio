@@ -80,10 +80,12 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
     history.replaceState(history.state, '', url);
   }
 
+  const fullScreenLink = <a href={urlOf(base, path)} target="_blank" rel="noopener noreferrer" />;
+
   return (
     <div className="site-viewer flex flex-col">
       <div className="mx-auto flex w-full max-w-screen-2xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3 sm:px-6">
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3 max-sm:flex-1">
           <Link
             href="/templates"
             className="site-press inline-flex size-11 shrink-0 items-center justify-center rounded-control border border-line text-fg-muted pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:size-9"
@@ -103,6 +105,13 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
           </div>
         </div>
         <ViewerControls
+          action={
+            <Button render={fullScreenLink} className="shrink-0 sm:hidden">
+              <ArrowSquareOutIcon aria-hidden weight="bold" className="size-4" />
+              Full screen
+              <span className="sr-only"> (opens in a new tab)</span>
+            </Button>
+          }
           className="min-w-0 flex-1 max-sm:order-last max-sm:basis-full"
           pages={pages}
           route={routeFor(routes, path)}
@@ -116,19 +125,16 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
           look={look}
           onLook={setLook}
         />
-        <div className="flex w-full items-center gap-2 sm:w-auto">
+        <div className="flex items-center gap-2 max-sm:ms-auto">
           <Button
             variant="secondary"
             render={<Link href={template.docsHref} />}
-            className="max-sm:flex-1"
+            className="max-sm:size-11 max-sm:px-0"
           >
             <BookOpenTextIcon aria-hidden weight="bold" className="size-4" />
-            Docs
+            <span className="max-sm:sr-only">Docs</span>
           </Button>
-          <Button
-            render={<a href={urlOf(base, path)} target="_blank" rel="noopener noreferrer" />}
-            className="max-sm:flex-1"
-          >
+          <Button render={fullScreenLink} className="max-sm:hidden">
             <ArrowSquareOutIcon aria-hidden weight="bold" className="size-4" />
             Open full screen
             <span className="sr-only"> (opens in a new tab)</span>
@@ -152,7 +158,7 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
             onLookChange={setLook}
           />
         </div>
-        <div className="mx-auto flex w-full max-w-screen-2xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 pb-4 sm:px-6">
+        <div className="mx-auto flex w-full max-w-screen-2xl flex-wrap items-center gap-x-4 gap-y-2 px-4 pb-4 sm:px-6">
           <CopyCommand command={template.command} className="max-w-full overflow-x-auto" />
           <p className="text-sm text-fg-muted">
             Templates are Pro: the command asks for your license key.

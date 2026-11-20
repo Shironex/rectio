@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@rectio/ui';
+import { Skeleton, cn } from '@rectio/ui';
 import { useEffect, useRef, useState } from 'react';
 
 import type { Mode, ThemeId } from '@/lib/site';
@@ -171,7 +171,14 @@ export function PreviewFrame({
               </a>
             </>
           ) : (
-            <p>Loading the preview</p>
+            <>
+              <span className="sr-only">Loading the preview</span>
+              <div aria-hidden className="flex w-full max-w-sm flex-col gap-3">
+                <Skeleton className="block h-6 w-2/5" />
+                <Skeleton className="block h-4 w-4/5" />
+                <Skeleton className="block h-24 w-full" />
+              </div>
+            </>
           )}
         </div>
       )}

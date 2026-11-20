@@ -8,6 +8,7 @@ import {
   SunIcon,
 } from '@phosphor-icons/react';
 import { Select, SelectContent, SelectItem, SelectTrigger, cn } from '@rectio/ui';
+import type { ReactNode } from 'react';
 
 import { Segmented } from '@/components/segmented';
 import type { PreviewPage } from '@/lib/previews-url';
@@ -30,6 +31,7 @@ export function ViewerControls({
   onDevice,
   look,
   onLook,
+  action,
   className,
 }: {
   pages: readonly PreviewPage[];
@@ -42,35 +44,47 @@ export function ViewerControls({
   onDevice: (device: DeviceId) => void;
   look: Look;
   onLook: (look: Look) => void;
+  /** Sits beside the page picker on a phone, where it is the main way to see the template. */
+  action?: ReactNode;
   className?: string;
 }) {
   return (
     <div className={cn('flex flex-wrap items-center gap-x-3 gap-y-2', className)}>
-      <Select
-        value={route ?? null}
-        items={pages.map((page) => ({ value: page.route, label: page.label }))}
-        onValueChange={(value) => {
-          const page = pages.find((p) => p.route === value);
-          if (page !== undefined) onRoute(page);
-        }}
-      >
-        <SelectTrigger aria-label="Page" className="w-full sm:w-56">
-          <span className="truncate">
-            {title !== '' ? title : (pages.find((p) => p.route === route)?.label ?? 'Another page')}
-          </span>
-        </SelectTrigger>
-        <SelectContent>
-          {pages.map((page) => (
-            <SelectItem
-              key={page.route}
-              value={page.route}
-              hint={<span className="font-mono text-xs">{page.route}</span>}
-            >
-              {page.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex min-w-0 items-center gap-2 max-sm:w-full">
+        <Select
+          value={route ?? null}
+          items={pages.map((page) => ({ value: page.route, label: page.label }))}
+          onValueChange={(value) => {
+            const page = pages.find((p) => p.route === value);
+            if (page !== undefined) onRoute(page);
+          }}
+        >
+          <SelectTrigger aria-label="Page" className="min-w-0 flex-1 sm:w-60 sm:flex-none">
+            <span className="truncate">
+              {title !== ''
+                ? title
+                : (pages.find((p) => p.route === route)?.label ?? 'Another page')}
+            </span>
+            {route?.includes('[') === true && (
+              <span className="ms-auto shrink-0 font-mono text-xs text-fg-subtle max-sm:hidden">
+                {route}
+              </span>
+            )}
+          </SelectTrigger>
+          <SelectContent>
+            {pages.map((page) => (
+              <SelectItem
+                key={page.route}
+                value={page.route}
+                hint={<span className="font-mono text-xs">{page.route}</span>}
+              >
+                {page.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {action}
+      </div>
       <Segmented
         touch
         label="Width"
@@ -90,11 +104,14 @@ export function ViewerControls({
           };
         })}
       />
-      <div className="flex items-center gap-3 sm:ms-auto">
-        {/* The site's own theme switch sits in the bar above: say which one this is. */}
-        <span aria-hidden className="text-sm text-fg-muted max-md:hidden">
-          Template
-        </span>
+      {/* The site's own theme switch sits in the bar above: a framed, named group says this one
+          changes the template. */}
+      <div
+        role="group"
+        aria-label="Template look"
+        className="flex items-center gap-2 rounded-control border border-dashed border-line-strong py-1 ps-3 pe-1 sm:ms-auto"
+      >
+        <span className="text-sm text-fg-muted">Template</span>
         <Segmented
           touch
           label="Template theme"

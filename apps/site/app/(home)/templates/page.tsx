@@ -66,7 +66,13 @@ export default function TemplatesPage() {
                     {template.description}
                   </p>
                   <TemplateActions template={template} size="lg" className="mt-2" />
-                  <CopyCommand command={template.command} className="max-w-full overflow-x-auto" />
+                  <div className="mt-2 flex w-full flex-col items-start gap-2 border-t border-line pt-5">
+                    <p className="text-sm text-fg-muted">Start a project from it</p>
+                    <CopyCommand
+                      command={template.command}
+                      className="max-w-full overflow-x-auto"
+                    />
+                  </div>
                 </div>
               </li>
             ))}
