@@ -1,7 +1,11 @@
 'use client';
 
 import { ArrowRightIcon } from '@phosphor-icons/react';
-import { type CommentThreadResolution, type ThreadComment } from '@rectio/blocks';
+import {
+  type CommentThreadResolution,
+  type KanbanPriority,
+  type ThreadComment,
+} from '@rectio/blocks';
 import { CommentThread } from '@rectio/blocks/motion';
 import {
   Badge,
@@ -24,24 +28,33 @@ import { customerById } from '@/data/customers';
 import { AGENTS } from '@/data/team';
 import { TICKET_COLUMNS, ticketThread, type Ticket } from '@/data/tickets';
 import { CURRENT_USER, LOCALE, NOW, formatShortDate, formatTime } from '@/data/workspace';
-import { PRIORITY_LABELS, PRIORITY_TONES } from './ticket-format';
+import { PRIORITY_LABELS } from './ticket-format';
 
 /** What the sheet can change on a ticket. */
 export interface TicketChange {
   columnId?: string;
   assignee?: Ticket['assignee'] | undefined;
+  priority?: KanbanPriority;
 }
 
 /** The ticket with a sheet change applied; an `assignee` of undefined unassigns it. */
 export function applyTicketChange(ticket: Ticket, change: TicketChange): Ticket {
   const columnId = change.columnId ?? ticket.columnId;
   const assignee = 'assignee' in change ? change.assignee : ticket.assignee;
-  const next: Ticket = { ...ticket, columnId };
+  const next: Ticket = {
+    ...ticket,
+    columnId,
+    priority: change.priority ?? ticket.priority ?? 'medium',
+  };
   if (assignee === undefined) delete next.assignee;
   else next.assignee = assignee;
   return next;
 }
 
+const PRIORITY_ITEMS = (['low', 'medium', 'high', 'urgent'] as const).map((value) => ({
+  value,
+  label: PRIORITY_LABELS[value],
+}));
 const STATUS_ITEMS = TICKET_COLUMNS.map((c) => ({ value: c.id, label: c.title }));
 const ASSIGNEE_ITEMS = [
   { value: 'none', label: 'Unassigned' },
@@ -120,9 +133,24 @@ function TicketDetail({
     ],
     [
       'Priority',
-      <Badge key="p" tone={PRIORITY_TONES[priority]}>
-        {PRIORITY_LABELS[priority]}
-      </Badge>,
+      <Select
+        key="p"
+        items={PRIORITY_ITEMS}
+        value={priority}
+        onValueChange={(value) => {
+          const next = PRIORITY_ITEMS.find((item) => item.value === value);
+          if (next !== undefined) onChange({ priority: next.value });
+        }}
+      >
+        <SelectTrigger aria-label="Priority" />
+        <SelectContent>
+          {PRIORITY_ITEMS.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>,
     ],
     [
       'Assignee',

@@ -101,6 +101,30 @@ function WorkspaceForm({ invalid }: { invalid: boolean }) {
   const [tried, setTried] = useState(invalid);
   const [pending, setPending] = useState(false);
   const [confirm, setConfirm] = useState('');
+  const values = { name, subdomain, language, zone, days, opens, closes, autoReply };
+  // What was last saved, so Save only wakes up once something changed.
+  const [saved, setSaved] = useState<typeof values>(() => ({
+    name: WORKSPACE.name,
+    subdomain: WORKSPACE.subdomain,
+    language: 'en-US',
+    zone: 'America/New_York',
+    days: ['mon', 'tue', 'wed', 'thu', 'fri'],
+    opens: '7',
+    closes: '19',
+    autoReply: true,
+  }));
+  const dirty = JSON.stringify(values) !== JSON.stringify(saved);
+  const discard = () => {
+    setName(saved.name);
+    setSubdomain(saved.subdomain);
+    setLanguage(saved.language);
+    setZone(saved.zone);
+    setDays(saved.days);
+    setOpens(saved.opens);
+    setCloses(saved.closes);
+    setAutoReply(saved.autoReply);
+    setTried(false);
+  };
   const logo = useFileUpload({ multiple: false });
 
   const errors = {
@@ -127,6 +151,8 @@ function WorkspaceForm({ invalid }: { invalid: boolean }) {
     setPending(true);
     await saveWorkspace();
     setPending(false);
+    setSaved(values);
+    setTried(false);
     toast.add({ type: 'success', title: 'Workspace saved' });
   };
 
@@ -312,8 +338,16 @@ function WorkspaceForm({ invalid }: { invalid: boolean }) {
             <FieldDescription>PNG or SVG, up to 2 MB, at least 240 pixels wide.</FieldDescription>
           </Field>
         </FormSection>
-        <FormActions>
-          <Button type="submit" loading={pending}>
+        <FormActions align="between">
+          <span className="text-sm text-fg-muted" aria-live="polite">
+            {dirty ? 'You have unsaved changes' : 'All changes saved'}
+          </span>
+          {dirty && (
+            <Button variant="ghost" onClick={discard}>
+              Discard
+            </Button>
+          )}
+          <Button type="submit" loading={pending} disabled={!dirty && !tried}>
             {pending ? 'Saving' : 'Save changes'}
           </Button>
         </FormActions>
