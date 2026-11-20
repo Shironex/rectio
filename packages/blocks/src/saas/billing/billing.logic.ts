@@ -23,8 +23,10 @@ export interface BillingUsage {
   used: number;
   /** The allowance on the plan. */
   limit: number;
-  /** The unit in countLabel, such as "runs" or "GB". */
+  /** The unit after a count, such as "runs" or "GB". */
   unit: string;
+  /** The unit after a count of exactly one, such as "run" for "1 run left". Defaults to `unit`. */
+  unitOne?: string;
   resetsOn?: Date;
 }
 
@@ -58,22 +60,29 @@ export function billingUsageLevel(used: number, limit: number): BillingUsageLeve
   return 'ok';
 }
 
+/** A count of the allowance's unit: "1 seat", "3 seats", "18.4 GB". */
+export function billingUnits(count: number, usage: BillingUsage, locale: string): string {
+  const unit = count === 1 ? (usage.unitOne ?? usage.unit) : usage.unit;
+  return `${numberFormat(locale).format(count)} ${unit}`;
+}
+
 /** What the level means in words, so a full meter is never colour alone. */
 export function billingUsageNote(
   usage: BillingUsage,
   locale: string,
   resetText: string | null,
 ): string {
-  const format = numberFormat(locale);
   const reset = resetText === null ? '' : `, resets ${resetText}`;
   if (usage.used > usage.limit) {
-    return `Over the allowance by ${format.format(usage.used - usage.limit)} ${usage.unit}${reset}`;
+    return `Over the allowance by ${billingUnits(usage.used - usage.limit, usage, locale)}${reset}`;
   }
   if (usage.limit > 0 && usage.used === usage.limit) {
-    return `All ${format.format(usage.limit)} ${usage.unit} in use${reset}`;
+    // "All 1 seat" reads wrong; one is "The 1 seat".
+    const all = usage.limit === 1 ? 'The' : 'All';
+    return `${all} ${billingUnits(usage.limit, usage, locale)} in use${reset}`;
   }
   if (billingUsageLevel(usage.used, usage.limit) === 'warning') {
-    return `${format.format(usage.limit - usage.used)} ${usage.unit} left${reset}`;
+    return `${billingUnits(usage.limit - usage.used, usage, locale)} left${reset}`;
   }
   return resetText === null ? 'Within the allowance' : `Resets ${resetText}`;
 }

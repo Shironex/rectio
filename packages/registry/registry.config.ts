@@ -1323,6 +1323,7 @@ export default defineRegistry({
           'billing',
           'Billing and plan',
           'Current plan and renewal, usage meters with levels in words, the card on file and invoices with downloads.',
+          { version: '0.1.1' },
         ),
         ...saasItems(
           'api-keys',

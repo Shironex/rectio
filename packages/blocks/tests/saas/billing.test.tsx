@@ -55,6 +55,18 @@ describe('billing logic', () => {
     );
   });
 
+  it('says one of a unit in the singular when a singular is given', () => {
+    const seats = { id: 'seats', label: 'Seats', unit: 'seats', unitOne: 'seat' };
+    expect(billingUsageNote({ ...seats, used: 9, limit: 10 }, 'en-GB', null)).toBe('1 seat left');
+    expect(billingUsageNote({ ...seats, used: 11, limit: 10 }, 'en-GB', null)).toBe(
+      'Over the allowance by 1 seat',
+    );
+    expect(billingUsageNote({ ...seats, used: 1, limit: 1 }, 'en-GB', null)).toBe(
+      'The 1 seat in use',
+    );
+    expect(billingUsageNote({ ...seats, used: 8, limit: 10 }, 'en-GB', null)).toBe('2 seats left');
+  });
+
   it('knows when a card expires and when the plan renews', () => {
     expect(billingCardState({ brand: 'Visa', last4: '1', expMonth: 4, expYear: 2026 }, TODAY)).toBe(
       'expiring',

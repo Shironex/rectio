@@ -20,6 +20,7 @@ import {
   billingDaysLeft,
   billingInvoiceTotals,
   billingUsageLevel,
+  billingUnits,
   billingUsageNote,
   type BillingInvoice,
   type BillingPaymentMethod,
@@ -199,7 +200,7 @@ export function Billing({
               {usage.map((item) => {
                 const level = billingUsageLevel(item.used, item.limit);
                 const format = numberFormat(locale);
-                const valueText = `${format.format(item.used)} of ${format.format(item.limit)} ${item.unit}`;
+                const valueText = `${format.format(item.used)} of ${billingUnits(item.limit, item, locale)}`;
                 const seatsFull =
                   onAddSeats !== undefined &&
                   (item.id === 'seats' || item.unit === 'seats') &&
