@@ -1,6 +1,8 @@
 /**
- * A tiny static server for the exported site in out/, so captures and previews need no extra
- * package. Serves `/x` from `x.html` or `x/index.html`, as a CDN does.
+ * A tiny static server for the exported site in out/ (and the live template previews in .previews/
+ * during `pnpm dev`), so captures and previews need no extra package. Serves `/x` from `x.html` or
+ * `x/index.html`, as a CDN does, and a missing page from the nearest `404.html` above it, so a
+ * template's own not found page answers inside its preview.
  */
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
@@ -24,18 +26,44 @@ const TYPES: Record<string, string> = {
   '.webmanifest': 'application/manifest+json',
 };
 
-function resolveFile(root: string, url: string): string | null {
-  const path = normalize(decodeURIComponent(url.split('?')[0] ?? '/')).replace(/^(\.\.[/\\])+/, '');
+const isFile = (file: string) => existsSync(file) && statSync(file).isFile();
+
+/** The request path, decoded, without the query and never above the root. */
+const cleanPath = (url: string) =>
+  normalize(decodeURIComponent(url.split('?')[0] ?? '/')).replace(/^(\.\.[/\\])+/, '');
+
+function resolveFile(root: string, path: string): string | null {
   const candidates = [join(root, path), join(root, `${path}.html`), join(root, path, 'index.html')];
-  return candidates.find((file) => existsSync(file) && statSync(file).isFile()) ?? null;
+  return candidates.find(isFile) ?? null;
 }
 
-export function serveStatic(root: string, port = 0): Promise<{ server: Server; url: string }> {
+/** `/preview/x/missing` answers with `preview/x/404.html` when there is one, else `404.html`. */
+function notFoundFile(root: string, path: string): string | null {
+  const segments = path.split(/[/\\]/).filter(Boolean);
+  for (let depth = segments.length; depth >= 0; depth -= 1) {
+    const file = join(root, ...segments.slice(0, depth), '404.html');
+    if (isFile(file)) return file;
+  }
+  return null;
+}
+
+/**
+ * Serves `root` on 127.0.0.1. With `mount`, only requests under that path are served, from the
+ * root without it: `/preview/x/` is `<root>/x/index.html` for the mount `/preview`.
+ */
+export function serveStatic(
+  root: string,
+  port = 0,
+  mount = '',
+): Promise<{ server: Server; url: string }> {
   const server = createServer((req, res) => {
-    const file = resolveFile(root, req.url ?? '/');
+    const url = req.url ?? '/';
+    const mounted = mount === '' || url === mount || url.startsWith(`${mount}/`);
+    const path = cleanPath(mounted ? url.slice(mount.length) || '/' : '/');
+    const file = mounted ? resolveFile(root, path) : null;
     if (file === null) {
       res.writeHead(404, { 'content-type': 'text/html; charset=utf-8' });
-      const missing = resolveFile(root, '/404');
+      const missing = mounted ? notFoundFile(root, path) : null;
       if (missing === null) res.end('not found');
       else createReadStream(missing).pipe(res);
       return;

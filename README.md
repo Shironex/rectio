@@ -118,7 +118,14 @@ into `out/preview/`, marks every page noindex and keeps root-relative `<a>` link
 preview. A new template folder gets its preview with no site change, provided it keeps that
 `basePath` line, routes through `next/link` or the router (never `location.pathname` into the
 router), and keeps its look on `<html>` as `data-theme` and `data-mode` (the viewer sets those).
-`pnpm --filter @rectio/site walk-previews` opens every page of every preview headless after a build.
+`pnpm --filter @rectio/site walk-previews` opens every page of every preview and every viewer
+headless after a build (`WALK_URL=http://localhost:4350` walks a running dev server instead).
+
+In development, `pnpm --filter @rectio/site dev` builds any preview that is missing (a first run takes
+a few minutes, later starts are instant), serves `.previews/` beside next dev and proxies
+`/preview/*` to it, so the viewer works as it does on the built site. A running dev server keeps
+serving the builds it found: after editing a template or the kit, rebuild them with `pnpm --filter
+@rectio/site previews` (or the cached `pnpm turbo run previews --filter=@rectio/site`) and reload.
 
 ## The token rule
 

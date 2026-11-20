@@ -4,6 +4,7 @@
  *
  *   node scripts/previews.ts build   build every template into apps/site/.previews/<name>/
  *   node scripts/previews.ts copy    copy .previews/* into out/preview/ (builds what is missing)
+ *   node scripts/previews.ts missing build only the templates with no preview yet (`pnpm dev`)
  *
  * Turborepo runs `build` as the site's `previews` task (cached on the templates and the kit), and the
  * site build runs `copy` after `next build`. A template reads the base path from one line in its
@@ -114,6 +115,7 @@ async function buildAll(names: string[]): Promise<void> {
 
 const names = readTemplates().map((t) => t.name);
 const mode = process.argv[2];
+const missing = () => names.filter((name) => !existsSync(join(PREVIEWS_DIR, name, 'index.html')));
 
 if (mode === 'build') {
   // A template that is gone leaves no stale preview behind.
@@ -123,12 +125,24 @@ if (mode === 'build') {
     }
   }
   await buildAll(names);
+} else if (mode === 'missing') {
+  // The dev server serves whatever is in .previews: a first run builds it, later runs start at once.
+  const todo = missing();
+  if (todo.length > 0) {
+    console.log(
+      `previews: building ${todo.join(', ')} for the live previews (a first build takes a minute or two)`,
+    );
+    await buildAll(todo);
+  }
+  console.log(
+    'previews: serving the builds in .previews; after editing a template or the kit, run `pnpm previews` to rebuild them',
+  );
 } else if (mode === 'copy') {
-  await buildAll(names.filter((name) => !existsSync(join(PREVIEWS_DIR, name, 'index.html'))));
+  await buildAll(missing());
   const out = join(site, 'out', 'preview');
   rmSync(out, { recursive: true, force: true });
   for (const name of names) cpSync(join(PREVIEWS_DIR, name), join(out, name), { recursive: true });
   console.log(`previews: ${String(names.length)} template(s) copied to ${relative(site, out)}/`);
 } else {
-  throw new Error('usage: node scripts/previews.ts build|copy');
+  throw new Error('usage: node scripts/previews.ts build|copy|missing');
 }
