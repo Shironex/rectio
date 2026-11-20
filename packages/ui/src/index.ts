@@ -1,6 +1,13 @@
 export { cn } from './lib/cn';
 export { ThemeScope, usePortalContainer, type ThemeScopeProps } from './theme-scope/theme-scope';
-export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './button/button';
+export {
+  Button,
+  ButtonSpinner,
+  splitLeadingIcon,
+  type ButtonProps,
+  type ButtonSize,
+  type ButtonVariant,
+} from './button/button';
 export {
   Field,
   FieldDescription,

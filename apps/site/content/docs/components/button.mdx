@@ -25,8 +25,10 @@ import { Button } from '@/components/ui/button';
 ```
 
 One primary action per view. `danger` is outlined until hovered or pressed, so a destructive action
-never outweighs the primary beside it. `loading` keeps the label's width and the focus, blocks
-presses and sets `aria-busy`.
+never outweighs the primary beside it. `loading` shows a spinner beside the label, which stays
+readable, keeps the focus, blocks presses and sets `aria-busy`. A leading icon gives its slot to
+the spinner, so the button keeps its exact width; a text-only button grows by the spinner. Under
+reduced motion the spinner breathes in place instead of turning.
 
 ## Props
 
@@ -43,7 +45,8 @@ Every prop of Base UI's `Button` is accepted as well.
     loading: {
       type: 'boolean',
       default: 'false',
-      description: 'Shows a spinner and blocks presses, keeping the width and the focus.',
+      description:
+        'Shows a spinner beside the label and blocks presses, keeping the focus. A leading icon gives its slot to the spinner, so the width holds.',
     },
     iconOnly: {
       type: 'boolean',
@@ -51,7 +54,7 @@ Every prop of Base UI's `Button` is accepted as well.
       description: 'A square button holding only an icon. Give it an aria-label.',
     },
     renderContent: {
-      type: '(content: { children: ReactNode; loading: boolean }) => ReactNode',
+      type: '(content: { children: ReactNode; loading: boolean; iconOnly: boolean }) => ReactNode',
       description: 'Draws the label and loading indicator, as the motion add-on does.',
     },
   }}

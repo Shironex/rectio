@@ -32,11 +32,59 @@ describe('Button', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('keeps the label in the accessibility tree while loading (transparent, never visibility hidden)', () => {
+  it('keeps the label visible beside the spinner while loading', () => {
     render(<Button loading>Save</Button>);
+    const button = screen.getByRole('button', { name: 'Save' });
     const label = screen.getByText('Save');
-    expect(label.className).toContain('text-transparent');
-    expect(label.className).not.toContain('invisible');
+    expect(label.className).not.toMatch(/text-transparent|invisible|sr-only/);
+    expect(button.querySelector('[data-part="spinner"]')).not.toBeNull();
+  });
+
+  it('gives a leading icon slot to the spinner, keeping the icon box so the width holds', () => {
+    render(
+      <Button loading>
+        <svg data-testid="icon" aria-hidden className="size-4" />
+        Send
+      </Button>,
+    );
+    const button = screen.getByRole('button', { name: 'Send' });
+    const slot = button.querySelector('[data-part="icon-slot"]');
+    expect(slot).not.toBeNull();
+    expect(slot?.contains(screen.getByTestId('icon'))).toBe(true);
+    expect(screen.getByTestId('icon').parentElement?.className).toContain('invisible');
+    expect(slot?.querySelector('[data-part="spinner"]')).not.toBeNull();
+    expect(button.querySelectorAll('[data-part="spinner"]')).toHaveLength(1);
+    expect(screen.getByText('Send').className).not.toContain('invisible');
+  });
+
+  it('treats a lone component child as the label, never as an icon to hide', () => {
+    function Label() {
+      return <span>Save draft</span>;
+    }
+    render(
+      <Button loading>
+        <Label />
+      </Button>,
+    );
+    expect(screen.getByRole('button', { name: 'Save draft' })).toBeInTheDocument();
+    expect(screen.getByText('Save draft').closest('[data-part="icon-slot"]')).toBeNull();
+  });
+
+  it('swaps the icon of an icon-only button for the spinner', () => {
+    render(
+      <Button loading iconOnly aria-label="Refresh">
+        <svg data-testid="icon" aria-hidden />
+      </Button>,
+    );
+    const button = screen.getByRole('button', { name: 'Refresh' });
+    expect(screen.getByTestId('icon').parentElement?.className).toContain('invisible');
+    expect(button.querySelector('[data-part="spinner"]')).not.toBeNull();
+  });
+
+  it('breathes instead of turning under reduced motion', () => {
+    render(<Button loading>Save</Button>);
+    const spinner = screen.getByRole('button').querySelector('[data-part="spinner"]');
+    expect(spinner?.getAttribute('class')).toContain('motion-reduce:animate-breathe');
   });
 
   it('leaves the tab order when disabled', async () => {
