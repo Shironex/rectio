@@ -145,3 +145,50 @@ describe('CommandMenu', () => {
     expect(onSelect).toHaveBeenCalledWith('payables');
   });
 });
+
+describe('CommandMenu scroll cue', () => {
+  /** Gives the list a fixed box, since jsdom lays nothing out. */
+  function sized(list: HTMLElement, scrollHeight: number, clientHeight: number) {
+    Object.defineProperty(list, 'scrollHeight', { configurable: true, value: scrollHeight });
+    Object.defineProperty(list, 'clientHeight', { configurable: true, value: clientHeight });
+  }
+
+  it('fades the edge that hides rows, and only that one', async () => {
+    render(<CommandMenu groups={groups(vi.fn())} defaultOpen />);
+    const dialog = await screen.findByRole('dialog', { name: 'Command menu' });
+    const list = dialog.querySelector<HTMLElement>('[data-slot="command-list"]');
+    if (list === null) throw new Error('no list');
+    expect(list).not.toHaveAttribute('data-overflow-start');
+    expect(list).not.toHaveAttribute('data-overflow-end');
+
+    sized(list, 600, 300);
+    list.scrollTop = 0;
+    list.dispatchEvent(new Event('scroll'));
+    await waitFor(() => {
+      expect(list).toHaveAttribute('data-overflow-end');
+    });
+    expect(list).not.toHaveAttribute('data-overflow-start');
+
+    list.scrollTop = 150;
+    list.dispatchEvent(new Event('scroll'));
+    await waitFor(() => {
+      expect(list).toHaveAttribute('data-overflow-start');
+    });
+    expect(list).toHaveAttribute('data-overflow-end');
+
+    list.scrollTop = 300;
+    list.dispatchEvent(new Event('scroll'));
+    await waitFor(() => {
+      expect(list).not.toHaveAttribute('data-overflow-end');
+    });
+    expect(list).toHaveAttribute('data-overflow-start');
+  });
+
+  it('uses masks, not a moving overlay, so there is nothing to animate', async () => {
+    render(<CommandMenu groups={groups(vi.fn())} defaultOpen />);
+    const dialog = await screen.findByRole('dialog', { name: 'Command menu' });
+    const list = dialog.querySelector('[data-slot="command-list"]');
+    expect(list?.className).toContain('data-overflow-end:mask-b-from-85%');
+    expect(list?.className).not.toMatch(/transition|animate/);
+  });
+});

@@ -17,6 +17,7 @@ import { ariaKeyShortcut, useIsMac, useShortcut } from '../kbd/shortcut';
 import { cn } from '../lib/cn';
 import { usePortalContainer } from '../theme-scope/theme-scope';
 import { fuzzyScore } from './fuzzy';
+import { useScrollEdges } from './scroll-edges';
 
 export interface CommandItem {
   /** Unique across the whole menu. */
@@ -168,6 +169,7 @@ export function CommandMenu({
   // the dialog's root: a root wrapped around the app would count every dialog and sheet in it as
   // nested, and Base UI draws no backdrop for a nested one.
   const [handle] = useState(() => BaseDialog.createHandle());
+  const [listRef, edges] = useScrollEdges();
 
   const setOpen = (next: boolean) => {
     if (openProp === undefined) setOpenState(next);
@@ -262,7 +264,17 @@ export function CommandMenu({
                   </BaseDialog.Close>
                 </div>
 
-                <div className="max-h-(--rx-command-list-height) min-h-0 overflow-y-auto overscroll-contain">
+                {/* The ends fade while rows hide past them, so a long list reads as one that scrolls. */}
+                <div
+                  ref={listRef}
+                  data-slot="command-list"
+                  data-overflow-start={edges.start ? '' : undefined}
+                  data-overflow-end={edges.end ? '' : undefined}
+                  className={cn(
+                    'max-h-(--rx-command-list-height) min-h-0 overflow-y-auto overscroll-contain',
+                    'data-overflow-start:mask-t-from-85% data-overflow-end:mask-b-from-85%',
+                  )}
+                >
                   <Autocomplete.Status className="sr-only">
                     {query.trim() === '' ? null : formatCount(resultCount)}
                   </Autocomplete.Status>
@@ -305,11 +317,6 @@ export function CommandMenu({
                       </Autocomplete.Group>
                     )}
                   </Autocomplete.List>
-                  {/* Fades rows into the edge while more are below; at the end it is only space. */}
-                  <div
-                    aria-hidden
-                    className="pointer-events-none sticky bottom-0 h-4 bg-linear-to-t from-surface-overlay to-transparent"
-                  />
                 </div>
 
                 {showHints && (

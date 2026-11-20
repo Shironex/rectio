@@ -148,6 +148,9 @@ Every prop of Base UI's `Dialog.Trigger` is accepted as well.
 - Groups are named, items with a shortcut carry `aria-keyshortcuts`, and the keyboard hints are
   linked to the field as its description.
 - With no matches the empty message is announced.
+- A long list fades at the top and bottom while rows hide past that edge, so it reads as one that
+  scrolls. The fade is a still mask, so it never moves and needs no reduced motion handling.
 
 <ComponentSource path="command-menu/command-menu.tsx" />
 <ComponentSource path="command-menu/fuzzy.ts" />
+<ComponentSource path="command-menu/scroll-edges.ts" />
