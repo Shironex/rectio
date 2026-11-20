@@ -42,7 +42,7 @@ import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
-import { focusFirstInvalid, useNow } from '../lib/focus';
+import { focusFirstInvalid, useNow, useRemovalFocus } from '../lib/focus';
 import { formatDateTime, isoDateTime, countLabel, relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import {
@@ -140,6 +140,11 @@ export function CommentThread({
   const [showResolved, setShowResolved] = useState(false);
   const listId = useId();
   const tree = commentTree(comments);
+  // Oldest first, replies under their comment: a deleted comment hands focus to the next one.
+  const removal = useRemovalFocus(
+    list,
+    tree.flatMap(({ comment, replies }) => [comment.id, ...replies.map((reply) => reply.id)]),
+  );
   const people = commentParticipants(comments);
 
   const renderComment = (comment: ThreadComment, threadId: string) => {
@@ -186,6 +191,7 @@ export function CommentThread({
     const when = relativeTime(comment.createdAt, now, locale);
     return (
       <article
+        data-row-id={comment.id}
         className="group/comment flex gap-3"
         aria-label={`${comment.author.name}, ${relativeTime(comment.createdAt, now, locale)}`}
       >
@@ -437,10 +443,12 @@ export function CommentThread({
 
       <DeleteCommentDialog
         comment={deleting}
+        finalFocus={removal.landing}
         onCancel={() => {
           setDeleting(null);
         }}
         onConfirm={(comment) => {
+          removal.prepare([comment.id]);
           onDelete?.(comment.id);
           setDeleting(null);
         }}
@@ -581,10 +589,13 @@ function Composer({
 
 function DeleteCommentDialog({
   comment,
+  finalFocus,
   onCancel,
   onConfirm,
 }: {
   comment: ThreadComment | null;
+  /** Where focus goes as the dialog closes: the row's neighbour after a confirm. */
+  finalFocus: () => HTMLElement | true;
   onCancel: () => void;
   onConfirm: (comment: ThreadComment) => void;
 }) {
@@ -598,7 +609,7 @@ function DeleteCommentDialog({
         if (!open) onCancel();
       }}
     >
-      <DialogContent>
+      <DialogContent finalFocus={finalFocus}>
         <DialogHeader>
           <DialogTitle>Delete this comment?</DialogTitle>
           <DialogDescription>

@@ -41,7 +41,7 @@ import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
-import { useNow } from '../lib/focus';
+import { useNow, useRemovalFocus } from '../lib/focus';
 import { isoDateTime, countLabel, relativeTime } from '../lib/saas';
 import {
   EMPTY_USER_FILTERS,
@@ -392,6 +392,12 @@ export function UsersTable({
   const bulkLanding = () =>
     tableArea.current?.querySelector<HTMLElement>('[aria-label="Select all rows"]') ??
     tableArea.current;
+  // A removal hands focus to the next row on the page, else the previous one, else the table.
+  const removal = useRemovalFocus(
+    tableArea,
+    table.getRowModel().rows.map((row) => row.id),
+    () => bulkLanding(),
+  );
   const endBulk = () => {
     clearSelection();
     requestAnimationFrame(() => {
@@ -617,6 +623,7 @@ export function UsersTable({
               <DataTableBody
                 table={table}
                 rowProps={(row) => ({
+                  'data-row-id': row.id,
                   'data-suspended': row.original.status === 'suspended' || undefined,
                 })}
                 empty={
@@ -663,10 +670,15 @@ export function UsersTable({
         onCancel={() => {
           setConfirming(null);
         }}
-        finalFocus={() => bulkLanding() ?? true}
+        finalFocus={() => {
+          const landing = removal.landing();
+          return landing === true ? (bulkLanding() ?? true) : landing;
+        }}
         onConfirm={(action, ids) => {
-          if (action === 'remove') onRemove?.(ids);
-          else onSuspend?.(ids);
+          if (action === 'remove') {
+            removal.prepare(ids);
+            onRemove?.(ids);
+          } else onSuspend?.(ids);
           setConfirming(null);
           clearSelection();
         }}

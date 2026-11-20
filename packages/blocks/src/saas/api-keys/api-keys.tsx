@@ -33,7 +33,7 @@ import { EmptyNote } from '../../lib/empty-note';
 import { formatShortDate, resolveLocale } from '../../lib/finance';
 import { StateBadge } from '../../lib/state-badge';
 import { FormMessage } from '../lib/auth';
-import { focusFirstInvalid, useNow } from '../lib/focus';
+import { focusFirstInvalid, useNow, useRemovalFocus } from '../lib/focus';
 import { countLabel, relativeTime } from '../lib/saas';
 import { focusRing, inlineLink } from '../lib/styles';
 import { useSaasParts } from '../lib/saas-parts';
@@ -171,12 +171,19 @@ export function ApiKeys({
   const sorted = sortApiKeys(keys);
   const liveKeys = sorted.filter((key) => key.revokedAt === undefined);
   const revokedKeys = sorted.filter((key) => key.revokedAt !== undefined);
-  const renderKeys = (list: readonly ApiKey[], label: string) => (
+  const panel = useRef<HTMLElement>(null);
+  // A revoked key leaves the active list: focus moves to the next active key's Revoke.
+  const removal = useRemovalFocus(
+    panel,
+    liveKeys.map((key) => key.id),
+  );
+  const renderKeys = (list: readonly ApiKey[], label: string, live: boolean) => (
     <ul aria-label={label} className="flex flex-col">
       <Items>
         {list.map((key) => (
           <Item
             key={key.id}
+            data-row-id={live ? key.id : undefined}
             className="flex flex-col gap-2 py-3.5 not-last:border-b not-last:border-line @lg:flex-row @lg:items-center @lg:gap-3"
           >
             <KeyRow
@@ -200,6 +207,7 @@ export function ApiKeys({
 
   return (
     <BlockPanel
+      ref={panel}
       title={title}
       description={
         live.length === 0
@@ -281,7 +289,7 @@ export function ApiKeys({
         )
       ) : (
         <>
-          {liveKeys.length > 0 && renderKeys(liveKeys, 'API keys')}
+          {liveKeys.length > 0 && renderKeys(liveKeys, 'API keys', true)}
           {/* Revoked keys stay on record but out of the way, one click from view. */}
           {revokedKeys.length > 0 && (
             <details className="group border-t border-line">
@@ -300,7 +308,7 @@ export function ApiKeys({
                 <span className="hidden group-open:inline">Hide</span>
                 <span>{countLabel(revokedKeys.length, 'revoked key')}</span>
               </summary>
-              {renderKeys(revokedKeys, 'Revoked API keys')}
+              {renderKeys(revokedKeys, 'Revoked API keys', false)}
             </details>
           )}
         </>
@@ -308,10 +316,12 @@ export function ApiKeys({
 
       <RevokeDialog
         apiKey={revoking}
+        finalFocus={removal.landing}
         onCancel={() => {
           setRevoking(null);
         }}
         onConfirm={(key) => {
+          removal.prepare([key.id]);
           onRevoke?.(key.id);
           setRevoking(null);
         }}
@@ -435,6 +445,7 @@ function KeyRow({
           )}
           {canRevoke && (
             <Button
+              data-row-focus
               variant="ghost"
               size="sm"
               className="text-fg-muted hover:bg-negative-subtle hover:text-negative-strong"
@@ -684,10 +695,13 @@ function KeyReveal({ name, value, onDone }: { name: string; value: string; onDon
 
 function RevokeDialog({
   apiKey,
+  finalFocus,
   onCancel,
   onConfirm,
 }: {
   apiKey: ApiKey | null;
+  /** Where focus goes as the dialog closes: the row's neighbour after a confirm. */
+  finalFocus: () => HTMLElement | true;
   onCancel: () => void;
   onConfirm: (key: ApiKey) => void;
 }) {
@@ -702,7 +716,7 @@ function RevokeDialog({
         if (!open) onCancel();
       }}
     >
-      <DialogContent>
+      <DialogContent finalFocus={finalFocus}>
         <DialogHeader>
           <DialogTitle>Revoke {shown?.name}?</DialogTitle>
           <DialogDescription>

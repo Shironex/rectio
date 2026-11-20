@@ -53,7 +53,7 @@ import { ChoiceSelect, type Choice } from '../../lib/choice-select';
 import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu, type MenuAction } from '../lib/action-menu';
-import { useNow } from '../lib/focus';
+import { useNow, useRemovalFocus } from '../lib/focus';
 import { formatBytes, formatDateTime, isoDateTime, countLabel, relativeTime } from '../lib/saas';
 import { USAGE_NOTE, USAGE_TONE, focusRing } from '../lib/styles';
 import {
@@ -208,6 +208,11 @@ export function FileManager({
     returnFocus.current = null;
     tableArea.current?.querySelector<HTMLElement>(selector)?.focus();
   }, [renaming]);
+  // A delete hands focus to the next row's menu, else the previous one, else the empty folder.
+  const removal = useRemovalFocus(
+    tableArea,
+    sorted.map((entry) => entry.id),
+  );
   // Selection never outlives the entries it points at.
   const chosen = sorted.filter((entry) => selected.has(entry.id));
   const all = sorted.length > 0 && chosen.length === sorted.length;
@@ -551,7 +556,11 @@ export function FileManager({
                     const KindIcon = KIND_ICONS[kind];
                     const actions = rowActions(entry);
                     return (
-                      <Row key={entry.id} data-selected={selected.has(entry.id) || undefined}>
+                      <Row
+                        key={entry.id}
+                        data-row-id={entry.id}
+                        data-selected={selected.has(entry.id) || undefined}
+                      >
                         {selectable && (
                           <TableCell className="w-0 pe-0">
                             <span className="flex items-center">
@@ -719,12 +728,13 @@ export function FileManager({
       )}
 
       <DeleteEntriesDialog
-        finalFocus={() => tableArea.current ?? true}
+        finalFocus={removal.landing}
         entries={deleting === null ? [] : deleting.flatMap((id) => byId.get(id) ?? [])}
         onCancel={() => {
           setDeleting(null);
         }}
         onConfirm={(ids) => {
+          removal.prepare(ids);
           onDelete?.(ids);
           setSelected((was) => new Set([...was].filter((id) => !ids.includes(id))));
           setDeleting(null);

@@ -38,6 +38,8 @@ export function ActionMenu({ label, actions, trigger, align = 'end', className }
   return (
     <Menu>
       <MenuTrigger
+        // The row's own control: focus lands here when a neighbouring row is removed.
+        data-row-focus
         aria-label={trigger === undefined ? label : undefined}
         className={cn(
           'relative inline-flex h-(--rx-button-height-sm) min-w-(--rx-button-height-sm) shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-(--rx-button-radius) px-1.5',

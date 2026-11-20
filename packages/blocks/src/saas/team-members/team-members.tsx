@@ -30,10 +30,11 @@ import { useId, useRef, useState, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
+import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { ActionMenu } from '../lib/action-menu';
 import { Avatar } from '../lib/avatar';
-import { focusFirstInvalid, useNow, useReturnFocus } from '../lib/focus';
+import { focusFirstInvalid, useNow, useRemovalFocus, useReturnFocus } from '../lib/focus';
 import { countLabel, relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
 import {
@@ -109,6 +110,15 @@ export function TeamMembers({
   const canInvite = onInvite !== undefined && assignableRoles(currentRole).length > 0;
   const sorted = sortMembers(members);
   const alone = members.length <= 1 && invites.length === 0;
+  // Members then invites, as one list: removing a row hands focus to its neighbour.
+  const removal = useRemovalFocus(panel, [
+    ...sorted.map((member) => `member:${member.id}`),
+    ...invites.map((invite) => `invite:${invite.id}`),
+  ]);
+  const revokeInvite = (inviteId: string) => {
+    removal.prepare([`invite:${inviteId}`]);
+    onRevokeInvite?.(inviteId);
+  };
 
   const description = [
     countLabel(members.length, 'member'),
@@ -177,6 +187,7 @@ export function TeamMembers({
             return (
               <Item
                 key={member.id}
+                data-row-id={`member:${member.id}`}
                 className="flex items-center gap-3 py-2.5 not-last:border-b not-last:border-line"
               >
                 <Avatar name={member.name} src={member.avatarUrl} />
@@ -264,6 +275,7 @@ export function TeamMembers({
               {invites.map((invite) => (
                 <Item
                   key={invite.id}
+                  data-row-id={`invite:${invite.id}`}
                   className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2.5 not-last:border-b not-last:border-line"
                 >
                   <span
@@ -310,7 +322,7 @@ export function TeamMembers({
                                   icon: XIcon,
                                   danger: true,
                                   onSelect: () => {
-                                    onRevokeInvite(invite.id);
+                                    revokeInvite(invite.id);
                                   },
                                 },
                               ]),
@@ -321,6 +333,7 @@ export function TeamMembers({
                   <span className="hidden items-center gap-2 @xl:flex pointer-coarse:gap-5">
                     {onResendInvite !== undefined && (
                       <Button
+                        data-row-focus
                         variant="ghost"
                         size="sm"
                         aria-label={`Resend invite to ${invite.email}`}
@@ -338,7 +351,7 @@ export function TeamMembers({
                         size="sm"
                         aria-label={`Revoke invite to ${invite.email}`}
                         onClick={() => {
-                          onRevokeInvite(invite.id);
+                          revokeInvite(invite.id);
                         }}
                       >
                         <XIcon aria-hidden weight="bold" className="size-3.5" />
@@ -354,42 +367,38 @@ export function TeamMembers({
       )}
 
       {alone && !inviting && (
-        <div className="flex flex-col items-center gap-3 rounded-control border border-dashed border-line px-4 py-10 text-center text-sm text-fg-muted">
-          <span
-            aria-hidden
-            className="inline-flex size-10 items-center justify-center rounded-full bg-surface-sunken text-fg-muted"
-          >
-            <UsersThreeIcon weight="bold" className="size-5" />
-          </span>
-          <div className="flex max-w-sm flex-col gap-1">
-            <p className="font-medium text-fg">It is just you so far</p>
-            <p className="text-pretty">
-              {canInvite
-                ? 'Invite the people you work with. They get an email and join with the role you pick.'
-                : 'An owner or admin can invite the people you work with.'}
-            </p>
-          </div>
-          {canInvite && (
-            <Button
-              data-invite-trigger
-              onClick={() => {
-                invitePanel.remember();
-                setInviting(true);
-              }}
-            >
-              <UserPlusIcon aria-hidden weight="bold" className="size-4" />
-              Invite people
-            </Button>
-          )}
-        </div>
+        <EmptyNote
+          icon={UsersThreeIcon}
+          title="It is just you so far"
+          action={
+            canInvite ? (
+              <Button
+                data-invite-trigger
+                onClick={() => {
+                  invitePanel.remember();
+                  setInviting(true);
+                }}
+              >
+                <UserPlusIcon aria-hidden weight="bold" className="size-4" />
+                Invite people
+              </Button>
+            ) : undefined
+          }
+        >
+          {canInvite
+            ? 'Invite the people you work with. They get an email and join with the role you pick.'
+            : 'An owner or admin can invite the people you work with.'}
+        </EmptyNote>
       )}
 
       <RemoveDialog
         member={removing}
+        finalFocus={removal.landing}
         onCancel={() => {
           setRemoving(null);
         }}
         onConfirm={(member) => {
+          removal.prepare([`member:${member.id}`]);
           onRemove?.(member.id);
           setRemoving(null);
         }}
@@ -533,10 +542,13 @@ function InviteForm({
 
 function RemoveDialog({
   member,
+  finalFocus,
   onCancel,
   onConfirm,
 }: {
   member: TeamMember | null;
+  /** Where focus goes as the dialog closes: the row's neighbour after a confirm. */
+  finalFocus: () => HTMLElement | true;
   onCancel: () => void;
   onConfirm: (member: TeamMember) => void;
 }) {
@@ -551,7 +563,7 @@ function RemoveDialog({
         if (!open) onCancel();
       }}
     >
-      <DialogContent>
+      <DialogContent finalFocus={finalFocus}>
         <DialogHeader>
           <DialogTitle>Remove {shown?.name}?</DialogTitle>
           <DialogDescription>
