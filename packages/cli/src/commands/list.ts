@@ -3,6 +3,7 @@ import type { IndexEntry } from '@rectio/registry';
 import { readConfig, registryUrl } from '../core/config.ts';
 import { CliError, type CliContext } from '../core/context.ts';
 import { readLock } from '../core/lockfile.ts';
+import { outdatedItems, printOutdatedHint } from '../core/outdated.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
 
 export interface ListOptions {
@@ -31,7 +32,7 @@ function printEntries(ctx: CliContext, entries: readonly IndexEntry[]) {
 
 async function loadIndex(ctx: CliContext, flag: string | undefined) {
   const client = createRegistryClient(registryUrl(ctx, flag, readConfig(ctx.cwd)));
-  return (await client.index()).items;
+  return client.index();
 }
 
 function printTemplates(ctx: CliContext, entries: readonly IndexEntry[]) {
@@ -51,14 +52,18 @@ function printTemplates(ctx: CliContext, entries: readonly IndexEntry[]) {
 
 export async function runList(ctx: CliContext, options: ListOptions = {}) {
   if (options.templates === true) {
-    const templates = (await loadIndex(ctx, options.registry)).filter((e) => e.type === 'template');
+    const templates = (await loadIndex(ctx, options.registry)).items.filter(
+      (e) => e.type === 'template',
+    );
     printTemplates(ctx, templates);
     return templates;
   }
-  const entries = (await loadIndex(ctx, options.registry)).filter(
-    (e) => options.type === undefined || e.type === options.type,
-  );
+  const index = await loadIndex(ctx, options.registry);
+  const entries = index.items.filter((e) => options.type === undefined || e.type === options.type);
   printEntries(ctx, entries);
+  if (readConfig(ctx.cwd) !== undefined) {
+    printOutdatedHint(ctx, outdatedItems(index, readLock(ctx.cwd)));
+  }
   return entries;
 }
 
@@ -88,7 +93,7 @@ export async function runSearch(
   if (query === undefined || query.trim() === '') {
     throw new CliError('give a search term', 'Example: rectio search money');
   }
-  const entries = rankMatches(await loadIndex(ctx, options.registry), query.trim());
+  const entries = rankMatches((await loadIndex(ctx, options.registry)).items, query.trim());
   printEntries(ctx, entries);
   return entries;
 }

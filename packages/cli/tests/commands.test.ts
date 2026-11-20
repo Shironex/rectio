@@ -324,6 +324,23 @@ describe('diff, list, search and update', () => {
     const { ctx, out } = capture(cwd);
     expect(await runUpdate(ctx)).toHaveLength(1);
     expect(out.join('\n')).toContain('-> 0.2.0');
+
+    // list and add say so in one line, from the index they already fetched. theme-ledger does not
+    // reinstall cn, the outdated item.
+    const hint = /^\n1 installed item has a newer version in the registry: run `rectio update`/;
+    const listed = capture(cwd);
+    await runList(listed.ctx, { type: 'theme' });
+    expect(listed.out.at(-1)).toMatch(hint);
+    const added = capture(cwd);
+    await runAdd(added.ctx, ['theme-ledger'], noInstall);
+    expect(added.out.at(-1)).toMatch(hint);
+  });
+
+  it('adds no outdated line when everything is current', async () => {
+    const cwd = await initialised();
+    const { ctx, out } = capture(cwd);
+    await runList(ctx);
+    expect(out.join('\n')).not.toContain('newer version in the registry');
   });
 });
 

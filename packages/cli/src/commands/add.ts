@@ -2,6 +2,8 @@ import { requireConfig, registryUrl } from '../core/config.ts';
 import { CliError, type CliContext } from '../core/context.ts';
 import { countDependencies } from '../core/install.ts';
 import { installItems, type InstallOptions, type InstallReport } from '../core/installer.ts';
+import { readLock } from '../core/lockfile.ts';
+import { outdatedItems, printOutdatedHint } from '../core/outdated.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
 
 export interface AddOptions extends InstallOptions {
@@ -37,6 +39,10 @@ export async function runAdd(ctx: CliContext, names: readonly string[], options:
   printReport(ctx, report);
   if (!report.dryRun && options.install === false && countDependencies(report.added) > 0) {
     ctx.log('\nPackages were added to package.json: run your package manager install.');
+  }
+  // The index is already fetched for the install, so this costs no request.
+  if (!report.dryRun) {
+    printOutdatedHint(ctx, outdatedItems(await client.index(), readLock(ctx.cwd)));
   }
   return report;
 }
