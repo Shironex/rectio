@@ -41,7 +41,12 @@ Options
   --type <type>        list: component, block, theme, lib, hook or style
   --templates          list: templates only
   -h, --help           Show this help
-  -v, --version        Show the version`;
+  -v, --version        Show the version
+
+Environment
+  RECTIO_REGISTRY_URL  Registry URL or folder, when --registry is not given
+  RECTIO_NO_UPDATE_CHECK=1
+                       Do not check npm for a newer rectio`;
 
 const OPTIONS = {
   cwd: { type: 'string' },
