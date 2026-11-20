@@ -7,7 +7,7 @@ The `rectio` command copies registry items into your project and keeps track of 
 Node 22.12 or later. It asks nothing: every choice is a flag, so it runs the same in a script.
 
 ```sh
-pnpm dlx rectio <command> [options]
+pnpm dlx @rectio/cli <command> [options]
 ```
 
 ## Commands
@@ -37,7 +37,7 @@ Running `init` again with another `--theme` installs that theme and records it i
 ### init --template
 
 Starts a new project from a [template](/docs/templates): a complete Next.js app you own from the
-first commit. Templates are Pro, so the license key is needed as for any Pro item.
+first commit.
 
 ```sh
 rectio init --template finance-app [folder] [--theme ledger] [--registry <url|folder>]
@@ -93,10 +93,10 @@ install, and prints a unified patch from your file to the registry's.
 
 ### list
 
-Lists registry items with their type, tier, version and title.
+Lists registry items with their type, version and title.
 
 ```sh
-rectio list [--type component|block|theme|lib|hook|style|template] [--tier free|pro] [--templates]
+rectio list [--type component|block|theme|lib|hook|style|template] [--templates]
 ```
 
 In a project, `*` marks an installed item and `^` one with a newer version available.
@@ -151,20 +151,7 @@ The CLI uses the first of:
 1. `--registry`
 2. the `RECTIO_REGISTRY_URL` environment variable
 3. `registry` in `rectio.json`
-4. `https://rectio.dev/r`
+4. `https://shironex.github.io/rectio/r`, the registry published with these docs
 
 A plain folder or a `file://` URL works for development, as does the
 [local registry server](/docs/registry#local-registry).
-
-<Callout>
-  `https://rectio.dev/r` is a placeholder until the hosted registry exists. Point the CLI at a local
-  registry for now.
-</Callout>
-
-## Pro items
-
-Pro items need a license key, from `RECTIO_LICENSE_KEY` or `auth.json` in your user config folder
-([where it lives](/docs/installation#pro-license-key)). The key is sent as a bearer token, only with
-requests for Pro items, and never stored in the project. Without a key, `add` names the Pro items
-and writes nothing. A refused key (401) or a key that does not cover an item (403) also leaves the
-project untouched. A local folder registry does not check keys.

@@ -8,28 +8,20 @@ such as Claude Code, Cursor or VS Code's agent mode can look up what rectio has,
 source with your aliases, and get the exact command to add it.
 
 It is part of the CLI, so one install covers both. It uses the same registry lookup (`--registry`,
-`RECTIO_REGISTRY_URL`, then `rectio.json`) and the same license key lookup (`RECTIO_LICENSE_KEY`,
-then `auth.json`). It never writes files: `get_add_command` returns the command for you or the agent
+`RECTIO_REGISTRY_URL`, then `rectio.json`, then the published registry). It never writes files: `get_add_command` returns the command for you or the agent
 to run.
 
 ## Tools
 
 | Tool              | Use it to                                                                                           |
 | ----------------- | --------------------------------------------------------------------------------------------------- |
-| `list_items`      | See what exists, filtered by `type` and `tier`.                                                     |
+| `list_items`      | See what exists, filtered by `type`.                                                                |
 | `search_items`    | Find items by words in the name, title, categories and description.                                 |
 | `get_item`        | Read one item: description, versions, what installs with it, npm packages, files.                   |
 | `get_item_source` | Read the source of an item or one of its files. Imports use your aliases when `rectio.json` exists. |
 | `get_tokens`      | Get the token names and values of a theme and mode, with the Tailwind utility for each.             |
 | `get_docs`        | Get an item's usage notes and exports, or the general rules without an item.                        |
-| `get_add_command` | Get the exact `rectio add ...` command, with what else it installs and the key it needs.            |
-
-## Pro items
-
-Until a key is configured, `get_item` shows a Pro item's metadata only, and `get_item_source`,
-`get_docs` and `get_tokens` answer with how to get a key, and no source. The key is never printed.
-Give the server its key in the `env` of its config, as below, or in
-[`auth.json`](/docs/installation#pro-license-key).
+| `get_add_command` | Get the exact `rectio add ...` command, with what else it installs.                                 |
 
 ## Set up
 
@@ -44,12 +36,6 @@ Add it for the project; this writes `.mcp.json`. Drop `--scope project` to add i
 claude mcp add rectio --scope project -- rectio mcp
 ```
 
-With a Pro key:
-
-```sh
-claude mcp add rectio --scope project -e RECTIO_LICENSE_KEY=<key> -- rectio mcp
-```
-
 Or write `.mcp.json` yourself:
 
 ```jsonc title=".mcp.json"
@@ -58,7 +44,6 @@ Or write `.mcp.json` yourself:
     "rectio": {
       "command": "rectio",
       "args": ["mcp"],
-      "env": { "RECTIO_LICENSE_KEY": "<key>" }, // optional, Pro items only
     },
   },
 }
@@ -73,7 +58,6 @@ Or write `.mcp.json` yourself:
     "rectio": {
       "command": "rectio",
       "args": ["mcp"],
-      "env": { "RECTIO_LICENSE_KEY": "<key>" }, // optional, Pro items only
     },
   },
 }
@@ -82,24 +66,13 @@ Or write `.mcp.json` yourself:
 </Tab>
 <Tab value="VS Code">
 
-VS Code asks for the key once and keeps it out of the file.
-
 ```jsonc title=".vscode/mcp.json"
 {
-  "inputs": [
-    {
-      "id": "rectio-key",
-      "type": "promptString",
-      "description": "rectio license key",
-      "password": true,
-    },
-  ],
   "servers": {
     "rectio": {
       "type": "stdio",
       "command": "rectio",
       "args": ["mcp"],
-      "env": { "RECTIO_LICENSE_KEY": "${input:rectio-key}" },
     },
   },
 }
@@ -107,11 +80,6 @@ VS Code asks for the key once and keeps it out of the file.
 
 </Tab>
 </Tabs>
-
-<Callout type="warn">
-  Do not commit a real key. Keep the `env` block out of shared config, or put the key in `auth.json`
-  instead.
-</Callout>
 
 ### A local registry
 

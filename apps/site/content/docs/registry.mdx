@@ -1,10 +1,11 @@
 ---
 title: Registry
-description: The static JSON the CLI installs from, and how items are built, versioned and gated.
+description: The static JSON the CLI installs from, and how items are built and versioned.
 ---
 
 rectio ships as source. The registry is a tree of static JSON files built from the component and
-token sources. The CLI and the MCP server read it; you never need to read it by hand.
+token sources and published with these docs at `https://shironex.github.io/rectio/r`. The CLI and
+the MCP server read it; you never need to read it by hand.
 
 ## Items
 
@@ -18,15 +19,12 @@ An item is one installable unit. Its `type` is one of:
 | `style`     | Shared CSS: `tokens`, the Tailwind theme mapping, density and reduced motion. |
 | `lib`       | A helper, such as `cn`.                                                       |
 | `hook`      | A React hook.                                                                 |
-| `template`  | A whole app for [init --template](/docs/cli#init---template), always Pro.     |
+| `template`  | A whole app for [init --template](/docs/cli#init---template).                 |
 
-Every item has a `tier` (`free` or `pro`), a semver `version`, its npm `dependencies`, the
+Every item has a semver `version`, its npm `dependencies`, the
 `registryDependencies` it needs, and `requires`: the React range, the Tailwind range and the token
 contract version it was built for. Its `files` each carry a `path`, a `type`, a `target` through an
-alias placeholder (`@ui/button.tsx`), the `content` and its `sha256`. Field names match shadcn's
-registry item where the two overlap.
-
-A free item never depends on a Pro one; the build fails if it would.
+alias placeholder (`@ui/button.tsx`), the `content` and its `sha256`.
 
 A `template` item is different: its files target `@project/<path>`, the root of the new project,
 instead of an alias, and a `template` field carries its category, routes and the kit items it uses
@@ -35,13 +33,12 @@ instead of an alias, and a `template` field carries its category, routes and the
 
 ## Layout
 
-| Path                                 | What it holds                                                                       |
-| ------------------------------------ | ----------------------------------------------------------------------------------- |
-| `index.json`                         | Every item: name, type, tier, versions, title and registry dependencies. No source. |
-| `items/<name>.json`                  | The latest free item, with file contents and hashes.                                |
-| `items/<name>@<version>.json`        | An immutable copy of one version.                                                   |
-| `pro/items/<name>.json` (and `@ver`) | Pro items, served only with a valid license key.                                    |
-| `schema/{item,index,config}.json`    | JSON Schemas of an item, the index and `rectio.json`.                               |
+| Path                              | What it holds                                                                 |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| `index.json`                      | Every item: name, type, versions, title and registry dependencies. No source. |
+| `items/<name>.json`               | The latest version of an item, with file contents and hashes.                 |
+| `items/<name>@<version>.json`     | An immutable copy of one version.                                             |
+| `schema/{item,index,config}.json` | JSON Schemas of an item, the index and `rectio.json`.                         |
 
 Versioned copies never change. They are what a future `rectio update` will merge from: the exact
 version you installed, beside the latest one.
@@ -52,13 +49,6 @@ Every file carries the sha256 of its content, and the item carries an `integrity
 `sha256-<base64>` over its canonical JSON (keys sorted at every level). The CLI checks both after
 download and refuses an item that does not match, before anything is written. Line endings are
 normalised to LF before hashing, so Windows and macOS agree.
-
-## Pro items
-
-Pro item bodies live under `pro/` in the same tree. A static host serves the free tier as it is, and
-the license server only has to guard one prefix. The CLI sends the license key as
-`Authorization: Bearer <key>` to `pro/` paths only. The index stays public, so `rectio list` and
-`rectio search` show Pro items to everyone.
 
 ## Building
 
@@ -71,7 +61,7 @@ pnpm --filter @rectio/registry build    # writes packages/registry/dist/registry
 The build reads each item's source, turns relative imports into registry imports and registry
 dependencies, and package imports into npm dependencies with the range from the source
 `package.json`. It fails on an undeclared package, a relative import outside every item, a source
-folder no item lists, a free item that depends on a Pro one, or a test file in an item. It adds
+folder no item lists, or a test file in an item. It adds
 `'use client'` to files that use hooks, context or a UI package, so they work in Next.js. The token
 CSS is split into the `tokens` style item and one `theme-<id>` item per theme.
 
@@ -81,12 +71,7 @@ CSS is split into the `tokens` style item and one `theme-<id>` item per theme.
 pnpm --filter @rectio/registry serve    # http://127.0.0.1:4873
 ```
 
-The dev server serves the built folder the way the hosted registry will, and refuses `pro/` requests
-without a known key (401). Give it keys and a port through the environment:
-
-```sh
-PORT=5000 RECTIO_DEV_LICENSE_KEYS=key-a,key-b pnpm --filter @rectio/registry serve
-```
+The dev server serves the built folder as the published registry does. Set `PORT` for another port.
 
 Point a project at it with `--registry http://127.0.0.1:4873`, or at the built folder itself with
-`--registry ../rectio/packages/registry/dist/registry`. A folder registry checks no keys.
+`--registry ../rectio/packages/registry/dist/registry`.

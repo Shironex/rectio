@@ -12,6 +12,12 @@ description: Set up rectio in a React project and add your first component.
   says what to add.
 - Node 22.12 or later to run the CLI.
 
+<Callout>
+  The CLI is not on npm yet. Until the first release, build it from the repository
+  (`pnpm --filter @rectio/cli build`) and run `node <path-to-rectio>/packages/cli/dist/bin.js` in
+  place of `pnpm dlx @rectio/cli`.
+</Callout>
+
 ## Set up
 
 <Steps>
@@ -20,7 +26,7 @@ description: Set up rectio in a React project and add your first component.
 ### Run init
 
 ```sh
-pnpm dlx rectio init
+pnpm dlx @rectio/cli init
 ```
 
 `init` reads the project, then installs the tokens, a theme and the `cn` helper. It asks nothing:
@@ -60,9 +66,9 @@ every choice is a flag.
 
 ```json title="rectio.json"
 {
-  "$schema": "https://rectio.dev/r/schema/config.json",
+  "$schema": "https://shironex.github.io/rectio/r/schema/config.json",
   "schemaVersion": 1,
-  "registry": "https://rectio.dev/r",
+  "registry": "https://shironex.github.io/rectio/r",
   "framework": "vite",
   "css": "src/index.css",
   "theme": "default",
@@ -97,7 +103,7 @@ of the nearest lockfile: pnpm, npm, yarn or bun. With a theme other than `defaul
 ### Add components
 
 ```sh
-pnpm dlx rectio add button dialog money
+pnpm dlx @rectio/cli add button dialog money
 ```
 
 `add` installs the items and everything they depend on. It fetches each item, checks its schema and
@@ -113,28 +119,10 @@ import { Button } from '@/components/ui/button';
 
 ## The lockfile
 
-`rectio.lock.json` records each item's version, tier and integrity, and the sha256 of every file as
+`rectio.lock.json` records each item's version and integrity, and the sha256 of every file as
 it was written. Commit it.
 
 It is how rectio tells your edits from its own. A file you changed since rectio wrote it stops the
 whole `add`, and nothing is written, unless you pass `--overwrite`. `rectio diff <item>` shows what
 changed. Files with CRLF line endings compare equal to the LF originals, so a Windows checkout and a
 macOS one agree on what was edited.
-
-## Pro license key
-
-Pro items need a license key. The CLI reads it from the `RECTIO_LICENSE_KEY` environment variable
-first, then from `auth.json` in your user config folder:
-
-```json title="auth.json"
-{ "licenseKey": "<your key>" }
-```
-
-| System       | Folder                                                      |
-| ------------ | ----------------------------------------------------------- |
-| macOS, Linux | `$XDG_CONFIG_HOME/rectio`, or `~/.config/rectio` without it |
-| Windows      | `%APPDATA%\rectio`                                          |
-
-The key is sent only with requests for Pro items and is never written into the project, so it
-cannot be committed by accident. There is no `--key` flag, because keys in shell history leak.
-Without a key, `add` names the Pro items it needs and writes nothing.
