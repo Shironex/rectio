@@ -1,7 +1,6 @@
 ---
 title: Motion add-on
 description: Motion that confirms a change, from the same props and the same tokens.
-pro: true
 ---
 
 The motion add-on gives the components that move a motioned twin. Each twin has the same name and
@@ -81,8 +80,9 @@ same test checks that.
 
 ## Install
 
-<Callout>
-  The motion add-on is part of rectio Pro. Each twin is a registry item named `motion-` and the
-  component, such as `motion-button`, and installs with `rectio add` and a license key, as described
-  in [Installation](/docs/installation#pro-license-key).
-</Callout>
+Each twin is a registry item named `motion-` and the component, such as `motion-button`, and
+installs with `rectio add` like any other item. It brings the plain component with it.
+
+```sh
+pnpm dlx rectio add motion-button
+```

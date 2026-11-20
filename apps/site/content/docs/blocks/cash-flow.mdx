@@ -1,7 +1,6 @@
 ---
 title: Cash flow chart
 description: 'Inflow, outflow and net by month or quarter, with a table of the same figures.'
-pro: true
 ---
 
 <Preview
@@ -13,9 +12,6 @@ pro: true
 />
 
 ## Install
-
-Blocks are part of rectio Pro: set `RECTIO_LICENSE_KEY` first. Without a key, `add` refuses and
-writes nothing.
 
 ```sh
 pnpm dlx rectio add cash-flow
@@ -31,7 +27,8 @@ with a halo, so it reads over either series. Quarters are summed in minor units 
 so a quarter always equals its three months to the cent.
 
 The block is data-agnostic: it takes plain records and calls you back; it never fetches. The Code
-tab shows the preview's usage. The block's own source comes with the license.
+tab shows the preview's usage. The block's own source is in
+the repository, under `packages/blocks`.
 
 ## Props
 

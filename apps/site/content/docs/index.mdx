@@ -17,20 +17,23 @@ rectio ships as source. `rectio add` copies a component into your project, rewri
 aliases, and you own the code from then on. A lockfile records what was written, so rectio can tell
 your edits from its own updates.
 
-| Part                       | What it is                                                                                                                                            |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tokens                     | Colour, type, radius, shadow, density and motion values as CSS variables, with a Tailwind v4 theme that maps utilities onto them.                     |
-| Themes                     | `default` and `ledger`, each in light and dark, with a compact density.                                                                               |
-| Components                 | Button, Field and Input, AmountInput, Select, Checkbox, DatePicker and DateRangePicker, Calendar, Money, Badge, DataTable, Dialog, Toast, ThemeScope. |
-| [CLI](/docs/cli)           | `rectio init`, `add`, `diff`, `list`, `search` and `update`.                                                                                          |
-| [Registry](/docs/registry) | The static JSON the CLI installs from, with versions and integrity hashes.                                                                            |
-| [MCP server](/docs/mcp)    | `rectio mcp`, so a coding agent can read items, tokens and source instead of guessing.                                                                |
+| Part                                  | What it is                                                                                                                                                     |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tokens                                | Colour, type, radius, shadow, density and motion values as CSS variables, with a Tailwind v4 theme that maps utilities onto them.                              |
+| Themes                                | `default` and `ledger`, each in light and dark, with a compact density.                                                                                        |
+| [Components](/docs/components/button) | Forms, overlays, navigation, data display and finance primitives: Button, Field, Select, DataTable, DatePicker, Money, Dialog, Sidebar, Command menu and more. |
+| [Blocks](/docs/blocks)                | Composed sections for finance, SaaS, marketing and docs screens, most with a motion twin.                                                                      |
+| [Templates](/docs/templates)          | Whole Next.js apps built from the kit, with a live preview of every page.                                                                                      |
+| [CLI](/docs/cli)                      | `rectio init`, `add`, `diff`, `list`, `search` and `update`.                                                                                                   |
+| [Registry](/docs/registry)            | The static JSON the CLI installs from, with versions and integrity hashes.                                                                                     |
+| [MCP server](/docs/mcp)               | `rectio mcp`, so a coding agent can read items, tokens and source instead of guessing.                                                                         |
 
-### Free and Pro
+### Free and open source
 
-The components, the tokens and both themes are free. rectio Pro adds the
-[motion add-on](/docs/motion), a motioned twin of the components that move, and further theme packs.
-Pro pages carry a <ProBadge /> mark.
+Everything here is free and MIT licensed: the components, the tokens and both themes, the
+[motion add-on](/docs/motion), the blocks, the templates, the CLI, the registry and the MCP server.
+The source lives at [github.com/Shironex/rectio](https://github.com/Shironex/rectio), where bug
+reports, requests and pull requests are welcome.
 
 ## Principles
 
