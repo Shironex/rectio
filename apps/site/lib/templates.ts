@@ -39,6 +39,7 @@ export function readTemplates(): SiteTemplate[] {
         pages: manifest.pages,
         uses: manifest.uses,
         href: `/docs/templates/${manifest.name}`,
+        previewHref: `/templates/${manifest.name}`,
         command: `rectio init --template ${manifest.name}`,
         shots: {
           light: served(manifest.name, light),

@@ -10,7 +10,8 @@
         "$TURBO_ROOT$/packages/motion/src/**",
         "$TURBO_ROOT$/templates/*/template.json",
         "$TURBO_ROOT$/templates/*/screenshots/**"
-      ]
+      ],
+      "dependsOn": ["^build", "previews"]
     },
     "test": {
       "inputs": [
@@ -21,6 +22,26 @@
     },
     "typecheck": {
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/templates/*/template.json"]
+    },
+    "previews": {
+      "dependsOn": ["^build"],
+      "outputs": [".previews/**"],
+      "inputs": [
+        "scripts/previews.ts",
+        "lib/previews.ts",
+        "lib/templates.ts",
+        "lib/template-types.ts",
+        "$TURBO_ROOT$/templates/**",
+        "!$TURBO_ROOT$/templates/*/node_modules/**",
+        "!$TURBO_ROOT$/templates/*/.next/**",
+        "!$TURBO_ROOT$/templates/*/out/**",
+        "!$TURBO_ROOT$/templates/*/screenshots/**",
+        "!$TURBO_ROOT$/templates/*/scripts/**",
+        "$TURBO_ROOT$/packages/ui/src/**",
+        "$TURBO_ROOT$/packages/motion/src/**",
+        "$TURBO_ROOT$/packages/blocks/src/**",
+        "$TURBO_ROOT$/packages/tokens/src/**"
+      ]
     }
   }
 }

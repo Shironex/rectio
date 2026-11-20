@@ -20,3 +20,6 @@ next-env.d.ts
 apps/site/content/docs/templates/*.mdx
 !apps/site/content/docs/templates/index.mdx
 apps/site/public/templates/
+# live template previews built by apps/site/scripts/previews.ts
+.preview-builds/
+apps/site/.previews/

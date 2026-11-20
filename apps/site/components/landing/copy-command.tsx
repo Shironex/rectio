@@ -19,14 +19,14 @@ export function CopyCommand({ command, className }: { command: string; className
   return (
     <div
       className={cn(
-        'inline-flex h-11 items-center gap-1 rounded-control border border-line bg-surface ps-3.5 pe-1 font-mono text-sm text-fg',
+        'inline-flex h-11 max-w-full items-center gap-1 rounded-control border border-line bg-surface ps-3.5 pe-1 font-mono text-sm text-fg pointer-coarse:h-12',
         className,
       )}
     >
       <span aria-hidden className="text-fg-muted select-none">
         $
       </span>
-      <code className="ms-1.5 whitespace-nowrap">{command}</code>
+      <code className="ms-1.5 min-w-0 overflow-x-auto whitespace-nowrap">{command}</code>
       <button
         type="button"
         onClick={() => {
@@ -39,7 +39,7 @@ export function CopyCommand({ command, className }: { command: string; className
             },
           );
         }}
-        className="site-press ms-2 inline-flex size-9 cursor-pointer items-center justify-center rounded-control text-fg-muted transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus"
+        className="site-press ms-2 inline-flex size-9 shrink-0 cursor-pointer pointer-coarse:size-11 items-center justify-center rounded-control text-fg-muted transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus"
       >
         {copied ? (
           <CheckIcon aria-hidden weight="bold" className="size-4 text-positive-strong" />

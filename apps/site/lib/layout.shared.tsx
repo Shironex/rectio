@@ -8,6 +8,7 @@ export function baseOptions(): BaseLayoutProps {
     links: [
       { text: 'Docs', url: '/docs', active: 'nested-url' },
       { text: 'Components', url: '/docs/components/button', active: 'none' },
+      { text: 'Templates', url: '/templates', active: 'nested-url' },
       { text: 'Pricing', url: '/#pricing', active: 'none' },
     ],
   };

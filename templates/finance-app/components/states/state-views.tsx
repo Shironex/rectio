@@ -2,7 +2,7 @@
 
 import { ArrowClockwiseIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { Button, EmptyState, SkeletonChart, SkeletonLine, SkeletonTable, cn } from '@rectio/ui';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 /** A row of figure cells, like the KPI strip and the summary at the top of a list. */
@@ -131,6 +131,8 @@ export function LoadingRegion({ label, children }: { label: string; children: Re
 /** A load that failed: what failed, that nothing was lost, and a way to try again. */
 export function ErrorPanel({ title, description }: { title: string; description?: ReactNode }) {
   const router = useRouter();
+  // The router's own pathname: without the base path the app may be served under.
+  const pathname = usePathname();
   return (
     <div role="alert" className="rounded-panel border border-line bg-surface">
       <EmptyState
@@ -145,7 +147,7 @@ export function ErrorPanel({ title, description }: { title: string; description?
           <Button
             variant="secondary"
             onClick={() => {
-              router.replace(location.pathname);
+              router.replace(pathname);
             }}
           >
             <ArrowClockwiseIcon aria-hidden weight="bold" className="size-4" />

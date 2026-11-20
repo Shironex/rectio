@@ -20,6 +20,7 @@ export function Segmented<T extends string>({
   onChange,
   label,
   size = 'sm',
+  touch = false,
   className,
 }: {
   value: T;
@@ -29,6 +30,8 @@ export function Segmented<T extends string>({
   /** Names the group for assistive technology. */
   label: string;
   size?: 'sm' | 'md';
+  /** Grows each option to a full touch target on a coarse pointer, for controls used on phones. */
+  touch?: boolean;
   className?: string;
 }) {
   return (
@@ -64,6 +67,7 @@ export function Segmented<T extends string>({
             'pointer-fine:hover:text-fg',
             'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus',
             size === 'sm' ? 'h-7 px-2.5 text-sm' : 'h-9 px-3.5 text-base',
+            touch && 'pointer-coarse:h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center',
           )}
         >
           {option.label}

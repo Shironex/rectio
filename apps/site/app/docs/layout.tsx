@@ -1,4 +1,4 @@
-import { HouseIcon } from '@phosphor-icons/react/dist/ssr';
+import { AppWindowIcon, HouseIcon } from '@phosphor-icons/react/dist/ssr';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
 
@@ -20,6 +20,14 @@ export default function Layout({ children }: { children: ReactNode }) {
           text: 'rectio home',
           label: 'rectio home',
           url: '/',
+        },
+        // The live templates sit outside the docs tree, so they keep a link of their own.
+        {
+          type: 'icon',
+          icon: <AppWindowIcon aria-hidden />,
+          text: 'Live templates',
+          label: 'Live templates',
+          url: '/templates',
         },
       ]}
       sidebar={{ banner: <ThemeSwitch /> }}

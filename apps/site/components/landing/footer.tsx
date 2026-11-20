@@ -5,6 +5,7 @@ import { Wordmark } from '@/components/wordmark';
 const LINKS = [
   { href: '/docs', label: 'Docs' },
   { href: '/docs/components/button', label: 'Components' },
+  { href: '/templates', label: 'Templates' },
   { href: '/docs/cli', label: 'CLI' },
   { href: '/docs/mcp', label: 'MCP' },
   { href: '/#pricing', label: 'Pricing' },
@@ -19,7 +20,7 @@ export function Footer() {
           <p className="text-sm text-fg-muted">Made by noctcore.</p>
         </div>
         <nav aria-label="Footer">
-          <ul className="flex flex-wrap gap-x-6 gap-y-2">
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-2 sm:flex sm:flex-wrap">
             {LINKS.map((l) => (
               <li key={l.href}>
                 <Link
