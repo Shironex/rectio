@@ -39,7 +39,6 @@ export function FilesPage() {
         <ErrorPanel title="Files did not load" />
       ) : (
         <FileManager
-          title="Library"
           path={folderPath(folderId)}
           entries={entries}
           storage={STORAGE}

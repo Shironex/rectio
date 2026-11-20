@@ -2,7 +2,7 @@ import type { FileEntry, FilePathSegment, StorageUsage } from '@rectio/blocks';
 
 import { at, minutesAgo } from './workspace';
 
-export const ROOT: FilePathSegment = { id: 'root', name: 'Files' };
+export const ROOT: FilePathSegment = { id: 'root', name: 'Team library' };
 
 /** A folder and what it holds. Files are the help desk's shared library: macros, images, exports. */
 export interface Folder {

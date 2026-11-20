@@ -36,6 +36,13 @@ import { CUSTOMERS } from '@/data/customers';
 import { AGENTS } from '@/data/team';
 import { TICKET_COLUMNS, TICKET_TAGS } from '@/data/tickets';
 
+/** How each checked field is named in the error summary, matching its label. */
+const FIELD_NAMES = {
+  title: 'Subject',
+  customer: 'Customer',
+  summary: 'What the customer said',
+} as const;
+
 export interface TicketDraft {
   columnId: string;
   title: string;
@@ -126,6 +133,9 @@ function TicketForm({
   };
   const show = (key: keyof typeof errors) => (tried ? errors[key] : null);
   const failures = tried ? Object.values(errors).filter((e) => e !== null).length : 0;
+  const failing = (Object.keys(errors) as (keyof typeof errors)[])
+    .filter((key) => errors[key] !== null)
+    .map((key) => FIELD_NAMES[key]);
 
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -164,7 +174,7 @@ function TicketForm({
               failures === 1 ? 'One field needs a fix' : `${String(failures)} fields need a fix`
             }
           >
-            The ticket was not created. The fields are marked below.
+            The ticket was not created. Check {failing.join(', ')}.
           </Alert>
         )}
         <Field invalid={show('title') !== null}>

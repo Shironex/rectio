@@ -97,13 +97,13 @@ export const NOTIFICATION_EVENTS: readonly NotificationEvent[] = [
   {
     id: 'reply',
     label: 'A customer replies on my ticket',
-    group: 'Tickets',
+    group: 'Ticket updates',
   },
   {
     id: 'sla',
     label: 'A ticket is about to miss its target',
     description: '30 minutes before the first-response target',
-    group: 'Tickets',
+    group: 'Ticket updates',
   },
   {
     id: 'rating',

@@ -117,11 +117,7 @@ const columns: DataTableColumnDef<Customer>[] = [
     header: 'Open',
     sortFn: 'basic',
     meta: { align: 'end', label: 'Open tickets', className: 'hidden sm:table-cell' },
-    cell: ({ row }) => (
-      <span className={row.original.openTickets === 0 ? 'text-fg-subtle' : undefined}>
-        {formatCount(row.original.openTickets)}
-      </span>
-    ),
+    cell: ({ row }) => <span>{formatCount(row.original.openTickets)}</span>,
   },
   {
     id: 'csat',

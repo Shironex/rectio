@@ -165,7 +165,7 @@ export function ErrorPanel({ title, description }: { title: string; description?
         title={title}
         description={
           description ??
-          'The connection to the server dropped before the data arrived. Nothing was changed.'
+          'The connection to the server dropped before the data arrived. Try again in a moment.'
         }
         actions={
           <Button

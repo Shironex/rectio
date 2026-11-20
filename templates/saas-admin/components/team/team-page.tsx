@@ -29,6 +29,9 @@ function RolesTable() {
       description="Owners also manage billing and can delete the workspace"
       bodyClassName="px-0 pb-0"
     >
+      <p className="px-5 pb-3 text-sm text-fg-muted sm:hidden">
+        Scroll sideways to see every role.
+      </p>
       <div className="overflow-x-auto">
         <Table>
           <TableCaption className="sr-only">What each role can do</TableCaption>
