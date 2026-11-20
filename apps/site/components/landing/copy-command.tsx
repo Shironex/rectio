@@ -19,14 +19,15 @@ export function CopyCommand({ command, className }: { command: string; className
   return (
     <div
       className={cn(
-        'inline-flex h-11 max-w-full items-center gap-1 rounded-control border border-line bg-surface ps-3.5 pe-1 font-mono text-sm text-fg pointer-coarse:h-12',
+        'inline-flex min-h-11 max-w-full items-center gap-1 rounded-control border border-line bg-surface py-1 ps-3.5 pe-1 font-mono text-sm text-fg pointer-coarse:min-h-12',
         className,
       )}
     >
-      <span aria-hidden className="text-fg-muted select-none">
+      <span aria-hidden className="self-start pt-2 text-fg-muted select-none pointer-coarse:pt-2.5">
         $
       </span>
-      <code className="ms-1.5 min-w-0 overflow-x-auto whitespace-nowrap">{command}</code>
+      {/* A long command wraps on a narrow screen rather than hiding behind a scroll. */}
+      <code className="ms-1.5 min-w-0 break-all">{command}</code>
       <button
         type="button"
         onClick={() => {

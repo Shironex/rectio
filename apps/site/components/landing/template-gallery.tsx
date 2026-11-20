@@ -89,7 +89,7 @@ function TemplateText({
       <p className="max-w-prose text-base text-pretty text-fg-muted">{template.description}</p>
       {/* The command and the link sit at the foot, so cards side by side line up. */}
       <div className="mt-auto flex max-w-full flex-col items-start gap-4">
-        <CopyCommand command={template.command} className="max-w-full overflow-x-auto" />
+        <CopyCommand command={template.command} />
         <div className="flex flex-wrap items-center gap-x-6">
           <Link href={template.previewHref} className={actionLink}>
             Live preview
