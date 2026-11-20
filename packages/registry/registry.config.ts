@@ -91,7 +91,11 @@ const marketingItems = (
   title: string,
   description: string,
   folder: string,
-  { logic = false, motion = true }: { logic?: boolean; motion?: boolean } = {},
+  {
+    logic = false,
+    motion = true,
+    extra = [],
+  }: { logic?: boolean; motion?: boolean; extra?: readonly string[] } = {},
 ) => [
   {
     name,
@@ -101,7 +105,14 @@ const marketingItems = (
     title,
     description,
     categories: ['marketing', 'blocks'],
-    files: [`${folder}/${folder}.tsx`, ...(logic ? [`${folder}/${folder}.logic.ts`] : [])],
+    files: [
+      `${folder}/${folder}.tsx`,
+      ...extra,
+      ...(logic ? [`${folder}/${folder}.logic.ts`] : []),
+    ],
+    // The source decides: interactive files carry their own 'use client', static blocks stay
+    // server components and ship no JavaScript.
+    client: false,
   },
   ...(motion
     ? [
@@ -1168,11 +1179,15 @@ export default defineRegistry({
           tier: 'pro',
           version: '0.1.0',
           title: 'Marketing core',
+          // Only the marquee and the parts context's client tree need the browser; the marquee
+          // carries its own directive, the rest renders on the server.
+          client: false,
           description:
             'Sections, headings, links drawn as buttons, the marquee, prose styles and the small pieces every marketing block shares.',
           categories: ['marketing', 'blocks'],
           files: [
             'lib/parts.tsx',
+            'lib/client-button.tsx',
             'lib/section.tsx',
             'lib/action.tsx',
             'lib/marquee.tsx',
@@ -1212,8 +1227,9 @@ export default defineRegistry({
         ...marketingItems(
           'hero',
           'Heroes',
-          'Centred, split, floating UI cards and a cycling headline, each framing your live product.',
+          'Centred, split, floating UI cards and a cycling headline, each framing your live product, over a wash you can change or turn off.',
           'hero',
+          { extra: ['hero/hero-word-cycle.tsx'] },
         ),
         ...marketingItems(
           'logo-strip',

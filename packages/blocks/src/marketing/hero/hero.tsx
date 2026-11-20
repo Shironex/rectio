@@ -1,9 +1,25 @@
 import { cn } from '@rectio/ui';
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 
 import { Actions, type MarketingAction } from '../lib/action';
 import { useMarketingParts } from '../lib/parts';
 import { Container, Eyebrow } from '../lib/section';
+
+/**
+ * The background behind a hero: `accent`, a soft tint of the accent fading into the page;
+ * `neutral`, the same fade from the sunken surface; `none`, the bare page.
+ */
+export type HeroWash = 'accent' | 'neutral' | 'none';
+
+interface HeroBackground {
+  /** The tinted wash behind the hero. Each layout has its own default. */
+  wash?: HeroWash | undefined;
+  /**
+   * Your own layer behind the content, such as a pattern or a picture, drawn over the wash and
+   * hidden from assistive technology. Pair it with `wash="none"` to replace the wash outright.
+   */
+  backdrop?: ReactNode;
+}
 
 interface HeroCopy {
   /** The headline. Mix weights by wrapping the words to stress in `<Em>`. */
@@ -16,13 +32,13 @@ interface HeroCopy {
   secondary?: MarketingAction;
 }
 
-export interface HeroCenteredProps extends HeroCopy {
+export interface HeroCenteredProps extends HeroCopy, HeroBackground {
   /** Your product, rendered live: it rises under the copy and fades out at the fold. */
   visual?: ReactNode;
   className?: string | undefined;
 }
 
-export interface HeroSplitProps extends HeroCopy {
+export interface HeroSplitProps extends HeroCopy, HeroBackground {
   /** Your product, rendered live, beside the copy. */
   visual: ReactNode;
   /** Put the visual on the left. */
@@ -39,7 +55,7 @@ export interface FloatingCard {
   position: FloatingCardPosition;
 }
 
-export interface HeroFloatingProps extends HeroCopy {
+export interface HeroFloatingProps extends HeroCopy, HeroBackground {
   /** The main visual, framed. */
   visual: ReactNode;
   /** Up to four cards that float over the visual's corners on wide screens and line up under it on narrow ones (two on a phone). */
@@ -47,24 +63,28 @@ export interface HeroFloatingProps extends HeroCopy {
   className?: string;
 }
 
-export interface HeroWordCycleProps extends Omit<HeroCopy, 'title'> {
-  /** The words before the cycling one, such as "Close the books on". */
-  before: ReactNode;
-  /** The words that take turns, such as invoices, payouts and approvals. */
-  words: readonly string[];
-  /** The words after the cycling one, if any. */
-  after?: ReactNode;
-  /**
-   * What assistive technology reads in place of the cycling headline. Defaults to the words joined:
-   * "Close the books on invoices, payouts and approvals".
-   */
-  srTitle?: string;
-  /** Milliseconds each word stays. */
-  interval?: number;
-  /** How many times the words go round before the headline settles on the first word again. */
-  loops?: number;
-  visual?: ReactNode;
-  className?: string;
+// Tokens only: each wash fades from a soft surface into the page canvas.
+const WASH: Record<HeroWash, string> = {
+  accent: 'bg-linear-to-b from-accent-subtle via-surface-canvas to-surface-canvas',
+  neutral: 'bg-linear-to-b from-surface-sunken via-surface-canvas to-surface-canvas',
+  none: '',
+};
+
+// The floating layout's fade ends higher: its cards hang over the bare page.
+const FLOATING_WASH: Record<HeroWash, string> = {
+  accent: 'bg-linear-to-b from-accent-subtle to-surface-canvas to-60%',
+  neutral: 'bg-linear-to-b from-surface-sunken to-surface-canvas to-60%',
+  none: '',
+};
+
+/** The backdrop layer: behind the content, inert and unheard. */
+function Backdrop({ children }: { children: ReactNode }) {
+  if (children === undefined || children === null || children === false) return null;
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+      {children}
+    </div>
+  );
 }
 
 const TITLE = 'font-display text-4xl font-regular tracking-tight text-balance text-fg sm:text-5xl';
@@ -142,7 +162,13 @@ export function FloatingCardFrame({
  * Copy centred over a soft tinted wash, with the product rising underneath and fading out at the
  * fold: the message first, then the proof.
  */
-export function HeroCentered({ visual, className, ...copy }: HeroCenteredProps) {
+export function HeroCentered({
+  visual,
+  wash = 'accent',
+  backdrop,
+  className,
+  ...copy
+}: HeroCenteredProps) {
   const { Reveal } = useMarketingParts();
   const titleId = useId();
   return (
@@ -150,11 +176,13 @@ export function HeroCentered({ visual, className, ...copy }: HeroCenteredProps) 
       aria-labelledby={titleId}
       data-slot="hero"
       className={cn(
-        'overflow-hidden bg-linear-to-b from-accent-subtle via-surface-canvas to-surface-canvas pt-16 text-fg sm:pt-24',
+        'relative isolate overflow-hidden pt-16 text-fg sm:pt-24',
+        WASH[wash],
         visual === undefined && 'pb-16 sm:pb-24',
         className,
       )}
     >
+      <Backdrop>{backdrop}</Backdrop>
       <Container>
         <Copy {...copy} align="center" titleId={titleId} />
         {visual !== undefined && (
@@ -170,15 +198,27 @@ export function HeroCentered({ visual, className, ...copy }: HeroCenteredProps) 
 }
 
 /** Copy on one side, the product on the other; stacked on narrow screens with the copy first. */
-export function HeroSplit({ visual, reverse = false, className, ...copy }: HeroSplitProps) {
+export function HeroSplit({
+  visual,
+  reverse = false,
+  wash = 'none',
+  backdrop,
+  className,
+  ...copy
+}: HeroSplitProps) {
   const { Reveal } = useMarketingParts();
   const titleId = useId();
   return (
     <section
       aria-labelledby={titleId}
       data-slot="hero"
-      className={cn('overflow-hidden py-16 text-fg sm:py-24', className)}
+      className={cn(
+        'relative isolate overflow-hidden py-16 text-fg sm:py-24',
+        WASH[wash],
+        className,
+      )}
     >
+      <Backdrop>{backdrop}</Backdrop>
       <Container width="wide" className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
         <div className={cn('lg:col-span-5', reverse && 'lg:order-last')}>
           <Copy {...copy} align="start" titleId={titleId} />
@@ -203,7 +243,14 @@ const CORNER: Record<FloatingCardPosition, string> = {
  * landing, a figure moving, a status changing. On narrow screens the cards line up under the
  * visual instead of covering it.
  */
-export function HeroFloating({ visual, cards, className, ...copy }: HeroFloatingProps) {
+export function HeroFloating({
+  visual,
+  cards,
+  wash = 'accent',
+  backdrop,
+  className,
+  ...copy
+}: HeroFloatingProps) {
   const { Reveal } = useMarketingParts();
   const titleId = useId();
   return (
@@ -211,10 +258,12 @@ export function HeroFloating({ visual, cards, className, ...copy }: HeroFloating
       aria-labelledby={titleId}
       data-slot="hero"
       className={cn(
-        'overflow-hidden bg-linear-to-b from-accent-subtle to-surface-canvas to-60% pt-10 pb-12 text-fg sm:pt-12 sm:pb-16',
+        'relative isolate overflow-hidden pt-10 pb-12 text-fg sm:pt-12 sm:pb-16',
+        FLOATING_WASH[wash],
         className,
       )}
     >
+      <Backdrop>{backdrop}</Backdrop>
       <Container width="wide" className="grid items-center gap-14 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-5">
           <Copy {...copy} align="start" titleId={titleId} />
@@ -247,116 +296,5 @@ export function HeroFloating({ visual, cards, className, ...copy }: HeroFloating
         </div>
       </Container>
     </section>
-  );
-}
-
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
-}
-
-/**
- * Steps through the words once per `interval`, `loops` times round, and settles on the first word.
- * Holds still while `paused`, while the tab is hidden and under reduced motion.
- */
-export function useWordCycle(
-  count: number,
-  { interval, loops, paused }: { interval: number; loops: number; paused: boolean },
-): number {
-  const [step, setStep] = useState(0);
-  const [visible, setVisible] = useState(true);
-  const total = count * loops;
-  useEffect(() => {
-    const onChange = () => {
-      setVisible(document.visibilityState !== 'hidden');
-    };
-    document.addEventListener('visibilitychange', onChange);
-    return () => {
-      document.removeEventListener('visibilitychange', onChange);
-    };
-  }, []);
-  useEffect(() => {
-    if (paused || !visible || count < 2 || step >= total || prefersReducedMotion()) return;
-    const timer = window.setTimeout(() => {
-      setStep((value) => value + 1);
-    }, interval);
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [paused, visible, count, step, total, interval]);
-  return count === 0 ? 0 : step % count;
-}
-
-function joinWords(words: readonly string[]): string {
-  if (words.length < 2) return words.join('');
-  return `${words.slice(0, -1).join(', ')} and ${words.at(-1) ?? ''}`;
-}
-
-/**
- * A centred headline whose key noun takes turns: "Close the books on invoices", then payouts, then
- * approvals. The widest word reserves its width so nothing around it moves, the cycle holds while
- * hovered, settles after `loops` rounds, and assistive technology reads one stable sentence.
- */
-export function HeroWordCycle({
-  before,
-  words,
-  after,
-  srTitle,
-  interval = 2200,
-  loops = 2,
-  visual,
-  className,
-  ...copy
-}: HeroWordCycleProps) {
-  const { Swap } = useMarketingParts();
-  const [paused, setPaused] = useState(false);
-  const index = useWordCycle(words.length, { interval, loops, paused });
-  const word = words[index] ?? '';
-  const spoken =
-    srTitle ??
-    [
-      typeof before === 'string' ? before : '',
-      joinWords(words),
-      typeof after === 'string' ? after : '',
-    ]
-      .filter((part) => part !== '')
-      .join(' ');
-  const title = (
-    <span
-      onPointerEnter={() => {
-        setPaused(true);
-      }}
-      onPointerLeave={() => {
-        setPaused(false);
-      }}
-    >
-      <span className="sr-only">{spoken}</span>
-      <span aria-hidden>
-        {before}{' '}
-        <span className="inline-grid justify-items-start overflow-hidden pb-1 text-start align-bottom">
-          {/* Every word, invisible, in the same cell: the widest one sets the width. */}
-          {words.map((each) => (
-            <span key={each} className="invisible col-start-1 row-start-1 font-heading">
-              {each}
-            </span>
-          ))}
-          <Swap swapKey={word} className="col-start-1 row-start-1 font-heading text-accent-strong">
-            {word}
-          </Swap>
-        </span>
-        {after !== undefined && <> {after}</>}
-      </span>
-    </span>
-  );
-  return (
-    <HeroCentered
-      {...copy}
-      title={title}
-      {...(visual === undefined ? {} : { visual })}
-      className={className}
-    />
   );
 }

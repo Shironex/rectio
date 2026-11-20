@@ -1,3 +1,5 @@
+'use client';
+
 import { motioned } from '../lib/motion-parts';
 import { ContactSection as PlainContactSection, type ContactSectionProps } from './contact';
 

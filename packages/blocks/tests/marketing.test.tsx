@@ -8,6 +8,9 @@ import {
   ContactSection,
   CookieConsent,
   Faq,
+  HeroCentered,
+  HeroFloating,
+  HeroSplit,
   HeroWordCycle,
   LegalPage,
   Newsletter,
@@ -274,5 +277,41 @@ describe('motion twins', () => {
     render(<moving.StatRow stats={stats} locale="en-GB" />);
     expect(screen.getAllByText('1,240+').length).toBeGreaterThan(0);
     expect(screen.getByText('teams')).toBeInTheDocument();
+  });
+});
+
+describe('hero wash', () => {
+  const hero = (container: HTMLElement) => container.querySelector('[data-slot="hero"]');
+
+  it('keeps the accent wash by default and turns it off or neutral on request', () => {
+    const { container, rerender } = render(<HeroCentered title="Ship it" />);
+    expect(hero(container)?.className).toContain('from-accent-subtle');
+    rerender(<HeroCentered title="Ship it" wash="none" />);
+    expect(hero(container)?.className).not.toMatch(/from-|bg-linear/);
+    rerender(<HeroCentered title="Ship it" wash="neutral" />);
+    expect(hero(container)?.className).toContain('from-surface-sunken');
+  });
+
+  it('draws your backdrop behind the content, hidden from assistive technology', () => {
+    const { container } = render(
+      <HeroFloating
+        title="Ship it"
+        visual={<div />}
+        cards={[]}
+        wash="none"
+        backdrop={<div data-testid="pattern" />}
+      />,
+    );
+    const layer = screen.getByTestId('pattern').parentElement;
+    expect(layer).toHaveAttribute('aria-hidden', 'true');
+    expect(layer?.className).toContain('-z-10');
+    expect(hero(container)?.className).not.toContain('from-accent-subtle');
+  });
+
+  it('gives the split hero and the cycling headline the same props', () => {
+    const { container } = render(<HeroSplit title="Ship it" visual={<div />} wash="accent" />);
+    expect(hero(container)?.className).toContain('from-accent-subtle');
+    const cycle = render(<HeroWordCycle before="Close" words={['a', 'b']} wash="none" />);
+    expect(hero(cycle.container)?.className).not.toContain('from-accent-subtle');
   });
 });

@@ -1,4 +1,4 @@
-import { CheckIcon } from '@phosphor-icons/react';
+import { CheckIcon } from '@phosphor-icons/react/ssr';
 import { cn } from '@rectio/ui';
 import type { ReactNode } from 'react';
 

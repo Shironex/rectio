@@ -1,3 +1,5 @@
+'use client';
+
 import { CaretDownIcon, WarningIcon } from '@phosphor-icons/react';
 import { cn } from '@rectio/ui';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';

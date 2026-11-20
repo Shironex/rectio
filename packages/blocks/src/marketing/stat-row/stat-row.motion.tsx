@@ -1,3 +1,5 @@
+'use client';
+
 import { motioned } from '../lib/motion-parts';
 import { StatRow as PlainStatRow, type StatRowProps } from './stat-row';
 

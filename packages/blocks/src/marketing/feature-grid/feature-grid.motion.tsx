@@ -1,3 +1,5 @@
+'use client';
+
 import { motioned } from '../lib/motion-parts';
 import {
   FeatureIconGrid as PlainFeatureIconGrid,

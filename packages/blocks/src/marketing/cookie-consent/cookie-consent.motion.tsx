@@ -1,3 +1,5 @@
+'use client';
+
 import { motioned } from '../lib/motion-parts';
 import {
   CookieConsent as PlainCookieConsent,

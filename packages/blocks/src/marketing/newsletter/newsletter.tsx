@@ -1,3 +1,5 @@
+'use client';
+
 import { CheckCircleIcon } from '@phosphor-icons/react';
 import { Field, FieldError, FieldLabel, Input, cn } from '@rectio/ui';
 import { useId, useState, type SyntheticEvent, type ReactNode } from 'react';

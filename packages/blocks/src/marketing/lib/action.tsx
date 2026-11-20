@@ -1,4 +1,4 @@
-import { ArrowRightIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon } from '@phosphor-icons/react/ssr';
 import { cn } from '@rectio/ui';
 import type { ComponentProps, ReactNode } from 'react';
 

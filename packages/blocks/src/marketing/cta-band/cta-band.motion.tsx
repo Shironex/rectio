@@ -1,3 +1,5 @@
+'use client';
+
 import { motioned } from '../lib/motion-parts';
 import { CtaBand as PlainCtaBand, type CtaBandProps } from './cta-band';
 

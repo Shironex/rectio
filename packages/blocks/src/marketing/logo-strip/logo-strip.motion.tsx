@@ -1,3 +1,5 @@
+'use client';
+
 import { motioned } from '../lib/motion-parts';
 import { LogoStrip as PlainLogoStrip, type LogoStripProps } from './logo-strip';
 

@@ -1,5 +1,5 @@
 import { Accordion as BaseAccordion } from '@base-ui/react/accordion';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from '@phosphor-icons/react/ssr';
 import { cn } from '@rectio/ui';
 import type { ReactNode } from 'react';
 
