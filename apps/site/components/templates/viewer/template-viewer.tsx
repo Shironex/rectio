@@ -159,7 +159,7 @@ export function TemplateViewer({ template }: { template: ViewerTemplate }) {
           />
         </div>
         <div className="mx-auto flex w-full max-w-screen-2xl flex-wrap items-center gap-x-4 gap-y-2 px-4 pb-4 sm:px-6">
-          <CopyCommand command={template.command} className="max-w-full overflow-x-auto" />
+          <CopyCommand command={template.command} />
           <p className="text-sm text-fg-muted">
             Templates are Pro: the command asks for your license key.
           </p>
