@@ -172,6 +172,9 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
+      '@noctcore/showcase-kit':
+        specifier: 0.3.1
+        version: 0.3.1(@types/node@22.20.5)(playwright@1.65.0)
       '@tailwindcss/postcss':
         specifier: ^4.3.5
         version: 4.3.5
@@ -1821,6 +1824,20 @@ packages:
     engines: {node: '>=22'}
     hasBin: true
 
+  '@noctcore/showcase-kit@0.3.1':
+    resolution: {integrity: sha512-HKsjHUxPUUgM7ExHopcaLr0S+JuEb3oVNjQmIxqQm4LtxbMhRl9D45uI3p4oLlUUf/GEZWJ4e5C+EpMmqCH3pg==}
+    engines: {node: '>=22'}
+    hasBin: true
+    peerDependencies:
+      '@lydell/node-pty': '>=1.2.0-beta.15'
+      node-pty: '>=1.1.0'
+      playwright: '>=1.50.0'
+    peerDependenciesMeta:
+      '@lydell/node-pty':
+        optional: true
+      node-pty:
+        optional: true
+
   '@oxc-project/types@0.156.0':
     resolution: {integrity: sha512-1Duyg48TdJNdyhEB8Xn1L36bT9Pv6GUtlKjHxOys8xkaF/rQq3XJE+bAurSK/AgIz5mGFsb77cn9Pb20+WCScw==}
 
@@ -2364,6 +2381,9 @@ packages:
 
   '@vitest/spy@5.1.0':
     resolution: {integrity: sha512-2DPO5OMHWKrBngC+fCmTQqemNF0gidRhp3lxbBmRhW+M1XJrfgPpqNqWVevXtn2f2ufD5ZaR1B6B641aAlcX5A==}
+
+  '@xterm/headless@6.0.0':
+    resolution: {integrity: sha512-5Yj1QINYCyzrZtf8OFIHi47iQtI+0qYFPHmouEfG8dHNxbZ9Tb9YGSuLcsEwj9Z+OL75GJqPyJbyoFer80a2Hw==}
 
   '@yuku-core/binding-android-arm64@0.19.0':
     resolution: {integrity: sha512-wdL2XmTiZixAOaHk9Z0JJZ8u9Qm8d333Zjpc6gaxXFX+UR5BlsfxZ7a2+2Rm71pamppsPYGUGFq2oVLbh6DISw==}
@@ -5418,8 +5438,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@img/colour@1.1.0':
-    optional: true
+  '@img/colour@1.1.0': {}
 
   '@img/sharp-darwin-arm64@0.35.5':
     optionalDependencies:
@@ -5843,6 +5862,14 @@ snapshots:
       - supports-color
 
   '@noctcore/harness@0.8.0': {}
+
+  '@noctcore/showcase-kit@0.3.1(@types/node@22.20.5)(playwright@1.65.0)':
+    dependencies:
+      '@xterm/headless': 6.0.0
+      playwright: 1.65.0
+      sharp: 0.35.5(@types/node@22.20.5)
+    transitivePeerDependencies:
+      - '@types/node'
 
   '@oxc-project/types@0.156.0': {}
 
@@ -6351,6 +6378,8 @@ snapshots:
       vite: 8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
 
   '@vitest/spy@5.1.0': {}
+
+  '@xterm/headless@6.0.0': {}
 
   '@yuku-core/binding-android-arm64@0.19.0':
     optional: true
@@ -8587,7 +8616,6 @@ snapshots:
       '@img/sharp-win32-ia32': 0.35.5
       '@img/sharp-win32-x64': 0.35.5
       '@types/node': 22.20.5
-    optional: true
 
   shebang-command@2.0.0:
     dependencies:
