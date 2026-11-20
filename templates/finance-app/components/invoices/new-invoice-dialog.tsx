@@ -1,6 +1,6 @@
 'use client';
 
-import { taxOn } from '@rectio/blocks';
+import { roundMoney } from '@rectio/blocks';
 import {
   AmountInput,
   Button,
@@ -76,7 +76,8 @@ export function NewInvoiceDialog({
     net: net === null || net <= 0 ? 'Enter an amount above zero.' : null,
   };
   const show = (key: keyof typeof errors) => (tried ? errors[key] : null);
-  const vat = customer === undefined || net === null ? 0 : taxOn(net, customer.vatRate, CURRENCY);
+  const vat =
+    customer === undefined || net === null ? 0 : roundMoney(net * customer.vatRate, CURRENCY);
 
   const reset = () => {
     setCustomerId(null);
