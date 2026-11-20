@@ -12,6 +12,8 @@ export interface UserRecord {
   lastSeen?: Date;
   /** Team or department, shown under the name on wide tables. */
   team?: string;
+  /** Marks the signed-in user, from your session: their own row gets no actions. */
+  you?: boolean;
 }
 
 export const USER_ROLES: readonly UserRole[] = ['owner', 'admin', 'member', 'guest'];
@@ -110,17 +112,50 @@ export function userCounts(users: readonly UserRecord[]): {
 }
 
 /**
+ * Who is looking at the table, from your session: their role decides which rows they may act on.
+ * Leave it out and only the owner rule applies; mark their own record with `you`.
+ */
+export interface UsersTableViewer {
+  role?: UserRole | undefined;
+}
+
+const USER_RANK: Record<UserRole, number> = { owner: 3, admin: 2, member: 1, guest: 0 };
+
+/** The roles the person looking may hand out: never owner, and nothing above their own role. */
+export function assignableUserRoles(viewer: UsersTableViewer = {}): UserRole[] {
+  const ceiling = viewer.role === undefined ? USER_RANK.admin : USER_RANK[viewer.role];
+  if (viewer.role === 'member' || viewer.role === 'guest') return [];
+  return USER_ROLES.filter((role) => role !== 'owner' && USER_RANK[role] <= ceiling);
+}
+
+/**
+ * Whether the person looking may change, suspend or remove `target`: never an owner, never
+ * themselves, and never someone above their own role. Members and guests manage no one.
+ */
+export function canActOnUser(target: UserRecord, viewer: UsersTableViewer = {}): boolean {
+  if (target.role === 'owner') return false;
+  if (target.you === true) return false;
+  if (viewer.role === undefined) return true;
+  if (assignableUserRoles(viewer).length === 0) return false;
+  return USER_RANK[target.role] <= USER_RANK[viewer.role];
+}
+
+/**
  * The ids a bulk action may touch: owners are never changed, suspended or removed in bulk, so a
- * select-all can never lock the workspace out of its owners. Returns the rest and how many were held.
+ * select-all can never lock the workspace out of its owners; with a `viewer`, neither are they
+ * themselves nor anyone above their role. Returns the rest and how many were held.
  */
 export function bulkUserTargets(
   users: readonly UserRecord[],
   ids: readonly string[],
-): { ids: string[]; skippedOwners: number } {
+  viewer: UsersTableViewer = {},
+): { ids: string[]; skippedOwners: number; skipped: number } {
   const wanted = new Set(ids);
   const chosen = users.filter((user) => wanted.has(user.id));
+  const allowed = chosen.filter((user) => canActOnUser(user, viewer));
   return {
-    ids: chosen.filter((user) => user.role !== 'owner').map((user) => user.id),
+    ids: allowed.map((user) => user.id),
     skippedOwners: chosen.filter((user) => user.role === 'owner').length,
+    skipped: chosen.length - allowed.length,
   };
 }

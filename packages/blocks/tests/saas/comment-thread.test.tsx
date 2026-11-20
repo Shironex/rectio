@@ -206,3 +206,35 @@ describe('CommentThread', () => {
     expect(onReopen).toHaveBeenCalled();
   });
 });
+
+describe('CommentThread moderation', () => {
+  it('offers delete on everyone’s comments only to a moderator', async () => {
+    const { rerender } = render(
+      <CommentThread
+        comments={COMMENTS}
+        writer={ME}
+        now={NOW}
+        onAdd={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    );
+    expect(
+      screen.queryByRole('button', { name: /^Actions for the comment by Ines Duarte/ }),
+    ).toBeNull();
+    rerender(
+      <CommentThread
+        comments={COMMENTS}
+        writer={ME}
+        now={NOW}
+        onAdd={vi.fn()}
+        onDelete={vi.fn()}
+        canModerate
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /^Actions for the comment by Ines Duarte/ }),
+    );
+    expect(await screen.findByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Edit' })).toBeNull();
+  });
+});

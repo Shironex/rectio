@@ -234,3 +234,22 @@ describe('FileManager paging', () => {
     expect(screen.getByRole('button', { name: 'Page 2' })).toHaveAttribute('aria-current', 'page');
   });
 });
+
+describe('FileManager session claims', () => {
+  it('offers rename and delete only on entries the user may change', async () => {
+    render(
+      <FileManager
+        path={PATH}
+        entries={ENTRIES}
+        now={NOW}
+        onRename={vi.fn()}
+        onDelete={vi.fn()}
+        onOpen={vi.fn()}
+        canModify={(entry) => entry.id !== 'b'}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Actions for Report Q2.pdf' }));
+    expect(screen.queryByRole('menuitem', { name: 'Delete' })).toBeNull();
+    expect(screen.queryByRole('menuitem', { name: 'Rename' })).toBeNull();
+  });
+});

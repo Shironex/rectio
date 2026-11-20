@@ -99,6 +99,11 @@ export interface FileManagerProps {
   onDownload?: (entryIds: string[]) => void;
   /** Asked to confirm first. */
   onDelete?: (entryIds: string[]) => void;
+  /**
+   * From your session: whether the signed-in user may rename and delete this entry, such as only
+   * their own files unless they are an admin. Leave it out and every entry may be changed.
+   */
+  canModify?: (entry: FileEntry) => boolean;
   /** Shows an Upgrade link under the storage meter. */
   onUpgrade?: () => void;
   /**
@@ -196,6 +201,7 @@ export function FileManager({
   onRename,
   onDownload,
   onDelete,
+  canModify,
   onUpgrade,
   defaultSelectedIds,
   pageSize = FILE_PAGE_SIZE,
@@ -260,6 +266,9 @@ export function FileManager({
   // Selection never outlives the entries it points at.
   const chosen = sorted.filter((entry) => selected.has(entry.id));
   const all = sorted.length > 0 && chosen.length === sorted.length;
+  const modifiable = (entry: FileEntry) => canModify?.(entry) ?? true;
+  // Only what the signed-in user may change goes into a bulk delete.
+  const deletable = chosen.filter(modifiable);
   const folders = entries.filter((entry) => entry.type === 'folder').length;
   const byId = new Map(entries.map((entry) => [entry.id, entry]));
   const selectable = onDelete !== undefined || onDownload !== undefined;
@@ -298,7 +307,7 @@ export function FileManager({
             },
           },
         ]),
-    ...(onRename === undefined
+    ...(onRename === undefined || !modifiable(entry)
       ? []
       : [
           {
@@ -322,7 +331,7 @@ export function FileManager({
             },
           },
         ]),
-    ...(onDelete === undefined
+    ...(onDelete === undefined || !modifiable(entry)
       ? []
       : [
           {
@@ -524,16 +533,16 @@ export function FileManager({
                   Download
                 </Button>
               )}
-              {chosen.length > 0 && onDelete !== undefined && (
+              {deletable.length > 0 && onDelete !== undefined && (
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={() => {
-                    setDeleting(chosen.map((e) => e.id));
+                    setDeleting(deletable.map((e) => e.id));
                   }}
                 >
                   <TrashIcon aria-hidden weight="bold" className="size-3.5" />
-                  Delete {chosen.length}
+                  Delete {deletable.length}
                 </Button>
               )}
               {chosen.length === 0 && (

@@ -63,8 +63,13 @@ export interface CommentThreadProps {
   /** Posts a comment, or a reply when `parentId` is given. Called with trimmed, valid text. */
   onAdd: (body: string, parentId?: string) => void;
   onEdit?: (commentId: string, body: string) => void;
-  /** Asked to confirm first. */
+  /** Asked to confirm first. Offered on your own comments, and on everyone's with `canModerate`. */
   onDelete?: (commentId: string) => void;
+  /**
+   * From your session: the writer may delete anyone's comment (a moderator or an admin). Editing
+   * stays with each comment's author.
+   */
+  canModerate?: boolean;
   /** Adds Copy link to every comment's menu, so each comment has the same menu. */
   onCopyLink?: (commentId: string) => void;
   /** Set when the discussion is resolved: the composer gives way to a Reopen button. */
@@ -91,6 +96,7 @@ export function CommentThread({
   onAdd,
   onEdit,
   onDelete,
+  canModerate = false,
   onCopyLink,
   resolved,
   onResolve,
@@ -162,7 +168,7 @@ export function CommentThread({
             },
           ]
         : []),
-      ...(own && onDelete !== undefined
+      ...((own || canModerate) && onDelete !== undefined
         ? [
             {
               id: 'delete',
