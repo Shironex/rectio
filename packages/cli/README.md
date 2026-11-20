@@ -23,6 +23,12 @@ Other commands: `diff <item>` shows how your copy differs from the registry, `li
 `search <query>` browse the registry, and `update` reports installed items with a newer version.
 `rectio --help` lists every flag.
 
+`init` and `add` show numbered steps with a spinner and close with a short summary. `--verbose`
+lists every item, file and package; `--quiet` prints only the result line and errors. Piped or in
+CI the output is plain text, and `NO_COLOR` is honored. The package manager comes from your
+lockfile, or from how you started the CLI (`pnpm dlx`, `npx`, `bunx`, `yarn dlx`) when there is
+none.
+
 ## For coding agents
 
 `rectio mcp` runs a read-only MCP server on stdio for Claude Code, Cursor or VS Code. It lists and

@@ -75,7 +75,9 @@ rectio add button dialog money [--overwrite] [--dry-run] [--no-install]
 4. Writes the files with imports rewritten to your aliases, adds theme and style CSS to the managed
    block in your CSS entry, and records everything in `rectio.lock.json`.
 5. Adds missing packages to `package.json` (ranges already there win) and runs the install of the
-   package manager whose lockfile is nearest: pnpm, npm, yarn or bun.
+   package manager whose lockfile is nearest: pnpm, npm, yarn or bun. Without a lockfile it uses
+   the `packageManager` field, then the manager that started the CLI (`pnpm dlx` means pnpm, `npx`
+   npm, `bunx` bun, `yarn dlx` yarn), then npm.
 
 | Flag           | What it does                                              |
 | -------------- | --------------------------------------------------------- |
@@ -91,18 +93,19 @@ Compares an installed item with the latest registry version.
 rectio diff dialog
 ```
 
-It lists each file as the same (`=`), changed (`~`) or missing (`!`), marks the ones you edited since
+It lists each file as the same (`=`), changed (`~`) or missing (`✗`), marks the ones you edited since
 install, and prints a unified patch from your file to the registry's.
 
 ### list
 
-Lists registry items with their type, version and title.
+Lists registry items grouped by type, each with its version and title.
 
 ```sh
 rectio list [--type component|block|theme|lib|hook|style|template] [--templates]
 ```
 
-In a project, `*` marks an installed item and `^` one with a newer version available.
+In a project, `✓` marks an installed item and `↑` one with a newer version available (`+` and `^`
+in a terminal without UTF-8).
 
 ### search
 
@@ -138,14 +141,46 @@ rectio mcp [--registry <url|folder>]
 
 ## Shared options
 
-| Option             | What it does                                        |
-| ------------------ | --------------------------------------------------- |
-| `--cwd <dir>`      | The project folder. Defaults to the current folder. |
-| `--registry <url>` | A registry URL or folder for this run.              |
-| `-h`, `--help`     | Show the help.                                      |
-| `-v`, `--version`  | Show the version.                                   |
+| Option             | What it does                                           |
+| ------------------ | ------------------------------------------------------ |
+| `--cwd <dir>`      | The project folder. Defaults to the current folder.    |
+| `--registry <url>` | A registry URL or folder for this run.                 |
+| `--verbose`        | `init`, `add`: list every item, file and package.      |
+| `-q`, `--quiet`    | `init`, `add`: print only the result line, and errors. |
+| `-h`, `--help`     | Show the help.                                         |
+| `-v`, `--version`  | Show the version.                                      |
 
 A command that fails prints one message and a hint, and exits with code 1.
+
+## Output
+
+`init`, `init --template` and `add` run as numbered steps. In a terminal each step spins while it
+works and ends as one line with its time and a short note; a box closes the run with what was
+added and what to run next:
+
+```text
+  rectio init  0.1.1
+
+  template         saas-admin
+  folder           my-admin
+  theme            default
+  package manager  pnpm
+
+  ✓ [1/5] Checking project     0.2s  my-admin is free
+  ✓ [2/5] Fetching template    0.2s  saas-admin 0.1.0, 73 files
+  ✓ [3/5] Resolving items      0.5s  88 kit items
+  ✓ [4/5] Writing files        0.0s  215 files
+  ✓ [5/5] Installing packages  2.6s  pnpm, 9 packages
+```
+
+`add` sums the files up by folder and counts the dependencies it pulled in; `--verbose` lists every
+item, file and package instead. A failed step names itself, its reason and the hint, and says
+whether anything was written.
+
+Progress and results go to stdout; errors, warnings and the update notice go to stderr. When stdout
+is not a terminal, or in CI, the CLI prints plain `[2/5] Fetching template ... ok (0.2s)` lines with
+no spinner and no box borders. `NO_COLOR` turns color off, `FORCE_COLOR` turns it on, and a locale
+without UTF-8 gets ASCII marks.
 
 ## Registry URL
 
