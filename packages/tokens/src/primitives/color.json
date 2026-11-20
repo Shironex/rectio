@@ -80,6 +80,13 @@
           "alpha": 1
         }
       },
+      "650": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.505, 0.007, 75],
+          "alpha": 1
+        }
+      },
       "700": {
         "$value": {
           "colorSpace": "oklch",
