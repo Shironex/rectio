@@ -606,7 +606,8 @@ export function ExpenseApproval({
                   key={event.id}
                   className="flex items-start justify-between gap-3 border-b border-line py-2 last:border-b-0"
                 >
-                  <span className="flex min-w-0 items-start gap-2.5 text-sm">
+                  {/* On a narrow block the badge sits above the sentence, which keeps the full width. */}
+                  <span className="flex min-w-0 items-start gap-2.5 text-sm @max-md:flex-col @max-md:gap-1">
                     {event.action === 'approved' || event.action === 'rejected' ? (
                       <StateBadge state={event.action} label={m.states[event.action]} />
                     ) : (
