@@ -27,7 +27,7 @@ export function CopyCommand({ command, className }: { command: string; className
         $
       </span>
       {/* A long command wraps on a narrow screen rather than hiding behind a scroll. */}
-      <code className="ms-1.5 min-w-0 break-all">{command}</code>
+      <code className="ms-1.5 min-w-0 break-words">{command}</code>
       <button
         type="button"
         onClick={() => {
