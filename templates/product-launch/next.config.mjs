@@ -7,6 +7,7 @@ const config = {
   reactStrictMode: true,
   // No generated AGENTS.md from next dev.
   agentRules: false,
+  basePath: process.env.PREVIEW_BASE_PATH ?? '', // rectio:workspace
   // The rectio packages ship their TypeScript source.
   transpilePackages: ['@rectio/ui', '@rectio/motion', '@rectio/blocks'], // rectio:workspace
 };

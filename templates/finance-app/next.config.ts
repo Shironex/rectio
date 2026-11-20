@@ -5,6 +5,7 @@ const config: NextConfig = {
   output: 'export',
   reactStrictMode: true,
   agentRules: false,
+  basePath: process.env.PREVIEW_BASE_PATH ?? '', // rectio:workspace
   transpilePackages: ['@rectio/ui', '@rectio/motion', '@rectio/blocks'], // rectio:workspace
 };
 
