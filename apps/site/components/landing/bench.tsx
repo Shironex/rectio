@@ -103,7 +103,7 @@ export function Bench() {
           <button
             type="button"
             onClick={stop}
-            className="inline-flex items-center gap-2 self-end rounded-control px-2 py-1 text-sm text-fg-muted transition-colors duration-fast ease-standard pointer-fine:hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            className="inline-flex min-h-9 items-center gap-2 self-end rounded-control px-2 text-sm font-medium text-fg transition-colors duration-fast ease-standard pointer-coarse:min-h-11 pointer-fine:hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           >
             <PauseIcon aria-hidden weight="fill" className="size-3.5" />
             Stop the tour
