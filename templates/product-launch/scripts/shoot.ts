@@ -2,8 +2,8 @@
  * Headless captures of the built site. Build first (`pnpm build`), then:
  *
  * - `pnpm shoot 3` writes a design round to .rounds/product-launch-round-3/ at the repo root: the
- *   launch page on desktop (1440) and phone (390), light and dark, in both themes, plus the 404, the
- *   phone menu and the waitlist's error and success states. `pnpm shoot 3 launch` shoots one page.
+ *   launch page on desktop (1440) and phone (390), light and dark, plus the 404, the phone menu
+ *   and the waitlist's error and success states. `pnpm shoot 3 launch` shoots one page.
  * - `pnpm shoot screenshots` refreshes screenshots/, the stills the docs and the showcase use.
  *
  * It serves out/ itself and never touches the screen.
@@ -22,8 +22,8 @@ const arg = process.argv[2] ?? '1';
 const only = process.argv[3];
 
 const PAGES = [
-  { name: 'launch', path: '/', themes: ['ledger', 'default'] },
-  { name: 'not-found', path: '/no-such-page', themes: ['ledger'] },
+  { name: 'launch', path: '/' },
+  { name: 'not-found', path: '/no-such-page' },
 ] as const;
 
 const VIEWPORTS = [
@@ -44,7 +44,6 @@ interface Options {
   height: number;
   mobile: boolean;
   mode: 'light' | 'dark';
-  theme: string;
   consent?: boolean;
 }
 
@@ -57,16 +56,15 @@ async function open(browser: Browser, base: string, path: string, options: Optio
     colorScheme: options.mode,
   });
   await context.addInitScript(
-    ({ theme, mode, consent, decided }) => {
+    ({ mode, consent, decided }) => {
       try {
-        localStorage.setItem('quarry-theme', JSON.stringify({ theme, mode }));
+        localStorage.setItem('quarry-theme', JSON.stringify({ mode }));
         if (consent) localStorage.setItem('quarry-consent', decided);
       } catch {
         // A capture without storage shows the defaults.
       }
     },
     {
-      theme: options.theme,
       mode: options.mode,
       consent: options.consent ?? true,
       decided: DECIDED,
@@ -118,7 +116,6 @@ try {
       const { context, page } = await open(browser, base, '/', {
         ...still.view,
         mode: still.mode,
-        theme: 'ledger',
       });
       await settle(page);
       const path = join(dir, still.file);
@@ -132,20 +129,14 @@ try {
     mkdirSync(out, { recursive: true });
     let count = 0;
     for (const entry of PAGES.filter((p) => only === undefined || p.name === only)) {
-      for (const theme of entry.themes) {
-        for (const view of VIEWPORTS) {
-          for (const mode of MODES) {
-            const { context, page } = await open(browser, base, entry.path, {
-              ...view,
-              mode,
-              theme,
-            });
-            await settle(page);
-            const file = `${entry.name}-${theme}-${view.name}-${mode}.png`;
-            await page.screenshot({ path: join(out, file), fullPage: true });
-            count += 1;
-            await context.close();
-          }
+      for (const view of VIEWPORTS) {
+        for (const mode of MODES) {
+          const { context, page } = await open(browser, base, entry.path, { ...view, mode });
+          await settle(page);
+          const file = `${entry.name}-${view.name}-${mode}.png`;
+          await page.screenshot({ path: join(out, file), fullPage: true });
+          count += 1;
+          await context.close();
         }
       }
     }
@@ -155,7 +146,6 @@ try {
         const { context, page } = await open(browser, base, '/#waitlist', {
           ...view,
           mode: 'dark',
-          theme: 'ledger',
         });
         await settle(page);
         const form = page.locator('#waitlist');
@@ -175,7 +165,6 @@ try {
         const { context, page } = await open(browser, base, '/', {
           ...VIEWPORTS[1],
           mode,
-          theme: 'ledger',
         });
         await settle(page);
         await page.getByRole('button', { name: 'Menu' }).click();

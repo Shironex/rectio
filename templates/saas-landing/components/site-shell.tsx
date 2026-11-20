@@ -68,7 +68,7 @@ function useConsent() {
   return { consent, known: raw !== undefined, save };
 }
 
-/** Theme, colour mode and cookie choices, in the footer of every page. */
+/** Colour mode and cookie choices, in the footer of every page. */
 function SiteSettings({ onCookieSettings }: { onCookieSettings: () => void }) {
   return (
     <div className="flex flex-col gap-3 border-t border-line pt-6">
@@ -91,7 +91,7 @@ function SiteSettings({ onCookieSettings }: { onCookieSettings: () => void }) {
 
 /**
  * Everything around a page: the announcement, the header with its phone menu, the footer with the
- * newsletter, theme switch and cookie settings, and the cookie banner on a first visit.
+ * newsletter, light and dark switch and cookie settings, and the cookie banner on a first visit.
  */
 export function SiteShell({ children }: { children: ReactNode }) {
   const current = currentNav(usePathname());

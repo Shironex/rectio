@@ -2,8 +2,8 @@
  * Headless captures of the built site. Build first (`pnpm build`), then:
  *
  * - `pnpm shoot 3` writes a design round to .rounds/saas-landing-round-3/ at the repo root: every
- *   page on desktop (1440) and phone (390), light and dark, the home and pricing pages in both
- *   themes, plus the phone menu, the cookie banner and the 404. `pnpm shoot 3 pricing` shoots one page.
+ *   page on desktop (1440) and phone (390), light and dark, plus the phone menu, the cookie banner
+ *   and the 404. `pnpm shoot 3 pricing` shoots one page.
  * - `pnpm shoot screenshots` refreshes screenshots/, the stills the docs and the showcase use.
  *
  * It serves out/ itself and never touches the screen.
@@ -22,9 +22,9 @@ const arg = process.argv[2] ?? '1';
 const only = process.argv[3];
 
 const PAGES = [
-  { name: 'home', path: '/', themes: ['default', 'ledger'] },
+  { name: 'home', path: '/' },
   { name: 'features', path: '/features' },
-  { name: 'pricing', path: '/pricing', themes: ['default', 'ledger'] },
+  { name: 'pricing', path: '/pricing' },
   { name: 'customers', path: '/customers' },
   { name: 'blog', path: '/blog' },
   { name: 'article', path: '/blog/harbour-street-rota-by-thursday' },
@@ -55,7 +55,6 @@ interface Options {
   height: number;
   mobile: boolean;
   mode: 'light' | 'dark';
-  theme: string;
   consent?: boolean;
 }
 
@@ -68,16 +67,15 @@ async function open(browser: Browser, base: string, path: string, options: Optio
     colorScheme: options.mode,
   });
   await context.addInitScript(
-    ({ theme, mode, consent, decided }) => {
+    ({ mode, consent, decided }) => {
       try {
-        localStorage.setItem('rostra-theme', JSON.stringify({ theme, mode }));
+        localStorage.setItem('rostra-theme', JSON.stringify({ mode }));
         if (consent) localStorage.setItem('rostra-consent', decided);
       } catch {
         // A capture without storage shows the defaults.
       }
     },
     {
-      theme: options.theme,
       mode: options.mode,
       consent: options.consent ?? true,
       decided: DECIDED,
@@ -129,7 +127,6 @@ try {
       const { context, page } = await open(browser, base, '/', {
         ...still.view,
         mode: still.mode,
-        theme: 'default',
       });
       await settle(page);
       const path = join(dir, still.file);
@@ -143,37 +140,15 @@ try {
     mkdirSync(out, { recursive: true });
     let count = 0;
     for (const entry of PAGES.filter((p) => only === undefined || p.name === only)) {
-      const themes = 'themes' in entry ? entry.themes : (['default'] as const);
-      for (const theme of themes) {
-        for (const view of VIEWPORTS) {
-          for (const mode of MODES) {
-            const { context, page } = await open(browser, base, entry.path, {
-              ...view,
-              mode,
-              theme,
-            });
-            await settle(page);
-            const file = `${entry.name}-${theme}-${view.name}-${mode}.png`;
-            await page.screenshot({ path: join(out, file), fullPage: true });
-            count += 1;
-            await context.close();
-          }
+      for (const view of VIEWPORTS) {
+        for (const mode of MODES) {
+          const { context, page } = await open(browser, base, entry.path, { ...view, mode });
+          await settle(page);
+          const file = `${entry.name}-${view.name}-${mode}.png`;
+          await page.screenshot({ path: join(out, file), fullPage: true });
+          count += 1;
+          await context.close();
         }
-      }
-      // Every other page once in ledger, so the second theme is seen across the site.
-      if (!('themes' in entry)) {
-        const { context, page } = await open(browser, base, entry.path, {
-          ...VIEWPORTS[0],
-          mode: 'dark',
-          theme: 'ledger',
-        });
-        await settle(page);
-        await page.screenshot({
-          path: join(out, `${entry.name}-ledger-desktop-dark.png`),
-          fullPage: true,
-        });
-        count += 1;
-        await context.close();
       }
     }
     if (only === undefined) {
@@ -182,7 +157,6 @@ try {
         const { context, page } = await open(browser, base, '/', {
           ...view,
           mode: 'light',
-          theme: 'default',
           consent: false,
         });
         await settle(page);
@@ -195,7 +169,6 @@ try {
         const { context, page } = await open(browser, base, '/contact', {
           ...view,
           mode: 'light',
-          theme: 'default',
         });
         await settle(page);
         const form = page.locator('form').first();
@@ -210,7 +183,6 @@ try {
         const { context, page } = await open(browser, base, '/pricing', {
           ...VIEWPORTS[1],
           mode,
-          theme: 'default',
         });
         await settle(page);
         await page.getByRole('button', { name: 'Menu' }).click();

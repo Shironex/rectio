@@ -1,7 +1,7 @@
 {
   "name": "product-launch",
   "title": "Product launch",
-  "description": "A single long launch page for a research tool: a word-cycling hero over a live product board, a feature bento, how it works, a waitlist with validation and a place in line, and an FAQ. Starts in the ledger theme.",
+  "description": "A single long launch page for a research tool: a word-cycling hero over a live product board, a feature bento, how it works, a waitlist with validation and a place in line, and an FAQ.",
   "category": "marketing",
   "pages": ["/", "/404"],
   "uses": [
