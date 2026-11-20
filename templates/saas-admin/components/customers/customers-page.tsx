@@ -84,7 +84,12 @@ const columns: DataTableColumnDef<Customer>[] = [
           >
             {row.original.name}
           </Link>
-          <span className="truncate text-sm text-fg-muted">{row.original.city}</span>
+          <span className="truncate text-sm text-fg-muted">
+            <span className="md:hidden">
+              {row.original.plan}, {plural(row.original.openTickets, 'open ticket')}
+            </span>
+            <span className="max-md:hidden">{row.original.city}</span>
+          </span>
         </span>
       </span>
     ),

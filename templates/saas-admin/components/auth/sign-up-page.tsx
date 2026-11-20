@@ -1,6 +1,6 @@
 'use client';
 
-import { GoogleLogoIcon } from '@phosphor-icons/react';
+import { GoogleLogoIcon, WindowsLogoIcon } from '@phosphor-icons/react';
 import { SocialButton } from '@rectio/blocks';
 import { SignUp } from '@rectio/blocks/motion';
 import {
@@ -51,16 +51,27 @@ export function SignUpPage() {
         error={error}
         emailTaken={taken}
         social={
-          <SocialButton
-            icon={<GoogleLogoIcon aria-hidden weight="bold" />}
-            onClick={() => {
-              void signInWith('google').then((result) => {
-                if (result.ok) router.push('/');
-              });
-            }}
-          >
-            Sign up with Google
-          </SocialButton>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {(['google', 'microsoft'] as const).map((provider) => (
+              <SocialButton
+                key={provider}
+                icon={
+                  provider === 'google' ? (
+                    <GoogleLogoIcon aria-hidden weight="bold" />
+                  ) : (
+                    <WindowsLogoIcon aria-hidden weight="bold" />
+                  )
+                }
+                onClick={() => {
+                  void signInWith(provider).then((result) => {
+                    if (result.ok) router.push('/?state=empty');
+                  });
+                }}
+              >
+                {provider === 'google' ? 'Google' : 'Microsoft'}
+              </SocialButton>
+            ))}
+          </div>
         }
         terms={() => {
           setLegal('terms');

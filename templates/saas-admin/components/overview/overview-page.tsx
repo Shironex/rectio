@@ -3,6 +3,7 @@
 import {
   ArrowRightIcon,
   ChatsCircleIcon,
+  InfoIcon,
   PlusIcon,
   TimerIcon,
   TrayIcon,
@@ -17,9 +18,11 @@ import {
   StatGroup,
   Toggle,
   ToggleGroup,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverTitle,
+  PopoverTrigger,
   cn,
 } from '@rectio/ui';
 import Link from 'next/link';
@@ -297,14 +300,19 @@ export function OverviewPage() {
                 description="Created and resolved per day"
                 className="max-lg:order-2"
                 actions={
-                  <Tooltip>
-                    <TooltipTrigger className="cursor-help rounded-control text-sm text-fg-muted underline decoration-dotted underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">
+                  <Popover>
+                    <PopoverTrigger render={<Button variant="ghost" size="sm" />}>
+                      <InfoIcon aria-hidden weight="bold" className="size-3.5" />
                       Why the spike?
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      A card payments outage on 10 November doubled the queue for two days.
-                    </TooltipContent>
-                  </Tooltip>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="max-w-xs">
+                      <PopoverTitle>Card payments outage</PopoverTitle>
+                      <PopoverDescription>
+                        Apple Pay checkouts failed on 8 November, and the queue doubled for two
+                        days. Resolved tickets caught up by 10 November.
+                      </PopoverDescription>
+                    </PopoverContent>
+                  </Popover>
                 }
               >
                 <VolumeChart days={days} />

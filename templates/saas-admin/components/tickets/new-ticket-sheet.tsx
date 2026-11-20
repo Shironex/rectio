@@ -205,7 +205,7 @@ function TicketForm({
             onValueChange={(value) => {
               setPriority(value as KanbanPriority);
             }}
-            className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+            className="grid grid-cols-2 gap-2"
           >
             {PRIORITIES.map((p) => (
               <RadioCard

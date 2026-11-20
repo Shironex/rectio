@@ -6,7 +6,6 @@ import { CommentThread } from '@rectio/blocks/motion';
 import {
   Avatar,
   Badge,
-  Button,
   Sheet,
   SheetBody,
   SheetContent,
@@ -104,11 +103,11 @@ function TicketDetail({ ticket, onClose }: { ticket: Ticket; onClose: () => void
         </SheetDescription>
       </SheetHeader>
       <SheetBody className="gap-6">
-        <dl className="grid grid-cols-3 gap-x-6 gap-y-2.5 text-sm">
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
           {facts.map(([label, value]) => (
-            <div key={label} className="contents">
+            <div key={label} className="flex min-w-0 flex-col gap-0.5">
               <dt className="text-fg-muted">{label}</dt>
-              <dd className="col-span-2 min-w-0 text-fg">{value}</dd>
+              <dd className="min-w-0 text-fg">{value}</dd>
             </div>
           ))}
         </dl>
@@ -157,11 +156,6 @@ function TicketDetail({ ticket, onClose }: { ticket: Ticket; onClose: () => void
           }}
         />
       </SheetBody>
-      <div className="flex shrink-0 justify-end gap-2 border-t border-line px-5 py-3">
-        <Button variant="ghost" onClick={onClose}>
-          Close
-        </Button>
-      </div>
     </>
   );
 }

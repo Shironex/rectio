@@ -106,7 +106,9 @@ function TicketsTab({ customer, people }: { customer: Customer; people: readonly
               <TableCell className="max-sm:hidden">
                 <Badge tone={STATUS_TONES[t.status]}>{STATUS_LABELS[t.status]}</Badge>
               </TableCell>
-              <TableCell className="text-fg-muted max-md:hidden">{t.requester}</TableCell>
+              <TableCell className="whitespace-nowrap text-fg-muted max-md:hidden">
+                {t.requester}
+              </TableCell>
               <TableCell align="end" className="whitespace-nowrap text-fg-muted">
                 {formatShortDate(t.updated)}
               </TableCell>
@@ -241,7 +243,7 @@ function Details({ customer }: { customer: Customer }) {
     ],
   ];
   return (
-    <BlockPanel title="Details">
+    <BlockPanel title="Details" className="lg:sticky lg:top-20">
       <dl className="flex flex-col gap-4 text-sm">
         {rows.map(([label, value]) => (
           <div key={label} className="flex flex-col gap-1">
@@ -274,6 +276,7 @@ export function CustomerDetailPage({ id }: { id: string }) {
   if (customer === undefined) return <ErrorPanel title="This customer does not exist" />;
   const people = portalUsers(customer);
   const active = people.filter((p) => p.status === 'active').length;
+  const waiting = customerTickets(customer, people).filter((t) => t.status === 'waiting').length;
 
   return (
     <>
@@ -348,12 +351,20 @@ export function CustomerDetailPage({ id }: { id: string }) {
             <Stat
               label="Open tickets"
               value={state === 'empty' ? '0' : String(customer.openTickets)}
+              description={
+                state === 'empty' ? 'Nothing asked yet' : `${String(waiting)} waiting on them`
+              }
             />
             <Stat
               label="Satisfaction, 90 days"
               value={<Csat value={state === 'empty' ? null : customer.csat} />}
+              description="Workspace average 94%"
             />
-            <Stat label="Median first reply" value={formatDuration(customer.firstResponse)} />
+            <Stat
+              label="Median first reply"
+              value={formatDuration(customer.firstResponse)}
+              description="Target is 2 hours"
+            />
             <Stat
               label="Portal users"
               value={String(people.length)}

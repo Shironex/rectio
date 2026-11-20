@@ -18,8 +18,6 @@ import {
   SidebarGroup,
   SidebarHeader,
   SidebarItem,
-  SidebarSubItem,
-  SidebarSubmenu,
 } from '@rectio/ui';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -28,12 +26,11 @@ import { WORKSPACE } from '@/data/workspace';
 import { usePageState } from '../use-page-state';
 import { useAppData } from './app-data';
 import { icon } from './icon';
-import { SETTINGS_SECTIONS } from './sections';
 
 /** A count with its meaning in words, so the number never stands alone. */
-function CountBadge({ count, label, urgent }: { count: number; label: string; urgent: boolean }) {
+function CountBadge({ count, label }: { count: number; label: string }) {
   return (
-    <span className={urgent ? 'font-medium text-negative-strong' : undefined}>
+    <span className="font-medium text-fg-muted numeric">
       {count} {label}
     </span>
   );
@@ -88,7 +85,7 @@ export function AppSidebar() {
             render={<Link href="/tickets" />}
             icon={icon(KanbanIcon)}
             active={on('/tickets')}
-            {...(fresh > 0 ? { badge: <CountBadge count={fresh} label="new" urgent /> } : {})}
+            {...(fresh > 0 ? { badge: <CountBadge count={fresh} label="new" /> } : {})}
           >
             Tickets
           </SidebarItem>
@@ -119,9 +116,7 @@ export function AppSidebar() {
             render={<Link href="/notifications" />}
             icon={icon(BellIcon)}
             active={on('/notifications')}
-            {...(unread > 0
-              ? { badge: <CountBadge count={unread} label="unread" urgent={false} /> }
-              : {})}
+            {...(unread > 0 ? { badge: <CountBadge count={unread} label="unread" /> } : {})}
           >
             Notifications
           </SidebarItem>
@@ -144,17 +139,13 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarSubmenu label="Settings" icon={icon(GearSixIcon)} active={onSettings}>
-          {SETTINGS_SECTIONS.map((section) => (
-            <SidebarSubItem
-              key={section.href}
-              render={<Link href={section.href} />}
-              active={pathname === section.href}
-            >
-              {section.label}
-            </SidebarSubItem>
-          ))}
-        </SidebarSubmenu>
+        <SidebarItem
+          render={<Link href="/settings" />}
+          icon={icon(GearSixIcon)}
+          active={onSettings}
+        >
+          Settings
+        </SidebarItem>
       </SidebarFooter>
     </Sidebar>
   );

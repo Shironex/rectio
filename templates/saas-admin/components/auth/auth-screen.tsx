@@ -27,7 +27,7 @@ const POINTS = [
 /** The brand panel beside the form on a wide screen: the promise, three points and a customer. */
 export function AuthAside() {
   return (
-    <div className="flex h-full flex-col justify-between gap-10">
+    <div className="flex h-full flex-col justify-center gap-12">
       <div className="flex flex-col gap-6">
         <p className="font-display text-2xl font-heading tracking-tight text-balance">
           {PRODUCT.tagline}
