@@ -3,17 +3,12 @@ title: Cookie consent
 description: 'A cookie banner that asks before anything optional runs, with preferences per category.'
 ---
 
-import CookieConsentBannerDemo from '@/demos/marketing-cookie-consent-banner';
-import CookieConsentBannerMotionDemo from '@/demos/marketing-cookie-consent-banner.motion';
-import CookieConsentPreferencesDemo from '@/demos/marketing-cookie-consent-preferences';
-import CookieConsentPreferencesMotionDemo from '@/demos/marketing-cookie-consent-preferences.motion';
-
 ## Banner
 
 <Preview
   name="marketing-cookie-consent-banner"
-  plain={<CookieConsentBannerDemo />}
-  motion={<CookieConsentBannerMotionDemo />}
+  plain={<Demo name="marketing-cookie-consent-banner" />}
+  motion={<Demo name="marketing-cookie-consent-banner.motion" />}
   importLine="import { CookieConsent } from '@rectio/blocks/marketing/motion';"
   align="start"
 />
@@ -22,8 +17,8 @@ import CookieConsentPreferencesMotionDemo from '@/demos/marketing-cookie-consent
 
 <Preview
   name="marketing-cookie-consent-preferences"
-  plain={<CookieConsentPreferencesDemo />}
-  motion={<CookieConsentPreferencesMotionDemo />}
+  plain={<Demo name="marketing-cookie-consent-preferences" />}
+  motion={<Demo name="marketing-cookie-consent-preferences.motion" />}
   importLine="import { CookiePreferences } from '@rectio/blocks/marketing/motion';"
   align="start"
 />
