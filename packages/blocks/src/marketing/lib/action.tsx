@@ -1,5 +1,5 @@
 import { ArrowRightIcon } from '@phosphor-icons/react/ssr';
-import { cn } from '@rectio/ui';
+import { Anchor as KitAnchor, cn } from '@rectio/ui';
 import type { ComponentProps, ReactNode } from 'react';
 
 /**
@@ -43,27 +43,13 @@ export const linkFocus =
   'rounded-control outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus';
 
 /**
- * The one place a marketing block renders a link. Swap the `<a>` here for your router's link
- * component and every block follows.
+ * The one place a marketing block renders a link: the kit's `Anchor`, so a `LinkProvider` around
+ * the app sends every internal link through your router and its base path.
  */
-export function Anchor({
-  href,
-  external = false,
-  children,
-  className,
-  ...props
-}: ComponentProps<'a'> & { href: string; external?: boolean | undefined }) {
-  return (
-    <a
-      href={href}
-      className={className}
-      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-      {...props}
-    >
-      {children}
-      {external && <span className="sr-only"> (opens in a new tab)</span>}
-    </a>
-  );
+export function Anchor(
+  props: ComponentProps<'a'> & { href: string; external?: boolean | undefined },
+) {
+  return <KitAnchor {...props} />;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { CheckIcon, SignOutIcon, XIcon } from '@phosphor-icons/react';
-import { Field, FieldDescription, FieldError, FieldLabel, Input, cn } from '@rectio/ui';
+import { Anchor, Field, FieldDescription, FieldError, FieldLabel, Input, cn } from '@rectio/ui';
 import { useId, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
@@ -128,7 +128,7 @@ export function ResetPassword({
       >
         {signIn !== undefined &&
           (typeof signIn === 'string' ? (
-            <Button render={<a href={signIn} />} nativeButton={false} className="w-full">
+            <Button render={<Anchor href={signIn} />} className="w-full">
               Continue to sign in
             </Button>
           ) : (

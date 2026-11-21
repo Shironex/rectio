@@ -1,5 +1,5 @@
 import { EyeIcon, EyeSlashIcon, WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
-import { Input, cn, type InputProps } from '@rectio/ui';
+import { Anchor, Input, cn, type InputProps } from '@rectio/ui';
 import { useEffect, useId, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
@@ -211,7 +211,10 @@ export function FormMessage({
   );
 }
 
-/** Where a link in a form goes: a URL renders an anchor, a function a button that calls it. */
+/**
+ * Where a link in a form goes: a URL renders the kit's `Anchor`, which follows a `LinkProvider`; a
+ * function renders a button that calls it.
+ */
 export type LinkTarget = string | (() => void);
 
 /** An inline link to another step, such as "Forgot password?" or "Sign up". */
@@ -227,9 +230,9 @@ export function AuthLink({
   const classes = cn(inlineLink, 'pointer-coarse:py-2', className);
   if (typeof to === 'string') {
     return (
-      <a href={to} className={classes}>
+      <Anchor href={to} className={classes}>
         {children}
-      </a>
+      </Anchor>
     );
   }
   return (

@@ -8,6 +8,7 @@ import {
   XCircleIcon,
 } from '@phosphor-icons/react';
 import {
+  Anchor,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -275,9 +276,9 @@ export function ApiKeys({
                     </Button>
                   )}
                   {docsHref !== undefined && (
-                    <a href={docsHref} className={cn(inlineLink, 'text-sm')}>
+                    <Anchor href={docsHref} className={cn(inlineLink, 'text-sm')}>
                       Read the API docs
-                    </a>
+                    </Anchor>
                   )}
                 </span>
               )

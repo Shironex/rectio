@@ -7,7 +7,7 @@ import {
   ConfettiIcon,
   ListChecksIcon,
 } from '@phosphor-icons/react';
-import { cn } from '@rectio/ui';
+import { Anchor, cn } from '@rectio/ui';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
@@ -333,9 +333,9 @@ function StepAction({ action, primary }: { action: OnboardingAction; primary: bo
       touchTarget,
     );
     return action.href !== undefined ? (
-      <a href={action.href} onClick={action.onSelect} className={link}>
+      <Anchor href={action.href} onClick={action.onSelect} className={link}>
         {content}
-      </a>
+      </Anchor>
     ) : (
       <button type="button" onClick={action.onSelect} className={link}>
         {content}
@@ -347,8 +347,7 @@ function StepAction({ action, primary }: { action: OnboardingAction; primary: bo
       <Button
         variant="primary"
         size="sm"
-        nativeButton={false}
-        render={<a href={action.href} />}
+        render={<Anchor href={action.href} />}
         onClick={action.onSelect}
       >
         {content}

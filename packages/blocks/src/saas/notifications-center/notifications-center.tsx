@@ -14,7 +14,7 @@ import {
   UserFocusIcon,
   type Icon,
 } from '@phosphor-icons/react';
-import { EmptyState, ScrollArea, cn } from '@rectio/ui';
+import { Anchor, EmptyState, ScrollArea, cn } from '@rectio/ui';
 import { useState, type ReactNode } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
@@ -298,9 +298,9 @@ function SettingsFooter({ to }: { to: LinkTarget }) {
   );
   if (typeof to === 'string') {
     return (
-      <a href={to} className={classes}>
+      <Anchor href={to} className={classes}>
         {content}
-      </a>
+      </Anchor>
     );
   }
   return (

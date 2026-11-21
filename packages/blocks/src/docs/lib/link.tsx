@@ -1,23 +1,25 @@
-import { createContext, use, type ComponentProps, type ReactNode } from 'react';
+import {
+  Anchor,
+  LinkProvider,
+  type AnchorProps,
+  type LinkRender,
+  type LinkRenderProps,
+} from '@rectio/ui';
+import type { ReactNode } from 'react';
 
 /** The props a router link receives: an anchor's props with an `href`. */
-export type DocsLinkRenderProps = ComponentProps<'a'> & { href: string; children?: ReactNode };
+export type DocsLinkRenderProps = LinkRenderProps;
 
 /** Draws an internal link, such as `(props) => <NextLink {...props} />`. */
-export type DocsLinkRender = (props: DocsLinkRenderProps) => ReactNode;
-
-const plainLink: DocsLinkRender = (props) => <a {...props} />;
-
-const LinkContext = createContext<DocsLinkRender>(plainLink);
+export type DocsLinkRender = LinkRender;
 
 /**
- * Every link the docs blocks draw goes through `DocsLink`, so one provider swaps in a router's
- * link component (Next, React Router, TanStack, Remix) for the whole kit:
+ * The kit's `LinkProvider` under the docs blocks' older name: one provider swaps in a router's link
+ * component (Next, React Router, TanStack, Remix) for every component and block:
  *
  *   <DocsLinkProvider render={(props) => <NextLink {...props} />}>…</DocsLinkProvider>
  *
- * Without a provider a link is a plain anchor. External links are always plain anchors that open
- * in a new tab.
+ * Without a provider a link is a plain anchor.
  */
 export function DocsLinkProvider({
   render,
@@ -26,25 +28,23 @@ export function DocsLinkProvider({
   render: DocsLinkRender;
   children: ReactNode;
 }) {
-  return <LinkContext value={render}>{children}</LinkContext>;
+  return <LinkProvider render={render}>{children}</LinkProvider>;
 }
 
-export interface DocsLinkProps extends ComponentProps<'a'> {
+export interface DocsLinkProps extends Omit<AnchorProps, 'newTabHint'> {
   href: string;
   /** Leaves the docs: a plain anchor that opens in a new tab, never the router's link. */
   external?: boolean | undefined;
 }
 
-export function DocsLink({ href, external = false, children, ...props }: DocsLinkProps) {
-  const render = use(LinkContext);
-  if (external || /^https?:\/\//.test(href)) {
-    return (
-      <a href={href} target="_blank" rel="noreferrer" {...props}>
-        {children}
-      </a>
-    );
-  }
-  return render({ href, children, ...props });
+/**
+ * A docs link: through the router inside the site; a web address opens in a new tab. The blocks
+ * word the new tab hint themselves, so the kit's own hint stays off.
+ */
+export function DocsLink({ href, external = false, ...props }: DocsLinkProps) {
+  return (
+    <Anchor href={href} external={external || /^https?:\/\//.test(href)} newTabHint="" {...props} />
+  );
 }
 
 /** The focus ring every docs link shares. */
