@@ -17,6 +17,7 @@ import {
   cn,
 } from '@rectio/ui';
 import {
+  DEFAULT_STEPS,
   FONTS,
   RADII,
   RANGES,
@@ -35,6 +36,7 @@ import {
   brandHex,
   clamp,
   layerScale,
+  moveBorder,
   neutralFor,
   percent,
   stepsFor,
@@ -137,7 +139,9 @@ export function ColourControls({
           format={{ style: 'percent', maximumFractionDigits: 1 }}
           onValueChange={(value) => {
             colour(update, (c) => {
-              c.depth = value as number;
+              const depth = value as number;
+              moveBorder(c, depth - c.depth);
+              c.depth = depth;
             });
           }}
         />
@@ -350,7 +354,9 @@ export function FineTuning({ inputs, update }: { inputs: ThemeInputs; update: Up
               format={{ style: 'percent' }}
               onValueChange={(value) => {
                 colour(update, (c) => {
-                  c.steps = stepsFor(value as number);
+                  const steps = stepsFor(value as number);
+                  moveBorder(c, steps[3] - (c.steps ?? DEFAULT_STEPS)[3]);
+                  c.steps = steps;
                 });
               }}
             />

@@ -88,6 +88,15 @@ export function stepsFor(scale: number): [number, number, number, number] {
 }
 
 /**
+ * A preset's tuned hairline is a lightness, not a step above the surfaces: when the dark depth or
+ * the layer steps move, it moves by the same amount, so the border keeps its place among them.
+ */
+export function moveBorder(color: ThemeInputs['color'], delta: number): void {
+  if (color.borderL === undefined) return;
+  color.borderL = Number(clamp(color.borderL + delta, RANGES.borderL).toFixed(4));
+}
+
+/**
  * The brand as the picker shows it: the light accent fill, or with the ink style (where the fill is
  * ink), the brand at its hue's most vivid lightness, as it appears as text on that ink.
  */
