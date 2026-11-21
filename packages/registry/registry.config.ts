@@ -741,7 +741,7 @@ export default defineRegistry({
     {
       name: 'sheet',
       type: 'component',
-      version: '0.1.2',
+      version: '0.1.3',
       title: 'Sheet',
       description:
         'A panel that slides in from any edge, a bottom sheet on phones, swipe to close.',
