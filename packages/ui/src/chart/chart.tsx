@@ -149,10 +149,18 @@ export const chartSurface = cn(
   '[&_.recharts-surface]:outline-none [&_.recharts-wrapper]:rounded-control',
   // While the motion add-on draws a line in, its end dot waits for the drawing edge.
   'in-data-drawing:[&_.rx-end-dot]:opacity-0',
-  // A quiet ring around the plot says where focus is; the active mark carries the strong one.
+  '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-2',
+  '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-offset-2',
+  '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-focus',
+);
+
+/**
+ * A quieter plot ring, for a chart whose active mark carries its own strong focus ring (the bar
+ * chart), so the two rings do not compete. Charts without one keep the full ring.
+ */
+export const quietPlotRing = cn(
   '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-1',
   '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-offset-4',
-  '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-focus',
 );
 
 export interface ChartTooltipRow {
@@ -210,13 +218,13 @@ export function ChartTooltip({ title, rows, layout = 'stack' }: ChartTooltipProp
   );
 }
 
-/** How far above the plot a one-line tooltip sits, in px: over the legend row, clear of the marks. */
 /**
  * Where a one-line tooltip sits in the kit charts: on the top edge of the plot, in the headroom
  * the rounded axis leaves, so it never covers the legend row or the table toggle above.
  */
 export const TOOLTIP_TOP = 2;
 
+/** How far above the plot a one-line tooltip sits, in px: over the legend row, clear of the marks. */
 export const TOOLTIP_LIFT = 44;
 
 /** The hovered or focused datum: Recharts' active index, read back into the chart's own data. */
@@ -477,6 +485,8 @@ export interface ChartFrameProps {
   /** One or two sentences saying what the chart shows, read before the plot. */
   summary: string;
   legend?: readonly LegendItem[] | undefined;
+  /** A short note beside the legend about how the plot is drawn, such as weekly averages. */
+  note?: string | undefined;
   /** The same figures as a table: in the page for screen readers, shown on request. */
   table?: ReactNode;
   /** Show the Show table switch. On by default; the table stays readable either way. */
@@ -487,6 +497,8 @@ export interface ChartFrameProps {
   emptyAction?: ReactNode;
   /** Height of the plot, a token utility such as `h-64`. */
   plotClassName?: string | undefined;
+  /** The active mark draws its own strong focus ring, so the plot ring steps back. */
+  quietRing?: boolean | undefined;
   messages: ChartMessages;
   className?: string | undefined;
   children: ReactNode;
@@ -502,12 +514,14 @@ export function ChartFrame({
   horizontal,
   summary,
   legend,
+  note,
   table,
   tableToggle = true,
   loading = false,
   empty = false,
   emptyAction,
   plotClassName = 'h-64',
+  quietRing = false,
   messages,
   className,
   children,
@@ -545,11 +559,21 @@ export function ChartFrame({
     // It fills a taller card, so the table switch lines up across cards in a row.
     <figure data-slot="chart" className={cn('m-0 flex min-w-0 flex-1 flex-col gap-3', className)}>
       <figcaption className="sr-only">{summary}</figcaption>
-      {showLegend && <ChartLegend items={legend} />}
+      {note === undefined ? (
+        showLegend && <ChartLegend items={legend} />
+      ) : (
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          {showLegend ? <ChartLegend items={legend} /> : <span />}
+          {/* The summary says it too, so the note is for sighted readers. */}
+          <p aria-hidden className="m-0 text-xs text-fg-muted">
+            {note}
+          </p>
+        </div>
+      )}
       <Stage
         kind={kind}
         horizontal={horizontal}
-        className={cn('relative min-w-0', chartSurface, plotClassName)}
+        className={cn('relative min-w-0', chartSurface, quietRing && quietPlotRing, plotClassName)}
       >
         {children}
       </Stage>

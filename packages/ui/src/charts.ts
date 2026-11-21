@@ -52,11 +52,13 @@ export {
   formatMoment,
   formatTick,
   gapSpans,
+  hasGaps,
   inferTimeScale,
   mergeSeries,
   summarizeSeries,
   timeTicks,
   weeklyMeans,
+  localDate,
   type SeriesSummary,
   type TickUnit,
   type TimePoint,
@@ -66,6 +68,7 @@ export {
 } from './chart/time-axis';
 export {
   TIME_CHART_MESSAGES,
+  seriesStyle,
   type ReferenceMark,
   type TimeChartMessages,
   type TimeChartProps,

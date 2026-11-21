@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import {
   Area,
   CartesianGrid,
@@ -38,6 +38,7 @@ import {
   fillGaps,
   formatMoment,
   gapSpans,
+  hasGaps,
   formatTick,
   inferTimeScale,
   mergeSeries,
@@ -82,6 +83,14 @@ export interface TimeChartMessages extends ChartMessages {
   noData: string;
   /** The tooltip title when a narrow plot draws weekly means of daily figures. */
   weekOf: (date: string) => string;
+  /** Beside the legend when a narrow plot draws weekly means. */
+  weeklyNote: string;
+  /** In the summary when a narrow plot draws weekly means. */
+  weeklySummary: string;
+  /** In the table caption when a narrow plot draws weekly means. */
+  weeklyTable: string;
+  /** In the summary and the table caption when some dates have no figures. */
+  missingDates: string;
 }
 
 export const TIME_CHART_MESSAGES: TimeChartMessages = {
@@ -92,6 +101,10 @@ export const TIME_CHART_MESSAGES: TimeChartMessages = {
     `${label} went from ${first} on ${firstDate} to ${last} on ${lastDate}, highest at ${peak} on ${peakDate}.`,
   noData: 'No data',
   weekOf: (date) => `Week of ${date}, daily average`,
+  weeklyNote: 'By week, daily average',
+  weeklySummary: 'The plot shows the daily figures averaged by week; the table has every day.',
+  weeklyTable: 'Every day, while the plot shows weekly averages.',
+  missingDates: 'Some dates have no figures, so the line breaks there.',
 };
 
 export interface ReferenceMark {
@@ -134,6 +147,8 @@ export interface TimeChartProps {
   plotClassName?: string | undefined;
   /** The chart's words; pass the keys you change. */
   messages?: Partial<TimeChartMessages> | undefined;
+  /** Told when a narrow plot starts or stops drawing daily figures as weekly averages. */
+  onWeeklyChange?: ((weekly: boolean) => void) | undefined;
   className?: string | undefined;
 }
 
@@ -149,12 +164,6 @@ const PX_PER_TICK = 88;
 /** Below this many px per day, a daily line is drawn as weekly means. */
 const MIN_PX_PER_DAY = 4;
 
-/**
- * Figures over time as lines or areas: one shared implementation behind LineChart and AreaChart.
- * Dates fall on round calendar steps in the reader's language, as many as the width holds; the
- * value axis counts from zero by round steps; gaps break the line; and the summary and the table
- * twin give the same figures without the plot.
- */
 /**
  * A reference rule's words, above its right end, drawn with a halo of the surface so they stay
  * readable where a line crosses them.
@@ -206,6 +215,27 @@ function labelSide(rows: readonly TimeRow[], value: number): 'start' | 'end' {
   return start > end ? 'start' : 'end';
 }
 
+/**
+ * How a series is drawn, by its place among all the series passed: its colour, and a broken line
+ * past the palette, where colours repeat, so the repeat stays apart without colour. A key or a
+ * legend drawn outside the chart uses this too, so it always matches the plot.
+ */
+export function seriesStyle(
+  series: Pick<TimeSeries, 'color' | 'dashed'>,
+  index: number,
+): { tone: ChartColor; dashed: boolean } {
+  return {
+    tone: series.color ?? paletteColor(index),
+    dashed: series.dashed ?? (series.color === undefined && index >= CHART_PALETTE.length),
+  };
+}
+
+/**
+ * Figures over time as lines or areas: one shared implementation behind LineChart and AreaChart.
+ * Dates fall on round calendar steps in the reader's language, as many as the width holds; the
+ * value axis counts from zero by round steps; gaps break the line; and the summary and the table
+ * twin give the same figures without the plot.
+ */
 export function TimeChart({
   variant,
   stacked = false,
@@ -226,6 +256,7 @@ export function TimeChart({
   tableToggle,
   plotClassName = 'h-64',
   messages,
+  onWeeklyChange,
   className,
 }: TimeChartProps & { variant: 'line' | 'area'; stacked?: boolean | undefined }) {
   const m = mergeMessages(TIME_CHART_MESSAGES, messages);
@@ -237,9 +268,7 @@ export function TimeChart({
   const keyed = series.map((s, index) => ({
     ...s,
     key: `s${String(index)}`,
-    tone: s.color ?? paletteColor(index),
-    // Past the palette, colours repeat: a broken line keeps the repeat apart without colour.
-    dashed: s.dashed ?? (s.color === undefined && index >= CHART_PALETTE.length),
+    ...seriesStyle(s, index),
   }));
   const merged = mergeSeries(keyed.map((s) => ({ id: s.key, points: s.points })));
   const scale = requestedScale ?? inferTimeScale(merged);
@@ -248,7 +277,11 @@ export function TimeChart({
   const weekly =
     scale === 'day' && !stacked && width > 0 && width / Math.max(1, merged.length) < MIN_PX_PER_DAY;
   const plotted = weekly ? weeklyMeans(rows) : rows;
-  const gaps = weekly ? [] : gapSpans(rows);
+  const gaps = gapSpans(plotted);
+  const missing = hasGaps(connectGaps ? fillGaps(merged, scale) : rows);
+  useEffect(() => {
+    onWeeklyChange?.(weekly);
+  }, [weekly, onWeeklyChange]);
   const data: Datum[] = plotted.map((row) => ({
     time: row.time,
     gap: row.gap === true,
@@ -267,15 +300,15 @@ export function TimeChart({
       : timeTicks(first.time, last.time, scale, width > 0 ? width / PX_PER_TICK : 6);
   const yearCrossed = crossesYear(merged);
 
-  // The value axis: from zero by round steps, or Recharts' own fit when asked to zoom.
-  const totals = merged.map((row) =>
+  // The value axis: from zero by round steps, or Recharts' own fit when asked to zoom. It is sized
+  // from what is drawn, so weekly averages fill the plot.
+  const drawn = plotted.filter((row) => row.gap !== true);
+  const totals = drawn.map((row) =>
     stacked
       ? Object.values(row.values).reduce<number>((sum, v) => sum + (v ?? 0), 0)
       : Math.max(...Object.values(row.values).map((v) => v ?? -Infinity)),
   );
-  const lows = merged.map((row) =>
-    Math.min(...Object.values(row.values).map((v) => v ?? Infinity)),
-  );
+  const lows = drawn.map((row) => Math.min(...Object.values(row.values).map((v) => v ?? Infinity)));
   const max = Math.max(0, ...totals.filter(Number.isFinite), ...references.map((r) => r.value));
   const min = Math.min(0, ...lows.filter(Number.isFinite), ...references.map((r) => r.value));
   const yTicks = baseline === 'zero' ? niceRangeTicks(min, max) : undefined;
@@ -327,7 +360,16 @@ export function TimeChart({
         loading={loading}
         empty={empty}
         emptyAction={emptyAction}
-        summary={summary ?? [...summaries, m.keyboardHint].join(' ')}
+        summary={
+          summary ??
+          [
+            ...summaries,
+            ...(weekly ? [m.weeklySummary] : []),
+            ...(missing ? [m.missingDates] : []),
+            m.keyboardHint,
+          ].join(' ')
+        }
+        note={weekly ? m.weeklyNote : undefined}
         legend={
           (legend ?? keyed.length > 1)
             ? keyed.map((s) => ({
@@ -342,7 +384,12 @@ export function TimeChart({
         messages={m}
         table={
           <ChartDataTable
-            caption={m.tableCaption}
+            caption={[
+              m.tableCaption,
+              [...(weekly ? [m.weeklyTable] : []), ...(missing ? [m.missingDates] : [])].join(' '),
+            ]
+              .filter(Boolean)
+              .join('. ')}
             headers={[m.dateHeader, ...keyed.map((s) => s.label)]}
             rows={merged.map((row) => ({
               key: row.time,

@@ -58,7 +58,7 @@ export interface SparklineProps extends Omit<ComponentProps<'span'>, 'children'>
   area?: boolean | undefined;
   /** Mark the latest figure with a dot. On by default. */
   endDot?: boolean | undefined;
-  /** A dashed line at this value, such as zero or a target, when it falls inside the range. */
+  /** A dashed line at this value, such as zero or a target; the range stretches to take it in. */
   reference?: number | undefined;
   /**
    * Names the trend for assistive technology: `Revenue, rising over 12 months`. Without it the
