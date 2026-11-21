@@ -181,3 +181,15 @@ describe('fitLine', () => {
     expect(fitLine(long, 40)).toBe(`${'x'.repeat(38)}…`);
   });
 });
+
+describe('typing ahead', () => {
+  it('keeps keys that arrive in one chunk for the prompts that follow', async () => {
+    const { term, ask } = prompter();
+    // A paste or a fast typist: every answer before the first prompt has even drawn.
+    term.input.write('j\rnab\r');
+    const first = await ask.select({ message: 'Pick', choices });
+    const second = await ask.confirm({ message: 'Sure?', initial: true });
+    const third = await ask.text({ message: 'Name' });
+    expect([first, second, third]).toEqual(['c', false, 'ab']);
+  });
+});

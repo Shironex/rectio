@@ -65,6 +65,40 @@ export function fitLine(line: string, columns: number): string {
   return `${plain.slice(0, max - 1)}…`;
 }
 
+type KeyHandler = (text: string | undefined, key: Key | undefined) => void;
+
+interface KeyQueue {
+  pending: [string | undefined, Key | undefined][];
+  handler: KeyHandler | undefined;
+}
+
+const queues = new WeakMap<PromptInput, KeyQueue>();
+
+/**
+ * One keypress listener per input for the whole run. Keys that arrive while no prompt listens
+ * (typed ahead, or several keys in one chunk such as a paste) wait here for the next prompt instead
+ * of being lost.
+ */
+function keyQueue(input: PromptInput): KeyQueue {
+  let queue = queues.get(input);
+  if (queue === undefined) {
+    const made: KeyQueue = { pending: [], handler: undefined };
+    emitKeypressEvents(input as NodeJS.ReadableStream);
+    input.on('keypress', (text: string | undefined, key: Key | undefined) => {
+      if (made.handler === undefined) made.pending.push([text, key]);
+      else made.handler(text, key);
+    });
+    queues.set(input, made);
+    queue = made;
+  }
+  return queue;
+}
+
+/** Whether a prompt is waiting for keys on this input (for tests that type step by step). */
+export function promptActive(input: PromptInput): boolean {
+  return queues.get(input)?.handler !== undefined;
+}
+
 /**
  * Runs one prompt: raw mode on, keys in, frames redrawn in place, raw mode off. Resolves with the
  * value or rejects with PromptCancelled; either way the cursor is shown again and the input paused,
@@ -91,7 +125,7 @@ export function runPrompt<T>(io: PromptIO, spec: PromptSpec<T>): Promise<T> {
 
   return new Promise<T>((resolve, reject) => {
     const finish = (lines: string[], done: () => void) => {
-      input.off('keypress', onKey);
+      queue.handler = undefined;
       input.off('end', onEnd);
       draw({ lines });
       write(`\n${ESC.showCursor}`);
@@ -100,6 +134,7 @@ export function runPrompt<T>(io: PromptIO, spec: PromptSpec<T>): Promise<T> {
       done();
     };
     const cancel = () => {
+      state.done = true;
       finish(spec.cancelled(), () => {
         reject(new PromptCancelled());
       });
@@ -107,7 +142,9 @@ export function runPrompt<T>(io: PromptIO, spec: PromptSpec<T>): Promise<T> {
     const onEnd = () => {
       cancel();
     };
-    const onKey = (text: string | undefined, key: Key | undefined) => {
+    const state = { done: false };
+    const onKey: KeyHandler = (text, key) => {
+      if (state.done) return;
       const k = key ?? { sequence: text };
       if ((k.ctrl === true && k.name === 'c') || k.name === 'escape') {
         cancel();
@@ -117,16 +154,23 @@ export function runPrompt<T>(io: PromptIO, spec: PromptSpec<T>): Promise<T> {
       if (result === 'cancel') cancel();
       else if (result === undefined) draw(spec.render());
       else {
+        state.done = true;
         finish(spec.answered(result.submit), () => {
           resolve(result.submit);
         });
       }
     };
-    emitKeypressEvents(input as NodeJS.ReadableStream);
+    const queue = keyQueue(input);
     input.setRawMode?.(true);
-    input.on('keypress', onKey);
     input.on('end', onEnd);
-    input.resume();
     draw(spec.render());
+    // Keys typed ahead go first; any that this prompt does not take wait for the next one.
+    while (!state.done && queue.pending.length > 0) {
+      const [text, key] = queue.pending.shift() ?? [undefined, undefined];
+      onKey(text, key);
+    }
+    if (state.done) return;
+    queue.handler = onKey;
+    input.resume();
   });
 }

@@ -2,7 +2,7 @@ import { PassThrough } from 'node:stream';
 import { stripVTControlCharacters } from 'node:util';
 
 import type { CliContext } from '../src/core/context.ts';
-import type { PromptInput } from '../src/prompt/session.ts';
+import { promptActive, type PromptInput } from '../src/prompt/session.ts';
 
 /** Key sequences as a terminal sends them. */
 export const KEY = {
@@ -105,7 +105,7 @@ export function fakeTerminal(
   const type = async (...keys: string[]) => {
     for (const key of keys) {
       // Wait for a prompt to listen: the flow may be reading the registry between questions.
-      for (let n = 0; input.listenerCount('keypress') === 0; n++) {
+      for (let n = 0; !promptActive(input); n++) {
         if (n > 5000) throw new Error(`no prompt is listening for ${JSON.stringify(key)}`);
         await tick();
       }
