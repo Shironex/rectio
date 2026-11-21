@@ -1,0 +1,86 @@
+---
+title: Time series chart
+description: 'A chart card over time: the latest figure and change of each series, the date range, a line or an area and a table twin.'
+---
+
+<Preview
+  name="time-series-chart"
+  plain={<Demo name="time-series-chart" />}
+  motion={<Demo name="time-series-chart.motion" />}
+  importLine="import { TimeSeriesChart } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add time-series-chart
+```
+
+The motion variant is `motion-time-series-chart`. It installs the plain block too; lines draw along
+time on first view and glide to new figures after.
+
+## Usage
+
+```tsx
+import { TimeSeriesChart } from '@rectio/blocks';
+
+<TimeSeriesChart
+  title="Revenue"
+  variant="area"
+  series={[{ id: 'revenue', label: 'Revenue', points }]}
+  format="currency"
+  currency="EUR"
+  actions={<RangeSwitch />}
+/>;
+```
+
+A thin block over the kit: a [ChartCard](/docs/components/chart-card) holding a
+[LineChart](/docs/components/line-chart) or [AreaChart](/docs/components/area-chart), with the
+headline worked out from the data. With one series, its latest figure is the card's value and its
+change across the range a [TrendChip](/docs/components/trend-chip). With two to four, each series'
+latest figure and change are listed above the plot, keyed by colour and line shape, in place of the
+legend. The date range, written in the locale, is the description unless you pass one.
+
+Every LineChart prop passes through: formats, scale, curve, baseline, references, gaps, loading and
+the empty action. Use the chart components directly when the headline is not the latest figure, such
+as a total over the range.
+
+## Props
+
+Every LineChart prop is accepted as well; the chart's words go in `chartMessages`.
+
+<TypeTable
+  type={{
+    variant: { type: "'line' | 'area'", default: "'line'", description: 'The chart.' },
+    stacked: { type: 'boolean', description: 'Stack the areas into a total.' },
+    title: { type: 'string', default: "'Over time'", description: 'Names the card.' },
+    description: { type: 'ReactNode', description: 'Replaces the date range.' },
+    actions: {
+      type: 'ReactNode',
+      description: 'Controls at the top right, such as a range switch.',
+    },
+    figures: {
+      type: 'boolean',
+      default: 'true',
+      description: 'The latest figure and change of each series, for one to four series.',
+    },
+    headingLevel: {
+      type: '2 | 3 | 4',
+      default: '3',
+      description: 'The level of the title heading.',
+    },
+    messages: { type: 'Partial<TimeSeriesChartMessages>', description: 'The block words.' },
+  }}
+/>
+
+## Logic
+
+`seriesFigures(series)` gives each series' latest figure, its date and its change from the first
+point (null from a zero start); `seriesRange(series)` the first and last moment.
+
+## Accessibility
+
+- A region named by its title, with the chart's summary, keyboard reading and table twin.
+- Every change says its direction and whether it is better in words, not only by colour.
+- The motion variant moves only clip paths, transforms and opacity, and is plain under reduced motion.

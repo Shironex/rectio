@@ -20,6 +20,7 @@
     "kanban-board",
     "comment-thread",
     "file-manager",
-    "sessions"
+    "sessions",
+    "time-series-chart"
   ]
 }
