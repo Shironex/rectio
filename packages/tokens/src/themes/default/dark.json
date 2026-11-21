@@ -5,25 +5,25 @@
     "canvas": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.175, 0.006, 75]
+        "components": [0.17, 0.006, 75]
       }
     },
     "default": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.2, 0.006, 75]
+        "components": [0.215, 0.006, 75]
       }
     },
     "raised": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.225, 0.006, 75]
+        "components": [0.235, 0.006, 75]
       }
     },
     "sunken": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.16, 0.006, 75]
+        "components": [0.155, 0.006, 75]
       }
     },
     "overlay": {
@@ -41,7 +41,7 @@
     "selected": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.28, 0.04, 263]
+        "components": [0.28, 0.035, 263]
       }
     },
     "inset": {
@@ -98,7 +98,7 @@
     "default": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.28, 0.006, 75]
+        "components": [0.305, 0.006, 75]
       }
     },
     "strong": {
@@ -119,7 +119,7 @@
     "hover": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.55, 0.18, 263]
+        "components": [0.56, 0.18, 263]
       }
     },
     "active": {
@@ -131,13 +131,13 @@
     "subtle": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.27, 0.035, 263]
+        "components": [0.27, 0.022, 263]
       }
     },
     "strong": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.8, 0.1004, 263]
+        "components": [0.77, 0.1168, 263]
       }
     },
     "contrast": {
@@ -158,7 +158,7 @@
     "subtle": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.255, 0.05, 152]
+        "components": [0.25, 0.05, 152]
       }
     },
     "strong": {
@@ -191,7 +191,7 @@
     "subtle": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.255, 0.05, 26]
+        "components": [0.25, 0.05, 26]
       }
     },
     "strong": {
@@ -218,7 +218,7 @@
     "subtle": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.255, 0.05, 72]
+        "components": [0.25, 0.05, 72]
       }
     },
     "strong": {
@@ -245,7 +245,7 @@
     "subtle": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.255, 0.05, 232]
+        "components": [0.25, 0.05, 232]
       }
     },
     "strong": {
@@ -276,7 +276,7 @@
       "$value": {
         "colorSpace": "oklch",
         "components": [0.08, 0.005, 75],
-        "alpha": 0.6
+        "alpha": 0.64
       }
     }
   },
@@ -390,14 +390,14 @@
       "1": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.7, 0.13, 263]
+          "components": [0.62, 0.145, 263]
         },
         "$description": "First series, such as inflow or actual."
       },
       "2": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.805, 0.1212, 48]
+          "components": [0.725, 0.145, 48]
         },
         "$description": "Second series, such as outflow. Blue against orange stays apart for every common colour vision type."
       },
@@ -487,7 +487,7 @@
     "halo": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.2, 0.006, 75]
+        "components": [0.215, 0.006, 75]
       },
       "$description": "Outline under a line or label so it stays readable over marks; the surface colour."
     }
@@ -497,7 +497,7 @@
       "subtle": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.295, 0.06, 263]
+          "components": [0.32, 0.07, 263]
         }
       },
       "strong": {
@@ -511,7 +511,7 @@
       "subtle": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.295, 0.06, 152]
+          "components": [0.32, 0.07, 152]
         }
       },
       "strong": {
@@ -525,7 +525,7 @@
       "subtle": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.295, 0.06, 72]
+          "components": [0.32, 0.0688, 72]
         }
       },
       "strong": {
@@ -539,7 +539,7 @@
       "subtle": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.295, 0.06, 232]
+          "components": [0.32, 0.0655, 232]
         }
       },
       "strong": {
@@ -553,7 +553,7 @@
       "subtle": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.295, 0.06, 48]
+          "components": [0.32, 0.07, 48]
         }
       },
       "strong": {
@@ -567,7 +567,7 @@
       "subtle": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.295, 0.06, 108]
+          "components": [0.32, 0.0693, 108]
         }
       },
       "strong": {
@@ -586,7 +586,7 @@
     "background": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.215, 0.006, 75]
+        "components": [0.21, 0.006, 75]
       },
       "$description": "Code blocks and their tabs."
     },
@@ -607,14 +607,14 @@
     "inserted": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.185, 0.045, 152]
+        "components": [0.18, 0.045, 152]
       },
       "$description": "A line a diff adds."
     },
     "deleted": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.185, 0.06, 26]
+        "components": [0.18, 0.06, 26]
       },
       "$description": "A line a diff removes."
     },

@@ -51,6 +51,16 @@ export interface Preset {
    * drop target. Defaults to 0.065; lower reads warmer on a warm neutral.
    */
   subtleChroma?: number;
+  /** Dark: the lightness of the hairline border (default: the hover step plus 0.005). */
+  borderL?: number;
+  /** Dark: the lightness of the first chart series (default: the solid's lightness less 0.04). */
+  seriesL?: number;
+  /** Dark: the chroma of the first two chart series (default 0.13 and 0.14). */
+  seriesChroma?: number;
+  /** Dark, white ink: hover keeps the solid's lightness and only gains chroma (default: 0.01 darker). */
+  flatHover?: boolean;
+  /** Dark: the lightness and chroma of the strong accent, the accent as text (default 0.8 and 0.11). */
+  strong?: [l: number, c: number];
 }
 
 export type Mode = 'light' | 'dark';
@@ -210,7 +220,7 @@ export function derive(p: Preset, mode: Mode): TokenSet {
   set('text-muted', ink(text - 0.13));
   set('text-subtle', ink(text - 0.22));
   set('text-disabled', ink(0.56));
-  set('border', n(D + s4 + 0.005));
+  set('border', n(p.borderL ?? D + s4 + 0.005));
   set('border-strong', ink(0.58));
   const solidInk = darkInk ? ink(0.19) : n(0.985, 0.6);
   // A light solid sits near its hue's cusp so it keeps its colour (a citron at 0.74 turns mustard),
@@ -228,11 +238,11 @@ export function derive(p: Preset, mode: Mode): TokenSet {
     // overlay), which must keep 3:1 against the lifted overlay.
     const midL = p.accentL ?? 0.56;
     set('accent', brand(midL, 0.17));
-    set('accent-hover', brand(midL - 0.01, 0.18));
+    set('accent-hover', brand(p.flatHover === true ? midL : midL - 0.01, 0.18));
     set('accent-active', brand(midL - 0.08, 0.15));
   }
   set('accent-contrast', solidInk);
-  set('accent-strong', brand(Math.max(0.8, solidL), 0.11));
+  set('accent-strong', p.strong ? brand(...p.strong) : brand(Math.max(0.8, solidL), 0.11));
   set('accent-subtle', o(D + s4 - 0.005, p.subtleChroma ?? 0.065, bh));
   set('focus', brand(solidL, 0.13));
   const solid = {
@@ -252,12 +262,15 @@ export function derive(p: Preset, mode: Mode): TokenSet {
     set(`${role}-contrast`, ink(0.19));
   }
   set('negative-hover', o(0.76, 0.16, STATUS.negative));
-  set('scrim', o(0.08, 0.005, nh, 0.6));
+  set('scrim', o(0.08, 0.005, nh, 0.64));
   // Series hold at least 0.1 of lightness apart, so they separate in greyscale and for every
   // colour vision type, not by hue alone.
-  const series1 = solidL - 0.04;
-  set('chart-series-1', brand(series1, 0.13));
-  set('chart-series-2', o(series1 >= 0.8 ? series1 - 0.14 : series1 + 0.105, 0.14, 48));
+  const series1 = p.seriesL ?? solidL - 0.04;
+  set('chart-series-1', brand(series1, p.seriesChroma ?? 0.13));
+  set(
+    'chart-series-2',
+    o(series1 >= 0.8 ? series1 - 0.14 : series1 + 0.105, p.seriesChroma ?? 0.14, 48),
+  );
   set('chart-series-3', ink(0.92));
   set('chart-sequence-1', brand(solidL - 0.02, 0.13));
   SEQUENCE.forEach(([h, , , l, c], i) => set(`chart-sequence-${String(i + 2)}`, o(l, c, h)));
@@ -269,7 +282,7 @@ export function derive(p: Preset, mode: Mode): TokenSet {
   set('chart-tooltip-border', n(D + s4 + 0.06));
   set('chart-halo', n(D + s1));
   IDENTITY_HUES(bh).forEach((h, i) => {
-    set(`identity-${String(i + 1)}-subtle`, o(D + 0.12, 0.06, h));
+    set(`identity-${String(i + 1)}-subtle`, o(D + 0.15, 0.07, h));
     set(`identity-${String(i + 1)}-strong`, o(0.89, 0.06, h));
   });
   set('code-background', n(D + 0.04));
@@ -371,14 +384,19 @@ export const GRAPHITE: Preset = {
   label: 'Graphite',
   brand: { hue: 263, chroma: 0.19 },
   neutral: { hue: 75, chroma: 0.006 },
-  depth: 0.175,
-  steps: [0.025, 0.05, 0.09, 0.1],
+  depth: 0.17,
+  steps: [0.045, 0.065, 0.095, 0.105],
   text: 0.93,
   solids: { light: 'light', dark: 'light' },
   accentL: 0.56,
-  selectedChroma: 0.04,
+  selectedChroma: 0.035,
   selectedStep: 0.005,
-  subtleChroma: 0.035,
+  subtleChroma: 0.022,
+  borderL: 0.305,
+  seriesL: 0.62,
+  seriesChroma: 0.145,
+  flatHover: true,
+  strong: [0.77, 0.13],
 };
 
 /** Starting points for the theme generator: the default (Graphite), a cool dark and a near black. */
