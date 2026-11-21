@@ -6,10 +6,12 @@ import {
   CartesianGrid,
   BarChart as RechartsBarChart,
   LabelList,
+  Rectangle,
   ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
+  type BarShapeProps,
   type TooltipContentProps,
 } from 'recharts';
 
@@ -100,8 +102,25 @@ export interface BarChartProps<T extends object> {
 }
 
 /** The focused group's bars get an outline in the text colour, so the group stands out. */
-// The active bar, by pointer or keyboard, is outlined in the focus colour, visible on every series.
-const ACTIVE_BAR = { stroke: 'var(--rx-focus)', strokeWidth: 2 };
+/**
+ * The active bar, by pointer or keyboard: a focus ring inside a halo, so the ring keeps its contrast over a pale segment
+ * as well as over the card.
+ */
+function ACTIVE_BAR(props: BarShapeProps) {
+  const { x, y, width, height, radius = 0 } = props;
+  const box = { x, y, width, height, radius };
+  return (
+    <g>
+      <Rectangle
+        {...box}
+        fill={props.fill ?? 'none'}
+        stroke="var(--rx-chart-halo)"
+        strokeWidth={4}
+      />
+      <Rectangle {...box} fill="none" stroke="var(--rx-focus)" strokeWidth={2} />
+    </g>
+  );
+}
 
 const ROW_HEIGHT: Record<number, string> = {
   1: 'h-20',
