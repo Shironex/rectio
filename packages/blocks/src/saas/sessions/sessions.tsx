@@ -170,12 +170,14 @@ export function Sessions({
         </ul>
       )}
       <p className="text-sm text-pretty text-fg-muted">
-        Do not recognise a session? Sign it out
+        {/* With no other session there is nothing to sign out: only the password is left to change. */}
+        {others.length === 0
+          ? 'Think someone else knows your password? '
+          : 'Do not recognise a session? Sign it out, then '}
         {passwordHref === undefined ? (
-          ', then change your password.'
+          'change your password.'
         ) : (
           <>
-            {', then '}
             <Anchor href={passwordHref} className={inlineLink}>
               change your password
             </Anchor>
