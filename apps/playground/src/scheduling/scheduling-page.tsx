@@ -144,7 +144,7 @@ export function SchedulingPage({
                 title="VAT return check"
                 start={at(17, 14)}
                 end={at(17, 15)}
-                tone="info"
+                tone="warning"
                 status="tentative"
                 locale="en-GB"
               />
