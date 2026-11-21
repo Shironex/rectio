@@ -32,6 +32,23 @@ summary: Work that is merging into main now and ships with the next release.
   it keep their file; for a new project, make the look from the ledger preset in the theme
   generator.
 
+## Kit
+
+- `SegmentedControl`: the toggle group driven by a list of options and one value, with counts on
+  options and two even columns on a phone. The motion indicator now glides on both axes. Block
+  filters use it in place of their own control.
+- `AlertDialog` for destructive confirms: it opens on the safe answer, and its action waits for a
+  promise before closing.
+- `Drawer`: a side panel on wide screens and a bottom sheet with snap points on phones. The sheet
+  backdrop thins as a bottom sheet is dragged down.
+- `CopyButton` with a spoken copied state and a fallback where the clipboard API is blocked, and
+  `copyToClipboard` for menus.
+- `Rating` on radios with optional half stars, and `RatingDisplay` for a score that is only read.
+- `Tree` with the full tree keyboard pattern, single or multiple selection, branches that load
+  when opened, and `useTreeChildren` to reload them.
+- Resizable panels with keyboard handles, size limits and a layout kept per browser.
+- `ScrollArea` takes `focusableViewport={false}` when its content holds the focus itself.
+
 ## CLI
 
 - `rectio init` asks its questions interactively.
@@ -45,3 +62,5 @@ summary: Work that is merging into main now and ships with the next release.
   density and fonts, every colour derived in OKLCH and corrected until each pair the kit draws
   passes WCAG 2.2 AA, with per-token overrides, five presets, a live preview, the CSS and a share
   link.
+- Docs pages for the alert dialog, drawer, copy button, rating, tree and resizable panels, and the
+  segmented control on the toggle page.
