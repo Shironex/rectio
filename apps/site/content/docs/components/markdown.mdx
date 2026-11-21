@@ -1,0 +1,81 @@
+---
+title: Markdown
+description: Safe, themed Markdown for chat replies and docs, with tables, lists and code blocks.
+---
+
+<Preview name="markdown" plain={<Demo name="markdown" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add markdown
+```
+
+`data-table` installs with it for the tables.
+
+## Usage
+
+```tsx
+import { Markdown } from '@/components/ui/markdown';
+
+<Markdown>{reply}</Markdown>;
+<Markdown streaming>{partialReply}</Markdown>;
+<Markdown
+  components={{ code: (props) => <CodeBlock code={props.code} lang={props.lang ?? undefined} /> }}
+>
+  {page}
+</Markdown>;
+```
+
+It reads headings, paragraphs, bold, italics, strikethrough, inline code, fenced code, ordered,
+nested and loose lists, quotes, tables with column alignment, rules and links. There is no path for
+raw HTML: a `<script>` shows as text. Links pass a protocol list (`http`, `https`, `mailto` and `tel`
+by default) and anything else, `javascript:` included, keeps its words without the link. External
+links open in a new tab and say so to a screen reader. Images are off unless you pass a
+`components.image`.
+
+With `streaming`, text still arriving from a model renders cleanly: an open `**` or a code fence
+closes in place, a link whose address has not arrived shows its words, and a caret follows the last
+words. `markdownToText` gives the plain words, for copying or announcing.
+
+Fenced code renders in a plain `pre` by default. Pass `components.code` to use your own, such as the
+docs `CodeBlock`; the AI chat thread block does exactly that. `size="sm"` suits chat and reasoning,
+`size="base"` a docs page.
+
+## Props
+
+<TypeTable
+  type={{
+    children: { type: 'string', required: true, description: 'The Markdown text.' },
+    streaming: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Text still arriving: open markers close in place and a caret follows.',
+    },
+    caret: { type: 'boolean', default: 'true', description: 'Show the caret while streaming.' },
+    size: { type: "'sm' | 'base'", default: "'base'" },
+    components: {
+      type: '{ code?, link?, image? }',
+      description: 'Your own renderers for code blocks, links and images.',
+    },
+    allowedProtocols: {
+      type: 'readonly string[]',
+      default: "['http', 'https', 'mailto', 'tel']",
+    },
+    externalLinks: { type: "'new-tab' | 'same-tab'", default: "'new-tab'" },
+    newTabLabel: { type: 'string', default: "'(opens in a new tab)'" },
+    messages: {
+      type: 'Partial<MarkdownMessages>',
+      description: 'Names of the code and table regions, to translate.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Real headings, lists, tables and quotes, so assistive technology can move by structure.
+- A wide table scrolls inside a focusable region named Table, with a fade at the edge while more
+  columns sit past it.
+- External links say they open a new tab.
+
+<ComponentSource path="markdown/markdown.tsx" />

@@ -1,0 +1,43 @@
+---
+title: AI blocks
+description: 'Whole conversations with an assistant, composed from the chat components.'
+---
+
+The AI blocks put the chat components together into screens: a conversation with replies in safe
+Markdown, reasoning and tool calls, sources, actions and a field that sends and stops. They are
+provider agnostic. The conversation is a prop and every action is a callback, so any model client
+and any streaming source feed them; nothing here fetches or depends on an SDK.
+
+```tsx
+import { AiChatThread } from '@rectio/blocks/ai'; // plain
+import { AiChatThread } from '@rectio/blocks/ai/motion'; // messages rise in, replies reveal evenly
+```
+
+They install under `@blocks/ai/`, beside the shared `ai-core` (the parts the motion twin swaps).
+
+| Block                                            | What it answers                                       |
+| :----------------------------------------------- | :---------------------------------------------------- |
+| [AI chat thread](/docs/blocks/ai/ai-chat-thread) | Ask an assistant, follow its reply, check its sources |
+
+## Feeding a stream
+
+Keep the conversation in your own state and update the last turn as chunks arrive:
+
+```tsx
+const [turns, setTurns] = useState<AiChatTurn[]>([]);
+const [status, setStatus] = useState<AiChatStatus>('idle');
+
+async function send(text: string) {
+  const id = crypto.randomUUID();
+  setTurns((all) => [...all, { id: `${id}-q`, role: 'user', content: text }]);
+  setStatus('submitting');
+  let reply = '';
+  for await (const chunk of yourModel.stream(text)) {
+    reply += chunk;
+    setStatus('streaming');
+    setTurns((all) => upsert(all, { id, role: 'assistant', content: reply, status: 'streaming' }));
+  }
+  setTurns((all) => upsert(all, { id, role: 'assistant', content: reply }));
+  setStatus('idle');
+}
+```

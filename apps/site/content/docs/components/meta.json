@@ -81,6 +81,16 @@
     "command-menu",
     "sidebar",
     "app-shell",
-    "theme-scope"
+    "theme-scope",
+    "---AI and chat---",
+    "chat-thread",
+    "chat-message",
+    "prompt-input",
+    "message-actions",
+    "markdown",
+    "chat-source",
+    "tool-call",
+    "reasoning",
+    "chat-loader"
   ]
 }

@@ -1,0 +1,70 @@
+---
+title: PromptInput
+description: A message field that grows, takes attachments, sends with Enter and turns Send into Stop.
+---
+
+<Preview name="prompt-input" plain={<Demo name="prompt-input" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add prompt-input
+```
+
+`file-upload` installs with it for attachments.
+
+## Usage
+
+```tsx
+import { PromptInput } from '@/components/ui/prompt-input';
+
+<PromptInput
+  status={status}
+  onSubmit={(text, attachments) => send(text, attachments)}
+  onStop={stop}
+  attachments={files}
+  onAttach={upload}
+  onRemoveAttachment={remove}
+  maxLength={4000}
+/>;
+```
+
+Enter sends and Shift Enter adds a line; on touch screens Enter adds a line and the Send button
+sends, and `submitKey="mod-enter"` asks for Ctrl or Cmd. Typing in an input method never sends
+mid word. The field empties and keeps focus after sending; return `false` from `onSubmit` to keep
+the text. Send waits while the field is empty, a reply streams or a file is still uploading, and
+turns into Stop while `status` is `streaming`. Near `maxLength` it counts the characters left.
+
+## Props
+
+Every prop of a `form` is accepted as well.
+
+<TypeTable
+  type={{
+    onSubmit: { type: '(value, attachments) => unknown', required: true },
+    onStop: { type: '() => void' },
+    status: { type: "'idle' | 'submitting' | 'streaming'", default: "'idle'" },
+    value: { type: 'string' },
+    defaultValue: { type: 'string' },
+    onValueChange: { type: '(value: string) => void' },
+    submitKey: { type: "'auto' | 'enter' | 'mod-enter'", default: "'auto'" },
+    maxLength: { type: 'number' },
+    minRows: { type: 'number' },
+    maxRows: { type: 'number' },
+    attachments: { type: 'readonly FileUploadEntry[]' },
+    onAttach: { type: '(files: File[]) => void', description: 'Shows the attach button.' },
+    onRemoveAttachment: { type: '(file) => void' },
+    tools: { type: 'ReactNode', description: 'Extra controls beside attach, a model picker.' },
+    hint: { type: 'ReactNode', description: 'A line under the field.' },
+    disabled: { type: 'boolean' },
+    messages: { type: 'Partial<PromptInputMessages>' },
+  }}
+/>
+
+## Accessibility
+
+- The field is named Message; Send and Stop are named buttons that stay focusable while they wait.
+- The count near the limit and upload waits are said politely.
+- Touch targets reach 44px.
+
+<ComponentSource path="prompt-input/prompt-input.tsx" />

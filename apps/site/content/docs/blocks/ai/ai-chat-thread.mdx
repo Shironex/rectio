@@ -1,0 +1,91 @@
+---
+title: AI chat thread
+description: 'A whole conversation: Markdown replies with code, reasoning, tool calls, sources, actions, a field that sends and stops, and an empty state with suggestions.'
+---
+
+import AiChatThreadDemo from '@/demos/ai-chat-thread';
+import AiChatThreadMotionDemo from '@/demos/ai-chat-thread.motion';
+
+<Preview
+  name="ai-chat-thread"
+  plain={<AiChatThreadDemo />}
+  motion={<AiChatThreadMotionDemo />}
+  importLine="import { AiChatThread } from '@rectio/blocks/ai/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add ai-chat-thread
+```
+
+The motion variant is `motion-ai-chat-thread`. It installs the plain block too.
+
+## Usage
+
+Pass the conversation, its status and the callbacks. Give the block a height; it fills it, with the
+field pinned at the bottom.
+
+```tsx
+import { AiChatThread } from '@/components/blocks/ai/chat-thread';
+
+<AiChatThread
+  conversation={turns}
+  status={status}
+  onSend={send}
+  onStop={stop}
+  onRetry={retry}
+  onRegenerate={regenerate}
+  onFeedback={rate}
+  suggestions={[{ id: 'overdue', label: 'Which invoices are overdue?' }]}
+  className="h-dvh"
+/>;
+```
+
+An assistant turn shows its reasoning and tool calls folded above the answer, the answer in safe
+Markdown with fenced code in the docs code block, and its sources folded under it once it is done.
+Copy and the thumbs sit under every finished reply; Regenerate only under the latest. Typing dots
+hold the reply's place between sending and the first words. A failed turn shows its reason and
+Retry. The empty thread offers suggestions; a chip sends its prompt.
+
+Write `[1](#source-1)` in a reply to cite its first source: the link becomes a numbered chip that
+opens that source. Pass `code` to render fenced code your own way, `composer` for the field's props (attachments,
+limits, placeholder, tools), `header` for a title bar, and `messages` for every word.
+
+## Props
+
+<TypeTable
+  type={{
+    conversation: {
+      type: 'readonly AiChatTurn[]',
+      required: true,
+      description:
+        'id, role, content, and optional createdAt, status, error, reasoning, tools, sources and feedback.',
+    },
+    status: { type: "'idle' | 'submitting' | 'streaming'", default: "'idle'" },
+    onSend: { type: '(text, attachments) => unknown', required: true },
+    onStop: { type: '() => void' },
+    onRetry: { type: '(turn) => void' },
+    onRegenerate: { type: '(turn) => void' },
+    onFeedback: { type: "(turn, value: 'good' | 'bad' | null) => void" },
+    suggestions: {
+      type: 'readonly AiChatSuggestion[]',
+      description: 'id, label and optional prompt.',
+    },
+    empty: { type: 'ReactNode', description: 'Replaces the empty state.' },
+    header: { type: 'ReactNode' },
+    avatar: { type: 'ReactNode' },
+    composer: { type: 'PromptInputProps', description: 'Without onSubmit, onStop and status.' },
+    code: { type: '(props: MarkdownCodeProps) => ReactNode' },
+    locale: { type: 'string' },
+    messages: { type: 'Partial<AiChatThreadMessages>' },
+  }}
+/>
+
+## Accessibility
+
+- The log never reads streamed chunks; one announcement says a reply started and one reads it when
+  done.
+- After sending, focus stays in the field; Jump to latest returns focus to the conversation.
+- Every action is a named button, and the actions row is one tab stop.

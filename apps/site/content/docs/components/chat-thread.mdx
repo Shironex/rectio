@@ -1,0 +1,59 @@
+---
+title: ChatThread
+description: A conversation that follows a streaming reply, with Jump to latest, day separators and a quiet announcer.
+---
+
+<Preview
+  name="chat-thread"
+  plain={<Demo name="chat-thread" />}
+  motion={<Demo name="chat-thread.motion" />}
+  importLine="import { ChatThread } from '@rectio/motion/chat';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add chat-thread
+```
+
+## Usage
+
+```tsx
+import { ChatAnnouncer, ChatDaySeparator, ChatThread } from '@/components/ui/chat-thread';
+
+<ChatThread footer={<PromptInput onSubmit={send} onStop={stop} status={status} />}>
+  <ChatDaySeparator date={yesterday} />
+  {messages}
+</ChatThread>;
+<ChatAnnouncer id={reply.id} text={reply.text} status={reply.status} author="Ledger assistant" />;
+```
+
+Give it a height. It stays pinned to the newest words while a reply streams, until the reader
+scrolls up; then a Jump to latest button appears over a fade, and following resumes once they are
+back at the bottom. Virtualization is not built in.
+
+`ChatDaySeparator` labels a day as Today, Yesterday, a weekday this week or a date. `ChatAnnouncer`
+is the live region: it says once that a reply started and once the finished reply, never each chunk,
+and stays quiet for replies loaded from history.
+
+## Props
+
+<TypeTable
+  type={{
+    children: { type: 'ReactNode', description: 'The messages and separators.' },
+    footer: { type: 'ReactNode', description: 'Below the scroller, usually the PromptInput.' },
+    label: { type: 'string', default: "'Conversation'" },
+    contentClassName: { type: 'string', description: 'Class for the column, for its width.' },
+    scrollRef: { type: 'Ref<HTMLDivElement>' },
+    messages: { type: 'Partial<ChatThreadMessages>' },
+  }}
+/>
+
+## Accessibility
+
+- The scroller is a focusable `log` with `aria-live="off"`, so the arrow keys scroll it and streamed
+  chunks are not read one by one; `ChatAnnouncer` speaks instead.
+- Jump to latest moves focus back to the log.
+
+<ComponentSource path="chat-thread/chat-thread.tsx" />

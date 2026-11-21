@@ -1,0 +1,49 @@
+---
+title: ChatSource
+description: Citation chips inside a reply and the list of sources behind it.
+---
+
+<Preview name="chat-source" plain={<Demo name="chat-source" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add chat-source
+```
+
+## Usage
+
+```tsx
+import { ChatSourceChip, ChatSources } from '@/components/ui/chat-source';
+
+<p>
+  Northwind has paid late four times <ChatSourceChip index={2} source={record} />.
+</p>;
+<ChatSources sources={sources} />;
+```
+
+A chip shows the source's number and site and links to it in a new tab. `ChatSources` folds the
+list under "3 sources"; open, each shows its number, title, site and the passage used. A source
+whose address has an unsafe protocol shows without a link.
+
+## Props
+
+<TypeTable
+  type={{
+    'ChatSourceChip index': { type: 'number', required: true },
+    'ChatSourceChip source': { type: 'ChatSourceItem', required: true },
+    'ChatSources sources': {
+      type: 'readonly ChatSourceItem[]',
+      required: true,
+      description: 'id, title, and optional url, site and excerpt.',
+    },
+    messages: { type: 'Partial<ChatSourceMessages>' },
+  }}
+/>
+
+## Accessibility
+
+- A chip is named "Source 2: its title", so a screen reader hears what is cited.
+- The list is a disclosure button with `aria-expanded`.
+
+<ComponentSource path="chat-source/chat-source.tsx" />

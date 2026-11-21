@@ -1,0 +1,82 @@
+---
+title: ChatMessage
+description: A user, assistant or system message with its time, status, error and Retry.
+---
+
+<Preview
+  name="chat-message"
+  plain={<Demo name="chat-message" />}
+  motion={<Demo name="chat-message.motion" />}
+  importLine="import { ChatMessage } from '@rectio/motion/chat';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add chat-message
+```
+
+The motion variant is `motion-chat`, which also covers `ChatThread`, `StreamingText` and
+`ChatLoader`.
+
+## Usage
+
+```tsx
+import { ChatMessage, ChatMessageEditor, StreamingText } from '@/components/ui/chat-message';
+import { Markdown } from '@/components/ui/markdown';
+
+<ChatMessage from="user" timestamp={sentAt}>
+  {question}
+</ChatMessage>;
+
+<ChatMessage from="assistant" status={streaming ? 'streaming' : undefined}>
+  <StreamingText text={reply} streaming={streaming}>
+    {(text, live) => <Markdown streaming={live}>{text}</Markdown>}
+  </StreamingText>
+</ChatMessage>;
+
+<ChatMessage from="user" status="error" error="You are offline." onRetry={resend}>
+  {question}
+</ChatMessage>;
+```
+
+The user's words sit in a bubble at the end edge. The assistant's reply runs the full width beside
+an optional `avatar` (hidden on phones), so tables and code read at a comfortable measure. A system
+note sits centred and quiet. Status shows in words: Sending, Writing while a reply streams, Stopped,
+and a failure with its reason and Retry. Pass `actions` for a `MessageActions` row; it shows on
+hover with a mouse and always on touch, or always with `actionsVisibility="always"`.
+
+`ChatMessageEditor` edits a sent message in place: Ctrl or Cmd and Enter saves, Escape cancels.
+`StreamingText` shows text from a stream with a caret; the motion twin evens bursty chunks into a
+steady reveal that ends on whole words.
+
+The motion variant lets messages added after the thread opened rise into place; the history a
+thread opens with stays still. Reduced motion renders the plain one.
+
+## Props
+
+Every prop of an `article` is accepted as well.
+
+<TypeTable
+  type={{
+    from: { type: "'user' | 'assistant' | 'system'", required: true },
+    author: { type: 'string', description: 'The name, "You" or "Assistant" by default.' },
+    avatar: { type: 'ReactNode' },
+    timestamp: { type: 'Date | string | number' },
+    locale: { type: 'string' },
+    status: { type: "'sending' | 'sent' | 'streaming' | 'stopped' | 'error'" },
+    error: { type: 'ReactNode', description: 'The reason, shown with status error.' },
+    onRetry: { type: '() => void', description: 'Adds Retry to a failed message.' },
+    actions: { type: 'ReactNode', description: 'Usually a MessageActions row.' },
+    actionsVisibility: { type: "'hover' | 'always'", default: "'hover'" },
+    messages: { type: 'Partial<ChatMessageMessages>', description: 'Every word, to translate.' },
+  }}
+/>
+
+## Accessibility
+
+- Each message is an `article` named by its author, so a screen reader can move message to message.
+- A streaming message is `aria-busy`, so its text is read once complete.
+- The failure is a `role="alert"` with the reason in words; status never rests on colour alone.
+
+<ComponentSource path="chat-message/chat-message.tsx" />

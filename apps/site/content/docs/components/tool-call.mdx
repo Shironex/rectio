@@ -1,0 +1,53 @@
+---
+title: ToolCall
+description: A tool the assistant called, running, done or failed, with its arguments and result folded underneath.
+---
+
+<Preview name="tool-call" plain={<Demo name="tool-call" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add tool-call
+```
+
+## Usage
+
+```tsx
+import { ToolCall } from '@/components/ui/tool-call';
+
+<ToolCall
+  name="search_invoices"
+  title="Searched unpaid invoices"
+  status="done"
+  duration="0.8 s"
+  args={{ status: 'unpaid' }}
+  result={{ count: 3 }}
+/>;
+```
+
+A quiet row with the status in an icon and a word, what the tool did and how long it took. Open, it
+shows the arguments and result as formatted JSON, or `result` as any element you render, such as a
+table. A failed call shows its `error`.
+
+## Props
+
+<TypeTable
+  type={{
+    name: { type: 'string', required: true, description: "The tool's name." },
+    title: { type: 'ReactNode', description: 'What it did, in words.' },
+    status: { type: "'running' | 'done' | 'failed'", required: true },
+    args: { type: 'unknown' },
+    result: { type: 'unknown', description: 'JSON, or a React element shown as it is.' },
+    error: { type: 'ReactNode' },
+    duration: { type: 'ReactNode' },
+    messages: { type: 'Partial<ToolCallMessages>' },
+  }}
+/>
+
+## Accessibility
+
+- A disclosure button with `aria-expanded`; status is in words as well as the icon.
+- The data blocks are focusable, so long JSON scrolls from the keyboard.
+
+<ComponentSource path="tool-call/tool-call.tsx" />

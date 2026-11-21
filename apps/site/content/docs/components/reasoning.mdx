@@ -1,0 +1,47 @@
+---
+title: Reasoning
+description: The reasoning behind a reply, open while the model thinks and folded once done.
+---
+
+<Preview name="reasoning" plain={<Demo name="reasoning" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add reasoning
+```
+
+## Usage
+
+```tsx
+import { Reasoning } from '@/components/ui/reasoning';
+
+<Reasoning status={thinking ? 'thinking' : 'done'} duration={seconds}>
+  <Markdown size="sm" streaming={thinking}>
+    {reasoning}
+  </Markdown>
+</Reasoning>;
+```
+
+While the model thinks it is open and says Thinking; once done it folds to "Thought for 12 seconds"
+so the answer leads. A reader who opens or closes it keeps their choice. Pass `open` to control it,
+or `followStatus={false}` to leave it as the reader set it.
+
+## Props
+
+<TypeTable
+  type={{
+    status: { type: "'thinking' | 'done' | 'failed'", required: true },
+    duration: { type: 'number', description: 'Seconds, for the summary.' },
+    followStatus: { type: 'boolean', default: 'true' },
+    open: { type: 'boolean' },
+    defaultOpen: { type: 'boolean' },
+    messages: { type: 'Partial<ReasoningMessages>' },
+  }}
+/>
+
+## Accessibility
+
+- A disclosure button with `aria-expanded`, named by its summary.
+
+<ComponentSource path="reasoning/reasoning.tsx" />

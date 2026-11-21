@@ -1,0 +1,52 @@
+---
+title: MessageActions
+description: Copy, regenerate, edit and thumbs up or down under a message.
+---
+
+<Preview name="message-actions" plain={<Demo name="message-actions" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add message-actions
+```
+
+## Usage
+
+```tsx
+import {
+  MessageActions,
+  MessageCopyAction,
+  MessageFeedback,
+  MessageRegenerateAction,
+} from '@/components/ui/message-actions';
+
+<MessageActions>
+  <MessageCopyAction value={() => markdownToText(reply)} />
+  <MessageFeedback value={rating} onValueChange={setRating} />
+  <MessageRegenerateAction onClick={regenerate} />
+</MessageActions>;
+```
+
+Copy turns into a check for two seconds and says Copied. The thumbs toggle; pressing the chosen one
+again clears it. `MessageAction` takes any icon and label for actions of your own.
+
+## Props
+
+<TypeTable
+  type={{
+    'MessageActions label': { type: 'string', default: "'Message actions'" },
+    'MessageCopyAction value': { type: 'string | (() => string)', required: true },
+    'MessageCopyAction onCopied': { type: '() => void' },
+    'MessageFeedback value': { type: "'good' | 'bad' | null", required: true },
+    'MessageFeedback onValueChange': { type: '(value) => void', required: true },
+    'MessageAction label': { type: 'string', required: true, description: 'Name and tooltip.' },
+  }}
+/>
+
+## Accessibility
+
+- A `toolbar`: one tab stop, then the arrow keys, Home and End move between actions.
+- Every icon has a name and a tooltip; the chosen thumb is `aria-pressed` and filled.
+
+<ComponentSource path="message-actions/message-actions.tsx" />

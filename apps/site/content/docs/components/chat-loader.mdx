@@ -1,0 +1,44 @@
+---
+title: ChatLoader
+description: Typing dots before the first words of a reply, and the skeleton of a reply while history loads.
+---
+
+<Preview
+  name="chat-loader"
+  plain={<Demo name="chat-loader" />}
+  motion={<Demo name="chat-loader.motion" />}
+  importLine="import { ChatLoader } from '@rectio/motion/chat';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add chat-loader
+```
+
+## Usage
+
+```tsx
+import { ChatLoader } from '@/components/ui/chat-loader';
+
+<ChatLoader />;
+<ChatLoader variant="skeleton" lines={4} label="Loading history" />;
+```
+
+The motion variant fades the dots up into the reply's place.
+
+## Props
+
+<TypeTable
+  type={{
+    variant: { type: "'typing' | 'skeleton'", default: "'typing'" },
+    label: { type: 'string', description: 'What a screen reader hears.' },
+    lines: { type: 'number', default: '3' },
+  }}
+/>
+
+## Accessibility
+
+- A `status` with its label in words. Under reduced motion the dots breathe instead of bouncing.
+
+<ComponentSource path="chat-loader/chat-loader.tsx" />
