@@ -1,6 +1,10 @@
 import { relativeChange } from './chart-format';
 
 export interface TimePoint {
+  /**
+   * The moment, in the reader's local time. A date-only ISO string such as '2026-03-01' parses as
+   * UTC midnight, which is the evening before west of UTC: build it with `localDate` instead.
+   */
   date: Date;
   /** The figure at that moment. `null` marks a known gap: the line breaks there. */
   value: number | null;
@@ -52,13 +56,27 @@ function smallestStep(rows: readonly Pick<TimeRow, 'time'>[]): number {
   return step;
 }
 
-/** The scale the points are on, from the smallest step between two of them. */
+/**
+ * The scale the points are on, from the smallest step between two of them. A daily step is 23 or
+ * 25 hours across a daylight saving change, so anything from 20 hours up counts as a day.
+ */
 export function inferTimeScale(rows: readonly Pick<TimeRow, 'time'>[]): TimeScale {
   const step = smallestStep(rows);
-  if (step < DAY) return 'hour';
+  if (step < 20 * HOUR) return 'hour';
   if (step < 28 * DAY) return 'day';
   return 'month';
 }
+
+/** A local calendar date from 'YYYY-MM-DD', at local midnight; Invalid Date for anything else. */
+export function localDate(iso: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (match === null) return new Date(Number.NaN);
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+/** The calendar day a moment falls on, as a whole number that steps by one a day in any zone. */
+const dayNumber = (date: Date) =>
+  Math.round(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / DAY);
 
 const monthIndex = (date: Date) => date.getFullYear() * 12 + date.getMonth();
 
@@ -70,6 +88,16 @@ const monthIndex = (date: Date) => date.getFullYear() * 12 + date.getMonth();
 export function fillGaps(rows: readonly TimeRow[], scale: TimeScale): TimeRow[] {
   const step = smallestStep(rows);
   if (!Number.isFinite(step) || step <= 0) return [...rows];
+  // Daily rows are measured in calendar days, so a weekend across a clock change is not a gap.
+  const dayStep = Math.max(
+    1,
+    Math.min(
+      ...rows.slice(1).map((row, index) => {
+        const previous = rows[index];
+        return previous === undefined ? Infinity : dayNumber(row.date) - dayNumber(previous.date);
+      }),
+    ),
+  );
   const out: TimeRow[] = [];
   rows.forEach((row, index) => {
     const previous = rows[index - 1];
@@ -77,7 +105,9 @@ export function fillGaps(rows: readonly TimeRow[], scale: TimeScale): TimeRow[] 
       const missing =
         scale === 'month'
           ? monthIndex(row.date) - monthIndex(previous.date) > 1
-          : row.time - previous.time > step * 3;
+          : scale === 'day'
+            ? dayNumber(row.date) - dayNumber(previous.date) > dayStep * 3
+            : row.time - previous.time > step * 3;
       if (missing) {
         const time = previous.time + Math.min(step, (row.time - previous.time) / 2);
         const values = Object.fromEntries(Object.keys(row.values).map((key) => [key, null]));
@@ -258,40 +288,66 @@ function weekStart(date: Date): Date {
 
 /**
  * Daily rows as one row per week (weeks start on Monday), each series' value the mean of its days
- * that week; a week with no figure for a series is null, so the line still breaks there. For a
- * plot too narrow to show every day as more than a comb.
+ * that week. Every week from the first to the last has a row: a week with no figure for a series
+ * is null for it, and a week with no figure at all is a gap row, so the line breaks there and a
+ * missing month never draws as a straight slope. For a plot too narrow to show every day.
  */
 export function weeklyMeans(rows: readonly TimeRow[]): TimeRow[] {
-  const weeks = new Map<number, { date: Date; sums: Map<string, [number, number]> }>();
-  const empty = (): Map<string, [number, number]> => new Map();
-  for (const row of rows) {
-    if (row.gap === true) continue;
-    const date = weekStart(row.date);
-    const week = weeks.get(date.getTime()) ?? { date, sums: empty() };
+  const known = rows.filter((row) => row.gap !== true);
+  const first = known[0];
+  const last = known.at(-1);
+  if (first === undefined || last === undefined) return [];
+  const keys = Object.keys(first.values);
+  const sums = new Map<number, Map<string, [number, number]>>();
+  for (const row of known) {
+    const time = weekStart(row.date).getTime();
+    const week = sums.get(time) ?? new Map<string, [number, number]>();
     for (const [key, value] of Object.entries(row.values)) {
-      const [sum, count] = week.sums.get(key) ?? [0, 0];
-      week.sums.set(key, value === null ? [sum, count] : [sum + value, count + 1]);
+      const [sum, count] = week.get(key) ?? [0, 0];
+      week.set(key, value === null ? [sum, count] : [sum + value, count + 1]);
     }
-    weeks.set(date.getTime(), week);
+    sums.set(time, week);
   }
-  return [...weeks.values()]
-    .sort((a, b) => a.date.getTime() - b.date.getTime())
-    .map(({ date, sums }) => ({
-      time: date.getTime(),
-      date,
-      values: Object.fromEntries(
-        [...sums].map(([key, [sum, count]]) => [key, count === 0 ? null : sum / count]),
-      ),
-    }));
+  const out: TimeRow[] = [];
+  // Step by calendar weeks, so a clock change never shifts a week off its Monday.
+  for (
+    const cursor = weekStart(first.date);
+    cursor.getTime() <= last.time;
+    cursor.setDate(cursor.getDate() + 7)
+  ) {
+    const date = new Date(cursor);
+    const week = sums.get(date.getTime());
+    const values = Object.fromEntries(
+      keys.map((key) => {
+        const [sum, count] = week?.get(key) ?? [0, 0];
+        return [key, count === 0 ? null : sum / count];
+      }),
+    );
+    const empty = Object.values(values).every((value) => value === null);
+    out.push({ time: date.getTime(), date, values, ...(empty ? { gap: true } : {}) });
+  }
+  return out;
 }
 
-/** The stretches a gap row breaks: from the last moment before it to the first one after. */
+/** True when some moments are missing between the first and the last row. */
+export function hasGaps(rows: readonly TimeRow[]): boolean {
+  return rows.some((row) => row.gap === true);
+}
+
+/**
+ * The stretches a run of gap rows breaks: from the last moment before the run to the first one
+ * after it, one span per run.
+ */
 export function gapSpans(rows: readonly TimeRow[]): { from: number; to: number }[] {
-  return rows.flatMap((row, index) => {
-    const before = rows[index - 1];
-    const after = rows[index + 1];
-    return row.gap === true && before !== undefined && after !== undefined
-      ? [{ from: before.time, to: after.time }]
-      : [];
+  const spans: { from: number; to: number }[] = [];
+  let from: number | undefined;
+  rows.forEach((row, index) => {
+    if (row.gap === true) {
+      from ??= rows[index - 1]?.time;
+      return;
+    }
+    if (from !== undefined) spans.push({ from, to: row.time });
+    from = undefined;
   });
+  return spans;
 }

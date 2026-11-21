@@ -109,7 +109,7 @@ describe('time axis', () => {
 });
 
 describe('narrow plots and gaps', () => {
-  it('averages daily rows into weeks that start on Monday, null where a week has no figure', () => {
+  it('averages daily rows into weeks that start on Monday, a week with no figure a gap row', () => {
     // 2026-11-02 is a Monday.
     const day = (n: number) => new Date(2026, 10, n);
     const rows = [
@@ -119,7 +119,7 @@ describe('narrow plots and gaps', () => {
     ];
     expect(weeklyMeans(rows)).toEqual([
       { time: day(2).getTime(), date: day(2), values: { a: 15 } },
-      { time: day(9).getTime(), date: day(9), values: { a: null } },
+      { time: day(9).getTime(), date: day(9), values: { a: null }, gap: true },
     ]);
   });
 
