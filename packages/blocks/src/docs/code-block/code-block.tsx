@@ -159,12 +159,13 @@ export function CodeBlock({
         className={cn(
           'm-0 overflow-x-auto py-3.5 font-mono text-sm',
           'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-focus',
-          heading === undefined && copy && 'pe-10',
         )}
       >
         <code
           className={cn(
             'grid',
+            // Room for the floating copy button at the end of the longest line, not only the frame.
+            heading === undefined && copy && 'pe-10',
             // Phones wrap long lines: a sideways scroll in a narrow column hides most of the line.
             wrap
               ? 'whitespace-pre-wrap'
