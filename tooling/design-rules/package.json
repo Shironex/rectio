@@ -10,7 +10,7 @@
     "./pieces": "./src/pieces.js"
   },
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --maxWorkers=2",
     "typecheck": "tsc -p tsconfig.json"
   },
   "devDependencies": {

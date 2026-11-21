@@ -30,7 +30,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/build.ts",
     "serve": "node scripts/serve.ts",
-    "test": "vitest run",
+    "test": "vitest run --maxWorkers=2",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {

@@ -32,7 +32,7 @@
     "build": "node scripts/build.ts && node scripts/generator-data.ts",
     "contrast": "node scripts/contrast.ts",
     "derive": "node scripts/derive.ts",
-    "test": "vitest run",
+    "test": "vitest run --maxWorkers=2",
     "typecheck": "tsc -p tsconfig.json"
   }
 }
