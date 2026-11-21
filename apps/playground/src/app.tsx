@@ -24,6 +24,9 @@ const PrimitivesPage = lazy(() =>
   import('./primitives/primitives-page').then((m) => ({ default: m.PrimitivesPage })),
 );
 const GapsPage = lazy(() => import('./gaps/gaps-page').then((m) => ({ default: m.GapsPage })));
+const ChartsPage = lazy(() =>
+  import('./charts/charts-page').then((m) => ({ default: m.ChartsPage })),
+);
 const MotionPage = lazy(() =>
   import('./motion/motion-page').then((m) => ({ default: m.MotionPage })),
 );
@@ -56,6 +59,8 @@ export function App() {
         <GapsPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'primitives' ? (
         <PrimitivesPage theme={theme} mode={mode} motion={motion} />
+      ) : view === 'charts' ? (
+        <ChartsPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'motion' ? (
         <MotionPage theme={theme} mode={mode} />
       ) : (

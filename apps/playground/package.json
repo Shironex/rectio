@@ -38,6 +38,7 @@
     "shoot:nav": "node scripts/shoot-nav.ts",
     "shoot:gaps": "node scripts/shoot-gaps.ts",
     "shoot:primitives": "node scripts/shoot-primitives.ts",
-    "shoot:skins": "node scripts/shoot-skins.ts"
+    "shoot:skins": "node scripts/shoot-skins.ts",
+    "shoot:charts": "node scripts/shoot-charts.ts"
   }
 }
