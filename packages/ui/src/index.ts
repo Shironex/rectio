@@ -556,3 +556,4 @@ export {
   type DrawerProps,
   type DrawerSide,
 } from './drawer/drawer';
+export { CopyButton, copyToClipboard, type CopyButtonProps } from './copy-button/copy-button';
