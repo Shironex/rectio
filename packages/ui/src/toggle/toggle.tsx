@@ -227,6 +227,8 @@ export function SegmentedControl<Value extends string = string>({
           // row keeps the control's height, so the options stay level with a button beside them.
           '@max-md:grid @max-md:h-auto @max-md:w-full @max-md:grid-cols-2',
           'max-sm:grid max-sm:h-auto max-sm:w-full max-sm:grid-cols-2',
+          // The group's touch height comes later in the sheet; the grid grows past it.
+          '@max-md:pointer-coarse:h-auto max-sm:pointer-coarse:h-auto',
           SEGMENT_ROWS[size],
         ],
         className,
