@@ -224,7 +224,8 @@ export function DataTableToolbar<TData extends RowData>({
             }}
           >
             <XIcon aria-hidden weight="bold" className="size-3.5" />
-            {clearLabel}
+            {/* In a narrow toolbar the cross alone, so the count and filters keep one row. */}
+            <span className="@max-sm/toolbar:sr-only">{clearLabel}</span>
           </Button>
         )}
       </div>
