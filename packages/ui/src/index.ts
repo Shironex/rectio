@@ -112,7 +112,6 @@ export {
   DateRangePicker,
   type DatePickerProps,
   type DateRangePickerProps,
-  type DateRangePreset,
 } from './date-picker/date-picker';
 export {
   datePattern,
@@ -120,6 +119,14 @@ export {
   parseDate,
   type DateDisplayFormat,
 } from './date-picker/date-format';
+export {
+  RangeCalendar,
+  RangePresets,
+  formatDateRange,
+  rangeLength,
+  type DateRangePreset,
+  type RangeCalendarProps,
+} from './date-picker/range-calendar';
 export type { DateRange } from '@daypicker/react';
 export { TimeField, type TimeFieldProps } from './time-field/time-field';
 export {
