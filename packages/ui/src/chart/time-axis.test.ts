@@ -3,11 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { formatValue, formatDuration, relativeChange } from './chart-format';
 import {
   fillGaps,
+  gapSpans,
   formatTick,
   inferTimeScale,
   mergeSeries,
   summarizeSeries,
   timeTicks,
+  weeklyMeans,
 } from './time-axis';
 
 const day = (d: number, month = 2, year = 2026) => new Date(year, month, d);
@@ -103,5 +105,30 @@ describe('time axis', () => {
     expect(summary?.peak.value).toBe(30);
     expect(summary?.change).toBeCloseTo(1);
     expect(summarizeSeries([])).toBeNull();
+  });
+});
+
+describe('narrow plots and gaps', () => {
+  it('averages daily rows into weeks that start on Monday, null where a week has no figure', () => {
+    // 2026-11-02 is a Monday.
+    const day = (n: number) => new Date(2026, 10, n);
+    const rows = [
+      { time: day(2).getTime(), date: day(2), values: { a: 10 } },
+      { time: day(4).getTime(), date: day(4), values: { a: 20 } },
+      { time: day(9).getTime(), date: day(9), values: { a: null } },
+    ];
+    expect(weeklyMeans(rows)).toEqual([
+      { time: day(2).getTime(), date: day(2), values: { a: 15 } },
+      { time: day(9).getTime(), date: day(9), values: { a: null } },
+    ]);
+  });
+
+  it('spans each gap row from the moment before to the moment after', () => {
+    const rows = [
+      { time: 1, date: new Date(1), values: {} },
+      { time: 2, date: new Date(2), values: {}, gap: true },
+      { time: 9, date: new Date(9), values: {} },
+    ];
+    expect(gapSpans(rows)).toEqual([{ from: 1, to: 9 }]);
   });
 });

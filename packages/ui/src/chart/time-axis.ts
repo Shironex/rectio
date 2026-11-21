@@ -248,3 +248,50 @@ export function summarizeSeries(points: readonly TimePoint[]): SeriesSummary | n
   const low = known.reduce((bottom, point) => (point.value < bottom.value ? point : bottom), first);
   return { first, last, peak, low, change: relativeChange(last.value, first.value) };
 }
+
+/** Monday 00:00 of the week a date falls in, in local time. */
+function weekStart(date: Date): Date {
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+  return start;
+}
+
+/**
+ * Daily rows as one row per week (weeks start on Monday), each series' value the mean of its days
+ * that week; a week with no figure for a series is null, so the line still breaks there. For a
+ * plot too narrow to show every day as more than a comb.
+ */
+export function weeklyMeans(rows: readonly TimeRow[]): TimeRow[] {
+  const weeks = new Map<number, { date: Date; sums: Map<string, [number, number]> }>();
+  const empty = (): Map<string, [number, number]> => new Map();
+  for (const row of rows) {
+    if (row.gap === true) continue;
+    const date = weekStart(row.date);
+    const week = weeks.get(date.getTime()) ?? { date, sums: empty() };
+    for (const [key, value] of Object.entries(row.values)) {
+      const [sum, count] = week.sums.get(key) ?? [0, 0];
+      week.sums.set(key, value === null ? [sum, count] : [sum + value, count + 1]);
+    }
+    weeks.set(date.getTime(), week);
+  }
+  return [...weeks.values()]
+    .sort((a, b) => a.date.getTime() - b.date.getTime())
+    .map(({ date, sums }) => ({
+      time: date.getTime(),
+      date,
+      values: Object.fromEntries(
+        [...sums].map(([key, [sum, count]]) => [key, count === 0 ? null : sum / count]),
+      ),
+    }));
+}
+
+/** The stretches a gap row breaks: from the last moment before it to the first one after. */
+export function gapSpans(rows: readonly TimeRow[]): { from: number; to: number }[] {
+  return rows.flatMap((row, index) => {
+    const before = rows[index - 1];
+    const after = rows[index + 1];
+    return row.gap === true && before !== undefined && after !== undefined
+      ? [{ from: before.time, to: after.time }]
+      : [];
+  });
+}

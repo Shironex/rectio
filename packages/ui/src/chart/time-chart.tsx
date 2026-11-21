@@ -6,6 +6,7 @@ import {
   CartesianGrid,
   ComposedChart,
   Line,
+  ReferenceArea,
   ReferenceLine,
   Tooltip,
   XAxis,
@@ -36,11 +37,13 @@ import {
   crossesYear,
   fillGaps,
   formatMoment,
+  gapSpans,
   formatTick,
   inferTimeScale,
   mergeSeries,
   summarizeSeries,
   timeTicks,
+  weeklyMeans,
   type TimePoint,
   type TimeScale,
 } from './time-axis';
@@ -74,6 +77,10 @@ export interface TimeChartMessages extends ChartMessages {
     peak: string;
     peakDate: string;
   }) => string;
+  /** Over a stretch of missing moments. */
+  noData: string;
+  /** The tooltip title when a narrow plot draws weekly means of daily figures. */
+  weekOf: (date: string) => string;
 }
 
 export const TIME_CHART_MESSAGES: TimeChartMessages = {
@@ -82,6 +89,8 @@ export const TIME_CHART_MESSAGES: TimeChartMessages = {
   tableCaption: 'Figures by date',
   seriesSummary: ({ label, first, firstDate, last, lastDate, peak, peakDate }) =>
     `${label} went from ${first} on ${firstDate} to ${last} on ${lastDate}, highest at ${peak} on ${peakDate}.`,
+  noData: 'No data',
+  weekOf: (date) => `Week of ${date}, daily average`,
 };
 
 export interface ReferenceMark {
@@ -135,6 +144,9 @@ interface Datum {
 
 /** About one date label per this many pixels of plot width. */
 const PX_PER_TICK = 88;
+
+/** Below this many px per day, a daily line is drawn as weekly means. */
+const MIN_PX_PER_DAY = 4;
 
 /**
  * Figures over time as lines or areas: one shared implementation behind LineChart and AreaChart.
@@ -203,7 +215,12 @@ export function TimeChart({
   const merged = mergeSeries(keyed.map((s) => ({ id: s.key, points: s.points })));
   const scale = requestedScale ?? inferTimeScale(merged);
   const rows = connectGaps ? merged : fillGaps(merged, scale);
-  const data: Datum[] = rows.map((row) => ({
+  // Too narrow for every day to be more than a comb: plot weekly means, keep the days in the table.
+  const weekly =
+    scale === 'day' && !stacked && width > 0 && width / Math.max(1, merged.length) < MIN_PX_PER_DAY;
+  const plotted = weekly ? weeklyMeans(rows) : rows;
+  const gaps = weekly ? [] : gapSpans(rows);
+  const data: Datum[] = plotted.map((row) => ({
     time: row.time,
     gap: row.gap === true,
     ...row.values,
@@ -257,7 +274,7 @@ export function TimeChart({
     return (
       <ChartTooltip
         layout="row"
-        title={moment(new Date(datum.time))}
+        title={weekly ? m.weekOf(moment(new Date(datum.time))) : moment(new Date(datum.time))}
         rows={keyed.map((s) => {
           const value = datum[s.key];
           return {
@@ -315,9 +332,19 @@ export function TimeChart({
           margin={{ top: 8, right: 8, bottom: 0, left: 4 }}
           style={{ width: '100%', height: '100%' }}
         >
-          {variant === 'area' && (
-            <defs>
-              {keyed.map((s) => (
+          <defs>
+            {/* The hatch over a stretch with no figures. */}
+            <pattern
+              id={`${gradientId}-gap`}
+              width={6}
+              height={6}
+              patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)"
+            >
+              <line x1={0} y1={0} x2={0} y2={6} stroke="var(--rx-chart-grid)" strokeWidth={2} />
+            </pattern>
+            {variant === 'area' &&
+              keyed.map((s) => (
                 <linearGradient
                   key={s.key}
                   id={`${gradientId}-${s.key}`}
@@ -338,8 +365,7 @@ export function TimeChart({
                   />
                 </linearGradient>
               ))}
-            </defs>
-          )}
+          </defs>
           <CartesianGrid vertical={false} />
           <XAxis
             dataKey="time"
@@ -370,6 +396,21 @@ export function TimeChart({
             tickFormatter={(value: number) => write(value, true)}
           />
           {min < 0 && <ReferenceLine y={0} className="rx-zero" stroke="var(--rx-chart-baseline)" />}
+          {gaps.map((gap) => (
+            // A stretch with no figures is hatched and named, so the break reads as missing data.
+            <ReferenceArea
+              key={gap.from}
+              x1={gap.from}
+              x2={gap.to}
+              fill={`url(#${gradientId}-gap)`}
+              stroke="none"
+              label={{
+                value: m.noData,
+                position: 'insideTop',
+                className: 'fill-chart-axis text-xs',
+              }}
+            />
+          ))}
           {references.map((reference) => (
             <ReferenceLine
               key={reference.label}
@@ -395,7 +436,7 @@ export function TimeChart({
           {keyed.map((s) => {
             const color = chartColor(s.tone);
             const lastIndex = (key: string) =>
-              rows.findLastIndex((row) => typeof row.values[key] === 'number');
+              plotted.findLastIndex((row) => typeof row.values[key] === 'number');
             const shared = {
               dataKey: s.key,
               name: s.label,
