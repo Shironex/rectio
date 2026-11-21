@@ -278,6 +278,13 @@ export function PrimitivesPage({
                   <DrawerDescription>Northwind Office Supply, 14 March.</DrawerDescription>
                 </DrawerHeader>
                 <DrawerBody>
+                  <CopyButton
+                    value="RCP-2041"
+                    showLabel
+                    label="Copy receipt number"
+                    variant="secondary"
+                    className="self-start"
+                  />
                   {['Paper, 10 reams', 'Toner, black', 'Desk lamp', 'Cables, USB C'].map((line) => (
                     <p key={line} className="text-sm text-fg">
                       {line}
