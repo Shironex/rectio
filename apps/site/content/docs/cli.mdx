@@ -40,7 +40,7 @@ Run in a terminal with no deciding flag, `init` first asks how to start:
   [shironex.github.io/rectio/templates](https://shironex.github.io/rectio/templates).
 
 The theme is `default` (light and dark), or a theme URL from the
-[theme generator](/docs/theming). A one-line recap follows, then the same steps and summary as the
+[theme generator](/docs/theming/generator). A one-line recap follows, then the same steps and summary as the
 flag forms. Arrow keys or `j` and `k` move, space toggles in a list of checkboxes, Enter answers,
 and Ctrl+C or Esc stops with exit code 130 and nothing written.
 
@@ -53,7 +53,7 @@ rectio init [--theme <id>] [--css src/index.css] [--framework vite|next|tanstack
 | Flag                 | What it does                                                          |
 | -------------------- | --------------------------------------------------------------------- |
 | `-y`, `--yes`        | Ask nothing and take every default: rectio in this project.           |
-| `--theme <id>`       | Theme to install. Defaults to `default`. Skips the theme question.    |
+| `--theme <id>`       | Theme to install, or a theme generator link. Defaults to `default`.   |
 | `--css <path>`       | The CSS file that imports Tailwind. Implies this project, no prompts. |
 | `--framework <name>` | `vite`, `next` or `tanstack-start`. Implies this project, no prompts. |
 | `--pm <name>`        | `pnpm`, `npm`, `yarn` or `bun` instead of the detected one.           |

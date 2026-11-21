@@ -40,18 +40,18 @@ the defaults:
 pnpm dlx @rectio/cli init --yes
 ```
 
-| Flag                 | What it does                                                        |
-| -------------------- | ------------------------------------------------------------------- |
-| `-y`, `--yes`        | Ask nothing; set up this project with the defaults.                 |
-| `--pm <name>`        | `pnpm`, `npm`, `yarn` or `bun` instead of the detected one.         |
-| `--theme <id>`       | The theme to install. Defaults to `default`, the theme that ships.  |
-| `--css <path>`       | The CSS file that imports Tailwind, when it is not found.           |
-| `--framework <name>` | `vite`, `next` or `tanstack-start`, when detection fails.           |
-| `--registry <url>`   | A registry URL or folder. See [CLI](/docs/cli#registry-url).        |
-| `--force`            | Rewrite `rectio.json` even if it exists.                            |
-| `--dry-run`          | Show the plan and write nothing.                                    |
-| `--no-install`       | Add packages to `package.json` without running the package manager. |
-| `--cwd <dir>`        | The project folder, when it is not the current one.                 |
+| Flag                 | What it does                                                              |
+| -------------------- | ------------------------------------------------------------------------- |
+| `-y`, `--yes`        | Ask nothing; set up this project with the defaults.                       |
+| `--pm <name>`        | `pnpm`, `npm`, `yarn` or `bun` instead of the detected one.               |
+| `--theme <id>`       | `default`, or a link from the [theme generator](/docs/theming/generator). |
+| `--css <path>`       | The CSS file that imports Tailwind, when it is not found.                 |
+| `--framework <name>` | `vite`, `next` or `tanstack-start`, when detection fails.                 |
+| `--registry <url>`   | A registry URL or folder. See [CLI](/docs/cli#registry-url).              |
+| `--force`            | Rewrite `rectio.json` even if it exists.                                  |
+| `--dry-run`          | Show the plan and write nothing.                                          |
+| `--no-install`       | Add packages to `package.json` without running the package manager.       |
+| `--cwd <dir>`        | The project folder, when it is not the current one.                       |
 
 </Step>
 <Step>
