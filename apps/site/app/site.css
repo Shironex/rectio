@@ -171,7 +171,7 @@
   aspect-ratio: 1;
   border-radius: var(--rx-radius-full);
   background: var(--rx-accent);
-  opacity: 0.1;
+  opacity: 0.06;
   filter: blur(calc(var(--rx-space-unit) * 32));
   pointer-events: none;
 }
