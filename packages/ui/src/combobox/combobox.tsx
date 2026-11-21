@@ -1,3 +1,5 @@
+'use client';
+
 import { Combobox as BaseCombobox } from '@base-ui/react/combobox';
 import {
   CaretUpDownIcon,
@@ -8,10 +10,12 @@ import {
 } from '@phosphor-icons/react';
 import { useRef, useState, type ComponentProps, type ReactNode } from 'react';
 
-import { controlSurface } from '../field/field';
 import { cn } from '../lib/cn';
 import { popupGroupLabel, popupItem, popupMotion, popupSurface } from '../select/select';
 import { usePortalContainer } from '../theme-scope/theme-scope';
+import { comboboxSurface, comboboxIconButton } from './combobox-styles';
+
+export { comboboxSurface, comboboxIconButton } from './combobox-styles';
 
 type WithClassName<P> = Omit<P, 'className'> & { className?: string };
 
@@ -36,22 +40,6 @@ function defaultLabel(item: unknown): string {
   }
   return typeof item === 'string' || typeof item === 'number' ? String(item) : '';
 }
-
-/** The surface of a combobox-like control: the field look, a ring while anything inside has focus. */
-export const comboboxSurface = cn(
-  controlSurface,
-  'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus',
-  // While the list is open the user is fixing the field: show it neutral, not still wrong.
-  'data-popup-open:border-fg-subtle data-popup-open:data-invalid:border-fg-subtle data-popup-open:data-invalid:ring-0',
-);
-
-/** The small buttons at the end of a combobox: clear and open. 44px wide on touch screens. */
-export const comboboxIconButton = cn(
-  'flex h-full w-7 shrink-0 cursor-pointer items-center justify-center text-fg-subtle',
-  'rounded-(--rx-badge-radius) transition-colors duration-fast ease-standard hover:text-fg',
-  'outline-none pointer-coarse:w-(--rx-field-height-touch)',
-  'data-disabled:cursor-not-allowed data-disabled:text-fg-disabled',
-);
 
 export type ComboboxProps<Value> = Omit<BaseCombobox.Root.Props<Value>, 'multiple'> & {
   /**

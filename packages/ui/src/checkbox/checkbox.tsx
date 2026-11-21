@@ -1,3 +1,5 @@
+'use client';
+
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 import { CheckIcon, MinusIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from 'react';

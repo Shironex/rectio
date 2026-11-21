@@ -1,3 +1,5 @@
+'use client';
+
 import { Collapsible } from '@base-ui/react/collapsible';
 import { mergeProps } from '@base-ui/react/merge-props';
 import { useRender } from '@base-ui/react/use-render';
@@ -17,7 +19,8 @@ import {
   type ReactNode,
 } from 'react';
 
-import { ariaKeyShortcut, useIsMac, useShortcut } from '../kbd/shortcut';
+import { ariaKeyShortcut } from '../kbd/shortcut';
+import { useIsMac, useShortcut } from '../kbd/use-shortcut';
 import { cn, touchHitArea } from '../lib/cn';
 import { anchorRender } from '../link/link';
 import { Menu, MenuContent, MenuGroup, MenuLinkItem, MenuTrigger } from '../menu/menu';

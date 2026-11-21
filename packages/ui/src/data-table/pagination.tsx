@@ -1,3 +1,5 @@
+'use client';
+
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import type { RowData } from '@tanstack/react-table';
 

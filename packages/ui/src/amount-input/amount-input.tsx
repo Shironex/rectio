@@ -1,7 +1,7 @@
 import { NumberField } from '@base-ui/react/number-field';
 import type { ComponentProps } from 'react';
 
-import { controlSurface } from '../field/field';
+import { controlSurface } from '../field/control-styles';
 import { cn } from '../lib/cn';
 
 export interface AmountInputProps extends Omit<

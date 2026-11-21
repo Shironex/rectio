@@ -1,4 +1,4 @@
-import { ArrowDownRightIcon, ArrowRightIcon, ArrowUpRightIcon } from '@phosphor-icons/react';
+import { ArrowDownRightIcon, ArrowRightIcon, ArrowUpRightIcon } from '@phosphor-icons/react/ssr';
 import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '../lib/cn';

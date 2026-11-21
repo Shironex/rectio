@@ -1,3 +1,5 @@
+'use client';
+
 import { Drawer } from '@base-ui/react/drawer';
 import { XIcon } from '@phosphor-icons/react';
 import { createContext, use, type ComponentProps, type ReactNode } from 'react';

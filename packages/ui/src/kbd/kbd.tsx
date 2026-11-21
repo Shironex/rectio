@@ -1,7 +1,10 @@
+'use client';
+
 import { Fragment, type ComponentProps, type ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
-import { shortcutKeys, shortcutLabel, useIsMac } from './shortcut';
+import { shortcutKeys, shortcutLabel } from './shortcut';
+import { useIsMac } from './use-shortcut';
 
 /** Symbols that a screen reader would read as nothing or as their Unicode name. */
 const SPOKEN: Record<string, string> = {

@@ -1,7 +1,9 @@
+'use client';
+
 import { OTPField } from '@base-ui/react/otp-field';
 import { Fragment, type ComponentProps } from 'react';
 
-import { controlFocus, controlSurface } from '../field/field';
+import { controlFocus, controlSurface } from '../field/control-styles';
 import { cn } from '../lib/cn';
 
 type RootProps = ComponentProps<typeof OTPField.Root>;

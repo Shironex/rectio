@@ -1,3 +1,5 @@
+'use client';
+
 import { Popover as BasePopover } from '@base-ui/react/popover';
 import { XIcon } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from 'react';
@@ -5,6 +7,9 @@ import type { ComponentProps, ReactNode } from 'react';
 import { cn, touchHitArea } from '../lib/cn';
 import { popupMotion } from '../select/select';
 import { usePortalContainer } from '../theme-scope/theme-scope';
+import { popoverSurface } from './popover-surface';
+
+export { popoverSurface } from './popover-surface';
 
 type WithClassName<P> = Omit<P, 'className'> & { className?: string };
 type PositionerProps = ComponentProps<typeof BasePopover.Positioner>;
@@ -12,12 +17,6 @@ type PositionerProps = ComponentProps<typeof BasePopover.Positioner>;
 export const Popover = BasePopover.Root;
 export const PopoverTrigger = BasePopover.Trigger;
 export const PopoverClose = BasePopover.Close;
-
-/** The panel every anchored overlay shares: hairline, overlay surface, the popover shadow. */
-export const popoverSurface = cn(
-  'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow)',
-  'outline-none',
-);
 
 export type PopoverContentProps = WithClassName<ComponentProps<typeof BasePopover.Popup>> & {
   side?: PositionerProps['side'];

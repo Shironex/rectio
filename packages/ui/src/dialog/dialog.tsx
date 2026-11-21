@@ -1,3 +1,5 @@
+'use client';
+
 import { Dialog as BaseDialog } from '@base-ui/react/dialog';
 import { XIcon } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from 'react';

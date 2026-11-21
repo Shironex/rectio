@@ -1,3 +1,5 @@
+'use client';
+
 import { Toast } from '@base-ui/react/toast';
 import { CheckCircleIcon, InfoIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react';
 import type { ReactNode, Ref } from 'react';

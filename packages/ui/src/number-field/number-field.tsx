@@ -1,8 +1,10 @@
+'use client';
+
 import { NumberField as BaseNumberField } from '@base-ui/react/number-field';
 import { MinusIcon, PlusIcon } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { controlSurface } from '../field/field';
+import { controlSurface } from '../field/control-styles';
 import { cn } from '../lib/cn';
 
 export interface NumberFieldProps extends Omit<

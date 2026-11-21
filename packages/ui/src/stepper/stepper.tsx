@@ -1,3 +1,5 @@
+'use client';
+
 import { CheckIcon, WarningIcon } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from 'react';
 

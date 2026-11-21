@@ -1,3 +1,5 @@
+'use client';
+
 import { Meter as BaseMeter } from '@base-ui/react/meter';
 import type { ComponentProps, ReactNode } from 'react';
 
@@ -9,20 +11,9 @@ import {
   progressShare,
   type ProgressTone,
 } from '../progress/progress';
+import { meterLevel, type MeterThresholds, type MeterLevel } from './meter-level';
 
-export interface MeterThresholds {
-  /** From this value up the meter reads as a warning. */
-  warning?: number | undefined;
-  /** From this value up the meter reads as critical. */
-  critical?: number | undefined;
-  /**
-   * `high` (default) when more is worse, such as storage used; `low` when less is worse, such as a
-   * health score, so the thresholds count downward.
-   */
-  worse?: 'high' | 'low' | undefined;
-}
-
-export type MeterLevel = 'normal' | 'warning' | 'critical';
+export { meterLevel, type MeterThresholds, type MeterLevel } from './meter-level';
 
 const LEVEL_TONE: Record<MeterLevel, ProgressTone> = {
   normal: 'accent',
@@ -35,16 +26,6 @@ const LEVEL_TEXT: Record<MeterLevel, string> = {
   warning: 'text-warning-strong',
   critical: 'text-negative-strong',
 };
-
-/** Where a value sits against its thresholds. */
-export function meterLevel(value: number, thresholds: MeterThresholds = {}): MeterLevel {
-  const { warning, critical, worse = 'high' } = thresholds;
-  const past = (limit: number | undefined) =>
-    limit !== undefined && (worse === 'high' ? value >= limit : value <= limit);
-  if (past(critical)) return 'critical';
-  if (past(warning)) return 'warning';
-  return 'normal';
-}
 
 /**
  * The gauge's arc: a half circle from the left end through the top to the right, measured as 100.

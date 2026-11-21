@@ -1,3 +1,5 @@
+'use client';
+
 import { ArrowDownIcon, ArrowUpIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
 import type { RowData } from '@tanstack/react-table';
 

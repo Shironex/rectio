@@ -1,7 +1,8 @@
 import { Switch as BaseSwitch } from '@base-ui/react/switch';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { Field, FieldDescription, FieldLabel, controlFocus } from '../field/field';
+import { controlFocus } from '../field/control-styles';
+import { Field, FieldDescription, FieldLabel } from '../field/field';
 import { cn, touchHitArea } from '../lib/cn';
 
 export interface SwitchProps extends Omit<ComponentProps<typeof BaseSwitch.Root>, 'className'> {

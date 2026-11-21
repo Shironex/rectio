@@ -1,8 +1,10 @@
+'use client';
+
 import { Field as BaseField } from '@base-ui/react/field';
 import type { ComponentProps, MouseEvent } from 'react';
 
 import { Button, type ButtonProps } from '../button/button';
-import { controlSurface } from '../field/field';
+import { controlSurface } from '../field/control-styles';
 import { cn } from '../lib/cn';
 
 type WithClassName<P> = Omit<P, 'className'> & { className?: string };

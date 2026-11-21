@@ -1,3 +1,5 @@
+'use client';
+
 import { NavigationMenu as BaseNavigationMenu } from '@base-ui/react/navigation-menu';
 import { CaretDownIcon, ListIcon } from '@phosphor-icons/react';
 import { useState, type ComponentProps, type ReactNode } from 'react';

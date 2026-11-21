@@ -1,15 +1,13 @@
+'use client';
+
 import { Button as BaseButton } from '@base-ui/react/button';
 import { CircleNotchIcon } from '@phosphor-icons/react';
-import {
-  Children,
-  Fragment,
-  isValidElement,
-  type ComponentProps,
-  type ReactElement,
-  type ReactNode,
-} from 'react';
+import { isValidElement, type ComponentProps, type ReactElement, type ReactNode } from 'react';
 
 import { cn, touchHitArea } from '../lib/cn';
+import { splitLeadingIcon, inferNativeButton } from './button-content';
+
+export { splitLeadingIcon, inferNativeButton } from './button-content';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -51,32 +49,6 @@ const ICON_ONLY: Record<ButtonSize, string> = {
 };
 
 /**
- * Splits a leading icon off a button's children, so the loading spinner can take its slot and the
- * button keeps its width. An element counts as the icon only when a label follows it, or when it
- * is all an icon-only button holds; a lone component child is treated as the label.
- */
-export function splitLeadingIcon(
-  children: ReactNode,
-  iconOnly = false,
-): { icon: ReactNode; label: ReactNode } {
-  let items = Children.toArray(children);
-  const [only] = items;
-  if (
-    items.length === 1 &&
-    isValidElement<{ children?: ReactNode }>(only) &&
-    only.type === Fragment
-  ) {
-    items = Children.toArray(only.props.children);
-  }
-  const [first, ...rest] = items;
-  const isIcon =
-    isValidElement(first) &&
-    (typeof first.type !== 'string' || first.type === 'svg') &&
-    (rest.length > 0 || iconOnly);
-  return isIcon ? { icon: first, label: rest } : { icon: null, label: items };
-}
-
-/**
  * The loading mark: it turns, and under reduced motion it breathes in place instead. Sized like a
  * button icon, so it can stand in for one.
  */
@@ -114,15 +86,6 @@ export interface ButtonProps extends Omit<ComponentProps<typeof BaseButton>, 'cl
     iconOnly: boolean;
   }) => ReactNode;
   children?: ReactNode;
-}
-
-/**
- * Whether `render` draws a native <button>: an element tells by its type, so a link or a router
- * link is not one; a render function cannot tell, so it stays native unless `nativeButton` says.
- */
-export function inferNativeButton(render: ButtonProps['render']): boolean {
-  if (render === undefined || typeof render === 'function') return true;
-  return isValidElement(render) && render.type === 'button';
 }
 
 export function Button({

@@ -1,3 +1,5 @@
+'use client';
+
 import { Autocomplete } from '@base-ui/react/autocomplete';
 import { Dialog as BaseDialog } from '@base-ui/react/dialog';
 import { MagnifyingGlassIcon } from '@phosphor-icons/react';
@@ -13,7 +15,8 @@ import {
 } from 'react';
 
 import { Kbd, KbdShortcut } from '../kbd/kbd';
-import { ariaKeyShortcut, useIsMac, useShortcut } from '../kbd/shortcut';
+import { ariaKeyShortcut } from '../kbd/shortcut';
+import { useIsMac, useShortcut } from '../kbd/use-shortcut';
 import { cn } from '../lib/cn';
 import { usePortalContainer } from '../theme-scope/theme-scope';
 import { fuzzyScore } from './fuzzy';

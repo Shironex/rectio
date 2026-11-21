@@ -1,4 +1,4 @@
-import { CaretRightIcon, DotsThreeIcon } from '@phosphor-icons/react';
+import { CaretRightIcon, DotsThreeIcon } from '@phosphor-icons/react/ssr';
 import { isValidElement, type ComponentProps, type ReactElement, type ReactNode } from 'react';
 
 import { cn, touchHitArea } from '../lib/cn';

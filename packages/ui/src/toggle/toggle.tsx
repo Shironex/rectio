@@ -1,8 +1,10 @@
+'use client';
+
 import { Toggle as BaseToggle } from '@base-ui/react/toggle';
 import { ToggleGroup as BaseToggleGroup } from '@base-ui/react/toggle-group';
 import { createContext, use, useId, useMemo, type ComponentProps, type ReactNode } from 'react';
 
-import { controlFocus } from '../field/field';
+import { controlFocus } from '../field/control-styles';
 import { cn, touchHitArea } from '../lib/cn';
 
 type WithClassName<P> = Omit<P, 'className'> & { className?: string };

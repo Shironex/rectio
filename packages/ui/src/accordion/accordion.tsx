@@ -1,3 +1,5 @@
+'use client';
+
 import { Accordion as BaseAccordion } from '@base-ui/react/accordion';
 import { CaretDownIcon } from '@phosphor-icons/react';
 import { createContext, use, type ComponentProps, type ReactNode } from 'react';

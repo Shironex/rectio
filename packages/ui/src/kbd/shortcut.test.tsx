@@ -9,8 +9,8 @@ import {
   parseShortcut,
   shortcutKeys,
   shortcutLabel,
-  useShortcut,
 } from './shortcut';
+import { useShortcut } from './use-shortcut';
 
 const press = (init: Partial<KeyboardEvent>) => ({
   key: 'k',

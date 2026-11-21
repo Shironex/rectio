@@ -1,13 +1,17 @@
+'use client';
+
 import { Menu as BaseMenu } from '@base-ui/react/menu';
 import { CaretRightIcon, CheckIcon, DotOutlineIcon } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { ariaKeyShortcut, shortcutKeys, useIsMac } from '../kbd/shortcut';
+import { ariaKeyShortcut, shortcutKeys } from '../kbd/shortcut';
+import { useIsMac } from '../kbd/use-shortcut';
 import { cn } from '../lib/cn';
 import { anchorRender } from '../link/link';
-import { popoverSurface } from '../popover/popover';
-import { popupMotion } from '../select/select';
 import { usePortalContainer } from '../theme-scope/theme-scope';
+import { menuPopup, menuItem } from './menu-styles';
+
+export { menuPopup, menuItem } from './menu-styles';
 
 type WithClassName<P> = Omit<P, 'className'> & { className?: string };
 type PositionerProps = ComponentProps<typeof BaseMenu.Positioner>;
@@ -16,24 +20,6 @@ export const Menu = BaseMenu.Root;
 export const MenuTrigger = BaseMenu.Trigger;
 export const MenuSub = BaseMenu.SubmenuRoot;
 export const MenuRadioGroup = BaseMenu.RadioGroup;
-
-/** The popup of a menu, a submenu or a context menu. */
-export const menuPopup = cn(
-  'max-h-(--available-height) min-w-48 overflow-y-auto p-1',
-  popoverSurface,
-  popupMotion,
-);
-
-/** A row in a menu. Shared with the context menu and the motioned menu. */
-export const menuItem = cn(
-  'relative flex cursor-default items-center gap-2 scroll-my-1',
-  'rounded-(--rx-field-radius) py-1.5 ps-2 pe-2 text-base text-fg outline-none select-none',
-  'pointer-coarse:min-h-(--rx-field-height-touch)',
-  'data-highlighted:bg-accent-subtle data-disabled:text-fg-disabled',
-  // Under a popup with one gliding highlight of its own (the motion add-on), rows let it show.
-  'in-data-glide:data-highlighted:bg-transparent',
-  '[&_svg]:shrink-0',
-);
 
 export type MenuContentProps = WithClassName<ComponentProps<typeof BaseMenu.Popup>> & {
   side?: PositionerProps['side'];

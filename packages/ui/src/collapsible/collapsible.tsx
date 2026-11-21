@@ -1,3 +1,5 @@
+'use client';
+
 import { Collapsible as BaseCollapsible } from '@base-ui/react/collapsible';
 import { CaretRightIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from 'react';

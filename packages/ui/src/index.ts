@@ -3,11 +3,11 @@ export { ThemeScope, usePortalContainer, type ThemeScopeProps } from './theme-sc
 export {
   Button,
   ButtonSpinner,
-  splitLeadingIcon,
   type ButtonProps,
   type ButtonSize,
   type ButtonVariant,
 } from './button/button';
+export { splitLeadingIcon } from './button/button-content';
 export {
   Field,
   FieldDescription,
@@ -95,14 +95,16 @@ export { resolveDateLocale } from './calendar/locales';
 export {
   DatePicker,
   DateRangePicker,
-  datePattern,
-  formatDisplayDate,
-  parseDate,
-  type DateDisplayFormat,
   type DatePickerProps,
   type DateRangePickerProps,
   type DateRangePreset,
 } from './date-picker/date-picker';
+export {
+  datePattern,
+  formatDisplayDate,
+  parseDate,
+  type DateDisplayFormat,
+} from './date-picker/date-format';
 export type { DateRange } from '@daypicker/react';
 export { ToastProvider, useToast, type ToastProviderProps, type ToastType } from './toast/toast';
 export {
@@ -165,13 +167,8 @@ export {
   type ProgressCircleProps,
   type ProgressCircleSize,
 } from './progress-circle/progress-circle';
-export {
-  Meter,
-  meterLevel,
-  type MeterLevel,
-  type MeterProps,
-  type MeterThresholds,
-} from './meter/meter';
+export { Meter, type MeterProps } from './meter/meter';
+export { meterLevel, type MeterLevel, type MeterThresholds } from './meter/meter-level';
 export {
   Alert,
   DismissButton,
@@ -282,12 +279,7 @@ export {
   FileProgress,
   FileUpload,
   FileUploadTrigger,
-  defaultFileUploadMessages,
-  describeAccept,
-  formatFileSize,
-  matchesAccept,
   useFileUpload,
-  validateFiles,
   type FileDropzoneProps,
   type FileItemProps,
   type FileListProps,
@@ -303,29 +295,35 @@ export {
   type FileUploadTriggerProps,
   type UseFileUploadOptions,
 } from './file-upload/file-upload';
-export { popupGroupLabel, popupItem, popupMotion, popupSurface } from './select/select';
+export {
+  defaultFileUploadMessages,
+  describeAccept,
+  formatFileSize,
+  matchesAccept,
+  validateFiles,
+} from './file-upload/file-validation';
+export { popupGroupLabel, popupItem, popupMotion, popupSurface } from './select/popup-styles';
 export {
   Tag,
   TagInput,
-  tagRemoveButton,
   type TagInputProps,
   type TagProps,
   type TagRejection,
 } from './tag-input/tag-input';
+export { tagRemoveButton } from './tag-input/tag-input-styles';
 export {
   Combobox,
   ComboboxContent,
   ComboboxGroup,
   ComboboxInput,
   ComboboxItem,
-  comboboxIconButton,
-  comboboxSurface,
   type ComboboxContentProps,
   type ComboboxGroupProps,
   type ComboboxInputProps,
   type ComboboxItemProps,
   type ComboboxProps,
 } from './combobox/combobox';
+export { comboboxIconButton, comboboxSurface } from './combobox/combobox-styles';
 export {
   MultiSelect,
   MultiSelectContent,
@@ -344,11 +342,9 @@ export {
   parseShortcut,
   shortcutKeys,
   shortcutLabel,
-  useIsMac,
-  useShortcut,
   type Shortcut,
-  type UseShortcutOptions,
 } from './kbd/shortcut';
+export { useIsMac, useShortcut, type UseShortcutOptions } from './kbd/use-shortcut';
 export {
   Tooltip,
   TooltipContent,
@@ -364,11 +360,11 @@ export {
   PopoverDescription,
   PopoverTitle,
   PopoverTrigger,
-  popoverSurface,
   type PopoverContentProps,
   type PopoverDescriptionProps,
   type PopoverTitleProps,
 } from './popover/popover';
+export { popoverSurface } from './popover/popover-surface';
 export {
   HoverCard,
   HoverCardContent,
@@ -392,8 +388,6 @@ export {
   MenuSubContent,
   MenuSubTrigger,
   MenuTrigger,
-  menuItem,
-  menuPopup,
   type MenuCheckboxItemProps,
   type MenuContentProps,
   type MenuGroupProps,
@@ -405,6 +399,7 @@ export {
   type MenuShortcutProps,
   type MenuSubTriggerProps,
 } from './menu/menu';
+export { menuItem, menuPopup } from './menu/menu-styles';
 export {
   ContextMenu,
   ContextMenuContent,
@@ -417,12 +412,11 @@ export {
   TabsList,
   TabsPanel,
   TabsTab,
-  tabsIndicator,
   type TabsListProps,
   type TabsPanelProps,
   type TabsTabProps,
-  type TabsVariant,
 } from './tabs/tabs';
+export { tabsIndicator, type TabsVariant } from './tabs/tabs-styles';
 export {
   Sheet,
   SheetBody,
@@ -447,12 +441,8 @@ export {
   type BreadcrumbLinkProps,
   type BreadcrumbProps,
 } from './breadcrumb/breadcrumb';
-export {
-  Pagination,
-  paginationRange,
-  type PageRangeItem,
-  type PaginationProps,
-} from './pagination/pagination-bar';
+export { Pagination, type PaginationProps } from './pagination/pagination-bar';
+export { paginationRange, type PageRangeItem } from './pagination/page-range';
 export {
   NavigationBar,
   NavigationMenu,

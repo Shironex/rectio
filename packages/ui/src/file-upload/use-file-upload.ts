@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import type { FileUploadEntry } from './file-validation';

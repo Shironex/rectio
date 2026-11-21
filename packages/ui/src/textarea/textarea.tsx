@@ -1,3 +1,5 @@
+'use client';
+
 import { Field as BaseField } from '@base-ui/react/field';
 import { WarningCircleIcon } from '@phosphor-icons/react';
 import {
@@ -10,7 +12,7 @@ import {
   type Ref,
 } from 'react';
 
-import { controlFocus, controlSurface } from '../field/field';
+import { controlFocus, controlSurface } from '../field/control-styles';
 import { cn } from '../lib/cn';
 
 type ControlProps = ComponentProps<typeof BaseField.Control>;

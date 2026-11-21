@@ -1,3 +1,5 @@
+'use client';
+
 import { Field as BaseField } from '@base-ui/react/field';
 import { Progress } from '@base-ui/react/progress';
 import {
@@ -34,7 +36,7 @@ import {
 } from 'react';
 
 import { Button, type ButtonProps } from '../button/button';
-import { controlFocus } from '../field/field';
+import { controlFocus } from '../field/control-styles';
 import { cn } from '../lib/cn';
 import {
   defaultFileUploadMessages,

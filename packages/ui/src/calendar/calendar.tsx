@@ -1,3 +1,5 @@
+'use client';
+
 import { DayPicker, type DayPickerLocale, type DayPickerProps } from '@daypicker/react';
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 

@@ -1,3 +1,5 @@
+'use client';
+
 import { Fieldset as BaseFieldset } from '@base-ui/react/fieldset';
 import {
   createContext,

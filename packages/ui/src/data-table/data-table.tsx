@@ -1,3 +1,5 @@
+'use client';
+
 import { ArrowDownIcon, ArrowUpIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
 import {
   createPaginatedRowModel,

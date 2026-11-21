@@ -1,15 +1,14 @@
+'use client';
+
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { createContext, use, type ComponentProps, type ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
+import { tabsIndicator, type TabsVariant } from './tabs-styles';
+
+export { tabsIndicator, type TabsVariant } from './tabs-styles';
 
 type WithClassName<P> = Omit<P, 'className'> & { className?: string };
-
-/**
- * `line`: page sections, an underline under the active tab. `segmented`: a few views of the same
- * thing (chart or table, month or quarter), drawn as a switch.
- */
-export type TabsVariant = 'line' | 'segmented';
 
 const VariantContext = createContext<TabsVariant>('line');
 
@@ -27,18 +26,6 @@ const listStyles: Record<TabsVariant, string> = {
   line: 'flex max-w-full gap-1 overflow-x-auto border-b border-line',
   segmented:
     'inline-flex max-w-full gap-0.5 rounded-control border border-line bg-surface-sunken p-0.5',
-};
-
-/** The underline or the raised pill, placed on the active tab from Base UI's measurements. */
-export const tabsIndicator: Record<TabsVariant, string> = {
-  line: cn(
-    'absolute bottom-0 left-0 h-0.5 rounded-full bg-accent',
-    'w-(--active-tab-width) translate-x-(--active-tab-left)',
-  ),
-  segmented: cn(
-    'absolute top-(--active-tab-top) left-0 -z-1 h-(--active-tab-height) w-(--active-tab-width) translate-x-(--active-tab-left)',
-    'rounded-control bg-surface-overlay shadow-raised ring-1 ring-line-strong',
-  ),
 };
 
 /**

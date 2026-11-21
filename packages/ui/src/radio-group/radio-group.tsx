@@ -1,9 +1,11 @@
+'use client';
+
 import { Fieldset } from '@base-ui/react/fieldset';
 import { Radio as BaseRadio } from '@base-ui/react/radio';
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { useId, type ComponentProps, type ReactNode } from 'react';
 
-import { controlFocus } from '../field/field';
+import { controlFocus } from '../field/control-styles';
 import { cn, touchHitArea } from '../lib/cn';
 
 type WithClassName<P> = Omit<P, 'className'> & { className?: string };
