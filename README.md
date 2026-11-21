@@ -12,6 +12,7 @@
   <p>
     <a href="https://github.com/Shironex/rectio/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Shironex/rectio/ci.yml?branch=main&style=flat&label=ci" alt="CI status"></a>
     <a href="https://github.com/Shironex/rectio/actions/workflows/pages.yml"><img src="https://img.shields.io/github/actions/workflow/status/Shironex/rectio/pages.yml?branch=main&style=flat&label=pages" alt="Pages deploy status"></a>
+    <a href="https://www.npmjs.com/package/@rectio/cli"><img src="https://img.shields.io/npm/v/@rectio/cli?style=flat&color=2f5bd3&label=%40rectio%2Fcli" alt="@rectio/cli on npm"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2f5bd3?style=flat" alt="MIT license"></a>
   </p>
 
