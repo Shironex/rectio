@@ -264,6 +264,8 @@ export function DonutChart({
               <span
                 className={cn(
                   'font-strong tracking-tight text-fg numeric',
+                  // An amount takes the skin's money face, like every other amount in the kit.
+                  format === 'currency' && 'font-(family-name:--rx-money-family)',
                   // A long figure steps down a size so it keeps clear of the ring.
                   typeof middle === 'string' && middle.length > 6 ? 'text-xl' : 'text-2xl',
                 )}
