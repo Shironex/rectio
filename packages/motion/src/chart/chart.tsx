@@ -69,8 +69,9 @@ function enter(
           ),
         );
       }
-      if (plot !== undefined)
-        tips.push(...leadingTips(root, plot, tokens, bezier(tokens.easing.settle)));
+      const clip = animations.at(-1);
+      if (plot !== undefined && clip !== undefined)
+        tips.push(...leadingTips(root, plot.x, width, clip));
     } else if (kind === 'bar') {
       const zero = root.querySelector<SVGGraphicsElement>('.rx-zero line')?.getBBox();
       [...root.querySelectorAll<SVGGraphicsElement>(BARS)].forEach((bar, index) => {
@@ -144,11 +145,10 @@ function enter(
  */
 function leadingTips(
   root: HTMLElement,
-  plot: DOMRect,
-  tokens: NonNullable<ReturnType<typeof readMotionTokens>>,
-  ease: (progress: number) => number,
+  left: number,
+  width: number,
+  clip: Animation,
 ): (() => void)[] {
-  const duration = tokens.duration.count * 1000;
   return [...root.querySelectorAll<SVGPathElement>('.recharts-line-curve, .recharts-area-curve')]
     .filter((path) => typeof path.getTotalLength === 'function')
     .map((path) => {
@@ -164,7 +164,8 @@ function leadingTips(
       tip.setAttribute('stroke', 'var(--rx-chart-halo)');
       tip.setAttribute('stroke-width', '2');
       tip.setAttribute('aria-hidden', 'true');
-      path.parentNode?.append(tip);
+      // On the surface itself, outside the clipped marks, so the edge never cuts the dot in half.
+      (path.ownerSVGElement ?? path.parentNode)?.append(tip);
       // The point on the path at a given x: the path runs left to right, so search by length.
       const at = (x: number) => {
         let low = 0;
@@ -176,15 +177,18 @@ function leadingTips(
         }
         return path.getPointAtLength(high);
       };
-      const started = performance.now();
       let frame = 0;
-      const step = (now: number) => {
-        const progress = Math.min(1, (now - started) / duration);
-        const point = at(plot.x + ease(progress) * plot.width);
+      // Read the clip's own eased progress, so the dot sits exactly on the edge the line is cut at.
+      const step = () => {
+        const progress = clip.effect?.getComputedTiming().progress;
+        if (clip.playState === 'finished' || progress === null || progress === undefined) {
+          tip.remove();
+          return;
+        }
+        const point = at(left + progress * (width - left));
         tip.setAttribute('cx', String(point.x));
         tip.setAttribute('cy', String(point.y));
-        if (progress < 1) frame = requestAnimationFrame(step);
-        else tip.remove();
+        frame = requestAnimationFrame(step);
       };
       frame = requestAnimationFrame(step);
       return () => {
