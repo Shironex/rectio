@@ -2,9 +2,11 @@
  * Headless screenshots of the kit fixes for a design round: `pnpm shoot:gaps <round> [filter]`.
  * Writes to .rounds/round-<n>/gaps/ at the repo root (gitignored). Starts its own Vite server and
  * never touches the screen. Shots, at desktop (1440) and phone (390) width in every mode: the
- * fixes page (field errors, skeleton widths, loading buttons, date formats), the command
- * menu open at its top and scrolled to the middle, the app shell's sidebar with its current page,
- * and the finance blocks that changed. Logs phone overflow and the smallest touch target.
+ * fixes page (table filters, sheet sizes, field errors, skeleton widths, loading buttons, date
+ * formats), the table filters filtered, empty and with the facet menu open, the large and full
+ * sheets, the command menu open at its top and scrolled to the middle, the app shell's sidebar, the
+ * forms page (toggles) and the blocks that changed. Logs phone overflow and the smallest touch
+ * target. `SHOOT_PORT` pins the Vite port, for lanes that share a machine.
  */
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -30,12 +32,10 @@ const WIDTHS = [
 ] as const;
 /** The finance blocks this round changed, with any extra query a shot needs. */
 const BLOCKS: [name: string, query: string][] = [
-  ['invoice-detail', 'block=invoice-detail'],
-  ['expense-approval', 'block=expense-approval'],
-  ['expense-approval-approved', 'block=expense-approval&approval=approved'],
-  ['expense-approval-all', 'block=expense-approval&approval=all'],
-  ['invoice-list', 'block=invoice-list'],
-  ['ledger', 'block=ledger'],
+  ['sessions', 'block=sessions'],
+  ['sessions-alone', 'block=sessions&empty=1'],
+  ['notifications-center', 'block=notifications-center'],
+  ['kanban-board', 'block=kanban-board'],
   ['kpi-row', 'block=kpi-row'],
 ];
 
@@ -74,7 +74,10 @@ async function tall(page: Page, file: string) {
 
 const server = await createServer({
   root: join(here, '..'),
-  server: { port: 0, strictPort: false },
+  server: {
+    port: Number(process.env.SHOOT_PORT ?? 0),
+    strictPort: process.env.SHOOT_PORT !== undefined,
+  },
   logLevel: 'error',
 });
 await server.listen();
@@ -101,6 +104,42 @@ try {
         await page.close();
       }
 
+      for (const filter of ['some', 'nothing'] as const) {
+        if (!wanted(`filters-${filter}-${name}`)) continue;
+        const page = await open(browser, base, `view=gaps&filter=${filter}&${scope}`, phone);
+        await page
+          .locator('section', { hasText: 'Table filters' })
+          .first()
+          .screenshot({
+            path: join(out, `filters-${filter}-${name}.png`),
+          });
+        await page.close();
+      }
+
+      if (wanted(`filters-menu-${name}`)) {
+        const page = await open(browser, base, `view=gaps&filter=some&${scope}`, phone);
+        await page.getByRole('button', { name: /^Status, 2 selected/ }).click();
+        await page.getByRole('menu').waitFor();
+        await settle(page);
+        await page.screenshot({ path: join(out, `filters-menu-${name}.png`) });
+        await page.close();
+      }
+
+      for (const size of ['lg', 'full'] as const) {
+        if (!wanted(`sheet-${size}-${name}`)) continue;
+        const page = await open(browser, base, `view=gaps&sheet=${size}&${scope}`, phone);
+        await page.getByRole('dialog').waitFor();
+        await settle(page);
+        await page.screenshot({ path: join(out, `sheet-${size}-${name}.png`) });
+        await page.close();
+      }
+
+      if (wanted(`forms-${name}`)) {
+        const page = await open(browser, base, `view=forms&${scope}`, phone);
+        await tall(page, `forms-${name}.png`);
+        await page.close();
+      }
+
       if (wanted(`command-${name}`)) {
         const page = await open(browser, base, `view=gaps&open=command&${scope}`, phone);
         await page.getByRole('dialog').waitFor();
@@ -124,7 +163,7 @@ try {
       for (const [block, query] of BLOCKS) {
         if (!wanted(`${block}-${name}`)) continue;
         // The extra status views once per width, in light.
-        if (block.startsWith('expense-approval-') && mode !== 'light') {
+        if (block.endsWith('-alone') && mode !== 'light') {
           continue;
         }
         const page = await open(browser, base, `view=blocks&${query}&${scope}`, phone);
