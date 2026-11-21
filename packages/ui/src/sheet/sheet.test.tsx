@@ -107,4 +107,30 @@ describe('Sheet', () => {
     expect(bottom.className).toContain('max-h-none');
     expect(bottom.className).not.toContain('max-h-5/6');
   });
+
+  it('keeps the parts of a full size sheet to a reading measure, and no other size', async () => {
+    const parts = (size: 'full' | 'lg') => (
+      <Sheet side="right" defaultOpen>
+        <SheetContent size={size}>
+          <SheetHeader data-testid="header">
+            <SheetTitle>Invoice</SheetTitle>
+          </SheetHeader>
+          <SheetBody data-testid="body">Lines</SheetBody>
+          <SheetFooter data-testid="footer">
+            <Button>Send</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    );
+    const { unmount } = render(parts('full'));
+    await screen.findByRole('dialog');
+    for (const id of ['header', 'body', 'footer']) {
+      expect(screen.getByTestId(id).className).toContain('px-sheet');
+    }
+    unmount();
+    render(parts('lg'));
+    await screen.findByRole('dialog');
+    expect(screen.getByTestId('body').className).not.toContain('px-sheet');
+    expect(screen.getByTestId('body').className).toContain('px-5');
+  });
 });

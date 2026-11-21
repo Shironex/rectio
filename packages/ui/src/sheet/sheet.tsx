@@ -20,6 +20,15 @@ const SWIPE: Record<SheetSide, 'left' | 'right' | 'up' | 'down'> = {
 };
 
 const SideContext = createContext<SheetSide>('right');
+/** True inside a full size sheet, where the header, body and footer keep a reading measure. */
+const FullContext = createContext(false);
+
+/**
+ * Side padding of a part. In a full size sheet the parts stay full bleed (their rules and footer
+ * band reach the edges) while their content keeps to the sheet measure in the middle, so a label
+ * never sits a screen away from its value.
+ */
+const gutter = (full: boolean) => (full ? 'px-sheet' : 'px-5');
 
 export type SheetProps<Payload = unknown> = Omit<Drawer.Root.Props<Payload>, 'swipeDirection'> & {
   /** Default `right`. The sheet can be swiped back toward this edge to close it. */
@@ -144,7 +153,7 @@ export function SheetContent({
             // Clears the home indicator on phones without a design value: the inset comes from the device.
             style={side === 'bottom' ? { paddingBottom: 'env(safe-area-inset-bottom)' } : undefined}
           >
-            {children}
+            <FullContext value={size === 'full'}>{children}</FullContext>
           </Drawer.Content>
           {showClose && (
             <Drawer.Close
@@ -168,9 +177,16 @@ export function SheetContent({
 }
 
 export function SheetHeader({ className, ...props }: ComponentProps<'div'>) {
+  const full = use(FullContext);
   return (
     <div
-      className={cn('flex shrink-0 flex-col gap-1 px-5 pt-5 pb-3 pe-14', className)}
+      className={cn(
+        'flex shrink-0 flex-col gap-1 pt-5 pb-3',
+        gutter(full),
+        // Clear of the close button in the corner.
+        full ? 'pe-sheet-close' : 'pe-14',
+        className,
+      )}
       {...props}
     />
   );
@@ -195,9 +211,14 @@ export function SheetDescription({ className, ...props }: SheetDescriptionProps)
 
 /** The scrolling middle. */
 export function SheetBody({ className, ...props }: ComponentProps<'div'>) {
+  const full = use(FullContext);
   return (
     <div
-      className={cn('flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 py-3', className)}
+      className={cn(
+        'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-3',
+        gutter(full),
+        className,
+      )}
       {...props}
     />
   );
@@ -205,10 +226,12 @@ export function SheetBody({ className, ...props }: ComponentProps<'div'>) {
 
 /** Actions, end-aligned and pinned to the bottom. The primary action goes last. */
 export function SheetFooter({ className, ...props }: ComponentProps<'div'>) {
+  const full = use(FullContext);
   return (
     <div
       className={cn(
-        'flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-line bg-(--rx-dialog-footer-background) px-5 py-3',
+        'flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-line bg-(--rx-dialog-footer-background) py-3',
+        gutter(full),
         className,
       )}
       {...props}
