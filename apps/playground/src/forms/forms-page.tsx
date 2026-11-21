@@ -474,7 +474,7 @@ function SettingsForm({ kit, invalid }: { kit: Kit; invalid: boolean }) {
 
         <FormActions
           align="between"
-          className="sticky bottom-0 rounded-b-(--rx-popover-radius) bg-surface p-4 sm:px-8"
+          className="sticky bottom-0 rounded-b-(--rx-popover-radius) bg-surface p-5 sm:px-8 sm:py-4"
         >
           <p
             role="status"

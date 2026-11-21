@@ -337,9 +337,10 @@ function Dashboard({ blocks, locale }: { blocks: Blocks; locale: data.Locale }) 
           </h1>
         </div>
         <nav aria-label={'Sections'}>
-          <ul className="flex flex-wrap gap-x-1 gap-y-1">
+          {/* One row that scrolls sideways on a phone, so no label is orphaned on a second line. */}
+          <ul className="scrollbar-none flex gap-1 overflow-x-auto max-sm:-mx-4 max-sm:px-4">
             {sections.map((section) => (
-              <li key={section.id}>
+              <li key={section.id} className="shrink-0 whitespace-nowrap">
                 <a
                   href={`#${section.id}`}
                   className="inline-flex min-h-8 items-center rounded-md px-2 text-sm text-fg-muted hover:bg-surface-sunken hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus pointer-coarse:min-h-(--rx-control-height-touch)"
