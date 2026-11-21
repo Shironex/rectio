@@ -51,7 +51,7 @@ const STATUSES = [
   { value: 'unpaid', label: 'Unpaid', hint: 11 },
   { value: 'overdue', label: 'Overdue', hint: 3 },
   { value: 'paid', label: 'Paid', hint: 34 },
-  { value: 'void', label: 'Void' },
+  { value: 'void', label: 'Void', hint: 0 },
 ] as const;
 
 const PERIODS = [
@@ -321,7 +321,17 @@ export function PrimitivesPage({
                 </li>
               ))}
             </ul>
-            <Rating aria-label="Read only rating" defaultValue={4} readOnly size="sm" />
+            <div className="flex items-center justify-between gap-4 text-sm">
+              <span id="primitives-rating-locked" className="text-fg-muted">
+                Your rating, locked after approval
+              </span>
+              <Rating
+                aria-labelledby="primitives-rating-locked"
+                defaultValue={4}
+                readOnly
+                size="sm"
+              />
+            </div>
           </Section>
         </div>
 
@@ -337,7 +347,7 @@ export function PrimitivesPage({
               selected={selected}
               onSelectedChange={setSelected}
               loadChildren={loadChildren}
-              className="h-96"
+              className="max-h-120"
             />
           </div>
         </Section>
