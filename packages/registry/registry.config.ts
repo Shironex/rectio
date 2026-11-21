@@ -763,6 +763,16 @@ export default defineRegistry({
       files: ['drawer/drawer.tsx'],
     },
     {
+      name: 'copy-button',
+      type: 'component',
+      version: '0.1.0',
+      title: 'Copy button',
+      description:
+        'Copies a value with a check and a spoken "Copied", with a fallback where the Clipboard API is blocked.',
+      categories: ['actions'],
+      files: ['copy-button/copy-button.tsx'],
+    },
+    {
       name: 'breadcrumb',
       type: 'component',
       version: '0.1.2',
@@ -888,6 +898,12 @@ export default defineRegistry({
           'Motion AlertDialog',
           'Alert dialog that opens on the dialog spring and closes on a faster tween.',
           ['alert-dialog/alert-dialog.tsx'],
+        ),
+        motionItem(
+          'copy-button',
+          'Motion CopyButton',
+          'Copy button whose check settles in on the press spring.',
+          ['copy-button/copy-button.tsx'],
         ),
         motionItem(
           'select',
