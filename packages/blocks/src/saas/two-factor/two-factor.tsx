@@ -14,7 +14,7 @@ import { useEffect, useRef, useState, type ReactNode, type SyntheticEvent } from
 import { useBlockParts } from '../../lib/block-parts';
 import { AuthFrame, AuthLink, type LinkTarget } from '../lib/auth';
 import { focusFirstInvalid } from '../lib/focus';
-import { inlineLink } from '../lib/styles';
+import { inlineLink, touchTarget } from '../lib/styles';
 import {
   backupCodeError,
   formatTwoFactorWait,
@@ -294,7 +294,8 @@ function ResendButton({
       onClick={onResend}
       className={cn(
         inlineLink,
-        'pointer-coarse:py-2',
+        'relative',
+        touchTarget,
         // The countdown stays readable: muted text, only the link's underline goes.
         'disabled:cursor-not-allowed disabled:font-regular disabled:text-fg-muted disabled:no-underline',
       )}

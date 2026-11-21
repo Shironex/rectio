@@ -227,7 +227,8 @@ export function AuthLink({
   className?: string;
   children: ReactNode;
 }) {
-  const classes = cn(inlineLink, 'pointer-coarse:py-2', className);
+  // A 44px hit area on touch screens, without moving the text around it.
+  const classes = cn(inlineLink, 'relative', touchTarget, className);
   if (typeof to === 'string') {
     return (
       <Anchor href={to} className={classes}>
