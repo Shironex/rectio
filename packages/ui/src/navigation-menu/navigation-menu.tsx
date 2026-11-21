@@ -3,6 +3,7 @@ import { CaretDownIcon, ListIcon } from '@phosphor-icons/react';
 import { useState, type ComponentProps, type ReactNode } from 'react';
 
 import { cn, touchHitArea } from '../lib/cn';
+import { anchorRender } from '../link/link';
 import { popoverSurface } from '../popover/popover';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../sheet/sheet';
 import { usePortalContainer } from '../theme-scope/theme-scope';
@@ -135,13 +136,22 @@ export type NavigationMenuLinkProps = WithClassName<
   active?: boolean;
 };
 
-/** A top-level link with no panel. Pass `render` for a router's link. */
-export function NavigationMenuLink({ className, active, ...props }: NavigationMenuLinkProps) {
+/**
+ * A top-level link with no panel. With an `href` it follows a `LinkProvider`; pass `render` for a
+ * link of your own.
+ */
+export function NavigationMenuLink({
+  className,
+  active,
+  render,
+  ...props
+}: NavigationMenuLinkProps) {
   return (
     <BaseNavigationMenu.Link
       active={active}
       aria-current={active === true ? 'page' : undefined}
       className={cn(topLevel, className)}
+      {...anchorRender(render, props.href)}
       {...props}
     />
   );
@@ -161,10 +171,12 @@ export function NavigationMenuPanelLink({
   title,
   description,
   icon,
+  render,
   ...props
 }: NavigationMenuPanelLinkProps) {
   return (
     <BaseNavigationMenu.Link
+      {...anchorRender(render, props.href)}
       className={cn(
         'flex gap-3 rounded-control p-2.5 text-start no-underline pointer-coarse:min-h-(--rx-control-height-touch)',
         'transition-colors duration-fast ease-standard hover:bg-surface-hover',

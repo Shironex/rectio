@@ -2,6 +2,7 @@ import { CaretRightIcon, DotsThreeIcon } from '@phosphor-icons/react';
 import { isValidElement, type ComponentProps, type ReactElement, type ReactNode } from 'react';
 
 import { cn, touchHitArea } from '../lib/cn';
+import { Anchor } from '../link/link';
 import { Menu, MenuContent, MenuItem, MenuLinkItem, MenuTrigger } from '../menu/menu';
 
 export interface BreadcrumbItem {
@@ -32,8 +33,8 @@ export interface BreadcrumbProps extends Omit<ComponentProps<'nav'>, 'children'>
    */
   collapseOnPhone?: boolean;
   /**
-   * Draws a visible link, for a router's link component. Defaults to an anchor. Collapsed levels in
-   * the menu are plain anchors.
+   * Draws a link, for a router's link component. Defaults to the kit's `Anchor`, which follows a
+   * `LinkProvider`. The collapsed levels in the menu are drawn with it too.
    */
   renderLink?: (props: BreadcrumbLinkProps) => ReactNode;
   /** Name of the landmark. Default "Breadcrumb". */
@@ -50,10 +51,11 @@ const linkStyle = cn(
   'pointer-coarse:py-3',
 );
 
+/** Through the app's router link when a `LinkProvider` sets one, a plain anchor otherwise. */
 const defaultLink = ({ href, className, children }: BreadcrumbLinkProps) => (
-  <a href={href} className={className}>
+  <Anchor href={href} className={className}>
     {children}
-  </a>
+  </Anchor>
 );
 
 /** Which items are shown, and the collapsed run between them, for `maxItems`. */

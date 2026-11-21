@@ -4,6 +4,7 @@ import type { ComponentProps, ReactNode } from 'react';
 
 import { ariaKeyShortcut, shortcutKeys, useIsMac } from '../kbd/shortcut';
 import { cn } from '../lib/cn';
+import { anchorRender } from '../link/link';
 import { popoverSurface } from '../popover/popover';
 import { popupMotion } from '../select/select';
 import { usePortalContainer } from '../theme-scope/theme-scope';
@@ -148,12 +149,23 @@ export type MenuLinkItemProps = WithClassName<ComponentProps<typeof BaseMenu.Lin
   hint?: ReactNode;
 };
 
-/** A row that navigates. Renders an anchor; pass `render` for a router's link. */
-export function MenuLinkItem({ className, icon, hint, children, ...props }: MenuLinkItemProps) {
+/**
+ * A row that navigates. With an `href` it renders the kit's `Anchor`, so it follows a
+ * `LinkProvider`; pass `render` for a link of your own.
+ */
+export function MenuLinkItem({
+  className,
+  icon,
+  hint,
+  children,
+  render,
+  ...props
+}: MenuLinkItemProps) {
   return (
     <BaseMenu.LinkItem
       data-slot="menu-item"
       className={cn(menuItem, 'cursor-pointer', className)}
+      {...anchorRender(render, props.href)}
       {...props}
     >
       {icon !== undefined && (

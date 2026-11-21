@@ -508,3 +508,13 @@ export {
   type AppShellHeaderProps,
   type AppShellProps,
 } from './app-shell/app-shell';
+export {
+  Anchor,
+  LinkProvider,
+  useLinkRender,
+  type AnchorProps,
+  type LinkProviderProps,
+  type LinkRender,
+  type LinkRenderProps,
+} from './link/link';
+export { isExternalHref, isHashHref } from './link/href';

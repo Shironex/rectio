@@ -19,6 +19,7 @@ import {
 
 import { ariaKeyShortcut, useIsMac, useShortcut } from '../kbd/shortcut';
 import { cn, touchHitArea } from '../lib/cn';
+import { anchorRender } from '../link/link';
 import { Menu, MenuContent, MenuGroup, MenuLinkItem, MenuTrigger } from '../menu/menu';
 import { Sheet, SheetContent, SheetTitle } from '../sheet/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip/tooltip';
@@ -336,7 +337,10 @@ export type SidebarItemProps = Omit<ComponentProps<'a'>, 'children'> & {
   active?: boolean;
   /** A count at the end, such as items waiting. Hidden in the icon rail. */
   badge?: ReactNode;
-  /** Replaces the anchor, for a router's link: `render={<Link to="/invoices" />}`. */
+  /**
+   * Replaces the anchor, for a link of your own: `render={<Link to="/invoices" />}`. With only an
+   * `href` the item follows a `LinkProvider`.
+   */
   render?: ReactElement;
 };
 
@@ -358,7 +362,7 @@ export function SidebarItem({
 
   const element = useRender({
     defaultTagName: isLink ? 'a' : 'button',
-    render,
+    ...anchorRender(render, props.href),
     props: mergeProps<'a'>(
       {
         'aria-current': active ? 'page' : undefined,
@@ -515,7 +519,7 @@ export function SidebarSubItem({
 
   const element = useRender({
     defaultTagName: 'a',
-    render,
+    ...anchorRender(render, props.href),
     enabled: !inFlyout,
     props: mergeProps<'a'>(
       {

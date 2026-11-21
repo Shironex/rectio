@@ -2,6 +2,7 @@ import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from 'react';
 
 import { cn, touchHitArea } from '../lib/cn';
+import { Anchor } from '../link/link';
 
 /** A page number, or a gap standing for the pages between its neighbours. */
 export type PageRangeItem = number | 'gap-start' | 'gap-end';
@@ -111,7 +112,7 @@ export function Pagination({
     }
     if (getHref !== undefined) {
       return (
-        <a
+        <Anchor
           href={getHref(target)}
           onClick={(event) => {
             if (onPageChange === undefined) return;
@@ -121,7 +122,7 @@ export function Pagination({
           {...common}
         >
           {content}
-        </a>
+        </Anchor>
       );
     }
     return (

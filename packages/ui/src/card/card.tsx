@@ -1,6 +1,7 @@
 import type { ComponentProps } from 'react';
 
 import { cn } from '../lib/cn';
+import { Anchor } from '../link/link';
 
 export type CardVariant = 'outline' | 'raised' | 'sunken';
 
@@ -120,17 +121,14 @@ export function CardFooter({ className, ...props }: ComponentProps<'div'>) {
 
 /**
  * The link of an interactive card. Its hit area stretches over the whole card, so the card is one
- * target with one accessible name (the link text) instead of a clickable div.
+ * target with one accessible name (the link text) instead of a clickable div. It follows a
+ * `LinkProvider`.
  */
-export function CardLink({ className, ...props }: ComponentProps<'a'>) {
-  return (
-    <a
-      data-slot="card-link"
-      className={cn(
-        'outline-none after:absolute after:inset-0 after:rounded-panel hover:underline hover:decoration-line-strong hover:underline-offset-4',
-        className,
-      )}
-      {...props}
-    />
+export function CardLink({ className, href, ...props }: ComponentProps<'a'>) {
+  const classes = cn(
+    'outline-none after:absolute after:inset-0 after:rounded-panel hover:underline hover:decoration-line-strong hover:underline-offset-4',
+    className,
   );
+  if (href === undefined) return <a data-slot="card-link" className={classes} {...props} />;
+  return <Anchor data-slot="card-link" href={href} className={classes} {...props} />;
 }

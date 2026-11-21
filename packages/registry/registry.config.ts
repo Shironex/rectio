@@ -747,9 +747,19 @@ export default defineRegistry({
       files: ['sheet/sheet.tsx'],
     },
     {
+      name: 'link',
+      type: 'component',
+      version: '0.1.0',
+      title: 'Link',
+      description:
+        'One provider sends every link the kit draws through your router, so links follow its base path.',
+      categories: ['navigation'],
+      files: ['link/link.tsx', 'link/href.ts'],
+    },
+    {
       name: 'breadcrumb',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Breadcrumb',
       description: 'Where the page sits, with the middle collapsed into a menu when long.',
       categories: ['navigation'],
