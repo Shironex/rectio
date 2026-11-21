@@ -1,5 +1,13 @@
 # @rectio/cli
 
+<p>
+  <a href="https://www.npmjs.com/package/@rectio/cli"><img src="https://img.shields.io/npm/v/@rectio/cli?style=flat&color=2f5bd3&label=npm" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@rectio/cli"><img src="https://img.shields.io/npm/dm/@rectio/cli?style=flat&color=2f5bd3&label=downloads" alt="npm downloads per month"></a>
+  <a href="https://github.com/Shironex/rectio/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Shironex/rectio/ci.yml?branch=main&style=flat&label=ci" alt="CI status"></a>
+  <img src="https://img.shields.io/node/v/@rectio/cli?style=flat&color=2f5bd3" alt="Node 22.12 or later">
+  <a href="https://github.com/Shironex/rectio/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-2f5bd3?style=flat" alt="MIT license"></a>
+</p>
+
 The command line for [rectio](https://shironex.github.io/rectio/), a React 19 and Tailwind CSS v4
 kit of components, blocks, themes and templates for finance and back-office apps. The CLI copies
 items into your project as source you own, rewrites their imports to your aliases, and keeps a
