@@ -1,0 +1,78 @@
+---
+title: EventCard
+description: One event with its time, place and people, coloured by kind, in a full or a compact size.
+---
+
+<Preview name="event-card" plain={<Demo name="event-card" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add event-card
+```
+
+`avatar-group` installs with it.
+
+## Usage
+
+```tsx
+import { EventCard } from '@/components/ui/event-card';
+
+<EventCard
+  title="Audit kickoff"
+  start={new Date(2026, 2, 19, 9, 30)}
+  end={new Date(2026, 2, 19, 11)}
+  tone="warning"
+  location="Floor 3"
+  attendees={[{ name: 'Ines Duarte' }, { name: 'Callum Ross' }]}
+  locale="en-GB"
+  onSelect={() => openEvent('kickoff')}
+/>;
+```
+
+The full card shows the time with its length, the place, and the attendees with their names. The
+compact card is the title and the time on two lines, for lists and grids such as the
+[week agenda](/docs/blocks/saas/week-agenda).
+
+`tone` colours the card by kind of event (a meeting, a deadline, time off) from the status tokens.
+`status` says how sure it is: a tentative event has a dashed edge and the word "Tentative", a
+cancelled one turns neutral, is struck through and says "Cancelled". An event past midnight writes
+both days, and `allDay` reads "All day".
+
+With `onSelect`, the title becomes a button that covers the card. `triggerProps` passes a roving
+`tabIndex` or a key handler to that button.
+
+`formatEventTime` and `formatEventLength` are exported for your own lists.
+
+## Props
+
+<TypeTable
+  type={{
+    title: { type: 'string', required: true },
+    start: { type: 'Date', required: true },
+    end: { type: 'Date', required: true },
+    allDay: { type: 'boolean', default: 'false' },
+    location: { type: 'string' },
+    attendees: { type: 'readonly AvatarGroupItem[]', description: 'Shown in the full card.' },
+    tone: {
+      type: "'accent' | 'info' | 'positive' | 'warning' | 'negative' | 'neutral'",
+      default: "'accent'",
+    },
+    status: { type: "'confirmed' | 'tentative' | 'cancelled'", default: "'confirmed'" },
+    variant: { type: "'full' | 'compact'", default: "'full'" },
+    locale: { type: 'string', description: 'BCP 47 tag for times and attendee names.' },
+    onSelect: { type: '() => void', description: 'Makes the card one button.' },
+    triggerProps: { type: 'ComponentProps<"button">', description: 'Extra props for that button.' },
+    footer: { type: 'ReactNode', description: 'A join link or an action under the details.' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The card is an `article`; with `onSelect`, its one button is named by the title and described by
+  the time, status and place.
+- Status is a word and an icon as well as a style, so it never rests on colour alone.
+- Times use tabular figures and the locale's clock.
+
+<ComponentSource path="event-card/event-card.tsx" />

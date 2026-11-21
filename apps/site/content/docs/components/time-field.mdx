@@ -1,0 +1,77 @@
+---
+title: TimeField
+description: A time of day typed hour by hour and minute by minute, on the clock the locale uses.
+---
+
+<Preview name="time-field" plain={<Demo name="time-field" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add time-field
+```
+
+`field` installs with it.
+
+## Usage
+
+```tsx
+import { Field, FieldLabel } from '@/components/ui/field';
+import { TimeField, type TimeValue } from '@/components/ui/time-field';
+
+const [starts, setStarts] = useState<TimeValue | null>({ hour: 9, minute: 30 });
+
+<Field>
+  <FieldLabel>Meeting starts</FieldLabel>
+  <TimeField locale="en-GB" value={starts} onValueChange={setStarts} step={15} />
+</Field>;
+```
+
+The value is `{ hour, minute }` on a 24 hour clock, or `null` while a segment is empty. The face
+follows the locale: `en-GB` shows `14:00`, `en-US` shows `02:00 PM` with an AM or PM segment. Pass
+`hourCycle` to choose the clock yourself.
+
+Each segment is its own spin button. Type digits and focus moves on once a segment is full; arrow
+keys step it. `min` and `max` bound the arrow keys, and a typed time outside them marks the field
+invalid, so pair it with a `FieldError`. With `name`, a hidden input submits the time as `HH:mm`.
+
+`formatIsoTime`, `parseIsoTime`, `formatTime`, `resolveHourCycle` and `stepTime` are exported for
+your own storage and messages.
+
+## Props
+
+<TypeTable
+  type={{
+    value: { type: 'TimeValue | null', required: true },
+    onValueChange: { type: '(value: TimeValue | null) => void', required: true },
+    locale: { type: 'string', description: 'BCP 47 tag; sets the clock and the AM and PM names.' },
+    hourCycle: { type: '12 | 24', description: 'Overrides the clock the locale uses.' },
+    step: {
+      type: 'number',
+      default: '1',
+      description: 'Minutes per arrow press; stepped minutes snap to it.',
+    },
+    min: { type: 'TimeValue' },
+    max: { type: 'TimeValue' },
+    name: { type: 'string', description: 'Submits the time as HH:mm in a hidden input.' },
+    disabled: { type: 'boolean', default: 'false' },
+    autoFocus: { type: 'boolean', default: 'false' },
+    minuteLabel: { type: 'string', default: "'Minutes'" },
+    periodLabel: { type: 'string', default: "'AM or PM'" },
+    'aria-label': { type: 'string', description: 'Only when no FieldLabel names the field.' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Accessibility
+
+- The hour segment is named by the `FieldLabel`; minutes and the period carry their own names.
+  Each is a spin button with its value and range read out.
+- Arrow Up and Arrow Down step a segment, Page Up and Page Down step by 3 hours or 15 minutes, Home
+  and End jump to its ends. Arrow Left and Right move between segments, in reading order for right
+  to left scripts too.
+- Backspace clears a segment and then moves back. A colon, a full stop or a space moves on. A and P
+  set the period.
+- Digits arrive through the input's own change, so phone keyboards type into it like any field.
+
+<ComponentSource path="time-field/time-field.tsx" />

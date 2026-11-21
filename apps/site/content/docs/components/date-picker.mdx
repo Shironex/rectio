@@ -59,6 +59,26 @@ A button that shows the period and opens two months. Each opening picks a fresh 
 press sets the start, the second the end, then it closes. Closing early keeps the start. Presets sit
 beside the calendar with their dates written out; one press picks the whole period.
 
+### RangeCalendar
+
+<Preview name="range-calendar" plain={<Demo name="range-calendar" />} />
+
+```tsx
+import { RangeCalendar } from '@/components/ui/date-picker';
+
+<RangeCalendar
+  aria-label="Report period"
+  value={period}
+  onValueChange={setPeriod}
+  presets={presets}
+/>;
+```
+
+The same two months and presets in place, for a filter panel or a page of its own. While the end
+is open, the days up to the pointer are shaded, and a line under the months says what is picked:
+"Pick the first day", then "From 12 Mar 2026. Pick the last day", then "12 Mar to 18 Mar 2026, 7
+days". `formatDateRange` and `rangeLength` are exported for your own summaries.
+
 Both popups portal into the nearest `ThemeScope`. On phones the calendar opens as a sheet along the
 bottom edge, with its own close button.
 
@@ -143,12 +163,35 @@ bottom edge, with its own close button.
   }}
 />
 
+### RangeCalendar
+
+<TypeTable
+  type={{
+    value: { type: 'DateRange | undefined', required: true },
+    onValueChange: { type: '(value: DateRange | undefined) => void', required: true },
+    onComplete: {
+      type: '(range: DateRange) => void',
+      description: 'Called once both ends are picked.',
+    },
+    'aria-label': { type: 'string', description: 'Names the group, such as "Report period".' },
+    locale: { type: 'string' },
+    dateLocale: { type: 'DayPickerLocale' },
+    numberOfMonths: { type: 'number', default: '2' },
+    presets: { type: 'DateRangePreset[]' },
+    disabledDays: { type: 'Matcher | Matcher[]' },
+    defaultMonth: { type: 'Date', description: 'The first month shown when nothing is picked.' },
+    hideSummary: { type: 'boolean', default: 'false' },
+    className: { type: 'string' },
+  }}
+/>
+
 ## Accessibility
 
 - The input is named by its `FieldLabel` and shows the locale pattern as its placeholder.
 - The calendar button is named "Choose date", plus the chosen date when there is one.
 - The calendar opens on the chosen day with focus on it, and picks from the keyboard like
   [Calendar](/docs/components/calendar).
+- The range calendar's summary is a polite live region, so each press is read out.
 - The range button's name includes the period it shows. The preset matching the current period is
   marked pressed (`aria-pressed`), and each preset reads its dates.
 
