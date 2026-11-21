@@ -7,6 +7,7 @@ const LINKS = [
   { href: '/docs', label: 'Docs' },
   { href: '/docs/components/button', label: 'Components' },
   { href: '/templates', label: 'Templates' },
+  { href: '/changelog', label: 'Changelog' },
   { href: '/docs/cli', label: 'CLI' },
   { href: '/docs/mcp', label: 'MCP' },
   { href: repoUrl, label: 'GitHub' },
