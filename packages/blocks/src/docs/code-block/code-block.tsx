@@ -158,7 +158,7 @@ export function CodeBlock({
         aria-label={typeof heading === 'string' ? heading : m.example(label ?? m.code)}
         className={cn(
           'm-0 overflow-x-auto py-3.5 font-mono text-sm',
-          'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+          'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-focus',
           heading === undefined && copy && 'pe-10',
         )}
       >
