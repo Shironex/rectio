@@ -70,4 +70,17 @@ describe('bundle cost', () => {
     // the anchored entrance, the gliding highlight and indicator.
     expect(added).toBeLessThan(10);
   }, 120_000);
+
+  it('animates the charts for a few hundred bytes and keeps them out of the other entries', async () => {
+    const plain = await bundle('charts-plain-entry.ts');
+    const motion = await bundle('charts-motion-entry.ts');
+    // Entrances are element.animate calls and updates are Recharts' own: no Motion library.
+    expect(motion.modules.filter((id) => MOTION.test(id))).toEqual([]);
+    const added = (motion.gzip - plain.gzip) / 1024;
+    console.info(`motion charts entry: +${added.toFixed(1)} kB gzip over the plain charts`);
+    expect(added).toBeLessThan(3);
+    // The main entry never pulls the chart library in.
+    const main = await bundle('motion-entry.ts');
+    expect(main.modules.some((id) => /[\\/]recharts[\\/]/.test(id))).toBe(false);
+  }, 120_000);
 });

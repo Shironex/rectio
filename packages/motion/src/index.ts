@@ -77,3 +77,4 @@ export {
   type MultiSelectItemProps,
   type MultiSelectProps,
 } from './multi-select/multi-select';
+export { Sparkline, type SparklineProps } from './sparkline/sparkline';
