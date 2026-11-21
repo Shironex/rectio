@@ -10,7 +10,7 @@ export const SUGGESTIONS: AiChatSuggestion[] = [
   { id: 'close', label: 'What is left before we can close November?' },
 ];
 
-export const OVERDUE_REPLY = `Three invoices are past due, **$18,420.00** in total. Northwind is the one to chase first: it is the oldest and the largest.
+export const OVERDUE_REPLY = `Three invoices are past due, **$18,420.00** in total[1](#source-1). Northwind is the one to chase first: it is the oldest and the largest.
 
 | Customer | Invoice | Due | Days late | Amount |
 | :-- | :-- | :-- | --: | --: |
@@ -20,7 +20,7 @@ export const OVERDUE_REPLY = `Three invoices are past due, **$18,420.00** in tot
 
 Two things stand out:
 
-1. Northwind paid its last four invoices late, by 30 days on average, so a reminder alone has not worked before.
+1. Northwind paid its last four invoices late, by 30 days on average, so a reminder alone has not worked before[2](#source-2).
 2. Fabrikam's contact changed in October; the reminder may have gone to an old address.
 
 To pull the same list in the ledger yourself:
@@ -32,7 +32,7 @@ where status = 'unpaid' and due_on < current_date
 order by days_late desc;
 \`\`\`
 
-Want me to draft a reminder to Northwind with the [late fee terms](https://example.com/terms) attached?`;
+Want me to draft a reminder to Northwind with the late fee terms[3](#source-3) attached?`;
 
 export const REMINDER_REPLY = `Here is a draft you can send from the invoice page:
 

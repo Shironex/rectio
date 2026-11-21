@@ -172,7 +172,10 @@ export function ChatPage({ theme, mode, motion }: { theme: ThemeId; mode: Mode; 
         onRegenerate={chat.regenerate}
         onFeedback={chat.rate}
         suggestions={SUGGESTIONS}
-        messages={{ assistant: 'Ledger assistant' }}
+        messages={{
+          assistant: 'Ledger assistant',
+          emptyDescription: 'I can read your invoices, bills, bank feeds and the close checklist.',
+        }}
         avatar={
           <span
             aria-hidden
@@ -182,10 +185,14 @@ export function ChatPage({ theme, mode, motion }: { theme: ThemeId; mode: Mode; 
           </span>
         }
         composer={{
-          placeholder: 'Ask about invoices, cash or the close',
+          placeholder:
+            state === 'error'
+              ? 'Offline. Reconnect to send'
+              : 'Ask about invoices, cash or the close',
           maxLength: 4000,
           onAttach: () => undefined,
           hint: 'Check figures before you send them on.',
+          disabled: state === 'error',
         }}
         header={
           <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-line px-4">
