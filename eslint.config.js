@@ -118,7 +118,9 @@ export default tseslint.config(
       // `@rectio/blocks/motion` is a declared entry: each block's motioned twin, picked by import path.
       // `@rectio/blocks/marketing` (and its `/motion`) is the declared entry of the marketing group.
       // `@rectio/blocks/docs` (and its `/motion`) is the declared entry of the docs group.
+      // `@rectio/blocks/ai` (and its `/motion`) is the declared entry of the AI group.
       // `@rectio/motion/navigation` is the motioned navigation, split to stay inside its bundle budget.
+      // `@rectio/motion/chat` is the motioned chat, split so an app without a conversation never loads it.
       // `@rectio/tokens/generator` (and its `.json` data) is the theme generator core the docs page runs.
       // `@rectio/ui/charts` (and `@rectio/motion/charts`) keeps the chart library out of apps without charts.
       'noctcore-monorepo/no-deep-package-imports': [
@@ -131,7 +133,10 @@ export default tseslint.config(
             'marketing/motion',
             'docs',
             'docs/motion',
+            'ai',
+            'ai/motion',
             'navigation',
+            'chat',
             'generator',
             'generator.json',
             'charts',
