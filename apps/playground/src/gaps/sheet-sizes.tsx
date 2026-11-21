@@ -27,6 +27,13 @@ const LINES = [
   ['FigJam add-on', 100],
 ] as const;
 
+const ACTIVITY = [
+  ['18 Mar', 'Second reminder sent to accounts@figma.example'],
+  ['11 Mar', 'Reminder sent; opened twice'],
+  ['4 Mar', 'Due date passed'],
+  ['2 Feb', 'Invoice sent by Niamh Walsh'],
+] as const;
+
 /** A trigger per size; `open` opens that size on load, for a screenshot. */
 export function SheetSizes({ open }: { open: SheetSize | null }) {
   return (
@@ -68,6 +75,17 @@ export function SheetSizes({ open }: { open: SheetSize | null }) {
                   </li>
                 ))}
               </ul>
+              <section className="flex flex-col gap-2">
+                <h3 className="text-sm font-medium">Activity</h3>
+                <ol className="flex flex-col gap-2 text-sm">
+                  {ACTIVITY.map(([date, event]) => (
+                    <li key={event} className="grid grid-cols-[4rem_1fr] gap-3">
+                      <span className="numeric text-fg-muted">{date}</span>
+                      <span>{event}</span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
             </SheetBody>
             <SheetFooter>
               <SheetClose render={<Button variant="secondary" />}>Close</SheetClose>
