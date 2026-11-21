@@ -13,10 +13,12 @@ import {
   generatorPresets,
   isThemeReference,
   pairsOf,
+  parseColor,
   passCount,
   renderThemeCss,
   resolveTheme,
   templateColors,
+  toHex,
   type GeneratorData,
   type ThemeInputs,
 } from '../generator/index.ts';
@@ -293,5 +295,19 @@ describe('theme css', () => {
     expect(renderThemeCss(TEMPLATE, again, resolveTheme(again, pairs, shipped), data.compact)).toBe(
       renderThemeCss(TEMPLATE, graphite.inputs, resolved, data.compact),
     );
+  });
+});
+
+describe('colour input', () => {
+  it('reads hex and OKLCH, and refuses anything else', () => {
+    const blue = parseColor('#2f6bd8');
+    expect(blue?.h).toBeGreaterThan(255);
+    expect(blue?.h).toBeLessThan(270);
+    expect(toHex(parseColor('#36d') ?? { l: 0, c: 0, h: 0 })).toBe('#3366dd');
+    expect(toHex(parseColor('#2f6bd8') ?? { l: 0, c: 0, h: 0 })).toBe('#2f6bd8');
+    expect(parseColor('oklch(53% 0.19 263)')).toMatchObject({ l: 0.53, h: 263 });
+    expect(parseColor('oklch(0.53 0.1 20 / 50%)')).toMatchObject({ l: 0.53, alpha: 0.5 });
+    expect(parseColor('blue')).toBeUndefined();
+    expect(parseColor('oklch(120% 0.1 20)')).toBeUndefined();
   });
 });

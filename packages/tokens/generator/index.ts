@@ -58,3 +58,4 @@ export {
 export { cuspLightness, type Correction, type Mode, type Preset } from '../scripts/derive-core.ts';
 export { parseOklch, toHex, type Pair, type Result } from '../scripts/evaluate.ts';
 export { fitSrgb, formatOklch, type Oklch } from '../scripts/color.ts';
+export { fromSrgb, parseColor } from './color-input.ts';
