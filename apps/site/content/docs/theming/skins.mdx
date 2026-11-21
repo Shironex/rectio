@@ -13,10 +13,10 @@ including one from the [theme generator](/docs/theming/generator).
 
 ## The skins
 
-| Skin        | For                                         | What it sets                                                                                                                                                     |
-| ----------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dense`     | Data-heavy apps: finance, admin, monitoring | 13px body text, tighter line heights, 3px controls and 6px panels, a smaller spacing unit, 32px controls                                                         |
-| `editorial` | Reading surfaces, reports, marketing pages  | IBM Plex Serif headings, hairline borders (0.5px: one device pixel on 2x screens, 1px on 1x), 2px controls and 4px panels, looser line heights, a roomier rhythm |
+| Skin        | For                                         | What it sets                                                                                                                                                 |
+| ----------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `dense`     | Data-heavy apps: finance, admin, monitoring | 13px body text, tighter line heights, 3px controls and 6px panels, a 3.5px spacing unit, 24, 32 and 36px controls                                            |
+| `editorial` | Reading surfaces, reports, marketing pages  | IBM Plex Serif headings and amounts, hairline borders (0.5px: one device pixel on 2x screens, 1px on 1x), 2px corners, looser line heights, a roomier rhythm |
 
 Each ships as its own registry item. Install one, then set the attribute:
 
@@ -75,15 +75,18 @@ where a pointer allows smaller targets.
 A skin may override these token groups and nothing else. The token build fails on anything outside
 them, and on a token the theme does not define.
 
-| Group               | Tokens                                                                        |
-| ------------------- | ----------------------------------------------------------------------------- |
-| Type                | `--rx-font-family-*`, `-size-*`, `-line-height-*`, `-weight-*`, `-tracking-*` |
-| Shape               | `--rx-radius-*`, `--rx-border-width`                                          |
-| Rhythm and controls | `--rx-space-unit`, `--rx-control-height-*`, `--rx-control-padding-x-*`        |
-| Component           | Non-colour component tokens, such as `--rx-emphasis-style`                    |
+| Group               | Tokens                                                                           |
+| ------------------- | -------------------------------------------------------------------------------- |
+| Type                | `--rx-font-family-*`, `-size-*`, `-line-height-*`, `-weight-*`, `-tracking-*`    |
+| Shape               | `--rx-radius-*`, `--rx-border-width`                                             |
+| Rhythm and controls | `--rx-space-unit`, `--rx-control-height-*`, `--rx-control-padding-x-*`           |
+| Component           | Non-colour component tokens, such as `--rx-emphasis-style` or `--rx-tree-indent` |
 
-Colour, shadow and motion are never part of a skin. Figures and tables keep the theme's numeric face in every skin, so amounts stay tabular; editorial
-sets only headings in the serif.
+Colour, shadow and motion are never part of a skin, and neither is a touch height
+(`--rx-control-height-touch` and every `*-touch` token): touch targets stay 44px in every skin.
+Amounts stay tabular in every skin. Editorial sets them in the serif through `--rx-money-family`,
+which keeps tabular lining figures, so columns still line up; other figures, such as chart axes,
+keep the theme's numeric face.
 
 ## Your own skin
 
