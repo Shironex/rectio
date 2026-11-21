@@ -344,8 +344,9 @@ export function CloseBooks() {
                             <span className="hidden text-fg-muted sm:block">{line.note}</span>
                           </span>
                         </span>
+                        {/* The report's own side: a claim is positive, the refund a credit against it. */}
                         <Money
-                          amount={line.amount}
+                          amount={-line.amount}
                           currency={CURRENCY}
                           locale={LOCALE}
                           tone={line.amount < 0 ? 'neutral' : 'auto'}
