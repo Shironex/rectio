@@ -165,7 +165,7 @@ try {
       }
       // The curtain, then the registry once its terminal session has typed out and the block landed.
       for (const [name, text, wait] of [
-        ['03-curtain', 'Calm by day.', 900],
+        ['03-curtain', 'Light by day.', 900],
         ['04-registry', 'One command, and', 9000],
       ] as const) {
         const heading = page.getByText(text).first();
