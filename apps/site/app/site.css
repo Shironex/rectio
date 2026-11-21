@@ -176,6 +176,18 @@
   pointer-events: none;
 }
 
+/* In dark the backdrop stays quiet: dots in the hairline colour, the glow barely there. */
+html[data-mode='dark'] .site-dots {
+  background-image: radial-gradient(
+    circle at center,
+    var(--rx-border) calc(var(--rx-space-unit) * 0.25),
+    transparent calc(var(--rx-space-unit) * 0.3)
+  );
+}
+html[data-mode='dark'] .site-glow {
+  opacity: 0.04;
+}
+
 /* Hero word cycle: every word sits in one grid cell, so the widest reserves the width. */
 .site-cycle {
   display: inline-grid;

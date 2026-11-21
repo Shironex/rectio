@@ -108,7 +108,7 @@ and dark: [open the templates gallery](https://shironex.github.io/rectio/templat
 | **61 blocks**     | 14 finance, 18 SaaS and app, 16 marketing and 13 docs blocks: data agnostic, typed props in and callbacks out                                         |
 | **5 templates**   | Whole Next.js apps: a finance back office, a help desk admin, a SaaS marketing site, a product launch page and a docs site                            |
 | **Motion add-on** | 73 motion twins (24 components, 49 blocks) with the same names and props as the plain ones, about 13 kB gzip, plain under reduced motion              |
-| **1 theme**       | `default`, in light and dark, with a compact density; 208 tokens per mode                                                                             |
+| **1 theme**       | `default`, in light and dark, with a compact density; 210 tokens per mode                                                                             |
 | **CLI**           | `rectio init`, `add`, `diff`, `list`, `search` and `update`, with integrity checks and a lockfile that respects your edits                            |
 | **MCP server**    | `rectio mcp`: seven read-only tools, so a coding agent can look up items, tokens, docs and source instead of guessing                                 |
 

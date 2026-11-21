@@ -63,7 +63,7 @@ export function Segmented<T extends string>({
           className={cn(
             'inline-flex cursor-pointer items-center gap-1.5 rounded-control font-medium whitespace-nowrap text-fg-muted select-none',
             'transition-[color,background-color,box-shadow] duration-fast ease-standard',
-            'data-pressed:bg-surface-raised data-pressed:text-fg data-pressed:shadow-raised',
+            'data-pressed:bg-surface-overlay data-pressed:text-fg data-pressed:shadow-raised',
             'pointer-fine:hover:text-fg',
             'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus',
             size === 'sm' ? 'h-7 px-2.5 text-sm' : 'h-9 px-3.5 text-base',
