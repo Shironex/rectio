@@ -605,9 +605,10 @@ export default defineRegistry({
     {
       name: 'toggle',
       type: 'component',
-      version: '0.1.2',
-      title: 'Toggle and toggle group',
-      description: 'Pressed-state buttons and a segmented control, single or multiple.',
+      version: '0.2.0',
+      title: 'Toggle, toggle group and segmented control',
+      description:
+        'Pressed-state buttons, a toggle group for single or multiple choice, and a segmented control driven by options.',
       categories: ['forms', 'actions'],
       files: ['toggle/toggle.tsx'],
     },
@@ -931,11 +932,11 @@ export default defineRegistry({
         ]),
         motionItem(
           'toggle',
-          'Motion ToggleGroup',
-          'Segmented control whose chosen chip slides to the new choice.',
+          'Motion ToggleGroup and SegmentedControl',
+          'Segmented controls whose chosen chip slides to the new choice, across rows too.',
           ['toggle/toggle.tsx'],
           'component',
-          '0.1.1',
+          '0.2.0',
         ),
         motionItem(
           'file-upload',
