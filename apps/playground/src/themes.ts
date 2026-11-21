@@ -31,6 +31,7 @@ export function readView(search: string) {
         'shell',
         'nav',
         'gaps',
+        'primitives',
       ] as const
     ).find((v) => v === params.get('view')) ?? 'matrix';
   const motion = params.get('motion') === 'on';
