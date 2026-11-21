@@ -59,7 +59,7 @@
       "$type": "dimension",
       "tight": {
         "$value": {
-          "value": -0.005,
+          "value": -0.01,
           "unit": "rem"
         }
       },
@@ -68,6 +68,13 @@
           "value": 0.08,
           "unit": "rem"
         }
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "heading": {
+        "$value": "{font-weight.medium}",
+        "$description": "Plex Serif reads heavier than the sans at the same weight: medium keeps display headings calm."
       }
     }
   },
