@@ -273,7 +273,7 @@ export function MessageFeedback({
             label={label}
             aria-pressed={pressed}
             disabled={disabled}
-            className="aria-pressed:text-accent-strong"
+            className="aria-pressed:text-fg"
             onClick={() => {
               onValueChange(pressed ? null : rating);
             }}

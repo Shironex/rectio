@@ -62,10 +62,8 @@ describe('ChatMessage', () => {
 
   it('shows a system note centred, without an avatar', () => {
     render(<ChatMessage from="system">Model changed to the fast one</ChatMessage>);
-    expect(screen.getByRole('article', { name: 'Model changed to the fast one' })).toHaveAttribute(
-      'data-from',
-      'system',
-    );
+    expect(screen.getByRole('article')).toHaveTextContent('Model changed to the fast one');
+    expect(screen.getByRole('article')).toHaveAttribute('data-from', 'system');
   });
 });
 

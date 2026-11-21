@@ -51,7 +51,7 @@ export interface ChatSourceChipProps extends Omit<ComponentProps<'a'>, 'href' | 
 }
 
 /**
- * A citation inside a reply: the source's number and site in a small chip that links to it. Its
+ * A citation inside a reply: the source's number in a small chip that links to it. Its
  * accessible name says the number and the title, so a screen reader hears what is cited.
  */
 export function ChatSourceChip({
@@ -63,28 +63,18 @@ export function ChatSourceChip({
 }: ChatSourceChipProps) {
   const m = { ...CHAT_SOURCE_MESSAGES, ...messages };
   const href = source.url === undefined ? null : safeUrl(source.url);
-  const site = source.site ?? sourceSite(source.url ?? undefined);
   const classes = cn(
-    'mx-0.5 inline-flex h-5 max-w-48 items-center gap-1 rounded-badge border border-line bg-surface-sunken px-1.5 align-baseline',
-    'text-xs font-medium text-fg-muted numeric',
-    href !== null && cn('hover:border-line-strong hover:text-fg', linkFocus),
+    'relative ms-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-badge bg-accent-subtle px-1.5 align-baseline pointer-coarse:before:absolute pointer-coarse:before:-inset-2.5',
+    'text-xs font-medium text-accent-strong numeric',
+    href !== null && cn('hover:text-fg', linkFocus),
     className,
   );
-  const content = (
-    <>
-      <span className="text-fg">{index}</span>
-      {site !== null && <span className="truncate max-md:hidden">{site}</span>}
-    </>
-  );
+  const content = <span>{index}</span>;
   if (href === null) {
     return (
-      <span
-        data-slot="chat-source-chip"
-        aria-label={m.cite(index, source.title)}
-        role="note"
-        className={classes}
-      >
-        {content}
+      <span data-slot="chat-source-chip" className={classes}>
+        <span aria-hidden>{index}</span>
+        <span className="sr-only">{m.cite(index, source.title)}</span>
       </span>
     );
   }
@@ -131,7 +121,7 @@ export function ChatSources({ sources, messages, className, ...props }: ChatSour
       <BaseCollapsible.Trigger
         className={cn(
           'group/trigger inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-control py-1 text-sm font-medium text-fg-muted',
-          'pointer-coarse:min-h-(--rx-control-height-touch) hover:text-fg',
+          'relative pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 hover:text-fg',
           linkFocus,
         )}
       >

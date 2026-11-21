@@ -618,6 +618,7 @@ export { ChartCard, type ChartCardProps } from './chart-card/chart-card';
 // AI and chat.
 export {
   DEFAULT_PROTOCOLS,
+  MARKDOWN_MESSAGES,
   Markdown,
   MarkdownCode,
   markdownToText,
@@ -631,6 +632,7 @@ export {
   type MarkdownImageProps,
   type MarkdownInline,
   type MarkdownLinkProps,
+  type MarkdownMessages,
   type MarkdownParseOptions,
   type MarkdownProps,
   type MarkdownSize,
@@ -710,6 +712,7 @@ export {
   type ReasoningStatus,
 } from './reasoning/reasoning';
 export {
+  CHAT_LOADER_MESSAGES,
   ChatLoader,
   type ChatLoaderProps,
   type ChatLoaderVariant,

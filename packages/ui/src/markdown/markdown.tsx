@@ -1,5 +1,13 @@
 import { ArrowSquareOutIcon } from '@phosphor-icons/react';
-import { Fragment, useMemo, type ComponentProps, type ReactNode } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../data-table/table';
 import { cn } from '../lib/cn';
@@ -64,7 +72,21 @@ export interface MarkdownProps extends Omit<ComponentProps<'div'>, 'children'> {
   externalLinks?: 'new-tab' | 'same-tab' | undefined;
   /** Said after a link that opens a new tab. Default "(opens in a new tab)". */
   newTabLabel?: string | undefined;
+  /** Names of the scrolling regions, for apps that translate them. */
+  messages?: Partial<MarkdownMessages> | undefined;
 }
+
+/** Names the renderer gives its scrolling regions, for apps that translate them. */
+export interface MarkdownMessages {
+  /** Names a code block: "ts code", or "Code" without a language. */
+  code: (lang: string | undefined) => string;
+  table: string;
+}
+
+export const MARKDOWN_MESSAGES: MarkdownMessages = {
+  code: (lang) => (lang === undefined ? 'Code' : `${lang} code`),
+  table: 'Table',
+};
 
 const HEADING: Record<MarkdownSize, Record<1 | 2 | 3 | 4 | 5 | 6, string>> = {
   base: {
@@ -100,14 +122,6 @@ export const streamingCaret = cn(
   'after:rounded-badge after:bg-accent after:animate-breathe',
 );
 
-/** The same caret on the last paragraph or list item of a streaming Markdown text. */
-const markdownCaret = cn(
-  '[&>p:last-child]:after:ms-0.5 [&>p:last-child]:after:inline-block [&>p:last-child]:after:h-4 [&>p:last-child]:after:w-0.5 [&>p:last-child]:after:translate-y-0.5',
-  '[&>p:last-child]:after:rounded-badge [&>p:last-child]:after:bg-accent [&>p:last-child]:after:animate-breathe',
-  '[&>[role=list]:last-child>li:last-child>:last-child]:after:ms-0.5 [&>[role=list]:last-child>li:last-child>:last-child]:after:inline-block [&>[role=list]:last-child>li:last-child>:last-child]:after:h-4 [&>[role=list]:last-child>li:last-child>:last-child]:after:w-0.5 [&>[role=list]:last-child>li:last-child>:last-child]:after:translate-y-0.5',
-  '[&>[role=list]:last-child>li:last-child>:last-child]:after:rounded-badge [&>[role=list]:last-child>li:last-child>:last-child]:after:bg-accent [&>[role=list]:last-child>li:last-child>:last-child]:after:animate-breathe',
-);
-
 const isExternal = (href: string) => /^(?:[a-z][a-z\d+.-]*:)?\/\//i.test(href);
 
 interface RenderContext {
@@ -117,10 +131,17 @@ interface RenderContext {
   newTabLabel: string;
   /** Inside a tight list item: paragraphs drop their margins. */
   tight: boolean;
+  /** The last block here ends the streaming text and carries the caret. */
+  caret: boolean;
+  messages: MarkdownMessages;
 }
 
 /** The code block drawn when no `components.code` is given: the code, its language, no chrome. */
-export function MarkdownCode({ code, lang }: MarkdownCodeProps) {
+export function MarkdownCode({
+  code,
+  lang,
+  label = MARKDOWN_MESSAGES.code(lang),
+}: MarkdownCodeProps & { label?: string | undefined }) {
   return (
     <figure
       data-slot="markdown-code"
@@ -134,7 +155,7 @@ export function MarkdownCode({ code, lang }: MarkdownCodeProps) {
       <pre
         // A scroll area must be reachable with the keyboard to scroll it without a pointer.
         tabIndex={0}
-        aria-label={lang === undefined ? 'Code' : `${lang} code`}
+        aria-label={label}
         className={cn(
           'm-0 overflow-x-auto px-3 py-2.5 font-mono text-sm',
           'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
@@ -178,6 +199,55 @@ function MarkdownLink({
         </>
       )}
     </a>
+  );
+}
+
+/**
+ * Wide tables scroll inside their frame, never the page; the frame takes focus to scroll. While
+ * columns sit past the end edge a fade there says the table goes on.
+ */
+function TableFrame({ label, children }: { label: string; children: ReactNode }) {
+  const frame = useRef<HTMLDivElement>(null);
+  const [more, setMore] = useState(false);
+  const [scrolls, setScrolls] = useState(false);
+  useEffect(() => {
+    const element = frame.current;
+    if (element === null || typeof ResizeObserver === 'undefined') return;
+    const check = () => {
+      setScrolls(element.scrollWidth > element.clientWidth + 1);
+      setMore(Math.abs(element.scrollLeft) + element.clientWidth < element.scrollWidth - 1);
+    };
+    // The observer reports once on observe, so the first check needs no call of its own.
+    const observer = new ResizeObserver(check);
+    observer.observe(element);
+    element.addEventListener('scroll', check, { passive: true });
+    return () => {
+      observer.disconnect();
+      element.removeEventListener('scroll', check);
+    };
+  }, []);
+  return (
+    <div data-slot="markdown-table" data-more={more || undefined} className="relative min-w-0">
+      <div
+        ref={frame}
+        // Only a frame that scrolls takes a tab stop: a table that fits needs no keyboard scroll.
+        tabIndex={scrolls ? 0 : undefined}
+        role="region"
+        aria-label={label}
+        className={cn(
+          'min-w-0 overflow-x-auto rounded-panel border border-line',
+          'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+        )}
+      >
+        {children}
+      </div>
+      {more && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-px end-px w-12 rounded-e-panel bg-linear-to-l from-surface to-transparent rtl:bg-linear-to-r"
+        />
+      )}
+    </div>
   );
 }
 
@@ -261,6 +331,7 @@ function renderInline(nodes: readonly MarkdownInline[], context: RenderContext):
 function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext): ReactNode[] {
   return blocks.map((block, index) => {
     const key = index;
+    const caret = context.caret && index === blocks.length - 1;
     switch (block.type) {
       case 'heading': {
         // Headings in a reply sit under the page's own: they start at h3 so the outline holds.
@@ -273,11 +344,11 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
       }
       case 'paragraph':
         return context.tight ? (
-          <span key={key} className="block">
+          <span key={key} className={cn('block', caret && streamingCaret)}>
             {renderInline(block.children, context)}
           </span>
         ) : (
-          <p key={key} className="text-pretty">
+          <p key={key} className={cn('text-pretty', caret && streamingCaret)}>
             {renderInline(block.children, context)}
           </p>
         );
@@ -295,6 +366,7 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
                 lang={block.lang}
                 meta={block.meta}
                 closed={block.closed}
+                label={context.messages.code(block.lang)}
               />
             )}
           </div>
@@ -319,7 +391,11 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
                 key={itemIndex}
                 className="ps-1 marker:text-fg-subtle [&>*+*]:mt-2"
               >
-                {renderBlocks(item, { ...context, tight: block.tight })}
+                {renderBlocks(item, {
+                  ...context,
+                  tight: block.tight,
+                  caret: caret && itemIndex === block.items.length - 1,
+                })}
               </li>
             ))}
           </Tag>
@@ -329,25 +405,14 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
         return (
           <blockquote
             key={key}
-            className="flex flex-col gap-3 border-s border-line-strong ps-4 text-fg-muted"
+            className="flex flex-col gap-3 rounded-control bg-surface-sunken px-4 py-3 text-fg-muted"
           >
-            {renderBlocks(block.children, { ...context, tight: false })}
+            {renderBlocks(block.children, { ...context, tight: false, caret })}
           </blockquote>
         );
       case 'table':
         return (
-          <div
-            key={key}
-            data-slot="markdown-table"
-            // Wide tables scroll inside their frame, never the page; the frame takes focus to scroll.
-            tabIndex={0}
-            role="region"
-            aria-label="Table"
-            className={cn(
-              'min-w-0 overflow-x-auto rounded-panel border border-line',
-              'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-            )}
-          >
+          <TableFrame key={key} label={context.messages.table}>
             <Table className="text-sm whitespace-nowrap [&_tbody_tr:last-child_td]:border-b-0">
               <TableHeader>
                 <TableRow>
@@ -388,7 +453,7 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </TableFrame>
         );
       case 'hr':
         return <hr key={key} className="border-line" />;
@@ -412,6 +477,7 @@ export function Markdown({
   allowedProtocols,
   externalLinks = 'new-tab',
   newTabLabel = '(opens in a new tab)',
+  messages,
   className,
   ...props
 }: MarkdownProps) {
@@ -427,7 +493,6 @@ export function Markdown({
       className={cn(
         'flex min-w-0 flex-col text-fg wrap-anywhere',
         size === 'sm' ? 'gap-3 text-sm' : 'gap-4 text-base',
-        streaming && caret && markdownCaret,
         className,
       )}
       {...props}
@@ -438,6 +503,8 @@ export function Markdown({
         newTab: externalLinks === 'new-tab',
         newTabLabel,
         tight: false,
+        caret: streaming && caret,
+        messages: { ...MARKDOWN_MESSAGES, ...messages },
       })}
     </div>
   );

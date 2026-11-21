@@ -91,7 +91,7 @@ export function DisclosureData({ label, children }: { label: string; children: R
 }
 
 const codeBox = cn(
-  'm-0 max-h-72 overflow-auto rounded-control border border-line bg-code-background px-3 py-2 font-mono text-sm text-code-foreground',
+  'm-0 max-h-72 overflow-auto rounded-control bg-code-background px-3 py-2 font-mono text-sm text-code-foreground',
   'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
 );
 
@@ -127,18 +127,13 @@ export function ToolCall({
       <BaseCollapsible.Trigger
         className={cn(
           'group/trigger flex w-fit max-w-full cursor-pointer items-center gap-2 rounded-control py-1 text-start text-sm text-fg-muted',
-          'pointer-coarse:min-h-(--rx-control-height-touch) hover:text-fg',
+          'relative pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 hover:text-fg',
           'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         )}
       >
         {STATUS_ICON[status]}
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-2">
-          <span className="font-medium text-pretty">
-            {title ?? <span className="font-mono">{name}</span>}
-          </span>
-          {title !== undefined && (
-            <span className="truncate font-mono text-xs text-fg-subtle max-sm:hidden">{name}</span>
-          )}
+          <span className="text-pretty">{title ?? <span className="font-mono">{name}</span>}</span>
         </span>
         <span
           className={cn(
@@ -146,9 +141,16 @@ export function ToolCall({
             status === 'failed' ? 'font-medium text-negative-strong' : 'text-fg-subtle',
           )}
         >
-          {word}
+          {/* Done is already the check; it stays in words for a screen reader. */}
+          <span className={cn(status === 'done' && duration !== undefined && 'sr-only')}>
+            {word}
+          </span>
           {duration !== undefined && status !== 'running' && (
-            <span className="numeric">, {duration}</span>
+            <span className="numeric">
+              <span className="sr-only">, </span>
+              {status === 'done' ? '' : ', '}
+              {duration}
+            </span>
           )}
         </span>
         <CaretRightIcon
@@ -161,7 +163,8 @@ export function ToolCall({
         />
       </BaseCollapsible.Trigger>
       <BaseCollapsible.Panel className={disclosurePanelMotion}>
-        <div className="flex flex-col gap-3 border-s border-line-strong ps-4">
+        <div className="flex flex-col gap-3 rounded-control bg-surface-sunken p-3">
+          {title !== undefined && <p className="font-mono text-xs text-fg-subtle">{name}</p>}
           {hasArgs && (
             <DisclosureData label={m.input}>
               <pre tabIndex={0} aria-label={`${m.input}: ${name}`} className={codeBox}>

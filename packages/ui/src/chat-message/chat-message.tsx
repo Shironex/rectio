@@ -20,6 +20,8 @@ export interface ChatMessageMessages {
   /** The name read for the assistant's messages when `author` is not given. */
   assistant: string;
   sending: string;
+  /** Beside the name while a reply streams. */
+  writing: string;
   stopped: string;
   /** Shown with `status: 'error'` when `error` is not given. */
   failed: string;
@@ -34,6 +36,7 @@ export const CHAT_MESSAGE_MESSAGES: ChatMessageMessages = {
   you: 'You',
   assistant: 'Assistant',
   sending: 'Sending',
+  writing: 'Writing',
   stopped: 'Stopped',
   failed: 'The message could not be sent.',
   retry: 'Retry',
@@ -125,7 +128,6 @@ export function ChatMessage({
       <article
         data-slot="chat-message"
         data-from="system"
-        aria-label={typeof children === 'string' ? children : undefined}
         className={cn(
           'flex items-center gap-3 text-center text-sm text-fg-muted',
           'before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line',
@@ -214,6 +216,12 @@ export function ChatMessage({
             {name}
           </span>
           {time}
+          {status === 'streaming' && (
+            <span aria-hidden className="flex items-center gap-1.5 text-xs text-fg-subtle">
+              <span className="size-1.5 rounded-full bg-accent animate-breathe" />
+              {m.writing}
+            </span>
+          )}
         </header>
         <div
           data-part="body"
@@ -221,7 +229,7 @@ export function ChatMessage({
             'min-w-0',
             isUser
               ? cn(
-                  'max-w-xl rounded-panel border border-line bg-surface-sunken px-3.5 py-2.5 text-fg',
+                  'max-w-full rounded-panel border border-transparent bg-accent-subtle px-3.5 py-2.5 text-fg sm:max-w-xl',
                   'whitespace-pre-wrap wrap-anywhere',
                   failed && 'border-negative bg-negative-subtle',
                 )

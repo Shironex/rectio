@@ -81,7 +81,7 @@ export function Reasoning({
       <BaseCollapsible.Trigger
         className={cn(
           'group/trigger inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-control py-1 text-sm font-medium text-fg-muted',
-          'pointer-coarse:min-h-(--rx-control-height-touch) hover:text-fg',
+          'relative pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 hover:text-fg',
           'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         )}
       >
@@ -108,7 +108,9 @@ export function Reasoning({
         />
       </BaseCollapsible.Trigger>
       <BaseCollapsible.Panel className={disclosurePanelMotion}>
-        <div className="border-s border-line-strong ps-4 text-sm text-fg-muted">{children}</div>
+        <div className="rounded-control bg-surface-sunken px-3 py-2.5 text-sm text-fg-muted">
+          {children}
+        </div>
       </BaseCollapsible.Panel>
     </BaseCollapsible.Root>
   );

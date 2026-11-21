@@ -114,10 +114,10 @@ describe('Markdown', () => {
     );
   });
 
-  it('draws tables with header cells and a scrollable, focusable frame', () => {
+  it('draws tables with header cells in a scrolling frame that takes focus only when it scrolls', () => {
     render(<Markdown>{'| Vendor | Amount |\n| --- | ---: |\n| Northwind | 1,200 |'}</Markdown>);
     const region = screen.getByRole('region', { name: 'Table' });
-    expect(region).toHaveAttribute('tabindex', '0');
+    expect(region).not.toHaveAttribute('tabindex');
     expect(within(region).getAllByRole('columnheader')).toHaveLength(2);
     expect(within(region).getByRole('cell', { name: '1,200' })).toHaveClass('text-end');
   });

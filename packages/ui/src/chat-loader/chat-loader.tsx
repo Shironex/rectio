@@ -5,6 +5,12 @@ import { Skeleton, SkeletonCircle, SkeletonLine } from '../skeleton/skeleton';
 
 export type ChatLoaderVariant = 'typing' | 'skeleton';
 
+/** What the loaders say to a screen reader when no `label` is given. */
+export const CHAT_LOADER_MESSAGES = {
+  typing: 'Assistant is typing',
+  loading: 'Loading messages',
+};
+
 export interface ChatLoaderProps extends Omit<ComponentProps<'div'>, 'children'> {
   /**
    * `typing`: three dots, for the moment between sending and the first words. `skeleton`: the
@@ -48,7 +54,7 @@ export function ChatLoader({
         className={cn('flex w-full gap-3', className)}
         {...props}
       >
-        <span className="sr-only">{label ?? 'Loading messages'}</span>
+        <span className="sr-only">{label ?? CHAT_LOADER_MESSAGES.loading}</span>
         <SkeletonCircle size="md" />
         <div className="flex min-w-0 flex-1 flex-col gap-2 pt-1">
           <Skeleton className="h-3 w-24" />
@@ -74,7 +80,7 @@ export function ChatLoader({
       )}
       {...props}
     >
-      <span className="sr-only">{label ?? 'Assistant is typing'}</span>
+      <span className="sr-only">{label ?? CHAT_LOADER_MESSAGES.typing}</span>
       {[0, 1, 2].map((index) => (
         <span
           key={index}

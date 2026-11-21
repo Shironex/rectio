@@ -23,7 +23,7 @@ describe('ChatSource', () => {
     const chip = screen.getByRole('link', { name: 'Source 1: Accounts payable policy' });
     expect(chip).toHaveAttribute('href', 'https://www.example.com/ap-policy');
     expect(chip).toHaveAttribute('target', '_blank');
-    expect(chip).toHaveTextContent('1example.com');
+    expect(chip).toHaveTextContent('1');
   });
 
   it('folds the list under a count and drops unsafe links', async () => {

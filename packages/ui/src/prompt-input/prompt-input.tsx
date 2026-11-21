@@ -258,7 +258,7 @@ export function PromptInput({
           textareaClassName,
         )}
       />
-      <div className="flex items-center gap-2 px-2 pt-1 pb-2">
+      <div className="flex items-center gap-2 px-2 pb-2">
         {attaching && (
           <FileUploadTrigger
             variant="ghost"
@@ -288,7 +288,8 @@ export function PromptInput({
           )}
           {canStop ? (
             <Button
-              variant="secondary"
+              // The same footprint as Send, so the button under the thumb never jumps.
+              variant="ghost"
               iconOnly
               aria-label={m.stop}
               data-part="stop"
@@ -297,11 +298,14 @@ export function PromptInput({
                 field.current?.focus();
               }}
             >
-              <StopIcon aria-hidden weight="fill" className="size-4" />
+              <StopIcon aria-hidden weight="fill" className="size-4 text-fg" />
             </Button>
           ) : (
             <Button
               type="submit"
+              // A filled button only once there is something to send; the quiet one reads as waiting.
+              variant={canSend ? 'primary' : 'ghost'}
+              className={cn(!canSend && 'text-fg-muted')}
               iconOnly
               aria-label={m.send}
               data-part="send"
