@@ -71,13 +71,17 @@ const popupBySide: Record<SheetSide, string> = {
   ),
   bottom: cn(
     'inset-x-0 bottom-0 max-h-5/6 rounded-t-(--rx-sheet-radius) border-t',
-    'translate-y-(--drawer-swipe-movement-y)',
+    'translate-y-(--drawer-swipe-movement-y) transform-(--rx-sheet-snap)',
     'data-starting-style:translate-y-full data-ending-style:translate-y-full',
   ),
 };
 
-/** Where a bottom sheet rests at a snap point, measured by Base UI; nothing without snap points. */
-const SNAP_OFFSET = 'translateY(var(--drawer-snap-point-offset, 0px))';
+/**
+ * Where a bottom sheet rests at a snap point, measured by Base UI; nothing without snap points.
+ * Held in a variable the stylesheet reads, not in an inline transform: Base UI removes the inline
+ * transform while the sheet is dragged, which would drop the offset and jump the sheet up.
+ */
+const SNAP_OFFSET = { '--rx-sheet-snap': 'translateY(var(--drawer-snap-point-offset, 0px))' };
 const SNAP_PADDING = 'calc(env(safe-area-inset-bottom) + var(--drawer-snap-point-offset, 0px))';
 
 export type SheetSize = 'sm' | 'md' | 'lg' | 'full';
@@ -152,7 +156,7 @@ export function SheetContent({
           style={
             side === 'bottom'
               ? (state) => ({
-                  transform: SNAP_OFFSET,
+                  ...SNAP_OFFSET,
                   ...(typeof style === 'function' ? style(state) : style),
                 })
               : style
