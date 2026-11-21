@@ -190,7 +190,7 @@ export function PrimitivesPage({
           </div>
         </Section>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid items-start gap-6 md:grid-cols-2">
           <Section
             title="Alert dialog"
             note="Opens on the safe answer. The action waits for the request before it closes."
@@ -226,14 +226,14 @@ export function PrimitivesPage({
 
           <Section
             title="Drawer"
-            note="A side panel here, a bottom sheet on a phone that rests at half or full height."
+            note="A side panel here, a bottom sheet on a phone that a swipe down closes."
           >
-            <Drawer defaultOpen={open === 'drawer'} snapPoints={[0.55, 1]}>
+            <Drawer defaultOpen={open === 'drawer'}>
               <DrawerTrigger render={<Button variant="secondary" className="self-start" />}>
                 <FunnelIcon aria-hidden weight="bold" className="size-4" />
                 Filter expenses
               </DrawerTrigger>
-              <DrawerContent size="sm" height="full">
+              <DrawerContent size="sm">
                 <DrawerHeader>
                   <DrawerTitle>Filter expenses</DrawerTitle>
                   <DrawerDescription>
@@ -270,7 +270,7 @@ export function PrimitivesPage({
           </Section>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid items-start gap-6 md:grid-cols-2">
           <Section
             title="Copy button"
             note="Copies in one press, shows a check and says Copied. Falls back where the clipboard is blocked."
@@ -337,7 +337,7 @@ export function PrimitivesPage({
               selected={selected}
               onSelectedChange={setSelected}
               loadChildren={loadChildren}
-              className="h-80"
+              className="h-96"
             />
           </div>
         </Section>
