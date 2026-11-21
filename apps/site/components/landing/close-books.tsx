@@ -86,7 +86,9 @@ const CORNERS: Corner[] = ['tl', 'tr', 'bl', 'br'];
  */
 export function CloseBooks() {
   const [scrolled, setStep] = useState(0);
-  const still = useReducedMotion();
+  // The server HTML is the settled month end: what reduced motion and no JavaScript should see.
+  // The live part (a client render, never a hydration) takes the real setting and rewinds.
+  const still = useReducedMotion(true);
   const step = still ? LAST : scrolled;
   const markers = useRef<(HTMLDivElement | null)[]>([]);
   const stage = useRef<HTMLDivElement>(null);

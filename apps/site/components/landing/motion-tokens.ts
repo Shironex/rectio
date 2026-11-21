@@ -25,7 +25,10 @@ function subscribeReduced(onChange: () => void) {
   };
 }
 
-/** Whether the visitor asked for reduced motion, kept in step with the system setting. */
-export function useReducedMotion(): boolean {
-  return useSyncExternalStore(subscribeReduced, prefersReducedMotion, () => false);
+/**
+ * Whether the visitor asked for reduced motion, kept in step with the system setting. `onServer`
+ * is the answer the server HTML is rendered with, where the setting is unknown.
+ */
+export function useReducedMotion(onServer = false): boolean {
+  return useSyncExternalStore(subscribeReduced, prefersReducedMotion, () => onServer);
 }
