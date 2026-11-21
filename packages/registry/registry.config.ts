@@ -773,6 +773,16 @@ export default defineRegistry({
       files: ['copy-button/copy-button.tsx'],
     },
     {
+      name: 'rating',
+      type: 'component',
+      version: '0.1.0',
+      title: 'Rating',
+      description:
+        'A star rating on radios with half steps and a pointer preview, and a read-only display.',
+      categories: ['forms'],
+      files: ['rating/rating.tsx'],
+    },
+    {
       name: 'breadcrumb',
       type: 'component',
       version: '0.1.2',
