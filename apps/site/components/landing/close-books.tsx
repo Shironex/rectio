@@ -169,9 +169,9 @@ export function CloseBooks() {
   return (
     <section
       aria-labelledby="close-books-title"
+      // The runway (site.css) is shorter on phones; the panel inside stays pinned along it. The
+      // layout follows the media query in CSS, so it is right before this part hydrates.
       className="site-runway relative"
-      // The runway (site.css) is shorter on phones; the panel inside stays pinned along it.
-      style={still ? undefined : { height: 'var(--site-runway)' }}
     >
       <a
         href="#kit"
@@ -187,7 +187,7 @@ export function CloseBooks() {
               markers.current[i] = el;
             }}
             aria-hidden
-            className="absolute inset-x-0"
+            className="absolute inset-x-0 motion-reduce:hidden"
             style={{
               top: `calc(50vh + ${String(i)} * var(--site-band))`,
               height: 'var(--site-band)',
@@ -196,8 +196,8 @@ export function CloseBooks() {
         ))}
       <div
         className={cn(
-          'flex flex-col justify-center',
-          still ? 'py-16' : 'sticky top-0 min-h-dvh pt-16 pb-4 sm:py-8',
+          'flex flex-col justify-center motion-reduce:py-16',
+          'motion-safe:sticky motion-safe:top-0 motion-safe:min-h-dvh motion-safe:pt-16 motion-safe:pb-4 motion-safe:sm:py-8',
         )}
       >
         <div className="mx-auto grid w-full max-w-7xl gap-4 px-4 sm:gap-6 sm:px-8 lg:grid-cols-12 lg:gap-12">

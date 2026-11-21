@@ -362,6 +362,12 @@ html[data-mode='dark'] .site-panel {
     --site-runway: 340vh;
   }
 }
+/* The runway is as tall as the scroll it drives; with reduced motion the panel just sits there. */
+@media (prefers-reduced-motion: no-preference) {
+  .site-runway {
+    height: var(--site-runway);
+  }
+}
 
 /*
  * Template screenshots: the light and dark captures are both in the page, and the page's mode
