@@ -16,7 +16,7 @@ function Inline({ text }: { text: string }) {
       return (
         <code
           key={i}
-          className="rounded-control bg-surface-sunken px-1 py-0.5 font-mono text-sm text-fg"
+          className="rounded-control bg-surface-hover px-1 py-px font-mono text-sm text-fg"
         >
           {part.value}
         </code>
@@ -42,11 +42,11 @@ function Entry({ entry }: { entry: ChangelogEntry }) {
     <li className="list-disc text-base text-pretty text-fg-muted marker:text-fg-subtle">
       <Inline text={entry.text} />
       {entry.points.length > 0 && (
-        <ul className="mt-2 flex flex-col gap-1.5 ps-5">
+        <ul className="mt-2 flex flex-col gap-2 ps-5">
           {entry.points.map((point) => (
             <li
               key={point}
-              className="list-disc text-sm marker:text-fg-subtle text-pretty text-fg-muted"
+              className="list-disc text-base text-pretty text-fg-muted marker:text-fg-subtle"
             >
               <Inline text={point} />
             </li>
@@ -75,21 +75,33 @@ export function ReleaseList({
       {releases.map((release) => (
         <li
           key={release.id}
-          className="grid gap-x-10 gap-y-4 border-t border-line py-10 first:border-t-0 first:pt-2 md:py-14 @3xl:grid-cols-4"
+          className="grid gap-x-10 gap-y-4 border-t border-line py-12 first:border-t-0 first:pt-2 md:py-16 @3xl:grid-cols-4"
         >
           <div className="flex flex-col gap-2 @3xl:sticky @3xl:top-24 @3xl:self-start">
-            <h2 id={release.id} className="scroll-mt-24">
-              <a href={`#${release.id}`} className={`text-lg font-strong text-fg ${focus}`}>
+            <h2 id={release.id} className="group scroll-mt-24">
+              <a
+                href={`#${release.id}`}
+                className={`inline-flex items-center gap-2 text-base font-medium text-fg-muted tabular-nums pointer-coarse:min-h-11 pointer-fine:hover:text-fg ${focus}`}
+              >
                 {release.date === undefined ? (
                   'Unreleased'
                 ) : (
                   <time dateTime={isoDate(release.date)}>{formatDate(release.date, 'en-GB')}</time>
                 )}
+                {/* The title reads with the date in the outline; sighted readers see it beside. */}
+                <span className="sr-only">{`: ${release.title}`}</span>
+                <span
+                  aria-hidden
+                  data-anchor-mark
+                  className="font-mono text-accent-strong opacity-0 transition-opacity duration-fast ease-standard group-focus-within:opacity-100 pointer-coarse:opacity-100 pointer-fine:group-hover:opacity-100"
+                >
+                  #
+                </span>
               </a>
             </h2>
             <div className="flex flex-wrap gap-1.5">
               {release.id === latestId && <DocsBadge tone="new">Latest</DocsBadge>}
-              {release.date === undefined && <DocsBadge tone="beta">On main</DocsBadge>}
+              {release.date === undefined && <DocsBadge>On main</DocsBadge>}
               {release.version !== undefined && (
                 <DocsBadge className="font-mono">{`rectio ${release.version}`}</DocsBadge>
               )}
@@ -98,9 +110,9 @@ export function ReleaseList({
               )}
             </div>
           </div>
-          <div className="flex min-w-0 flex-col gap-6 @3xl:col-span-3">
+          <div className="flex min-w-0 flex-col gap-7 @3xl:col-span-3">
             <div className="flex flex-col gap-3">
-              <p className="font-display text-2xl font-heading tracking-tight text-balance text-fg">
+              <p className="font-display text-2xl font-heading tracking-tight text-balance text-fg md:text-3xl">
                 {release.title}
               </p>
               {release.summary !== undefined && (
@@ -115,7 +127,7 @@ export function ReleaseList({
               >
                 <h3
                   id={`${release.id}-${group.area}`}
-                  className="text-xs font-strong tracking-caps text-fg uppercase"
+                  className="text-xs font-strong tracking-caps text-fg-muted uppercase"
                 >
                   {group.label}
                 </h3>

@@ -417,3 +417,14 @@ html[data-mode='dark'] .site-shot-dark {
     height: auto;
   }
 }
+
+/*
+ * A changelog release opened from its link: the date takes full text colour and keeps its # mark,
+ * so the landing says which release the link meant without moving anything.
+ */
+[data-slot='changelog'] h2:target a {
+  color: var(--rx-text);
+}
+[data-slot='changelog'] h2:target [data-anchor-mark] {
+  opacity: 1;
+}

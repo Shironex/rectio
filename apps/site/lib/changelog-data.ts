@@ -59,3 +59,12 @@ export function inlineParts(text: string): InlinePart[] {
   if (at < text.length) parts.push({ kind: 'text', value: text.slice(at) });
   return parts;
 }
+
+/** `2026-11-21` as `21 Nov 2026`: the jump row and the docs sidebar link. */
+export function shortDate(date: string): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(`${date}T00:00:00`));
+}
