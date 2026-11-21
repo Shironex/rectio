@@ -132,6 +132,7 @@ export { TimeField, type TimeFieldProps } from './time-field/time-field';
 export {
   EventCard,
   formatEventLength,
+  formatEventStart,
   formatEventTime,
   type EventCardProps,
   type EventStatus,

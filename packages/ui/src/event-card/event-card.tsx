@@ -26,6 +26,11 @@ export interface EventCardProps extends Omit<ComponentProps<'article'>, 'title' 
    * tight block of title and time for a time grid or a dense list.
    */
   variant?: 'full' | 'compact';
+  /**
+   * `range` (default) writes the start and the end; `start` writes the start alone, for a compact
+   * card too narrow for both. The whole range is still read out.
+   */
+  timeDisplay?: 'range' | 'start';
   /** BCP 47 tag for the times and the attendee names. */
   locale?: string;
   /** Opens the event: the title becomes a button that covers the whole card. */
@@ -53,7 +58,8 @@ const TONES: Record<EventTone, { surface: string; ink: string }> = {
     surface: 'border-negative-strong/25 bg-negative-subtle',
     ink: 'text-negative-strong',
   },
-  neutral: { surface: 'border-line-strong bg-surface-sunken', ink: 'text-fg-muted' },
+  // A tint of the ink, so it lifts off the surface in dark as well as light.
+  neutral: { surface: 'border-fg/15 bg-surface-hover', ink: 'text-fg-muted' },
 };
 
 const sameDay = (a: Date, b: Date) =>
@@ -82,6 +88,14 @@ export function formatEventTime(start: Date, end: Date, locale?: string, allDay 
   return sameDay(start, end)
     ? `${time.format(start)} to ${time.format(end)}`
     : `${day.format(start)}, ${time.format(start)} to ${day.format(end)}, ${time.format(end)}`;
+}
+
+/** When an event starts, on the locale's clock: `09:00` or `9:00 AM`. */
+export function formatEventStart(start: Date, locale?: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    hour: resolveHourCycle(locale) === 24 ? '2-digit' : 'numeric',
+    minute: '2-digit',
+  }).format(start);
 }
 
 /** How long an event lasts, short: `45 min`, `1 hr 30 min`, `3 days`. */
@@ -118,6 +132,7 @@ export function EventCard({
   tone = 'accent',
   status = 'confirmed',
   variant = 'full',
+  timeDisplay = 'range',
   locale,
   onSelect,
   triggerProps,
@@ -133,6 +148,18 @@ export function EventCard({
   const StatusIcon = status === 'tentative' ? QuestionIcon : ProhibitIcon;
   const statusWord = status === 'confirmed' ? null : STATUS_WORDS[status];
 
+  // A compact card may lose its status word to a narrow column; the icon stays by the title.
+  const compactIcon = compact && statusWord !== null && (
+    <StatusIcon
+      aria-hidden
+      weight="bold"
+      className={cn(
+        'me-1 inline-block size-3 align-middle',
+        cancelled ? 'text-fg-muted' : colours.ink,
+      )}
+    />
+  );
+
   const titleClass = cn(
     'min-w-0 font-medium text-fg',
     compact ? 'line-clamp-2 text-sm leading-tight' : 'text-base',
@@ -141,7 +168,10 @@ export function EventCard({
 
   const heading =
     onSelect === undefined ? (
-      <span className={titleClass}>{title}</span>
+      <span className={titleClass}>
+        {compactIcon}
+        {title}
+      </span>
     ) : (
       <button
         type="button"
@@ -156,6 +186,7 @@ export function EventCard({
           triggerProps?.className,
         )}
       >
+        {compactIcon}
         {title}
       </button>
     );
@@ -201,7 +232,14 @@ export function EventCard({
                 <span className="font-medium">{statusWord},</span>{' '}
               </>
             )}
-            {when}
+            {timeDisplay === 'start' && !allDay ? (
+              <>
+                <span aria-hidden>{formatEventStart(start, locale)}</span>
+                <span className="sr-only">{when}</span>
+              </>
+            ) : (
+              when
+            )}
             {location !== undefined && <span className="sr-only">, {location}</span>}
           </p>
         </>
@@ -247,7 +285,7 @@ export function EventCard({
               items={attendees}
               label="Attendees"
               size="sm"
-              max={4}
+              max={3}
               names="always"
               locale={locale}
               className="relative z-10"
