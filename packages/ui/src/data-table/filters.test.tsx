@@ -97,7 +97,7 @@ describe('DataTable filters', () => {
     const user = userEvent.setup();
     render(<Invoices />);
     await user.type(screen.getByRole('searchbox', { name: 'Search invoices' }), '410');
-    expect(screen.getByText('No rows match the search and filters.')).toBeInTheDocument();
+    expect(screen.getByText('No rows match')).toBeInTheDocument();
   });
 
   it('keeps the rows with any of the picked values, with counts, from the keyboard', async () => {

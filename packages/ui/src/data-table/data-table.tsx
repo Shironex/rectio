@@ -353,7 +353,7 @@ export function DataTableBody<TData extends RowData>({
     return (
       <TableBody>
         <TableRow>
-          <TableCell colSpan={columns.length} className="h-auto py-10 text-center text-fg-muted">
+          <TableCell colSpan={columns.length} className="h-auto py-12 text-center text-fg-muted">
             {hidden ? (emptyFiltered ?? <NoMatches table={table} />) : (empty ?? 'No rows.')}
           </TableCell>
         </TableRow>
@@ -385,9 +385,13 @@ export function DataTableBody<TData extends RowData>({
 
 function NoMatches<TData extends RowData>({ table }: { table: DataTableInstance<TData> }) {
   return (
-    <span className="inline-flex flex-col items-center gap-2">
-      <span>No rows match the search and filters.</span>
+    <span className="inline-flex flex-col items-center gap-1">
+      <span className="font-medium text-fg">No rows match</span>
+      <span className="text-pretty">
+        Try another search, or clear the filters to see every row.
+      </span>
       <Button
+        className="mt-3"
         variant="secondary"
         size="sm"
         onClick={() => {
