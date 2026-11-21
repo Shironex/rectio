@@ -140,6 +140,29 @@ const PX_PER_TICK = 88;
  * value axis counts from zero by round steps; gaps break the line; and the summary and the table
  * twin give the same figures without the plot.
  */
+/**
+ * A reference rule's words, above its right end, drawn with a halo of the surface so they stay
+ * readable where a line crosses them.
+ */
+function ReferenceLabel({ viewBox, text }: { viewBox: unknown; text: string }) {
+  const box = viewBox as { x?: number; y?: number; width?: number } | undefined;
+  if (box?.x === undefined || box.y === undefined || box.width === undefined) return null;
+  return (
+    <text
+      x={box.x + box.width - 4}
+      y={box.y - 6}
+      textAnchor="end"
+      stroke="var(--rx-chart-halo)"
+      strokeWidth={4}
+      strokeLinejoin="round"
+      paintOrder="stroke"
+      className="fill-chart-axis text-xs"
+    >
+      {text}
+    </text>
+  );
+}
+
 export function TimeChart({
   variant,
   stacked = false,
@@ -351,16 +374,9 @@ export function TimeChart({
               y={reference.value}
               stroke="var(--rx-chart-reference)"
               strokeDasharray="4 4"
-              label={{
-                value: reference.label,
-                // Above the rule at its right end, clear of the axis labels.
-                position: 'insideBottomRight',
-                className: 'fill-chart-axis text-xs',
-                // A halo of the surface keeps the words readable where the line crosses them.
-                stroke: 'var(--rx-chart-halo)',
-                strokeWidth: 3,
-                paintOrder: 'stroke',
-              }}
+              label={(props: { viewBox?: unknown }) => (
+                <ReferenceLabel viewBox={props.viewBox} text={reference.label} />
+              )}
             />
           ))}
           <Tooltip

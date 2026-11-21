@@ -453,8 +453,9 @@ function ChartLoading({ kind, label }: { kind: ChartKind; label: string }) {
                 key={index}
                 index={index}
                 animation="pulse"
-                className={cn('flex-1 rounded-b-none', kind !== 'bar' && 'opacity-60')}
-                style={{ height: `${String(kind === 'bar' ? height : height / 3)}%` }}
+                className="flex-1 rounded-b-none"
+                // Bars keep their own heights; a line or an area gets a gentler ridge in the plot's middle.
+                style={{ height: `${String(kind === 'bar' ? height : 30 + height / 2)}%` }}
               />
             ))}
           </div>
@@ -536,7 +537,8 @@ export function ChartFrame({
   const hasTable = table !== undefined && table !== null;
   const showLegend = legend !== undefined && legend.length > 0;
   return (
-    <figure data-slot="chart" className={cn('m-0 flex min-w-0 flex-col gap-3', className)}>
+    // It fills a taller card, so the table switch lines up across cards in a row.
+    <figure data-slot="chart" className={cn('m-0 flex min-w-0 flex-1 flex-col gap-3', className)}>
       <figcaption className="sr-only">{summary}</figcaption>
       {showLegend && <ChartLegend items={legend} />}
       <Stage
@@ -548,7 +550,7 @@ export function ChartFrame({
       </Stage>
       {hasTable && tableToggle && (
         // Under the plot, in the same place on every chart, and right above the table it opens.
-        <div className="flex">
+        <div className="mt-auto flex">
           <Button
             variant="ghost"
             size="sm"
