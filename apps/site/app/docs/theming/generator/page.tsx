@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { ThemeGenerator } from '@/components/generator/theme-generator';
-import { readThemeTemplate } from '@/lib/generator-template';
+import { readSkins, readThemeTemplate } from '@/lib/generator-template';
 
 export const metadata: Metadata = {
   title: 'Theme generator',
@@ -22,6 +22,7 @@ export const metadata: Metadata = {
  */
 export default function ThemeGeneratorPage() {
   const template = readThemeTemplate();
+  const skins = readSkins();
   return (
     <DocsPage full>
       <DocsTitle>Theme generator</DocsTitle>
@@ -35,7 +36,7 @@ export default function ThemeGeneratorPage() {
         .
       </DocsDescription>
       <div className="not-prose mt-6">
-        <ThemeGenerator template={template.css} />
+        <ThemeGenerator template={template.css} skins={skins} />
       </div>
     </DocsPage>
   );

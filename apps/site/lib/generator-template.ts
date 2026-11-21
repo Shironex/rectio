@@ -17,3 +17,37 @@ export function readThemeTemplate(): { css: string; version: string } {
   if (file === undefined) throw new Error('theme-default has no theme file: rebuild the registry');
   return { css: file.content, version: item.version };
 }
+
+/** A skin as the registry ships it, for the generator's skin picker and its output. */
+export interface SkinTemplate {
+  id: string;
+  title: string;
+  description: string;
+  css: string;
+}
+
+/**
+ * Every skin item in the registry build, in the order the registry lists them. The page shows the
+ * same CSS that `rectio add skin-<id>` writes.
+ */
+export function readSkins(): SkinTemplate[] {
+  const index = JSON.parse(readFileSync(join(ITEM, '..', 'index.json'), 'utf8')) as {
+    items: { name: string; type: string }[];
+  };
+  return index.items
+    .filter((entry) => entry.type === 'skin')
+    .map((entry) => {
+      const item = JSON.parse(
+        readFileSync(join(ITEM, `${entry.name}.json`), 'utf8'),
+      ) as RegistryItem;
+      const file = item.files.find((f) => f.type === 'skin');
+      if (file === undefined || item.skin === undefined)
+        throw new Error(`${entry.name} has no skin file: rebuild the registry`);
+      return {
+        id: item.skin.id,
+        title: item.title,
+        description: item.description,
+        css: file.content,
+      };
+    });
+}

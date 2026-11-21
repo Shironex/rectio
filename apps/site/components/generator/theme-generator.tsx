@@ -2,7 +2,9 @@
 
 import { InfoIcon, WarningIcon } from '@phosphor-icons/react';
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from '@rectio/ui';
-import { useState, useSyncExternalStore } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
+
+import type { SkinTemplate } from '@/lib/generator-template';
 
 import { AdvancedOverrides } from './advanced';
 import { ContrastStatus } from './contrast-status';
@@ -11,7 +13,9 @@ import { fresh, matchingPreset, presetById } from './model';
 import { Output } from './output';
 import { PresetPicker } from './presets';
 import { Preview, type PreviewMode } from './preview';
+import { SkinControl } from './skin-control';
 import { useGenerator, type Origin } from './use-generator';
+import { useSkin } from './use-skin';
 
 const MODE_KEY = 'rectio-theme-generator-mode';
 
@@ -58,9 +62,18 @@ function OriginNotice({ origin }: { origin: Origin }) {
  * passes WCAG 2.2 AA; overrides in the advanced panel are the one way to break that, and they are
  * reported.
  */
-export function ThemeGenerator({ template }: { template: string }) {
+export function ThemeGenerator({
+  template,
+  skins,
+}: {
+  template: string;
+  /** The registry's skins, read at build time. */
+  skins: readonly SkinTemplate[];
+}) {
   const g = useGenerator(template);
   const { inputs, resolved, update } = g;
+  const ids = useMemo(() => skins.map((s) => s.id), [skins]);
+  const [skin, setSkin] = useSkin(ids);
   // The remembered preview mode, read after hydration; a choice made here wins over it.
   const remembered = useSyncExternalStore(noop, storedMode, () => 'light' as const);
   const [chosen, setChosen] = useState<PreviewMode | null>(null);
@@ -109,6 +122,7 @@ export function ThemeGenerator({ template }: { template: string }) {
           </div>
           <div className="order-3 flex flex-col gap-6 lg:order-none">
             <ShapeControls inputs={inputs} update={update} />
+            <SkinControl skins={skins} skin={skin} onChange={setSkin} />
             <FineTuning inputs={inputs} update={update} />
             <div className="flex flex-col gap-5 border-t border-line pt-5">
               <NameField inputs={inputs} update={update} />
@@ -117,7 +131,13 @@ export function ThemeGenerator({ template }: { template: string }) {
         </div>
         <div className="order-2 flex min-w-0 flex-1 flex-col gap-4 lg:sticky lg:top-20 lg:order-none">
           <ContrastStatus resolved={resolved} />
-          <Preview css={g.previewCss} mode={mode} onModeChange={changeMode} stale={g.stale} />
+          <Preview
+            css={g.previewCss}
+            mode={mode}
+            skin={skin}
+            onModeChange={changeMode}
+            stale={g.stale}
+          />
         </div>
       </div>
 
@@ -137,7 +157,12 @@ export function ThemeGenerator({ template }: { template: string }) {
         </CollapsiblePanel>
       </Collapsible>
 
-      <Output code={g.code} css={g.css} name={inputs.name} />
+      <Output
+        code={g.code}
+        css={g.css}
+        name={inputs.name}
+        skin={skins.find((s) => s.id === skin)}
+      />
     </div>
   );
 }

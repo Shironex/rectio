@@ -48,11 +48,14 @@ const MODE_OPTIONS = [
 export function Preview({
   css,
   mode,
+  skin,
   onModeChange,
   stale,
 }: {
   css: string;
   mode: PreviewMode;
+  /** A skin id to show the theme with, or undefined for the theme as it is. */
+  skin: string | undefined;
   onModeChange: (mode: PreviewMode) => void;
   /** The newest inputs are still resolving. */
   stale: boolean;
@@ -91,7 +94,8 @@ export function Preview({
       <ThemeScope
         theme={PREVIEW_ID}
         mode={mode}
-        aria-label={`Preview of the theme, ${mode} mode`}
+        skin={skin}
+        aria-label={`Preview of the theme, ${mode} mode${skin === undefined ? '' : `, ${skin} skin`}`}
         role="region"
         aria-busy={stale}
         className={cn(
