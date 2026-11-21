@@ -57,7 +57,9 @@ async function scrollThrough(page: Page) {
 /** Pause every looping animation at the same point of its own timeline. */
 async function freeze(page: Page) {
   await page.evaluate((at) => {
+    // Only loops (skeleton shimmer): a finite entrance paused part way would be shot half drawn.
     for (const animation of document.getAnimations()) {
+      if (animation.effect?.getTiming().iterations !== Infinity) continue;
       animation.pause();
       animation.currentTime = at;
     }
@@ -85,6 +87,8 @@ async function shoot(
   // A viewport as tall as the page, not `fullPage`, so touch sizes stay in the picture.
   const height = await page.evaluate(() => document.documentElement.scrollHeight);
   await page.setViewportSize({ width, height });
+  // Charts that only now reach the viewport start their entrance a few frames later: let them begin.
+  await page.waitForTimeout(400);
   await settle(page);
   await freeze(page);
   await page.screenshot({ path: join(out, `${name}.png`) });
