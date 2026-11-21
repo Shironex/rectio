@@ -1,3 +1,5 @@
+'use client';
+
 import { TableIcon } from '@phosphor-icons/react';
 import {
   createContext,

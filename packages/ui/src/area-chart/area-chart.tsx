@@ -1,3 +1,5 @@
+'use client';
+
 import { TimeChart, type TimeChartProps } from '../chart/time-chart';
 
 export interface AreaChartProps extends TimeChartProps {

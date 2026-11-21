@@ -1,3 +1,5 @@
+'use client';
+
 import { useId, type ComponentProps, type ReactNode } from 'react';
 
 import { Card, CardFooter, type CardVariant } from '../card/card';
