@@ -27,9 +27,33 @@ describe('DonutChart', () => {
       within(table)
         .getAllByRole('rowheader')
         .map((h) => h.textContent),
-    ).toEqual(['Rent', 'Payroll', 'Other', 'Total']);
-    expect(within(table).getByRole('row', { name: /Other/ })).toHaveTextContent('Other1,900');
+    ).toEqual([
+      'Rent',
+      'Payroll',
+      'Other',
+      'Software, in Other',
+      'Travel, in Other',
+      'Meals, in Other',
+      'Total',
+    ]);
+    expect(within(table).getByRole('row', { name: /^Other/ })).toHaveTextContent('Other1,900');
     expect(screen.queryByText('Refund')).toBeNull();
+  });
+
+  it('never repeats a colour: past three uncoloured parts the rest fold into Other', () => {
+    const { container } = render(<DonutChart data={data} maxSlices={8} locale="en-GB" />);
+    const legend = container.querySelector('[data-slot="donut-legend"]');
+    expect(legend?.querySelectorAll('dt')).toHaveLength(4);
+    expect(legend).toHaveTextContent('Other');
+    // With a colour on every part, more slices may be drawn.
+    const coloured = data.map((slice, index) => ({
+      ...slice,
+      color: (
+        ['series-1', 'series-2', 'series-3', 'sequence-1', 'sequence-2', 'sequence-3'] as const
+      )[index],
+    }));
+    const { container: own } = render(<DonutChart data={coloured} maxSlices={8} locale="en-GB" />);
+    expect(own.querySelector('[data-slot="donut-legend"]')?.querySelectorAll('dt')).toHaveLength(5);
   });
 
   it('puts the total or your own figure in the middle', () => {

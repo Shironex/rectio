@@ -14,6 +14,7 @@ import {
   CHART_MESSAGES,
   ChartDataTable,
   ChartFrame,
+  CHART_PALETTE,
   ChartTooltip,
   Swatch,
   chartColor,
@@ -38,6 +39,8 @@ export interface DonutSlice {
 export interface DonutChartMessages extends ChartMessages {
   /** The slice that gathers the smallest ones past `maxSlices`. */
   other: string;
+  /** A table row for a slice folded into Other. */
+  inOther: (label: string) => string;
   /** Under the figure in the middle, and the table's last row. */
   total: string;
   share: string;
@@ -51,6 +54,7 @@ export interface DonutChartMessages extends ChartMessages {
 export const DONUT_CHART_MESSAGES: DonutChartMessages = {
   ...CHART_MESSAGES,
   other: 'Other',
+  inOther: (label) => `${label}, in Other`,
   total: 'Total',
   share: 'Share',
   valueHeader: 'Value',
@@ -66,8 +70,9 @@ export interface DonutChartProps {
   currency?: string | undefined;
   locale?: string | undefined;
   /**
-   * Most slices drawn; the smallest past it join one Other slice. Four by default: the three
-   * series colours and Other in the reference colour, all apart for every colour vision type.
+   * Most slices drawn; the smallest past it join one Other slice. Four by default and at most:
+   * the three series colours and Other in the reference colour, all apart for every colour
+   * vision type. Only when every slice brings its own colour can there be more.
    */
   maxSlices?: number | undefined;
   /** The figure in the middle. The total by default; pass null for an empty middle. */
@@ -92,31 +97,50 @@ interface Part {
   tone: ChartColor;
 }
 
-/** The slices to draw: positive figures, the smallest folded into Other past `max`. */
-function partsOf(data: readonly DonutSlice[], max: number, other: string): Part[] {
+/**
+ * The slices to draw: positive figures, the smallest folded into Other past `max`. Without a
+ * colour on every slice, at most the palette's three plus Other, so no colour repeats.
+ */
+function partsOf(
+  data: readonly DonutSlice[],
+  max: number,
+  other: string,
+): { parts: Part[]; folded: Part[] } {
   const positive = data.filter((slice) => Number.isFinite(slice.value) && slice.value > 0);
   const total = positive.reduce((sum, slice) => sum + slice.value, 0);
+  const coloured = positive.every((slice) => slice.color !== undefined);
   const limit = Math.max(2, Math.floor(max));
+  const room = coloured ? limit : Math.min(limit, CHART_PALETTE.length + 1);
+  const fold = positive.length > room || (!coloured && positive.length > CHART_PALETTE.length);
   let kept: DonutSlice[] = positive;
   let rest: DonutSlice[] = [];
-  if (positive.length > limit) {
+  if (fold) {
+    const count = coloured ? room - 1 : Math.min(room - 1, CHART_PALETTE.length);
     const ranked = [...positive].sort((a, b) => b.value - a.value);
-    const keep = new Set(ranked.slice(0, limit - 1).map((slice) => slice.id));
+    const keep = new Set(ranked.slice(0, count).map((slice) => slice.id));
     kept = positive.filter((slice) => keep.has(slice.id));
     rest = positive.filter((slice) => !keep.has(slice.id));
   }
+  const share = (value: number) => (total === 0 ? 0 : value / total);
   const parts: Part[] = kept.map((slice, index) => ({
     id: slice.id,
     label: slice.label,
     value: slice.value,
-    share: total === 0 ? 0 : slice.value / total,
+    share: share(slice.value),
     tone: slice.color ?? paletteColor(index),
+  }));
+  const folded: Part[] = rest.map((slice) => ({
+    id: slice.id,
+    label: slice.label,
+    value: slice.value,
+    share: share(slice.value),
+    tone: 'reference',
   }));
   if (rest.length > 0) {
     const value = rest.reduce((sum, slice) => sum + slice.value, 0);
-    parts.push({ id: '__other', label: other, value, share: value / total, tone: 'reference' });
+    parts.push({ id: '__other', label: other, value, share: share(value), tone: 'reference' });
   }
-  return parts;
+  return { parts, folded };
 }
 
 /**
@@ -146,7 +170,7 @@ export function DonutChart({
   const write = (value: number, compact = false) =>
     formatValue(value, format, { locale, currency, compact });
   const percent = (share: number) => formatValue(share, 'percent', { locale });
-  const parts = partsOf(data, maxSlices, m.other);
+  const { parts, folded } = partsOf(data, maxSlices, m.other);
   const total = parts.reduce((sum, part) => sum + part.value, 0);
 
   const tooltip = (props: TooltipContentProps) => {
@@ -196,11 +220,19 @@ export function DonutChart({
         <ChartDataTable
           caption={m.tableCaption}
           headers={[m.categoryHeader, m.valueHeader, m.share]}
-          rows={parts.map((part) => ({
-            key: part.id,
-            header: part.label,
-            cells: [write(part.value), percent(part.share)],
-          }))}
+          // The slices inside Other follow it, so the table still names every part.
+          rows={[
+            ...parts.map((part) => ({
+              key: part.id,
+              header: part.label,
+              cells: [write(part.value), percent(part.share)],
+            })),
+            ...folded.map((part) => ({
+              key: `other-${part.id}`,
+              header: m.inOther(part.label),
+              cells: [write(part.value), percent(part.share)],
+            })),
+          ]}
           footer={{ header: m.total, cells: [write(total), percent(1)] }}
         />
       }
