@@ -221,4 +221,18 @@ describe('SegmentedControl', () => {
     rerender(<SegmentedControl label="Status" options={STATUSES} layout="row" />);
     expect(screen.getByRole('group').className).not.toContain('grid-cols-2');
   });
+
+  it('lets the track grow when the options wrap, each segment one line high', () => {
+    const { rerender } = render(<SegmentedControl label="Status" options={STATUSES} />);
+    const group = screen.getByRole('group');
+    expect(group.className.split(' ')).toContain('h-auto');
+    expect(group.className).not.toContain('h-(--rx-button-height-md)');
+    const segment = screen.getAllByRole('button')[0];
+    expect(segment?.className).toContain('h-(--rx-segment-height)');
+    expect(segment?.style.getPropertyValue('--rx-segment-height')).toContain(
+      '--rx-button-height-md',
+    );
+    rerender(<SegmentedControl label="Status" options={STATUSES} layout="row" />);
+    expect(screen.getByRole('group').className).toContain('h-(--rx-button-height-md)');
+  });
 });

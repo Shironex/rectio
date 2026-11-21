@@ -2,7 +2,15 @@
 
 import { Toggle as BaseToggle } from '@base-ui/react/toggle';
 import { ToggleGroup as BaseToggleGroup } from '@base-ui/react/toggle-group';
-import { createContext, use, useId, useMemo, type ComponentProps, type ReactNode } from 'react';
+import {
+  createContext,
+  use,
+  useId,
+  useMemo,
+  type ComponentProps,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 
 import { controlFocus } from '../field/control-styles';
 import { cn, touchHitArea } from '../lib/cn';
@@ -222,13 +230,13 @@ export function SegmentedControl<Value extends string = string>({
       className={cn(
         'max-w-full',
         columns && [
-          'flex-wrap',
+          // Options that do not fit on one line wrap, so the track grows with them instead of
+          // holding one line's height; each segment keeps that height itself (SEGMENT_HEIGHT).
+          'h-auto flex-wrap pointer-coarse:h-auto',
           // Two even columns in a narrow container or on a phone, instead of a ragged wrap. Each
           // row keeps the control's height, so the options stay level with a button beside them.
-          '@max-md:grid @max-md:h-auto @max-md:w-full @max-md:grid-cols-2',
-          'max-sm:grid max-sm:h-auto max-sm:w-full max-sm:grid-cols-2',
-          // The group's touch height comes later in the sheet; the grid grows past it.
-          '@max-md:pointer-coarse:h-auto max-sm:pointer-coarse:h-auto',
+          '@max-md:grid @max-md:w-full @max-md:grid-cols-2',
+          'max-sm:grid max-sm:w-full max-sm:grid-cols-2',
           SEGMENT_ROWS[size],
         ],
         className,
@@ -239,9 +247,11 @@ export function SegmentedControl<Value extends string = string>({
         <Toggle
           key={option.value}
           value={option.value}
+          {...(columns ? { style: SEGMENT_VARS[size] } : {})}
           {...(option.disabled === true ? { disabled: true } : {})}
           className={cn(
             'shrink-0 grow',
+            columns && SEGMENT_HEIGHT,
             // An odd last option takes the whole row, so no empty cell sits beside it.
             columns && '@max-md:last:odd:col-span-2 max-sm:last:odd:col-span-2',
           )}
@@ -259,6 +269,26 @@ export function SegmentedControl<Value extends string = string>({
     </ToggleGroup>
   );
 }
+
+/**
+ * A segment's height in a track that may wrap: one line of the group (its height less the border
+ * and padding), the touch height on touch screens. In two columns the grid row sets it instead.
+ */
+const SEGMENT_HEIGHT = cn(
+  'h-(--rx-segment-height) pointer-coarse:h-(--rx-segment-height-touch)',
+  '@max-md:h-full max-sm:h-full @max-md:pointer-coarse:h-full max-sm:pointer-coarse:h-full',
+);
+
+const SEGMENT_VARS: Record<ToggleSize, CSSProperties> = {
+  sm: {
+    '--rx-segment-height': 'calc(var(--rx-button-height-sm) - 2px - 0.25rem)',
+    '--rx-segment-height-touch': 'calc(var(--rx-button-height-touch) - 2px - 0.25rem)',
+  } as CSSProperties,
+  md: {
+    '--rx-segment-height': 'calc(var(--rx-button-height-md) - 2px - 0.25rem)',
+    '--rx-segment-height-touch': 'calc(var(--rx-button-height-touch) - 2px - 0.25rem)',
+  } as CSSProperties,
+};
 
 /** Row height of a segmented control laid out in two columns: the control's own height. */
 const SEGMENT_ROWS: Record<ToggleSize, string> = {
