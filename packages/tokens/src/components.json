@@ -99,6 +99,23 @@
         "$value": "{surface.inset}"
       }
     },
+    "tree": {
+      "indent": {
+        "$type": "dimension",
+        "$value": "{size.20}",
+        "$description": "How far each level of a tree is inset: a chevron's width, so a child's label lines up under its parent's."
+      },
+      "row-height": {
+        "$type": "dimension",
+        "$value": "{control.height.sm}",
+        "$description": "Height of a tree row. Follows density."
+      },
+      "row-height-touch": {
+        "$type": "dimension",
+        "$value": "{control.height.touch}",
+        "$description": "Height of a tree row on touch screens. Never follows density."
+      }
+    },
     "alert-dialog": {
       "width": {
         "$type": "dimension",
