@@ -3,9 +3,11 @@
  * the small helpers the controls share. Everything colour-related comes from @rectio/tokens.
  */
 import {
+  DEFAULT_NAME,
   DEFAULT_STEPS,
   RANGES,
   cuspLightness,
+  encodeTheme,
   expandPairs,
   fitSrgb,
   generatorPresets,
@@ -35,7 +37,10 @@ export const fresh = (inputs: ThemeInputs): ThemeInputs => structuredClone(input
 
 /** The preset these inputs still match, colours, shape and type alike; overrides do not count. */
 export function matchingPreset(inputs: ThemeInputs): string | undefined {
-  const strip = (i: ThemeInputs) => JSON.stringify({ ...i, name: '', overrides: null });
+  // Compared through the theme code, which drops defaults and fixes the key order, so inputs read
+  // back from a link or the stored copy still match the preset they came from.
+  const strip = (i: ThemeInputs) =>
+    encodeTheme({ ...i, name: DEFAULT_NAME, overrides: { light: {}, dark: {} } });
   const key = strip(inputs);
   return PRESETS.find((p) => strip(p.inputs) === key)?.id;
 }

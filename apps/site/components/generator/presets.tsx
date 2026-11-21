@@ -71,6 +71,11 @@ export function PresetPicker({
                 onChange={() => {
                   onPick(preset.inputs, preset.id);
                 }}
+                // An edited card is still the checked radio, so a click fires no change: picking it
+                // again goes back to the preset as it ships.
+                onClick={() => {
+                  if (checked && edited) onPick(preset.inputs, preset.id);
+                }}
                 className="sr-only"
               />
               <span
