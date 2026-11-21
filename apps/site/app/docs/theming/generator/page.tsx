@@ -1,3 +1,8 @@
+// The font picker offers two families the kit no longer ships in tokens/fonts.css; their faces load
+// on this page only, for the preview. A generated theme that uses them installs the packages itself.
+import '@fontsource-variable/schibsted-grotesk/wght.css';
+import '@fontsource-variable/source-serif-4/opsz.css';
+import '@fontsource-variable/source-serif-4/opsz-italic.css';
 import { DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import type { Metadata } from 'next';
 import Link from 'next/link';
