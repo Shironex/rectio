@@ -42,6 +42,7 @@ import {
   inferTimeScale,
   mergeSeries,
   summarizeSeries,
+  type TimeRow,
   timeTicks,
   weeklyMeans,
   type TimePoint,
@@ -158,14 +159,22 @@ const MIN_PX_PER_DAY = 4;
  * A reference rule's words, above its right end, drawn with a halo of the surface so they stay
  * readable where a line crosses them.
  */
-function ReferenceLabel({ viewBox, text }: { viewBox: unknown; text: string }) {
+function ReferenceLabel({
+  viewBox,
+  text,
+  side,
+}: {
+  viewBox: unknown;
+  text: string;
+  side: 'start' | 'end';
+}) {
   const box = viewBox as { x?: number; y?: number; width?: number } | undefined;
   if (box?.x === undefined || box.y === undefined || box.width === undefined) return null;
   return (
     <text
-      x={box.x + box.width - 4}
+      x={side === 'end' ? box.x + box.width - 4 : box.x + 4}
       y={box.y - 6}
-      textAnchor="end"
+      textAnchor={side}
       stroke="var(--rx-chart-halo)"
       strokeWidth={4}
       strokeLinejoin="round"
@@ -175,6 +184,26 @@ function ReferenceLabel({ viewBox, text }: { viewBox: unknown; text: string }) {
       {text}
     </text>
   );
+}
+
+/**
+ * Which end of a reference line takes its label. The label sits just above the line over about a
+ * fifth of the plot; it goes to the end where the series stay clear of that band, the right end
+ * when both are clear or both are crossed.
+ */
+function labelSide(rows: readonly TimeRow[], value: number): 'start' | 'end' {
+  const points = rows.filter((row) => row.gap !== true);
+  const span = Math.max(1, Math.ceil(points.length / 5));
+  // How close the series come above the line within the label's span; Infinity when none do.
+  const clearance = (part: readonly TimeRow[]) =>
+    Math.min(
+      ...part.flatMap((row) =>
+        Object.values(row.values).flatMap((v) => (v !== null && v >= value ? [v - value] : [])),
+      ),
+    );
+  const start = clearance(points.slice(0, span));
+  const end = clearance(points.slice(-span));
+  return start > end ? 'start' : 'end';
 }
 
 export function TimeChart({
@@ -420,7 +449,11 @@ export function TimeChart({
               stroke="var(--rx-chart-reference)"
               strokeDasharray="4 4"
               label={(props: { viewBox?: unknown }) => (
-                <ReferenceLabel viewBox={props.viewBox} text={reference.label} />
+                <ReferenceLabel
+                  viewBox={props.viewBox}
+                  text={reference.label}
+                  side={labelSide(plotted, reference.value)}
+                />
               )}
             />
           ))}
