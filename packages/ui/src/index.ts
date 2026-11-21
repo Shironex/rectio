@@ -90,6 +90,20 @@ export {
 } from './data-table/data-table';
 export { DataTablePagination, type DataTablePaginationProps } from './data-table/pagination';
 export { DataTableSort, type DataTableSortProps } from './data-table/sort';
+export {
+  DataTableFacetFilter,
+  DataTableSearch,
+  DataTableToolbar,
+  type DataTableFacetFilterProps,
+  type DataTableFacetOption,
+  type DataTableSearchProps,
+  type DataTableToolbarProps,
+} from './data-table/filters';
+export {
+  clearDataTableFilters,
+  filterFn_match,
+  isDataTableFiltered,
+} from './data-table/filter-state';
 export { Calendar, type CalendarProps } from './calendar/calendar';
 export { resolveDateLocale } from './calendar/locales';
 export {

@@ -2,8 +2,14 @@
 
 import { ArrowDownIcon, ArrowUpIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
 import {
+  columnFacetingFeature,
+  columnFilteringFeature,
+  createFacetedRowModel,
+  createFacetedUniqueValues,
+  createFilteredRowModel,
   createPaginatedRowModel,
   createSortedRowModel,
+  globalFilteringFeature,
   metaHelper,
   rowPaginationFeature,
   rowSelectionFeature,
@@ -23,6 +29,7 @@ import {
 } from '@tanstack/react-table';
 import { createContext, use, useState, type ComponentProps, type ReactNode } from 'react';
 
+import { Button } from '../button/button';
 import { Checkbox } from '../checkbox/checkbox';
 import { cn } from '../lib/cn';
 import {
@@ -36,6 +43,7 @@ import {
   TableRow,
   type CellAlign,
 } from './table';
+import { clearDataTableFilters, filterFn_match, isDataTableFiltered } from './filter-state';
 
 /** What a column can tell the table about itself, beyond TanStack's own options. */
 export interface DataTableColumnMeta {
@@ -47,13 +55,23 @@ export interface DataTableColumnMeta {
   className?: string;
 }
 
-/** Sorting, row selection and pagination, plus the sort functions they need. Nothing else ships. */
+/**
+ * Sorting, row selection, pagination, column filters with their facets and a global search, plus
+ * the sort and filter functions they need. Nothing else ships.
+ */
 export const dataTableFeatures = tableFeatures({
   rowSortingFeature,
   rowSelectionFeature,
   rowPaginationFeature,
+  columnFilteringFeature,
+  globalFilteringFeature,
+  columnFacetingFeature,
   sortedRowModel: createSortedRowModel(),
   paginatedRowModel: createPaginatedRowModel(),
+  filteredRowModel: createFilteredRowModel(),
+  facetedRowModel: createFacetedRowModel(),
+  facetedUniqueValues: createFacetedUniqueValues(),
+  filterFns: { match: filterFn_match },
   sortFns: {
     alphanumeric: sortFn_alphanumeric,
     basic: sortFn_basic,
@@ -92,7 +110,10 @@ export function useDataTable<TData extends RowData>({
     manualPagination: !paginate,
     // Sorting works on what the column shows; a third click returns to the original order.
     enableSortingRemoval: true,
+    // Facet choices, typed search and exact values all go through the one match function.
+    globalFilterFn: 'match',
     ...options,
+    defaultColumn: { filterFn: 'match', ...options.defaultColumn },
   });
 }
 
@@ -269,6 +290,11 @@ export interface DataTableBodyProps<TData extends RowData> {
   table: DataTableInstance<TData>;
   /** Shown in place of rows when there are none. Say why, and what to do next. */
   empty?: ReactNode;
+  /**
+   * Shown when there are rows but the search or a filter hides them all. Defaults to a short note
+   * with a button that clears every filter.
+   */
+  emptyFiltered?: ReactNode;
   /** Skeleton rows in the shape of the table while data loads. */
   loading?: boolean;
   loadingRows?: number;
@@ -281,6 +307,7 @@ export interface DataTableBodyProps<TData extends RowData> {
 export function DataTableBody<TData extends RowData>({
   table,
   empty,
+  emptyFiltered,
   loading = false,
   loadingRows = 5,
   rowProps,
@@ -322,11 +349,12 @@ export function DataTableBody<TData extends RowData>({
   }
 
   if (rows.length === 0) {
+    const hidden = table.getCoreRowModel().rows.length > 0 && isDataTableFiltered(table);
     return (
       <TableBody>
         <TableRow>
           <TableCell colSpan={columns.length} className="h-auto py-10 text-center text-fg-muted">
-            {empty ?? 'No rows.'}
+            {hidden ? (emptyFiltered ?? <NoMatches table={table} />) : (empty ?? 'No rows.')}
           </TableCell>
         </TableRow>
       </TableBody>
@@ -352,6 +380,23 @@ export function DataTableBody<TData extends RowData>({
         </TableRow>
       ))}
     </TableBody>
+  );
+}
+
+function NoMatches<TData extends RowData>({ table }: { table: DataTableInstance<TData> }) {
+  return (
+    <span className="inline-flex flex-col items-center gap-2">
+      <span>No rows match the search and filters.</span>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => {
+          clearDataTableFilters(table);
+        }}
+      >
+        Clear filters
+      </Button>
+    </span>
   );
 }
 
