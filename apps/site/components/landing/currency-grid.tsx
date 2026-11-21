@@ -97,12 +97,13 @@ export function CurrencyGrid({
         </div>
       </div>
       <div className="flex min-w-0 flex-col gap-6 lg:col-span-8">
-        <ul id={listId} className="grid gap-x-10 sm:grid-cols-2">
+        {/* Two columns read downwards, as a printed list does, so the codes run in order in each. */}
+        <ul id={listId} className="gap-x-10 sm:columns-2">
           {shown.map((code, i) => (
             <li
               key={code}
               className={cn(
-                'flex items-baseline gap-3 py-2',
+                'flex break-inside-avoid items-baseline gap-3 py-2',
                 folded && i >= FOLDED_PHONE && 'max-sm:hidden',
               )}
             >
@@ -119,7 +120,7 @@ export function CurrencyGrid({
             </li>
           ))}
           {found.length === 0 && (
-            <li className="col-span-full py-6 text-base text-fg-muted">
+            <li className="py-6 text-base text-fg-muted">
               No currency matches “{query}”. Try a code such as CHF, or a country.
             </li>
           )}
