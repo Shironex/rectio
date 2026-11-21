@@ -22,7 +22,8 @@ export interface ThemeScopeProps extends ComponentProps<'div'> {
   density?: 'comfortable' | 'compact';
   /**
    * A skin id: `dense`, `editorial`, or one of your own. Changes type, corners, rhythm and control
-   * sizes on top of the theme, in either mode. Leave unset for the theme as it is.
+   * sizes on top of the theme, in either mode; the nearest skin wins. Unset keeps the skin around
+   * the scope, if any. `none` turns it off, so the subtree shows the theme as it is.
    */
   skin?: string | undefined;
 }

@@ -19,6 +19,17 @@ describe('ThemeScope', () => {
     expect(scope).not.toHaveAttribute('data-skin');
   });
 
+  it('turns the skin around it off with none', () => {
+    render(
+      <ThemeScope skin="none" data-testid="scope">
+        x
+      </ThemeScope>,
+    );
+    const scope = screen.getByTestId('scope');
+    expect(scope).toHaveAttribute('data-skin', 'none');
+    expect(scope).toHaveAttribute('data-theme', 'default');
+  });
+
   it('sets a skin beside the theme', () => {
     render(
       <ThemeScope skin="editorial" mode="light" data-testid="scope">
