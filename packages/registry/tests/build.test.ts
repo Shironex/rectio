@@ -240,7 +240,7 @@ describe('the rectio registry', () => {
     for (const item of result.items) expect(item.$schema).toBe(`${REGISTRY_URL}/schema/item.json`);
   });
 
-  it('publishes every component, the tokens and one theme item per theme', () => {
+  it('publishes every component, the tokens, one theme item per theme and one per skin', () => {
     expect([...byName.keys()].sort()).toEqual([
       'accordion',
       'activity-feed',
@@ -439,6 +439,8 @@ describe('the rectio registry', () => {
       'site-footer',
       'site-header',
       'skeleton',
+      'skin-dense',
+      'skin-editorial',
       'slider',
       'spinner',
       'stat',
@@ -727,5 +729,31 @@ describe('the rectio registry', () => {
     expect(tokens).toContain('prefers-reduced-motion');
     expect(tokens).not.toContain("@import './themes.css'");
     expect(tokens).not.toContain('[data-theme="ledger"]');
+    // Skins live in their own items, never in the tokens or a theme.
+    expect(tokens).not.toContain('[data-skin="');
+    expect(tokens).toContain('[data-density="compact"][data-skin]');
+    expect(defaults).not.toContain('[data-skin="');
+  });
+
+  it('publishes each skin as its own item, with its fonts', () => {
+    const editorial = byName.get('skin-editorial');
+    expect(editorial?.type).toBe('skin');
+    expect(editorial?.categories).toEqual(['skin']);
+    expect(editorial?.registryDependencies).toEqual(['tokens']);
+    expect(editorial?.skin?.id).toBe('editorial');
+    expect(editorial?.skin?.tokens).toContain('--rx-font-family-display');
+    expect(editorial?.dependencies).toEqual({ '@fontsource/ibm-plex-serif': '^5.3.0' });
+    const file = editorial?.files[0];
+    expect(file?.type).toBe('skin');
+    expect(file?.target).toBe('@styles/skins/editorial.css');
+    expect(file?.content).toContain("@import '@fontsource/ibm-plex-serif/500.css';");
+    expect(file?.content).toContain('[data-skin="editorial"] [data-theme] {');
+    expect(file?.content).not.toContain('[data-skin="dense"]');
+    expect(editorial?.docs).toContain('data-skin="editorial"');
+
+    const dense = byName.get('skin-dense');
+    expect(dense?.dependencies).toEqual({});
+    expect(dense?.files[0]?.content).not.toContain('@import');
+    expect(result.index.items.find((i) => i.name === 'skin-dense')?.type).toBe('skin');
   });
 });

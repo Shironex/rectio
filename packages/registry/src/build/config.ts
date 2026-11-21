@@ -35,6 +35,14 @@ export interface ThemeItemConfig {
   deprecated?: string;
 }
 
+export interface SkinItemConfig {
+  /** The `data-skin` id: a file in @rectio/tokens src/skins. The item is named `skin-<id>`. */
+  id: string;
+  version: string;
+  title: string;
+  description: string;
+}
+
 export interface TokensItemConfig {
   version: string;
   title: string;
@@ -75,6 +83,8 @@ export interface RegistryConfig {
     dir: string;
     item: TokensItemConfig;
     themes: ThemeItemConfig[];
+    /** Every skin @rectio/tokens builds must be listed, and only those. */
+    skins?: SkinItemConfig[];
   };
   items: SourceItemConfig[];
   /** Add-on trees built on top of `sourceDir`. */

@@ -17,7 +17,7 @@ import { REGISTRY_URL } from '../site.ts';
 import type { RegistryConfig } from './config.ts';
 import { buildSourceItems, readRanges, sortRecord, type BuiltFile } from './sources.ts';
 import { buildTemplate, findTemplates } from './templates.ts';
-import { splitTokens } from './themes.ts';
+import { splitTokens, type SplitTokens } from './themes.ts';
 
 export const ITEM_SCHEMA_URL = `${REGISTRY_URL}/${SCHEMA_PATHS.item}`;
 export const INDEX_SCHEMA_URL = `${REGISTRY_URL}/${SCHEMA_PATHS.index}`;
@@ -177,6 +177,7 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
         }),
       );
     }
+    items.push(...skinItems(config.tokens, split));
   }
 
   // Templates last: they rest on every kit item, and must not collide with any kit file.
@@ -252,6 +253,53 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
     })),
   });
   return { index, items, warnings };
+}
+
+/**
+ * One `skin-<id>` item per skin @rectio/tokens builds: its CSS block and the font packages it
+ * imports. A skin rests on the tokens, which bring the default theme.
+ */
+function skinItems(
+  tokens: NonNullable<RegistryConfig['tokens']>,
+  split: SplitTokens,
+): RegistryItem[] {
+  const configured = tokens.skins ?? [];
+  for (const id of split.skins.keys()) {
+    if (!configured.some((s) => s.id === id))
+      throw new Error(`skin "${id}" from @rectio/tokens has no registry config`);
+  }
+  const ranges = readRanges([join(tokens.dir, 'package.json')]);
+  return configured.map((skin) => {
+    const built = split.skins.get(skin.id);
+    if (built === undefined) throw new Error(`skin "${skin.id}" is not in @rectio/tokens`);
+    const dependencies: Record<string, string> = {};
+    for (const pkg of built.fontPackages) {
+      const range = ranges.get(pkg);
+      if (range === undefined) throw new Error(`font package ${pkg} is not in the tokens deps`);
+      dependencies[pkg] = range;
+    }
+    return finish({
+      ...base(`skin-${skin.id}`, skin.version),
+      type: 'skin',
+      title: skin.title,
+      description: skin.description,
+      categories: ['skin'],
+      dependencies: sortRecord(dependencies),
+      devDependencies: {},
+      registryDependencies: [TOKENS_ITEM],
+      requires: { tokenContract: TOKEN_CONTRACT_VERSION },
+      files: [
+        {
+          path: `styles/skins/${skin.id}.css`,
+          type: 'skin',
+          target: `@styles/skins/${skin.id}.css`,
+          content: built.css,
+        },
+      ],
+      skin: { id: skin.id, tokens: built.tokens },
+      docs: `Set data-skin="${skin.id}" on <html> (or skin="${skin.id}" on a ThemeScope) to use it. It works with any theme, light or dark, and with compact density.`,
+    });
+  });
 }
 
 /** Unique names and known dependencies. */

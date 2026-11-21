@@ -213,6 +213,22 @@ export default defineRegistry({
         description: 'Warm stone neutrals, cobalt accent, 4px controls, IBM Plex. Light and dark.',
       },
     ],
+    skins: [
+      {
+        id: 'dense',
+        version: '0.1.0',
+        title: 'Dense skin',
+        description:
+          'A smaller type scale, tighter line heights, smaller corners and controls for data-heavy apps. Works with any theme and with compact density.',
+      },
+      {
+        id: 'editorial',
+        version: '0.1.0',
+        title: 'Editorial skin',
+        description:
+          'IBM Plex Serif headings, hairline borders, restrained corners and a more generous rhythm. Works with any theme, light or dark.',
+      },
+    ],
   },
   items: [
     {
@@ -228,7 +244,7 @@ export default defineRegistry({
       type: 'component',
       version: '0.1.2',
       title: 'ThemeScope',
-      description: 'Applies a theme, mode and density to a subtree; popups render inside it.',
+      description: 'Applies a theme, mode, density and skin to a subtree; popups render inside it.',
       categories: ['theming'],
       files: ['theme-scope/theme-scope.tsx'],
     },
