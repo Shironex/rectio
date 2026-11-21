@@ -57,6 +57,7 @@ export {
 export { Changelog, type ChangelogProps } from './saas/changelog/changelog.motion';
 export { UsersTable, type UsersTableProps } from './saas/users-table/users-table.motion';
 export { KanbanBoard, type KanbanBoardProps } from './saas/kanban-board/kanban-board.motion';
+export { WeekAgenda, type WeekAgendaProps } from './saas/week-agenda/week-agenda.motion';
 export {
   CommentThread,
   type CommentThreadProps,
