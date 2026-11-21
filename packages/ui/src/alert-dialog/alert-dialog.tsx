@@ -147,14 +147,14 @@ export function AlertDialogDescription({ className, ...props }: DialogDescriptio
 }
 
 /**
- * The answers, end-aligned with the action last. On a phone they stack at full width, the action
- * on top and the safe action under it, both easy to reach with a thumb.
+ * The answers, end-aligned with the action last. On a phone they stack at full width with the safe
+ * answer on top, where focus starts, so the eye does not land on the destructive one first.
  */
 export function AlertDialogFooter({ className, ...props }: ComponentProps<'div'>) {
   return (
     <DialogFooter
       data-slot="alert-dialog-footer"
-      className={cn('max-sm:flex-col-reverse max-sm:items-stretch', className)}
+      className={cn('max-sm:flex-col max-sm:items-stretch', className)}
       {...props}
     />
   );
