@@ -100,12 +100,13 @@ const marketingItems = (
     logic = false,
     motion = true,
     extra = [],
-  }: { logic?: boolean; motion?: boolean; extra?: readonly string[] } = {},
+    version = '0.1.0',
+  }: { logic?: boolean; motion?: boolean; extra?: readonly string[]; version?: string } = {},
 ) => [
   {
     name,
     type: 'block' as const,
-    version: '0.1.0',
+    version,
     title,
     description,
     categories: ['marketing', 'blocks'],
@@ -1145,7 +1146,7 @@ export default defineRegistry({
         {
           name: 'marketing-core',
           type: 'lib',
-          version: '0.1.1',
+          version: '0.1.2',
           title: 'Marketing core',
           // Only the marquee and the parts context's client tree need the browser; the marquee
           // carries its own directive, the rest renders on the server.
@@ -1161,7 +1162,6 @@ export default defineRegistry({
             'lib/marquee.tsx',
             'lib/prose.tsx',
             'lib/marketing.ts',
-            'lib/accordion.tsx',
             'lib/avatar.tsx',
             'lib/switch.tsx',
             'lib/textarea.tsx',
@@ -1228,6 +1228,7 @@ export default defineRegistry({
           'FAQ',
           'Questions as an accordion beside the heading, or a numbered list read in full.',
           'faq',
+          { version: '0.1.1' },
         ),
         ...marketingItems(
           'cta-band',
