@@ -52,7 +52,7 @@ export function ThemePacks({ intro }: { intro: ReactNode }) {
       <div className="flex flex-col lg:col-span-7">
         <article
           aria-labelledby="pack-default"
-          className="site-reveal relative w-11/12 overflow-hidden rounded-panel border border-line-strong shadow-overlay sm:w-4/5 sm:-rotate-1"
+          className="site-reveal relative w-11/12 overflow-hidden rounded-panel border border-line-strong shadow-overlay sm:w-4/5"
         >
           {/* The theme attribute alone scopes the tokens: no popups here, so no ThemeScope needed. */}
           <div
@@ -80,7 +80,7 @@ export function ThemePacks({ intro }: { intro: ReactNode }) {
         </article>
         <article
           aria-labelledby="pack-yours"
-          className="site-reveal site-step-1 relative -mt-6 w-11/12 self-end overflow-hidden rounded-panel border border-dashed border-line-strong bg-surface shadow-overlay sm:w-4/5 sm:rotate-1"
+          className="site-reveal site-step-1 relative -mt-6 w-11/12 self-end overflow-hidden rounded-panel border border-dashed border-line-strong bg-surface shadow-overlay sm:w-4/5"
         >
           <div className="flex h-full flex-col gap-5 p-6 sm:p-8">
             <div className="flex items-center justify-between gap-3">
