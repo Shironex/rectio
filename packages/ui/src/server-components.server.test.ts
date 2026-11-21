@@ -28,8 +28,26 @@ const modules = sources(ROOT).map((path) => ({
 const byPath = new Map(modules.map((module) => [module.path, module]));
 
 /** React names a server component cannot use: state, effects, refs and context. */
-const CLIENT_ONLY =
-  /\b(useState|useEffect|useLayoutEffect|useRef|useContext|useReducer|useSyncExternalStore|useId|useMemo|useCallback|createContext|use)\b/;
+const CLIENT_NAMES =
+  'useState|useEffect|useLayoutEffect|useRef|useContext|useReducer|useSyncExternalStore|useId|useMemo|useCallback|createContext|use';
+const CLIENT_ONLY = new RegExp(`\\b(${CLIENT_NAMES})\\b`);
+
+/**
+ * Whether a module reaches for state, effects or context: through named imports from react, or
+ * through a namespace or default import (`import * as React`, `import React`) used as `React.useX`.
+ */
+function holdsClientState(source: string): boolean {
+  const named = [...source.matchAll(/^import\s+(?!type\b)\{([^}]*)\}\s+from\s+'react'/gm)]
+    .map((match) => match[1] ?? '')
+    .join(',');
+  if (CLIENT_ONLY.test(named)) return true;
+  const namespaces = [
+    ...source.matchAll(
+      /^import\s+(?!type\b)(?:\*\s+as\s+(\w+)|(\w+))(?:\s*,\s*\{[^}]*\})?\s+from\s+'react'/gm,
+    ),
+  ].map((match) => match[1] ?? match[2] ?? '');
+  return namespaces.some((name) => new RegExp(`\\b${name}\\.(${CLIENT_NAMES})\\b`).test(source));
+}
 
 const localImports = (module: (typeof modules)[number]) =>
   [...module.source.matchAll(/^import\s+(?!type\b)\{([^}]*)\}\s+from\s+'(\.[^']+)'/gm)].map(
@@ -76,14 +94,22 @@ describe('@rectio/ui in a React Server Component', { timeout: 30_000 }, () => {
 
   it('marks every module that holds state, effects or context as a client module', () => {
     const missing = modules
-      .filter(({ source }) => {
-        const react = [...source.matchAll(/^import\s+(?!type\b)\{([^}]*)\}\s+from\s+'react'/gm)]
-          .map((match) => match[1] ?? '')
-          .join(',');
-        return CLIENT_ONLY.test(react) && !isClientModule(source);
-      })
+      .filter(({ source }) => holdsClientState(source) && !isClientModule(source))
       .map(({ name }) => name);
     expect(missing).toEqual([]);
+  });
+
+  it('sees state behind a namespace or default import of react, not only named imports', () => {
+    expect(holdsClientState("import { useState } from 'react';")).toBe(true);
+    expect(holdsClientState("import * as React from 'react';\nReact.useRef(null);")).toBe(true);
+    expect(holdsClientState("import R from 'react';\nconst c = R.createContext(0);")).toBe(true);
+    expect(holdsClientState("import React, { type ReactNode } from 'react';\nReact.use(p);")).toBe(
+      true,
+    );
+    expect(holdsClientState("import * as React from 'react';\ntype P = React.ReactNode;")).toBe(
+      false,
+    );
+    expect(holdsClientState("import type { ReactNode } from 'react';")).toBe(false);
   });
 
   it('loads icons from the server-safe entry outside client modules', () => {
