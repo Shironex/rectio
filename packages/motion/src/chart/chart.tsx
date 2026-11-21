@@ -48,9 +48,15 @@ function enter(
     const ease = cssEasing(root, 'enter');
     const step = (tokens.duration.base * 1000) / STAGGER_STEPS / 2;
     if (kind === 'line' || kind === 'area') {
+      // Every mark is uncovered from the plot's left edge, in pixels, so a line, its dots and its
+      // area share one moving edge and no dot runs ahead of its line.
+      const plot = root.querySelector<SVGGraphicsElement>('.recharts-cartesian-grid')?.getBBox();
       for (const mark of root.querySelectorAll<SVGGraphicsElement>(LINES)) {
+        const box = mark.getBBox();
+        const hidden =
+          plot === undefined ? '100%' : `${String(Math.max(0, box.x + box.width - plot.x))}px`;
         animations.push(
-          mark.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], {
+          mark.animate([{ clipPath: `inset(0 ${hidden} 0 0)` }, { clipPath: 'inset(0 0 0 0)' }], {
             duration: tokens.duration.count * 1000,
             easing: cssEasing(root, 'settle'),
             fill: 'backwards',
