@@ -119,6 +119,7 @@ export default tseslint.config(
       // `@rectio/blocks/marketing` (and its `/motion`) is the declared entry of the marketing group.
       // `@rectio/blocks/docs` (and its `/motion`) is the declared entry of the docs group.
       // `@rectio/motion/navigation` is the motioned navigation, split to stay inside its bundle budget.
+      // `@rectio/tokens/generator` (and its `.json` data) is the theme generator core the docs page runs.
       'noctcore-monorepo/no-deep-package-imports': [
         'error',
         {
@@ -130,6 +131,8 @@ export default tseslint.config(
             'docs',
             'docs/motion',
             'navigation',
+            'generator',
+            'generator.json',
           ],
         },
       ],
