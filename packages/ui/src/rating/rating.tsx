@@ -18,7 +18,7 @@ const CELLS: Record<RatingSize, string> = {
 const STARS: Record<RatingSize, string> = { sm: 'size-4', md: 'size-5' };
 
 /** Display sizes for a read-only rating, which needs no touch target. */
-const READ_STARS: Record<RatingSize, string> = { sm: 'size-3.5', md: 'size-4' };
+const READ_STARS: Record<RatingSize, string> = { sm: 'size-4', md: 'size-5' };
 
 type Fill = 'full' | 'half' | 'empty';
 
