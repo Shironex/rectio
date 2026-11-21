@@ -10,6 +10,7 @@ import {
   createContext,
   use,
   useId,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -113,8 +114,32 @@ export function AgendaPartsProvider({
 
 const DEFAULT_HOURS: AgendaHours = { start: 8, end: 19 };
 
-/** Most events side by side before the rest gather behind a "+N" button. */
+/** Most events side by side before the rest gather behind a "more" button. */
 const MAX_COLUMNS = { week: 2, day: 4 } as const;
+
+/** The narrowest an event beside another may get before the group gathers behind one button. */
+const MIN_COLUMN_PX = 72;
+
+/** The hour gutter, from the gutter width token (3.5rem at the default 16px root). */
+const GUTTER_PX = 56;
+
+/** The width of an element, measured after layout; 0 until then (and on the server). */
+function useWidth() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const element = ref.current;
+    if (element === null || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry !== undefined) setWidth(entry.contentRect.width);
+    });
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+  return [ref, width] as const;
+}
 
 /** Height in the grid for a number of minutes, from the hour height token. */
 const span = (minutes: number) => `calc(var(--rx-agenda-hour-height) * ${String(minutes / 60)})`;
@@ -164,6 +189,13 @@ export function WeekAgenda({
   const now = useNow(requestedNow);
   const { Button } = useBlockParts();
   const { Stage } = use(AgendaPartsContext);
+  const [frame, width] = useWidth();
+  // How many events fit side by side in a day column at this width: fewer when it is narrow.
+  const dayWidth = (width - GUTTER_PX) / (variant === 'week' ? 7 : 1);
+  const maxColumns =
+    width === 0
+      ? MAX_COLUMNS[variant]
+      : Math.min(MAX_COLUMNS[variant], Math.max(1, Math.floor(dayWidth / MIN_COLUMN_PX)));
   const firstDay = weekStartsOn ?? agendaWeekStart(locale);
   // Keyed by plain values, so a new Date for the same day or new hours keep the layout.
   const dayKey = startOfDay(date).getTime();
@@ -171,7 +203,7 @@ export function WeekAgenda({
     const shown = agendaDays(new Date(dayKey), variant, weekStartsOn ?? agendaWeekStart(locale));
     const fitted = agendaFitHours(events, shown, { start: hours.start, end: hours.end });
     const placed = shown.map((day) => layoutDayEvents(events, day, fitted));
-    const collapsed = placed.map((day) => collapseColumns(day, MAX_COLUMNS[variant]));
+    const collapsed = placed.map((day) => collapseColumns(day, maxColumns));
     const timed = collapsed.map((day) => day.shown);
     const more = collapsed.map((day) => day.more);
     const allDay = layoutAllDay(events, shown);
@@ -181,7 +213,7 @@ export function WeekAgenda({
       inRange: allDay.length + placed.reduce((sum, day) => sum + day.length, 0),
       layout: { timed, more, allDay, stops: agendaStops(timed, allDay, more) },
     };
-  }, [events, dayKey, variant, weekStartsOn, locale, hours.start, hours.end]);
+  }, [events, dayKey, variant, weekStartsOn, locale, hours.start, hours.end, maxColumns]);
   const rangeKey = `${variant}:${String(days[0]?.getTime() ?? 0)}`;
   // Which way the last step went, so the motion variant can slide from that side.
   const [step, setStep] = useState({ key: rangeKey, direction: 0 });
@@ -273,14 +305,16 @@ export function WeekAgenda({
       className={className}
       bodyClassName="gap-3"
     >
-      <Stage rangeKey={rangeKey} direction={direction}>
-        <div className={BREAK[variant].grid}>
-          <AgendaGrid {...shared} empty={inRange === 0} />
-        </div>
-        <div className={BREAK[variant].list}>
-          <AgendaList {...shared} empty={inRange === 0} />
-        </div>
-      </Stage>
+      <div ref={frame} className="min-w-0">
+        <Stage rangeKey={rangeKey} direction={direction}>
+          <div className={BREAK[variant].grid}>
+            <AgendaGrid {...shared} empty={inRange === 0} />
+          </div>
+          <div className={BREAK[variant].list}>
+            <AgendaList {...shared} empty={inRange === 0} />
+          </div>
+        </Stage>
+      </div>
     </BlockPanel>
   );
 }
@@ -778,11 +812,14 @@ function MoreEvents({
   triggerProps: Record<string, unknown>;
 }) {
   const count = chip.events.length;
+  // With one column the whole group is behind the button; otherwise it holds the rest.
+  const what = chip.columns === 1 ? 'events' : 'more events';
+  const short = chip.columns === 1 ? 'events' : 'more';
   const first = chip.events[0];
   const from = first === undefined ? '' : time.format(first.start);
   return (
     <Popover
-      title={`${String(count)} more events, ${dayLabel}`}
+      title={`${String(count)} ${what}, ${dayLabel}`}
       open={open}
       onOpenChange={onOpenChange}
       align="start"
@@ -790,7 +827,7 @@ function MoreEvents({
       trigger={
         <button
           type="button"
-          aria-label={`${String(count)} more events from ${from}, ${dayLabel}`}
+          aria-label={`${String(count)} ${what} from ${from}, ${dayLabel}`}
           className={cn(
             'flex size-full cursor-pointer flex-col items-start rounded-badge border border-line-strong bg-surface-hover px-1.5 py-0.5 text-start shadow-raised',
             'text-xs font-medium text-fg hover:border-fg-subtle',
@@ -800,7 +837,7 @@ function MoreEvents({
           {...triggerProps}
         >
           <span className="flex items-center gap-1">
-            {count} more
+            {count} {short}
             <CaretDownIcon aria-hidden weight="bold" className="size-3 shrink-0" />
           </span>
           <span className="font-regular text-fg-muted numeric">from {from}</span>
@@ -808,7 +845,7 @@ function MoreEvents({
       }
     >
       <p aria-hidden className="px-3 pt-3 pb-2 text-sm font-medium text-fg">
-        {count} more from {from}
+        {count} {short} from {from}
       </p>
       <ul className="flex flex-col gap-1.5 px-3 pb-3">
         {chip.events.map((event) => (
