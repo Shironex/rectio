@@ -99,16 +99,20 @@ export function Bench() {
         }}
         className="flex flex-col gap-6"
       >
-        {auto && (
-          <button
-            type="button"
-            onClick={stop}
-            className="inline-flex min-h-9 items-center gap-2 self-end rounded-control px-2 text-sm font-medium text-fg transition-colors duration-fast ease-standard pointer-coarse:min-h-11 pointer-fine:hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          >
-            <PauseIcon aria-hidden weight="fill" className="size-3.5" />
-            Stop the tour
-          </button>
-        )}
+        {/* The row keeps its height once the tour stops: a press on a tab stops the tour, and the
+            tabs must not move between that press and its click. */}
+        <div className="flex min-h-9 justify-end pointer-coarse:min-h-11">
+          {auto && (
+            <button
+              type="button"
+              onClick={stop}
+              className="inline-flex min-h-9 items-center gap-2 rounded-control px-2 text-sm font-medium text-fg transition-colors duration-fast ease-standard pointer-coarse:min-h-11 pointer-fine:hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            >
+              <PauseIcon aria-hidden weight="fill" className="size-3.5" />
+              Stop the tour
+            </button>
+          )}
+        </div>
         <Tabs.List
           aria-label="Live blocks"
           className="grid grid-cols-2 gap-x-2 gap-y-2 border-b border-line sm:grid-cols-4"
