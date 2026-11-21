@@ -2,7 +2,8 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { CopyButton, copyToClipboard } from './copy-button';
+import { copyToClipboard } from './clipboard';
+import { CopyButton } from './copy-button';
 
 function clipboard(writeText: (text: string) => Promise<void>) {
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });

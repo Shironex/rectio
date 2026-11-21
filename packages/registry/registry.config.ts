@@ -770,7 +770,7 @@ export default defineRegistry({
       description:
         'Copies a value with a check and a spoken "Copied", with a fallback where the Clipboard API is blocked.',
       categories: ['actions'],
-      files: ['copy-button/copy-button.tsx'],
+      files: ['copy-button/copy-button.tsx', 'copy-button/clipboard.ts'],
     },
     {
       name: 'rating',
