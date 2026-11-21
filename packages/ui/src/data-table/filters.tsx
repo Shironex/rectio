@@ -72,7 +72,7 @@ export interface DataTableFacetFilterProps<TData extends RowData> {
   options?: readonly DataTableFacetOption[];
   /** BCP 47 locale for the counts. */
   locale?: string;
-  /** The menu item that empties this filter. */
+  /** The menu item that empties this filter. Default "Clear" and the label, such as "Clear status". */
   clearLabel?: string;
   className?: string;
 }
@@ -88,7 +88,7 @@ export function DataTableFacetFilter<TData extends RowData>({
   label,
   options,
   locale,
-  clearLabel = 'Clear filter',
+  clearLabel,
   className,
 }: DataTableFacetFilterProps<TData>) {
   const column = table.getColumn(columnId);
@@ -153,11 +153,13 @@ export function DataTableFacetFilter<TData extends RowData>({
           <>
             <MenuSeparator />
             <MenuItem
+              // In the check column, so its words line up with the values above.
+              icon={<XIcon weight="bold" className="size-3.5" />}
               onClick={() => {
                 column.setFilterValue(undefined);
               }}
             >
-              {clearLabel}
+              {clearLabel ?? `Clear ${label.toLocaleLowerCase(locale)}`}
             </MenuItem>
           </>
         )}
