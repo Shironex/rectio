@@ -18,6 +18,12 @@ export type ScrollAreaProps = WithClassName<ComponentProps<typeof BaseScrollArea
    * the content overflows, so a short popup list says at rest that it scrolls.
    */
   scrollbar?: 'scroll' | 'always' | undefined;
+  /**
+   * Whether the viewport takes a Tab stop when it overflows, so keyboard users can scroll it.
+   * Turn it off when the content is focusable itself, such as a tree or a listbox, whose focus
+   * already scrolls the area: one stop instead of two.
+   */
+  focusableViewport?: boolean | undefined;
 };
 
 function Scrollbar({
@@ -54,6 +60,7 @@ export function ScrollArea({
   className,
   viewportClassName,
   scrollbar = 'scroll',
+  focusableViewport = true,
   children,
   ...props
 }: ScrollAreaProps) {
@@ -67,6 +74,7 @@ export function ScrollArea({
       <BaseScrollArea.Viewport
         aria-label={label}
         role={label === undefined ? undefined : 'region'}
+        {...(focusableViewport ? {} : { tabIndex: -1 })}
         className={cn(
           'min-h-0 flex-1 overscroll-contain outline-none',
           'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
