@@ -135,13 +135,18 @@ export function useSmoothText(
     if (!text.startsWith(previous.slice(0, shown))) setShown(text.length);
   }
   const latest = useRef(text);
+  const count = useRef(shown);
   useLayoutEffect(() => {
     latest.current = text;
+    count.current = shown;
   });
 
   const active = enabled && (streaming || shown < text.length);
+  // The loop restarts when more text arrives and stops once it has caught up, so a paused stream
+  // costs nothing.
+  const behind = active && shown < text.length;
   useEffect(() => {
-    if (!active) return;
+    if (!behind) return;
     const element = host.current;
     const tokens = element === null ? null : readMotionTokens(element);
     if (tokens === null) {
@@ -153,29 +158,35 @@ export function useSmoothText(
     let last: number | null = null;
     let carry = 0;
     const tick = (now: number) => {
-      const elapsed = last === null ? 16 : now - last;
+      // About thirty steps a second: smooth to the eye, and half the Markdown parses of every frame.
+      if (last !== null && now - last < 32) {
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+      const elapsed = last === null ? 32 : now - last;
       last = now;
-      setShown((count) => {
-        const goal = latest.current;
-        const backlog = goal.length - count;
-        if (backlog <= 0) return count;
-        // Characters per millisecond: the backlog over one slow duration, at least 40 a second.
-        carry += Math.max(backlog / span, 0.04) * elapsed;
-        const step = Math.floor(carry);
-        carry -= step;
-        let next = Math.min(goal.length, count + step);
-        // Finish the word in hand rather than stopping inside it.
-        const space = goal.slice(next).search(/\s/);
-        if (step > 0 && space > 0 && space <= 12) next = Math.min(goal.length, next + space);
-        return next;
-      });
+      const goal = latest.current;
+      const backlog = goal.length - count.current;
+      if (backlog <= 0) return;
+      // Characters per millisecond: the backlog over one slow duration, at least 40 a second.
+      carry += Math.max(backlog / span, 0.04) * elapsed;
+      const step = Math.floor(carry);
+      carry -= step;
+      let next = Math.min(goal.length, count.current + step);
+      // Finish the word in hand rather than stopping inside it.
+      const space = goal.slice(next).search(/\s/);
+      if (step > 0 && space > 0 && space <= 12) next = Math.min(goal.length, next + space);
+      if (next !== count.current) {
+        count.current = next;
+        setShown(next);
+      }
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(frame);
     };
-  }, [active, host]);
+  }, [behind, host, text.length]);
 
   return enabled ? text.slice(0, Math.min(shown, text.length)) : text;
 }
