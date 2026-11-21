@@ -44,7 +44,8 @@ const localImports = (module: (typeof modules)[number]) =>
     },
   );
 
-describe('@rectio/ui in a React Server Component', () => {
+// The first two tests import the whole package root cold, which takes seconds on a busy machine.
+describe('@rectio/ui in a React Server Component', { timeout: 30_000 }, () => {
   it('imports from the package root on the server', async () => {
     const kit = await import('./index');
     expect(Object.keys(kit).length).toBeGreaterThan(150);
