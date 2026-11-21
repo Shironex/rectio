@@ -181,6 +181,13 @@ export function buildTestRegistry(): { dir: string; url: string; cleanup: () => 
   return { ...temp, url: pathToFileURL(temp.dir).href };
 }
 
+/** An item's version in the real registry config, so tests follow its bumps instead of pinning them. */
+export function registryVersion(name: string): string {
+  const item = config.items.find((entry) => entry.name === name);
+  if (item === undefined) throw new Error(`no registry item named ${name}`);
+  return item.version;
+}
+
 /** A Vite app as the CLI sees it, without node_modules. */
 export const VITE_APP: Record<string, string> = {
   'package.json': `${JSON.stringify(

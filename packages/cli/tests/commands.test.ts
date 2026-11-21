@@ -10,7 +10,15 @@ import { runList, runSearch } from '../src/commands/list.ts';
 import { runUpdate } from '../src/commands/update.ts';
 import { readLock } from '../src/core/lockfile.ts';
 import { main } from '../src/main.ts';
-import { VITE_APP, buildTestRegistry, capture, read, tempDir, writeTree } from './helpers.ts';
+import {
+  VITE_APP,
+  buildTestRegistry,
+  capture,
+  read,
+  registryVersion,
+  tempDir,
+  writeTree,
+} from './helpers.ts';
 
 let registry: ReturnType<typeof buildTestRegistry>;
 beforeAll(() => {
@@ -162,7 +170,10 @@ describe('add', () => {
     expect(existsSync(join(cwd, 'src/components/ui/theme-scope.tsx'))).toBe(true);
 
     const lock = readLock(cwd);
-    expect(lock.items.dialog).toMatchObject({ version: '0.2.0', type: 'component' });
+    expect(lock.items.dialog).toMatchObject({
+      version: registryVersion('dialog'),
+      type: 'component',
+    });
     expect(lock.items.dialog).not.toHaveProperty('tier');
     expect(lock.items.dialog?.files[0]).toMatchObject({
       path: 'src/components/ui/dialog.tsx',
