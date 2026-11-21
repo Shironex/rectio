@@ -341,7 +341,7 @@ export function TimeChart({
               patternUnits="userSpaceOnUse"
               patternTransform="rotate(45)"
             >
-              <line x1={0} y1={0} x2={0} y2={6} stroke="var(--rx-chart-grid)" strokeWidth={2} />
+              <line x1={0} y1={0} x2={0} y2={6} stroke="var(--rx-chart-axis)" strokeWidth={1} />
             </pattern>
             {variant === 'area' &&
               keyed.map((s) => (
@@ -454,6 +454,7 @@ export function TimeChart({
                       props.cy !== undefined ? (
                         <circle
                           key={`${s.key}-end`}
+                          className="rx-end-dot"
                           cx={props.cx}
                           cy={props.cy}
                           r={3}

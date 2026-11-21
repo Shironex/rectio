@@ -242,8 +242,10 @@ export function DonutChart({
                     startAngle={props.startAngle}
                     endAngle={props.endAngle}
                     cornerRadius={2}
-                    stroke="var(--rx-chart-halo)"
-                    strokeWidth={2}
+                    // The pale Other slice gets an axis coloured edge, so it holds 3:1 against the card.
+                    {...(parts[index]?.tone === 'reference'
+                      ? { stroke: 'var(--rx-chart-axis)', strokeWidth: 1 }
+                      : { stroke: 'var(--rx-chart-halo)', strokeWidth: 2 })}
                     fill={chartColor(parts[index]?.tone ?? 'reference')}
                     className={cn(
                       'transition-opacity duration-fast ease-standard',
