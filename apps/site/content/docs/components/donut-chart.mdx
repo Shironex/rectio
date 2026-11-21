@@ -33,8 +33,9 @@ import { DonutChart } from '@/components/ui/donut-chart';
 
 The ring is a picture of the list beside it: every part keeps its name, figure and share in the
 list, so nothing is read from angles alone. Past `maxSlices` (four by default) the smallest parts fold
-into one Other part in the reference colour. Zero and negative figures are left out, since they cannot
-be a share of a whole.
+into one Other part in the reference colour, and the table names each part inside it. Without a colour
+on every part, at most three parts and Other are drawn, so no colour repeats. Zero and negative figures
+are left out, since they cannot be a share of a whole.
 
 The middle shows the total, written in full when it fits and short when it does not; pass
 `centerValue` for your own figure, or `null` when the card around it already shows the total. In a

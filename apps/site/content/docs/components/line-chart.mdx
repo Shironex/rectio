@@ -36,8 +36,15 @@ Points are `{ date, value }`. The step (hour, day or month) is read from the dat
 the finest tick spacing that fits the width: hours, days, weeks starting on Monday, months, quarters or
 years, written in the locale. The year appears where the range crosses one, and midnight names its day.
 
+Dates are read in the reader's local time, and a daily step stays daily across a clock change. A
+date-only string such as `'2026-03-01'` parses as UTC midnight, which is the evening before west of
+UTC, so build days with `localDate('2026-03-01')` from `@rectio/ui/charts`.
+
 A `null` value, or a run of missing points longer than three steps, breaks the line, so a broken
-import reads as missing rather than as a straight slope. Dash a series for a forecast or a previous
+import reads as missing rather than as a straight slope; the stretch is hatched and labelled No data,
+and the summary and table say that dates are missing. When the plot is too narrow for every day
+(under 4px each), daily figures are drawn as weekly averages: a note beside the legend, the tooltip,
+the summary and the table caption say so, and the table keeps every day. Dash a series for a forecast or a previous
 period; series past the third are dashed for you.
 
 Charts live in their own entry, `@rectio/ui/charts`, so an app that draws none never ships the chart
