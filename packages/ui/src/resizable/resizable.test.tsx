@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderToString } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './resizable';
@@ -134,6 +135,35 @@ describe('Resizable', () => {
     unmount();
     render(<Layout storageKey="invoices" />);
     expect(flex('list')).toBeCloseTo(25);
+  });
+
+  it('pulls a saved size back inside the panel limits', () => {
+    localStorage.setItem('rectio:resizable:invoices', JSON.stringify({ list: 80, detail: 20 }));
+    render(<Layout storageKey="invoices" />);
+    expect(flex('list')).toBe(50);
+    expect(flex('detail')).toBe(40);
+    expect(handle()).toHaveAttribute('aria-valuenow', '50');
+  });
+
+  it('draws the defaults on the server even with a saved layout', () => {
+    localStorage.setItem('rectio:resizable:invoices', JSON.stringify({ list: 45, detail: 55 }));
+    const html = renderToString(<Layout storageKey="invoices" />);
+    expect(html).not.toContain('flex:45');
+    expect(html).toContain('flex:30 1 0px');
+  });
+
+  it('gives the handle a value when the panels have no default size', () => {
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel id="a">A</ResizablePanel>
+        <ResizableHandle label="Resize A" />
+        <ResizablePanel id="b">B</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+    expect(screen.getByRole('separator', { name: 'Resize A' })).toHaveAttribute(
+      'aria-valuenow',
+      '50',
+    );
   });
 
   it('goes back to the defaults on a double click', async () => {

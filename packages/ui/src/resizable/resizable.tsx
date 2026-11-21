@@ -64,20 +64,47 @@ const FREE: PanelLimits = { defaultSize: undefined, minSize: 0, maxSize: 100 };
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const storageName = (key: string) => `rectio:resizable:${key}`;
 
-/** A layout saved under `key`: each panel's size by panel id. */
-function readStored(key: string | undefined): Record<string, number> {
-  if (key === undefined || typeof localStorage === 'undefined') return {};
+/** The layout saved under `key`, as stored, or null. A string, so the store snapshot is stable. */
+function readSaved(key: string | undefined): string | null {
+  if (key === undefined || typeof localStorage === 'undefined') return null;
   try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(storageName(key)) ?? '{}');
+    return localStorage.getItem(storageName(key));
+  } catch {
+    // Storage blocked: the default sizes apply.
+    return null;
+  }
+}
+
+/** Another tab saved a layout: the store reads it again. */
+function subscribeSaved(listener: () => void): () => void {
+  window.addEventListener('storage', listener);
+  return () => {
+    window.removeEventListener('storage', listener);
+  };
+}
+
+/** A saved layout as each panel's size by panel id, pulled inside the limits of the panels known. */
+function parseSaved(
+  saved: string | null,
+  panels: ReadonlyMap<string, PanelLimits>,
+): Record<string, number> {
+  if (saved === null) return {};
+  try {
+    const parsed: unknown = JSON.parse(saved);
     if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
     return Object.fromEntries(
-      Object.entries(parsed).filter(
-        (entry): entry is [string, number] =>
-          typeof entry[1] === 'number' && Number.isFinite(entry[1]),
-      ),
+      Object.entries(parsed)
+        .filter(
+          (entry): entry is [string, number] =>
+            typeof entry[1] === 'number' && Number.isFinite(entry[1]),
+        )
+        .map(([id, size]) => {
+          const limits = panels.get(id);
+          return [id, limits === undefined ? size : clamp(size, limits.minSize, limits.maxSize)];
+        }),
     );
   } catch {
-    // Storage blocked or a value from another version: the default sizes apply.
+    // A value from another version: the default sizes apply.
     return {};
   }
 }
@@ -162,10 +189,15 @@ export function ResizablePanelGroup({
     const next = defaultSizes(ids.map((id) => registered.get(id) ?? FREE));
     return Object.fromEntries(ids.map((id, index) => [id, next[index] ?? 0]));
   }, [registered]);
-  // A saved layout applies from the first draw; without one each panel starts at its default.
-  const [sizes, setSizes] = useState<Readonly<Record<string, number>>>(() =>
-    readStored(storageKey),
+  // The server has no saved layout, so it draws the defaults and hydration matches; the browser
+  // then applies the saved layout before it paints. A layout the user makes here wins over both.
+  const saved = useSyncExternalStore(
+    subscribeSaved,
+    () => readSaved(storageKey),
+    () => null,
   );
+  const [made, setSizes] = useState<Readonly<Record<string, number>> | null>(null);
+  const sizes = useMemo(() => made ?? parseSaved(saved, registered), [made, saved, registered]);
   const [dragging, setDragging] = useState(false);
   const latest = useRef({ onLayout, storageKey });
   useEffect(() => {
@@ -392,7 +424,11 @@ export function ResizableHandle({
 
   const before = pair?.[0];
   const limits = before === undefined ? undefined : group.limits(before);
-  const size = before === undefined ? undefined : (group.sizes[before] ?? limits?.defaultSize);
+  // The size drawn now: the user's layout, else the panel's default share.
+  const size =
+    before === undefined
+      ? undefined
+      : (group.sizes[before] ?? group.fallback[before] ?? limits?.defaultSize);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (pair === null || limits === undefined) return;
