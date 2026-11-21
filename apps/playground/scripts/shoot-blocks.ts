@@ -60,6 +60,7 @@ const SAAS_BLOCKS = [
   'kanban-board',
   'comment-thread',
   'file-manager',
+  'sessions',
 ] as const;
 
 const wanted = (name: string) => only === undefined || name.includes(only);

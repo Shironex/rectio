@@ -27,6 +27,8 @@ import {
 import { useState, type ComponentType, type ReactNode } from 'react';
 
 import { usePageCanvas } from '../page-canvas';
+import { SheetSizes } from './sheet-sizes';
+import { TableFilters } from './table-filters';
 import type { Mode, ThemeId } from '../themes';
 
 /** Enough commands that the list scrolls, so the edge fades show. */
@@ -101,7 +103,10 @@ function Pair({ Button, ...props }: ButtonProps & { Button: ComponentType<Button
 export function GapsPage({ theme, mode, motion }: { theme: ThemeId; mode: Mode; motion: boolean }) {
   const canvas = usePageCanvas(theme, mode);
   const Button = motion ? MotionButton : PlainButton;
-  const open = new URLSearchParams(window.location.search).get('open') === 'command';
+  const params = new URLSearchParams(window.location.search);
+  const open = params.get('open') === 'command';
+  const sheet = params.get('sheet');
+  const filter = params.get('filter');
   const [due, setDue] = useState<Date | null>(new Date(2026, 2, 19));
   const [issued, setIssued] = useState<Date | null>(new Date(2026, 2, 5));
   const [range, setRange] = useState<DateRange | undefined>({
@@ -115,9 +120,28 @@ export function GapsPage({ theme, mode, motion }: { theme: ThemeId; mode: Mode; 
         <header className="flex flex-col gap-1">
           <h1 className="font-display text-2xl font-heading tracking-tight">Kit fixes</h1>
           <p className="text-sm text-fg-muted">
-            Field errors, skeleton widths, loading buttons, date formats and the command menu.
+            Table filters, sheet sizes, field errors, skeleton widths, loading buttons, date formats
+            and the command menu.
           </p>
         </header>
+
+        <Section
+          title="Table filters"
+          note="A search box and a status facet over a table, with the count and Clear filters while anything narrows the rows."
+        >
+          <TableFilters filter={filter === 'some' || filter === 'nothing' ? filter : 'none'} />
+        </Section>
+
+        <Section
+          title="Sheet sizes"
+          note="Small, medium and large from the width tokens, and full for the whole screen."
+        >
+          <SheetSizes
+            open={
+              sheet === 'sm' || sheet === 'md' || sheet === 'lg' || sheet === 'full' ? sheet : null
+            }
+          />
+        </Section>
 
         <Section
           title="Field errors"

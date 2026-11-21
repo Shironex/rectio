@@ -17,6 +17,7 @@ import { UsersTableDemo } from './users-table';
 import { KanbanBoardDemo } from './kanban-board';
 import { CommentThreadDemo } from './comment-thread';
 import { FileManagerDemo } from './file-manager';
+import { SessionsDemo } from './sessions';
 
 /** Every SaaS block demo by its registry name, in the order the screenshots walk them. */
 export const SAAS_DEMOS = {
@@ -38,6 +39,7 @@ export const SAAS_DEMOS = {
   'kanban-board': KanbanBoardDemo,
   'comment-thread': CommentThreadDemo,
   'file-manager': FileManagerDemo,
+  sessions: SessionsDemo,
 } satisfies Record<string, Demo>;
 
 export type SaasBlockName = keyof typeof SAAS_DEMOS;
