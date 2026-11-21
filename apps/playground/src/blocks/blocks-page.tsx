@@ -337,8 +337,8 @@ function Dashboard({ blocks, locale }: { blocks: Blocks; locale: data.Locale }) 
           </h1>
         </div>
         <nav aria-label={'Sections'}>
-          {/* One row that scrolls sideways on a phone, so no label is orphaned on a second line. */}
-          <ul className="scrollbar-none flex gap-1 overflow-x-auto max-sm:-mx-4 max-sm:px-4">
+          {/* One row that scrolls sideways on a phone, fading at the edge so the cut reads as more to come. */}
+          <ul className="scrollbar-none flex gap-1 overflow-x-auto max-sm:-mx-4 max-sm:px-4 max-sm:mask-r-from-85%">
             {sections.map((section) => (
               <li key={section.id} className="shrink-0 whitespace-nowrap">
                 <a
