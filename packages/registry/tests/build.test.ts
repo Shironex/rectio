@@ -391,6 +391,7 @@ describe('the rectio registry', () => {
       'motion-team',
       'motion-team-members',
       'motion-testimonials',
+      'motion-time-series-chart',
       'motion-timeline',
       'motion-toast',
       'motion-toggle',
@@ -446,6 +447,7 @@ describe('the rectio registry', () => {
       'theme-default',
       'theme-ledger',
       'theme-scope',
+      'time-series-chart',
       'timeline',
       'toast',
       'toggle',
@@ -523,7 +525,7 @@ describe('the rectio registry', () => {
       for (const item of [byName.get(name), byName.get(`motion-${name}`)]) {
         expect(item, name).toBeDefined();
         expect(item?.type, item?.name).toBe('block');
-        expect(item?.version, item?.name).toBe('0.1.0');
+        expect(item?.version, item?.name).toMatch(/^0\.1\.\d+$/);
       }
       // The plain block rests on the shared core; its twin on the plain block and the motion core.
       expect(byName.get(name)?.registryDependencies).toContain('blocks-core');
@@ -599,6 +601,7 @@ describe('the rectio registry', () => {
       'kanban-board',
       'comment-thread',
       'file-manager',
+      'time-series-chart',
     ];
     for (const name of blocks) {
       for (const item of [byName.get(name), byName.get(`motion-${name}`)]) {

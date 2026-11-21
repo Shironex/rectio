@@ -1004,7 +1004,7 @@ export default defineRegistry({
         {
           name: 'blocks-core',
           type: 'lib',
-          version: '0.1.3',
+          version: '0.1.4',
           title: 'Blocks core',
           description:
             'Money maths in minor units, the panel, chart theming with a table fallback, and the parts every finance block shares.',
@@ -1020,12 +1020,13 @@ export default defineRegistry({
             'lib/figures.tsx',
             'lib/segmented.tsx',
             'lib/state-badge.tsx',
+            'lib/value-format.ts',
           ],
         },
         {
           name: 'motion-blocks-core',
           type: 'lib',
-          version: '0.1.0',
+          version: '0.1.1',
           title: 'Motion blocks core',
           description:
             'First-view entrances, chart bars that grow from the baseline and rows that leave without a jump.',
@@ -1035,9 +1036,10 @@ export default defineRegistry({
         ...blockItems(
           'kpi-row',
           'KPI row',
-          'Key figures with their change in words and a sparkline.',
+          'Key figures in money, counts, percentages or durations, with their change in words and a sparkline.',
           'kpi-row',
           'kpi-row',
+          '0.1.1',
         ),
         ...blockItems(
           'cash-flow',
@@ -1407,6 +1409,11 @@ export default defineRegistry({
           'file-manager',
           'File manager',
           'One folder of files with a path, sorting, rename in place, bulk delete and storage use.',
+        ),
+        ...saasItems(
+          'time-series-chart',
+          'Time series chart',
+          'Figures over time as a line or an area, dates in the reader language, a summary, empty and loading states and a table fallback.',
         ),
       ],
     },
