@@ -98,7 +98,7 @@ const STAGGER_STEPS = 8;
 
 /**
  * Grows each bar from the zero line (scaleY for columns, scaleX for horizontal bars) and fades the
- * lines in after the bars, or draws a chart of lines alone from left to right, once, on first view. Values are never animated: the bars reach their
+ * lines in after the bars, once, on first view. Values are never animated: the bars reach their
  * true length and the figures beside them are exact from the first frame.
  */
 function ChartStage({ children, className }: { children: ReactNode; className?: string }) {
@@ -149,18 +149,6 @@ function ChartStage({ children, className }: { children: ReactNode; className?: 
         );
       });
       for (const line of lines) {
-        // A chart of lines alone draws them through time, left to right, with a clip: the marks
-        // are at their true values from the first frame, only uncovered.
-        if (bars.length === 0) {
-          animations.push(
-            line.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], {
-              duration,
-              easing: ease,
-              fill: 'backwards',
-            }),
-          );
-          continue;
-        }
         animations.push(
           line.animate([{ opacity: 0 }, { opacity: 1 }], {
             duration: tokens.duration.base * 1000,
@@ -185,7 +173,6 @@ function ChartStage({ children, className }: { children: ReactNode; className?: 
         'data-[enter=waiting]:[&_.recharts-bar-rectangle]:opacity-0',
         'data-[enter=waiting]:[&_.recharts-line]:opacity-0',
         'data-[enter=waiting]:[&_.recharts-line-dots]:opacity-0',
-        'data-[enter=waiting]:[&_.recharts-area]:opacity-0',
         className,
       )}
     >
