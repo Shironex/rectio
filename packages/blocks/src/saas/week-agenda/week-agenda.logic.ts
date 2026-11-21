@@ -58,7 +58,6 @@ export interface PlacedAllDay {
   continuesAfter: boolean;
 }
 
-const DAY_MS = 86_400_000;
 /** The shortest an event is drawn, in minutes, so a five minute call still has a line of text. */
 export const AGENDA_MIN_MINUTES = 26;
 
@@ -115,9 +114,33 @@ export function agendaStep(date: Date, variant: AgendaVariant, direction: 1 | -1
   return addDays(date, (variant === 'day' ? 1 : 7) * direction);
 }
 
-/** True when an event belongs in the all-day row: marked all day, or a day long or more. */
+/**
+ * True when an event belongs in the all-day row: marked all day, or a calendar day long or more.
+ * A day is counted on the wall clock, so midnight to midnight across a clock change (23 or 25
+ * hours) is still a whole day.
+ */
 export function isAllDayEvent(event: AgendaEvent): boolean {
-  return event.allDay === true || event.end.getTime() - event.start.getTime() >= DAY_MS;
+  if (event.allDay === true) return true;
+  const { start } = event;
+  const dayLater = new Date(
+    start.getFullYear(),
+    start.getMonth(),
+    start.getDate() + 1,
+    start.getHours(),
+    start.getMinutes(),
+  );
+  return event.end.getTime() >= dayLater.getTime();
+}
+
+/**
+ * Where an instant falls in a day, as wall-clock minutes from its midnight: 0 before the day,
+ * 1440 after it. Read from the clock rather than counted from midnight, so 10:00 is minute 600
+ * on the day the clocks go forward or back too.
+ */
+function wallMinutes(time: number, dayStart: number, dayEnd: number): number {
+  if (time <= dayStart) return 0;
+  if (time >= dayEnd) return 1440;
+  return minutesOfDay(new Date(time));
 }
 
 /** An all-day event's exclusive end: the next midnight when the app gave the same day. */
@@ -150,8 +173,10 @@ export function layoutDayEvents(
     const to = Math.min(event.end.getTime(), dayEnd);
     // An event ending exactly at midnight does not spill an empty slice into the next day.
     if (to <= from && !(from === to && event.start.getTime() === event.end.getTime())) continue;
-    let start = Math.round((from - dayStart) / 60_000);
-    let end = Math.round((to - dayStart) / 60_000);
+    let start = wallMinutes(from, dayStart, dayEnd);
+    let end = wallMinutes(to, dayStart, dayEnd);
+    // In the hour the clocks go back, an event can end on an earlier wall time than it starts.
+    if (end < start) end = start;
     const clippedBefore = start < windowStart;
     const clippedAfter = end > windowEnd;
     start = Math.min(Math.max(start, windowStart), windowEnd - AGENDA_MIN_MINUTES);
@@ -312,8 +337,12 @@ export function layoutAllDay(
     .filter(({ start, end }) => start < rangeEnd && end > rangeStart)
     .map(({ event, start, end }) => {
       const covered = days
-        .map((day, index) => ({ index, from: startOfDay(day).getTime() }))
-        .filter(({ from }) => start < from + DAY_MS && end > from)
+        .map((day, index) => ({
+          index,
+          from: startOfDay(day).getTime(),
+          to: addDays(day, 1).getTime(),
+        }))
+        .filter(({ from, to }) => start < to && end > from)
         .map(({ index }) => index);
       return {
         event,

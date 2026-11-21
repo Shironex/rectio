@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   agendaDays,
@@ -219,5 +219,58 @@ describe('now, slots and keyboard moves', () => {
         days,
       ),
     ).toEqual({ start: 7, end: 21 });
+  });
+});
+
+// Node reads TZ on every date call, so the clock changes of one zone can be tested anywhere.
+describe('week agenda across a clock change', () => {
+  const zone = process.env.TZ;
+  beforeAll(() => {
+    process.env.TZ = 'Europe/London';
+  });
+  afterAll(() => {
+    if (zone === undefined) delete process.env.TZ;
+    else process.env.TZ = zone;
+  });
+
+  const at = (month: number, day: number, hour: number, minute = 0) =>
+    new Date(2026, month, day, hour, minute);
+
+  it('lays out wall-clock hours on the day the clocks go forward', () => {
+    // 29 March 2026: 01:00 becomes 02:00, the day is 23 hours long.
+    const day = at(2, 29, 0);
+    const placed = layoutDayEvents(
+      [
+        { id: 'early', title: 'Early', start: at(2, 29, 0, 30), end: at(2, 29, 3) },
+        { id: 'stand', title: 'Standup', start: at(2, 29, 10), end: at(2, 29, 11) },
+        { id: 'late', title: 'Late', start: at(2, 29, 22), end: at(2, 30, 0) },
+      ],
+      day,
+    );
+    const by = (id: string) => placed.find((slice) => slice.event.id === id);
+    expect(by('early')).toMatchObject({ start: 30, end: 180 });
+    expect(by('stand')).toMatchObject({ start: 600, end: 660 });
+    expect(by('late')).toMatchObject({ start: 1320, end: 1440, continuesAfter: false });
+  });
+
+  it('lays out wall-clock hours on the day the clocks go back', () => {
+    // 25 October 2026: 02:00 becomes 01:00, the day is 25 hours long.
+    const placed = layoutDayEvents(
+      [{ id: 'stand', title: 'Standup', start: at(9, 25, 10), end: at(9, 25, 11, 30) }],
+      at(9, 25, 0),
+    );
+    expect(placed[0]).toMatchObject({ start: 600, end: 690 });
+  });
+
+  it('counts midnight to midnight as a whole day, however long the day is', () => {
+    const short = { id: 'a', title: 'Offsite', start: at(2, 29, 0), end: at(2, 30, 0) };
+    const long = { id: 'b', title: 'Offsite', start: at(9, 25, 0), end: at(9, 26, 0) };
+    expect(isAllDayEvent(short)).toBe(true);
+    expect(isAllDayEvent(long)).toBe(true);
+    expect(isAllDayEvent({ ...short, end: at(2, 29, 23) })).toBe(false);
+    const week = agendaDays(at(2, 25, 12), 'week', 1);
+    expect(week.map((date) => date.getDate())).toEqual([23, 24, 25, 26, 27, 28, 29]);
+    const bars = layoutAllDay([short], week);
+    expect(bars[0]).toMatchObject({ first: 6, last: 6 });
   });
 });

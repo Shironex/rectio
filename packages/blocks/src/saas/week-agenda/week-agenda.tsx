@@ -47,6 +47,7 @@ import {
   type AgendaVariant,
   type PlacedAllDay,
   type PlacedEvent,
+  isAllDayEvent,
 } from './week-agenda.logic';
 
 export interface WeekAgendaProps {
@@ -987,10 +988,7 @@ function AgendaList({
                       title={event.title}
                       start={event.start}
                       end={event.end}
-                      allDay={
-                        event.allDay === true ||
-                        event.end.getTime() - event.start.getTime() >= 86_400_000
-                      }
+                      allDay={isAllDayEvent(event)}
                       tone={event.tone ?? 'accent'}
                       status={event.status ?? 'confirmed'}
                       locale={locale}
