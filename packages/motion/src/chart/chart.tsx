@@ -30,6 +30,7 @@ function enter(
   const root = element as HTMLElement;
   const tokens = readMotionTokens(root);
   const animations: Animation[] = [];
+  const tips: (() => void)[] = [];
   let frame = 0;
   let tries = 0;
   const start = () => {
@@ -68,6 +69,8 @@ function enter(
           ),
         );
       }
+      if (plot !== undefined)
+        tips.push(...leadingTips(root, plot, tokens, bezier(tokens.easing.settle)));
     } else if (kind === 'bar') {
       const zero = root.querySelector<SVGGraphicsElement>('.rx-zero line')?.getBBox();
       [...root.querySelectorAll<SVGGraphicsElement>(BARS)].forEach((bar, index) => {
@@ -130,7 +133,65 @@ function enter(
   return () => {
     cancelAnimationFrame(frame);
     for (const animation of animations) animation.cancel();
+    for (const stop of tips) stop();
   };
+}
+
+/**
+ * A dot riding the moving edge of each line while it draws, so the line reads as being drawn
+ * rather than cut off. It follows the clip edge across the plot, finds the line's height there on
+ * the path, and leaves when the draw ends (the line's own end dot takes over). Returns stoppers.
+ */
+function leadingTips(
+  root: HTMLElement,
+  plot: DOMRect,
+  tokens: NonNullable<ReturnType<typeof readMotionTokens>>,
+  ease: (progress: number) => number,
+): (() => void)[] {
+  const duration = tokens.duration.count * 1000;
+  return [...root.querySelectorAll<SVGPathElement>('.recharts-line-curve, .recharts-area-curve')]
+    .filter((path) => typeof path.getTotalLength === 'function')
+    .map((path) => {
+      let total = 0;
+      try {
+        total = path.getTotalLength();
+      } catch {
+        return () => undefined;
+      }
+      const tip = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      tip.setAttribute('r', '3.5');
+      tip.setAttribute('fill', path.getAttribute('stroke') ?? 'currentColor');
+      tip.setAttribute('stroke', 'var(--rx-chart-halo)');
+      tip.setAttribute('stroke-width', '2');
+      tip.setAttribute('aria-hidden', 'true');
+      path.parentNode?.append(tip);
+      // The point on the path at a given x: the path runs left to right, so search by length.
+      const at = (x: number) => {
+        let low = 0;
+        let high = total;
+        for (let i = 0; i < 18; i += 1) {
+          const mid = (low + high) / 2;
+          if (path.getPointAtLength(mid).x < x) low = mid;
+          else high = mid;
+        }
+        return path.getPointAtLength(high);
+      };
+      const started = performance.now();
+      let frame = 0;
+      const step = (now: number) => {
+        const progress = Math.min(1, (now - started) / duration);
+        const point = at(plot.x + ease(progress) * plot.width);
+        tip.setAttribute('cx', String(point.x));
+        tip.setAttribute('cy', String(point.y));
+        if (progress < 1) frame = requestAnimationFrame(step);
+        else tip.remove();
+      };
+      frame = requestAnimationFrame(step);
+      return () => {
+        cancelAnimationFrame(frame);
+        tip.remove();
+      };
+    });
 }
 
 /** A cubic Bézier easing as a function of progress, for Recharts' transitions. */
