@@ -372,6 +372,16 @@ export default defineRegistry({
       files: ['time-field/time-field.tsx', 'time-field/time.ts'],
     },
     {
+      name: 'event-card',
+      type: 'component',
+      version: '0.1.0',
+      title: 'EventCard',
+      description:
+        'One event with its time, length, place and attendees, coloured by kind, in full and compact variants.',
+      categories: ['scheduling'],
+      files: ['event-card/event-card.tsx'],
+    },
+    {
       name: 'toast',
       type: 'component',
       version: '0.2.1',
