@@ -148,6 +148,52 @@ should ship carries a changeset: run `pnpm changeset`, pick the bump and write o
 changelog. On main, the release workflow collects changesets into a "Version Packages" pull request,
 and merging it publishes the new version to npm with provenance.
 
+## Changelog
+
+The public changelog at [/changelog](https://shironex.github.io/rectio/changelog) (and its Atom
+feed, `/changelog.xml`) is built from two sources, each written once:
+
+- `apps/site/content/changelog/`: one Markdown file per release, named by its date
+  (`2026-11-21.md`), plus `unreleased.md` for what is on main but not released yet.
+- `packages/cli/CHANGELOG.md`: written by changesets. Never copy CLI notes into a release file; name
+  the CLI version in the release's `cli` field and its notes appear under CLI.
+
+Add a line to `unreleased.md` in the same PR as any user-visible change: a new or changed component,
+block, template or theme, a CLI behaviour, a docs or site feature. Refactors, tests, CI and tooling
+stay out unless someone using the kit would notice. When a release is cut, rename `unreleased.md` to
+the release date, give it a `date` and a real title, and start a new `unreleased.md` when the next
+change lands.
+
+A release file looks like this:
+
+```md
+---
+date: 2026-11-21
+title: Design QA fixes and the installer style CLI
+summary: One or two plain sentences on what the release is about.
+cli: 0.1.1
+---
+
+## Kit
+
+- Sheet takes a `size` of `sm`, `md` or `lg` on the side edges.
+
+## Templates
+
+- The help desk ticket sheets use the new Sheet sizes.
+```
+
+- Frontmatter: `date` (must match the file name; none in `unreleased.md`), `title`, and optionally
+  `summary`, `version` (a rectio version such as `0.1.0`) and `cli` (an `@rectio/cli` version from
+  `packages/cli/CHANGELOG.md`). Values are plain text on one line.
+- Groups: `## Kit` (components and blocks), `## Templates`, `## Themes`, `## CLI`, `## Docs and
+site`. Leave out the ones you do not need; any other heading fails the build.
+- Entries: one `- ` bullet per change, one line where possible, plain and user facing, written as a
+  statement of what is true now. Inline code and `[links](/docs/cli)` work; site links start with
+  `/` and get the base path.
+
+`pnpm --filter @rectio/site test` checks every file against this format.
+
 ## Pull requests
 
 Fill in the PR template: what changed, the checklist, and screenshots in light and dark,
