@@ -1100,6 +1100,8 @@ export default defineRegistry({
     '@rectio/blocks/marketing/motion': join(blocks, 'src', 'marketing', 'motion.ts'),
     '@rectio/blocks/docs': join(blocks, 'src', 'docs', 'index.ts'),
     '@rectio/blocks/docs/motion': join(blocks, 'src', 'docs', 'motion.ts'),
+    '@rectio/blocks/ai': join(blocks, 'src', 'ai', 'index.ts'),
+    '@rectio/blocks/ai/motion': join(blocks, 'src', 'ai', 'motion.ts'),
   },
   templates: { dir: join(packages, '..', 'templates') },
   addons: [
@@ -1885,6 +1887,42 @@ export default defineRegistry({
           'changelog',
           { logic: true, motion: true },
         ),
+      ],
+    },
+    {
+      sourceDir: join(blocks, 'src', 'ai'),
+      targetFolder: 'ai',
+      requireEveryFolder: true,
+      items: [
+        {
+          name: 'ai-core',
+          type: 'lib',
+          version: '0.1.0',
+          title: 'AI core',
+          description: 'The parts the AI blocks draw, which the motion twins swap for moving ones.',
+          categories: ['ai', 'blocks'],
+          files: ['lib/parts.tsx'],
+        },
+        {
+          name: 'ai-chat-thread',
+          type: 'block',
+          version: '0.1.0',
+          title: 'AI chat thread',
+          description:
+            'A whole conversation: Markdown replies with code blocks, reasoning, tool calls, sources, copy, rate and regenerate, a field that sends and stops, and an empty state with suggestions.',
+          categories: ['ai', 'blocks'],
+          files: ['chat-thread/chat-thread.tsx', 'chat-thread/chat-thread.logic.ts'],
+        },
+        {
+          name: 'motion-ai-chat-thread',
+          type: 'block',
+          version: '0.1.0',
+          title: 'Motion AI chat thread',
+          description:
+            'AI chat thread with new messages that rise into place, typing dots that fade up and an even text reveal.',
+          categories: ['ai', 'blocks', 'motion'],
+          files: ['chat-thread/chat-thread.motion.tsx'],
+        },
       ],
     },
   ],

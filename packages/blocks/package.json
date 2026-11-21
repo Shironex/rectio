@@ -12,7 +12,9 @@
     "./marketing": "./src/marketing/index.ts",
     "./marketing/motion": "./src/marketing/motion.ts",
     "./docs": "./src/docs/index.ts",
-    "./docs/motion": "./src/docs/motion.ts"
+    "./docs/motion": "./src/docs/motion.ts",
+    "./ai": "./src/ai/index.ts",
+    "./ai/motion": "./src/ai/motion.ts"
   },
   "files": [
     "src"
