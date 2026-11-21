@@ -16,7 +16,6 @@ import {
   useShortcut,
   type BreadcrumbItem,
 } from '@rectio/ui';
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMemo, useState, type ReactNode } from 'react';
 
@@ -79,16 +78,7 @@ function Frame({ children }: { children: ReactNode }) {
 
   const header = (
     <AppShellHeader
-      title={
-        <Breadcrumb
-          items={breadcrumbFor(pathname)}
-          renderLink={({ href, className, children: label }) => (
-            <Link href={href} className={className}>
-              {label}
-            </Link>
-          )}
-        />
-      }
+      title={<Breadcrumb items={breadcrumbFor(pathname)} />}
       actions={
         <>
           <CommandMenuTrigger />

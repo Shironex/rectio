@@ -79,9 +79,7 @@ export function SignUpPage() {
         privacy={() => {
           setLegal('privacy');
         }}
-        signIn={() => {
-          router.push('/sign-in');
-        }}
+        signIn="/sign-in"
         onSubmit={(values) => {
           setPending(true);
           setError(undefined);

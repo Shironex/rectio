@@ -19,7 +19,6 @@ import {
   SidebarSubItem,
   SidebarSubmenu,
 } from '@rectio/ui';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { COMPANY, TODAY } from '@/data/company';
@@ -77,13 +76,13 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarItem render={<Link href="/" />} icon={icon(HouseIcon)} active={on('/')}>
+          <SidebarItem href="/" icon={icon(HouseIcon)} active={on('/')}>
             Overview
           </SidebarItem>
         </SidebarGroup>
         <SidebarGroup label="Money in">
           <SidebarItem
-            render={<Link href="/invoices" />}
+            href="/invoices"
             icon={icon(FileTextIcon)}
             active={on('/invoices')}
             {...(overdue > 0
@@ -95,7 +94,7 @@ export function AppSidebar() {
         </SidebarGroup>
         <SidebarGroup label="Money out">
           <SidebarItem
-            render={<Link href="/expenses" />}
+            href="/expenses"
             icon={icon(CreditCardIcon)}
             active={on('/expenses')}
             {...(pending > 0
@@ -112,40 +111,23 @@ export function AppSidebar() {
             active={onJournal}
             defaultOpen
           >
-            <SidebarSubItem
-              render={<Link href="/journal" />}
-              active={onJournal && account === null}
-            >
+            <SidebarSubItem href="/journal" active={onJournal && account === null}>
               Journal
             </SidebarSubItem>
-            <SidebarSubItem
-              render={<Link href="/journal?account=1000" />}
-              active={onJournal && account === '1000'}
-            >
+            <SidebarSubItem href="/journal?account=1000" active={onJournal && account === '1000'}>
               Bank account
             </SidebarSubItem>
-            <SidebarSubItem
-              render={<Link href="/journal?account=1100" />}
-              active={onJournal && account === '1100'}
-            >
+            <SidebarSubItem href="/journal?account=1100" active={onJournal && account === '1100'}>
               Trade debtors
             </SidebarSubItem>
           </SidebarSubmenu>
-          <SidebarItem
-            render={<Link href="/reports" />}
-            icon={icon(ChartLineUpIcon)}
-            active={on('/reports')}
-          >
+          <SidebarItem href="/reports" icon={icon(ChartLineUpIcon)} active={on('/reports')}>
             Reports
           </SidebarItem>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarItem
-          render={<Link href="/settings" />}
-          icon={icon(GearSixIcon)}
-          active={on('/settings')}
-        >
+        <SidebarItem href="/settings" icon={icon(GearSixIcon)} active={on('/settings')}>
           Settings
         </SidebarItem>
       </SidebarFooter>

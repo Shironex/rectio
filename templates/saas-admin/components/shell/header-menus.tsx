@@ -29,7 +29,6 @@ import {
   MenuTrigger,
   useToast,
 } from '@rectio/ui';
-import Link from 'next/link';
 
 import { CURRENT_USER } from '@/data/workspace';
 import { MODES, type ModeId } from '../appearance-script';
@@ -95,10 +94,10 @@ export function AccountMenu({ onShowShortcuts }: { onShowShortcuts: () => void }
           <span className="text-sm text-fg-muted">{CURRENT_USER.email}</span>
         </div>
         <MenuSeparator />
-        <MenuLinkItem icon={icon(UserCircleIcon)} render={<Link href="/settings" />}>
+        <MenuLinkItem icon={icon(UserCircleIcon)} href="/settings">
           Profile
         </MenuLinkItem>
-        <MenuLinkItem icon={icon(GearSixIcon)} render={<Link href="/settings/workspace" />}>
+        <MenuLinkItem icon={icon(GearSixIcon)} href="/settings/workspace">
           Workspace settings
         </MenuLinkItem>
         <MenuSub>
@@ -113,7 +112,7 @@ export function AccountMenu({ onShowShortcuts }: { onShowShortcuts: () => void }
         <MenuItem icon={icon(KeyboardIcon)} onClick={onShowShortcuts}>
           Keyboard shortcuts
         </MenuItem>
-        <MenuLinkItem icon={icon(SparkleIcon)} render={<Link href="/whats-new" />}>
+        <MenuLinkItem icon={icon(SparkleIcon)} href="/whats-new">
           What’s new
         </MenuLinkItem>
         <MenuSeparator />
@@ -134,7 +133,7 @@ export function AccountMenu({ onShowShortcuts }: { onShowShortcuts: () => void }
           Contact support
         </MenuItem>
         <MenuSeparator />
-        <MenuLinkItem icon={icon(SignOutIcon)} render={<Link href="/sign-in" />}>
+        <MenuLinkItem icon={icon(SignOutIcon)} href="/sign-in">
           Sign out
         </MenuLinkItem>
       </MenuContent>

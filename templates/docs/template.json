@@ -21,6 +21,7 @@
   "uses": [
     "button",
     "kbd",
+    "link",
     "menu",
     "docs-core",
     "docs-layout",

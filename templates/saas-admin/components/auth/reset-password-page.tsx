@@ -2,7 +2,6 @@
 
 import type { ResetPasswordStep } from '@rectio/blocks';
 import { ResetPassword } from '@rectio/blocks/motion';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { useQueryParam } from '../use-page-state';
@@ -20,7 +19,6 @@ export function ResetPasswordPage() {
 }
 
 function ResetScreen({ fromLink }: { fromLink: boolean }) {
-  const router = useRouter();
   const [step, setStep] = useState<ResetPasswordStep>(fromLink ? 'reset' : 'request');
   const [sentTo, setSentTo] = useState<string | undefined>(undefined);
   const [pending, setPending] = useState(false);
@@ -63,9 +61,7 @@ function ResetScreen({ fromLink }: { fromLink: boolean }) {
             else setError(result.message);
           });
         }}
-        signIn={() => {
-          router.push('/sign-in');
-        }}
+        signIn="/sign-in"
       />
     </AuthScreen>
   );

@@ -19,7 +19,6 @@ import {
   SidebarHeader,
   SidebarItem,
 } from '@rectio/ui';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { WORKSPACE } from '@/data/workspace';
@@ -78,26 +77,22 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarItem render={<Link href="/" />} icon={icon(HouseIcon)} active={on('/')}>
+          <SidebarItem href="/" icon={icon(HouseIcon)} active={on('/')}>
             Overview
           </SidebarItem>
           <SidebarItem
-            render={<Link href="/tickets" />}
+            href="/tickets"
             icon={icon(KanbanIcon)}
             active={on('/tickets')}
             {...(fresh > 0 ? { badge: <CountBadge count={fresh} label="new" /> } : {})}
           >
             Tickets
           </SidebarItem>
-          <SidebarItem
-            render={<Link href="/customers" />}
-            icon={icon(BuildingsIcon)}
-            active={on('/customers')}
-          >
+          <SidebarItem href="/customers" icon={icon(BuildingsIcon)} active={on('/customers')}>
             Customers
           </SidebarItem>
           <SidebarItem
-            render={<Link href="/notifications" />}
+            href="/notifications"
             icon={icon(BellIcon)}
             active={on('/notifications')}
             {...(unread > 0 ? { badge: <CountBadge count={unread} label="unread" /> } : {})}
@@ -106,42 +101,22 @@ export function AppSidebar() {
           </SidebarItem>
         </SidebarGroup>
         <SidebarGroup label="Workspace">
-          <SidebarItem
-            render={<Link href="/team" />}
-            icon={icon(UsersThreeIcon)}
-            active={on('/team')}
-          >
+          <SidebarItem href="/team" icon={icon(UsersThreeIcon)} active={on('/team')}>
             Team
           </SidebarItem>
-          <SidebarItem
-            render={<Link href="/files" />}
-            icon={icon(FolderSimpleIcon)}
-            active={on('/files')}
-          >
+          <SidebarItem href="/files" icon={icon(FolderSimpleIcon)} active={on('/files')}>
             Files
           </SidebarItem>
-          <SidebarItem
-            render={<Link href="/billing" />}
-            icon={icon(CreditCardIcon)}
-            active={on('/billing')}
-          >
+          <SidebarItem href="/billing" icon={icon(CreditCardIcon)} active={on('/billing')}>
             Billing
           </SidebarItem>
-          <SidebarItem
-            render={<Link href="/developers" />}
-            icon={icon(CodeIcon)}
-            active={on('/developers')}
-          >
+          <SidebarItem href="/developers" icon={icon(CodeIcon)} active={on('/developers')}>
             Developers
           </SidebarItem>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarItem
-          render={<Link href="/settings" />}
-          icon={icon(GearSixIcon)}
-          active={onSettings}
-        >
+        <SidebarItem href="/settings" icon={icon(GearSixIcon)} active={onSettings}>
           Settings
         </SidebarItem>
       </SidebarFooter>

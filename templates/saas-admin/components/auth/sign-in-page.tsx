@@ -73,12 +73,8 @@ function SignInScreen({ failed }: { failed: boolean }) {
             else setError(result.message);
           });
         }}
-        forgotPassword={() => {
-          router.push('/reset-password');
-        }}
-        signUp={() => {
-          router.push('/sign-up');
-        }}
+        forgotPassword="/reset-password"
+        signUp="/sign-up"
       />
     </AuthScreen>
   );

@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
 import { APPEARANCE_SCRIPT } from '@/components/appearance-script';
+import { LinkProvider } from '@/components/link-provider';
 
 export const metadata: Metadata = {
   title: { default: 'Fernhill Finance', template: '%s | Fernhill Finance' },
@@ -20,7 +21,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: APPEARANCE_SCRIPT }} />
       </head>
-      <body className="min-h-dvh bg-surface-canvas font-sans text-fg">{children}</body>
+      <body className="min-h-dvh bg-surface-canvas font-sans text-fg">
+        <LinkProvider>{children}</LinkProvider>
+      </body>
     </html>
   );
 }

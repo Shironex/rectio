@@ -9,7 +9,7 @@ import {
   SectionHeader,
   TestimonialGrid,
 } from '@rectio/blocks/marketing/motion';
-import { cn } from '@rectio/ui';
+import { Anchor, cn } from '@rectio/ui';
 
 import { CUSTOMERS } from '@/components/brand';
 import { PageIntro } from '@/components/page-intro';
@@ -21,7 +21,7 @@ function CaseStudyCard({ study }: { study: CaseStudy }) {
   const logo = CUSTOMERS.find((customer) => study.company.startsWith(customer.name))?.logo;
   return (
     <li>
-      <a
+      <Anchor
         href={study.href}
         className={cn(
           'group flex h-full flex-col gap-6 rounded-panel border border-line bg-surface p-6 text-fg',
@@ -52,7 +52,7 @@ function CaseStudyCard({ study }: { study: CaseStudy }) {
             />
           </span>
         </span>
-      </a>
+      </Anchor>
     </li>
   );
 }

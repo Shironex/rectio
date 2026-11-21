@@ -20,6 +20,7 @@
   ],
   "uses": [
     "announcement-bar",
+    "link",
     "site-header",
     "feature-grid",
     "stat-row",

@@ -47,9 +47,7 @@ function TwoFactorScreen({ failed }: { failed: boolean }) {
           setError(undefined);
           void verifyBackupCode(code).then(done);
         }}
-        back={() => {
-          router.push('/sign-in');
-        }}
+        back="/sign-in"
       />
     </AuthScreen>
   );

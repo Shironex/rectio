@@ -171,10 +171,10 @@ export function AccountMenu({ onShowShortcuts }: { onShowShortcuts: () => void }
           <span className="text-sm text-fg-muted">{CURRENT_USER.email}</span>
         </div>
         <MenuSeparator />
-        <MenuLinkItem icon={icon(UserCircleIcon)} render={<Link href="/settings#team" />}>
+        <MenuLinkItem icon={icon(UserCircleIcon)} href="/settings#team">
           Profile
         </MenuLinkItem>
-        <MenuLinkItem icon={icon(GearSixIcon)} render={<Link href="/settings" />}>
+        <MenuLinkItem icon={icon(GearSixIcon)} href="/settings">
           Settings
         </MenuLinkItem>
         <MenuSub>
@@ -190,7 +190,7 @@ export function AccountMenu({ onShowShortcuts }: { onShowShortcuts: () => void }
           Keyboard shortcuts
         </MenuItem>
         <MenuSeparator />
-        <MenuLinkItem icon={icon(SignOutIcon)} render={<Link href="/sign-in" />}>
+        <MenuLinkItem icon={icon(SignOutIcon)} href="/sign-in">
           Sign out
         </MenuLinkItem>
       </MenuContent>

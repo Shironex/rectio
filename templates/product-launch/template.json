@@ -5,6 +5,7 @@
   "category": "marketing",
   "pages": ["/", "/404"],
   "uses": [
+    "link",
     "site-header",
     "testimonials",
     "faq",

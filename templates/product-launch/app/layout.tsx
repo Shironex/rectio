@@ -3,6 +3,7 @@ import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
+import { LinkProvider } from '@/components/link-provider';
 import { SITE } from '@/data/site';
 import { BOOT_SCRIPT } from '@/lib/theme-script';
 
@@ -26,7 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: BOOT_SCRIPT }} />
       </head>
       <body className="flex min-h-dvh flex-col bg-surface-canvas font-sans text-fg">
-        {children}
+        <LinkProvider>{children}</LinkProvider>
       </body>
     </html>
   );

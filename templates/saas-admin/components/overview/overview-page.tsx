@@ -26,7 +26,6 @@ import {
   cn,
 } from '@rectio/ui';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 
 import { USAGE } from '@/data/account';
@@ -65,7 +64,7 @@ function TargetQueue({ className }: { className?: string }) {
       }
       bodyClassName="px-0 pb-2"
       actions={
-        <Button variant="ghost" size="sm" render={<Link href="/tickets" />} nativeButton={false}>
+        <Button variant="ghost" size="sm" render={<Link href="/tickets" />}>
           Board
           <ArrowRightIcon aria-hidden weight="bold" className="size-3.5 rtl:-scale-x-100" />
         </Button>
@@ -119,7 +118,7 @@ function PlanUsage({ className }: { className?: string }) {
       description="Business plan, resets 1 December. Marks show 80% and 95% of each allowance."
       bodyClassName="gap-5"
       actions={
-        <Button variant="ghost" size="sm" render={<Link href="/billing" />} nativeButton={false}>
+        <Button variant="ghost" size="sm" render={<Link href="/billing" />}>
           Billing
           <ArrowRightIcon aria-hidden weight="bold" className="size-3.5 rtl:-scale-x-100" />
         </Button>
@@ -162,7 +161,6 @@ function OverviewLoading() {
 
 /** The first steps of a new workspace, shown on the empty overview instead of figures. */
 function Setup() {
-  const router = useRouter();
   const [steps, setSteps] = useState<OnboardingStep[]>(() => [
     {
       id: 'email',
@@ -177,9 +175,7 @@ function Setup() {
       done: false,
       action: {
         label: 'Invite people',
-        onSelect: () => {
-          router.push('/team#invite');
-        },
+        href: '/team#invite',
       },
     },
     {
@@ -189,9 +185,7 @@ function Setup() {
       done: false,
       action: {
         label: 'Import a CSV',
-        onSelect: () => {
-          router.push('/customers');
-        },
+        href: '/customers',
       },
     },
     {
@@ -202,9 +196,7 @@ function Setup() {
       optional: true,
       action: {
         label: 'Create a key',
-        onSelect: () => {
-          router.push('/developers');
-        },
+        href: '/developers',
       },
     },
   ]);
