@@ -50,6 +50,11 @@ It composes with everything else:
   contrast and colour vision suite for each skin in both modes anyway.
 - **A theme inside it.** A skin wins over a theme on the same element and over any `data-theme`
   inside it.
+- **Skins inside skins.** The nearest skin wins: a `ThemeScope skin="editorial"` on a dense page
+  is editorial, and so is everything in a plain `<div data-skin="editorial">`, at any depth.
+- **Turning a skin off.** `skin="none"` on a ThemeScope (or `data-skin="none"` beside a
+  `data-theme`) stops the skin around it: the subtree shows the theme's own type, corners and
+  rhythm. A ThemeScope with no `skin` keeps the skin around it.
 - **Compact density.** `data-density="compact"` applies on top of a skin, inside it or around it.
 - **Reduced motion.** Motion belongs to the theme and to reduced motion, never to a skin.
 - **Touch.** Controls keep their 44px hit area on touch screens in every skin.
@@ -58,11 +63,11 @@ It composes with everything else:
 
 Both make a screen tighter, at different scales:
 
-|               | `data-density="compact"`                    | `data-skin="dense"`                                        |
-| ------------- | ------------------------------------------- | ---------------------------------------------------------- |
-| Changes       | Spacing unit, control, row and header sizes | Type scale and line heights, corners, spacing and controls |
-| Typical scope | One region: a table, a side panel           | The whole app                                              |
-| Together      | Compact inside a dense app tightens further | Dense leaves room for compact below it                     |
+|               | `data-density="compact"`                                                     | `data-skin="dense"`                                        |
+| ------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Changes       | Spacing unit, control, row and header sizes                                  | Type scale and line heights, corners, spacing and controls |
+| Typical scope | One region: a table, a side panel                                            | The whole app                                              |
+| Together      | Inside dense: same control heights, a smaller spacing unit and large padding | Dense leaves room for compact below it                     |
 
 Reach for compact when one working area needs more rows on screen; reach for dense when the whole
 product is a tool people read numbers in all day.
@@ -90,23 +95,31 @@ keep the theme's numeric face.
 
 ## Your own skin
 
-A skin is one CSS rule. Copy `styles/rectio/skins/dense.css` after adding it, rename the id in its
-selectors and change the values. Keep the three selectors (the skin, the skin on a theme, and a
-theme inside the skin) so it beats the theme, and import the file after your themes.
+A skin is two CSS rules. Copy `styles/rectio/skins/dense.css` after adding it, rename the id in
+its selectors and change the values, and import the file after your themes. The first rule sets the
+values on the skin and on a theme on the same element, so it beats the theme. The second lets a
+theme inside the skin (a ThemeScope, say) take the same tokens back from around it with `inherit`;
+that is what makes the nearest skin win when skins nest, so list every token of the first rule in it.
 
 ```css
 [data-skin='roomy'],
-[data-skin='roomy'][data-theme],
-[data-skin='roomy'] [data-theme] {
+[data-skin='roomy'][data-theme] {
   --rx-space-unit: 0.3rem;
   --rx-radius-panel: 0.75rem;
   --rx-popover-radius: var(--rx-radius-panel);
   --rx-dialog-radius: var(--rx-radius-panel);
 }
+
+[data-skin='roomy'] :where([data-theme]:not([data-skin])) {
+  --rx-space-unit: inherit;
+  --rx-radius-panel: inherit;
+  --rx-popover-radius: inherit;
+  --rx-dialog-radius: inherit;
+}
 ```
 
 A component token that reads a token you change (such as `--rx-button-radius`, which reads
 `--rx-radius-control`) has to be declared in the rule again, as the shipped skins do: a CSS variable
-keeps the value it had where it was declared.
+keeps the value it had where it was declared. `none` is taken: it turns a skin off.
 
 The [theme generator](/docs/theming/generator) previews any theme under each skin.
