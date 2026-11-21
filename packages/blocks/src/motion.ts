@@ -63,3 +63,7 @@ export {
 } from './saas/comment-thread/comment-thread.motion';
 export { FileManager, type FileManagerProps } from './saas/file-manager/file-manager.motion';
 export { Sessions, type SessionsProps } from './saas/sessions/sessions.motion';
+export {
+  TimeSeriesChart,
+  type TimeSeriesChartProps,
+} from './saas/time-series-chart/time-series-chart.motion';

@@ -156,3 +156,10 @@ export {
 } from './lib/value-format';
 export { Sessions, type SessionsProps } from './saas/sessions/sessions';
 export * from './saas/sessions/sessions.logic';
+export {
+  TIME_SERIES_CHART_MESSAGES,
+  TimeSeriesChart,
+  type TimeSeriesChartMessages,
+  type TimeSeriesChartProps,
+} from './saas/time-series-chart/time-series-chart';
+export * from './saas/time-series-chart/time-series-chart.logic';
