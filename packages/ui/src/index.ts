@@ -557,3 +557,10 @@ export {
   type DrawerSide,
 } from './drawer/drawer';
 export { CopyButton, copyToClipboard, type CopyButtonProps } from './copy-button/copy-button';
+export {
+  Rating,
+  RatingDisplay,
+  type RatingDisplayProps,
+  type RatingProps,
+  type RatingSize,
+} from './rating/rating';
