@@ -15,7 +15,7 @@ including one from the [theme generator](/docs/theming/generator).
 
 | Skin        | For                                         | What it sets                                                                                                                                                     |
 | ----------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dense`     | Data-heavy apps: ledgers, admin, monitoring | 13px body text, tighter line heights, 3px controls and 6px panels, a smaller spacing unit, 32px controls                                                         |
+| `dense`     | Data-heavy apps: finance, admin, monitoring | 13px body text, tighter line heights, 3px controls and 6px panels, a smaller spacing unit, 32px controls                                                         |
 | `editorial` | Reading surfaces, reports, marketing pages  | IBM Plex Serif headings, hairline borders (0.5px: one device pixel on 2x screens, 1px on 1x), 2px controls and 4px panels, looser line heights, a roomier rhythm |
 
 Each ships as its own registry item. Install one, then set the attribute:
@@ -39,7 +39,7 @@ and popups opened inside the scope keep it.
 
 ```tsx
 <ThemeScope skin="dense">
-  <Ledger />
+  <Dashboard />
 </ThemeScope>
 ```
 
