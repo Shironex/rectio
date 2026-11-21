@@ -86,23 +86,25 @@
     "$type": "dimension",
     "unit": {
       "$value": {
-        "value": 0.225,
+        "value": 0.21875,
         "unit": "rem"
       },
-      "$description": "Between the default unit and compact density, so compact inside a dense app still tightens."
+      "$description": "3.5px: just above compact density's unit, so compact inside a dense app still tightens."
     }
   },
   "control": {
     "$type": "dimension",
     "height": {
       "sm": {
-        "$value": "{size.26}"
+        "$value": "{size.24}",
+        "$description": "24px: compact's small control, for tree rows and table toolbars."
       },
       "md": {
         "$value": "{size.32}"
       },
       "lg": {
-        "$value": "{size.38}"
+        "$value": "{size.36}",
+        "$description": "36px: compact's large control, so table rows hold more lines on a desktop screen."
       }
     },
     "padding-x": {
