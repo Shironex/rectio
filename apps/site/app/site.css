@@ -256,14 +256,22 @@ html[data-mode='dark'] .site-glow {
   animation-play-state: paused;
 }
 
-/* The hero window settles flat as the page scrolls its first stretch. */
+/*
+ * The hero window settles flat as the page scrolls its first stretch. The tilt is also its resting
+ * transform: a scroll timeline resolves a frame after layout, and the first frame would otherwise
+ * paint it flat and then snap.
+ */
 @keyframes site-window-settle {
   from {
     transform: perspective(calc(var(--rx-space-unit) * 600)) rotateX(9deg) scale(0.94);
   }
+  to {
+    transform: none;
+  }
 }
 @supports (animation-timeline: scroll()) {
   .site-window {
+    transform: perspective(calc(var(--rx-space-unit) * 600)) rotateX(9deg) scale(0.94);
     transform-origin: 50% 0;
     animation: site-window-settle linear both;
     animation-timeline: scroll(root);
@@ -338,6 +346,9 @@ html[data-mode='dark'] .site-glow {
   .site-window,
   .site-stamp {
     animation: none;
+  }
+  .site-window {
+    transform: none;
   }
   .site-corner {
     transition: none;
