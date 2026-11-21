@@ -177,6 +177,11 @@ export type RatingDisplayProps = Omit<ComponentProps<'span'>, 'children'> & {
   label?: string;
   /** Show the figure beside the stars, such as "4.5". */
   showValue?: boolean;
+  /**
+   * BCP 47 locale for the figure, such as "de-DE" for "4,5". Default "en-US", the same on the
+   * server and in the browser, so the page hydrates without a mismatch.
+   */
+  locale?: string;
 };
 
 /**
@@ -189,11 +194,12 @@ export function RatingDisplay({
   size = 'md',
   label,
   showValue = false,
+  locale = 'en-US',
   className,
   ...props
 }: RatingDisplayProps) {
   const rounded = Math.round(value * 2) / 2;
-  const reading = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(value);
+  const reading = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
   return (
     <span
       role="img"

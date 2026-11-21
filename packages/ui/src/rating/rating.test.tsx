@@ -99,4 +99,11 @@ describe('RatingDisplay', () => {
     render(<RatingDisplay value={3} max={4} label="Rated 3 of 4 by finance" />);
     expect(screen.getByRole('img', { name: 'Rated 3 of 4 by finance' })).toBeInTheDocument();
   });
+
+  it('formats the figure in a fixed locale unless given one', () => {
+    const { rerender } = render(<RatingDisplay value={4.5} showValue />);
+    expect(screen.getByText('4.5')).toBeInTheDocument();
+    rerender(<RatingDisplay value={4.5} showValue locale="de-DE" />);
+    expect(screen.getByText('4,5')).toBeInTheDocument();
+  });
 });
