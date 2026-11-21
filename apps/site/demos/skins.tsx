@@ -23,7 +23,7 @@ const LOOKS = [
 export default function SkinsDemo() {
   const mode = useSiteMode();
   return (
-    <div className="grid w-full gap-3 lg:grid-cols-3">
+    <div className="grid w-full items-start gap-3 lg:grid-cols-3">
       {LOOKS.map(({ skin, label }) => (
         <ThemeScope
           key={label}
@@ -55,11 +55,9 @@ export default function SkinsDemo() {
             <Input defaultValue="Client dinner in Dublin" />
             <FieldDescription>Shown on the approval request.</FieldDescription>
           </Field>
-          <div className="mt-auto flex gap-2 border-t border-line pt-4">
-            <Button size="sm">Submit</Button>
-            <Button size="sm" variant="secondary">
-              Save draft
-            </Button>
+          <div className="flex gap-2 border-t border-line pt-4">
+            <Button>Submit</Button>
+            <Button variant="secondary">Save draft</Button>
           </div>
         </ThemeScope>
       ))}
