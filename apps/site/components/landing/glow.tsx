@@ -1,6 +1,5 @@
 'use client';
 
-import { cn } from '@rectio/ui';
 import { useEffect, useRef } from 'react';
 
 import { prefersReducedMotion, readDuration, readEasing } from './motion-tokens';
@@ -41,5 +40,5 @@ export function Glow({ className }: { className?: string }) {
     };
   }, []);
 
-  return <div ref={ref} aria-hidden className={cn('site-glow', className)} />;
+  return <div ref={ref} aria-hidden className={`site-glow ${className ?? ''}`} />;
 }

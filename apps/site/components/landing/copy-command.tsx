@@ -1,7 +1,6 @@
 'use client';
 
 import { CheckIcon, CopyIcon } from '@phosphor-icons/react';
-import { cn } from '@rectio/ui';
 import { useEffect, useState } from 'react';
 
 /** A shell command with a copy button. Says "Copied" for a moment, in words and to screen readers. */
@@ -17,11 +16,10 @@ export function CopyCommand({ command, className }: { command: string; className
     };
   }, [copied]);
   return (
+    // A plain join, not cn: this sits in the hero, and the class merger is code the first screen
+    // can do without. Callers only add classes the base does not set.
     <div
-      className={cn(
-        'inline-flex min-h-11 max-w-full items-center gap-1 rounded-control border border-line bg-surface py-1 ps-3.5 pe-1 font-mono text-sm text-fg pointer-coarse:min-h-12',
-        className,
-      )}
+      className={`inline-flex min-h-11 max-w-full items-center gap-1 rounded-control border border-line bg-surface py-1 ps-3.5 pe-1 font-mono text-sm text-fg pointer-coarse:min-h-12 ${className ?? ''}`}
     >
       {/* The prompt sits in the same line box as the command, so both share a baseline when a long
           command wraps on a narrow screen instead of hiding behind a scroll. */}
