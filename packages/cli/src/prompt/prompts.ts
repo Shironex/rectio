@@ -121,7 +121,11 @@ export class Prompter {
       const hint = choice.disabled ?? choice.hint ?? '';
       const text = `${mark(choice, i)}${i === active ? this.s.cyan(label) : label}`;
       const line = `${this.indent}  ${cursor} ${choice.disabled === undefined ? text : this.s.dim(text)}`;
-      return hint === '' ? line.trimEnd() : `${line}  ${this.s.dim(hint)}`;
+      // A hint that would not fit is cut here, before it is styled, so it stays dim.
+      const room = this.io.columns - 1 - visibleWidth(line) - 2;
+      if (hint === '' || room < 8) return line.trimEnd();
+      const shown = hint.length > room ? `${hint.slice(0, room - 1).trimEnd()}…` : hint;
+      return `${line}  ${this.s.dim(shown)}`;
     });
   }
 

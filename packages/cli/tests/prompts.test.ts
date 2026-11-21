@@ -174,6 +174,32 @@ describe('confirm', () => {
   });
 });
 
+describe('long hints', () => {
+  it('are cut to the terminal width and stay dim', async () => {
+    const term = fakeTerminal('.');
+    const write = term.ctx.write ?? (() => undefined);
+    const ask = new Prompter(
+      { input: term.input, write, columns: 40 },
+      styles(true),
+      glyphs(true),
+      true,
+      '  ',
+    );
+    const answer = ask.select({
+      message: 'Pick',
+      choices: [
+        { value: 'a', label: 'card', hint: 'A frame for one unit with header, content and footer' },
+      ],
+    });
+    const line = screenOf(term.raw()).find((l) => l.includes('card')) ?? '';
+    expect(line.length).toBeLessThanOrEqual(39);
+    expect(line.endsWith('…')).toBe(true);
+    expect(term.raw()).toMatch(new RegExp(`${ESC}\\[2mA frame for`));
+    await term.type(KEY.enter);
+    await answer;
+  });
+});
+
 describe('fitLine', () => {
   it('cuts a line that would wrap, so the redraw stays in place', () => {
     expect(fitLine('short', 80)).toBe('short');
