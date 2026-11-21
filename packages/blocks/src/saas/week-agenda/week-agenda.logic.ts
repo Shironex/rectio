@@ -39,6 +39,8 @@ export interface PlacedEvent {
   span: number;
   /** Columns in its overlap group: its width is `span / columns` of the day. */
   columns: number;
+  /** Its overlap group in the day, counted from 0 in time order. */
+  group: number;
   /** True when the event started before this slice: an earlier day, or above the hours shown. */
   continuesBefore: boolean;
   continuesAfter: boolean;
@@ -58,7 +60,7 @@ export interface PlacedAllDay {
 
 const DAY_MS = 86_400_000;
 /** The shortest an event is drawn, in minutes, so a five minute call still has a line of text. */
-export const AGENDA_MIN_MINUTES = 20;
+export const AGENDA_MIN_MINUTES = 24;
 
 export function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -140,7 +142,7 @@ export function layoutDayEvents(
   const dayEnd = addDays(day, 1).getTime();
   const windowStart = hours.start * 60;
   const windowEnd = hours.end * 60;
-  const slices: Omit<PlacedEvent, 'column' | 'span' | 'columns'>[] = [];
+  const slices: Omit<PlacedEvent, 'column' | 'span' | 'columns' | 'group'>[] = [];
 
   for (const event of events) {
     if (isAllDayEvent(event)) continue;
@@ -170,8 +172,10 @@ export function layoutDayEvents(
   let group: (typeof placed)[number][] = [];
   let groupEnd = -1;
   let lanes: number[] = [];
+  let groupIndex = 0;
 
   const closeGroup = () => {
+    if (group.length === 0) return;
     const columns = lanes.length;
     for (const item of group) {
       // Widen into the columns to the right while nothing there overlaps this event.
@@ -185,8 +189,9 @@ export function layoutDayEvents(
       ) {
         span += 1;
       }
-      placed.push({ ...item, span, columns });
+      placed.push({ ...item, span, columns, group: groupIndex });
     }
+    groupIndex += 1;
     group = [];
     lanes = [];
   };
@@ -203,11 +208,84 @@ export function layoutDayEvents(
     } else {
       lanes[column] = slice.end;
     }
-    group.push({ ...slice, column, span: 1, columns: 1 });
+    group.push({ ...slice, column, span: 1, columns: 1, group: groupIndex });
     groupEnd = Math.max(groupEnd, slice.end);
   }
   closeGroup();
   return placed;
+}
+
+/** The events of a crowded group that do not fit, gathered behind one "+N" button. */
+export interface AgendaMore {
+  key: string;
+  events: AgendaEvent[];
+  /** Where the button sits: the first hidden event's start, in the last column. */
+  start: number;
+  end: number;
+  column: number;
+  columns: number;
+}
+
+/**
+ * Keeps a day readable when many events overlap: a group wider than `maxColumns` keeps its first
+ * `maxColumns - 1` columns and gathers the rest behind one "+N" button in the last column, so no
+ * event shrinks to a sliver. Groups that fit are left as they are.
+ */
+export function collapseColumns(
+  placed: readonly PlacedEvent[],
+  maxColumns: number,
+): { shown: PlacedEvent[]; more: AgendaMore[] } {
+  const limit = Math.max(1, Math.floor(maxColumns));
+  const shown: PlacedEvent[] = [];
+  const hidden = new Map<number, PlacedEvent[]>();
+  for (const slice of placed) {
+    if (slice.columns <= limit) {
+      shown.push(slice);
+    } else if (slice.column < limit - 1) {
+      shown.push({
+        ...slice,
+        columns: limit,
+        span: Math.min(slice.span, limit - 1 - slice.column),
+      });
+    } else {
+      hidden.set(slice.group, [...(hidden.get(slice.group) ?? []), slice]);
+    }
+  }
+  const more = [...hidden.entries()].map(([group, slices]) => {
+    const first = slices.reduce((a, b) => (b.start < a.start ? b : a));
+    return {
+      key: `more@${String(group)}@${first.key}`,
+      events: slices.sort((a, b) => a.start - b.start).map((slice) => slice.event),
+      start: first.start,
+      end: Math.max(...slices.map((slice) => slice.end)),
+      column: limit - 1,
+      columns: limit,
+    };
+  });
+  return { shown, more };
+}
+
+/**
+ * The hours a grid shows: the default window, widened to the whole hours that the timed events in
+ * these days need, so an early cut-off or a late call is never cropped.
+ */
+export function agendaFitHours(
+  events: readonly AgendaEvent[],
+  days: readonly Date[],
+  fallback: AgendaHours = { start: 8, end: 19 },
+): AgendaHours {
+  const first = days[0];
+  const last = days.at(-1);
+  if (first === undefined || last === undefined) return fallback;
+  let start = fallback.start;
+  let end = fallback.end;
+  for (const day of days) {
+    for (const slice of layoutDayEvents(events, day)) {
+      start = Math.min(start, Math.floor(slice.start / 60));
+      end = Math.max(end, Math.ceil(slice.end / 60));
+    }
+  }
+  return { start, end: Math.min(24, end) };
 }
 
 /**
@@ -305,11 +383,15 @@ export type AgendaMove = 'next' | 'previous' | 'left' | 'right' | 'first' | 'las
 export function agendaStops(
   timed: readonly (readonly PlacedEvent[])[],
   allDay: readonly PlacedAllDay[],
+  more: readonly (readonly AgendaMore[])[] = [],
 ): AgendaStop[] {
   const stops: AgendaStop[] = [
     ...allDay.map((bar) => ({ key: bar.key, day: bar.first, start: -1, column: bar.row })),
     ...timed.flatMap((placed, day) =>
       placed.map((slice) => ({ key: slice.key, day, start: slice.start, column: slice.column })),
+    ),
+    ...more.flatMap((chips, day) =>
+      chips.map((chip) => ({ key: chip.key, day, start: chip.start, column: chip.column })),
     ),
   ];
   return stops.sort((a, b) => a.day - b.day || a.start - b.start || a.column - b.column);

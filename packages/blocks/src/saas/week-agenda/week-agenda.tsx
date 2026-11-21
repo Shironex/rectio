@@ -1,4 +1,10 @@
-import { CalendarBlankIcon, CaretLeftIcon, CaretRightIcon, PlusIcon } from '@phosphor-icons/react';
+import {
+  CalendarBlankIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
+  ListIcon,
+  PlusIcon,
+} from '@phosphor-icons/react';
 import { cn, EventCard } from '@rectio/ui';
 import {
   createContext,
@@ -20,8 +26,10 @@ import { Segmented } from '../../lib/segmented';
 import { countLabel } from '../lib/saas';
 import { useNow } from '../lib/focus';
 import { focusRing, touchTarget } from '../lib/styles';
+import { Popover } from '../lib/popover';
 import {
   agendaDays,
+  agendaFitHours,
   agendaHourLabels,
   agendaNeighbor,
   agendaNowOffset,
@@ -29,6 +37,7 @@ import {
   agendaStep,
   agendaStops,
   agendaWeekStart,
+  collapseColumns,
   formatAgendaRange,
   isSameDay,
   layoutAllDay,
@@ -37,6 +46,7 @@ import {
   startOfDay,
   type AgendaEvent,
   type AgendaHours,
+  type AgendaMore,
   type AgendaMove,
   type AgendaVariant,
   type PlacedAllDay,
@@ -60,7 +70,10 @@ export interface WeekAgendaProps {
    * button (the keyboard way in). Leave it out and the empty grid does nothing.
    */
   onSlotClick?: (slot: { start: Date; end: Date }) => void;
-  /** The hours the grid shows. Default 8 to 19 (8:00 to 19:00); earlier and later events clamp to the edges. */
+  /**
+   * The hours the grid shows at least. Default 8 to 19 (8:00 to 19:00); the grid grows to whole hours
+   * for earlier or later events, so none is cropped.
+   */
   hours?: AgendaHours;
   /** The length of a slot in minutes, for slot presses. Default 30. */
   slotMinutes?: number;
@@ -98,6 +111,9 @@ export function AgendaPartsProvider({
 }
 
 const DEFAULT_HOURS: AgendaHours = { start: 8, end: 19 };
+
+/** Most events side by side before the rest gather behind a "+N" button. */
+const MAX_COLUMNS = { week: 2, day: 4 } as const;
 
 /** Height in the grid for a number of minutes, from the hour height token. */
 const span = (minutes: number) => `calc(var(--rx-agenda-hour-height) * ${String(minutes / 60)})`;
@@ -147,19 +163,26 @@ export function WeekAgenda({
   const firstDay = weekStartsOn ?? agendaWeekStart(locale);
   // Keyed by plain values, so a new Date for the same day or new hours keep the layout.
   const dayKey = startOfDay(date).getTime();
-  const { days, layout } = useMemo(() => {
+  const { days, layout, shownHours, inRange } = useMemo(() => {
     const shown = agendaDays(new Date(dayKey), variant, weekStartsOn ?? agendaWeekStart(locale));
-    const shownHours = { start: hours.start, end: hours.end };
-    const timed = shown.map((day) => layoutDayEvents(events, day, shownHours));
+    const fitted = agendaFitHours(events, shown, { start: hours.start, end: hours.end });
+    const placed = shown.map((day) => layoutDayEvents(events, day, fitted));
+    const collapsed = placed.map((day) => collapseColumns(day, MAX_COLUMNS[variant]));
+    const timed = collapsed.map((day) => day.shown);
+    const more = collapsed.map((day) => day.more);
     const allDay = layoutAllDay(events, shown);
-    return { days: shown, layout: { timed, allDay, stops: agendaStops(timed, allDay) } };
+    return {
+      days: shown,
+      shownHours: fitted,
+      inRange: allDay.length + placed.reduce((sum, day) => sum + day.length, 0),
+      layout: { timed, more, allDay, stops: agendaStops(timed, allDay, more) },
+    };
   }, [events, dayKey, variant, weekStartsOn, locale, hours.start, hours.end]);
   const rangeKey = `${variant}:${String(days[0]?.getTime() ?? 0)}`;
   // Which way the last step went, so the motion variant can slide from that side.
   const [step, setStep] = useState({ key: rangeKey, direction: 0 });
   const direction = step.key === rangeKey ? step.direction : 0;
 
-  const inRange = layout.allDay.length + layout.timed.reduce((sum, day) => sum + day.length, 0);
   const unit = variant === 'week' ? 'week' : 'day';
 
   const go = (next: Date, by: number) => {
@@ -226,7 +249,7 @@ export function WeekAgenda({
     layout,
     locale,
     now,
-    hours,
+    hours: shownHours,
     onEventClick,
     onSlotClick,
     slotMinutes,
@@ -262,6 +285,7 @@ interface ViewProps {
   days: Date[];
   layout: {
     timed: PlacedEvent[][];
+    more: AgendaMore[][];
     allDay: PlacedAllDay[];
     stops: ReturnType<typeof agendaStops>;
   };
@@ -292,6 +316,12 @@ function useDayNames(locale: string) {
       date: new Intl.DateTimeFormat(locale, { day: 'numeric' }),
       long: new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long' }),
       time: new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }),
+      // The gutter is narrow: no day period on a 12 hour clock.
+      short: new Intl.DateTimeFormat(locale, {
+        hour: 'numeric',
+        minute: '2-digit',
+        hourCycle: 'h23',
+      }),
     }),
     [locale],
   );
@@ -321,6 +351,7 @@ function AgendaGrid({
       ? active
       : (layout.stops[0]?.key ?? null);
   const [hover, setHover] = useState<{ day: number; start: number } | null>(null);
+  const [openMore, setOpenMore] = useState<string | null>(null);
   const columns = {
     gridTemplateColumns: `var(--rx-agenda-gutter-width) repeat(${String(days.length)}, minmax(0, 1fr))`,
   } as CSSProperties;
@@ -362,6 +393,8 @@ function AgendaGrid({
   };
 
   const allDayRows = layout.allDay.reduce((rows, bar) => Math.max(rows, bar.row + 1), 0);
+  const todayShown = days.find((day) => isSameDay(day, now));
+  const nowRow = todayShown === undefined ? null : agendaNowOffset(now, todayShown, hours);
 
   return (
     <div
@@ -389,7 +422,7 @@ function AgendaGrid({
             >
               <h3
                 className="flex min-w-0 items-baseline gap-1.5"
-                aria-label={names.long.format(day)}
+                aria-label={`${names.long.format(day)}${today ? ', today' : ''}`}
               >
                 <span
                   className={cn(
@@ -407,7 +440,6 @@ function AgendaGrid({
                 >
                   {names.date.format(day)}
                 </span>
-                {today && <span className="sr-only">, today</span>}
               </h3>
               {onSlotClick !== undefined && (
                 <button
@@ -494,11 +526,20 @@ function AgendaGrid({
               className="relative h-(--rx-agenda-hour-height) pe-2 text-end text-xs text-fg-subtle numeric"
             >
               {/* Each label sits on its hour's line; the first stays inside the grid. */}
-              <span className={cn('relative block', index > 0 && '-top-2')}>
-                {index > 0 && label}
+              <span className={cn('relative block', index > 0 ? '-top-2' : 'top-0.5')}>
+                {label}
               </span>
             </div>
           ))}
+          {/* The current time in the gutter, so it reads even where events cover the line. */}
+          {nowRow !== null && (
+            <span
+              className="absolute end-1 z-20 -translate-y-1/2 rounded-badge bg-accent px-1 text-xs leading-4 font-medium text-accent-contrast numeric"
+              style={{ top: span(nowRow) }}
+            >
+              {names.short.format(now)}
+            </span>
+          )}
         </div>
         {days.map((day, dayIndex) => {
           const placed = layout.timed[dayIndex] ?? [];
@@ -507,12 +548,11 @@ function AgendaGrid({
           const weekend = day.getDay() === 0 || day.getDay() === 6;
           const hovered = hover?.day === dayIndex ? hover.start : null;
           return (
-            <section
+            <div
               key={day.getTime()}
-              aria-label={names.long.format(day)}
               className={cn(
                 'relative min-w-0 border-s border-line',
-                weekend && variant === 'week' && 'bg-surface-sunken/60',
+                weekend && variant === 'week' && 'bg-surface-sunken/30',
                 today && variant === 'week' && 'bg-accent-subtle/40',
               )}
             >
@@ -565,10 +605,13 @@ function AgendaGrid({
                 {placed.map((slice) => {
                   const minutes = slice.end - slice.start;
                   const short = minutes < 45;
+                  // A third of a week column has room for a word or two, not the time as well.
+                  const share = slice.span / slice.columns;
+                  const narrow = variant === 'week' ? share <= 0.5 : share < 0.34;
                   return (
                     <li
                       key={slice.key}
-                      className="pointer-events-auto absolute z-10 px-px pb-px"
+                      className="pointer-events-auto absolute z-10 px-0.5 pb-px"
                       style={{
                         top: span(slice.start - hours.start * 60),
                         height: span(minutes),
@@ -583,14 +626,18 @@ function AgendaGrid({
                         end={slice.event.end}
                         tone={slice.event.tone ?? 'accent'}
                         status={slice.event.status ?? 'confirmed'}
+                        timeDisplay={narrow ? 'start' : 'range'}
                         locale={locale}
                         {...(slice.event.location === undefined
                           ? {}
                           : { location: slice.event.location })}
                         className={cn(
                           'h-full shadow-raised',
-                          short &&
-                            'flex-row items-baseline gap-1.5 py-0.5 [&_button]:truncate [&>span]:truncate',
+                          // Short: the title alone on one line; the time is still read out.
+                          short && 'justify-center py-0 [&>:first-child]:truncate [&_p]:sr-only',
+                          // Narrow: a smaller title that may wrap, and the start time alone.
+                          narrow &&
+                            'px-1.5 [&>:first-child]:text-xs [&>:first-child]:break-words [&>:first-child]:hyphens-auto',
                           slice.continuesBefore && 'rounded-t-none border-t-0',
                           slice.continuesAfter && 'rounded-b-none border-b-0',
                         )}
@@ -603,12 +650,54 @@ function AgendaGrid({
                     </li>
                   );
                 })}
+                {(layout.more[dayIndex] ?? []).map((chip) => (
+                  <li
+                    key={chip.key}
+                    className="pointer-events-auto absolute z-10 px-0.5 pb-px"
+                    style={{
+                      top: span(chip.start - hours.start * 60),
+                      height: span(Math.max(chip.end - chip.start, 24)),
+                      left: `${String((chip.column / chip.columns) * 100)}%`,
+                      width: `${String((1 / chip.columns) * 100)}%`,
+                    }}
+                  >
+                    <MoreEvents
+                      chip={chip}
+                      dayLabel={names.long.format(day)}
+                      time={names.time}
+                      locale={locale}
+                      open={openMore === chip.key}
+                      onOpenChange={(next) => {
+                        setOpenMore(next ? chip.key : null);
+                      }}
+                      onEventClick={
+                        onEventClick === undefined
+                          ? undefined
+                          : (event) => {
+                              setOpenMore(null);
+                              onEventClick(event);
+                            }
+                      }
+                      triggerProps={{
+                        'data-agenda-stop': chip.key,
+                        tabIndex: onEventClick === undefined || tabStop === chip.key ? 0 : -1,
+                        onFocus: () => {
+                          setActive(chip.key);
+                        },
+                        onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => {
+                          onKeyDown(e, chip.key);
+                        },
+                      }}
+                    />
+                  </li>
+                ))}
               </ol>
 
               {nowAt !== null && (
                 <div
                   data-slot="week-agenda-now"
-                  className="pointer-events-none absolute inset-x-0 z-20 flex items-center"
+                  // Under the events, so the line never runs through a title.
+                  className="pointer-events-none absolute inset-x-0 flex items-center"
                   style={{ top: span(nowAt) }}
                 >
                   <span className="-ms-1 size-2 shrink-0 -translate-y-1/2 rounded-full bg-accent" />
@@ -616,23 +705,100 @@ function AgendaGrid({
                   <span className="sr-only">Now, {names.time.format(now)}</span>
                 </div>
               )}
-              {today && nowAt === null && <span className="sr-only">Today</span>}
-            </section>
+            </div>
           );
         })}
         {empty && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
-            <p className="flex max-w-72 flex-col items-center gap-1.5 rounded-control border border-dashed border-line-strong bg-surface px-4 py-3 text-center text-sm text-fg-muted shadow-raised">
+            <p className="flex max-w-72 flex-col items-center gap-1.5 rounded-control border border-line bg-surface-raised px-4 py-3 text-center text-sm text-fg-muted shadow-raised">
               <CalendarBlankIcon aria-hidden weight="duotone" className="size-6 text-fg-subtle" />
               <span className="font-medium text-fg">Nothing scheduled</span>
-              {onSlotClick !== undefined && (
-                <span>Press a slot or a day&rsquo;s plus to add an event.</span>
-              )}
+              {onSlotClick !== undefined && <span>Press an empty slot to add an event there.</span>}
             </p>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+/** The events a crowded group could not fit, behind one button that lists them in a popover. */
+function MoreEvents({
+  chip,
+  dayLabel,
+  time,
+  locale,
+  open,
+  onOpenChange,
+  onEventClick,
+  triggerProps,
+}: {
+  chip: AgendaMore;
+  dayLabel: string;
+  time: Intl.DateTimeFormat;
+  locale: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onEventClick: ((event: AgendaEvent) => void) | undefined;
+  triggerProps: Record<string, unknown>;
+}) {
+  const count = chip.events.length;
+  const first = chip.events[0];
+  const from = first === undefined ? '' : time.format(first.start);
+  return (
+    <Popover
+      title={`${String(count)} more events, ${dayLabel}`}
+      open={open}
+      onOpenChange={onOpenChange}
+      align="start"
+      className="w-72"
+      trigger={
+        <button
+          type="button"
+          aria-label={`${String(count)} more events from ${from}, ${dayLabel}`}
+          className={cn(
+            'flex size-full cursor-pointer flex-col items-start rounded-badge border border-dashed border-fg/20 bg-surface px-1.5 py-0.5 text-start',
+            'text-xs font-medium text-fg-muted hover:border-line-strong hover:text-fg',
+            'transition-[border-color,color,scale] duration-fast ease-standard active:scale-99 motion-reduce:active:scale-100',
+            focusRing,
+          )}
+          {...triggerProps}
+        >
+          <span className="flex items-center gap-1">
+            <ListIcon aria-hidden weight="bold" className="size-3 shrink-0" />
+            {count} more
+          </span>
+          <span className="font-regular text-fg-subtle numeric">{from}</span>
+        </button>
+      }
+    >
+      <p aria-hidden className="px-3 pt-3 pb-2 text-sm font-medium text-fg">
+        {count} more from {from}
+      </p>
+      <ul className="flex flex-col gap-1.5 px-3 pb-3">
+        {chip.events.map((event) => (
+          <li key={event.id}>
+            <EventCard
+              variant="compact"
+              title={event.title}
+              start={event.start}
+              end={event.end}
+              tone={event.tone ?? 'accent'}
+              status={event.status ?? 'confirmed'}
+              locale={locale}
+              {...(event.location === undefined ? {} : { location: event.location })}
+              {...(onEventClick === undefined
+                ? {}
+                : {
+                    onSelect: () => {
+                      onEventClick(event);
+                    },
+                  })}
+            />
+          </li>
+        ))}
+      </ul>
+    </Popover>
   );
 }
 

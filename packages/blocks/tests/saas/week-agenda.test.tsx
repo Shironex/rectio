@@ -50,7 +50,7 @@ describe('WeekAgenda', () => {
       screen.getByRole('heading', { level: 2, name: '16 to 22 March 2026' }),
     ).toBeInTheDocument();
     expect(screen.getByText('4 events this week')).toBeInTheDocument();
-    expect(grid().getByRole('heading', { name: 'Wednesday 18 March' })).toBeInTheDocument();
+    expect(grid().getByRole('heading', { name: 'Wednesday 18 March, today' })).toBeInTheDocument();
     expect(grid().queryByRole('button', { name: /Next week/ })).toBeNull();
   });
 
@@ -170,5 +170,31 @@ describe('WeekAgenda', () => {
     expect(
       screen.getByRole('heading', { level: 2, name: '16 to 22 March 2026' }),
     ).toBeInTheDocument();
+  });
+
+  it('gathers a crowded hour behind a more button that lists the rest', async () => {
+    const user = userEvent.setup();
+    const onEventClick = vi.fn();
+    const crowded: AgendaEvent[] = [
+      { id: 'a', title: 'Board pack', start: at(18, 10), end: at(18, 12) },
+      { id: 'b', title: 'Interview', start: at(18, 11), end: at(18, 12) },
+      { id: 'c', title: 'Expenses', start: at(18, 11, 30), end: at(18, 12, 30) },
+    ];
+    render(
+      <WeekAgenda
+        events={crowded}
+        date={at(18, 12)}
+        now={NOW}
+        locale="en-GB"
+        onEventClick={onEventClick}
+      />,
+    );
+    expect(screen.getByText('3 events this week')).toBeInTheDocument();
+    expect(grid().queryByRole('button', { name: /^Interview/ })).toBeNull();
+    await user.click(
+      grid().getByRole('button', { name: '2 more events from 11:00, Wednesday 18 March' }),
+    );
+    await user.click(await screen.findByRole('button', { name: /^Expenses/ }));
+    expect(onEventClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'c' }));
   });
 });

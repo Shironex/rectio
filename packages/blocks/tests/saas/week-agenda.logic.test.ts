@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   agendaDays,
+  agendaFitHours,
   agendaHourLabels,
   agendaNeighbor,
   agendaNowOffset,
@@ -9,6 +10,7 @@ import {
   agendaStep,
   agendaStops,
   agendaWeekStart,
+  collapseColumns,
   formatAgendaRange,
   isAllDayEvent,
   layoutAllDay,
@@ -114,7 +116,7 @@ describe('layoutDayEvents', () => {
     const by = Object.fromEntries(placed.map((p) => [p.event.id, p]));
     expect(by.early).toMatchObject({ start: 480, end: 540, continuesBefore: true });
     expect(by.late).toMatchObject({ start: 1080, end: 1140, continuesAfter: true });
-    expect(by.blip).toMatchObject({ start: 720, end: 740 });
+    expect(by.blip).toMatchObject({ start: 720, end: 744 });
     expect(by.night).toMatchObject({ start: 480, continuesBefore: true, continuesAfter: false });
     expect(by.allday).toBeUndefined();
   });
@@ -183,5 +185,39 @@ describe('now, slots and keyboard moves', () => {
     expect(id(agendaNeighbor(stops, key('wed15'), 'left'))).toBe('tue');
     expect(id(agendaNeighbor(stops, key('wed15'), 'right'))).toBeUndefined();
     expect(id(agendaNeighbor(stops, key('mon14'), 'last'))).toBe('wed15');
+  });
+
+  it('gathers the columns past the limit behind one more button and leaves narrow groups alone', () => {
+    const placed = layoutDayEvents(
+      [
+        ev('a', at(16, 10), at(16, 12)),
+        ev('b', at(16, 11), at(16, 12)),
+        ev('c', at(16, 11, 30), at(16, 12, 30)),
+        ev('d', at(16, 14), at(16, 15)),
+      ],
+      MONDAY,
+    );
+    const { shown, more } = collapseColumns(placed, 2);
+    expect(shown.map((slice) => [slice.event.id, slice.column, slice.span, slice.columns])).toEqual(
+      [
+        ['a', 0, 1, 2],
+        ['d', 0, 1, 1],
+      ],
+    );
+    expect(more).toHaveLength(1);
+    expect(more[0]).toMatchObject({ start: 660, end: 750, column: 1, columns: 2 });
+    expect(more[0]?.events.map((event) => event.id)).toEqual(['b', 'c']);
+    expect(collapseColumns(placed, 4).more).toEqual([]);
+  });
+
+  it('widens the hours to fit early and late events', () => {
+    const days = [MONDAY, new Date(2026, 2, 17)];
+    expect(agendaFitHours([ev('a', at(16, 9), at(16, 10))], days)).toEqual({ start: 8, end: 19 });
+    expect(
+      agendaFitHours(
+        [ev('a', at(16, 7, 30), at(16, 8)), ev('b', at(17, 18), at(17, 20, 15))],
+        days,
+      ),
+    ).toEqual({ start: 7, end: 21 });
   });
 });
