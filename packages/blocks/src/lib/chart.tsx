@@ -1,114 +1,34 @@
 import { TableIcon } from '@phosphor-icons/react';
 import { Button, Money, cn } from '@rectio/ui';
+import {
+  ChartLegend,
+  Swatch,
+  TOOLTIP_LIFT,
+  activeDatum,
+  chartColor,
+  chartSurface,
+  niceTicks,
+  type ChartColor,
+  type LegendItem,
+  type SwatchShape,
+} from '@rectio/ui/charts';
 import { useId, useState, type ReactNode } from 'react';
-import type { TooltipContentProps } from 'recharts';
 
 import { useBlockParts } from './block-parts';
 
-/** The chart colour tokens a mark can take. */
-export type ChartColor =
-  | 'series-1'
-  | 'series-2'
-  | 'series-3'
-  | 'sequence-1'
-  | 'sequence-2'
-  | 'sequence-3'
-  | 'sequence-4'
-  | 'sequence-5'
-  | 'reference';
-
-/** The token as a CSS value, for Recharts props such as `fill` and `stroke`. */
-export const chartColor = (color: ChartColor) => `var(--rx-chart-${color})`;
-
-const SWATCH: Record<ChartColor, string> = {
-  'series-1': 'bg-chart-series-1',
-  'series-2': 'bg-chart-series-2',
-  'series-3': 'bg-chart-series-3',
-  'sequence-1': 'bg-chart-sequence-1',
-  'sequence-2': 'bg-chart-sequence-2',
-  'sequence-3': 'bg-chart-sequence-3',
-  'sequence-4': 'bg-chart-sequence-4',
-  'sequence-5': 'bg-chart-sequence-5',
-  reference: 'bg-chart-reference',
+// The shared chart parts live in the kit; blocks add the money tooltip and the block parts stage.
+export {
+  ChartLegend,
+  Swatch,
+  TOOLTIP_LIFT,
+  activeDatum,
+  chartColor,
+  chartSurface,
+  niceTicks,
+  type ChartColor,
+  type LegendItem,
+  type SwatchShape,
 };
-
-/** How a legend key is drawn: a square for bars, a rule for lines, a broken rule for forecasts. */
-export type SwatchShape = 'bar' | 'hatched' | 'line' | 'dashed';
-
-/** A legend key: a square for bars, a short rule for lines. Always next to its name. */
-export function Swatch({
-  color,
-  shape = 'bar',
-}: {
-  color: ChartColor;
-  shape?: SwatchShape | undefined;
-}) {
-  if (shape === 'dashed') {
-    return (
-      <span aria-hidden className="inline-flex w-3.5 shrink-0 justify-between">
-        <span className={cn('h-0.5 w-1.5 rounded-full', SWATCH[color])} />
-        <span className={cn('h-0.5 w-1.5 rounded-full', SWATCH[color])} />
-      </span>
-    );
-  }
-  if (shape === 'hatched') {
-    // The same stripes as the mark it keys, so the step reads without telling colours apart.
-    return (
-      <span
-        aria-hidden
-        className={cn('inline-block size-2.5 shrink-0 rounded-badge', SWATCH[color])}
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(135deg, transparent 0 2px, var(--rx-surface) 2px 3px)',
-        }}
-      />
-    );
-  }
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        'inline-block shrink-0',
-        shape === 'bar' ? 'size-2.5 rounded-badge' : 'h-0.5 w-3.5 rounded-full',
-        SWATCH[color],
-      )}
-    />
-  );
-}
-
-export interface LegendItem {
-  label: ReactNode;
-  color: ChartColor;
-  shape?: SwatchShape;
-}
-
-export function ChartLegend({ items }: { items: readonly LegendItem[] }) {
-  return (
-    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-fg-muted">
-      {items.map((item, index) => (
-        <li key={index} className="inline-flex items-center gap-1.5">
-          <Swatch color={item.color} shape={item.shape} />
-          {item.label}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-/**
- * Axis text, gridlines and the keyboard focus ring, all from the chart tokens. Recharts writes
- * presentation attributes; these classes win over them because CSS outranks attributes.
- */
-export const chartSurface = cn(
-  'text-xs [&_.recharts-cartesian-axis-tick-value]:fill-chart-axis',
-  '[&_.recharts-text]:font-numeric [&_.recharts-text]:tabular-nums',
-  '[&_.recharts-cartesian-grid_line]:stroke-chart-grid',
-  // The accessibility layer makes the plot focusable; arrows then step through the points.
-  '[&_.recharts-surface]:outline-none [&_.recharts-wrapper]:rounded-control',
-  '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-2',
-  '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-offset-2',
-  '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-focus',
-);
 
 export interface TooltipRow {
   label: ReactNode;
@@ -174,16 +94,6 @@ export function ChartTooltip({
   );
 }
 
-/** How far above the plot a one-line tooltip sits, in px: over the legend row, clear of the bars. */
-export const TOOLTIP_LIFT = 44;
-
-/** The hovered or focused datum: Recharts' active index, read back into the chart's own data. */
-export function activeDatum<T>(props: TooltipContentProps, data: readonly T[]): T | undefined {
-  if (!props.active) return undefined;
-  const index = Number(props.activeIndex);
-  return Number.isInteger(index) ? data[index] : undefined;
-}
-
 export interface ChartFigureProps {
   /** One or two sentences saying what the chart shows, read before the plot. */
   summary: string;
@@ -246,16 +156,4 @@ export function ChartFigure({
       </div>
     </figure>
   );
-}
-
-/**
- * Round axis ticks from zero: `count` equal steps of 1, 2, 2.5 or 5 times a power of ten, the
- * smallest that leaves headroom over `max`, so the tallest mark never touches the top line.
- */
-export function niceTicks(max: number, count = 4): number[] {
-  if (!(max > 0)) return [0, 1];
-  const raw = (max * 1.05) / count;
-  const power = 10 ** Math.floor(Math.log10(raw));
-  const step = ([1, 2, 2.5, 5, 10].find((m) => m * power >= raw) ?? 10) * power;
-  return Array.from({ length: count + 1 }, (_, index) => index * step);
 }
