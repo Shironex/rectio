@@ -120,6 +120,32 @@ try {
     }
   }
 
+  // The dense skin, which shortens the agenda hour, on the element an app would set it on.
+  if (wanted('dense')) {
+    const page = await open(browser, base, 'view=scheduling&mode=light&skin=dense', false);
+    await page
+      .locator('[data-shot="agenda"]')
+      .screenshot({ path: join(out, 'dense-agenda-desktop-light.png') });
+    await page.close();
+  }
+
+  // Keyboard states of the form pieces: a focused time segment and a range previewed by arrows.
+  if (wanted('keys')) {
+    const page = await open(browser, base, 'view=scheduling&mode=light', false);
+    await page.locator('[data-shot="time"] [role="spinbutton"]').first().focus();
+    await page.keyboard.press('ArrowUp');
+    await page.locator('[data-shot="time"]').screenshot({ path: join(out, 'keys-time.png') });
+    const range = page.locator('[data-shot="range"]');
+    const days = range.locator('[role="gridcell"] button:not([disabled])');
+    await days.nth(9).click();
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await settle(page);
+    await range.screenshot({ path: join(out, 'keys-range.png') });
+    await page.close();
+  }
+
   if (wanted('motion')) {
     const page = await open(browser, base, 'view=scheduling&mode=light&motion=on', false);
     await page
