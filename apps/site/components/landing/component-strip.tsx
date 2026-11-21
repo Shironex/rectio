@@ -223,6 +223,7 @@ export function ComponentStrip({ total }: { total: number }) {
   const [date, setDate] = useState<Date | null>(new Date(2026, 2, 19));
   const [vat, setVat] = useState('PL52');
   const vatInvalid = !/^PL\d{10}$/.test(vat.replaceAll(' ', ''));
+  const vatDigits = vat.replaceAll(/\D/g, '').length;
 
   return (
     <ToastProvider>
@@ -310,7 +311,11 @@ export function ComponentStrip({ total }: { total: number }) {
             <Field className="w-full" invalid={vatInvalid}>
               <FieldLabel>VAT number</FieldLabel>
               <Input value={vat} onValueChange={setVat} spellCheck={false} autoComplete="off" />
-              <FieldError>PL and ten digits.</FieldError>
+              <FieldError>
+                {vat.trim().startsWith('PL')
+                  ? `Ten digits after PL; this has ${String(vatDigits)}.`
+                  : 'Start with PL, then ten digits.'}
+              </FieldError>
             </Field>
           </Cell>
           <Cell name="Dialog" slug="dialog">
