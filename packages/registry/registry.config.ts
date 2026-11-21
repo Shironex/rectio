@@ -139,7 +139,7 @@ const marketingItems = (
 /**
  * A docs block, installed under `@blocks/docs/`. `files` overrides the default
  * `<folder>/<folder>.tsx`; `logic` adds its logic file; `motion` adds a `motion-<name>` twin for
- * blocks with something to animate.
+ * blocks with something to animate. `version` is the plain item's; bump it when its files change.
  */
 const docsItems = (
   name: string,
@@ -150,12 +150,13 @@ const docsItems = (
     logic = false,
     motion = false,
     files,
-  }: { logic?: boolean; motion?: boolean; files?: string[] } = {},
+    version = '0.1.0',
+  }: { logic?: boolean; motion?: boolean; files?: string[]; version?: string } = {},
 ) => [
   {
     name,
     type: 'block' as const,
-    version: '0.1.0',
+    version,
     title,
     description,
     categories: ['docs', 'blocks'],
@@ -199,7 +200,7 @@ export default defineRegistry({
   tokens: {
     dir: tokens,
     item: {
-      version: '0.2.4',
+      version: '0.3.0',
       title: 'Tokens',
       description:
         'The Tailwind v4 theme mapped to rectio tokens, density and reduced motion. Installed by init.',
@@ -920,9 +921,14 @@ export default defineRegistry({
         motionItem('money', 'Motion Money', 'Money that counts to a new figure.', [
           'money/money.tsx',
         ]),
-        motionItem('dialog', 'Motion Dialog', 'Dialog that springs out of its trigger and back.', [
-          'dialog/dialog.tsx',
-        ]),
+        motionItem(
+          'dialog',
+          'Motion Dialog',
+          'Dialog that springs out of its trigger and back.',
+          ['dialog/dialog.tsx'],
+          'component',
+          '0.2.0',
+        ),
         motionItem(
           'alert-dialog',
           'Motion AlertDialog',
@@ -1062,7 +1068,7 @@ export default defineRegistry({
         {
           name: 'blocks-core',
           type: 'lib',
-          version: '0.1.4',
+          version: '0.1.5',
           title: 'Blocks core',
           description:
             'Money maths in minor units, the panel, chart theming with a table fallback, and the parts every finance block shares.',
@@ -1547,7 +1553,7 @@ export default defineRegistry({
           'Code block',
           'Highlighted tokens from any build-time highlighter, file name, line highlights, line numbers, diff marks and copy.',
           'code-block',
-          { logic: true },
+          { logic: true, version: '0.1.1' },
         ),
         ...docsItems(
           'docs-code-tabs',

@@ -673,7 +673,7 @@ describe('the rectio registry', () => {
     const out = join(dir, 'registry');
     writeRegistry(out, result);
     expect(existsSync(join(out, 'items/motion-dialog.json'))).toBe(true);
-    expect(existsSync(join(out, 'items/motion-dialog@0.1.0.json'))).toBe(true);
+    expect(existsSync(join(out, 'items/motion-dialog@0.2.0.json'))).toBe(true);
     expect(existsSync(join(out, 'pro'))).toBe(false);
   });
 
