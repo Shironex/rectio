@@ -109,7 +109,8 @@ export function Sparkline({
   const segments = runs.filter((run) => run.length > 0);
   const line = segments
     .map((run) =>
-      run
+      // A lone figure between gaps is drawn as a dot: a zero-length stroke with round caps.
+      (run.length === 1 ? [...run, ...run] : run)
         .map((p, i) => `${i === 0 ? 'M' : 'L'}${x(p.index).toFixed(2)},${y(p.value).toFixed(2)}`)
         .join(''),
     )

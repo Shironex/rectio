@@ -98,8 +98,8 @@ export interface BarChartProps<T extends object> {
 }
 
 /** The focused group's bars get an outline in the text colour, so the group stands out. */
-// The active bar, by pointer or keyboard, takes the focus colour so it reads as the current mark.
-const ACTIVE_BAR = { stroke: 'var(--rx-focus)', strokeWidth: 2 };
+// The active bar, by pointer or keyboard, is outlined in the text colour, apart from every series.
+const ACTIVE_BAR = { stroke: 'var(--rx-text)', strokeWidth: 2 };
 
 const ROW_HEIGHT: Record<number, string> = {
   1: 'h-20',
@@ -223,6 +223,8 @@ export function BarChart<T extends object>({
     tickFormatter: (value: number) => write(value, true),
     tickLine: false,
     axisLine: false,
+    // Bars that carry their own figures need no second readout on a value axis.
+    hide: labels,
   };
   const categoryAxis = {
     type: 'category' as const,
@@ -281,11 +283,12 @@ export function BarChart<T extends object>({
         margin={{ top: 8, right: labels && horizontal ? 56 : 8, bottom: 0, left: 4 }}
         style={{ width: '100%', height: '100%' }}
       >
-        <CartesianGrid vertical={horizontal} horizontal={!horizontal} />
+        {/* Labelled bars drop the value axis, and its gridlines with it. */}
+        {!labels && <CartesianGrid vertical={horizontal} horizontal={!horizontal} />}
         {horizontal ? (
           <>
             <XAxis {...valueAxis} tickMargin={8} />
-            <YAxis {...categoryAxis} width="auto" tickMargin={8} />
+            <YAxis {...categoryAxis} width="auto" tickMargin={12} />
           </>
         ) : (
           <>

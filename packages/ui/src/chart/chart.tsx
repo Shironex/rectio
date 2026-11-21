@@ -380,7 +380,7 @@ export function ChartDataTable({ caption, headers, rows, footer }: ChartTableDat
   const [first, ...rest] = headers;
   return (
     <Table>
-      <TableCaption className="sr-only">{caption}</TableCaption>
+      <TableCaption>{caption}</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead>{first}</TableHead>
