@@ -565,3 +565,12 @@ export {
   type RatingSize,
 } from './rating/rating';
 export { Tree, useTreeChildren, type TreeLoader, type TreeNode, type TreeProps } from './tree/tree';
+export {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+  type ResizableDirection,
+  type ResizableHandleProps,
+  type ResizablePanelGroupProps,
+  type ResizablePanelProps,
+} from './resizable/resizable';
