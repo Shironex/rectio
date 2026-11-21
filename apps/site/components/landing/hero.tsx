@@ -1,32 +1,53 @@
 import { ArrowRightIcon } from '@phosphor-icons/react/dist/ssr';
+import { formatMoney } from '@rectio/ui';
 import Link from 'next/link';
 
 import { CopyCommand } from './copy-command';
 import { GithubButton } from './github-button';
 import { Glow } from './glow';
 import { HeroWindow } from './hero-window';
-import type { KitFacts } from './kit-facts';
 import { Ticker } from './ticker';
 import { WordCycle } from './word-cycle';
 
 /** The nouns the headline cycles through once; it settles on the last. */
 const NOUNS = ['invoices,', 'payouts,', 'approvals,', 'money,'] as const;
 
-function facts(kit: KitFacts) {
-  return [
-    `${String(kit.components)} components`,
-    `${String(kit.blocks)} blocks`,
-    `${String(kit.templates)} templates`,
-    'light and dark modes',
-    `${String(kit.tokens)} tokens per theme`,
-    `motion add-on, ${kit.motionKb} kB gzip`,
-    'keyboard complete',
-    'MIT licensed',
-    'MCP server for coding agents',
-  ];
-}
+/**
+ * The strip under the headline shows what Money prints, set by the kit's own formatter when the
+ * page is built: the kit in numbers is the stat row further down, so the strip never repeats it.
+ */
+const SAMPLES: {
+  amount: number;
+  currency: string;
+  locale: string;
+  note: string;
+  accounting?: true;
+}[] = [
+  { amount: -412.8, currency: 'EUR', locale: 'en-IE', note: 'a true minus, never a hyphen' },
+  { amount: 176_400, currency: 'JPY', locale: 'ja-JP', note: 'yen, no minor unit' },
+  { amount: 12.5, currency: 'BHD', locale: 'en', note: 'dinar, three decimals' },
+  { amount: 1_234_567, currency: 'INR', locale: 'en-IN', note: 'grouped in lakhs' },
+  { amount: 1234.5, currency: 'CHF', locale: 'de-CH', note: 'Swiss grouping' },
+  {
+    amount: -1104.3,
+    currency: 'EUR',
+    locale: 'en-IE',
+    note: 'accounting brackets, on request',
+    accounting: true,
+  },
+  { amount: 0, currency: 'EUR', locale: 'en-IE', note: 'the difference, reconciled' },
+];
 
-export function Hero({ kit }: { kit: KitFacts }) {
+const samples = SAMPLES.map(({ amount, currency, locale, note, accounting }) => (
+  <span key={note} className="flex items-baseline gap-3">
+    <span className="text-fg tabular-nums">
+      {formatMoney(amount, currency, { locale, accounting: accounting === true })}
+    </span>
+    <span className="text-fg-muted">{note}</span>
+  </span>
+));
+
+export function Hero() {
   return (
     <section className="relative isolate overflow-hidden pb-14 md:pb-16">
       <div aria-hidden className="site-dots site-dots-hero absolute inset-0 -z-10" />
@@ -65,7 +86,7 @@ export function Hero({ kit }: { kit: KitFacts }) {
       </div>
 
       <div className="site-enter site-step-3 mx-auto mt-10 w-full max-w-7xl border-y border-line py-3 md:mt-14">
-        <Ticker label="rectio in numbers" items={facts(kit)} />
+        <Ticker label="Amounts as Money prints them" items={samples} />
       </div>
 
       <div className="site-enter site-step-4 mt-10 md:mt-14">

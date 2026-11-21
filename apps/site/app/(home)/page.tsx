@@ -36,7 +36,7 @@ export default function Home() {
   return (
     <>
       <div id="content" className="flex flex-col">
-        <Hero kit={kit} />
+        <Hero />
 
         <CloseBooks />
 

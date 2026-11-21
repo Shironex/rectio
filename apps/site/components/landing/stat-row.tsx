@@ -5,7 +5,7 @@ import type { KitFacts } from './kit-facts';
  * so the row cannot drift from what ships.
  */
 export function StatRow({ kit }: { kit: KitFacts }) {
-  const stats: { value: string; unit?: string; label: string; note: string }[] = [
+  const stats: { value: string; label: string; note: string }[] = [
     {
       value: String(kit.components),
       label: 'components',
@@ -18,12 +18,6 @@ export function StatRow({ kit }: { kit: KitFacts }) {
     },
     { value: String(kit.templates), label: 'templates', note: 'Whole apps, live on this site' },
     { value: String(kit.tokens), label: 'tokens per theme mode', note: 'Every value a theme sets' },
-    {
-      value: kit.motionKb,
-      unit: 'kB',
-      label: 'motion add-on, gzip',
-      note: 'Measured in the build',
-    },
   ];
   return (
     <div className="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-16">
@@ -43,11 +37,6 @@ export function StatRow({ kit }: { kit: KitFacts }) {
             <dd className="text-sm text-fg-muted">{stat.note}</dd>
             <dd className="row-span-2 font-display text-3xl font-heading text-fg tabular-nums md:text-4xl">
               {stat.value}
-              {stat.unit !== undefined && (
-                <span className="ms-1 text-lg font-strong text-fg-muted md:text-xl">
-                  {stat.unit}
-                </span>
-              )}
             </dd>
           </div>
         ))}
