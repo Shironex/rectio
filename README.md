@@ -121,7 +121,14 @@ and lining, and money uses the true minus sign.
 rectio needs React 19 and Tailwind CSS v4, in a Vite, Next.js or TanStack Start project.
 
 ```sh
-pnpm dlx @rectio/cli init                                # tokens, a theme and the cn helper
+pnpm dlx @rectio/cli init
+```
+
+It asks whether to add rectio to the app you are in or to start a new app from a template, then
+sets it up. For scripts and CI, every answer is a flag:
+
+```sh
+pnpm dlx @rectio/cli init --yes                          # tokens, a theme and the cn helper
 pnpm dlx @rectio/cli add button dialog data-table        # components, with what they depend on
 pnpm dlx @rectio/cli add invoice-list motion-kpi-row     # blocks, plain or with motion
 pnpm dlx @rectio/cli init --template finance-app my-app  # a whole app in a new folder

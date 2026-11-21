@@ -4,14 +4,20 @@ description: Every rectio command, its flags and what it writes.
 ---
 
 The `rectio` command copies registry items into your project and keeps track of them. It needs
-Node 22.12 or later. It asks nothing: every choice is a flag, so it runs the same in a script.
+Node 22.12 or later. Start with:
 
 ```sh
-pnpm dlx @rectio/cli <command> [options]
+pnpm dlx @rectio/cli init
 ```
+
+In a terminal, `init` asks what you want: rectio in the app you are in, or a new app from a
+template. Every answer is also a flag, so scripts and CI run the same command with no questions.
 
 The commands below write `rectio` for short. Run them through `pnpm dlx @rectio/cli` (or
 `npx @rectio/cli`), or install the CLI globally with `pnpm add -g @rectio/cli` to type `rectio`.
+The commands the CLI itself suggests (in the summary box, hints and errors) follow how you started
+it: `pnpm dlx @rectio/cli add <item>` after a `pnpm dlx` run, `rectio add <item>` after a global
+install.
 
 ## Commands
 
@@ -21,19 +27,51 @@ Sets up a project: detects the framework, checks Tailwind v4, finds the CSS entr
 alias, writes `rectio.json`, and installs `tokens`, a theme and `cn`.
 [Installation](/docs/installation) walks through it.
 
+Run in a terminal with no deciding flag, `init` first asks how to start:
+
+- **Add rectio to this project**, offered when the folder has a `package.json`, with what it
+  detected (`Vite, Tailwind 4.3.5`). It then confirms the framework, the CSS entry and the import
+  aliases (you can edit each alias), asks for the theme, and offers a starter set of components
+  (button, field, select, dialog, card, badge, tabs, data-table, money) or none.
+- **Start a new app from a template**: pick a template (type to filter), a folder, the theme, the
+  package manager (the detected one first), whether to install now, and whether to create a git
+  repo with a first commit (asked only when git is on your PATH and the folder is not already
+  inside a repo). Preview the templates at
+  [shironex.github.io/rectio/templates](https://shironex.github.io/rectio/templates).
+
+The theme is `default` (light and dark), or a theme URL from the
+[theme generator](/docs/theming). A one-line recap follows, then the same steps and summary as the
+flag forms. Arrow keys or `j` and `k` move, space toggles in a list of checkboxes, Enter answers,
+and Ctrl+C or Esc stops with exit code 130 and nothing written.
+
 ```sh
 rectio init [--theme <id>] [--css src/index.css] [--framework vite|next|tanstack-start]
-            [--registry <url|folder>] [--force] [--dry-run] [--no-install]
+            [--registry <url|folder>] [--pm pnpm|npm|yarn|bun] [--force] [--dry-run]
+            [--no-install] [-y]
 ```
 
-| Flag                 | What it does                                                |
-| -------------------- | ----------------------------------------------------------- |
-| `--theme <id>`       | Theme to install. Defaults to `default`.                    |
-| `--css <path>`       | The CSS file that imports Tailwind.                         |
-| `--framework <name>` | `vite`, `next` or `tanstack-start`, when detection fails.   |
-| `--force`            | Rewrite `rectio.json` even if it exists.                    |
-| `--dry-run`          | Show the plan, write nothing.                               |
-| `--no-install`       | Add packages to `package.json` without running the install. |
+| Flag                 | What it does                                                          |
+| -------------------- | --------------------------------------------------------------------- |
+| `-y`, `--yes`        | Ask nothing and take every default: rectio in this project.           |
+| `--theme <id>`       | Theme to install. Defaults to `default`. Skips the theme question.    |
+| `--css <path>`       | The CSS file that imports Tailwind. Implies this project, no prompts. |
+| `--framework <name>` | `vite`, `next` or `tanstack-start`. Implies this project, no prompts. |
+| `--pm <name>`        | `pnpm`, `npm`, `yarn` or `bun` instead of the detected one.           |
+| `--force`            | Rewrite `rectio.json` even if it exists.                              |
+| `--dry-run`          | Show the plan, write nothing.                                         |
+| `--no-install`       | Add packages to `package.json` without running the install.           |
+
+#### When init asks
+
+| Run                                                   | Questions                                      |
+| ----------------------------------------------------- | ---------------------------------------------- |
+| `init` in a terminal                                  | yes, minus any a flag answers                  |
+| `init --yes`, `init -q`                               | none: rectio in this project with the defaults |
+| `init --css ...` or `init --framework ...`            | none: rectio in this project                   |
+| `init --template <name> [folder]`                     | none, as before                                |
+| stdin or stdout not a terminal, `CI` set, `TERM=dumb` | none: the defaults, as before                  |
+| `init --yes` with no `package.json`                   | none: fails and asks for `--template <name>`   |
+| `rectio mcp`                                          | never                                          |
 
 Running `init` again with another `--theme` installs that theme and records it in `rectio.json`.
 
@@ -44,8 +82,13 @@ first commit.
 
 ```sh
 rectio init --template finance-app [folder] [--theme <id>] [--registry <url|folder>]
-            [--force] [--dry-run] [--no-install]
+            [--pm pnpm|npm|yarn|bun] [--git | --no-git] [--force] [--dry-run] [--no-install]
 ```
+
+`--pm` picks the package manager for the install. `--git` creates a git repo with a first commit
+after the install (with a default `.gitignore` when the template has none); a missing git identity
+leaves the repo without a commit and says so. A folder that is not empty stops the run unless you
+pass `--force`.
 
 1. Resolves the template and every kit item it uses, checks the key, then fetches and verifies all
    of them. A missing key or a failed download writes nothing.
@@ -199,7 +242,11 @@ A plain folder or a `file://` URL works for development, as does the
 When a newer version of `@rectio/cli` is on npm, the CLI prints a short notice on stderr after the
 command, with the version and how to get it. It asks npm at most once a day, caches the answer in
 your user cache folder, and gives up after 1.5 seconds, so it never slows a command down or makes
-it fail. It stays quiet in CI, when stdout is not a terminal, and always in `rectio mcp`.
+it fail. A failed ask (offline, or npm without an answer yet) is tried again after an hour. It
+stays quiet in CI, when stdout is not a terminal, and always in `rectio mcp`.
+
+`pnpm dlx` keeps a downloaded package for a day, so a plain `pnpm dlx @rectio/cli` can run an older
+copy. Started that way, the notice suggests `pnpm dlx @rectio/cli@latest` and says why.
 
 Set `RECTIO_NO_UPDATE_CHECK=1` to turn it off.
 

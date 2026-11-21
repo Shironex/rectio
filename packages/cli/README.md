@@ -10,7 +10,18 @@ It needs Node 22.12 or later and a Vite, Next.js or TanStack Start project with 
 ## Use
 
 ```sh
-pnpm dlx @rectio/cli init                                # tokens, a theme and the cn helper
+pnpm dlx @rectio/cli init
+```
+
+In a terminal, `init` asks whether to add rectio to the app you are in (it shows what it detected,
+then the aliases, the theme and a few starter components) or to start a new Next.js app from a
+template (folder, theme, package manager, install, git). Ctrl+C or Esc stops before anything is
+written.
+
+Every answer is also a flag, and scripts and CI never get a question:
+
+```sh
+pnpm dlx @rectio/cli init --yes                          # tokens, a theme and the cn helper
 pnpm dlx @rectio/cli add button dialog data-table        # components, with what they depend on
 pnpm dlx @rectio/cli add invoice-list                    # blocks work the same way
 pnpm dlx @rectio/cli init --template finance-app my-app  # a whole Next.js app in a new folder
@@ -42,7 +53,7 @@ claude mcp add rectio --scope project -- rectio mcp
 ## Update notice
 
 When a newer `@rectio/cli` is on npm, the CLI says so on stderr after a command. It asks npm at
-most once a day, gives up after 1.5 seconds, and stays quiet in CI, when the output is not a
+most once a day (an hour after a failed ask), gives up after 1.5 seconds, and stays quiet in CI, when the output is not a
 terminal, and in `rectio mcp`. Set `RECTIO_NO_UPDATE_CHECK=1` to turn it off.
 
 ## Docs
