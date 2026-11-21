@@ -91,7 +91,8 @@
       "$value": "{size.2}"
     },
     "panel": {
-      "$value": "{size.4}"
+      "$value": "{size.2}",
+      "$description": "2px: panels read nearly square at 1x, the ruled look of a printed report."
     },
     "badge": {
       "$value": "{size.1}"
@@ -139,6 +140,13 @@
       "style": {
         "$type": "other",
         "$value": "italic"
+      }
+    },
+    "money": {
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{font.family.display}",
+        "$description": "Figures in the serif: the cue that reads at any pixel density, where a hairline rounds up to 1px."
       }
     }
   }

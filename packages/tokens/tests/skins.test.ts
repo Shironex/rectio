@@ -159,6 +159,11 @@ describe('editorial', () => {
     expect(editorial['--rx-font-family-sans']).toBeUndefined();
   });
 
+  // A hairline rounds up to 1px on a 1x screen, so the serif amounts carry the look there.
+  it('sets amounts in the serif', () => {
+    expect(editorial['--rx-money-family']).toBe('var(--rx-font-family-display)');
+  });
+
   it('draws hairline borders and restrained corners, with a more generous rhythm', () => {
     expect(px(editorial['--rx-border-width'])).toBeGreaterThan(0);
     expect(px(editorial['--rx-border-width'])).toBeLessThan(px(base['--rx-border-width']));
