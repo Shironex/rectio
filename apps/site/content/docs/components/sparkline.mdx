@@ -1,0 +1,64 @@
+---
+title: Sparkline
+description: A word-sized line of recent figures, for a stat, a table row or a card.
+---
+
+<Preview
+  name="sparkline"
+  plain={<Demo name="sparkline" />}
+  motion={<Demo name="sparkline.motion" />}
+  importLine="import { Sparkline } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add sparkline
+```
+
+## Usage
+
+```tsx
+import { Sparkline } from '@/components/ui/sparkline';
+
+<Sparkline data={[162, 171, 168, 180, 176, 189]} area />;
+<Sparkline data={recent} label="Revenue, rising over 12 months" className="h-8 w-32" />;
+```
+
+Plain SVG with no chart library, so it lives in the main entry and costs almost nothing. It stretches
+to whatever box it is given while the stroke keeps its width, and a dot marks the latest figure. A
+`null` leaves a gap; `reference` draws a dashed rule, such as zero or a target, when it falls inside
+the range.
+
+A sparkline shows a shape, not figures: put the figure and its change beside it, as text and a
+TrendChip. The motion variant draws the line along time the first time it is seen.
+
+## Props
+
+Every prop of a `span` is accepted as well.
+
+<TypeTable
+  type={{
+    data: { type: '(number | null)[]', description: 'Figures, oldest first. Required.' },
+    color: { type: 'ChartColor', default: "'series-1'", description: 'A chart colour token.' },
+    area: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Fill the area under the line, faintly.',
+    },
+    endDot: { type: 'boolean', default: 'true', description: 'Mark the latest figure.' },
+    reference: { type: 'number', description: 'A dashed rule at this value.' },
+    label: {
+      type: 'string',
+      description:
+        'Names the trend for screen readers. Without it the sparkline is decorative and hidden.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- Decorative and hidden by default: say the trend in words beside it.
+- With `label`, an image named by that label, such as `Revenue, rising over 12 months`.
+
+<ComponentSource path="sparkline/sparkline.tsx" />

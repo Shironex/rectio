@@ -1,0 +1,71 @@
+---
+title: ChartCard
+description: A card for one chart, with a title, the headline figure, its change, actions and the chart below.
+---
+
+<Preview name="chart-card" plain={<Demo name="chart-card" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add chart-card
+```
+
+## Usage
+
+```tsx
+import { ChartCard } from '@/components/ui/chart-card';
+import { TrendChip } from '@/components/ui/trend-chip';
+import { AreaChart } from '@/components/ui/area-chart';
+
+<ChartCard
+  title="Revenue"
+  description="Last 30 days, by day"
+  value="€53,940"
+  delta={<TrendChip value={0.058} comparison="vs previous period" />}
+  actions={<RangeSwitch />}
+>
+  <AreaChart series={revenue} format="currency" currency="EUR" />
+</ChartCard>;
+```
+
+The card is a named region: the title labels it, so a dashboard reads as a list of named charts. The
+value and its change sit above the chart, and the actions, such as a range switch or a menu, sit at
+the top right. With `loading`, the value turns into a skeleton and the card is marked busy; pass
+`loading` to the chart as well.
+
+ChartCard has no chart library in it, so it lives in the main entry; put any chart, or a table, in it.
+
+## Props
+
+Every Card prop is accepted as well.
+
+<TypeTable
+  type={{
+    title: { type: 'ReactNode', description: 'Names the card. Required.' },
+    description: {
+      type: 'ReactNode',
+      description: 'The period or the breakdown, under the title.',
+    },
+    value: { type: 'ReactNode', description: 'The headline figure.' },
+    delta: { type: 'ReactNode', description: 'Its change, usually a TrendChip.' },
+    actions: { type: 'ReactNode', description: 'Controls at the top right.' },
+    footer: { type: 'ReactNode', description: 'A note under the chart.' },
+    loading: {
+      type: 'boolean',
+      description: 'A skeleton in place of the value, and the card marked busy.',
+    },
+    headingLevel: {
+      type: '2 | 3 | 4 | 5 | 6',
+      default: '3',
+      description: 'The level of the title heading.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- A region named by its title heading, set to the level that fits the page with `headingLevel`.
+- `aria-busy` while loading.
+
+<ComponentSource path="chart-card/chart-card.tsx" />

@@ -1,0 +1,59 @@
+---
+title: AreaChart
+description: Figures over time as filled areas, alone or stacked into a total.
+---
+
+<Preview
+  name="area-chart"
+  plain={<Demo name="area-chart" />}
+  motion={<Demo name="area-chart.motion" />}
+  importLine="import { AreaChart } from '@rectio/motion/charts';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add area-chart
+```
+
+## Usage
+
+```tsx
+import { AreaChart } from '@/components/ui/area-chart';
+
+<AreaChart
+  series={[{ id: 'revenue', label: 'Revenue', points }]}
+  format="currency"
+  currency="EUR"
+/>;
+<AreaChart series={signupsByPlan} stacked />;
+```
+
+The same time axis, gaps and formats as LineChart, with the area under each line filled. Use
+`stacked` when the series add up to a whole worth reading, such as signups by plan; the tooltip then
+adds the total. For series that only need comparing, a LineChart reads better.
+
+The motion variant uncovers the areas along time on first view.
+
+## Props
+
+Every LineChart prop, plus:
+
+<TypeTable
+  type={{
+    stacked: { type: 'boolean', default: 'false', description: 'Stack the series into a total.' },
+  }}
+/>
+
+## Accessibility
+
+- A figure with a summary read before the plot: the range, and for each series its first, last, peak
+  and change. Pass `summary` to say it in your own words.
+- Every chart has a table twin, in the page for screen readers and shown on request with **Show
+  table**. The legend and the table use the same names and figures as the tooltip.
+- The plot takes focus: arrow keys move from point to point, and the tooltip follows.
+- Colours come from the three chart series tokens, which stay apart for every common colour vision
+  type; series past the third repeat a colour and turn dashed, so a line never rests on colour alone.
+- Figures use the true minus sign, so signed values line up.
+
+<ComponentSource path="area-chart/area-chart.tsx" />

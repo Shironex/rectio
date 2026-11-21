@@ -1,0 +1,112 @@
+---
+title: BarChart
+description: Figures by category as bars, vertical or horizontal, grouped side by side or stacked.
+---
+
+<Preview
+  name="bar-chart"
+  plain={<Demo name="bar-chart" />}
+  motion={<Demo name="bar-chart.motion" />}
+  importLine="import { BarChart } from '@rectio/motion/charts';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add bar-chart
+```
+
+## Usage
+
+```tsx
+import { BarChart } from '@/components/ui/bar-chart';
+
+<BarChart
+  data={months}
+  category="month"
+  stacked
+  series={[
+    { key: 'starter', label: 'Starter' },
+    { key: 'team', label: 'Team' },
+  ]}
+  format="currency"
+  currency="EUR"
+/>;
+<BarChart
+  data={tickets}
+  category="team"
+  orientation="horizontal"
+  labels
+  series={[{ key: 'open', label: 'Open' }]}
+/>;
+```
+
+`data` is your own rows; `category` names the field on the category axis and each series names a
+numeric field. Several series sit side by side, or one on another with `stacked`, where only the top
+segment is rounded and the tooltip adds the total. Bars below zero hang from a zero line.
+
+Use `horizontal` for long category names or a ranking: the plot grows with the number of rows.
+`labels` writes each bar's figure (the total for a stack) at its end.
+
+The motion variant grows the bars from the zero line one after another on first view.
+
+## Props
+
+<TypeTable
+  type={{
+    data: { type: 'T[]', description: 'Your rows. Required.' },
+    category: { type: 'keyof T', description: 'The field on the category axis. Required.' },
+    series: {
+      type: '{ key: keyof T; label: string; color?: ChartColor }[]',
+      description: 'The numeric fields to draw. Required.',
+    },
+    formatCategory: {
+      type: '(value, datum) => string',
+      description: 'Writes a category, such as a date.',
+    },
+    orientation: {
+      type: "'vertical' | 'horizontal'",
+      default: "'vertical'",
+      description: 'Which way the bars run.',
+    },
+    stacked: { type: 'boolean', default: 'false', description: 'Stack the series into a total.' },
+    labels: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Write each figure at the end of its bar.',
+    },
+    format: {
+      type: "'number' | 'currency' | 'percent' | 'duration'",
+      default: "'number'",
+      description: 'How figures are written.',
+    },
+    currency: { type: 'string', description: 'The ISO 4217 code for `currency`.' },
+    locale: { type: 'string', description: 'The locale for figures.' },
+    legend: { type: 'boolean', description: 'Shown when there is more than one series.' },
+    summary: { type: 'string', description: 'Replaces the generated summary.' },
+    loading: { type: 'boolean', description: 'A still skeleton of the plot.' },
+    emptyAction: { type: 'ReactNode', description: 'An action under the empty message.' },
+    tableToggle: {
+      type: 'boolean',
+      default: 'true',
+      description: 'The Show table button under the plot.',
+    },
+    plotClassName: { type: 'string', default: "'h-64'", description: 'Height of a vertical plot.' },
+    messages: {
+      type: 'Partial<BarChartMessages>',
+      description: 'Every word the chart prints, such as `categoryHeader` for the table.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- A figure with a summary read before the plot: the range, and for each series its total, highest and lowest category. Pass `summary` to say it in your own words.
+- Every chart has a table twin, in the page for screen readers and shown on request with **Show
+  table**. The legend and the table use the same names and figures as the tooltip.
+- The plot takes focus: arrow keys move from point to point, and the tooltip follows.
+- Colours come from the three chart series tokens, which stay apart for every common colour vision
+  type; series past the third repeat a colour and turn dashed, so a line never rests on colour alone.
+- Figures use the true minus sign, so signed values line up.
+
+<ComponentSource path="bar-chart/bar-chart.tsx" />

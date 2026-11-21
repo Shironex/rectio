@@ -1,0 +1,134 @@
+---
+title: LineChart
+description: Figures over time as lines, with locale dates, ticks that fit the width and real gaps for missing data.
+---
+
+<Preview
+  name="line-chart"
+  plain={<Demo name="line-chart" />}
+  motion={<Demo name="line-chart.motion" />}
+  importLine="import { LineChart } from '@rectio/motion/charts';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add line-chart
+```
+
+## Usage
+
+```tsx
+import { LineChart } from '@/components/ui/line-chart';
+
+<LineChart
+  series={[
+    { id: 'this', label: 'This quarter', points: thisQuarter },
+    { id: 'last', label: 'Last quarter', points: lastQuarter, dashed: true },
+  ]}
+  format="currency"
+  currency="EUR"
+  references={[{ value: 2000, label: 'Daily target €2,000' }]}
+/>;
+```
+
+Points are `{ date, value }`. The step (hour, day or month) is read from the data, and the axis picks
+the finest tick spacing that fits the width: hours, days, weeks starting on Monday, months, quarters or
+years, written in the locale. The year appears where the range crosses one, and midnight names its day.
+
+A `null` value, or a run of missing points longer than three steps, breaks the line, so a broken
+import reads as missing rather than as a straight slope. Dash a series for a forecast or a previous
+period; series past the third are dashed for you.
+
+Charts live in their own entry, `@rectio/ui/charts`, so an app that draws none never ships the chart
+library. The motion variant draws each line along time the first time it is seen, and later updates
+glide to the new figures; reduced motion keeps both still.
+
+## Props
+
+<TypeTable
+  type={{
+    series: {
+      type: 'TimeSeries[]',
+      description:
+        'Each series: `id`, `label`, `points` ({ date, value }, a null value leaves a gap), and optionally `color` and `dashed`. Required.',
+    },
+    format: {
+      type: "'number' | 'currency' | 'percent' | 'duration'",
+      default: "'number'",
+      description: 'How figures are written on the axis, in the tooltip and in the table.',
+    },
+    currency: { type: 'string', description: 'The ISO 4217 code for `currency`.' },
+    locale: {
+      type: 'string',
+      description: 'The locale for dates and figures. The browser locale when left out.',
+    },
+    scale: {
+      type: "'hour' | 'day' | 'month'",
+      description: 'The step between points. Read from the data when left out.',
+    },
+    curve: {
+      type: "'smooth' | 'linear' | 'step'",
+      default: "'smooth'",
+      description: 'How points are joined.',
+    },
+    baseline: {
+      type: "'zero' | 'fit'",
+      default: "'zero'",
+      description:
+        '`fit` lets the value axis start near the lowest figure, for a measure whose change matters more than its size.',
+    },
+    references: {
+      type: '{ value: number; label: string }[]',
+      description:
+        'Dashed rules, such as a target, labelled above their right end and listed in the legend.',
+    },
+    connectGaps: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Join across missing points instead of breaking the line.',
+    },
+    markers: { type: 'boolean', default: 'false', description: 'A dot on every point.' },
+    legend: {
+      type: 'boolean',
+      description: 'Shown when there is more than one series or a reference.',
+    },
+    summary: {
+      type: 'string',
+      description: 'Replaces the generated summary read before the plot.',
+    },
+    loading: { type: 'boolean', description: 'A still skeleton of the plot, announced once.' },
+    emptyAction: {
+      type: 'ReactNode',
+      description: 'An action under the empty message, such as a button that connects a source.',
+    },
+    tableToggle: {
+      type: 'boolean',
+      default: 'true',
+      description:
+        'The Show table button under the plot. The table stays in the page for screen readers either way.',
+    },
+    plotClassName: {
+      type: 'string',
+      default: "'h-64'",
+      description: 'Height of the plot, a token utility.',
+    },
+    messages: {
+      type: 'Partial<TimeChartMessages>',
+      description: 'Every word the chart prints, for translation.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- A figure with a summary read before the plot: the range, and for each series its first, last, peak
+  and change. Pass `summary` to say it in your own words.
+- Every chart has a table twin, in the page for screen readers and shown on request with **Show
+  table**. The legend and the table use the same names and figures as the tooltip.
+- The plot takes focus: arrow keys move from point to point, and the tooltip follows.
+- Colours come from the three chart series tokens, which stay apart for every common colour vision
+  type; series past the third repeat a colour and turn dashed, so a line never rests on colour alone.
+- Figures use the true minus sign, so signed values line up.
+
+<ComponentSource path="line-chart/line-chart.tsx" />

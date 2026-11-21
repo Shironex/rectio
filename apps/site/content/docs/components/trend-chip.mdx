@@ -1,0 +1,72 @@
+---
+title: TrendChip
+description: A change against a previous period, with its direction and whether that is good, in words as well as colour.
+---
+
+<Preview name="trend-chip" plain={<Demo name="trend-chip" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add trend-chip
+```
+
+## Usage
+
+```tsx
+import { TrendChip } from '@/components/ui/trend-chip';
+
+<TrendChip value={0.084} comparison="vs last month" />;
+<TrendChip value={0.003} format="points" better="down" comparison="vs last month" />;
+```
+
+`value` is the change as a fraction (0.084 is 8.4%), or in points with `format="points"` for a rate
+such as churn. The arrow shows the direction and the tone shows whether that is good: set
+`better="down"` for a cost, churn or response time, and `better="none"` for a figure with no good
+direction. No change reads as flat.
+
+Pass `display` to write the figure yourself, and `comparison` for the period it is measured against.
+
+## Props
+
+Every prop of a `span` is accepted as well.
+
+<TypeTable
+  type={{
+    value: { type: 'number', description: 'The change. Required.' },
+    format: {
+      type: "'percent' | 'points' | 'number'",
+      default: "'percent'",
+      description: 'How the change is written.',
+    },
+    better: {
+      type: "'up' | 'down' | 'none'",
+      default: "'up'",
+      description: 'Which direction is good.',
+    },
+    comparison: {
+      type: 'ReactNode',
+      description: 'The period, such as `vs last month`, beside the chip.',
+    },
+    display: { type: 'ReactNode', description: 'Your own figure in place of the formatted one.' },
+    locale: { type: 'string', description: 'The locale for the figure.' },
+    variant: {
+      type: "'soft' | 'plain'",
+      default: "'soft'",
+      description: 'A tinted chip, or coloured text only.',
+    },
+    size: { type: "'sm' | 'md'", default: "'sm'", description: 'The text size.' },
+    labels: {
+      type: 'Partial<TrendChipLabels>',
+      description: 'The words read for direction and judgement, for translation.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- The direction and the judgement are read in words, such as `up, better`, so neither rests on the
+  arrow or the colour.
+- Figures use the true minus sign.
+
+<ComponentSource path="trend-chip/trend-chip.tsx" />

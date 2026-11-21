@@ -1,0 +1,88 @@
+---
+title: DonutChart
+description: Parts of one whole as a ring, with the total in the middle and every part listed by figure and share.
+---
+
+<Preview
+  name="donut-chart"
+  plain={<Demo name="donut-chart" />}
+  motion={<Demo name="donut-chart.motion" />}
+  importLine="import { DonutChart } from '@rectio/motion/charts';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add donut-chart
+```
+
+## Usage
+
+```tsx
+import { DonutChart } from '@/components/ui/donut-chart';
+
+<DonutChart
+  data={[
+    { id: 'payroll', label: 'Payroll', value: 184200 },
+    { id: 'software', label: 'Software', value: 42800 },
+  ]}
+  format="currency"
+  currency="EUR"
+/>;
+```
+
+The ring is a picture of the list beside it: every part keeps its name, figure and share in the
+list, so nothing is read from angles alone. Past `maxSlices` (four by default) the smallest parts fold
+into one Other part in the reference colour. Zero and negative figures are left out, since they cannot
+be a share of a whole.
+
+The middle shows the total, written in full when it fits and short when it does not; pass
+`centerValue` for your own figure, or `null` when the card around it already shows the total. In a
+narrow column the list moves under the ring.
+
+The motion variant settles the parts in around the ring on first view.
+
+## Props
+
+<TypeTable
+  type={{
+    data: {
+      type: 'DonutSlice[]',
+      description: 'Each part: `id`, `label`, `value`, and optionally `color`. Required.',
+    },
+    format: {
+      type: "'number' | 'currency' | 'percent' | 'duration'",
+      default: "'number'",
+      description: 'How figures are written.',
+    },
+    currency: { type: 'string', description: 'The ISO 4217 code for `currency`.' },
+    locale: { type: 'string', description: 'The locale for figures.' },
+    maxSlices: {
+      type: 'number',
+      default: '4',
+      description: 'Most parts drawn before the rest fold into Other.',
+    },
+    centerValue: {
+      type: 'ReactNode',
+      description: 'The figure in the middle. The total by default; `null` for none.',
+    },
+    centerLabel: { type: 'ReactNode', default: "'Total'", description: 'The words under it.' },
+    summary: { type: 'string', description: 'Replaces the generated summary.' },
+    loading: { type: 'boolean', description: 'A still skeleton ring.' },
+    emptyAction: { type: 'ReactNode', description: 'An action under the empty message.' },
+    tableToggle: { type: 'boolean', default: 'true', description: 'The Show table button.' },
+    plotClassName: { type: 'string', default: "'h-48'", description: 'Size of the ring.' },
+    messages: { type: 'Partial<DonutChartMessages>', description: 'Every word the chart prints.' },
+  }}
+/>
+
+## Accessibility
+
+- A figure with a summary read first: the total and every part with its share.
+- The list beside the ring names every part with its figure and share; the figure in the middle is
+  hidden from screen readers, since the summary says it.
+- The table twin adds the total row, shown on request with **Show table**.
+- Other is drawn in the reference colour, apart from the three series for every common colour vision
+  type, and a hairline of the surface separates neighbours.
+
+<ComponentSource path="donut-chart/donut-chart.tsx" />
