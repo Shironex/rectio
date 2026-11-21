@@ -461,13 +461,15 @@ describe('the rectio registry', () => {
     ]);
   });
 
-  it('links the data table to the checkbox, button, field and select it renders', () => {
+  it('links the data table to the checkbox, button, field, select, menu and search it renders', () => {
     expect(byName.get('data-table')?.registryDependencies).toEqual([
       'tokens',
       'button',
       'checkbox',
       'cn',
       'field',
+      'menu',
+      'search-input',
       'select',
     ]);
     expect(byName.get('data-table')?.dependencies).toMatchObject({

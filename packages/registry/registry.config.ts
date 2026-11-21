@@ -323,16 +323,18 @@ export default defineRegistry({
     {
       name: 'data-table',
       type: 'component',
-      version: '0.2.1',
+      version: '0.3.0',
       title: 'DataTable',
       description:
-        'Composable table on TanStack Table: sorting (with a Sort by control for phones), row selection, sticky header, totals footer, loading, empty and pagination.',
+        'Composable table on TanStack Table: sorting (with a Sort by control for phones), search and column filters with counts, row selection, sticky header, totals footer, loading, empty and pagination.',
       categories: ['data', 'finance'],
       files: [
         'data-table/table.tsx',
         'data-table/data-table.tsx',
         'data-table/pagination.tsx',
         'data-table/sort.tsx',
+        'data-table/filters.tsx',
+        'data-table/filter-state.ts',
       ],
     },
     {
