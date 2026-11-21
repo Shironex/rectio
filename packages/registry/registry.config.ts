@@ -358,6 +358,16 @@ export default defineRegistry({
       files: ['date-picker/date-picker.tsx', 'date-picker/date-format.ts'],
     },
     {
+      name: 'time-field',
+      type: 'component',
+      version: '0.1.0',
+      title: 'TimeField',
+      description:
+        'A segmented time of day field: 12 or 24 hours by locale, minute steps, bounds and keyboard stepping.',
+      categories: ['forms'],
+      files: ['time-field/time-field.tsx', 'time-field/time.ts'],
+    },
+    {
       name: 'toast',
       type: 'component',
       version: '0.2.1',
