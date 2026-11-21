@@ -66,3 +66,4 @@ export {
   TimeSeriesChart,
   type TimeSeriesChartProps,
 } from './saas/time-series-chart/time-series-chart.motion';
+export { Sessions, type SessionsProps } from './saas/sessions/sessions.motion';
