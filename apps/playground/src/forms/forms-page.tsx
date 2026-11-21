@@ -41,7 +41,7 @@ import {
 import { useState } from 'react';
 
 import { usePageCanvas } from '../page-canvas';
-import type { Mode, ThemeId } from '../themes';
+import { readSkin, type Mode, type ThemeId } from '../themes';
 import { CURRENCIES, MEMBERS, RECEIPTS, TIME_ZONES, type Member, type TimeZone } from './data';
 
 /**
@@ -135,6 +135,7 @@ export function FormsPage({
       theme={theme}
       mode={mode}
       density={compact ? 'compact' : 'comfortable'}
+      skin={readSkin(window.location.search)}
       className="min-h-dvh bg-surface-canvas"
     >
       <SettingsForm kit={motion ? MOTION : PLAIN} invalid={invalid} />

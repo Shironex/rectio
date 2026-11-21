@@ -1,6 +1,6 @@
 import { Suspense, lazy } from 'react';
 
-import { readView } from './themes';
+import { readSkin, readView } from './themes';
 
 // Each view loads on its own, so the expense report never downloads the whole matrix.
 const ExpenseReport = lazy(() =>
@@ -27,6 +27,10 @@ const GapsPage = lazy(() => import('./gaps/gaps-page').then((m) => ({ default: m
 const MotionPage = lazy(() =>
   import('./motion/motion-page').then((m) => ({ default: m.MotionPage })),
 );
+
+// Views without a ThemeScope skin prop take the skin from <html>, as an app would set it.
+const skin = readSkin(window.location.search);
+if (skin !== undefined) document.documentElement.dataset.skin = skin;
 
 export function App() {
   const { theme, mode, view, motion } = readView(window.location.search);

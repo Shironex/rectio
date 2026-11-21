@@ -4,7 +4,7 @@ import { Button, ThemeScope } from '@rectio/ui';
 import { useReducer, type ReactNode } from 'react';
 
 import { usePageCanvas } from '../page-canvas';
-import type { Mode, ThemeId } from '../themes';
+import { readSkin, type Mode, type ThemeId } from '../themes';
 import * as data from './data';
 import { REPORTING_BLOCKS, isReportingBlock, renderReporting } from './reporting';
 import { OPERATIONS_BLOCKS, isOperationsBlock, renderOperations } from './operations';
@@ -255,6 +255,7 @@ export function BlocksPage({
       theme={theme}
       mode={mode}
       density={compact ? 'compact' : 'comfortable'}
+      skin={readSkin(window.location.search)}
       className="min-h-dvh bg-surface-canvas"
     >
       {saas !== null ? (

@@ -11,6 +11,16 @@ export const THEMES: readonly PlaygroundTheme[] = [
 
 export const MODES = ['light', 'dark'] as const;
 
+/** The skins @rectio/tokens ships, picked by `&skin=`. Unset is the theme as it is. */
+export const SKINS = ['dense', 'editorial'] as const;
+export type Skin = (typeof SKINS)[number];
+
+/** The skin in the URL, or undefined for none. */
+export function readSkin(search: string): Skin | undefined {
+  const asked = new URLSearchParams(search).get('skin');
+  return SKINS.find((s) => s === asked);
+}
+
 export type ThemeId = PlaygroundTheme['id'];
 export type Mode = (typeof MODES)[number];
 

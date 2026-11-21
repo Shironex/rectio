@@ -20,7 +20,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 
 import { usePageCanvas } from '../page-canvas';
-import type { Mode, ThemeId } from '../themes';
+import { readSkin, type Mode, type ThemeId } from '../themes';
 import { AddExpenseDialog } from './add-expense-dialog';
 import { EXPENSES, STATUSES, categoryLabel, type Expense } from './data';
 import { KitProvider, MOTION_KIT, PLAIN_KIT, useKit, type Kit } from './kit';
@@ -178,7 +178,13 @@ export function ExpenseReport({
   const { ToastProvider } = motion ? MOTION_KIT : PLAIN_KIT;
   const canvas = usePageCanvas(theme, mode);
   return (
-    <ThemeScope ref={canvas} theme={theme} mode={mode} className="min-h-dvh">
+    <ThemeScope
+      ref={canvas}
+      theme={theme}
+      mode={mode}
+      skin={readSkin(window.location.search)}
+      className="min-h-dvh"
+    >
       <KitProvider motion={motion}>
         <ToastProvider timeout={UNDO_MS}>
           <Report back={motion ? `?view=motion&theme=${theme}&mode=${mode}` : null} />
