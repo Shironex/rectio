@@ -128,6 +128,11 @@ try {
     'desktop-dark-editorial',
     'mode=dark&skin=editorial',
   );
+  // A close crop at full size, so the serif figures can be judged without downscaling.
+  await editorial?.screenshot({
+    path: join(out, 'state-editorial-figures.png'),
+    clip: { x: 0, y: 120, width: 1440, height: 520 },
+  });
   await editorial?.close();
   const densePhone = await shoot(browser, base, 'phone-light-dense', 'mode=light&skin=dense', {
     phone: true,

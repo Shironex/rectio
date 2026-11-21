@@ -115,8 +115,12 @@ function Dashboard({ charts }: { charts: Charts }) {
               setRange(value[0] ?? '90');
             }}
           >
-            <Toggle value="30">30d</Toggle>
-            <Toggle value="90">90d</Toggle>
+            <Toggle value="30" className="pointer-coarse:min-w-11">
+              30d
+            </Toggle>
+            <Toggle value="90" className="pointer-coarse:min-w-11">
+              90d
+            </Toggle>
           </ToggleGroup>
         }
       >
