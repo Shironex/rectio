@@ -58,6 +58,17 @@ summary: Work that is merging into main now and ships with the next release.
 - The SaaS blocks read the clock again every minute when no `now` is passed, so relative times and
   the agenda time line keep up (saas-core 0.2.0).
 
+- An AI and chat pack, provider agnostic: `ChatMessage`, `ChatThread` (follows a streaming reply,
+  Jump to latest, day separators and a live announcer that never reads each chunk),
+  `MessageActions`, `PromptInput` (attachments, Enter to send, Send that turns into Stop),
+  `ChatSource`, `ToolCall`, `Reasoning`, `ChatLoader` and a safe `Markdown` renderer for chat and
+  docs, with no raw HTML and checked links.
+- `@rectio/motion/chat`: messages that rise into place, typing dots that fade up and streamed text
+  revealed at an even pace on whole words, in a separate entry of 1.4 kB.
+- The AI chat thread block in `@rectio/blocks/ai`, with an empty state and suggestions, and its
+  motion twin.
+- The docs code block keeps room for its copy button at the end of the longest line.
+
 ## Templates
 
 - Every template sends its links through the link provider, so the live previews under
@@ -80,6 +91,8 @@ summary: Work that is merging into main now and ships with the next release.
 - `rectio init` takes a theme link at its theme question or in `--theme`.
 
 ## Docs and site
+
+- Pages for the chat components and the AI chat thread block, with demos fed by a fake stream.
 
 - A theme generator page in the docs: a brand colour, neutral temperature, dark depth, radius,
   density and fonts, every colour derived in OKLCH and corrected until each pair the kit draws
