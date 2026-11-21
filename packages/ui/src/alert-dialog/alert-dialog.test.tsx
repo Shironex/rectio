@@ -102,6 +102,9 @@ describe('AlertDialog', () => {
     const action = await screen.findByRole('button', { name: 'Delete invoice' });
     await userEvent.click(action);
     expect(action).toHaveAttribute('aria-busy', 'true');
+    // Nothing walks away from the running request: the safe answer waits and Escape holds.
+    expect(screen.getByRole('button', { name: 'Keep invoice' })).toBeDisabled();
+    await userEvent.keyboard('{Escape}');
     expect(screen.getByRole('alertdialog')).toBeInTheDocument();
     resolve();
     await waitFor(() => {

@@ -34,6 +34,9 @@ interface AlertDialogState {
   close: () => void;
   /** The safe action, which takes the focus when the dialog opens. */
   cancel: RefObject<HTMLButtonElement | null>;
+  /** The action's request is running: the dialog holds until it settles. */
+  running: boolean;
+  setRunning: (running: boolean) => void;
 }
 
 const StateContext = createContext<AlertDialogState | null>(null);
@@ -52,21 +55,40 @@ export type AlertDialogProps = BaseAlertDialog.Root.Props;
  * dialog it does not close on a press outside, and it opens with the focus on the safe action, so
  * a stray Enter keeps the data. Escape still cancels.
  */
-export function AlertDialog({ actionsRef, ...props }: AlertDialogProps) {
+export function AlertDialog({ actionsRef, onOpenChange, ...props }: AlertDialogProps) {
   const own = useRef<BaseAlertDialog.Root.Actions | null>(null);
   const actions = actionsRef ?? own;
   const cancel = useRef<HTMLButtonElement | null>(null);
+  const [running, setRunningState] = useState(false);
+  // Read when the action closes the dialog in the same tick as it stops running.
+  const runningNow = useRef(false);
   const state = useMemo<AlertDialogState>(
     () => ({
       cancel,
+      running,
+      setRunning: (next) => {
+        runningNow.current = next;
+        setRunningState(next);
+      },
       // Through Base UI, so onOpenChange hears it like any other close.
       close: () => actions.current?.close(),
     }),
-    [actions],
+    [actions, running],
   );
   return (
     <StateContext value={state}>
-      <BaseAlertDialog.Root actionsRef={actions} {...props} />
+      <BaseAlertDialog.Root
+        actionsRef={actions}
+        onOpenChange={(open, details) => {
+          // Escape cannot walk away from a request that is still running: its result lands here.
+          if (!open && runningNow.current) {
+            details.cancel();
+            return;
+          }
+          onOpenChange?.(open, details);
+        }}
+        {...props}
+      />
     </StateContext>
   );
 }
@@ -163,13 +185,18 @@ export function AlertDialogFooter({ className, ...props }: ComponentProps<'div'>
 export type AlertDialogCancelProps = Omit<ButtonProps, 'render'>;
 
 /** The safe answer ("Keep invoice"): closes the dialog and takes the focus when it opens. */
-export function AlertDialogCancel({ variant = 'secondary', ...props }: AlertDialogCancelProps) {
-  const { cancel } = useAlertDialog('AlertDialogCancel');
+export function AlertDialogCancel({
+  variant = 'secondary',
+  disabled,
+  ...props
+}: AlertDialogCancelProps) {
+  const { cancel, running } = useAlertDialog('AlertDialogCancel');
   return (
     <BaseAlertDialog.Close
       ref={cancel}
       data-slot="alert-dialog-cancel"
-      render={<Button variant={variant} {...props} />}
+      // While the action runs there is nothing left to cancel; the result decides.
+      render={<Button variant={variant} disabled={disabled === true || running} {...props} />}
     />
   );
 }
@@ -193,9 +220,8 @@ export function AlertDialogAction({
   loading,
   ...props
 }: AlertDialogActionProps) {
-  const { close } = useAlertDialog('AlertDialogAction');
+  const { close, running, setRunning } = useAlertDialog('AlertDialogAction');
   const tone = use(ToneContext);
-  const [running, setRunning] = useState(false);
   return (
     <Button
       data-slot="alert-dialog-action"
