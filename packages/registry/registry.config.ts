@@ -725,7 +725,7 @@ export default defineRegistry({
     {
       name: 'sheet',
       type: 'component',
-      version: '0.1.3',
+      version: '0.2.0',
       title: 'Sheet',
       description:
         'A panel that slides in from any edge, a bottom sheet on phones, swipe to close.',
@@ -751,6 +751,16 @@ export default defineRegistry({
         'A destructive or costly confirmation that opens on the safe answer and waits for an async action.',
       categories: ['overlays'],
       files: ['alert-dialog/alert-dialog.tsx'],
+    },
+    {
+      name: 'drawer',
+      type: 'component',
+      version: '0.1.0',
+      title: 'Drawer',
+      description:
+        'A bottom sheet with a drag handle and snap points on phones, a side panel on wider screens.',
+      categories: ['overlays'],
+      files: ['drawer/drawer.tsx'],
     },
     {
       name: 'breadcrumb',
