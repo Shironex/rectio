@@ -513,7 +513,7 @@ export default defineRegistry({
     {
       name: 'scroll-area',
       type: 'component',
-      version: '0.1.1',
+      version: '0.2.0',
       title: 'ScrollArea',
       description:
         'A region with its own themed scrollbar and fading edges, native scrolling underneath.',
@@ -781,6 +781,16 @@ export default defineRegistry({
         'A star rating on radios with half steps and a pointer preview, and a read-only display.',
       categories: ['forms'],
       files: ['rating/rating.tsx'],
+    },
+    {
+      name: 'tree',
+      type: 'component',
+      version: '0.1.0',
+      title: 'Tree',
+      description:
+        'A keyboard-complete tree with single or multiple selection, branches that load on open, and its own scroll.',
+      categories: ['data'],
+      files: ['tree/tree.tsx'],
     },
     {
       name: 'breadcrumb',
