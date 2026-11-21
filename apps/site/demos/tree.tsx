@@ -1,6 +1,6 @@
 'use client';
 
-import { FolderIcon, FolderOpenIcon, FileTextIcon } from '@phosphor-icons/react';
+import { FileTextIcon, FolderIcon } from '@phosphor-icons/react';
 import { Tree, type TreeNode } from '@rectio/ui';
 import { useState } from 'react';
 
@@ -22,7 +22,7 @@ const ITEMS: TreeNode[] = [
   {
     id: 'statements',
     label: 'Bank statements',
-    icon: <FolderOpenIcon weight="bold" />,
+    icon: folder,
     meta: 2,
     children: [
       {
