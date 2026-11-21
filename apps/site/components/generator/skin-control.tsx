@@ -21,7 +21,7 @@ export function SkinControl({
   onChange: (skin: string | undefined) => void;
 }) {
   const options = [
-    { value: NONE, label: 'None' },
+    { value: NONE, label: 'Default' },
     ...skins.map((s) => ({ value: s.id, label: s.id.charAt(0).toUpperCase() + s.id.slice(1) })),
   ];
   return (
@@ -41,7 +41,8 @@ export function SkinControl({
         <p className="text-sm text-fg-muted">
           Dense tightens type and controls for data-heavy apps; editorial sets serif headings and
           hairlines. A skin changes no colour, so every contrast check above still holds. It
-          installs as its own item, beside the theme.
+          installs as its own item, beside the theme. Compact density is separate and still applies
+          inside a skin.
         </p>
       </div>
     </ControlGroup>

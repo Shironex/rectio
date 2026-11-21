@@ -170,7 +170,7 @@ export function Output({
               >
                 {skin.title}
               </h2>
-              <p className="max-w-prose text-sm text-fg-muted">
+              <p className="text-sm text-fg-muted">
                 {skin.description} Import it after the theme and set{' '}
                 <code className="font-mono text-xs text-fg">data-skin=&quot;{skin.id}&quot;</code>{' '}
                 beside{' '}
