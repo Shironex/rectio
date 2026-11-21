@@ -1,7 +1,6 @@
-import { cn } from '@rectio/ui';
+import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger, cn } from '@rectio/ui';
 import type { ReactNode } from 'react';
 
-import { Accordion } from '../lib/accordion';
 import { useMarketingParts } from '../lib/parts';
 import { Section, SectionHeader, useHeadingId, type SectionTone } from '../lib/section';
 
@@ -81,14 +80,24 @@ export function Faq({
           <div className="lg:sticky lg:top-24">{header}</div>
         </div>
         <Reveal className="lg:col-span-7">
+          {/* The kit Accordion: closed answers stay findable with find in page, and an answer
+              fades in where it opens instead of animating its height. */}
           <Accordion
-            items={items.map((item) => ({
-              id: item.id,
-              title: item.question,
-              content: item.answer,
-            }))}
-            {...(defaultOpen === undefined ? {} : { defaultOpen })}
-          />
+            hiddenUntilFound
+            className="border-t border-line"
+            {...(defaultOpen === undefined ? {} : { defaultValue: defaultOpen })}
+          >
+            {items.map((item) => (
+              <AccordionItem key={item.id} value={item.id}>
+                <AccordionTrigger className="items-start gap-6 py-5 text-lg text-pretty">
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionPanel className="text-base">
+                  <div className="-mt-1 max-w-prose pe-12 pb-2 text-pretty">{item.answer}</div>
+                </AccordionPanel>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </Reveal>
       </div>
     </Section>
