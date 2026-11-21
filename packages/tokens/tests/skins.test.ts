@@ -146,7 +146,8 @@ describe('dense', () => {
     expect(px(compact['--rx-space-unit'])).toBeLessThan(px(dense['--rx-space-unit']));
   });
 
-  it('keeps body text at 12px or more', () => {
+  it('keeps every text size at 12px or more', () => {
+    expect(px(dense['--rx-font-size-xs'])).toBeGreaterThanOrEqual(12);
     expect(px(dense['--rx-font-size-sm'])).toBeGreaterThanOrEqual(12);
   });
 });

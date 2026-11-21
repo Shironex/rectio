@@ -5,10 +5,10 @@
       "$type": "dimension",
       "xs": {
         "$value": {
-          "value": 0.71875,
+          "value": 0.75,
           "unit": "rem"
         },
-        "$description": "11.5px: captions and axis labels stay legible at the dense scale."
+        "$description": "12px: captions, chart axes and legends keep the 12px floor at the dense scale."
       },
       "sm": {
         "$value": {
@@ -42,7 +42,7 @@
     "line-height": {
       "$type": "number",
       "xs": {
-        "$value": 1.273
+        "$value": 1.333
       },
       "sm": {
         "$value": 1.333
