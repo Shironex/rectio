@@ -164,3 +164,102 @@ export function ToggleGroup({
     </div>
   );
 }
+
+export interface SegmentedOption<Value extends string = string> {
+  value: Value;
+  label: ReactNode;
+  /** A count or figure after the label, such as the number of invoices in a status. */
+  hint?: ReactNode;
+  disabled?: boolean;
+}
+
+export type SegmentedControlProps<Value extends string = string> = Omit<
+  ToggleGroupProps,
+  'value' | 'defaultValue' | 'onValueChange' | 'multiple' | 'allowEmpty' | 'children' | 'aria-label'
+> & {
+  /** Names the control for screen readers, such as "Status". Use `legend` for a visible name. */
+  label?: string;
+  options: readonly SegmentedOption<Value>[];
+  value?: Value;
+  defaultValue?: Value;
+  onValueChange?: (value: Value) => void;
+  /**
+   * `columns` (default): one row while it fits; in a narrow container (under 28rem, inside an
+   * `@container`) or on a phone the options sit in two even columns, so every label stays whole and
+   * in sight. `row`: always one row, for two or three short options.
+   */
+  layout?: 'columns' | 'row';
+};
+
+/**
+ * One choice from a few, always in sight: a status filter or a period switch. A ToggleGroup with
+ * single selection that always keeps one option chosen, driven by a list of options and a single
+ * value instead of toggles and an array. Arrow keys move between options, Space or Enter picks.
+ */
+export function SegmentedControl<Value extends string = string>({
+  label,
+  options,
+  value,
+  defaultValue,
+  onValueChange,
+  layout = 'columns',
+  size = 'md',
+  className,
+  ...props
+}: SegmentedControlProps<Value>) {
+  const columns = layout === 'columns';
+  return (
+    <ToggleGroup
+      data-slot="segmented-control"
+      {...(label === undefined ? {} : { 'aria-label': label })}
+      {...(value === undefined ? {} : { value: [value] })}
+      {...(defaultValue === undefined ? {} : { defaultValue: [defaultValue] })}
+      onValueChange={(next) => {
+        const picked = next[0] as Value | undefined;
+        if (picked !== undefined) onValueChange?.(picked);
+      }}
+      size={size}
+      className={cn(
+        'max-w-full',
+        columns && [
+          'flex-wrap',
+          // Two even columns in a narrow container or on a phone, instead of a ragged wrap. Each
+          // row keeps the control's height, so the options stay level with a button beside them.
+          '@max-md:grid @max-md:h-auto @max-md:w-full @max-md:grid-cols-2',
+          'max-sm:grid max-sm:h-auto max-sm:w-full max-sm:grid-cols-2',
+          SEGMENT_ROWS[size],
+        ],
+        className,
+      )}
+      {...props}
+    >
+      {options.map((option) => (
+        <Toggle
+          key={option.value}
+          value={option.value}
+          {...(option.disabled === true ? { disabled: true } : {})}
+          className={cn(
+            'shrink-0 grow',
+            // An odd last option takes the whole row, so no empty cell sits beside it.
+            columns && '@max-md:last:odd:col-span-2 max-sm:last:odd:col-span-2',
+          )}
+        >
+          {option.label}
+          {/* A space for the accessible name ("Unpaid 11"); the flex gap draws the visible one. */}
+          {option.hint !== undefined && ' '}
+          {option.hint !== undefined && (
+            <span className="text-fg-subtle numeric in-data-pressed:text-fg-muted">
+              {option.hint}
+            </span>
+          )}
+        </Toggle>
+      ))}
+    </ToggleGroup>
+  );
+}
+
+/** Row height of a segmented control laid out in two columns: the control's own height. */
+const SEGMENT_ROWS: Record<ToggleSize, string> = {
+  sm: '@max-md:auto-rows-(--rx-button-height-sm) max-sm:auto-rows-(--rx-button-height-sm) pointer-coarse:auto-rows-(--rx-button-height-touch)',
+  md: '@max-md:auto-rows-(--rx-button-height-md) max-sm:auto-rows-(--rx-button-height-md) pointer-coarse:auto-rows-(--rx-button-height-touch)',
+};

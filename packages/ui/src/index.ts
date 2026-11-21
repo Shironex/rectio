@@ -280,8 +280,11 @@ export {
   type RadioProps,
 } from './radio-group/radio-group';
 export {
+  SegmentedControl,
   Toggle,
   ToggleGroup,
+  type SegmentedControlProps,
+  type SegmentedOption,
   type ToggleGroupProps,
   type ToggleProps,
   type ToggleSize,

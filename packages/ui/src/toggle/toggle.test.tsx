@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Toggle, ToggleGroup } from './toggle';
+import { SegmentedControl, Toggle, ToggleGroup } from './toggle';
 
 describe('Toggle', () => {
   it('reports its pressed state and flips on Space', async () => {
@@ -144,5 +144,81 @@ describe('ToggleGroup', () => {
     );
     await userEvent.click(pressed('Board'));
     expect(pressed('Board')).toHaveAttribute('aria-pressed', 'false');
+  });
+});
+
+const STATUSES = [
+  { value: 'all', label: 'All', hint: 16 },
+  { value: 'unpaid', label: 'Unpaid', hint: 11 },
+  { value: 'overdue', label: 'Overdue', hint: 7 },
+  { value: 'paid', label: 'Paid', hint: 3, disabled: true },
+] as const;
+
+describe('SegmentedControl', () => {
+  it('is a named group with the chosen option pressed and its hint in the name', () => {
+    render(<SegmentedControl label="Status" options={STATUSES} defaultValue="unpaid" />);
+    expect(screen.getByRole('group', { name: 'Status' })).toBeInTheDocument();
+    expect(pressed('Unpaid 11')).toHaveAttribute('aria-pressed', 'true');
+    expect(pressed('All 16')).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('reports a single value, moves with the arrows and keeps one choice', async () => {
+    const onValueChange = vi.fn();
+    render(
+      <SegmentedControl
+        label="Status"
+        options={STATUSES}
+        defaultValue="all"
+        onValueChange={onValueChange}
+      />,
+    );
+    await userEvent.click(pressed('All 16'));
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(pressed('All 16')).toHaveAttribute('aria-pressed', 'true');
+    pressed('All 16').focus();
+    await userEvent.keyboard('{ArrowRight}{Enter}');
+    expect(onValueChange).toHaveBeenLastCalledWith('unpaid');
+  });
+
+  it('follows a controlled value', async () => {
+    function Controlled() {
+      const [value, setValue] = useState<string>('all');
+      return (
+        <>
+          <SegmentedControl
+            label="Status"
+            options={STATUSES}
+            value={value}
+            onValueChange={setValue}
+          />
+          <output>{value}</output>
+        </>
+      );
+    }
+    render(<Controlled />);
+    await userEvent.click(pressed('Overdue 7'));
+    expect(screen.getByRole('status')).toHaveTextContent('overdue');
+    expect(pressed('Overdue 7')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('skips a disabled option', async () => {
+    const onValueChange = vi.fn();
+    render(
+      <SegmentedControl
+        label="Status"
+        options={STATUSES}
+        defaultValue="all"
+        onValueChange={onValueChange}
+      />,
+    );
+    await userEvent.click(pressed('Paid 3'));
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it('lays out in two even columns on a phone unless it is a single row', () => {
+    const { rerender } = render(<SegmentedControl label="Status" options={STATUSES} />);
+    expect(screen.getByRole('group').className).toContain('max-sm:grid-cols-2');
+    rerender(<SegmentedControl label="Status" options={STATUSES} layout="row" />);
+    expect(screen.getByRole('group').className).not.toContain('grid-cols-2');
   });
 });
