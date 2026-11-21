@@ -564,3 +564,4 @@ export {
   type RatingProps,
   type RatingSize,
 } from './rating/rating';
+export { Tree, useTreeChildren, type TreeLoader, type TreeNode, type TreeProps } from './tree/tree';
