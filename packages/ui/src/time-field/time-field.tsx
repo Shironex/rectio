@@ -60,7 +60,7 @@ const draftOf = (value: TimeValue | null, pm = false): Draft =>
     : { hour: value.hour, minute: value.minute, pm: value.hour >= 12 };
 
 const segmentClass = cn(
-  'h-full min-w-6 field-sizing-content rounded-badge bg-transparent px-0.5 text-center caret-transparent outline-none',
+  'h-full min-w-6 pointer-coarse:min-w-11 field-sizing-content rounded-badge bg-transparent px-0.5 text-center caret-transparent outline-none',
   'focus:bg-surface-selected focus:text-fg',
   'placeholder:text-fg-subtle data-disabled:cursor-not-allowed disabled:cursor-not-allowed',
 );
@@ -294,7 +294,11 @@ export function TimeField({
         aria-valuemin={twelve ? 1 : 0}
         aria-valuemax={twelve ? 12 : 23}
         aria-valuenow={draft.hour === null ? undefined : (twelveHour ?? draft.hour)}
-        aria-valuetext={draft.hour === null ? 'Empty' : (timeText ?? `${hourText} hours`)}
+        aria-valuetext={
+          draft.hour === null
+            ? 'Empty'
+            : `${hourText} hours${timeText === undefined ? '' : `, ${timeText}`}`
+        }
       />
       <span aria-hidden className="text-fg-subtle">
         :
@@ -310,7 +314,11 @@ export function TimeField({
         aria-valuemin={0}
         aria-valuemax={59}
         aria-valuenow={draft.minute ?? undefined}
-        aria-valuetext={draft.minute === null ? 'Empty' : (timeText ?? `${minuteText} minutes`)}
+        aria-valuetext={
+          draft.minute === null
+            ? 'Empty'
+            : `${minuteText} minutes${timeText === undefined ? '' : `, ${timeText}`}`
+        }
       />
       {twelve && (
         <input
@@ -320,6 +328,9 @@ export function TimeField({
           inputMode="text"
           size={Math.max(am.length, pm.length)}
           aria-label={periodLabel}
+          aria-valuemin={0}
+          aria-valuemax={1}
+          aria-valuenow={draft.pm ? 1 : 0}
           aria-valuetext={periodText}
           className={cn(segmentClass, 'ms-1')}
         />
