@@ -78,6 +78,7 @@ export function encodeTheme(inputs: ThemeInputs): string {
     ...((color.selectedChroma ?? DEFAULT_SELECTED_CHROMA) === DEFAULT_SELECTED_CHROMA
       ? {}
       : { c: round(color.selectedChroma ?? 0) }),
+    ...(tuning(color) === undefined ? {} : { e: tuning(color) }),
     ...(inputs.radius === 'default' ? {} : { r: inputs.radius }),
     ...(inputs.density === 'compact' ? { y: 'c' } : {}),
     ...(ROLES.every((r) => inputs.fonts[r] === DEFAULT_FONTS[r]) ? {} : { f: fonts }),
@@ -138,6 +139,55 @@ function unpackOverrides(value: unknown, mode: string): Overrides {
       `oklch(${String(l)}% ${String(c)} ${String(h)}${a === undefined ? '' : ` / ${String(a)}`})`;
   }
   return out;
+}
+
+type Color = ThemeInputs['color'];
+
+/**
+ * A preset's fine tuning (selected step, tint chroma, hairline, chart series, flat hover, strong
+ * accent) under one key, so a tuned preset such as Graphite survives the link exactly.
+ */
+function tuning(color: Color): Record<string, unknown> | undefined {
+  const e: Record<string, unknown> = {
+    ...(color.selectedStep === undefined ? {} : { p: round(color.selectedStep) }),
+    ...(color.subtleChroma === undefined ? {} : { v: round(color.subtleChroma) }),
+    ...(color.borderL === undefined ? {} : { o: round(color.borderL) }),
+    ...(color.seriesL === undefined ? {} : { q: round(color.seriesL) }),
+    ...(color.seriesChroma === undefined ? {} : { w: round(color.seriesChroma) }),
+    ...(color.flatHover === true ? { h: 1 } : {}),
+    ...(color.strong === undefined ? {} : { g: color.strong.map(round) }),
+  };
+  return Object.keys(e).length === 0 ? undefined : e;
+}
+
+function untuning(value: unknown): Partial<Color> {
+  if (value === undefined) return {};
+  if (!isRecord(value)) throw new ThemeCodeError('fine tuning is not an object');
+  const strong = value.g;
+  if (strong !== undefined && (!Array.isArray(strong) || strong.length !== 2))
+    throw new ThemeCodeError('strong accent is not [lightness, chroma]');
+  return {
+    ...(value.p === undefined
+      ? {}
+      : { selectedStep: num(value.p, 'selected step', RANGES.selectedStep) }),
+    ...(value.v === undefined
+      ? {}
+      : { subtleChroma: num(value.v, 'accent tint chroma', RANGES.subtleChroma) }),
+    ...(value.o === undefined ? {} : { borderL: num(value.o, 'border lightness', RANGES.borderL) }),
+    ...(value.q === undefined ? {} : { seriesL: num(value.q, 'series lightness', RANGES.seriesL) }),
+    ...(value.w === undefined
+      ? {}
+      : { seriesChroma: num(value.w, 'series chroma', RANGES.seriesChroma) }),
+    ...(value.h === 1 ? { flatHover: true } : {}),
+    ...(strong === undefined
+      ? {}
+      : {
+          strong: [
+            num(strong[0], 'strong accent lightness', RANGES.strongL),
+            num(strong[1], 'strong accent chroma', RANGES.strongChroma),
+          ],
+        }),
+  };
 }
 
 /**
@@ -215,6 +265,7 @@ export function decodeTheme(codeOrUrl: string): ThemeInputs {
       ...(raw.c === undefined
         ? {}
         : { selectedChroma: num(raw.c, 'selected tint', RANGES.selectedChroma) }),
+      ...untuning(raw.e),
     },
     radius,
     density: raw.y === 'c' ? 'compact' : 'comfortable',

@@ -234,6 +234,17 @@ describe('derivation with correction', () => {
       kept.map((role) => shipped.light[role]),
     );
   });
+
+  it('reproduces the shipped dark for Default, before and after a share link', () => {
+    const def = presets.find((p) => p.id === 'default');
+    if (def === undefined) throw new Error('no default preset');
+    for (const inputs of [def.inputs, decodeTheme(encodeTheme(def.inputs))]) {
+      const r = resolveTheme(inputs, pairs, shipped);
+      expect(colorRoles().map((role) => r.dark.tokens[role])).toEqual(
+        colorRoles().map((role) => shipped.dark[role]),
+      );
+    }
+  });
 });
 
 describe('theme css', () => {

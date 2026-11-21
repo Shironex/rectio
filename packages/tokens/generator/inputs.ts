@@ -52,6 +52,14 @@ export const RANGES = {
   text: [0.88, 0.97],
   accentL: [0.4, 0.9],
   selectedChroma: [0.01, 0.05],
+  /* The fine tuning a preset may carry (see Preset in scripts/derive-core.ts); no control sets them. */
+  selectedStep: [0, 0.1],
+  subtleChroma: [0, 0.1],
+  borderL: [0.1, 0.6],
+  seriesL: [0.4, 0.9],
+  seriesChroma: [0.05, 0.2],
+  strongL: [0.6, 0.95],
+  strongChroma: [0, 0.2],
 } as const satisfies Record<string, readonly [number, number]>;
 
 export interface RadiusScale {
