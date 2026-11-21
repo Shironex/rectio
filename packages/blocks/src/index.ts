@@ -144,6 +144,7 @@ export { UsersTable, type UsersTableProps } from './saas/users-table/users-table
 export * from './saas/users-table/users-table.logic';
 export { KanbanBoard, type KanbanBoardProps } from './saas/kanban-board/kanban-board';
 export * from './saas/kanban-board/kanban-board.logic';
+export * from './saas/week-agenda/week-agenda.logic';
 export { CommentThread, type CommentThreadProps } from './saas/comment-thread/comment-thread';
 export * from './saas/comment-thread/comment-thread.logic';
 export { FileManager, type FileManagerProps } from './saas/file-manager/file-manager';
