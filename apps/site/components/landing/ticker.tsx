@@ -70,7 +70,7 @@ export function Ticker({ items, label }: { items: readonly ReactNode[]; label: s
       <button
         type="button"
         aria-pressed={stopped}
-        aria-label="Pause the facts strip"
+        aria-label="Pause the amounts strip"
         onClick={() => {
           setStopped((value) => !value);
         }}
