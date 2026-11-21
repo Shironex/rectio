@@ -68,6 +68,19 @@ describe('Tree', () => {
     expect(item('Assets')).toHaveFocus();
   });
 
+  it('swaps left and right in a right to left page', async () => {
+    render(
+      <div dir="rtl" style={{ direction: 'rtl' }}>
+        <Tree aria-label="Accounts" items={ACCOUNTS} />
+      </div>,
+    );
+    item('Assets').focus();
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(item('Assets')).toHaveAttribute('aria-expanded', 'true');
+    await userEvent.keyboard('{ArrowRight}');
+    expect(item('Assets')).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('opens every sibling with * and jumps by typing', async () => {
     render(<Tree aria-label="Accounts" items={ACCOUNTS} />);
     item('Assets').focus();

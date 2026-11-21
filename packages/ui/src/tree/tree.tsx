@@ -319,7 +319,15 @@ export function Tree<Data = unknown>({
       // Shift with an arrow extends a multiple selection to the row it lands on.
       if (event.shiftKey && selectionMode === 'multiple') select(to, 'add');
     };
-    switch (event.key) {
+    // Right to left, the arrows swap: the key pointing into the indent opens a folder.
+    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+    const key =
+      rtl && event.key === 'ArrowRight'
+        ? 'ArrowLeft'
+        : rtl && event.key === 'ArrowLeft'
+          ? 'ArrowRight'
+          : event.key;
+    switch (key) {
       case 'ArrowDown':
         move(rows[index + 1]);
         break;
