@@ -16,7 +16,10 @@ describe('formatValue', () => {
   it('writes each format with the true minus sign', () => {
     expect(formatValue(-1234.5, 'number', { locale: 'en-GB' })).toBe('−1,234.5');
     expect(formatValue(0.243, 'percent', { locale: 'en-GB' })).toBe('24.3%');
-    expect(formatValue(48210, 'currency', { locale: 'en-GB', currency: 'EUR' })).toBe('€48,210.00');
+    expect(formatValue(48210, 'currency', { locale: 'en-GB', currency: 'EUR' })).toBe('€48,210');
+    expect(formatValue(48210.5, 'currency', { locale: 'en-GB', currency: 'EUR' })).toBe(
+      '€48,210.50',
+    );
     expect(
       formatValue(48210, 'currency', { locale: 'en-GB', currency: 'EUR', compact: true }),
     ).toBe('€48.2k');

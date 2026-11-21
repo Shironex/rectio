@@ -36,7 +36,20 @@ describe('DonutChart', () => {
     const { rerender } = render(
       <DonutChart data={data.slice(0, 2)} format="currency" currency="EUR" locale="en-GB" />,
     );
-    expect(screen.getByText('€13k')).toBeInTheDocument();
+    // The full total when it fits the hole, the short form only for a long one.
+    expect(screen.getAllByText('€13,000').length).toBeGreaterThan(1);
+    rerender(
+      <DonutChart
+        data={[
+          { id: 'a', label: 'A', value: 900_000 },
+          { id: 'b', label: 'B', value: 350_000 },
+        ]}
+        format="currency"
+        currency="EUR"
+        locale="en-GB"
+      />,
+    );
+    expect(screen.getByText('€1.3m')).toBeInTheDocument();
     rerender(<DonutChart data={data.slice(0, 2)} centerValue="72%" centerLabel="Spent" />);
     expect(screen.getByText('72%')).toBeInTheDocument();
     expect(screen.getByText('Spent')).toBeInTheDocument();

@@ -18,7 +18,7 @@ import {
   ChartDataTable,
   ChartFrame,
   ChartTooltip,
-  TOOLTIP_LIFT,
+  TOOLTIP_TOP,
   activeDatum,
   chartColor,
   mergeMessages,
@@ -304,12 +304,12 @@ export function TimeChart({
                   <stop
                     offset="0%"
                     stopColor={chartColor(s.tone)}
-                    stopOpacity={stacked ? 0.5 : 0.28}
+                    stopOpacity={stacked ? 0.5 : 0.34}
                   />
                   <stop
                     offset="100%"
                     stopColor={chartColor(s.tone)}
-                    stopOpacity={stacked ? 0.18 : 0.02}
+                    stopOpacity={stacked ? 0.18 : 0.04}
                   />
                 </linearGradient>
               ))}
@@ -353,8 +353,12 @@ export function TimeChart({
               strokeDasharray="4 4"
               label={{
                 value: reference.label,
-                position: 'insideTopRight',
+                position: 'insideTopLeft',
                 className: 'fill-chart-axis text-xs',
+                // A halo of the surface keeps the words readable where the line crosses them.
+                stroke: 'var(--rx-chart-halo)',
+                strokeWidth: 3,
+                paintOrder: 'stroke',
               }}
             />
           ))}
@@ -362,7 +366,7 @@ export function TimeChart({
             content={tooltip}
             cursor={{ stroke: 'var(--rx-chart-reference)', strokeWidth: 1 }}
             // One line above the plot, over the legend, so it never covers the line it reads.
-            position={{ y: -TOOLTIP_LIFT }}
+            position={{ y: TOOLTIP_TOP }}
             allowEscapeViewBox={{ x: false, y: true }}
             offset={16}
             isAnimationActive={false}

@@ -181,21 +181,24 @@ export function formatTick(
   time: number,
   unit: TickUnit,
   locale: string | undefined,
-  { first = false, crossesYear = false }: { first?: boolean; crossesYear?: boolean } = {},
+  {
+    first = false,
+    crossesYear: yearCrossed = false,
+  }: { first?: boolean; crossesYear?: boolean } = {},
 ): string {
   const date = new Date(time);
   if (unit === 'hour') {
-    // Midnight names the day, so a two-day range shows where the second day starts.
+    // Midnight names the day, so a range of days shows where each one starts.
     const options: Intl.DateTimeFormatOptions =
-      date.getHours() === 0 && !first
+      date.getHours() === 0
         ? { day: 'numeric', month: 'short' }
-        : { hour: 'numeric', minute: '2-digit' };
+        : { hour: '2-digit', minute: '2-digit' };
     return new Intl.DateTimeFormat(locale, options).format(date);
   }
   if (unit === 'day') {
     return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).format(date);
   }
-  const withYear = crossesYear && (first || date.getMonth() === 0);
+  const withYear = yearCrossed && (first || date.getMonth() === 0);
   return new Intl.DateTimeFormat(locale, {
     month: 'short',
     ...(withYear ? { year: 'numeric' } : {}),

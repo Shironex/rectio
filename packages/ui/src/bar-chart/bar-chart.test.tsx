@@ -68,7 +68,7 @@ describe('BarChart', () => {
       />,
     );
     expect(screen.getByRole('rowheader', { name: 'January' })).toBeInTheDocument();
-    expect(screen.getByText('€4,200.00')).toBeInTheDocument();
+    expect(screen.getByText('€4,200')).toBeInTheDocument();
   });
 
   it('shows the empty state with no data', () => {

@@ -206,6 +206,12 @@ export function ChartTooltip({ title, rows, layout = 'stack' }: ChartTooltipProp
 }
 
 /** How far above the plot a one-line tooltip sits, in px: over the legend row, clear of the marks. */
+/**
+ * Where a one-line tooltip sits in the kit charts: on the top edge of the plot, in the headroom
+ * the rounded axis leaves, so it never covers the legend row or the table toggle above.
+ */
+export const TOOLTIP_TOP = 2;
+
 export const TOOLTIP_LIFT = 44;
 
 /** The hovered or focused datum: Recharts' active index, read back into the chart's own data. */
@@ -230,14 +236,21 @@ export function niceTicks(max: number, count = 4): number[] {
   return Array.from({ length: count + 1 }, (_, index) => index * step);
 }
 
+/** Ticks up to the first one that holds `max`, so the plot is not half empty headroom. */
+function fitted(ticks: number[], max: number): number[] {
+  // A tenth of headroom keeps the top mark clear of the tooltip on the top edge.
+  const top = ticks.findIndex((tick) => tick >= max * 1.1);
+  return top === -1 ? ticks : ticks.slice(0, Math.max(top + 1, 2));
+}
+
 /**
  * Round ticks over a range that may cross zero, always including zero, so a value axis reads from
  * a true baseline. Falls back to `niceTicks` when nothing is below zero.
  */
 export function niceRangeTicks(min: number, max: number, count = 4): number[] {
-  if (min >= 0) return niceTicks(max, count);
+  if (min >= 0) return fitted(niceTicks(max, count), max);
   if (max <= 0)
-    return niceTicks(-min, count)
+    return fitted(niceTicks(-min, count), -min)
       .map((tick) => (tick === 0 ? 0 : -tick))
       .reverse();
   const step = niceStep(((max - min) * 1.05) / count);
@@ -525,29 +538,7 @@ export function ChartFrame({
   return (
     <figure data-slot="chart" className={cn('m-0 flex min-w-0 flex-col gap-3', className)}>
       <figcaption className="sr-only">{summary}</figcaption>
-      {(showLegend || (hasTable && tableToggle)) && (
-        // The legend wraps inside its own column, so the table switch keeps its place at the end.
-        <div className="flex items-start justify-between gap-x-4">
-          <div className="min-w-0 flex-1 pt-1.5">
-            {showLegend && <ChartLegend items={legend} />}
-          </div>
-          {hasTable && tableToggle && (
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-expanded={showTable}
-              aria-controls={tableId}
-              onClick={() => {
-                setShowTable((shown) => !shown);
-              }}
-              className="-me-2 shrink-0"
-            >
-              <TableIcon aria-hidden weight="bold" className="size-3.5" />
-              {showTable ? messages.hideTable : messages.showTable}
-            </Button>
-          )}
-        </div>
-      )}
+      {showLegend && <ChartLegend items={legend} />}
       <Stage
         kind={kind}
         horizontal={horizontal}
@@ -555,6 +546,24 @@ export function ChartFrame({
       >
         {children}
       </Stage>
+      {hasTable && tableToggle && (
+        // Under the plot, in the same place on every chart, and right above the table it opens.
+        <div className="flex">
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-expanded={showTable}
+            aria-controls={tableId}
+            onClick={() => {
+              setShowTable((shown) => !shown);
+            }}
+            className="-ms-2 text-fg-muted"
+          >
+            <TableIcon aria-hidden weight="bold" className="size-3.5" />
+            {showTable ? messages.hideTable : messages.showTable}
+          </Button>
+        </div>
+      )}
       {hasTable && (
         <div id={tableId} className={cn(!(showTable && tableToggle) && 'sr-only')}>
           {table}

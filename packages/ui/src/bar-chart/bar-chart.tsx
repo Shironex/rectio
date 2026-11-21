@@ -16,7 +16,7 @@ import {
   ChartDataTable,
   ChartFrame,
   ChartTooltip,
-  TOOLTIP_LIFT,
+  TOOLTIP_TOP,
   activeDatum,
   chartColor,
   mergeMessages,
@@ -302,7 +302,7 @@ export function BarChart<T extends object>({
         <Tooltip
           content={tooltip}
           cursor={{ fill: 'var(--rx-surface-hover)' }}
-          {...(horizontal ? {} : { position: { y: -TOOLTIP_LIFT } })}
+          {...(horizontal ? {} : { position: { y: TOOLTIP_TOP } })}
           allowEscapeViewBox={{ x: false, y: true }}
           offset={16}
           isAnimationActive={false}

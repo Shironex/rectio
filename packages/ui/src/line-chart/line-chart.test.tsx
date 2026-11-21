@@ -53,7 +53,7 @@ describe('LineChart', () => {
     const table = screen.getByRole('table', { name: 'Figures by date' });
     expect(within(table).getAllByRole('row')).toHaveLength(4);
     expect(within(table).getByRole('rowheader', { name: '2 Mar 2026' })).toBeInTheDocument();
-    expect(within(table).getByText('€180.00')).toBeInTheDocument();
+    expect(within(table).getByText('€180')).toBeInTheDocument();
     expect(table.parentElement).toHaveClass('sr-only');
     const toggle = screen.getByRole('button', { name: 'Show table' });
     await userEvent.click(toggle);

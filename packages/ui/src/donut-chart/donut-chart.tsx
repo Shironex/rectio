@@ -162,7 +162,10 @@ export function DonutChart({
     );
   };
 
-  const middle = centerValue === undefined ? write(total, true) : centerValue;
+  // The full figure when it fits the hole; a short form only for a long one.
+  const full = write(total);
+  const middle =
+    centerValue === undefined ? (full.length <= 8 ? full : write(total, true)) : centerValue;
 
   return (
     <ChartFrame

@@ -15,15 +15,39 @@ export type SparklineColor =
   | 'reference';
 
 const STROKE: Record<SparklineColor, string> = {
-  'series-1': 'stroke-chart-series-1 fill-chart-series-1 bg-chart-series-1',
-  'series-2': 'stroke-chart-series-2 fill-chart-series-2 bg-chart-series-2',
-  'series-3': 'stroke-chart-series-3 fill-chart-series-3 bg-chart-series-3',
-  'sequence-1': 'stroke-chart-sequence-1 fill-chart-sequence-1 bg-chart-sequence-1',
-  'sequence-2': 'stroke-chart-sequence-2 fill-chart-sequence-2 bg-chart-sequence-2',
-  'sequence-3': 'stroke-chart-sequence-3 fill-chart-sequence-3 bg-chart-sequence-3',
-  'sequence-4': 'stroke-chart-sequence-4 fill-chart-sequence-4 bg-chart-sequence-4',
-  'sequence-5': 'stroke-chart-sequence-5 fill-chart-sequence-5 bg-chart-sequence-5',
-  reference: 'stroke-chart-reference fill-chart-reference bg-chart-reference',
+  'series-1': 'stroke-chart-series-1',
+  'series-2': 'stroke-chart-series-2',
+  'series-3': 'stroke-chart-series-3',
+  'sequence-1': 'stroke-chart-sequence-1',
+  'sequence-2': 'stroke-chart-sequence-2',
+  'sequence-3': 'stroke-chart-sequence-3',
+  'sequence-4': 'stroke-chart-sequence-4',
+  'sequence-5': 'stroke-chart-sequence-5',
+  reference: 'stroke-chart-reference',
+};
+
+const FILL: Record<SparklineColor, string> = {
+  'series-1': 'fill-chart-series-1',
+  'series-2': 'fill-chart-series-2',
+  'series-3': 'fill-chart-series-3',
+  'sequence-1': 'fill-chart-sequence-1',
+  'sequence-2': 'fill-chart-sequence-2',
+  'sequence-3': 'fill-chart-sequence-3',
+  'sequence-4': 'fill-chart-sequence-4',
+  'sequence-5': 'fill-chart-sequence-5',
+  reference: 'fill-chart-reference',
+};
+
+const DOT: Record<SparklineColor, string> = {
+  'series-1': 'bg-chart-series-1',
+  'series-2': 'bg-chart-series-2',
+  'series-3': 'bg-chart-series-3',
+  'sequence-1': 'bg-chart-sequence-1',
+  'sequence-2': 'bg-chart-sequence-2',
+  'sequence-3': 'bg-chart-sequence-3',
+  'sequence-4': 'bg-chart-sequence-4',
+  'sequence-5': 'bg-chart-sequence-5',
+  reference: 'bg-chart-reference',
 };
 
 export interface SparklineProps extends Omit<ComponentProps<'span'>, 'children'> {
@@ -123,7 +147,7 @@ export function Sparkline({
           data-part="line"
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
-          className={cn('absolute inset-0 size-full overflow-visible', STROKE[color])}
+          className="absolute inset-0 size-full overflow-visible"
         >
           {reference !== undefined && (
             <line
@@ -137,7 +161,9 @@ export function Sparkline({
               className="stroke-chart-baseline"
             />
           )}
-          {area && fill !== '' && <path d={fill} fillOpacity={0.14} stroke="none" />}
+          {area && fill !== '' && (
+            <path d={fill} fillOpacity={0.14} stroke="none" className={FILL[color]} />
+          )}
           <path
             d={line}
             fill="none"
@@ -145,6 +171,7 @@ export function Sparkline({
             strokeLinecap="round"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
+            className={STROKE[color]}
           />
         </svg>
       )}
@@ -155,7 +182,7 @@ export function Sparkline({
           aria-hidden
           className={cn(
             'absolute size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-chart-halo',
-            STROKE[color],
+            DOT[color],
           )}
           style={{ left: `${String(x(lastIndex))}%`, top: `${String(y(lastValue))}%` }}
         />

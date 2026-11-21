@@ -60,7 +60,12 @@ export function formatValue(
   }
   const style: Intl.NumberFormatOptions =
     format === 'currency' && currency !== undefined
-      ? { style: 'currency', currency }
+      ? // Whole amounts drop the cents: €1,211, not €1,211.00.
+        {
+          style: 'currency',
+          currency,
+          ...(Number.isInteger(value) ? { minimumFractionDigits: 0 } : {}),
+        }
       : format === 'percent'
         ? { style: 'percent', maximumFractionDigits: 1 }
         : { maximumFractionDigits: 2 };
