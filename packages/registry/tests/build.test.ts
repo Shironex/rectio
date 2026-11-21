@@ -392,7 +392,6 @@ describe('the rectio registry', () => {
       'motion-team',
       'motion-team-members',
       'motion-testimonials',
-      'motion-time-series-chart',
       'motion-timeline',
       'motion-toast',
       'motion-toggle',
@@ -449,7 +448,6 @@ describe('the rectio registry', () => {
       'theme-default',
       'theme-ledger',
       'theme-scope',
-      'time-series-chart',
       'timeline',
       'toast',
       'toggle',
@@ -605,7 +603,6 @@ describe('the rectio registry', () => {
       'kanban-board',
       'comment-thread',
       'file-manager',
-      'time-series-chart',
       'sessions',
     ];
     for (const name of blocks) {

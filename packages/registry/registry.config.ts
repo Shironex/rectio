@@ -1029,7 +1029,7 @@ export default defineRegistry({
         {
           name: 'motion-blocks-core',
           type: 'lib',
-          version: '0.1.1',
+          version: '0.1.0',
           title: 'Motion blocks core',
           description:
             'First-view entrances, chart bars that grow from the baseline and rows that leave without a jump.',
@@ -1412,11 +1412,6 @@ export default defineRegistry({
           'file-manager',
           'File manager',
           'One folder of files with a path, sorting, rename in place, bulk delete and storage use.',
-        ),
-        ...saasItems(
-          'time-series-chart',
-          'Time series chart',
-          'Figures over time as a line or an area, dates in the reader language, a summary, empty and loading states and a table fallback.',
         ),
         ...saasItems(
           'sessions',
