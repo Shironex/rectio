@@ -1,4 +1,4 @@
-import { summarizeSeries, type TimeSeries } from '@rectio/ui/charts';
+import { extent, summarizeSeries, type TimeSeries } from '@rectio/ui/charts';
 
 /** A series' latest figure and its change across the range, for the figures above the plot. */
 export interface SeriesFigure {
@@ -33,5 +33,6 @@ export function seriesRange(series: readonly TimeSeries[]): { from: Date; to: Da
     s.points.map((p) => p.date.getTime()).filter((time) => Number.isFinite(time)),
   );
   if (times.length === 0) return null;
-  return { from: new Date(Math.min(...times)), to: new Date(Math.max(...times)) };
+  const { min, max } = extent(times);
+  return { from: new Date(min), to: new Date(max) };
 }

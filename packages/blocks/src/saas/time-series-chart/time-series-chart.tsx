@@ -75,6 +75,11 @@ export function TimeSeriesChart({
   const m = mergeMessages(TIME_SERIES_CHART_MESSAGES, messages);
   // A narrow plot draws daily figures as weekly averages; the description says so.
   const [weekly, setWeekly] = useState(false);
+  // A caller's own listener hears it too.
+  const onWeekly = (next: boolean) => {
+    setWeekly(next);
+    chart.onWeeklyChange?.(next);
+  };
   const locale = resolveLocale(chart.locale);
   const written = (value: number) =>
     formatValue(value, chart.format, { locale, currency: chart.currency });
@@ -98,7 +103,7 @@ export function TimeSeriesChart({
     variant === 'area' ? (
       <AreaChart
         {...chart}
-        onWeeklyChange={setWeekly}
+        onWeeklyChange={onWeekly}
         locale={locale}
         stacked={stacked}
         legend={listed ? false : chart.legend}
@@ -107,7 +112,7 @@ export function TimeSeriesChart({
     ) : (
       <LineChart
         {...chart}
-        onWeeklyChange={setWeekly}
+        onWeeklyChange={onWeekly}
         locale={locale}
         legend={listed ? false : chart.legend}
         messages={chartMessages}

@@ -1,6 +1,6 @@
 import type { TimeSeries } from '@rectio/ui/charts';
 import { render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { TimeSeriesChart, seriesFigures, seriesRange } from '../../src/index';
 import { TimeSeriesChart as MotionTimeSeriesChart } from '../../src/motion';
@@ -75,6 +75,35 @@ describe('TimeSeriesChart', () => {
     // The fourth series repeats the first colour, so it is dashed, as in the plot.
     expect(keys[2]?.querySelector('.bg-chart-series-1')).not.toBeNull();
     expect(keys[2]?.querySelectorAll('.bg-chart-series-1')).toHaveLength(2);
+  });
+
+  it('says when a narrow plot averages by week and still tells the caller', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      width: 300,
+      height: 200,
+      x: 0,
+      y: 0,
+      top: 0,
+      left: 0,
+      right: 300,
+      bottom: 200,
+      toJSON: () => ({}),
+    });
+    const points = Array.from({ length: 104 }, (_, index) => ({
+      date: new Date(2025, 0, 5 + index),
+      value: 100 + index,
+    }));
+    const onWeeklyChange = vi.fn();
+    render(
+      <TimeSeriesChart
+        title="Daily"
+        series={[{ id: 'daily', label: 'Daily', points }]}
+        onWeeklyChange={onWeeklyChange}
+        locale="en-GB"
+      />,
+    );
+    expect(screen.getByText(/by week, daily average$/)).toBeInTheDocument();
+    expect(onWeeklyChange).toHaveBeenLastCalledWith(true);
   });
 
   it('keeps a table twin and renders the motion twin with the same props', () => {
