@@ -24,7 +24,7 @@ export interface ThemeScopeProps extends ComponentProps<'div'> {
    * A skin id: `dense`, `editorial`, or one of your own. Changes type, corners, rhythm and control
    * sizes on top of the theme, in either mode. Leave unset for the theme as it is.
    */
-  skin?: string;
+  skin?: string | undefined;
 }
 
 /**
