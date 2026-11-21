@@ -231,7 +231,13 @@ function SessionRow({
       >
         <DeviceIcon weight="duotone" className="size-5" />
       </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-2 @lg:flex-row @lg:items-center @lg:gap-3">
+      <div
+        className={cn(
+          'flex min-w-0 flex-1 flex-col gap-2 @lg:flex-row @lg:items-center @lg:gap-3',
+          // A session on its way out steps back while the sign out runs.
+          pending && 'opacity-70',
+        )}
+      >
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="font-medium text-pretty">
@@ -241,33 +247,54 @@ function SessionRow({
             {session.current === true && <Badge tone="info">This device</Badge>}
           </span>
           <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm text-fg-muted">
-            {session.location !== undefined && <span>{session.location}</span>}
-            {session.ip !== undefined && (
-              <>
-                {session.location !== undefined && <MetaDot />}
-                <span className="font-mono text-xs">
+            {[
+              session.location !== undefined && <span key="location">{session.location}</span>,
+              session.ip !== undefined && (
+                <span key="ip" className="font-mono text-xs">
                   <span className="sr-only">IP address </span>
                   {session.ip}
                 </span>
-              </>
-            )}
-            {(session.location !== undefined || session.ip !== undefined) && <MetaDot />}
-            {active ? (
-              <span className="inline-flex items-center gap-1.5 font-medium text-positive-strong">
-                <span aria-hidden className="size-1.5 rounded-full bg-positive" />
-                Active now
-              </span>
-            ) : (
-              <span>
-                Last active{' '}
-                <time
-                  dateTime={isoDateTime(session.lastActiveAt)}
-                  title={formatDateTime(session.lastActiveAt, locale)}
+              ),
+              active ? (
+                <span
+                  key="seen"
+                  className="inline-flex items-center gap-1.5 font-medium text-positive-strong"
                 >
-                  {relativeTime(session.lastActiveAt, now, locale)}
-                </time>
-              </span>
-            )}
+                  <span aria-hidden className="size-1.5 rounded-full bg-positive" />
+                  Active now
+                </span>
+              ) : (
+                <span key="seen">
+                  Last active{' '}
+                  <time
+                    dateTime={isoDateTime(session.lastActiveAt)}
+                    title={formatDateTime(session.lastActiveAt, locale)}
+                  >
+                    {relativeTime(session.lastActiveAt, now, locale)}
+                  </time>
+                </span>
+              ),
+            ]
+              .filter((part) => part !== false)
+              // The dot travels with the part after it, so a wrapped line never ends on a dot. In a
+              // narrow row the activity takes its own line, where a leading dot would dangle.
+              .map((part, index, parts) => {
+                const activity = index > 0 && index === parts.length - 1;
+                return (
+                  <span
+                    key={index}
+                    className={cn(
+                      'inline-flex items-center gap-1.5',
+                      activity && 'basis-full @lg:basis-auto',
+                    )}
+                  >
+                    {index > 0 && (
+                      <MetaDot className={activity ? 'hidden @lg:inline' : undefined} />
+                    )}
+                    {part}
+                  </span>
+                );
+              })}
           </span>
         </div>
         {onRevoke !== undefined && (
@@ -276,12 +303,13 @@ function SessionRow({
             variant="ghost"
             size="sm"
             loading={pending}
-            className="-ms-2 self-start text-negative-strong hover:bg-negative-subtle @lg:ms-0 @lg:self-center"
-            aria-label={`Sign out, ${name}`}
+            // Quiet until reached for: a list of red actions reads as alarm, not as a choice.
+            className="-ms-2 self-start text-fg-muted hover:bg-negative-subtle hover:text-negative-strong focus-visible:text-negative-strong @lg:ms-0 @lg:self-center"
+            aria-label={pending ? `Signing out, ${name}` : `Sign out, ${name}`}
             onClick={onRevoke}
           >
             <SignOutIcon aria-hidden weight="bold" className="size-4" />
-            Sign out
+            {pending ? 'Signing out' : 'Sign out'}
           </Button>
         )}
       </div>
@@ -289,9 +317,9 @@ function SessionRow({
   );
 }
 
-function MetaDot() {
+function MetaDot({ className }: { className?: string | undefined }) {
   return (
-    <span aria-hidden className="text-fg-subtle">
+    <span aria-hidden className={cn('text-fg-subtle', className)}>
       ·
     </span>
   );

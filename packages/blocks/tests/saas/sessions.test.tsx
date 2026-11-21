@@ -132,7 +132,7 @@ describe('Sessions', () => {
       />,
     );
     expect(screen.getByRole('alert')).toHaveTextContent('Could not sign out. Try again.');
-    expect(screen.getByRole('button', { name: 'Sign out, Firefox on Windows' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Signing out, Firefox on Windows' })).toHaveAttribute(
       'aria-busy',
       'true',
     );
