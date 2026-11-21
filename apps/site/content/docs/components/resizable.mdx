@@ -37,8 +37,10 @@ for the limits. A double click puts every panel back to its default size.
 `direction="vertical"` stacks the panels.
 
 With `storageKey` the layout is kept in this browser and comes back on the next visit. Give each
-panel an `id` too, so a saved size finds its panel when the page changes. `onLayout` reports
-each change, to save it on the server instead.
+panel an `id` too, so a saved size finds its panel when the page changes. A saved size outside a
+panel's limits is pulled back inside them. The server draws the default sizes, and the browser
+applies the saved layout right after hydration, so a page rendered ahead of time can shift once on
+load; to avoid it, save the layout on the server with `onLayout` and pass it back as `defaultSize`.
 
 On a phone, side by side panels are rarely right: show one view at a time and switch with tabs or
 navigation.
