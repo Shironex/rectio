@@ -9,10 +9,10 @@ import {
   formatValue,
   inferTimeScale,
   mergeSeries,
-  paletteColor,
+  seriesStyle,
   type TimeChartProps,
 } from '@rectio/ui/charts';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { resolveLocale } from '../../lib/finance';
 import { mergeMessages } from '../../lib/messages';
@@ -24,12 +24,15 @@ export interface TimeSeriesChartMessages {
   range: (from: string, to: string) => string;
   /** Beside a change: what it is measured against. */
   sinceStart: string;
+  /** The description when a narrow plot draws daily figures as weekly averages. */
+  byWeek: (range: string) => string;
 }
 
 export const TIME_SERIES_CHART_MESSAGES: TimeSeriesChartMessages = {
   title: 'Over time',
   range: (from, to) => `${from} to ${to}`,
   sinceStart: 'over the range',
+  byWeek: (range) => `${range}, by week, daily average`,
 };
 
 export interface TimeSeriesChartProps extends Omit<TimeChartProps, 'messages' | 'className'> {
@@ -70,6 +73,8 @@ export function TimeSeriesChart({
   ...chart
 }: TimeSeriesChartProps) {
   const m = mergeMessages(TIME_SERIES_CHART_MESSAGES, messages);
+  // A narrow plot draws daily figures as weekly averages; the description says so.
+  const [weekly, setWeekly] = useState(false);
   const locale = resolveLocale(chart.locale);
   const written = (value: number) =>
     formatValue(value, chart.format, { locale, currency: chart.currency });
@@ -93,6 +98,7 @@ export function TimeSeriesChart({
     variant === 'area' ? (
       <AreaChart
         {...chart}
+        onWeeklyChange={setWeekly}
         locale={locale}
         stacked={stacked}
         legend={listed ? false : chart.legend}
@@ -101,6 +107,7 @@ export function TimeSeriesChart({
     ) : (
       <LineChart
         {...chart}
+        onWeeklyChange={setWeekly}
         locale={locale}
         legend={listed ? false : chart.legend}
         messages={chartMessages}
@@ -113,7 +120,12 @@ export function TimeSeriesChart({
         description ??
         (range === null
           ? undefined
-          : m.range(formatMoment(range.from, scale, locale), formatMoment(range.to, scale, locale)))
+          : (weekly ? m.byWeek : (text: string) => text)(
+              m.range(
+                formatMoment(range.from, scale, locale),
+                formatMoment(range.to, scale, locale),
+              ),
+            ))
       }
       actions={actions}
       loading={chart.loading}
@@ -124,15 +136,14 @@ export function TimeSeriesChart({
       {listed && (
         // The figures double as the legend: each keeps its series' colour and line shape.
         <dl data-slot="series-figures" className="flex flex-wrap gap-x-8 gap-y-3">
-          {items.map((item, index) => {
-            const source = chart.series.find((s) => s.id === item.id);
+          {items.map((item) => {
+            // Styled by its place among every series, as the plot styles it.
+            const index = chart.series.findIndex((s) => s.id === item.id);
+            const style = seriesStyle(chart.series[index] ?? {}, index);
             return (
               <div key={item.id} className="flex min-w-0 flex-col gap-1">
                 <dt className="inline-flex items-center gap-2 text-sm text-fg-muted">
-                  <Swatch
-                    color={source?.color ?? paletteColor(index)}
-                    shape={source?.dashed === true ? 'dashed' : 'line'}
-                  />
+                  <Swatch color={style.tone} shape={style.dashed ? 'dashed' : 'line'} />
                   {item.label}
                 </dt>
                 <dd className="flex flex-wrap items-baseline gap-x-2 gap-y-1">

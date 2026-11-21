@@ -58,6 +58,25 @@ describe('TimeSeriesChart', () => {
     expect(container.querySelector('[data-slot="chart-legend"]')).toBeNull();
   });
 
+  it('keys each figure like the plot draws its series, a fourth one dashed', () => {
+    const empty: TimeSeries = { id: 'none', label: 'Nothing yet', points: [] };
+    const more = (id: string): TimeSeries => ({ ...trials, id, label: id });
+    const { container } = render(
+      <TimeSeriesChart
+        title="Funnel"
+        series={[empty, signups, more('demos'), more('paid')]}
+        locale="en-GB"
+      />,
+    );
+    const keys = [...container.querySelectorAll('[data-slot="series-figures"] dt')];
+    expect(keys.map((key) => key.textContent)).toEqual(['Sign-ups', 'demos', 'paid']);
+    // Sign-ups is the second series passed, so it takes the second colour, as in the plot.
+    expect(keys[0]?.querySelector('.bg-chart-series-2')).not.toBeNull();
+    // The fourth series repeats the first colour, so it is dashed, as in the plot.
+    expect(keys[2]?.querySelector('.bg-chart-series-1')).not.toBeNull();
+    expect(keys[2]?.querySelectorAll('.bg-chart-series-1')).toHaveLength(2);
+  });
+
   it('keeps a table twin and renders the motion twin with the same props', () => {
     render(<MotionTimeSeriesChart title="Sign-ups" series={[signups]} locale="en-GB" />);
     expect(screen.getByRole('button', { name: 'Show table' })).toBeInTheDocument();
