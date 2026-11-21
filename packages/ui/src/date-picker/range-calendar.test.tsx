@@ -96,4 +96,17 @@ describe('RangeCalendar', () => {
     expect(onComplete).toHaveBeenCalledWith(week);
     expect(preset).toHaveAttribute('aria-pressed', 'true');
   });
+
+  it('previews the range from the keyboard as well as the pointer', async () => {
+    const user = userEvent.setup();
+    render(<Controlled />);
+    const start = day(/12 March 2026/);
+    if (start === undefined) throw new Error('no 12 March');
+    await user.click(start);
+    await user.keyboard('{ArrowRight}{ArrowRight}');
+    const cell = (name: RegExp) => day(name)?.closest('td')?.className ?? '';
+    expect(cell(/13 March 2026/)).toContain('bg-accent-subtle/60');
+    expect(cell(/14 March 2026/)).toContain('bg-accent-subtle/60');
+    expect(cell(/15 March 2026/)).not.toContain('bg-accent-subtle/60');
+  });
 });

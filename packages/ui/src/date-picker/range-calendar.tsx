@@ -124,10 +124,10 @@ export function RangeCalendar({
   const from = value?.from;
   const to = value?.to;
   const firstMonth = defaultMonth ?? from;
+  // A range set from outside (a preset, a reset) ends the half-picked state on its own.
+  const choosingEnd = pickingEnd && from !== undefined && to === undefined;
   const preview =
-    pickingEnd && from !== undefined && hovered !== null && isAfter(hovered, from)
-      ? { from, to: hovered }
-      : undefined;
+    choosingEnd && hovered !== null && isAfter(hovered, from) ? { from, to: hovered } : undefined;
 
   const complete = (range: { from: Date; to: Date }) => {
     setPickingEnd(false);
@@ -166,17 +166,21 @@ export function RangeCalendar({
           disabled={disabledDays}
           modifiers={preview === undefined ? {} : { preview }}
           modifiersClassNames={{
-            preview: 'not-data-selected:bg-surface-hover',
+            preview: 'not-data-selected:bg-accent-subtle/60 not-data-selected:text-fg',
           }}
+          // The pointer and the keyboard both show the range the next press would pick.
           onDayMouseEnter={(day) => {
-            if (pickingEnd) setHovered(day);
+            if (choosingEnd) setHovered(day);
+          }}
+          onDayFocus={(day) => {
+            if (choosingEnd) setHovered(day);
           }}
           onDayMouseLeave={() => {
             setHovered(null);
           }}
           onSelect={(range, picked) => {
             // The first press is always a fresh start, the second the end.
-            if (!pickingEnd || from === undefined) {
+            if (!choosingEnd) {
               setPickingEnd(true);
               onValueChange({ from: picked, to: undefined });
               return;
