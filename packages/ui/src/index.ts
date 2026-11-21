@@ -121,6 +121,22 @@ export {
   type DateDisplayFormat,
 } from './date-picker/date-format';
 export type { DateRange } from '@daypicker/react';
+export { TimeField, type TimeFieldProps } from './time-field/time-field';
+export {
+  clampTime,
+  dayPeriodNames,
+  formatIsoTime,
+  formatTime,
+  isTimeInRange,
+  minutesToTime,
+  parseIsoTime,
+  resolveHourCycle,
+  stepTime,
+  timeToMinutes,
+  type HourCycle,
+  type TimeSegment,
+  type TimeValue,
+} from './time-field/time';
 export { ToastProvider, useToast, type ToastProviderProps, type ToastType } from './toast/toast';
 export {
   Avatar,
