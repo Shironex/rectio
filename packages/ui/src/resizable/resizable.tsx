@@ -479,13 +479,13 @@ export function ResizableHandle({
           aria-hidden
           data-part="grip"
           className={cn(
-            'z-10 flex items-center justify-center gap-0.5 rounded-full border border-line bg-surface-raised shadow-raised',
+            'z-10 flex items-center justify-center gap-0.5 rounded-full border border-line-strong bg-surface-raised shadow-raised',
             'group-hover/handle:border-line-strong group-focus-visible/handle:border-focus',
             horizontal ? 'h-6 w-2.5 flex-col' : 'h-2.5 w-6',
           )}
         >
           {[0, 1, 2].map((dot) => (
-            <span key={dot} className="size-0.5 rounded-full bg-fg-subtle" />
+            <span key={dot} className="size-1 rounded-full bg-fg-muted" />
           ))}
         </span>
       )}
