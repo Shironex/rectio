@@ -168,6 +168,12 @@
         "unit": "rem"
       }
     },
+    "720": {
+      "$value": {
+        "value": 45,
+        "unit": "rem"
+      }
+    },
     "$type": "dimension",
     "$description": "Length steps named by their pixel size at a 16px root.",
     "full": {

@@ -232,6 +232,11 @@
         "$value": "{size.560}",
         "$description": "Width of a large side sheet, such as a record with a conversation."
       },
+      "measure": {
+        "$type": "dimension",
+        "$value": "{size.720}",
+        "$description": "Widest the content of a full screen sheet runs: the parts stay full bleed and their content keeps to a centred column this wide."
+      },
       "radius": {
         "$type": "dimension",
         "$value": "{radius.panel}"

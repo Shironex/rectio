@@ -238,6 +238,16 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   font-variant-numeric: tabular-nums lining-nums;
 }`;
 
+  const sheet = `/* The parts of a full screen sheet: full bleed, their content in a centred column of the sheet measure. */
+@utility px-sheet {
+  padding-inline: max(calc(var(--spacing) * 5), calc((100% - var(--rx-sheet-measure)) / 2));
+}
+
+/* The same, with the end kept clear of the close button in the corner. */
+@utility pe-sheet-close {
+  padding-inline-end: max(calc(var(--spacing) * 14), calc((100% - var(--rx-sheet-measure)) / 2));
+}`;
+
   const scrollbar = `/* A row that scrolls sideways without a bar, such as filter tabs on a phone. */
 @utility scrollbar-none {
   scrollbar-width: none;
@@ -365,6 +375,8 @@ ${durations.join('\n\n')}
 ${playback}
 
 ${numeric}
+
+${sheet}
 
 ${scrollbar}
 `;
