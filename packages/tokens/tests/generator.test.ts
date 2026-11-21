@@ -188,6 +188,7 @@ describe('derivation with correction', () => {
   });
 
   // A spread of inputs across every range: correction must leave no gated pair failing.
+  // About 4 s alone, but far slower when the gate runs every package test at once.
   it('keeps every theme across the input ranges accessible', () => {
     let seed = 7;
     const rand = () => {
@@ -208,7 +209,7 @@ describe('derivation with correction', () => {
       found.push(...failures(inputs).map((f) => `${encodeTheme(inputs)}: ${f}`));
     }
     expect(found).toEqual([]);
-  }, 30_000);
+  }, 120_000);
 
   it('keeps an override that breaks AA, and reports it', () => {
     const inputs = structuredClone(graphite.inputs);
