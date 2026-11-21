@@ -88,6 +88,30 @@ describe('AiChatThread', () => {
     expect(onStop).toHaveBeenCalledOnce();
   });
 
+  it('turns [1](#source-1) in a reply into the chip of that source', () => {
+    render(
+      <AiChatThread
+        conversation={[
+          QUESTION,
+          {
+            id: 'a3',
+            role: 'assistant',
+            content: 'Three are overdue [1](#source-1) and one is still to come [9](#source-9).',
+            sources: [{ id: 's1', title: 'AP policy', url: 'https://example.com/ap' }],
+          },
+        ]}
+        onSend={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('link', { name: 'Source 1: AP policy' })).toHaveAttribute(
+      'href',
+      'https://example.com/ap',
+    );
+    // A number whose source has not arrived is a chip without a link.
+    expect(screen.queryByRole('link', { name: /9/ })).not.toBeInTheDocument();
+    expect(screen.getByText(/^Source 9/)).toBeInTheDocument();
+  });
+
   it('renders the same thread from the motion entry', () => {
     render(<MotionAiChatThread conversation={CONVERSATION} onSend={vi.fn()} />);
     expect(screen.getAllByRole('article')).toHaveLength(2);

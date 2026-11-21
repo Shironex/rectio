@@ -1,7 +1,7 @@
-import { ArrowUpRightIcon, SparkleIcon } from '@phosphor-icons/react';
 import {
   ChatAnnouncer,
   ChatDaySeparator,
+  ChatSourceChip,
   ChatSources,
   Markdown,
   MessageActions,
@@ -42,6 +42,8 @@ export interface AiChatThreadMessages {
   emptyDescription: string;
   /** Names the group of suggestion chips. */
   suggestions: string;
+  /** Names a citation whose source has not arrived yet. */
+  source: (index: number) => string;
   /** Said by the typing dots before the first words of a reply. */
   typing: (assistant: string) => string;
 }
@@ -53,6 +55,7 @@ export const AI_CHAT_THREAD_MESSAGES: AiChatThreadMessages = {
   emptyDescription: 'Ask a question, or start from one of these.',
   suggestions: 'Suggestions',
   typing: (assistant) => `${assistant} is typing`,
+  source: (index) => `Source ${String(index)}`,
 };
 
 export interface AiChatThreadProps {
@@ -95,6 +98,8 @@ function DefaultCode({ code, lang, meta, closed }: MarkdownCodeProps) {
       code={code}
       lang={lang ?? undefined}
       meta={meta ?? undefined}
+      // A reply column is narrow: long lines wrap instead of running under the copy button.
+      wrap
       // A block still arriving has nothing worth copying yet.
       copy={closed}
     />
@@ -130,7 +135,21 @@ export function AiChatThread({
 }: AiChatThreadProps) {
   const m = { ...AI_CHAT_THREAD_MESSAGES, ...overrides };
   const { ChatThread, ChatMessage, StreamingText, ChatLoader } = useAiParts();
-  const components: MarkdownComponents = { code };
+  const citations = (turn: AiChatTurn): MarkdownComponents => ({
+    code,
+    // `[1](#source-1)` in a reply becomes the chip of its first source.
+    link: (props) => {
+      const match = /^#source-(\d+)$/.exec(props.href);
+      if (match === null) return undefined;
+      const index = Number(match[1]);
+      // While a reply streams its sources may not have arrived: the chip shows, without a link.
+      const source = turn.sources?.[index - 1] ?? {
+        id: `pending-${String(index)}`,
+        title: m.source(index),
+      };
+      return <ChatSourceChip index={index} source={source} />;
+    },
+  });
   const followed = announcedTurn(conversation);
   const busy = status !== 'idle';
 
@@ -146,9 +165,9 @@ export function AiChatThread({
       <ChatThread
         label={m.label}
         className="flex-1"
-        contentClassName={cn('max-w-3xl', conversation.length === 0 && 'min-h-full')}
+        contentClassName={cn('max-w-2xl', conversation.length === 0 && 'min-h-full')}
         footer={
-          <div className="mx-auto w-full max-w-3xl px-4 pb-4">
+          <div className="mx-auto w-full max-w-2xl px-4 pb-4">
             <PromptInput {...composer} status={status} onSubmit={onSend} onStop={onStop} />
           </div>
         }
@@ -159,21 +178,17 @@ export function AiChatThread({
               data-part="empty"
               className="my-auto flex flex-col items-center gap-5 py-8 text-center"
             >
-              <span
-                aria-hidden
-                className="grid size-10 place-items-center rounded-control bg-accent-subtle text-accent-strong"
-              >
-                <SparkleIcon weight="fill" className="size-5" />
-              </span>
               <div className="flex flex-col gap-1.5">
-                <h2 className="text-xl font-heading text-fg text-balance">{m.emptyTitle}</h2>
-                <p className="text-sm text-fg-muted text-pretty">{m.emptyDescription}</p>
+                <h2 className="text-2xl font-heading tracking-tight text-fg text-balance">
+                  {m.emptyTitle}
+                </h2>
+                <p className="text-base text-fg-muted text-pretty">{m.emptyDescription}</p>
               </div>
               {suggestions.length > 0 && (
                 <ul
                   role="list"
                   aria-label={m.suggestions}
-                  className="grid w-full gap-2 sm:grid-cols-2"
+                  className="grid w-full auto-rows-fr gap-2 sm:grid-cols-2"
                 >
                   {suggestions.map((suggestion) => (
                     <li key={suggestion.id} className="flex">
@@ -184,18 +199,13 @@ export function AiChatThread({
                           send(suggestion.prompt ?? suggestion.label);
                         }}
                         className={cn(
-                          'group/chip flex w-full cursor-pointer items-start justify-between gap-3 rounded-panel border border-line bg-surface px-3.5 py-3 text-start text-sm text-fg',
-                          'transition-colors duration-fast ease-standard hover:border-line-strong hover:bg-surface-hover',
+                          'group/chip flex w-full cursor-pointer items-center gap-3 rounded-panel bg-surface-sunken px-3.5 py-2.5 text-start text-sm text-fg',
+                          'transition-colors duration-fast ease-standard hover:bg-surface-hover',
                           'pointer-coarse:min-h-(--rx-control-height-touch) disabled:cursor-not-allowed disabled:opacity-60',
                           'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
                         )}
                       >
                         <span className="text-pretty">{suggestion.label}</span>
-                        <ArrowUpRightIcon
-                          aria-hidden
-                          weight="bold"
-                          className="mt-0.5 size-3.5 shrink-0 text-fg-subtle group-hover/chip:text-fg rtl:-scale-x-100"
-                        />
                       </button>
                     </li>
                   ))}
@@ -304,7 +314,7 @@ export function AiChatThread({
               {turn.content !== '' && (
                 <StreamingText text={turn.content} streaming={streaming}>
                   {(text, live) => (
-                    <Markdown streaming={live} components={components}>
+                    <Markdown streaming={live} components={citations(turn)}>
                       {text}
                     </Markdown>
                   )}
