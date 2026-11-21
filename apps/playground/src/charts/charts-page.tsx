@@ -33,6 +33,16 @@ type Charts = Pick<typeof plainCharts, 'AreaChart' | 'BarChart' | 'DonutChart' |
 
 const LOCALE = 'en-GB';
 
+const money = (value: number) =>
+  new Intl.NumberFormat(LOCALE, {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(value);
+
+const mrrTotal = (row: (typeof MRR)[number] | undefined) =>
+  row === undefined ? 1 : row.starter + row.team + row.enterprise;
+
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
@@ -72,7 +82,7 @@ function Dashboard({ charts }: { charts: Charts }) {
   const { AreaChart, BarChart, DonutChart, LineChart } = charts;
   const [range, setRange] = useState('90');
   const [basis, setBasis] = useState('booked');
-  const nudged = basis === 'forecast';
+  const mrr = basis === 'forecast' ? MRR_NEXT : MRR;
   const days = Number(range);
   const revenue = REVENUE.slice(-days);
   return (
@@ -81,11 +91,7 @@ function Dashboard({ charts }: { charts: Charts }) {
         className="lg:col-span-8"
         title="Revenue"
         description={`Last ${String(days)} days, by day`}
-        value={new Intl.NumberFormat(LOCALE, {
-          style: 'currency',
-          currency: 'EUR',
-          maximumFractionDigits: 0,
-        }).format(revenue.reduce((sum, p) => sum + p.value, 0))}
+        value={money(revenue.reduce((sum, p) => sum + p.value, 0))}
         delta={
           <TrendChip
             value={days === 90 ? 0.124 : 0.058}
@@ -119,7 +125,7 @@ function Dashboard({ charts }: { charts: Charts }) {
         className="lg:col-span-4"
         title="Plan mix"
         description="Active accounts"
-        footer="2,022 accounts on a paid plan"
+        footer="Counted at the start of each day"
       >
         <DonutChart data={PLAN_MIX} locale={LOCALE} centerLabel="Accounts" />
       </ChartCard>
@@ -127,8 +133,14 @@ function Dashboard({ charts }: { charts: Charts }) {
         className="lg:col-span-7"
         title="Monthly recurring revenue"
         description="By plan, June to November"
-        value="€68,840"
-        delta={<TrendChip value={0.071} locale={LOCALE} comparison="vs October" />}
+        value={money(mrrTotal(mrr.at(-1)))}
+        delta={
+          <TrendChip
+            value={(mrrTotal(mrr.at(-1)) - mrrTotal(mrr.at(-2))) / mrrTotal(mrr.at(-2))}
+            locale={LOCALE}
+            comparison="vs October"
+          />
+        }
         actions={
           <ToggleGroup
             size="sm"
@@ -144,7 +156,7 @@ function Dashboard({ charts }: { charts: Charts }) {
         }
       >
         <BarChart
-          data={nudged ? MRR_NEXT : MRR}
+          data={mrr}
           category="month"
           stacked
           series={[
@@ -183,7 +195,7 @@ function Dashboard({ charts }: { charts: Charts }) {
         value="4,198"
         delta={<TrendChip value={0.112} locale={LOCALE} comparison="vs last quarter" />}
       >
-        <LineChart series={ACTIVE_USERS} locale={LOCALE} markers plotClassName="h-56" />
+        <LineChart series={ACTIVE_USERS} locale={LOCALE} baseline="fit" plotClassName="h-56" />
       </ChartCard>
       <ChartCard
         className="lg:col-span-6"
@@ -247,7 +259,7 @@ function Edges({ charts }: { charts: Charts }) {
           messages={{ categoryHeader: 'Month' }}
         />
       </ChartCard>
-      <ChartCard title="Churn" loading>
+      <ChartCard title="Churn" description="Monthly, last 12 months" loading>
         <LineChart series={[]} loading plotClassName="h-48" />
       </ChartCard>
       <ChartCard title="Expansion revenue" description="No upgrades booked yet">

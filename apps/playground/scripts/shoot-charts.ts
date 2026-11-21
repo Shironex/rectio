@@ -153,7 +153,7 @@ try {
     await page.waitForTimeout(120);
     await bars.screenshot({ path: join(out, `state-keyboard-${mode}.png`) });
     await bars.getByRole('button', { name: 'Forecast' }).click();
-    await page.waitForTimeout(120);
+    await page.waitForTimeout(40);
     await bars.screenshot({ path: join(out, `state-update-mid-${mode}.png`) });
     await settle(page);
     await bars.getByRole('button', { name: 'Show table' }).click();

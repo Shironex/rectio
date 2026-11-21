@@ -144,7 +144,7 @@ export const STATS = [
     value: '17',
     change: 0,
     better: 'none' as const,
-    data: [15, 18, null, 16, 19, 17, 16, 18, 17, 16, 18, 17],
+    data: [15, 18, 16, 16, 19, 17, null, 18, 17, 16, 18, 17],
   },
 ];
 
