@@ -105,8 +105,8 @@ describe('RangeCalendar', () => {
     await user.click(start);
     await user.keyboard('{ArrowRight}{ArrowRight}');
     const cell = (name: RegExp) => day(name)?.closest('td')?.className ?? '';
-    expect(cell(/13 March 2026/)).toContain('bg-accent-subtle/60');
-    expect(cell(/14 March 2026/)).toContain('bg-accent-subtle/60');
-    expect(cell(/15 March 2026/)).not.toContain('bg-accent-subtle/60');
+    expect(cell(/13 March 2026/)).toContain('bg-accent-subtle');
+    expect(cell(/14 March 2026/)).toContain('bg-accent-subtle');
+    expect(cell(/15 March 2026/)).not.toContain('bg-accent-subtle');
   });
 });

@@ -63,7 +63,7 @@ const draftOf = (value: TimeValue | null, pm = false): Draft =>
 
 const segmentClass = cn(
   'h-full min-w-5 pointer-coarse:min-w-11 field-sizing-content rounded-badge bg-transparent px-0.5 text-center caret-transparent outline-none',
-  'focus:bg-accent-subtle focus:text-accent-strong',
+  'focus:bg-accent focus:text-accent-contrast',
   'placeholder:text-fg-subtle data-disabled:cursor-not-allowed disabled:cursor-not-allowed',
 );
 

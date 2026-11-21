@@ -166,7 +166,8 @@ export function RangeCalendar({
           disabled={disabledDays}
           modifiers={preview === undefined ? {} : { preview }}
           modifiersClassNames={{
-            preview: 'not-data-selected:bg-accent-subtle/60 not-data-selected:text-fg',
+            preview:
+              'not-data-selected:bg-accent-subtle not-data-selected:[&>button]:text-accent-strong',
           }}
           // The pointer and the keyboard both show the range the next press would pick.
           onDayMouseEnter={(day) => {
