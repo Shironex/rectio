@@ -66,3 +66,30 @@ export async function smallestTouchTarget(page: Page) {
     return `${smallest.size.toFixed(1)}px (${smallest.name})`;
   });
 }
+
+/**
+ * The smallest touch target among every link and button on screen, accordion triggers and text
+ * links included: the larger of the element's height and its `::after` hit area. Width is left out,
+ * since a short word in a full-height target is still easy to hit.
+ */
+export async function smallestInteractive(page: Page) {
+  return page.evaluate(() => {
+    let smallest = { size: Infinity, name: '' };
+    for (const element of document.querySelectorAll<HTMLElement>(
+      'a[href], button, [role="button"], summary',
+    )) {
+      const box = element.getBoundingClientRect();
+      if (box.width === 0 || element.closest('[hidden], [aria-hidden="true"], .sr-only') !== null)
+        continue;
+      const after = getComputedStyle(element, '::after');
+      const hit = after.position === 'absolute' ? Number.parseFloat(after.height) : 0;
+      const size = Math.max(box.height, hit);
+      if (size < smallest.size)
+        smallest = {
+          size,
+          name: element.getAttribute('aria-label') ?? element.textContent.trim().slice(0, 32),
+        };
+    }
+    return `${smallest.size.toFixed(1)}px (${smallest.name})`;
+  });
+}

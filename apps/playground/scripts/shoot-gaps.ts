@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium, type Browser, type Page } from 'playwright';
 import { createServer } from 'vite';
 
-import { smallestTouchTarget } from './checks.ts';
+import { smallestInteractive, smallestTouchTarget } from './checks.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const round = process.argv[2] ?? '1';
@@ -31,12 +31,19 @@ const WIDTHS = [
   ['phone', true],
 ] as const;
 /** The finance blocks this round changed, with any extra query a shot needs. */
+/** The blocks this lane changed, each with its full query (view included). */
 const BLOCKS: [name: string, query: string][] = [
-  ['sessions', 'block=sessions'],
-  ['sessions-alone', 'block=sessions&empty=1'],
-  ['notifications-center', 'block=notifications-center'],
-  ['kanban-board', 'block=kanban-board'],
-  ['kpi-row', 'block=kpi-row'],
+  ['sessions', 'view=blocks&block=sessions'],
+  ['sessions-alone', 'view=blocks&block=sessions&empty=1'],
+  ['notifications-center', 'view=blocks&block=notifications-center'],
+  ['kanban-board', 'view=blocks&block=kanban-board'],
+  ['kpi-row', 'view=blocks&block=kpi-row'],
+  ['kpi-row-saas', 'view=blocks&block=kpi-row&kpis=saas'],
+  ['faq', 'view=marketing&block=faq'],
+  ['sign-in', 'view=blocks&block=sign-in'],
+  ['sign-up', 'view=blocks&block=sign-up'],
+  ['two-factor', 'view=blocks&block=two-factor'],
+  ['reset-password', 'view=blocks&block=reset-password'],
 ];
 
 const wanted = (name: string) => only === undefined || name.includes(only);
@@ -166,12 +173,14 @@ try {
         if (block.endsWith('-alone') && mode !== 'light') {
           continue;
         }
-        const page = await open(browser, base, `view=blocks&${query}&${scope}`, phone);
+        const page = await open(browser, base, `${query}&${scope}`, phone);
         if (phone && mode === 'light') {
           const overflow = await page.evaluate(
             () => document.documentElement.scrollWidth - window.innerWidth,
           );
           console.log(`${block} phone horizontal overflow px`, overflow);
+          console.log(`${block} phone smallest touch target`, await smallestTouchTarget(page));
+          console.log(`${block} phone smallest link or button`, await smallestInteractive(page));
         }
         await tall(page, `${block}-${name}.png`);
         await page.close();

@@ -542,3 +542,45 @@ export function expenses(): ApprovalState {
     ],
   };
 }
+
+/** SaaS figures in the other formats: a count, a duration in seconds and money as `currency`. */
+export function saasKpis(): Kpi[] {
+  return [
+    {
+      id: 'active',
+      label: 'Active users',
+      format: 'number',
+      better: 'up',
+      value: 12_480,
+      previous: 11_920,
+      series: [9_800, 10_100, 10_400, 10_900, 11_200, 11_600, 11_920, 12_480],
+    },
+    {
+      id: 'response',
+      label: 'First response',
+      format: 'duration',
+      better: 'down',
+      value: 4_920,
+      previous: 6_300,
+      series: [7_800, 7_200, 6_900, 6_600, 6_300, 5_700, 5_100, 4_920],
+    },
+    {
+      id: 'mrr',
+      label: 'Monthly recurring revenue',
+      format: 'currency',
+      better: 'up',
+      value: 31_780,
+      previous: 30_410,
+      series: [24_870, 26_240, 27_015, 28_930, 29_600, 30_100, 30_410, 31_780],
+    },
+    {
+      id: 'churn',
+      label: 'Churn',
+      format: 'percent',
+      better: 'down',
+      value: 0.021,
+      previous: 0.026,
+      series: [0.031, 0.029, 0.03, 0.027, 0.026, 0.025, 0.026, 0.021],
+    },
+  ];
+}

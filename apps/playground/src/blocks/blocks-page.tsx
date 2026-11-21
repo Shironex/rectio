@@ -125,7 +125,12 @@ function renderBlock(
       return (
         <blocks.KpiRow
           {...common}
-          kpis={data.kpis()}
+          // `kpis=saas` shows the count, duration and currency formats.
+          kpis={
+            new URLSearchParams(window.location.search).get('kpis') === 'saas'
+              ? data.saasKpis()
+              : data.kpis()
+          }
           comparison={text.comparison}
           label={text.kpiLabel}
         />
