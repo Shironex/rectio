@@ -40,7 +40,7 @@ const SAMPLES: {
 
 const samples = SAMPLES.map(({ amount, currency, locale, note, accounting }) => (
   <span key={note} className="flex items-baseline gap-3">
-    <span className="text-fg tabular-nums">
+    <span className="font-medium text-fg tabular-nums">
       {formatMoney(amount, currency, { locale, accounting: accounting === true })}
     </span>
     <span className="text-fg-muted">{note}</span>

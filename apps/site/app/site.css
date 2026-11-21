@@ -218,21 +218,22 @@ html[data-mode='dark'] .site-glow {
     translate: -50% 0;
   }
 }
-/* The fade starts fully clear for a moment at each edge, so a word that crosses it is never seen
-   cut in half, and ramps over a few words' width. */
+/* The fade ramps over a few words' width at the right, where words come in, so one is never seen
+   cut in half. The left ramp is short, so the first fact is whole and clear while the strip rests. */
 .site-ticker {
   mask-image: linear-gradient(
     to right,
     transparent,
-    transparent 5%,
-    var(--rx-text) 18%,
+    var(--rx-text) 4%,
     var(--rx-text) 82%,
     transparent 95%,
     transparent
   );
 }
+/* It holds still for a beat on arrival, while the headline settles, so the first facts read whole. */
 .site-ticker-track {
-  animation: site-ticker calc(var(--rx-motion-duration-loop) * 44) linear infinite;
+  animation: site-ticker calc(var(--rx-motion-duration-loop) * 44) linear
+    calc(var(--rx-motion-duration-loop) * 4) infinite;
 }
 /* Phones: no loop. The strip starts on a whole item and scrolls by swipe, fading on the right. */
 @media (width < 40rem) {
