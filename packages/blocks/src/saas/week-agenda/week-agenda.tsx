@@ -656,10 +656,12 @@ function AgendaGrid({
               >
                 {placed.map((slice) => {
                   const minutes = slice.end - slice.start;
-                  const short = minutes < 45;
                   // A third of a week column has room for a word or two, not the time as well.
                   const share = slice.span / slice.columns;
                   const narrow = variant === 'week' ? share <= 0.5 : share < 0.25;
+                  // Too low for a title and a line below it, at the shortest hour a skin sets.
+                  const short = minutes < 45 || (narrow && minutes < 60);
+                  const confirmed = (slice.event.status ?? 'confirmed') === 'confirmed';
                   return (
                     <li
                       key={slice.key}
@@ -685,16 +687,21 @@ function AgendaGrid({
                           : { location: slice.event.location })}
                         className={cn(
                           'h-full shadow-raised has-focus-visible:outline-offset-0',
-                          // Short: the title alone on one line; the time is still read out.
+                          // Short: the title alone on one line; the time is still read out. A
+                          // narrow one does the same whatever its status: the icon by the title
+                          // still shows it, and the word is read out with the time.
                           short &&
-                            (slice.event.status ?? 'confirmed') === 'confirmed' &&
+                            (confirmed || narrow) &&
                             'justify-center py-0 [&>:first-child]:truncate [&_p]:sr-only',
-                          // A short tentative or cancelled event keeps its word beside the title.
+                          // A short tentative or cancelled event with room keeps its word beside
+                          // the title, which is the last to give way.
                           short &&
-                            (slice.event.status ?? 'confirmed') !== 'confirmed' &&
-                            'flex-row items-center gap-1.5 py-0 [&>:first-child]:truncate [&_p]:shrink-0',
-                          // Narrow: a smaller title that may wrap, and the start time alone.
-                          narrow && 'px-1.5 [&>:first-child]:text-xs [&>:first-child]:break-words',
+                            !confirmed &&
+                            !narrow &&
+                            'flex-row items-center gap-1.5 py-0 [&>:first-child]:max-w-full [&>:first-child]:shrink-0 [&>:first-child]:truncate [&_p]:min-w-0',
+                          // Narrow: a smaller title that may wrap, hyphenated, and the start time.
+                          narrow &&
+                            'px-1.5 [&>:first-child]:text-xs [&>:first-child]:break-words [&>:first-child]:hyphens-auto',
                           // A tall narrow card has room for a longer title.
                           narrow && minutes >= 90 && '[&>:first-child]:line-clamp-4',
                           slice.continuesBefore && 'rounded-t-none border-t-0',
