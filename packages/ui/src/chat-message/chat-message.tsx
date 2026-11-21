@@ -191,7 +191,8 @@ export function ChatMessage({
       {...props}
     >
       {avatar !== undefined && avatar !== null && (
-        <div data-part="avatar" className="flex shrink-0 pt-0.5">
+        // Phones give the reply the full width; the name above it already says who wrote it.
+        <div data-part="avatar" className="flex shrink-0 pt-0.5 max-sm:hidden">
           {avatar}
         </div>
       )}
@@ -220,11 +221,11 @@ export function ChatMessage({
             'min-w-0',
             isUser
               ? cn(
-                  'max-w-xl rounded-panel bg-surface-sunken px-3.5 py-2.5 text-fg',
+                  'max-w-xl rounded-panel border border-line bg-surface-sunken px-3.5 py-2.5 text-fg',
                   'whitespace-pre-wrap wrap-anywhere',
-                  failed && 'border border-negative',
+                  failed && 'border-negative bg-negative-subtle',
                 )
-              : 'w-full',
+              : 'flex w-full flex-col gap-3',
           )}
         >
           {children}
@@ -294,7 +295,7 @@ export function ChatMessageEditor({
   return (
     <form
       data-slot="chat-message-editor"
-      className={cn('flex w-full min-w-0 flex-col gap-2', className)}
+      className={cn('flex w-xl max-w-full min-w-0 flex-col gap-2', className)}
       onSubmit={(event) => {
         event.preventDefault();
         save();

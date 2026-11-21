@@ -165,7 +165,8 @@ export function ChatThread({
           </div>
         </div>
         {!atEnd && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
+          // A fade under the button keeps it off the words it floats over.
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-linear-to-t from-surface via-surface to-transparent pt-10 pb-3">
             <Button
               size="sm"
               variant="secondary"

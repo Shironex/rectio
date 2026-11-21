@@ -73,7 +73,7 @@ export function ChatSourceChip({
   const content = (
     <>
       <span className="text-fg">{index}</span>
-      {site !== null && <span className="truncate max-sm:hidden">{site}</span>}
+      {site !== null && <span className="truncate max-md:hidden">{site}</span>}
     </>
   );
   if (href === null) {

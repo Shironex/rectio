@@ -253,7 +253,7 @@ export function PromptInput({
         maxRows={maxRows}
         enterKeyHint="send"
         className={cn(
-          'border-0 bg-transparent px-3.5 pt-3 pb-1 hover:border-0',
+          'border-0 bg-transparent px-3.5 pt-3 pb-1 hover:border-0 pointer-coarse:min-h-(--rx-control-height-touch)',
           'focus-visible:outline-0 data-disabled:bg-transparent',
           textareaClassName,
         )}

@@ -121,19 +121,19 @@ export function ToolCall({
     <BaseCollapsible.Root
       data-slot="tool-call"
       data-status={status}
-      className={cn('w-full min-w-0 rounded-panel border border-line bg-surface', className)}
+      className={cn('flex w-full min-w-0 flex-col gap-2', className)}
       {...props}
     >
       <BaseCollapsible.Trigger
         className={cn(
-          'group/trigger flex w-full cursor-pointer items-center gap-2.5 rounded-panel px-3 py-2 text-start text-sm',
-          'pointer-coarse:min-h-(--rx-control-height-touch) hover:bg-surface-hover',
+          'group/trigger flex w-fit max-w-full cursor-pointer items-center gap-2 rounded-control py-1 text-start text-sm text-fg-muted',
+          'pointer-coarse:min-h-(--rx-control-height-touch) hover:text-fg',
           'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         )}
       >
         {STATUS_ICON[status]}
-        <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2">
-          <span className="truncate font-medium text-fg">
+        <span className="flex min-w-0 flex-wrap items-baseline gap-x-2">
+          <span className="font-medium text-pretty">
             {title ?? <span className="font-mono">{name}</span>}
           </span>
           {title !== undefined && (
@@ -161,7 +161,7 @@ export function ToolCall({
         />
       </BaseCollapsible.Trigger>
       <BaseCollapsible.Panel className={disclosurePanelMotion}>
-        <div className="flex flex-col gap-3 border-t border-line px-3 py-3">
+        <div className="flex flex-col gap-3 border-s border-line-strong ps-4">
           {hasArgs && (
             <DisclosureData label={m.input}>
               <pre tabIndex={0} aria-label={`${m.input}: ${name}`} className={codeBox}>

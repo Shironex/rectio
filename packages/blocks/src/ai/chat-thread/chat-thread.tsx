@@ -157,7 +157,7 @@ export function AiChatThread({
           (empty ?? (
             <div
               data-part="empty"
-              className="my-auto flex flex-col items-start gap-5 py-8 sm:items-center sm:text-center"
+              className="my-auto flex flex-col items-center gap-5 py-8 text-center"
             >
               <span
                 aria-hidden
@@ -285,18 +285,22 @@ export function AiChatThread({
                   </Markdown>
                 </Reasoning>
               )}
-              {turn.tools?.map((tool) => (
-                <ToolCall
-                  key={tool.id}
-                  name={tool.name}
-                  title={tool.title}
-                  status={tool.status}
-                  args={tool.args}
-                  result={tool.result}
-                  error={tool.error}
-                  duration={tool.duration}
-                />
-              ))}
+              {turn.tools !== undefined && turn.tools.length > 0 && (
+                <div className="flex flex-col gap-1">
+                  {turn.tools.map((tool) => (
+                    <ToolCall
+                      key={tool.id}
+                      name={tool.name}
+                      title={tool.title}
+                      status={tool.status}
+                      args={tool.args}
+                      result={tool.result}
+                      error={tool.error}
+                      duration={tool.duration}
+                    />
+                  ))}
+                </div>
+              )}
               {turn.content !== '' && (
                 <StreamingText text={turn.content} streaming={streaming}>
                   {(text, live) => (

@@ -96,15 +96,15 @@ const ALIGN: Record<Exclude<MarkdownAlign, null>, 'start' | 'center' | 'end'> = 
  * bar that breathes. Breathing is a fade, so it stays under reduced motion.
  */
 export const streamingCaret = cn(
-  'after:ms-0.5 after:inline-block after:h-3.5 after:w-1.5 after:translate-y-0.5',
+  'after:ms-0.5 after:inline-block after:h-4 after:w-0.5 after:translate-y-0.5',
   'after:rounded-badge after:bg-accent after:animate-breathe',
 );
 
 /** The same caret on the last paragraph or list item of a streaming Markdown text. */
 const markdownCaret = cn(
-  '[&>p:last-child]:after:ms-0.5 [&>p:last-child]:after:inline-block [&>p:last-child]:after:h-3.5 [&>p:last-child]:after:w-1.5 [&>p:last-child]:after:translate-y-0.5',
+  '[&>p:last-child]:after:ms-0.5 [&>p:last-child]:after:inline-block [&>p:last-child]:after:h-4 [&>p:last-child]:after:w-0.5 [&>p:last-child]:after:translate-y-0.5',
   '[&>p:last-child]:after:rounded-badge [&>p:last-child]:after:bg-accent [&>p:last-child]:after:animate-breathe',
-  '[&>[role=list]:last-child>li:last-child>:last-child]:after:ms-0.5 [&>[role=list]:last-child>li:last-child>:last-child]:after:inline-block [&>[role=list]:last-child>li:last-child>:last-child]:after:h-3.5 [&>[role=list]:last-child>li:last-child>:last-child]:after:w-1.5 [&>[role=list]:last-child>li:last-child>:last-child]:after:translate-y-0.5',
+  '[&>[role=list]:last-child>li:last-child>:last-child]:after:ms-0.5 [&>[role=list]:last-child>li:last-child>:last-child]:after:inline-block [&>[role=list]:last-child>li:last-child>:last-child]:after:h-4 [&>[role=list]:last-child>li:last-child>:last-child]:after:w-0.5 [&>[role=list]:last-child>li:last-child>:last-child]:after:translate-y-0.5',
   '[&>[role=list]:last-child>li:last-child>:last-child]:after:rounded-badge [&>[role=list]:last-child>li:last-child>:last-child]:after:bg-accent [&>[role=list]:last-child>li:last-child>:last-child]:after:animate-breathe',
 );
 
@@ -348,7 +348,7 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
               'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
             )}
           >
-            <Table className="text-sm [&_tbody_tr:last-child_td]:border-b-0">
+            <Table className="text-sm whitespace-nowrap [&_tbody_tr:last-child_td]:border-b-0">
               <TableHeader>
                 <TableRow>
                   {block.head.map((cell, cellIndex) => {
