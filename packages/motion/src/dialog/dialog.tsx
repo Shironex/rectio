@@ -33,7 +33,11 @@ type PopupState = Parameters<
  * not from the far end. The animations are Web Animations, which Base UI waits for before it
  * unmounts the popup and calls `onOpenChangeComplete`, so content stays intact until the exit ends.
  */
-function MotionPopup({ state, ref, ...props }: ComponentProps<'div'> & { state: PopupState }) {
+export function MotionPopup({
+  state,
+  ref,
+  ...props
+}: ComponentProps<'div'> & { state: PopupState }) {
   const node = useRef<HTMLDivElement | null>(null);
   const running = useRef<Controls[]>([]);
 
@@ -82,7 +86,7 @@ function MotionPopup({ state, ref, ...props }: ComponentProps<'div'> & { state: 
  * CSS transition outranks a Web Animation in the cascade. The ending opacity stays, so the popup is
  * already invisible in the frame its exit animation ends.
  */
-const REPLACES_CSS_MOTION = cn(
+export const REPLACES_CSS_MOTION = cn(
   'origin-center transition-none',
   'data-starting-style:translate-y-0 data-starting-style:scale-100 data-starting-style:opacity-100',
 );
