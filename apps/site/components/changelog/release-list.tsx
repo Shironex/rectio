@@ -81,7 +81,7 @@ export function ReleaseList({
             <h2 id={release.id} className="group scroll-mt-24">
               <a
                 href={`#${release.id}`}
-                className={`inline-flex items-center gap-2 text-base font-medium text-fg-muted tabular-nums pointer-coarse:min-h-11 pointer-fine:hover:text-fg ${focus}`}
+                className={`inline-flex items-center gap-2 text-base font-medium text-fg-muted tabular-nums pointer-coarse:min-h-11 group-target:text-fg pointer-fine:hover:text-fg ${focus}`}
               >
                 {release.date === undefined ? (
                   'Unreleased'
@@ -92,8 +92,7 @@ export function ReleaseList({
                 <span className="sr-only">{`: ${release.title}`}</span>
                 <span
                   aria-hidden
-                  data-anchor-mark
-                  className="font-mono text-accent-strong opacity-0 transition-opacity duration-fast ease-standard group-focus-within:opacity-100 pointer-coarse:opacity-100 pointer-fine:group-hover:opacity-100"
+                  className="font-mono text-accent-strong opacity-0 transition-opacity duration-fast ease-standard group-focus-within:opacity-100 group-target:opacity-100 pointer-coarse:opacity-100 pointer-fine:group-hover:opacity-100"
                 >
                   #
                 </span>
