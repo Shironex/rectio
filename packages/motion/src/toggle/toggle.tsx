@@ -92,7 +92,7 @@ function MotionToggleGroup({ ref, className, children, ...props }: ToggleGroupPr
         ref={indicator}
         aria-hidden
         data-part="indicator"
-        className="pointer-events-none absolute inset-y-0.5 left-0 rounded-(--rx-button-radius) bg-surface-raised opacity-0 shadow-raised ring-1 ring-line-strong"
+        className="pointer-events-none absolute inset-y-0.5 left-0 rounded-(--rx-button-radius) bg-surface-overlay opacity-0 shadow-raised ring-1 ring-line-strong"
       />
       {children}
     </PlainToggleGroup>
