@@ -58,9 +58,10 @@ async function readRaw(base: string, path: string): Promise<string> {
 
 /**
  * Drops index entries of an item type this CLI does not know, so a registry that gains a new
- * kind of item keeps working with an older CLI (which simply does not offer it).
+ * kind of item keeps working with an older CLI (which simply does not offer it). `debug` hears
+ * which entries were dropped, so a mistyped type does not vanish without a trace.
  */
-export function knownEntries(raw: unknown): unknown {
+export function knownEntries(raw: unknown, debug?: (line: string) => void): unknown {
   if (typeof raw !== 'object' || raw === null || !('items' in raw) || !Array.isArray(raw.items))
     return raw;
   const known = (entry: unknown) =>
@@ -68,7 +69,18 @@ export function knownEntries(raw: unknown): unknown {
     entry === null ||
     !('type' in entry) ||
     itemTypeSchema.safeParse(entry.type).success;
-  return { ...raw, items: (raw.items as unknown[]).filter(known) };
+  const entries = raw.items as unknown[];
+  const skipped = entries.filter((entry) => !known(entry));
+  if (skipped.length > 0 && debug !== undefined) {
+    const named = skipped.map((entry) => {
+      const { name, type } = entry as { name?: unknown; type?: unknown };
+      return `${String(name)} (${String(type)})`;
+    });
+    debug(
+      `registry: skipped ${String(skipped.length)} item(s) of a type this CLI does not know: ${named.join(', ')}`,
+    );
+  }
+  return { ...raw, items: entries.filter(known) };
 }
 
 function parse<T>(
@@ -94,7 +106,8 @@ function parse<T>(
   return parsed.data;
 }
 
-export function createRegistryClient(url: string): RegistryClient {
+/** `debug` hears registry notes, such as index entries this CLI skips. */
+export function createRegistryClient(url: string, debug?: (line: string) => void): RegistryClient {
   let cached: Promise<RegistryIndex> | undefined;
   // One fetch per item per run: `init --template` checks every item before writing, then installs.
   const items = new Map<string, Promise<RegistryItem>>();
@@ -117,7 +130,7 @@ export function createRegistryClient(url: string): RegistryClient {
     url,
     index: () => {
       cached ??= readRaw(url, INDEX_PATH).then((text) =>
-        parse(registryIndexSchema, text, `${url}/${INDEX_PATH}`, knownEntries),
+        parse(registryIndexSchema, text, `${url}/${INDEX_PATH}`, (raw) => knownEntries(raw, debug)),
       );
       return cached;
     },

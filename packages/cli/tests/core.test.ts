@@ -344,4 +344,19 @@ describe('the registry index', () => {
     });
     expect(knownEntries('not an index')).toBe('not an index');
   });
+
+  it('says which entries it dropped, so a mistyped type does not vanish', () => {
+    const lines: string[] = [];
+    const items = [
+      { name: 'button', type: 'component' },
+      { name: 'x', type: 'gadget' },
+      { name: 'y', type: 'compnent' },
+    ];
+    knownEntries({ items }, (line) => lines.push(line));
+    expect(lines).toEqual([
+      'registry: skipped 2 item(s) of a type this CLI does not know: x (gadget), y (compnent)',
+    ]);
+    knownEntries({ items: [items[0]] }, (line) => lines.push(line));
+    expect(lines).toHaveLength(1);
+  });
 });

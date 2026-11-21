@@ -38,7 +38,7 @@ export async function runUpdate(ctx: CliContext, options: { registry?: string } 
   const ui = new Ui(ctx);
   const config = requireConfig(ctx.cwd);
   const lock = readLock(ctx.cwd);
-  const client = createRegistryClient(registryUrl(ctx, options.registry, config));
+  const client = createRegistryClient(registryUrl(ctx, options.registry, config), ctx.debug);
   const index = await client.index();
   const outdated: Outdated[] = [
     ...outdatedItems(index, lock),

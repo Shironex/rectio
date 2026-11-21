@@ -137,7 +137,7 @@ export async function runInitTemplate(
   const steps = ui.steps(options.git === true ? 6 : 5);
 
   const { client, entry } = await steps.run('Checking project', async (step) => {
-    const registry = createRegistryClient(registryUrl(ctx, options.registry, undefined));
+    const registry = createRegistryClient(registryUrl(ctx, options.registry, undefined), ctx.debug);
     const index = await registry.index();
     const found = index.items.find((item) => item.name === name);
     if (found?.type !== 'template') {

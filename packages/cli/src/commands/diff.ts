@@ -53,7 +53,7 @@ export async function runDiff(
   if (locked === undefined)
     throw new CliError(`${name} is not installed`, `Add it with \`${cliCommand(`add ${name}`)}\`.`);
 
-  const client = createRegistryClient(registryUrl(ctx, options.registry, config));
+  const client = createRegistryClient(registryUrl(ctx, options.registry, config), ctx.debug);
   const item =
     locked.themeCode === undefined
       ? await registryItem(client, name)

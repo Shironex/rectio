@@ -77,7 +77,7 @@ function printGrouped(ui: Ui, entries: readonly IndexEntry[]) {
 }
 
 async function loadIndex(ctx: CliContext, flag: string | undefined) {
-  const client = createRegistryClient(registryUrl(ctx, flag, readConfig(ctx.cwd)));
+  const client = createRegistryClient(registryUrl(ctx, flag, readConfig(ctx.cwd)), ctx.debug);
   return client.index();
 }
 

@@ -245,7 +245,7 @@ async function templateFlow(ctx: CliContext, flags: InitFlags, ask: Prompter, ui
       'a new app from a template takes no skin',
       `Add the skin once the app exists: \`${cliCommand(`add skin-${flags.skin}`)}\`.`,
     );
-  const client = createRegistryClient(registryUrl(ctx, flags.registry, undefined));
+  const client = createRegistryClient(registryUrl(ctx, flags.registry, undefined), ctx.debug);
   const templates = (await client.index()).items.filter((e) => e.type === 'template');
   if (templates.length === 0) throw new CliError('the registry has no templates yet');
   const choices: Choice<string>[] = templates.map((entry: IndexEntry) => ({
@@ -416,7 +416,10 @@ async function existingFlow(
     recapParts.push(`${flags.skin} skin`);
   }
 
-  const index = await createRegistryClient(registryUrl(ctx, flags.registry, existing)).index();
+  const index = await createRegistryClient(
+    registryUrl(ctx, flags.registry, existing),
+    ctx.debug,
+  ).index();
   const starters = STARTER_COMPONENTS.flatMap((name) => {
     const entry = index.items.find((e) => e.name === name);
     return entry === undefined

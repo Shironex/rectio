@@ -13,7 +13,10 @@ export interface McpOptions {
  * as the other commands. Never write to stdout here: it is the protocol channel.
  */
 export async function runMcp(ctx: CliContext, options: McpOptions = {}): Promise<void> {
-  const client = createRegistryClient(registryUrl(ctx, options.registry, readConfig(ctx.cwd)));
+  const client = createRegistryClient(
+    registryUrl(ctx, options.registry, readConfig(ctx.cwd)),
+    ctx.debug,
+  );
   const server = createMcpServer(
     {
       client,

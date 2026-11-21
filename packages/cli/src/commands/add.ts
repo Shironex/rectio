@@ -48,7 +48,7 @@ export async function runAdd(ctx: CliContext, names: readonly string[], options:
     step.note = `${found.framework}, ${found.css}`;
     return {
       config: found,
-      client: createRegistryClient(registryUrl(ctx, options.registry, found)),
+      client: createRegistryClient(registryUrl(ctx, options.registry, found), ctx.debug),
     };
   });
   const { names: items, links } = splitThemeLinks(names);

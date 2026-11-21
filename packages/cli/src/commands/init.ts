@@ -194,7 +194,7 @@ async function checkProject(ctx: CliContext, options: InitOptions, step: StepHan
           aliases: options.aliases ?? defaultAliases(prefix),
         };
   const theme = options.theme ?? config.theme;
-  const client = createRegistryClient(registryUrl(ctx, options.registry, config));
+  const client = createRegistryClient(registryUrl(ctx, options.registry, config), ctx.debug);
   const index = await client.index();
   if (!index.items.some((i) => i.name === `theme-${theme}` && i.type === 'theme')) {
     const themes = index.items.filter((i) => i.type === 'theme').map((i) => i.name.slice(6));

@@ -10,6 +10,8 @@ export interface CliContext {
   log: (line: string) => void;
   /** One line on stderr: errors, warnings and the update notice. */
   warn: (line: string) => void;
+  /** One diagnostic line, only with --verbose or RECTIO_DEBUG set; unset means drop it. */
+  debug?: (line: string) => void;
   /** Raw text on stdout, for the spinner. Unset means no spinner. */
   write?: (text: string) => void;
   /** The keyboard, for the interactive init. Unset (tests, embedders) means never ask. */

@@ -177,7 +177,13 @@ async function runCommand(
   values: ParsedValues,
   base: CliContext,
 ): Promise<number> {
-  const ctx: CliContext = { ...base, cwd: resolve(base.cwd, values.cwd ?? '.') };
+  // Diagnostics go to stderr, so they never mix with output a script or the MCP client reads.
+  const debugging = values.verbose === true || (base.env.RECTIO_DEBUG ?? '') !== '';
+  const ctx: CliContext = {
+    ...base,
+    cwd: resolve(base.cwd, values.cwd ?? '.'),
+    ...(debugging ? { debug: base.debug ?? base.warn } : {}),
+  };
   const shared = {
     ...(values.registry === undefined ? {} : { registry: values.registry }),
   };
