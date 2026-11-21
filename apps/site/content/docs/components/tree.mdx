@@ -52,8 +52,8 @@ double click calls `onAction`, such as opening a file. A press on the chevron op
 without changing the selection.
 
 A node with `hasChildren` and no `children` loads them through `loadChildren` the first time it
-opens; its chevron turns into a spinner meanwhile. A failed load shows a row that tries again on
-Enter or a press. The tree keeps what it loaded; to refresh a branch yourself, make a loader with
+opens; its chevron turns into a spinner meanwhile. A failed load shows a row with a Try again
+action, run by Enter or a press on the row. The tree keeps what it loaded; to refresh a branch yourself, make a loader with
 `useTreeChildren(load)`, pass it as `loader`, and call `loader.reload(node)`.
 
 Give the tree a height through `className`: it scrolls in its own area.
@@ -86,8 +86,13 @@ Give the tree a height through `className`: it scrolls in its own area.
     },
     errorLabel: {
       type: 'string',
-      default: "'Could not load. Press Enter to try again.'",
+      default: "'Could not load.'",
       description: 'The row shown when a branch fails to load.',
+    },
+    retryLabel: {
+      type: 'string',
+      default: "'Try again'",
+      description: 'The action at the end of the error row; Enter or a press on the row runs it.',
     },
     className: { type: 'string', description: 'Sizes the scroll box, such as h-80.' },
   }}

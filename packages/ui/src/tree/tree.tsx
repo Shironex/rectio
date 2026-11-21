@@ -134,6 +134,8 @@ export interface TreeProps<Data = unknown> {
   loader?: TreeLoader<Data>;
   /** The row shown when a branch fails to load. Enter or a press on it tries again. */
   errorLabel?: string;
+  /** The action drawn at the end of the error row. Default "Try again". */
+  retryLabel?: string;
   /** The tree scrolls inside this box: give it a height, such as `h-80`. */
   className?: string;
 }
@@ -162,7 +164,8 @@ export function Tree<Data = unknown>({
   onAction,
   loadChildren,
   loader: loaderProp,
-  errorLabel = 'Could not load. Press Enter to try again.',
+  errorLabel = 'Could not load.',
+  retryLabel = 'Try again',
   className,
   ...labelling
 }: TreeProps<Data>) {
@@ -459,7 +462,7 @@ export function Tree<Data = unknown>({
                 'transition-[background-color] duration-fast ease-standard',
                 'hover:bg-surface-hover',
                 'data-selected:bg-surface-selected data-selected:font-medium',
-                'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+                'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-focus',
                 'aria-disabled:cursor-not-allowed aria-disabled:text-fg-disabled aria-disabled:hover:bg-transparent',
                 row.kind === 'error' && 'text-negative-strong',
               )}
@@ -505,7 +508,13 @@ export function Tree<Data = unknown>({
                 ) : null}
               </span>
               {row.kind === 'error' ? (
-                <span className="min-w-0 flex-1 truncate">{errorLabel}</span>
+                <>
+                  <span className="min-w-0 flex-1 truncate">{errorLabel}</span>
+                  {/* The whole row retries on Enter or a press; this names the action. */}
+                  <span className="shrink-0 text-xs font-medium text-fg underline underline-offset-2">
+                    {retryLabel}
+                  </span>
+                </>
               ) : (
                 <>
                   {row.node.icon !== undefined && (
