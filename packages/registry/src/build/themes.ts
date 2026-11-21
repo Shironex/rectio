@@ -105,7 +105,9 @@ export function splitTokens(tokensDir: string): SplitTokens {
     if (skin !== undefined) {
       if (themeOf(block.prelude) !== undefined)
         throw new Error(`a skin rule names a theme: ${block.prelude}`);
-      perSkin.set(skin, [...(perSkin.get(skin) ?? []), printBlock(block)]);
+      // The file header already says how to apply the skin: drop the block's own comment.
+      const text = printBlock(block).replace(/^\/\*[\s\S]*?\*\/\n/, '');
+      perSkin.set(skin, [...(perSkin.get(skin) ?? []), text]);
       continue;
     }
     const theme = themeOf(block.prelude);
