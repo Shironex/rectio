@@ -172,10 +172,10 @@ export function Sessions({
       <p className="text-sm text-pretty text-fg-muted">
         Do not recognise a session? Sign it out
         {passwordHref === undefined ? (
-          ' and change your password.'
+          ', then change your password.'
         ) : (
           <>
-            {' and '}
+            {', then '}
             <Anchor href={passwordHref} className={inlineLink}>
               change your password
             </Anchor>
@@ -231,13 +231,7 @@ function SessionRow({
       >
         <DeviceIcon weight="duotone" className="size-5" />
       </span>
-      <div
-        className={cn(
-          'flex min-w-0 flex-1 flex-col gap-2 @lg:flex-row @lg:items-center @lg:gap-3',
-          // A session on its way out steps back while the sign out runs.
-          pending && 'opacity-70',
-        )}
-      >
+      <div className="flex min-w-0 flex-1 flex-col gap-2 @lg:flex-row @lg:items-center @lg:gap-3">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="font-medium text-pretty">
