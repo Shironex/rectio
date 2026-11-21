@@ -15,7 +15,8 @@ import { readMotionTokens, type Bezier } from '../lib/tokens';
  * Recharts' own transitions: no animation library. Reduced motion renders the plain charts.
  */
 
-const LINES = '.recharts-line, .recharts-line-dots, .recharts-area';
+// The end dot is listed on its own: Recharts may draw dots outside the line's group.
+const LINES = '.recharts-line, .recharts-line-dots, .recharts-area, .rx-end-dot';
 const BARS = '.recharts-bar-rectangle path, .recharts-bar-rectangle rect';
 const SECTORS = '.recharts-pie-sector';
 /** Bars arrive one after another, but the whole set lands within this many steps of the first. */
