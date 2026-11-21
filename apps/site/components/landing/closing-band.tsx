@@ -18,16 +18,19 @@ export function ClosingBand() {
             issues and pull requests are welcome.
           </p>
         </div>
-        <div className="site-reveal site-step-2 flex flex-wrap items-center gap-3">
+        {/* The command on its own line, the two links under it on one shared left edge. */}
+        <div className="site-reveal site-step-2 flex flex-col items-start gap-3">
           <CopyCommand command="pnpm dlx @rectio/cli init" />
-          <Link
-            href="/docs"
-            className="site-press inline-flex h-11 items-center gap-2 rounded-control bg-accent px-5 text-base font-medium text-accent-contrast shadow-raised transition-colors duration-fast ease-standard pointer-fine:hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          >
-            Read the docs
-            <ArrowRightIcon aria-hidden weight="bold" className="size-4" />
-          </Link>
-          <GithubButton />
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/docs"
+              className="site-press inline-flex h-11 items-center gap-2 rounded-control bg-accent px-5 text-base font-medium text-accent-contrast shadow-raised transition-colors duration-fast ease-standard pointer-fine:hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            >
+              Read the docs
+              <ArrowRightIcon aria-hidden weight="bold" className="size-4" />
+            </Link>
+            <GithubButton />
+          </div>
         </div>
       </div>
     </div>
