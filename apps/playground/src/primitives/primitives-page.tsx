@@ -267,6 +267,25 @@ export function PrimitivesPage({
                 </DrawerFooter>
               </DrawerContent>
             </Drawer>
+            {/* On a phone this one rests at half height first; a drag up takes it to full. */}
+            <Drawer defaultOpen={open === 'drawer-snap'} snapPoints={[0.5, 1]}>
+              <DrawerTrigger render={<Button variant="secondary" className="self-start" />}>
+                Receipt details
+              </DrawerTrigger>
+              <DrawerContent size="sm" height="full">
+                <DrawerHeader>
+                  <DrawerTitle>Receipt 2041</DrawerTitle>
+                  <DrawerDescription>Northwind Office Supply, 14 March.</DrawerDescription>
+                </DrawerHeader>
+                <DrawerBody>
+                  {['Paper, 10 reams', 'Toner, black', 'Desk lamp', 'Cables, USB C'].map((line) => (
+                    <p key={line} className="text-sm text-fg">
+                      {line}
+                    </p>
+                  ))}
+                </DrawerBody>
+              </DrawerContent>
+            </Drawer>
           </Section>
         </div>
 
