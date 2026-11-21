@@ -303,6 +303,7 @@ describe('the rectio registry', () => {
       'donut-chart',
       'drawer',
       'empty-state',
+      'event-card',
       'expense-approval',
       'faq',
       'feature-grid',
@@ -416,6 +417,7 @@ describe('the rectio registry', () => {
       'motion-two-factor',
       'motion-users-table',
       'motion-vendors-list',
+      'motion-week-agenda',
       'multi-select',
       'navigation-menu',
       'newsletter',
@@ -470,6 +472,7 @@ describe('the rectio registry', () => {
       'textarea',
       'theme-default',
       'theme-scope',
+      'time-field',
       'time-series-chart',
       'timeline',
       'toast',
@@ -481,6 +484,7 @@ describe('the rectio registry', () => {
       'two-factor',
       'users-table',
       'vendors-list',
+      'week-agenda',
     ]);
   });
 
