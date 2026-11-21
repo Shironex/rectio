@@ -1,10 +1,4 @@
-import {
-  CalendarBlankIcon,
-  CaretLeftIcon,
-  CaretRightIcon,
-  CaretDownIcon,
-  PlusIcon,
-} from '@phosphor-icons/react';
+import { CalendarBlankIcon, CaretLeftIcon, CaretRightIcon, PlusIcon } from '@phosphor-icons/react';
 import { cn, EventCard } from '@rectio/ui';
 import {
   createContext,
@@ -393,9 +387,16 @@ function AgendaGrid({
   } as CSSProperties;
 
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, key: string) => {
-    const move = KEYS[event.key];
-    if (move === undefined) return;
+    const pressed = KEYS[event.key];
+    if (pressed === undefined) return;
     event.preventDefault();
+    const rtl = grid.current !== null && getComputedStyle(grid.current).direction === 'rtl';
+    const move =
+      rtl && (pressed === 'left' || pressed === 'right')
+        ? pressed === 'left'
+          ? 'right'
+          : 'left'
+        : pressed;
     const next = agendaNeighbor(layout.stops, key, move);
     if (next === null) return;
     setActive(next);
@@ -547,6 +548,32 @@ function AgendaGrid({
         </div>
       )}
 
+      {/* An empty range says so in a row of its own, with the way to add an event. */}
+      {empty && (
+        <div className="grid border-b border-line" style={columns}>
+          <div aria-hidden />
+          <div
+            className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-s border-line px-3 py-2.5 text-sm text-fg-muted"
+            style={{ gridColumn: `2 / span ${String(days.length)}` }}
+          >
+            <span className="flex items-center gap-2">
+              <CalendarBlankIcon aria-hidden weight="duotone" className="size-5 text-fg-subtle" />
+              Events you add for these days show up here.
+            </span>
+            {onSlotClick !== undefined && days[0] !== undefined && (
+              <AddButton
+                label="Add event"
+                variant="secondary"
+                onClick={() => {
+                  const first = days.find((day) => isSameDay(day, now)) ?? days[0] ?? now;
+                  onSlotClick(addSlot(first, now, hours, slotMinutes));
+                }}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
       {/* The time grid. */}
       <div className="relative grid" style={columns}>
         <div aria-hidden className="relative">
@@ -556,7 +583,13 @@ function AgendaGrid({
               className="relative h-(--rx-agenda-hour-height) pe-2 text-end text-xs text-fg-subtle numeric"
             >
               {/* Each label sits on its hour's line; the first stays inside the grid. */}
-              <span className={cn('relative block', index > 0 ? '-top-2' : 'top-0.5')}>
+              <span
+                className={cn(
+                  'relative block',
+                  index > 0 ? '-top-2' : 'top-0.5',
+                  nowRow !== null && Math.abs(nowRow - index * 60) < 15 && 'invisible',
+                )}
+              >
                 {label}
               </span>
             </div>
@@ -621,7 +654,7 @@ function AgendaGrid({
                   return (
                     <li
                       key={slice.key}
-                      className="pointer-events-auto absolute z-10 px-0.5 pb-px"
+                      className="pointer-events-auto absolute z-10 px-0.5 pb-px has-focus-visible:z-20"
                       style={{
                         top: span(slice.start - hours.start * 60),
                         height: span(minutes),
@@ -642,7 +675,7 @@ function AgendaGrid({
                           ? {}
                           : { location: slice.event.location })}
                         className={cn(
-                          'h-full shadow-raised',
+                          'h-full shadow-raised has-focus-visible:outline-offset-0',
                           // Short: the title alone on one line; the time is still read out.
                           short && 'justify-center py-0 [&>:first-child]:truncate [&_p]:sr-only',
                           // Narrow: a smaller title that may wrap, and the start time alone.
@@ -662,7 +695,7 @@ function AgendaGrid({
                 {(layout.more[dayIndex] ?? []).map((chip) => (
                   <li
                     key={chip.key}
-                    className="pointer-events-auto absolute z-10 px-0.5 pb-px"
+                    className="pointer-events-auto absolute z-10 px-0.5 pb-px has-focus-visible:z-20"
                     style={{
                       top: span(chip.start - hours.start * 60),
                       height: span(Math.max(chip.end - chip.start, AGENDA_MIN_MINUTES)),
@@ -705,36 +738,18 @@ function AgendaGrid({
               {nowAt !== null && (
                 <div
                   data-slot="week-agenda-now"
-                  // Under the events, so the line never runs through a title.
-                  className="pointer-events-none absolute inset-x-0 flex items-center"
+                  // Over the events but a hairline, so it reads across a busy hour.
+                  className="pointer-events-none absolute inset-x-0 z-20 flex items-center"
                   style={{ top: span(nowAt) }}
                 >
                   <span className="-ms-1 size-2 shrink-0 -translate-y-1/2 rounded-full bg-accent" />
-                  <span className="h-0.5 flex-1 -translate-y-1/2 bg-accent" />
+                  <span className="h-px flex-1 -translate-y-1/2 bg-accent" />
                   <span className="sr-only">Now, {names.time.format(now)}</span>
                 </div>
               )}
             </div>
           );
         })}
-        {empty && (
-          <div className="pointer-events-none absolute inset-0 z-30 flex items-start justify-center p-6 pt-16">
-            <div className="pointer-events-auto flex max-w-80 flex-col items-center gap-1.5 rounded-control border border-line bg-surface-raised px-5 py-4 text-center text-sm text-fg-muted shadow-raised">
-              <CalendarBlankIcon aria-hidden weight="duotone" className="size-6 text-fg-subtle" />
-              <span className="font-medium text-fg">Nothing scheduled this {variant}</span>
-              <span>Events you add for these days show up here.</span>
-              {onSlotClick !== undefined && days[0] !== undefined && (
-                <AddButton
-                  label="Add event"
-                  onClick={() => {
-                    const first = days.find((day) => isSameDay(day, now)) ?? days[0] ?? now;
-                    onSlotClick(addSlot(first, now, hours, slotMinutes));
-                  }}
-                />
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -829,16 +844,16 @@ function MoreEvents({
           type="button"
           aria-label={`${String(count)} ${what} from ${from}, ${dayLabel}`}
           className={cn(
-            'flex size-full cursor-pointer flex-col items-start rounded-badge border border-line-strong bg-surface-hover px-1.5 py-0.5 text-start shadow-raised',
-            'text-xs font-medium text-fg hover:border-fg-subtle',
+            'flex size-full cursor-pointer flex-col items-start rounded-badge border border-line-strong bg-surface px-1.5 py-0.5 text-start',
+            'text-xs font-medium text-fg hover:bg-surface-hover',
             'transition-transform duration-fast ease-standard active:scale-99 motion-reduce:active:scale-100',
             focusRing,
           )}
           {...triggerProps}
         >
           <span className="flex items-center gap-1">
+            <PlusIcon aria-hidden weight="bold" className="size-3 shrink-0" />
             {count} {short}
-            <CaretDownIcon aria-hidden weight="bold" className="size-3 shrink-0" />
           </span>
           <span className="font-regular text-fg-muted numeric">from {from}</span>
         </button>
@@ -994,20 +1009,22 @@ function AgendaList({
 function AddButton({
   label,
   onClick,
+  variant = 'ghost',
   'aria-label': ariaLabel,
 }: {
   label: string;
   onClick: () => void;
+  variant?: 'ghost' | 'secondary';
   'aria-label'?: string;
 }) {
   const { Button } = useBlockParts();
   return (
     <Button
-      variant="ghost"
+      variant={variant}
       size="sm"
       aria-label={ariaLabel}
       onClick={onClick}
-      className="text-fg-muted"
+      className={variant === 'ghost' ? 'text-fg-muted' : ''}
     >
       <PlusIcon aria-hidden weight="bold" className="size-3.5" />
       {label}

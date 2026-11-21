@@ -159,7 +159,7 @@ describe('WeekAgenda', () => {
 
   it('says so when the week is empty', () => {
     render(<WeekAgenda events={[]} date={at(18, 12)} now={NOW} locale="en-GB" />);
-    expect(screen.getAllByText('Nothing scheduled this week')).toHaveLength(3);
+    expect(screen.getAllByText('Nothing scheduled this week')).toHaveLength(2);
     expect(screen.getByRole('status')).toHaveTextContent(
       'Events you add for these days show up here.',
     );
