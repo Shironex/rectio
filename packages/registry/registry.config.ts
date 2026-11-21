@@ -793,6 +793,16 @@ export default defineRegistry({
       files: ['tree/tree.tsx'],
     },
     {
+      name: 'resizable',
+      type: 'component',
+      version: '0.1.0',
+      title: 'Resizable panels',
+      description:
+        'Panels resized by dragging or by keyboard handles, with limits and a layout kept per browser.',
+      categories: ['layout'],
+      files: ['resizable/resizable.tsx'],
+    },
+    {
       name: 'breadcrumb',
       type: 'component',
       version: '0.1.2',
