@@ -211,24 +211,6 @@ export default defineRegistry({
         title: 'Default theme',
         description: 'Warm stone neutrals, cobalt accent, 4px controls, IBM Plex. Light and dark.',
       },
-      {
-        // No longer a built-in theme: published from its last stylesheet for one more release.
-        id: 'ledger',
-        version: '0.2.4',
-        title: 'Ledger theme',
-        description:
-          'Deprecated: build your own from the ledger look in the theme generator. Green-black ink, citron accent, 2px corners, Source Serif 4 headings.',
-        deprecated: `The ledger theme is no longer built in and will be removed in the next release. Make your own from the ledger look in the theme generator: ${SITE_URL}/docs/theming/generator`,
-        frozen: {
-          css: join(packages, 'registry', 'legacy', 'theme-ledger.css'),
-          dependencies: {
-            '@fontsource-variable/ibm-plex-sans': '^5.3.0',
-            '@fontsource/ibm-plex-mono': '^5.3.0',
-            '@fontsource-variable/schibsted-grotesk': '^5.3.0',
-            '@fontsource-variable/source-serif-4': '^5.3.1',
-          },
-        },
-      },
     ],
   },
   items: [

@@ -28,6 +28,9 @@ summary: Work that is merging into main now and ships with the next release.
 
 - Graphite becomes the new default dark mode.
 - The ledger theme retires and lives on as a theme generator preset.
+- `theme-ledger` leaves the registry after one release marked deprecated. Projects that installed
+  it keep their file; for a new project, make the look from the ledger preset in the theme
+  generator.
 
 ## CLI
 

@@ -4,4 +4,3 @@ dist/
 coverage/
 .rounds/
 .changeset/*.md
-packages/registry/legacy/

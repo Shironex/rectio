@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { itemIntegrity, normalizeLineEndings, sha256Hex } from '../integrity.ts';
+import { itemIntegrity, sha256Hex } from '../integrity.ts';
 import { SCHEMA_PATHS } from '../layout.ts';
 import {
   SCHEMA_VERSION,
@@ -141,19 +141,11 @@ export function buildRegistry(config: RegistryConfig): BuildResult {
       }
     }
     for (const theme of themes) {
-      const css =
-        theme.frozen === undefined
-          ? split.themes.get(theme.id)
-          : {
-              css: normalizeLineEndings(readFileSync(theme.frozen.css, 'utf8')),
-              fontPackages: Object.keys(theme.frozen.dependencies),
-            };
+      const css = split.themes.get(theme.id);
       if (css === undefined) throw new Error(`theme "${theme.id}" is not in @rectio/tokens`);
-      if (theme.frozen !== undefined && split.themes.has(theme.id))
-        throw new Error(`theme "${theme.id}" is frozen but still built by @rectio/tokens`);
       const dependencies: Record<string, string> = {};
       for (const pkg of css.fontPackages) {
-        const range = theme.frozen?.dependencies[pkg] ?? tokenRanges.get(pkg);
+        const range = tokenRanges.get(pkg);
         if (range === undefined) throw new Error(`font package ${pkg} is not in the tokens deps`);
         dependencies[pkg] = range;
       }
