@@ -116,7 +116,10 @@ export async function runInit(ctx: CliContext, options: InitOptions = {}) {
       s.bold('Next'),
       ...commandRows(
         [
-          [cliCommand('add button'), 'add a component and what it needs'],
+          // Once components came with init, suggest more rather than one that is already there.
+          extra.length === 0
+            ? [cliCommand('add button'), 'add a component and what it needs']
+            : [cliCommand('add <item>'), 'add more components and blocks'],
           [cliCommand('list'), 'browse every item'],
         ],
         s,

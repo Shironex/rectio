@@ -35,6 +35,6 @@ exit 0
   │             added to package.json, run `npm install`         │
   │                                                              │
   │ Next                                                         │
-  │   rectio add button  add a component and what it needs       │
+  │   rectio add <item>  add more components and blocks          │
   │   rectio list        browse every item                       │
   ╰──────────────────────────────────────────────────────────────╯
