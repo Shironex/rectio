@@ -1,0 +1,101 @@
+---
+title: Resizable panels
+description: Panels that share a box and resize against each other, by drag or by keyboard, with limits and a layout kept per browser.
+---
+
+<Preview name="resizable" plain={<Demo name="resizable" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add resizable
+```
+
+## Usage
+
+```tsx
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+
+<ResizablePanelGroup storageKey="invoices">
+  <ResizablePanel id="invoice-list" defaultSize={35} minSize={25} maxSize={60}>
+    {/* the list */}
+  </ResizablePanel>
+  <ResizableHandle label="Resize the invoice list" withGrip />
+  <ResizablePanel id="invoice-detail" minSize={35}>
+    {/* the open invoice */}
+  </ResizablePanel>
+</ResizablePanelGroup>;
+```
+
+Use resizable panels where people work in two or three views at once for a long time, such as a
+list beside its detail. Sizes are percentages of the group; panels without a `defaultSize`
+share what is left. Each panel stays within its `minSize` and `maxSize`, and so does its
+neighbour, so a drag stops where either would break.
+
+Drag a handle, or focus it and use the arrow keys (`keyboardStep` sets the step) and Home and End
+for the limits. A double click puts every panel back to its default size.
+`direction="vertical"` stacks the panels.
+
+With `storageKey` the layout is kept in this browser and comes back on the next visit. Give each
+panel an `id` too, so a saved size finds its panel when the page changes. `onLayout` reports
+each change, to save it on the server instead.
+
+On a phone, side by side panels are rarely right: show one view at a time and switch with tabs or
+navigation.
+
+## Props
+
+### ResizablePanelGroup
+
+Every prop of a `div`.
+
+<TypeTable
+  type={{
+    direction: {
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Side by side, or stacked.',
+    },
+    storageKey: { type: 'string', description: 'Keeps the layout in this browser under this key.' },
+    onLayout: {
+      type: '(sizes: number[]) => void',
+      description: 'After the user resizes, with every panel size in percent, in order.',
+    },
+  }}
+/>
+
+### ResizablePanel
+
+Every prop of a `div`. Its content scrolls inside it.
+
+<TypeTable
+  type={{
+    defaultSize: { type: 'number', description: 'Starting size in percent.' },
+    minSize: { type: 'number', default: '10', description: 'Smallest size in percent.' },
+    maxSize: { type: 'number', default: '90', description: 'Largest size in percent.' },
+    id: { type: 'string', description: 'Keys a saved size; also what the handle controls.' },
+  }}
+/>
+
+### ResizableHandle
+
+Every prop of a `div` except `children`.
+
+<TypeTable
+  type={{
+    label: { type: 'string', default: "'Resize'", description: 'Name what it resizes.' },
+    keyboardStep: { type: 'number', default: '5', description: 'Percent per arrow key.' },
+    withGrip: { type: 'boolean', default: 'false', description: 'Draw a grip on the line.' },
+  }}
+/>
+
+## Accessibility
+
+- Each handle is a focusable `separator` with `aria-valuenow`, `aria-valuemin` and
+  `aria-valuemax` for the panel before it, and `aria-controls` pointing at that panel.
+- Arrow keys along the direction resize; Home and End go to the limits. Right to left layouts flip
+  the horizontal arrows.
+- The hit area is wider than the line, and wider still on touch screens.
+- A drag keeps the pointer captured, so it goes on when the pointer leaves the handle.
+
+<ComponentSource path="resizable/resizable.tsx" />

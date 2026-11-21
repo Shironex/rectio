@@ -1,0 +1,85 @@
+---
+title: Copy button
+description: Copies a value in one press, confirms it in place and to screen readers, and works where the clipboard API is blocked.
+---
+
+<Preview
+  name="copy-button"
+  plain={<Demo name="copy-button" />}
+  motion={<Demo name="copy-button.motion" />}
+  importLine="import { CopyButton } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add copy-button
+```
+
+`button` installs with it.
+
+## Usage
+
+```tsx
+import { CopyButton } from '@/components/ui/copy-button';
+
+<CopyButton value="IE29AIBK93115212345678" label="Copy IBAN" />;
+
+<CopyButton value={() => invoiceLink(2041)} showLabel variant="secondary" />;
+
+<CopyButton value={apiKey} onCopy={() => toast.add({ title: 'Key copied' })} />;
+```
+
+The icon turns into a check for two seconds after a copy, and a polite live region says
+"Copied". `value` can be a function, read at the moment of the press. Where the clipboard API is
+missing or blocked (an insecure origin, an old browser) it copies through a hidden text field
+instead; when both fail, `onCopyError` is called and nothing pretends to have worked.
+
+A toast is optional: the in-place check is enough for most copies. Add one in `onCopy` when the
+button is far from where the user looks.
+
+`copyToClipboard(text)` is exported too, with the same fallback, for copies from a menu item.
+
+The motion variant settles the check on a short spring.
+
+## Props
+
+Every prop of `Button` except `children` and `onClick`. It is a small ghost icon button by
+default.
+
+<TypeTable
+  type={{
+    value: { type: 'string | (() => string)', required: true, description: 'What is copied.' },
+    label: {
+      type: 'string',
+      default: "'Copy'",
+      description: 'The accessible name, and the text with showLabel. Name what is copied.',
+    },
+    copiedLabel: {
+      type: 'string',
+      default: "'Copied'",
+      description: 'Shown and announced after a copy.',
+    },
+    showLabel: { type: 'boolean', default: 'false', description: 'Draw the label beside the icon.' },
+    resetAfter: {
+      type: 'number',
+      default: '2000',
+      description: 'Milliseconds before the copied state goes back.',
+    },
+    onCopy: { type: '(text: string) => void', description: 'After a successful copy.' },
+    onCopyError: { type: '(error: unknown) => void', description: 'When every way to copy fails.' },
+    renderIcon: {
+      type: '(copied: boolean) => ReactNode',
+      description: 'Replaces the copy and check icons.',
+    },
+  }}
+/>
+
+## Accessibility
+
+- A button named by `label`. An icon button keeps that name after the copy, so focus is not
+  re-announced; with `showLabel` the visible text reads the copied label for a moment.
+- "Copied" is said once through a polite live region.
+- The swap of icons is a crossfade that turns off with reduced motion.
+
+<ComponentSource path="copy-button/copy-button.tsx" />

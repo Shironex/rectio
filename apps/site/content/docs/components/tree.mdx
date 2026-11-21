@@ -1,0 +1,124 @@
+---
+title: Tree
+description: A hierarchy to browse and pick from, with the full tree keyboard pattern and branches that load when opened.
+---
+
+<Preview name="tree" plain={<Demo name="tree" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add tree
+```
+
+`scroll-area` installs with it.
+
+## Usage
+
+```tsx
+import { Tree, type TreeNode } from '@/components/ui/tree';
+
+const ACCOUNTS: TreeNode[] = [
+  {
+    id: 'assets',
+    label: 'Assets',
+    children: [
+      { id: 'bank', label: 'Bank accounts' },
+      { id: 'receivables', label: 'Receivables' },
+    ],
+  },
+  { id: 'archive', label: 'Archive', hasChildren: true },
+];
+
+<Tree
+  aria-label="Chart of accounts"
+  items={ACCOUNTS}
+  defaultExpanded={['assets']}
+  selected={selected}
+  onSelectedChange={setSelected}
+  loadChildren={(node) => fetchChildren(node.id)}
+  className="h-80"
+/>;
+```
+
+Use a tree for a hierarchy the user browses: folders, a chart of accounts, an org's teams. For a
+flat list with groups, a list or a table reads faster.
+
+`items` is a nested list of nodes with unique ids. A node can carry an `icon` and a `meta` drawn
+at the end of the row, such as a count. `expanded` and `selected` are arrays of ids, controlled
+or uncontrolled. `selectionMode` is `single` by default; `multiple` lets Space and a Ctrl or Cmd
+press toggle rows and Shift with an arrow extend; `none` makes a press open and close. Enter or a
+double click calls `onAction`, such as opening a file. A press on the chevron opens and closes
+without changing the selection.
+
+A node with `hasChildren` and no `children` loads them through `loadChildren` the first time it
+opens; its chevron turns into a spinner meanwhile. A failed load shows a row that tries again on
+Enter or a press. The tree keeps what it loaded; to refresh a branch yourself, make a loader with
+`useTreeChildren(load)`, pass it as `loader`, and call `loader.reload(node)`.
+
+Give the tree a height through `className`: it scrolls in its own area.
+
+## Props
+
+<TypeTable
+  type={{
+    items: { type: 'readonly TreeNode[]', required: true, description: 'The nodes at the top level.' },
+    'aria-label': { type: 'string', description: 'Names the tree. Or pass aria-labelledby.' },
+    expanded: { type: 'readonly string[]', description: 'Open node ids, controlled.' },
+    defaultExpanded: { type: 'readonly string[]', default: '[]', description: 'Open at first.' },
+    onExpandedChange: { type: '(ids: string[]) => void' },
+    selectionMode: {
+      type: "'single' | 'multiple' | 'none'",
+      default: "'single'",
+      description: 'How rows are chosen.',
+    },
+    selected: { type: 'readonly string[]', description: 'Chosen node ids, controlled.' },
+    defaultSelected: { type: 'readonly string[]', default: '[]' },
+    onSelectedChange: { type: '(ids: string[]) => void' },
+    onAction: { type: '(node: TreeNode) => void', description: 'Enter or a double click on a row.' },
+    loadChildren: {
+      type: '(node: TreeNode) => Promise<TreeNode[]>',
+      description: 'Loads the children of a node marked hasChildren when it first opens.',
+    },
+    loader: {
+      type: 'TreeLoader',
+      description: 'A loader from useTreeChildren, for an app that reloads branches itself.',
+    },
+    errorLabel: {
+      type: 'string',
+      default: "'Could not load. Press Enter to try again.'",
+      description: 'The row shown when a branch fails to load.',
+    },
+    className: { type: 'string', description: 'Sizes the scroll box, such as h-80.' },
+  }}
+/>
+
+### TreeNode
+
+<TypeTable
+  type={{
+    id: { type: 'string', required: true, description: 'Unique in the whole tree.' },
+    label: { type: 'ReactNode', required: true },
+    textValue: { type: 'string', description: 'Plain text for type-ahead when label is not a string.' },
+    icon: { type: 'ReactNode', description: 'Drawn before the label.' },
+    meta: { type: 'ReactNode', description: 'Drawn at the end of the row.' },
+    children: { type: 'readonly TreeNode[]' },
+    hasChildren: { type: 'boolean', description: 'Has children to load on open.' },
+    disabled: { type: 'boolean', description: 'Focusable, but not selected or acted on.' },
+    data: { type: 'Data', description: 'Anything the app needs back in onAction.' },
+  }}
+/>
+
+## Accessibility
+
+- `role="tree"` with `treeitem` rows carrying their level, position and set size, `aria-expanded`
+  on branches, `aria-selected` when rows can be chosen and `aria-busy` while a branch loads.
+- One Tab stop: the focused row, else the first chosen row, else the first row.
+- Down and Up move; Right opens a branch, then steps into it; Left closes it, then steps out to
+  the parent; Home and End jump; `*` opens every branch at the level; typing jumps to a matching
+  name.
+- Enter acts, Space selects; in multiple mode Shift with an arrow extends and Ctrl or Cmd with A
+  selects every visible row.
+- Rows grow to 44px on touch screens.
+
+<ComponentSource path="tree/tree.tsx" />

@@ -1,6 +1,6 @@
 ---
-title: Toggle and toggle group
-description: Buttons that stay pressed, alone or as a segmented control.
+title: Toggle, toggle group and segmented control
+description: Buttons that stay pressed, alone, in a group, or as a segmented control driven by options.
 ---
 
 <Preview
@@ -40,6 +40,27 @@ import { Toggle, ToggleGroup } from '@/components/ui/toggle';
   Show archived
 </Toggle>;
 ```
+
+### Segmented control
+
+```tsx
+import { SegmentedControl } from '@/components/ui/toggle';
+
+const STATUSES = [
+  { value: 'all', label: 'All', hint: 48 },
+  { value: 'unpaid', label: 'Unpaid', hint: 11 },
+  { value: 'overdue', label: 'Overdue', hint: 3 },
+  { value: 'paid', label: 'Paid' },
+] as const;
+
+<SegmentedControl label="Status" options={STATUSES} value={status} onValueChange={setStatus} />;
+```
+
+`SegmentedControl` is the group with single selection, driven by a list of options and one value
+instead of toggles and an array. It always keeps one option chosen. An option can carry a `hint`,
+such as a count, read after its label. By default the options sit in one row while they fit and
+in two even columns on a phone or in a narrow container, so every label stays whole; set
+`layout="row"` for two or three short options that always fit.
 
 A toggle is a button that stays down: a view option or a filter that applies at once. A
 `ToggleGroup` draws its toggles as one segmented control and sets their size.
@@ -92,6 +113,33 @@ Every prop of Base UI's `ToggleGroup` is accepted as well: `value`, `defaultValu
       type: 'boolean',
       default: 'false',
       description: 'With single selection, pressing the chosen toggle again clears the choice.',
+    },
+  }}
+/>
+
+### SegmentedControl
+
+Every prop of `ToggleGroup` except `value`, `defaultValue`, `onValueChange`, `multiple` and
+`allowEmpty`, which it replaces.
+
+<TypeTable
+  type={{
+    options: {
+      type: 'readonly { value; label; hint?; disabled? }[]',
+      required: true,
+      description: 'The choices, in order. `hint` is drawn after the label, such as a count.',
+    },
+    value: { type: 'string', description: 'The chosen option, controlled.' },
+    defaultValue: { type: 'string', description: 'The option chosen first, uncontrolled.' },
+    onValueChange: { type: '(value) => void', description: 'Called with the newly chosen value.' },
+    label: {
+      type: 'string',
+      description: 'Names the control for screen readers. Use `legend` for a visible name.',
+    },
+    layout: {
+      type: "'columns' | 'row'",
+      default: "'columns'",
+      description: 'Two even columns on a phone or in a narrow container, or always one row.',
     },
   }}
 />

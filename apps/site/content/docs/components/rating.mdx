@@ -1,0 +1,91 @@
+---
+title: Rating
+description: A star rating to set, on radios with optional half steps, and a read-only display.
+---
+
+<Preview name="rating" plain={<Demo name="rating" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add rating
+```
+
+## Usage
+
+```tsx
+import { Rating, RatingDisplay } from '@/components/ui/rating';
+
+<Rating aria-label="Delivery" value={score} onValueChange={setScore} />;
+
+<Rating aria-label="Delivery" defaultValue={3.5} allowHalf name="delivery" />;
+
+<RatingDisplay value={4.6} size="sm" showValue />;
+```
+
+`Rating` is a radio group with one radio per value, so the arrow keys move the rating, the chosen
+value is announced, and with `name` it posts with a form. With `allowHalf` each star takes two
+values, its left half and the whole star. With a mouse, the stars preview the value under the
+pointer before the press; a finger sets it straight away.
+
+`RatingDisplay` is for a rating that is only read, such as a vendor's score in a table: one image
+named by its reading ("4.6 out of 5 stars"), rounded to the nearest half star, smaller than the
+control because it needs no touch target.
+
+Name the radios in the app language with `getItemLabel`. A filled star is solid and an empty one
+is an outline, so the reading does not rest on colour alone.
+
+## Props
+
+### Rating
+
+Every prop of Base UI's `RadioGroup` except `value`, `defaultValue` and `onValueChange`, which it
+replaces with numbers: `name`, `disabled`, `readOnly`, `required` and the rest.
+
+<TypeTable
+  type={{
+    value: { type: 'number | null', description: 'The rating, controlled. null for none.' },
+    defaultValue: { type: 'number | null', default: 'null', description: 'The starting rating.' },
+    onValueChange: { type: '(value: number) => void', description: 'Called with the new rating.' },
+    max: { type: 'number', default: '5', description: 'How many stars.' },
+    allowHalf: { type: 'boolean', default: 'false', description: 'Allow half stars.' },
+    size: {
+      type: "'sm' | 'md'",
+      default: "'md'",
+      description: 'Each star cell grows to 44px on touch screens either way.',
+    },
+    getItemLabel: {
+      type: '(value: number) => string',
+      default: '"3 stars"',
+      description: 'The name of each radio.',
+    },
+  }}
+/>
+
+### RatingDisplay
+
+Every prop of a `span`.
+
+<TypeTable
+  type={{
+    value: { type: 'number', required: true, description: 'The reading, any fraction.' },
+    max: { type: 'number', default: '5', description: 'How many stars.' },
+    size: { type: "'sm' | 'md'", default: "'md'", description: 'Star size.' },
+    label: {
+      type: 'string',
+      default: '"4.6 out of 5 stars"',
+      description: 'The spoken reading.',
+    },
+    showValue: { type: 'boolean', default: 'false', description: 'Draw the figure beside the stars.' },
+  }}
+/>
+
+## Accessibility
+
+- A named `radiogroup`; each star is a radio named by `getItemLabel`. Name the group with
+  `aria-label` or `aria-labelledby`.
+- Arrow keys move the rating; Tab enters on the chosen star and leaves the group.
+- The focused star draws the focus ring around its cell.
+- `RatingDisplay` is one `img` with the reading as its name; the stars inside are hidden.
+
+<ComponentSource path="rating/rating.tsx" />

@@ -1,0 +1,122 @@
+---
+title: Alert dialog
+description: A confirmation that interrupts for a destructive or lasting action, opening on the safe answer.
+---
+
+<Preview
+  name="alert-dialog"
+  plain={<Demo name="alert-dialog" />}
+  motion={<Demo name="alert-dialog.motion" />}
+  importLine="import { AlertDialogContent } from '@rectio/motion';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add alert-dialog
+```
+
+`dialog` and `button` install with it.
+
+## Usage
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+
+<AlertDialog>
+  <AlertDialogTrigger render={<Button variant="danger" />}>Delete draft</AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete draft invoice 2041?</AlertDialogTitle>
+      <AlertDialogDescription>The draft and its lines are removed.</AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Keep draft</AlertDialogCancel>
+      <AlertDialogAction onAction={() => deleteDraft(2041)}>Delete draft</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>;
+```
+
+Use an alert dialog only for a choice the user must make before going on: deleting, voiding,
+sending for good. For a form or a short task use `Dialog`; for an action that can be undone, act
+at once and offer Undo in a toast instead of asking.
+
+The dialog opens with focus on the cancel button, so a hurried Enter keeps the data. A press on
+the backdrop does not close it; Escape and the cancel button do. Name both buttons after what
+they do ("Delete draft", "Keep draft"), not Yes and No.
+
+`onAction` may return a promise: the action button shows a spinner until it settles, the dialog
+closes when it resolves and stays open when it rejects, so the error can be shown inside it. Set
+`closeOnAction={false}` to close it yourself.
+
+The motion variant of `AlertDialogContent` opens on the same spring as the motion `Dialog`.
+
+## Props
+
+### AlertDialog
+
+Base UI's `AlertDialog.Root`: `open`, `defaultOpen`, `onOpenChange`, `actionsRef` and the rest.
+
+### AlertDialogTrigger, AlertDialogCancel
+
+Base UI's `AlertDialog.Trigger` and `AlertDialog.Close`. The cancel button is drawn as a
+secondary `Button` and takes the first focus.
+
+### AlertDialogContent
+
+Every prop of `DialogContent` except `showClose`: an alert dialog has no corner close button.
+
+<TypeTable
+  type={{
+    tone: {
+      type: "'danger' | 'warning' | 'neutral'",
+      default: "'danger'",
+      description:
+        'Sets the icon in the header and the variant of the action button: danger for data that is lost, warning for something that can be reversed with effort.',
+    },
+  }}
+/>
+
+### AlertDialogAction
+
+Every prop of `Button`.
+
+<TypeTable
+  type={{
+    onAction: {
+      type: '() => void | Promise<unknown>',
+      description: 'Runs on press. A promise keeps the button loading until it settles.',
+    },
+    closeOnAction: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Close the dialog when the action resolves.',
+    },
+  }}
+/>
+
+### AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter
+
+The header draws the tone icon beside the title and the description. The footer puts the action
+last, and on a phone stacks the buttons with the action on top.
+
+## Accessibility
+
+- Opens as `role="alertdialog"`, named by the title and described by the description.
+- Focus starts on the cancel button, stays inside while open and returns to the trigger.
+- Escape closes it; a press on the backdrop does not.
+- While the action runs, its button is busy and both buttons stay in place.
+
+<ComponentSource path="alert-dialog/alert-dialog.tsx" />

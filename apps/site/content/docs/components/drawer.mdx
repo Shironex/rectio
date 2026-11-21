@@ -1,0 +1,106 @@
+---
+title: Drawer
+description: A side panel on wide screens that becomes a bottom sheet on phones, with drag to dismiss and snap points.
+---
+
+<Preview name="drawer" plain={<Demo name="drawer" />} />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add drawer
+```
+
+`sheet` installs with it.
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import {
+  Drawer,
+  DrawerBody,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
+
+<Drawer>
+  <DrawerTrigger render={<Button variant="secondary" />}>Filter expenses</DrawerTrigger>
+  <DrawerContent size="sm">
+    <DrawerHeader>
+      <DrawerTitle>Filter expenses</DrawerTitle>
+      <DrawerDescription>Narrow the March report.</DrawerDescription>
+    </DrawerHeader>
+    <DrawerBody>{/* the filters */}</DrawerBody>
+    <DrawerFooter>
+      <DrawerClose render={<Button variant="ghost" />}>Clear</DrawerClose>
+      <DrawerClose render={<Button />}>Show 12 expenses</DrawerClose>
+    </DrawerFooter>
+  </DrawerContent>
+</Drawer>;
+```
+
+A drawer is a `Sheet` that picks its edge for the screen: from `side` (right by default) on a
+wide screen, and from the bottom on a phone, where a thumb can reach it and a swipe down closes
+it. Use `side="bottom"` to keep it at the bottom everywhere.
+
+On the bottom, `snapPoints` lets the sheet rest part open, such as `[0.5, 1]` for half and full
+height; a fling moves to the next point and a swipe past the lowest closes it. The backdrop thins
+as the sheet is dragged down. `height="full"` opens a bottom drawer at most of the screen
+height for long content.
+
+Like the sheet, the drawer has no motion variant: it already follows the finger.
+
+## Props
+
+### Drawer
+
+Base UI's `Drawer.Root`: `open`, `defaultOpen`, `onOpenChange` and the rest.
+
+<TypeTable
+  type={{
+    side: {
+      type: "'right' | 'left' | 'bottom'",
+      default: "'right'",
+      description: 'The edge on wide screens. Phones always use the bottom.',
+    },
+    snapPoints: {
+      type: '(number | string)[]',
+      description:
+        'Resting heights of a bottom drawer: fractions of the screen, or lengths such as "20rem".',
+    },
+  }}
+/>
+
+### DrawerContent
+
+Every prop of `SheetContent`.
+
+<TypeTable
+  type={{
+    height: {
+      type: "'auto' | 'full'",
+      default: "'auto'",
+      description: 'A bottom drawer fits its content, or opens at most of the screen height.',
+    },
+  }}
+/>
+
+### DrawerTrigger, DrawerClose, DrawerHeader, DrawerTitle, DrawerDescription, DrawerBody, DrawerFooter
+
+The sheet parts under drawer names. The footer stacks its buttons on a phone with the primary one
+on top.
+
+## Accessibility
+
+- Opens as a modal dialog named by `DrawerTitle` and described by `DrawerDescription`.
+- Focus moves in, stays inside and returns to the trigger on close.
+- Escape and a press on the backdrop close it. The drag handle is decorative; the keyboard closes
+  it with Escape or a button.
+
+<ComponentSource path="drawer/drawer.tsx" />
