@@ -113,6 +113,8 @@ export const chartSurface = cn(
 export interface TooltipRow {
   label: ReactNode;
   amount: number;
+  /** The figure as written, for a value that is not money; `amount` is then ignored. */
+  value?: ReactNode;
   color?: ChartColor;
   shape?: SwatchShape;
   /** Bold the row, for a total or a net figure. */
@@ -122,7 +124,8 @@ export interface TooltipRow {
 export interface ChartTooltipProps {
   title: ReactNode;
   rows: readonly TooltipRow[];
-  currency: string;
+  /** The currency of money rows; rows that carry a written `value` need none. */
+  currency?: string;
   locale: string;
   /**
    * `row` lays the figures out on one line, short enough to sit over the legend row above the
@@ -165,7 +168,10 @@ export function ChartTooltip({
               {item.label}
             </dt>
             <dd className={cn('text-end', item.strong === true && 'font-strong')}>
-              <Money amount={item.amount} currency={currency} locale={locale} />
+              {item.value ??
+                (currency !== undefined && (
+                  <Money amount={item.amount} currency={currency} locale={locale} />
+                ))}
             </dd>
           </div>
         ))}

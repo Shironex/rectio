@@ -30,7 +30,8 @@ export function Figures({
   className,
 }: {
   items: readonly Figure[];
-  currency: string;
+  /** The currency of money figures; a row of written `value`s needs none. */
+  currency?: string | undefined;
   locale: string;
   className?: string;
 }) {
@@ -49,7 +50,7 @@ export function Figures({
         >
           <dt className="truncate text-sm text-fg-muted">{item.label}</dt>
           <dd className="flex flex-col items-start">
-            {item.value === undefined ? (
+            {item.value === undefined && currency !== undefined ? (
               <Money
                 amount={item.amount ?? 0}
                 currency={currency}

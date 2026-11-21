@@ -148,3 +148,16 @@ export { CommentThread, type CommentThreadProps } from './saas/comment-thread/co
 export * from './saas/comment-thread/comment-thread.logic';
 export { FileManager, type FileManagerProps } from './saas/file-manager/file-manager';
 export * from './saas/file-manager/file-manager.logic';
+export {
+  TimeSeriesChart,
+  TIME_SERIES_CHART_MESSAGES,
+  type TimeSeriesChartProps,
+  type TimeSeriesChartMessages,
+} from './saas/time-series-chart/time-series-chart';
+export * from './saas/time-series-chart/time-series-chart.logic';
+export {
+  formatDuration,
+  formatValue,
+  type ValueFormat,
+  type ValueFormatOptions,
+} from './lib/value-format';
