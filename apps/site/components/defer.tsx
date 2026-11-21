@@ -1,8 +1,10 @@
 'use client';
 
 import {
+  Component,
   createElement,
   lazy,
+  type ReactNode,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -10,6 +12,9 @@ import {
   useSyncExternalStore,
   type ComponentType,
 } from 'react';
+import { usePathname } from 'next/navigation';
+
+import { BASE_PATH } from '@/lib/base-path';
 
 /**
  * When a deferred part takes its code: `visible` as it nears the screen (or is pointed at or
@@ -55,18 +60,48 @@ function find(root: Element, mark: Mark): HTMLElement | undefined {
   return Array.from(root.getElementsByTagName(mark.tag)).find(same);
 }
 
-/** Presses the live control as a pointer would: some open on pointer down, others on click. */
+/**
+ * Presses the live control as a pointer would: some open on pointer down, others on click. A slider
+ * only takes focus: its drag wants a real pointer to capture, which a replay does not have.
+ */
 function press(target: HTMLElement) {
+  if (target.closest('[role="slider"]') !== null) {
+    target.focus({ preventScroll: true });
+    return;
+  }
   const init = { bubbles: true, cancelable: true, composed: true, button: 0, view: window };
-  target.dispatchEvent(
-    new PointerEvent('pointerdown', { ...init, pointerType: 'mouse', isPrimary: true }),
-  );
-  target.dispatchEvent(new MouseEvent('mousedown', init));
-  target.dispatchEvent(
-    new PointerEvent('pointerup', { ...init, pointerType: 'mouse', isPrimary: true }),
-  );
-  target.dispatchEvent(new MouseEvent('mouseup', init));
-  target.click();
+  const pointer = { ...init, pointerType: 'mouse', isPrimary: true };
+  try {
+    target.dispatchEvent(new PointerEvent('pointerdown', pointer));
+    target.dispatchEvent(new MouseEvent('mousedown', init));
+    target.dispatchEvent(new PointerEvent('pointerup', pointer));
+    target.dispatchEvent(new MouseEvent('mouseup', init));
+    target.click();
+  } catch {
+    // A control that refuses a replayed press keeps the focus it was given instead.
+    target.focus({ preventScroll: true });
+  }
+}
+
+/**
+ * Around a part the client loads during a navigation: if its code fails, load the page from the
+ * server instead (its HTML has the part in full) rather than showing the error screen.
+ */
+class LoadOrReload extends Component<{ to: string; children: ReactNode }, { failed: boolean }> {
+  override state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  override componentDidCatch() {
+    // The route being navigated to: the address bar may still show the page it came from.
+    window.location.assign(this.props.to);
+  }
+
+  override render() {
+    return this.state.failed ? null : this.props.children;
+  }
 }
 
 /** What a press can act on. A press anywhere else (text, a picture) just starts the load. */
@@ -109,6 +144,7 @@ export function deferred<P extends object>(
 
   function Deferred({ className, ...props }: P & { className?: string }) {
     const ref = useRef<HTMLDivElement>(null);
+    const pathname = usePathname();
     // True while hydrating server HTML, false when the client renders the part with no HTML to keep.
     const hydrating = useSyncExternalStore(
       noSubscribe,
@@ -228,7 +264,9 @@ export function deferred<P extends object>(
     } else if (fresh) {
       inner = (
         <div key="live" className="contents">
-          {createElement(Suspending, props as P)}
+          <LoadOrReload to={`${BASE_PATH}${pathname}`}>
+            {createElement(Suspending, props as P)}
+          </LoadOrReload>
         </div>
       );
     } else {
