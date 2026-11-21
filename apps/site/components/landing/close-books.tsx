@@ -258,8 +258,10 @@ export function CloseBooks() {
                   />
                 ))}
               </span>
-              <span className="sr-only">
-                Step {caption + 1} of {STEPS.length}:
+              {/* The dots only echo it: the position is in words too, not in colour alone. */}
+              <span className="me-2 tabular-nums">
+                Step {caption + 1} of {STEPS.length}
+                <span className="sr-only">:</span>
               </span>
               <span className="font-strong text-fg">{STEPS[caption].title}.</span>{' '}
               {STEPS[caption].text}
