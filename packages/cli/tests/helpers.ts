@@ -109,39 +109,6 @@ export function templateItem(): RegistryItem {
   return { ...body, integrity: itemIntegrity(body) };
 }
 
-/**
- * A skin item shaped like the ones the registry build makes, added to the built registry by
- * hand until the registry publishes its own skins.
- */
-export function skinItem(id: string): RegistryItem {
-  const content = `[data-skin="${id}"] {\n  --rx-radius-md: 2px;\n}\n`;
-  const body = {
-    schemaVersion: 1 as const,
-    name: `skin-${id}`,
-    version: '0.1.0',
-    type: 'skin' as const,
-    title: `${id} skin`,
-    description: `The ${id} skin.`,
-    categories: ['skin'],
-    dependencies: {},
-    devDependencies: {},
-    registryDependencies: ['tokens'],
-    requires: {},
-    files: [
-      {
-        path: `styles/skins/${id}.css`,
-        type: 'skin' as const,
-        target: `@styles/skins/${id}.css`,
-        content,
-        sha256: sha256Hex(content),
-      },
-    ],
-    skin: { id, tokens: ['--rx-radius-md'] },
-    docs: `Set data-skin="${id}" on <html> (or skin="${id}" on a ThemeScope) to use it.`,
-  };
-  return { ...body, integrity: itemIntegrity(body) };
-}
-
 /** Writes a hand-made item into a built registry folder: its body and its index entry. */
 function publish(dir: string, item: RegistryItem): void {
   for (const version of [undefined, item.version]) {
@@ -160,24 +127,63 @@ function publish(dir: string, item: RegistryItem): void {
     description: item.description,
     categories: item.categories,
     registryDependencies: item.registryDependencies,
+    ...(item.deprecated === undefined ? {} : { deprecated: item.deprecated }),
   });
   writeFileSync(indexFile, JSON.stringify(index));
 }
 
 /**
- * The real rectio registry plus one block, one small template and two skins, written to a temp
- * folder.
+ * A second, deprecated theme, made from the built default one. The real registry ships one theme
+ * and nothing deprecated, but the CLI still handles both, so the command tests keep a fixture.
  */
+function deprecatedThemeItem(dir: string): RegistryItem {
+  const base = JSON.parse(
+    readFileSync(join(dir, itemPath('theme-default')), 'utf8'),
+  ) as RegistryItem;
+  const files = base.files.map((file) => {
+    const content = file.content.replaceAll('"default"', '"ledger"');
+    return {
+      ...file,
+      path: file.path.replace('default.css', 'ledger.css'),
+      target: file.target.replace('default.css', 'ledger.css'),
+      content,
+      sha256: sha256Hex(content),
+    };
+  });
+  const body = {
+    ...base,
+    name: 'theme-ledger',
+    version: '0.2.4',
+    title: 'Ledger theme',
+    description:
+      'Deprecated: build your own from the ledger look in the theme generator. Green-black ink, citron accent, 2px corners, Source Serif 4 headings.',
+    deprecated:
+      'The ledger theme is no longer built in and will be removed in the next release. Make your own from the ledger look in the theme generator: https://shironex.github.io/rectio/docs/theming/generator',
+    // As the last published ledger theme: its own heading fonts, the tokens, and usage notes.
+    dependencies: {
+      ...base.dependencies,
+      '@fontsource-variable/schibsted-grotesk': '^5.3.0',
+      '@fontsource-variable/source-serif-4': '^5.3.1',
+    },
+    registryDependencies: ['tokens'],
+    docs: 'Set data-theme="ledger" on <html> (or wrap a subtree in ThemeScope) to use it.',
+    files,
+    ...(base.theme === undefined ? {} : { theme: { ...base.theme, id: 'ledger' } }),
+  };
+  // itemIntegrity hashes the body without its integrity field, so the copied one is replaced.
+  return { ...body, integrity: itemIntegrity(body) };
+}
+
+/** The real rectio registry plus a deprecated theme, one block and one small template, in a temp folder. */
 export function buildTestRegistry(): { dir: string; url: string; cleanup: () => void } {
   const temp = tempDir('rectio-cli-registry-');
   // The real templates are covered by the end-to-end test; command tests use the small one.
   const kit = { ...config };
   delete kit.templates;
   writeRegistry(temp.dir, buildRegistry(kit));
+  publish(temp.dir, deprecatedThemeItem(temp.dir));
   publish(temp.dir, blockItem());
   publish(temp.dir, templateItem());
-  publish(temp.dir, skinItem('dense'));
-  publish(temp.dir, skinItem('editorial'));
   return { ...temp, url: pathToFileURL(temp.dir).href };
 }
 
