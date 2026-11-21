@@ -12,6 +12,7 @@
     "test": "node --test tests/*.test.ts && vitest run --maxWorkers=2",
     "preview": "node scripts/serve.ts",
     "shoot": "node scripts/shoot.ts",
+    "measure-js": "node scripts/measure-js.ts",
     "showcase": "showcase all --config showcase/light.config.mjs && showcase hero --config showcase/light.config.mjs && showcase all --config showcase/dark.config.mjs && showcase hero --config showcase/dark.config.mjs",
     "templates": "node scripts/templates.ts",
     "previews": "node scripts/previews.ts build",
