@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ComponentProps,
   type KeyboardEvent,
   type PointerEvent,
@@ -27,6 +28,8 @@ interface GroupState {
   direction: ResizableDirection;
   /** Sizes the user set (or a saved layout), in percent by panel id. Empty until then. */
   sizes: Readonly<Record<string, number>>;
+  /** Each panel's default share, by panel id, once the panels have mounted. */
+  fallback: Readonly<Record<string, number>>;
   /** Every panel's size in percent now, measured when the user has not set them yet. */
   snapshot: () => Record<string, number>;
   register: (id: string, limits: PanelLimits) => () => void;
@@ -55,6 +58,7 @@ function useGroup(part: string): GroupState {
   return group;
 }
 
+const FREE: PanelLimits = { defaultSize: undefined, minSize: 0, maxSize: 100 };
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const storageName = (key: string) => `rectio:resizable:${key}`;
 
@@ -88,6 +92,40 @@ function defaultSizes(limits: readonly PanelLimits[]): number[] {
   return total === 0 ? sizes : sizes.map((size) => (size / total) * 100);
 }
 
+/** The panels that registered, in mount order, as a small store the group and panels read. */
+interface PanelStore {
+  subscribe: (listener: () => void) => () => void;
+  get: () => ReadonlyMap<string, PanelLimits>;
+  set: (id: string, limits: PanelLimits) => void;
+  remove: (id: string) => void;
+}
+
+function createPanelStore(): PanelStore {
+  let panels: ReadonlyMap<string, PanelLimits> = new Map();
+  const listeners = new Set<() => void>();
+  const change = (next: Map<string, PanelLimits>) => {
+    panels = next;
+    for (const listener of listeners) listener();
+  };
+  return {
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    get: () => panels,
+    set: (id, limits) => {
+      change(new Map(panels).set(id, limits));
+    },
+    remove: (id) => {
+      const next = new Map(panels);
+      next.delete(id);
+      change(next);
+    },
+  };
+}
+
 export type ResizablePanelGroupProps = Omit<ComponentProps<'div'>, 'dir'> & {
   /** `horizontal` (default): panels side by side. `vertical`: stacked. */
   direction?: ResizableDirection;
@@ -114,7 +152,14 @@ export function ResizablePanelGroup({
   ...props
 }: ResizablePanelGroupProps) {
   const node = useRef<HTMLDivElement | null>(null);
-  const registry = useRef(new Map<string, PanelLimits>());
+  const [store] = useState(createPanelStore);
+  const registered = useSyncExternalStore(store.subscribe, store.get, store.get);
+  // Panels without a default size share what the others leave, as soon as they have all mounted.
+  const fallback = useMemo(() => {
+    const ids = [...registered.keys()];
+    const next = defaultSizes(ids.map((id) => registered.get(id) ?? FREE));
+    return Object.fromEntries(ids.map((id, index) => [id, next[index] ?? 0]));
+  }, [registered]);
   // A saved layout applies from the first draw; without one each panel starts at its default.
   const [sizes, setSizes] = useState<Readonly<Record<string, number>>>(() =>
     readStored(storageKey),
@@ -173,13 +218,24 @@ export function ResizablePanelGroup({
     [panels],
   );
 
+  // Stable, so a panel registers once and not again on every resize.
+  const register = useCallback<GroupState['register']>(
+    (id, limits) => {
+      store.set(id, limits);
+      return () => {
+        store.remove(id);
+      };
+    },
+    [store],
+  );
+
   const state = useMemo<GroupState>(() => {
     const shift: GroupState['shift'] = (before, after, delta, from) => {
       const base = from ?? current();
       const a = base[before];
       const b = base[after];
-      const limitsA = registry.current.get(before);
-      const limitsB = registry.current.get(after);
+      const limitsA = store.get().get(before);
+      const limitsB = store.get().get(after);
       if (a === undefined || b === undefined || limitsA === undefined || limitsB === undefined) {
         return;
       }
@@ -194,13 +250,9 @@ export function ResizablePanelGroup({
     return {
       direction,
       sizes,
-      register: (id, limits) => {
-        registry.current.set(id, limits);
-        return () => {
-          registry.current.delete(id);
-        };
-      },
-      limits: (id) => registry.current.get(id),
+      fallback,
+      register,
+      limits: (id) => store.get().get(id),
       neighbours: (handle) => {
         const before = handle.previousElementSibling;
         const after = handle.nextElementSibling;
@@ -218,16 +270,14 @@ export function ResizablePanelGroup({
       },
       reset: () => {
         const ids = panels().map((panel) => panel.dataset.panelId ?? '');
-        const limits = ids.map(
-          (id) => registry.current.get(id) ?? { defaultSize: undefined, minSize: 0, maxSize: 100 },
-        );
+        const limits = ids.map((id) => store.get().get(id) ?? FREE);
         const next = defaultSizes(limits);
         commit(Object.fromEntries(ids.map((id, index) => [id, next[index] ?? 0])));
       },
       root: () => node.current,
       setDragging,
     };
-  }, [direction, sizes, commit, current, panels]);
+  }, [direction, sizes, fallback, store, register, commit, current, panels]);
 
   return (
     <GroupContext value={state}>
@@ -286,7 +336,7 @@ export function ResizablePanel({
     () => register(id, { defaultSize, minSize, maxSize }),
     [register, id, defaultSize, minSize, maxSize],
   );
-  const size = group.sizes[id] ?? defaultSize;
+  const size = group.sizes[id] ?? group.fallback[id] ?? defaultSize;
   return (
     <div
       id={id}

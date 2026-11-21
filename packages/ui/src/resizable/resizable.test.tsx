@@ -64,6 +64,20 @@ describe('Resizable', () => {
     expect(handle()).toHaveAttribute('aria-valuemax', '50');
   });
 
+  it('gives a panel without a default size what the others leave', () => {
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel id="a" defaultSize={38}>
+          A
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel id="b">B</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+    expect(flex('a')).toBeCloseTo(38);
+    expect(flex('b')).toBeCloseTo(62);
+  });
+
   it('moves with the arrow keys and stops at the limits', async () => {
     const onLayout = vi.fn();
     render(<Layout onLayout={onLayout} />);
