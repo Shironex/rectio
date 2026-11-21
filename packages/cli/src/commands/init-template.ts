@@ -15,6 +15,7 @@ import { countDependencies } from '../core/install.ts';
 import type { InstallOptions, InstallReport } from '../core/installer.ts';
 import { importsTailwind } from '../core/project.ts';
 import { createRegistryClient } from '../core/registry-client.ts';
+import { initGitRepo, type GitResult } from '../core/system.ts';
 import { projectContent } from '../core/transform.ts';
 import { commandRows, plural, wrap } from '../ui/layout.ts';
 import { Ui, type OutputOptions } from '../ui/output.ts';
@@ -38,6 +39,8 @@ export interface InitTemplateOptions extends InstallOptions, OutputOptions {
   force?: boolean;
   /** The data-theme the app starts on (every theme is installed). Default "default". */
   theme?: string;
+  /** Create a git repo with a first commit after the install. */
+  git?: boolean;
 }
 
 export interface TemplateFile {
@@ -119,17 +122,19 @@ export async function runInitTemplate(
   const root = resolve(ctx.cwd, options.dir ?? name);
   const shown = toProjectPath(ctx.cwd, root) || '.';
   const project: CliContext = { ...ctx, cwd: root };
-  const manager = managerFor(project);
+  const manager = options.manager ?? managerFor(project);
   const theme = options.theme ?? 'default';
-  ui.header('init', CLI_VERSION);
-  ui.rows([
-    ['template', name],
-    ['folder', shown],
-    ['theme', theme],
-    ['package manager', manager],
-  ]);
+  if (options.headerShown !== true) {
+    ui.header('init', CLI_VERSION);
+    ui.rows([
+      ['template', name],
+      ['folder', shown],
+      ['theme', theme],
+      ['package manager', manager],
+    ]);
+  }
   const dryRun = options.dryRun === true;
-  const steps = ui.steps(5);
+  const steps = ui.steps(options.git === true ? 6 : 5);
 
   const { client, entry } = await steps.run('Checking project', async (step) => {
     const registry = createRegistryClient(registryUrl(ctx, options.registry, undefined));
@@ -196,6 +201,18 @@ export async function runInitTemplate(
       },
     },
   );
+  let git: GitResult | undefined;
+  if (options.git === true) {
+    if (dryRun) steps.skip('Creating git repo', 'dry run');
+    else {
+      git = await steps.run('Creating git repo', (step) => {
+        const result = initGitRepo(root);
+        step.note = result.committed ? 'first commit made' : 'no commit';
+        if (result.reason !== undefined) step.warnings.push(result.reason);
+        return result;
+      });
+    }
+  }
   printVerbose(ui, report);
 
   const { s } = ui;
@@ -211,6 +228,9 @@ export async function runInitTemplate(
       `${String(files.length)} from the template, ${String(dryRun ? report.items.reduce((n, i) => n + i.files.length, 0) : report.files.length)} kit files`,
     ],
   ];
+  if (git !== undefined) {
+    rows.push(['Git', git.committed ? 'new repo, first commit made' : 'new repo, no commit yet']);
+  }
   const count = countDependencies(report.added);
   if (count > 0) {
     rows.push([

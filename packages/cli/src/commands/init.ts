@@ -42,6 +42,10 @@ export interface InitOptions extends InstallOptions, OutputOptions {
   framework?: string;
   /** Rewrite rectio.json even if it exists. */
   force?: boolean;
+  /** Import aliases for a new rectio.json; derived from tsconfig paths when unset. */
+  aliases?: RectioConfig['aliases'];
+  /** Items to add beside the base ones, such as a starter set of components. */
+  items?: readonly string[];
 }
 
 /** What init installs: the tokens (which pull in the default theme), the chosen theme and cn. */
@@ -49,7 +53,18 @@ export function baseItems(theme: string): string[] {
   return ['tokens', `theme-${theme}`, 'cn'];
 }
 
-function aliasHint(framework: Framework): string {
+/** The aliases init writes for an import prefix such as `@/`. */
+export function defaultAliases(prefix: string): RectioConfig['aliases'] {
+  return {
+    ui: `${prefix}components/ui`,
+    blocks: `${prefix}components/blocks`,
+    lib: `${prefix}lib`,
+    hooks: `${prefix}hooks`,
+    styles: `${prefix}styles/rectio`,
+  };
+}
+
+export function aliasHint(framework: Framework): string {
   const tsconfig = 'tsconfig.json: "compilerOptions": { "paths": { "@/*": ["./src/*"] } }';
   if (framework === 'next') return `Add ${tsconfig.replace('./src/*', './*')} (Next reads it).`;
   return `Add ${tsconfig}, and the same alias to vite.config (resolve.alias "@" -> ./src).`;
@@ -57,7 +72,7 @@ function aliasHint(framework: Framework): string {
 
 export async function runInit(ctx: CliContext, options: InitOptions = {}) {
   const ui = new Ui(ctx, options);
-  ui.header('init', CLI_VERSION);
+  if (options.headerShown !== true) ui.header('init', CLI_VERSION);
   const steps = ui.steps(4);
   const checked = await steps.run('Checking project', (step) => checkProject(ctx, options, step));
   const { existing, framework, tailwind, client } = checked;
@@ -65,7 +80,9 @@ export async function runInit(ctx: CliContext, options: InitOptions = {}) {
 
   const writeConfigFile =
     existing === undefined || options.force === true || existing.theme !== final.theme;
-  const report = await installSteps(steps, ctx, final, client, baseItems(final.theme), options, {
+  const extra = (options.items ?? []).filter((name) => !baseItems(final.theme).includes(name));
+  const names = [...baseItems(final.theme), ...extra];
+  const report = await installSteps(steps, ctx, final, client, names, options, {
     itemsLabel: 'item',
     beforeWrite: () => {
       if (!writeConfigFile) return 0;
@@ -80,7 +97,8 @@ export async function runInit(ctx: CliContext, options: InitOptions = {}) {
     ['Config', `${CONFIG_FILE}${writeConfigFile ? '' : s.dim(' (kept)')}`],
     ['Theme', final.theme],
     ['Tailwind', tailwind.version],
-    ...installRows(report, s, { manager: managerFor(ctx) }),
+    ...(extra.length === 0 ? [] : ([['Components', extra.join(', ')]] satisfies Rows)),
+    ...installRows(report, s, { manager: options.manager ?? managerFor(ctx) }),
   ];
   const lines = [
     report.dryRun
@@ -165,13 +183,7 @@ async function checkProject(ctx: CliContext, options: InitOptions, step: StepHan
           framework,
           css,
           theme: options.theme ?? existing?.theme ?? 'default',
-          aliases: {
-            ui: `${prefix}components/ui`,
-            blocks: `${prefix}components/blocks`,
-            lib: `${prefix}lib`,
-            hooks: `${prefix}hooks`,
-            styles: `${prefix}styles/rectio`,
-          },
+          aliases: options.aliases ?? defaultAliases(prefix),
         };
   const theme = options.theme ?? config.theme;
   const client = createRegistryClient(registryUrl(ctx, options.registry, config));

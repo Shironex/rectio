@@ -93,7 +93,7 @@ export async function installSteps(
   else if (count === 0) steps.skip('Installing packages', 'nothing new');
   else if (options.install === false) steps.skip('Installing packages', '--no-install');
   else {
-    const chosen = managerFor(ctx);
+    const chosen = options.manager ?? managerFor(ctx);
     await steps.run('Installing packages', async (step) => {
       await runInstall(ctx.cwd, chosen);
       step.note = `${chosen}, ${plural(count, 'package')}`;

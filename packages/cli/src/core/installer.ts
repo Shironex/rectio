@@ -20,6 +20,8 @@ export interface InstallOptions {
   dryRun?: boolean;
   /** Run the package manager after writing (default true). */
   install?: boolean;
+  /** The package manager to install with; detected from the project when unset. */
+  manager?: PackageManager;
 }
 
 export type FileAction = 'create' | 'update' | 'unchanged' | 'conflict';

@@ -16,6 +16,8 @@ export interface OutputOptions {
   quiet?: boolean;
   /** Every item and file, not the summary by folder. */
   verbose?: boolean;
+  /** The interactive flow already printed the header and the recap. */
+  headerShown?: boolean;
 }
 
 /** Where a failure happened, for the error block. */
