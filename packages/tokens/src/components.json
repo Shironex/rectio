@@ -99,6 +99,13 @@
         "$value": "{surface.inset}"
       }
     },
+    "alert-dialog": {
+      "width": {
+        "$type": "dimension",
+        "$value": "{size.400}",
+        "$description": "Narrower than a dialog: a short question and two answers read as one block."
+      }
+    },
     "money": {
       "family": {
         "$type": "fontFamily",
