@@ -111,9 +111,9 @@ export function DataTableFacetFilter<TData extends RowData>({
     <Menu>
       <MenuTrigger
         render={
+          // Medium, so the trigger stands level with the search box beside it.
           <Button
             variant="secondary"
-            size="sm"
             data-active={selected.length > 0 || undefined}
             aria-label={
               selected.length > 0
@@ -195,6 +195,7 @@ export function DataTableToolbar<TData extends RowData>({
   className,
 }: DataTableToolbarProps<TData>) {
   const filtered = isDataTableFiltered(table);
+  // With no row left, the table body offers the same button where the eye already is.
   const shown = table.getFilteredRowModel().rows.length;
   const total = table.getCoreRowModel().rows.length;
   const number = new Intl.NumberFormat(locale);
@@ -213,10 +214,9 @@ export function DataTableToolbar<TData extends RowData>({
         <span role="status" aria-live="polite" className="numeric text-sm text-fg-muted">
           {filtered ? count : ''}
         </span>
-        {filtered && (
+        {filtered && shown > 0 && (
           <Button
             variant="ghost"
-            size="sm"
             onClick={() => {
               clearDataTableFilters(table);
             }}

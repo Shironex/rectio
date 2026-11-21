@@ -123,6 +123,8 @@ describe('DataTable filters', () => {
     render(<Invoices />);
     const search = screen.getByRole('searchbox', { name: 'Search invoices' });
     await user.type(search, 'nobody');
+    // One Clear filters, in the body, once no row is left.
+    expect(toolbar().queryByRole('button', { name: 'Clear filters' })).toBeNull();
     await user.click(within(tableBody()).getByRole('button', { name: 'Clear filters' }));
     expect(bodyRows()).toHaveLength(4);
     expect(search).toHaveValue('');
