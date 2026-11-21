@@ -359,6 +359,7 @@ export default defineRegistry({
         'date-picker/date-picker.tsx',
         'date-picker/date-format.ts',
         'date-picker/range-calendar.tsx',
+        'date-picker/range-format.ts',
       ],
     },
     {
@@ -379,7 +380,7 @@ export default defineRegistry({
       description:
         'One event with its time, length, place and attendees, coloured by kind, in full and compact variants.',
       categories: ['scheduling'],
-      files: ['event-card/event-card.tsx'],
+      files: ['event-card/event-card.tsx', 'event-card/event-time.ts'],
     },
     {
       name: 'toast',

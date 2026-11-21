@@ -2,7 +2,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { EventCard, formatEventLength, formatEventTime } from './event-card';
+import { EventCard } from './event-card';
+import { formatEventLength, formatEventTime } from './event-time';
 
 const at = (day: number, hour: number, minute = 0) => new Date(2026, 2, day, hour, minute);
 

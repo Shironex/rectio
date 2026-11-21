@@ -5,12 +5,8 @@ import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { resolveDateLocale } from '../calendar/locales';
-import {
-  RangeCalendar,
-  formatDateRange,
-  rangeLength,
-  type DateRangePreset,
-} from './range-calendar';
+import { RangeCalendar, type DateRangePreset } from './range-calendar';
+import { formatDateRange, rangeLength } from './range-format';
 
 const MARCH = new Date(2026, 2, 1);
 

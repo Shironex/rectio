@@ -1,8 +1,10 @@
+'use client';
+
 import { Field as BaseField } from '@base-ui/react/field';
 import { ClockIcon } from '@phosphor-icons/react';
 import { useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
 
-import { controlSurface } from '../field/field';
+import { controlSurface } from '../field/control-styles';
 import { cn } from '../lib/cn';
 import {
   clampTime,

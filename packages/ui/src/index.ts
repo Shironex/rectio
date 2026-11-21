@@ -119,21 +119,18 @@ export {
   parseDate,
   type DateDisplayFormat,
 } from './date-picker/date-format';
+export { formatDateRange, rangeLength } from './date-picker/range-format';
 export {
   RangeCalendar,
   RangePresets,
-  formatDateRange,
-  rangeLength,
   type DateRangePreset,
   type RangeCalendarProps,
 } from './date-picker/range-calendar';
 export type { DateRange } from '@daypicker/react';
 export { TimeField, type TimeFieldProps } from './time-field/time-field';
+export { formatEventLength, formatEventStart, formatEventTime } from './event-card/event-time';
 export {
   EventCard,
-  formatEventLength,
-  formatEventStart,
-  formatEventTime,
   type EventCardProps,
   type EventStatus,
   type EventTone,
