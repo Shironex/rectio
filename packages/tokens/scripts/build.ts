@@ -16,6 +16,7 @@ import {
   COLOR_GROUPS,
   MODES,
   PRIMITIVE_GROUPS,
+  NO_SKIN,
   SKINS,
   THEMES,
   cssVarName,
@@ -141,14 +142,24 @@ function selectorsFor(theme: Theme) {
 }
 
 /**
- * Selectors of a skin. A skin beats a theme on the same element and on any theme inside it, and is
- * written after the themes so it also beats `:root`.
+ * Selectors of a skin. A skin beats a theme on the same element, and is written after the themes so
+ * it also beats `:root`.
  */
 const skinSelectors = (skin: string) => [
   `[data-skin="${skin}"]`,
   `[data-skin="${skin}"][data-theme]`,
-  `[data-skin="${skin}"] [data-theme]`,
 ];
+
+/**
+ * A theme inside a skin, with no skin of its own: its theme rule sets every token again, so it takes
+ * the skin's tokens back from its parent with `inherit`. Inheritance reaches the nearest skin around
+ * it at any depth, so when skins nest the closest one wins whatever order the rules are written in.
+ * `:where` keeps the weight of one attribute, so compact density, written later and heavier, still
+ * applies on top. `data-skin="none"` names no skin, so it stops an outer skin and leaves the theme's
+ * own values.
+ */
+const skinInsideSelector = (skin: string) =>
+  `[data-skin="${skin}"] :where([data-theme]:not([data-skin]))`;
 
 /** Compact density, written after the skins: it applies on top of any skin, inside or around it. */
 const DENSITY_SELECTORS = [
@@ -204,6 +215,10 @@ function themesCss(
         ...declarations(tokens),
         ...declarations(refs),
       ])}`,
+      block(
+        [skinInsideSelector(skin)],
+        [...tokens.keys(), ...refs.keys()].map((name) => `${name}: inherit;`),
+      ),
     );
   }
   parts.push(block(DENSITY_SELECTORS, [...declarations(compact), ...declarations(componentRefs)]));
@@ -467,6 +482,7 @@ async function main() {
   const skins = new Map<string, TokenMap>();
   const skinned = new Map<string, TokenMap>();
   for (const skin of SKINS) {
+    if (skin === NO_SKIN) throw new Error(`"${NO_SKIN}" turns a skin off; no skin may use the id`);
     skins.set(skin, await resolveSkin(skin));
     for (const theme of THEMES)
       for (const mode of MODES)

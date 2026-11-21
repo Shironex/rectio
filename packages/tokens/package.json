@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
+    "jsdom": "^31.0.0",
     "vitest": "^5.1.0"
   },
   "description": "Design tokens for rectio: DTCG sources, CSS variables and a Tailwind v4 theme.",

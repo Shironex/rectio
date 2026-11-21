@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { SKINS, skinViolation } from '../scripts/naming.ts';
+import { NO_SKIN, SKINS, skinViolation } from '../scripts/naming.ts';
 
 interface Built {
   contract: { name: string; type: string }[];
@@ -47,6 +47,7 @@ describe('skin contract', () => {
       .sort();
     expect(files).toEqual([...SKINS].sort());
     expect(Object.keys(built.skins).sort()).toEqual([...SKINS].sort());
+    expect(SKINS).not.toContain(NO_SKIN);
   });
 
   it.each(SKINS)('%s overrides only contract tokens, never colour, shadow or motion', (skin) => {
@@ -95,11 +96,18 @@ describe('skin contract', () => {
 });
 
 describe('skin css', () => {
-  it.each(SKINS)('%s beats a theme on the same element and inside it', (skin) => {
-    expect(css).toContain(
-      `[data-skin="${skin}"],\n[data-skin="${skin}"][data-theme],\n[data-skin="${skin}"] [data-theme] {`,
-    );
-  });
+  it.each(SKINS)(
+    '%s beats a theme on the same element, and a theme inside takes it back',
+    (skin) => {
+      expect(css).toContain(`[data-skin="${skin}"],\n[data-skin="${skin}"][data-theme] {`);
+      // A theme inside the skin takes every skin token back from its parent: the nearest skin wins.
+      const inside = new RegExp(
+        `\\[data-skin="${skin}"\\] :where\\(\\[data-theme\\]:not\\(\\[data-skin\\]\\)\\) \\{([^}]*)\\}`,
+      ).exec(css)?.[1];
+      for (const name of Object.keys(built.skins[skin]?.tokens ?? {}))
+        expect(inside, name).toContain(`${name}: inherit;`);
+    },
+  );
 
   it('writes the skins after the themes and before compact density', () => {
     const lastTheme = css.lastIndexOf('[data-theme="default"]');
@@ -115,7 +123,7 @@ describe('skin css', () => {
   });
 
   it('redeclares the component tokens that alias what a skin changes', () => {
-    const block = /\[data-skin="dense"\] \[data-theme\] \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    const block = /\[data-skin="dense"\]\[data-theme\] \{([^}]*)\}/.exec(css)?.[1] ?? '';
     expect(block).toContain('--rx-button-height-md: var(--rx-control-height-md);');
     expect(block).toContain('--rx-field-radius: var(--rx-radius-control);');
     expect(block).toContain('--rx-tree-row-height: var(--rx-control-height-sm);');

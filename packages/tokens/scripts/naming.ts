@@ -12,6 +12,9 @@ export type Mode = (typeof MODES)[number];
  */
 export const SKINS: readonly string[] = ['dense', 'editorial'];
 
+/** `data-skin="none"` turns an outer skin off for a subtree, so no skin may take the id. */
+export const NO_SKIN = 'none';
+
 /**
  * The skin contract: the token groups a skin may override. Type, corners, border width, rhythm and
  * control sizes, plus non-colour component tokens. Colour, shadow and motion belong to the theme

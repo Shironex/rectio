@@ -747,7 +747,9 @@ describe('the rectio registry', () => {
     expect(file?.type).toBe('skin');
     expect(file?.target).toBe('@styles/skins/editorial.css');
     expect(file?.content).toContain("@import '@fontsource/ibm-plex-serif/500.css';");
-    expect(file?.content).toContain('[data-skin="editorial"] [data-theme] {');
+    expect(file?.content).toContain(
+      '[data-skin="editorial"] :where([data-theme]:not([data-skin])) {',
+    );
     expect(file?.content).not.toContain('[data-skin="dense"]');
     expect(editorial?.docs).toContain('data-skin="editorial"');
 
