@@ -18,7 +18,7 @@ Commands
 Options
   --cwd <dir>         project folder (default: the current folder)
   --registry <url>    registry URL or folder (also RECTIO_REGISTRY_URL)
-  --theme <id>        init: theme to install (default: default)
+  --theme <id>        init: theme id or theme generator link (default: default)
   --css <path>        init: CSS file that imports Tailwind
   --framework <name>  init: vite, next or tanstack-start, when detection fails
   --template <name>   init: create a new project from this template, in [folder]

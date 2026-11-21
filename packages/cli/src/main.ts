@@ -20,6 +20,7 @@ import { commandRows } from './ui/layout.ts';
 import { printError, Ui } from './ui/output.ts';
 import { CLI_VERSION } from './version.ts';
 import { cliCommand, detectRunner, setRunner } from './core/runner.ts';
+import { themeFromFlag } from './core/theme-source.ts';
 
 type HelpRows = [string, string][];
 
@@ -39,7 +40,7 @@ const COMMANDS: HelpRows = [
 const FLAGS: HelpRows = [
   ['--cwd <dir>', 'project folder (default: the current folder)'],
   ['--registry <url>', 'registry URL or folder (also RECTIO_REGISTRY_URL)'],
-  ['--theme <id>', 'init: theme to install (default: default)'],
+  ['--theme <id>', 'init: theme id or theme generator link (default: default)'],
   ['--css <path>', 'init: CSS file that imports Tailwind'],
   ['--framework <name>', 'init: vite, next or tanstack-start, when detection fails'],
   ['--template <name>', 'init: create a new project from this template, in [folder]'],
@@ -195,8 +196,15 @@ async function runCommand(
         const chosen = {
           ...(manager === undefined ? {} : { manager }),
         };
+        // --theme takes a registry id or a theme generator link, through the one theme seam.
+        const theme = values.theme === undefined ? undefined : themeFromFlag(values.theme);
         if (values.template !== undefined) {
           if (rest.length > 1) throw new CliError('init --template takes one folder name');
+          if (theme?.kind === 'url')
+            throw new CliError(
+              'init --template takes a registry theme, not a theme link',
+              `Add the theme once the app exists: \`${cliCommand("add '<theme link>'")}\`.`,
+            );
           await runInitTemplate(ctx, values.template, {
             ...install,
             ...chosen,
@@ -245,10 +253,13 @@ async function runCommand(
           ...install,
           ...chosen,
           force: values.force === true,
-          ...(values.theme === undefined ? {} : { theme: values.theme }),
+          ...(theme === undefined ? {} : { theme: theme.kind === 'url' ? 'default' : theme.id }),
           ...(values.css === undefined ? {} : { css: values.css }),
           ...(values.framework === undefined ? {} : { framework: values.framework }),
         });
+        // A generated theme goes on top of default, as `rectio add <theme link>` would put it.
+        if (theme?.kind === 'url' && !install.dryRun)
+          await runAdd(ctx, [theme.url], { ...install, ...chosen });
         return 0;
       }
       case 'add':

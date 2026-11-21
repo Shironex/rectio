@@ -8,3 +8,4 @@
 - The theme installs as `theme-<name>` (default `theme-custom`) with the font packages it imports, and `rectio.lock.json` keeps its code.
 - `rectio diff theme-<name>` compares your file with a rebuild of the theme over the current default theme, and `rectio update` lists a generated theme whose rebuild has changed, with the `rectio add <code> --overwrite` that regenerates it.
 - A bare theme code works in place of the link.
+- `rectio init` takes a theme link at its theme question or in `--theme`: it sets up the default theme, then adds the linked theme on top.

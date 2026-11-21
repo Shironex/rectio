@@ -2,6 +2,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 
 import type { IndexEntry } from '@rectio/registry';
+import { isThemeReference } from '@rectio/tokens/generator';
 
 import {
   FRAMEWORKS,
@@ -25,7 +26,13 @@ import {
 import { createRegistryClient } from '../core/registry-client.ts';
 import { cliCommand } from '../core/runner.ts';
 import { commandExists, insideGitRepo } from '../core/system.ts';
-import { resolveThemeSource, THEME_GENERATOR_URL, type ThemeSource } from '../core/theme-source.ts';
+import {
+  resolveThemeSource,
+  themeFromFlag,
+  themeLabel,
+  THEME_GENERATOR_URL,
+  type ThemeSource,
+} from '../core/theme-source.ts';
 import type { Choice, Prompter } from '../prompt/prompts.ts';
 import type { PromptIO } from '../prompt/session.ts';
 import type { Ui } from '../ui/output.ts';
@@ -200,7 +207,7 @@ async function askTheme(ask: Prompter): Promise<ThemeSource> {
   const url = await ask.text({
     message: 'Theme URL',
     validate: (value) => {
-      if (!/^https?:\/\//i.test(value)) return 'paste the URL from the generator (https://...)';
+      if (!isThemeReference(value)) return 'paste the URL from the generator (https://...)';
       const result = resolveThemeSource(value);
       return result.ok ? undefined : result.message;
     },
@@ -210,6 +217,7 @@ async function askTheme(ask: Prompter): Promise<ThemeSource> {
   return result.source;
 }
 
+/** rectio.json names a registry theme; a generated one is written over default. */
 const themeId = (source: ThemeSource) => (source.kind === 'registry' ? source.id : 'default');
 
 /** After the setup: a theme URL goes through `rectio add <theme-url>`, as if typed by hand. */
@@ -255,7 +263,7 @@ async function templateFlow(ctx: CliContext, flags: InitFlags, ask: Prompter, ui
   const shown = toProjectPath(ctx.cwd, root) || '.';
 
   const theme: ThemeSource =
-    flags.theme === undefined ? await askTheme(ask) : { kind: 'registry', id: flags.theme };
+    flags.theme === undefined ? await askTheme(ask) : themeFromFlag(flags.theme);
 
   const detected = managerFor({ ...ctx, cwd: root });
   const manager =
@@ -291,7 +299,7 @@ async function templateFlow(ctx: CliContext, flags: InitFlags, ask: Prompter, ui
 
   recap(ui, [
     `${name} into ${shown}`,
-    `${themeId(theme)} theme`,
+    themeLabel(theme),
     manager,
     install ? 'install' : 'no install',
     gitNote ?? (git ? 'git repo' : 'no git'),
@@ -369,7 +377,7 @@ async function existingFlow(
     headerShown: true,
   };
   const recapParts: string[] = [];
-  let theme: ThemeSource = { kind: 'registry', id: flags.theme ?? existing?.theme ?? 'default' };
+  let theme: ThemeSource = themeFromFlag(flags.theme ?? existing?.theme ?? 'default');
 
   if (keepConfig) {
     ui.line(ui.s.dim('rectio.json found: its framework, CSS entry, aliases and theme are kept.'));
@@ -393,7 +401,7 @@ async function existingFlow(
     const aliases = await askAliases(ask, ctx.cwd, framework);
     if (flags.theme === undefined) theme = await askTheme(ask);
     Object.assign(options, { framework, css, aliases });
-    recapParts.push(FRAMEWORK_LABELS[framework], css, `${themeId(theme)} theme`);
+    recapParts.push(FRAMEWORK_LABELS[framework], css, themeLabel(theme));
   }
   options.theme = themeId(theme);
 

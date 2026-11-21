@@ -2,6 +2,8 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { encodeTheme, generatorPresets, type GeneratorData } from '@rectio/tokens/generator';
+import generatorData from '@rectio/tokens/generator.json' with { type: 'json' };
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -55,6 +57,17 @@ function start(term: FakeTerminal, args: string[]) {
 }
 
 const files = (dir: string) => readdirSync(dir).sort();
+
+const themeCode = encodeTheme({
+  ...structuredClone(
+    generatorPresets((generatorData as unknown as GeneratorData).presets)[1]?.inputs ??
+      (() => {
+        throw new Error('no generator preset');
+      })(),
+  ),
+  name: 'acme',
+});
+const themeUrl = `https://example.com/rectio/docs/theming/generator?theme=${themeCode}`;
 
 describe('interactive init: a new app from a template', () => {
   it('asks template, folder, theme, package manager and install, then creates the app', async () => {
@@ -155,7 +168,7 @@ describe('interactive init: a new app from a template', () => {
     expect(files(cwd)).toEqual(['books']);
   });
 
-  it('refuses a theme URL until the generator support lands, and asks again', async () => {
+  it('asks again for anything that is not a theme link, and refuses a damaged one', async () => {
     const cwd = folder();
     const term = fakeTerminal(cwd, MANAGERS_ONLY());
     const run = start(term, ['init', '--dry-run']);
@@ -165,11 +178,19 @@ describe('interactive init: a new app from a template', () => {
     expect(term.screen()).toContain('paste the URL from the generator (https://...)');
     await term.type(KEY.ctrlC);
     expect(await run).toBe(130);
+    expect(resolveThemeSource(themeUrl)).toEqual({
+      ok: true,
+      source: { kind: 'url', url: themeUrl },
+    });
+    expect(resolveThemeSource(themeCode)).toEqual({
+      ok: true,
+      source: { kind: 'url', url: themeCode },
+    });
     expect(
-      resolveThemeSource('https://shironex.github.io/rectio/docs/theming/generator#t=x'),
+      resolveThemeSource('https://shironex.github.io/rectio/docs/theming/generator?theme=1.x'),
     ).toEqual({
       ok: false,
-      message: 'theme URLs need a newer @rectio/cli; choose default for now',
+      message: 'that theme link does not hold a theme: the theme code is damaged',
     });
     expect(resolveThemeSource('default')).toEqual({
       ok: true,
@@ -204,6 +225,22 @@ describe('interactive init: rectio in an existing app', () => {
     expect(existsSync(join(cwd, 'src/components/ui/button.tsx'))).toBe(true);
     expect(existsSync(join(cwd, 'src/components/ui/dialog.tsx'))).toBe(true);
     expect(read(cwd, 'rectio.json')).toContain('"ui": "@/components/ui"');
+  });
+
+  it('installs a theme pasted from the generator after the setup', async () => {
+    const cwd = folder(VITE_APP);
+    const term = fakeTerminal(cwd, MANAGERS_ONLY());
+    const run = start(term, ['init', '--no-install']);
+    await term.type(KEY.enter, KEY.enter, KEY.enter, 'y'); // this project, Vite, CSS, aliases
+    await term.type('j', KEY.enter); // Paste a theme URL
+    await term.type(themeUrl, KEY.enter);
+    await term.type(KEY.enter); // no components
+    expect(await run).toBe(0);
+
+    expect(term.screen()).toContain('Vite, src/index.css, acme theme from a link, no components');
+    expect(read(cwd, 'rectio.json')).toContain('"theme": "default"');
+    expect(read(cwd, 'src/styles/rectio/themes/acme.css')).toContain('[data-theme="acme"]');
+    expect(read(cwd, 'rectio.lock.json')).toContain(`"themeCode": "${themeCode}"`);
   });
 
   it('lets the user edit the aliases, checked against the tsconfig paths', async () => {

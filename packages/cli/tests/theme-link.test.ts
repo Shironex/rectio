@@ -165,4 +165,20 @@ describe('add <theme link>', () => {
       expect.arrayContaining(['button', 'theme-custom']),
     );
   });
+
+  it('takes a theme link in init --theme: default first, then the theme on top', async () => {
+    const temp = tempDir('rectio-cli-theme-');
+    cleanups.push(temp.cleanup);
+    writeTree(temp.dir, VITE_APP);
+    const run = capture(temp.dir);
+    const args = ['init', '--yes', '--no-install', '--registry', registry.url];
+    expect(await main([...args, '--theme', link(preset('ink'))], run.ctx)).toBe(0);
+    expect(read(temp.dir, 'rectio.json')).toContain('"theme": "default"');
+    expect(Object.keys(readLock(temp.dir).items)).toEqual(
+      expect.arrayContaining(['theme-default', 'theme-custom']),
+    );
+    const refused = capture(temp.dir);
+    expect(await main([...args, '--theme', 'https://example.com/?theme=1.x'], refused.ctx)).toBe(1);
+    expect(refused.err.join('\n')).toContain('that theme link does not hold a theme');
+  });
 });
