@@ -100,7 +100,7 @@ const CATEGORIES = [
 const ROWS = [
   { merchant: 'Lufthansa', amount: -412.8 },
   { merchant: 'Hotel Bristol', amount: -538 },
-  { merchant: 'Refund, Bahn', amount: 89.9 },
+  { merchant: 'Hotel Bristol, refund', amount: 61 },
 ];
 
 /** One specimen: the component's name, linking to its page, over the component itself, live. */
