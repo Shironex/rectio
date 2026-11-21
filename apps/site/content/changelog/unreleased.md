@@ -17,23 +17,6 @@ summary: Work that is merging into main now and ships with the next release.
 - Sheet takes a `full` size for whole-screen panels.
 - The KPI row writes counts, durations and currency as well as money and percentages.
 - The FAQ block draws its questions with the kit Accordion.
-
-## Templates
-
-- Every template sends its links through the link provider, so the live previews under
-  `/preview/<name>/` follow their base path with no prefix in the data.
-- The SaaS admin template has a page for an address that does not exist.
-
-## Themes
-
-- Graphite becomes the new default dark mode.
-- The ledger theme retires and lives on as a theme generator preset.
-- `theme-ledger` leaves the registry after one release marked deprecated. Projects that installed
-  it keep their file; for a new project, make the look from the ledger preset in the theme
-  generator.
-
-## Kit
-
 - `SegmentedControl`: the toggle group driven by a list of options and one value, with counts on
   options and two even columns on a phone. The motion indicator now glides on both axes. Block
   filters use it in place of their own control.
@@ -48,6 +31,22 @@ summary: Work that is merging into main now and ships with the next release.
   when opened, and `useTreeChildren` to reload them.
 - Resizable panels with keyboard handles, size limits and a layout kept per browser.
 - `ScrollArea` takes `focusableViewport={false}` when its content holds the focus itself.
+- Focus rings show again on the scroll area viewport, tab panels and scrollable code blocks, and
+  a lint rule catches a class list whose ring would draw nothing.
+
+## Templates
+
+- Every template sends its links through the link provider, so the live previews under
+  `/preview/<name>/` follow their base path with no prefix in the data.
+- The SaaS admin template has a page for an address that does not exist.
+
+## Themes
+
+- Graphite becomes the new default dark mode.
+- The ledger theme retires and lives on as a theme generator preset.
+- `theme-ledger` leaves the registry after one release marked deprecated. Projects that installed
+  it keep their file; for a new project, make the look from the ledger preset in the theme
+  generator.
 
 ## CLI
 
