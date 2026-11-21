@@ -1,14 +1,13 @@
 'use client';
 
 import {
-  Suspense,
-  lazy,
+  createElement,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type ComponentType,
-  type LazyExoticComponent,
 } from 'react';
 
 /**
@@ -17,66 +16,83 @@ import {
  */
 export type DeferWhen = 'visible' | 'never';
 
-interface Gate<P> {
-  open: () => void;
-  Part: LazyExoticComponent<ComponentType<P>>;
-}
+/** Hydrating this keeps the server's markup as it is: React does not look inside it. */
+const KEEP = { __html: '' };
 
-function makeGate<P>(load: () => Promise<ComponentType<P>>): Gate<P> {
-  // The server renders the part straight away, so the exported HTML has it in full.
-  if (typeof window === 'undefined') {
-    return { open: () => undefined, Part: lazy(() => load().then((Part) => ({ default: Part }))) };
+const noSubscribe = () => () => undefined;
+
+/** Where `node` sits under `root`, as child indexes, to find its twin once the part is live. */
+function pathTo(root: Element, node: Element): number[] | undefined {
+  const path: number[] = [];
+  for (let at: Element = node; at !== root;) {
+    const parent = at.parentElement;
+    if (parent === null) return undefined;
+    path.unshift(Array.prototype.indexOf.call(parent.children, at));
+    at = parent;
   }
-  let open: () => void = () => undefined;
-  const ready = new Promise<undefined>((resolve) => {
-    open = () => {
-      resolve(undefined);
-    };
-  });
-  return { open, Part: lazy(() => ready.then(load).then((Part) => ({ default: Part }))) };
+  return path;
+}
+
+function follow(root: Element, path: readonly number[]): HTMLElement | undefined {
+  let at: Element | undefined = root;
+  for (const index of path) at = at?.children[index];
+  return at instanceof HTMLElement ? at : undefined;
 }
 
 /**
- * The server's HTML of a part, frozen, for the rare case React must render the part on the client
- * before its code is in (a change of site mode reaches every part still waiting). Comments are the
- * markers React left in it, not content.
- */
-function Frozen({ read, onShow }: { read: () => string; onShow: () => void }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useLayoutEffect(() => {
-    if (ref.current !== null) ref.current.innerHTML = read();
-    onShow();
-  }, [read, onShow]);
-  return <div ref={ref} className="contents" />;
-}
-
-/**
- * Wraps a client part so it is rendered on the server and shown from the HTML at once, but its
- * JavaScript loads, and it hydrates, only when `when` says so. Until then React leaves the server's
- * markup in place: the part is visible and laid out, it only does nothing yet. The part's module
- * must be imported nowhere else on the page, or its code ships with the page anyway.
+ * Wraps a client part so the server renders it in full (the HTML has it, readable without
+ * JavaScript, with no Suspense boundary that a script would have to reveal), while its JavaScript
+ * loads only when `when` says so. Until then the client keeps the server's markup untouched, not
+ * hydrated; then the part mounts live in its place. A press on a control in between is held and
+ * replayed on the live part, and focus moves across with it; links work as plain HTML throughout.
+ *
+ * `onServer` is the part itself, taken synchronously on the server only (see parts.tsx). The
+ * part's module must be imported nowhere else on the page, or its code ships with the page anyway.
  */
 export function deferred<P extends object>(
   load: () => Promise<ComponentType<P>>,
+  onServer: ComponentType<P> | undefined,
   when: DeferWhen = 'visible',
 ) {
   function Deferred({ className, ...props }: P & { className?: string }) {
     const ref = useRef<HTMLDivElement>(null);
-    const [gate] = useState(() => makeGate(load));
-    // Kept in a ref, not state: re-rendering this wrapper would hand the waiting part new props,
-    // and React would then render it on the client at once instead of waiting.
-    const snapshot = useRef('');
-    const [read] = useState(() => () => snapshot.current);
-    const { Part } = gate;
+    // True while hydrating server HTML, false when the client renders the part with no HTML to keep
+    // (a navigation inside the site): then the part loads at once.
+    const hydrating = useSyncExternalStore(
+      noSubscribe,
+      () => false,
+      () => true,
+    );
+    const [fresh] = useState(() => !hydrating);
+    const [Live, setLive] = useState<ComponentType<P> | null>(null);
+    const held = useRef<{ press?: number[] | undefined; focus?: number[] | undefined }>({});
 
     useEffect(() => {
       const element = ref.current;
-      if (element === null) return;
-      snapshot.current = element.innerHTML.replaceAll(/<!--[\s\S]*?-->/g, '');
-      if (when === 'never') return;
+      if (element === null || Live !== null || (when === 'never' && !fresh)) return;
+      let started = false;
+      let gone = false;
       const open = () => {
-        cleanup();
-        gate.open();
+        if (started) return;
+        started = true;
+        stopWatching();
+        void load().then((Part) => {
+          if (gone) return;
+          const kept = element.firstElementChild;
+          const focused = document.activeElement;
+          if (kept !== null && focused !== null && kept.contains(focused)) {
+            held.current.focus = pathTo(kept, focused);
+          }
+          setLive(() => Part);
+        });
+      };
+      const hold = (event: MouseEvent) => {
+        const kept = element.firstElementChild;
+        if (!(event.target instanceof Element) || kept === null) return;
+        if (event.target.closest('a[href]') !== null) return;
+        event.preventDefault();
+        held.current.press = pathTo(kept, event.target);
+        open();
       };
       const observer = new IntersectionObserver(
         ([entry]) => {
@@ -84,22 +100,64 @@ export function deferred<P extends object>(
         },
         { rootMargin: '25% 0px' },
       );
-      observer.observe(element);
-      element.addEventListener('pointerover', open);
-      element.addEventListener('focusin', open);
-      function cleanup() {
+      function stopWatching() {
         observer.disconnect();
         element?.removeEventListener('pointerover', open);
         element?.removeEventListener('focusin', open);
       }
-      return cleanup;
-    }, [gate]);
+      element.addEventListener('click', hold, true);
+      if (fresh) {
+        open();
+      } else {
+        observer.observe(element);
+        element.addEventListener('pointerover', open);
+        element.addEventListener('focusin', open);
+      }
+      return () => {
+        gone = true;
+        stopWatching();
+        element.removeEventListener('click', hold, true);
+      };
+    }, [Live, fresh]);
 
+    // Once live, give back what happened while the code was on its way.
+    useLayoutEffect(() => {
+      const live = ref.current?.firstElementChild;
+      if (Live === null || live === null || live === undefined) return;
+      const { press, focus } = held.current;
+      held.current = {};
+      if (focus !== undefined) follow(live, focus)?.focus({ preventScroll: true });
+      if (press !== undefined) follow(live, press)?.click();
+    }, [Live]);
+
+    let inner;
+    if (Live !== null) {
+      inner = (
+        <div key="live" className="contents">
+          {createElement(Live, props as P)}
+        </div>
+      );
+    } else if (onServer !== undefined) {
+      inner = (
+        <div key="kept" className="contents">
+          {createElement(onServer, props as P)}
+        </div>
+      );
+    } else {
+      inner = fresh ? (
+        <div key="kept" className="contents" />
+      ) : (
+        <div
+          key="kept"
+          className="contents"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={KEEP}
+        />
+      );
+    }
     return (
       <div ref={ref} className={className}>
-        <Suspense fallback={<Frozen read={read} onShow={gate.open} />}>
-          <Part {...(props as P)} />
-        </Suspense>
+        {inner}
       </div>
     );
   }
