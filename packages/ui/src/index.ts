@@ -615,3 +615,102 @@ export {
   type TrendDirection,
 } from './trend-chip/trend-chip';
 export { ChartCard, type ChartCardProps } from './chart-card/chart-card';
+// AI and chat.
+export {
+  DEFAULT_PROTOCOLS,
+  Markdown,
+  MarkdownCode,
+  markdownToText,
+  parseMarkdown,
+  safeUrl,
+  streamingCaret,
+  type MarkdownAlign,
+  type MarkdownBlock,
+  type MarkdownCodeProps,
+  type MarkdownComponents,
+  type MarkdownImageProps,
+  type MarkdownInline,
+  type MarkdownLinkProps,
+  type MarkdownParseOptions,
+  type MarkdownProps,
+  type MarkdownSize,
+} from './markdown/markdown';
+export {
+  CHAT_MESSAGE_MESSAGES,
+  ChatMessage,
+  ChatMessageEditor,
+  StreamingText,
+  type ChatMessageEditorProps,
+  type ChatMessageFrom,
+  type ChatMessageMessages,
+  type ChatMessageProps,
+  type ChatMessageStatus,
+  type StreamingTextProps,
+} from './chat-message/chat-message';
+export {
+  CHAT_ANNOUNCER_MESSAGES,
+  CHAT_THREAD_MESSAGES,
+  ChatAnnouncer,
+  ChatDaySeparator,
+  ChatThread,
+  chatDayLabel,
+  isSameDay,
+  type ChatAnnouncerMessages,
+  type ChatAnnouncerProps,
+  type ChatDaySeparatorProps,
+  type ChatThreadMessages,
+  type ChatThreadProps,
+} from './chat-thread/chat-thread';
+export {
+  MESSAGE_ACTIONS_MESSAGES,
+  MessageAction,
+  MessageActions,
+  MessageCopyAction,
+  MessageEditAction,
+  MessageFeedback,
+  MessageRegenerateAction,
+  type MessageActionProps,
+  type MessageActionsMessages,
+  type MessageActionsProps,
+  type MessageCopyActionProps,
+  type MessageFeedbackProps,
+  type MessageFeedbackValue,
+  type MessageRegenerateActionProps,
+} from './message-actions/message-actions';
+export {
+  PROMPT_INPUT_MESSAGES,
+  PromptInput,
+  type PromptInputMessages,
+  type PromptInputProps,
+  type PromptInputStatus,
+} from './prompt-input/prompt-input';
+export {
+  CHAT_SOURCE_MESSAGES,
+  ChatSourceChip,
+  ChatSources,
+  sourceSite,
+  type ChatSourceChipProps,
+  type ChatSourceItem,
+  type ChatSourceMessages,
+  type ChatSourcesProps,
+} from './chat-source/chat-source';
+export {
+  TOOL_CALL_MESSAGES,
+  ToolCall,
+  formatToolValue,
+  type ToolCallMessages,
+  type ToolCallProps,
+  type ToolCallStatus,
+} from './tool-call/tool-call';
+export {
+  REASONING_MESSAGES,
+  Reasoning,
+  type ReasoningMessages,
+  type ReasoningProps,
+  type ReasoningStatus,
+} from './reasoning/reasoning';
+export {
+  ChatLoader,
+  type ChatLoaderProps,
+  type ChatLoaderVariant,
+} from './chat-loader/chat-loader';

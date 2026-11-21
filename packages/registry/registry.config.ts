@@ -996,6 +996,95 @@ export default defineRegistry({
       categories: ['charts', 'layout'],
       files: ['chart-card/chart-card.tsx'],
     },
+    // AI and chat.
+    {
+      name: 'markdown',
+      type: 'component',
+      version: '0.1.0',
+      title: 'Markdown',
+      description:
+        'Safe, themed Markdown for chat replies and docs: no raw HTML, safe links, tables, lists and code blocks you can swap for the docs code block.',
+      categories: ['ai', 'typography'],
+      files: ['markdown/markdown.tsx', 'markdown/markdown-parse.ts'],
+    },
+    {
+      name: 'chat-message',
+      type: 'component',
+      version: '0.1.0',
+      title: 'ChatMessage',
+      description:
+        'A user, assistant or system message with avatar, time, sending and stopped states, an error with Retry, edit in place and streaming text.',
+      categories: ['ai'],
+      files: ['chat-message/chat-message.tsx', 'chat-message/streaming-text.tsx'],
+    },
+    {
+      name: 'chat-thread',
+      type: 'component',
+      version: '0.1.0',
+      title: 'ChatThread',
+      description:
+        'A conversation that follows a streaming reply until the reader scrolls up, with Jump to latest, day separators and a quiet live announcer.',
+      categories: ['ai'],
+      files: ['chat-thread/chat-thread.tsx'],
+    },
+    {
+      name: 'message-actions',
+      type: 'component',
+      version: '0.1.0',
+      title: 'MessageActions',
+      description: 'A toolbar of copy, regenerate, edit and thumbs up or down under a message.',
+      categories: ['ai', 'actions'],
+      files: ['message-actions/message-actions.tsx'],
+    },
+    {
+      name: 'prompt-input',
+      type: 'component',
+      version: '0.1.0',
+      title: 'PromptInput',
+      description:
+        'A message field that grows with the text, attachments, Send that turns into Stop, Enter to send and a character count near the limit.',
+      categories: ['ai', 'forms'],
+      files: ['prompt-input/prompt-input.tsx'],
+    },
+    {
+      name: 'chat-source',
+      type: 'component',
+      version: '0.1.0',
+      title: 'ChatSource',
+      description: 'Citation chips inside a reply and the list of sources behind it.',
+      categories: ['ai'],
+      files: ['chat-source/chat-source.tsx'],
+    },
+    {
+      name: 'tool-call',
+      type: 'component',
+      version: '0.1.0',
+      title: 'ToolCall',
+      description:
+        'A tool the assistant called, running, done or failed, with its arguments and result folded underneath.',
+      categories: ['ai', 'disclosure'],
+      files: ['tool-call/tool-call.tsx'],
+    },
+    {
+      name: 'reasoning',
+      type: 'component',
+      version: '0.1.0',
+      title: 'Reasoning',
+      description:
+        'The reasoning behind a reply, open while the model thinks and folded to how long it took once done.',
+      categories: ['ai', 'disclosure'],
+      files: ['reasoning/reasoning.tsx'],
+    },
+    {
+      name: 'chat-loader',
+      type: 'component',
+      version: '0.1.0',
+      title: 'ChatLoader',
+      description:
+        'Typing dots before the first words of a reply, and the skeleton of a reply while history loads.',
+      categories: ['ai', 'feedback'],
+      files: ['chat-loader/chat-loader.tsx'],
+    },
   ],
   // Add-ons: imports of @rectio/ui and @rectio/motion become registry dependencies on their items.
   workspacePackages: {
