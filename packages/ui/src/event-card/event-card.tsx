@@ -28,7 +28,8 @@ export interface EventCardProps extends Omit<ComponentProps<'article'>, 'title' 
   variant?: 'full' | 'compact';
   /**
    * `range` (default) writes the start and the end; `start` writes the start alone, for a compact
-   * card too narrow for both. The whole range is still read out.
+   * card too narrow for both. A tentative or cancelled compact card writes its status word and the
+   * start alone. The whole range is still read out.
    */
   timeDisplay?: 'range' | 'start';
   /** BCP 47 tag for the times and the attendee names. */
@@ -215,7 +216,7 @@ export function EventCard({
         status === 'tentative' && 'border-dashed bg-surface',
         compact ? 'gap-0.5 overflow-hidden rounded-badge px-2 py-1' : 'gap-2 rounded-control p-3',
         onSelect !== undefined && [
-          'transition-[border-color,transform] duration-fast ease-standard',
+          'transition-transform duration-fast ease-standard',
           'hover:border-line-strong active:scale-99 motion-reduce:active:scale-100',
           'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus',
         ],
@@ -229,10 +230,12 @@ export function EventCard({
           <p id={metaId} className={cn('truncate text-xs numeric', colours.ink)}>
             {statusWord !== null && (
               <>
-                <span className="font-medium">{statusWord},</span>{' '}
+                <span className={cn('font-medium', timeDisplay === 'start' && 'sr-only')}>
+                  {statusWord},
+                </span>{' '}
               </>
             )}
-            {timeDisplay === 'start' && !allDay ? (
+            {(timeDisplay === 'start' || statusWord !== null) && !allDay ? (
               <>
                 <span aria-hidden>{formatEventStart(start, locale)}</span>
                 <span className="sr-only">{when}</span>
