@@ -47,7 +47,7 @@ function Star({ fill, size, className }: { fill: Fill; size: string; className?:
             fill === 'half' ? 'w-1/2' : 'w-full',
           )}
         >
-          <StarIcon weight="fill" className={cn('max-w-none text-warning', size)} />
+          <StarIcon weight="fill" className={cn('max-w-none text-warning-strong', size)} />
         </span>
       )}
     </span>
