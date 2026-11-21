@@ -79,6 +79,7 @@ export {
   selectionColumn,
   useDataTable,
   type DataTableBodyProps,
+  type DataTableEmptyFilteredLabels,
   type DataTableColumnDef,
   type DataTableColumnMeta,
   type DataTableFeatures,

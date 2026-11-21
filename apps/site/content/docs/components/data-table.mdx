@@ -241,6 +241,10 @@ Every prop of a `table` is accepted as well, except `children`, which is require
       default: 'No rows match, with Clear filters',
       description: 'Shown when the search or a filter hides every row.',
     },
+    emptyFilteredLabels: {
+      type: '{ title?: string; description?: string; clear?: string }',
+      description: 'The words of the default filtered state, to translate.',
+    },
     loadingRows: { type: 'number', default: '5' },
     rowProps: {
       type: '(row) => ComponentProps<"tr">',

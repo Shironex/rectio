@@ -286,6 +286,15 @@ function SortButton({
   );
 }
 
+export interface DataTableEmptyFilteredLabels {
+  /** Default "No rows match". */
+  title?: string;
+  /** Default "Try another search, or clear the filters to see every row." */
+  description?: string;
+  /** Default "Clear filters", like the toolbar's button. */
+  clear?: string;
+}
+
 export interface DataTableBodyProps<TData extends RowData> {
   table: DataTableInstance<TData>;
   /** Shown in place of rows when there are none. Say why, and what to do next. */
@@ -295,6 +304,8 @@ export interface DataTableBodyProps<TData extends RowData> {
    * with a button that clears every filter.
    */
   emptyFiltered?: ReactNode;
+  /** The words of the default filtered state, to translate: its title, the next step and the button. */
+  emptyFilteredLabels?: DataTableEmptyFilteredLabels;
   /** Skeleton rows in the shape of the table while data loads. */
   loading?: boolean;
   loadingRows?: number;
@@ -308,6 +319,7 @@ export function DataTableBody<TData extends RowData>({
   table,
   empty,
   emptyFiltered,
+  emptyFilteredLabels,
   loading = false,
   loadingRows = 5,
   rowProps,
@@ -354,7 +366,9 @@ export function DataTableBody<TData extends RowData>({
       <TableBody>
         <TableRow>
           <TableCell colSpan={columns.length} className="h-auto py-12 text-center text-fg-muted">
-            {hidden ? (emptyFiltered ?? <NoMatches table={table} />) : (empty ?? 'No rows.')}
+            {hidden
+              ? (emptyFiltered ?? <NoMatches table={table} labels={emptyFilteredLabels} />)
+              : (empty ?? 'No rows.')}
           </TableCell>
         </TableRow>
       </TableBody>
@@ -383,13 +397,21 @@ export function DataTableBody<TData extends RowData>({
   );
 }
 
-function NoMatches<TData extends RowData>({ table }: { table: DataTableInstance<TData> }) {
+function NoMatches<TData extends RowData>({
+  table,
+  labels: {
+    title = 'No rows match',
+    description = 'Try another search, or clear the filters to see every row.',
+    clear = 'Clear filters',
+  } = {},
+}: {
+  table: DataTableInstance<TData>;
+  labels: DataTableEmptyFilteredLabels | undefined;
+}) {
   return (
     <span className="inline-flex flex-col items-center gap-1">
-      <span className="font-medium text-fg">No rows match</span>
-      <span className="text-pretty">
-        Try another search, or clear the filters to see every row.
-      </span>
+      <span className="font-medium text-fg">{title}</span>
+      <span className="text-pretty">{description}</span>
       <Button
         className="mt-3"
         variant="secondary"
@@ -398,7 +420,7 @@ function NoMatches<TData extends RowData>({ table }: { table: DataTableInstance<
           clearDataTableFilters(table);
         }}
       >
-        Clear filters
+        {clear}
       </Button>
     </span>
   );

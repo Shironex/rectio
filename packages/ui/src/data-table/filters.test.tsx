@@ -9,6 +9,7 @@ import {
   DataTableHeader,
   useDataTable,
   type DataTableColumnDef,
+  type DataTableEmptyFilteredLabels,
 } from './data-table';
 import { DataTableFacetFilter, DataTableSearch, DataTableToolbar } from './filters';
 
@@ -34,7 +35,13 @@ const columns: DataTableColumnDef<Invoice>[] = [
   { accessorKey: 'amount', header: 'Amount', meta: { align: 'end' }, enableGlobalFilter: false },
 ];
 
-function Invoices({ onSearch }: { onSearch?: (value: string) => void }) {
+function Invoices({
+  onSearch,
+  emptyFilteredLabels,
+}: {
+  onSearch?: (value: string) => void;
+  emptyFilteredLabels?: DataTableEmptyFilteredLabels;
+}) {
   const [globalFilter, setGlobalFilter] = useState('');
   const table = useDataTable({
     data: INVOICES,
@@ -67,7 +74,10 @@ function Invoices({ onSearch }: { onSearch?: (value: string) => void }) {
       </DataTableToolbar>
       <DataTable caption="Invoices">
         <DataTableHeader table={table} />
-        <DataTableBody table={table} />
+        <DataTableBody
+          table={table}
+          {...(emptyFilteredLabels === undefined ? {} : { emptyFilteredLabels })}
+        />
       </DataTable>
     </>
   );
@@ -132,6 +142,25 @@ describe('DataTable filters', () => {
     await user.click(toolbar().getByRole('button', { name: 'Clear filters' }));
     expect(bodyRows()).toHaveLength(4);
     expect(toolbar().getByRole('status')).toHaveTextContent('');
+  });
+
+  it('says the filtered empty state in your words', async () => {
+    const user = userEvent.setup();
+    render(
+      <Invoices
+        emptyFilteredLabels={{
+          title: 'Keine Treffer',
+          description: 'Andere Suche versuchen.',
+          clear: 'Filter löschen',
+        }}
+      />,
+    );
+    await user.type(screen.getByRole('searchbox', { name: 'Search invoices' }), 'nobody');
+    const body = within(tableBody());
+    expect(body.getByText('Keine Treffer')).toBeInTheDocument();
+    expect(body.getByText('Andere Suche versuchen.')).toBeInTheDocument();
+    await user.click(body.getByRole('button', { name: 'Filter löschen' }));
+    expect(bodyRows()).toHaveLength(4);
   });
 
   it('works with the search held in your own state', async () => {
