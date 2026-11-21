@@ -33,6 +33,11 @@ type Charts = Pick<typeof plainCharts, 'AreaChart' | 'BarChart' | 'DonutChart' |
 
 const LOCALE = 'en-GB';
 
+/** An amount in the skin's money face. */
+function MoneyFace({ children }: { children: ReactNode }) {
+  return <span className="font-(family-name:--rx-money-family)">{children}</span>;
+}
+
 const money = (value: number) =>
   new Intl.NumberFormat(LOCALE, {
     style: 'currency',
@@ -61,7 +66,9 @@ function StatRow({ spark }: { spark: typeof Sparkline }) {
           <p className="text-sm text-fg-muted">{stat.label}</p>
           <div className="flex items-end justify-between gap-3">
             <div className="flex min-w-0 flex-col gap-1">
-              <span className="text-2xl font-strong tracking-tight numeric">{stat.value}</span>
+              <span className="text-2xl font-strong tracking-tight numeric">
+                {'money' in stat ? <MoneyFace>{stat.value}</MoneyFace> : stat.value}
+              </span>
               <TrendChip
                 value={stat.change}
                 format={stat.format ?? 'percent'}
@@ -91,7 +98,7 @@ function Dashboard({ charts }: { charts: Charts }) {
         className="lg:col-span-8"
         title="Revenue"
         description={`Last ${String(days)} days, by day`}
-        value={money(revenue.reduce((sum, p) => sum + p.value, 0))}
+        value={<MoneyFace>{money(revenue.reduce((sum, p) => sum + p.value, 0))}</MoneyFace>}
         delta={
           <TrendChip
             value={days === 90 ? 0.124 : 0.058}
@@ -133,7 +140,7 @@ function Dashboard({ charts }: { charts: Charts }) {
         className="lg:col-span-7"
         title="Monthly recurring revenue"
         description="By plan, June to November"
-        value={money(mrrTotal(mrr.at(-1)))}
+        value={<MoneyFace>{money(mrrTotal(mrr.at(-1)))}</MoneyFace>}
         delta={
           <TrendChip
             value={(mrrTotal(mrr.at(-1)) - mrrTotal(mrr.at(-2))) / mrrTotal(mrr.at(-2))}

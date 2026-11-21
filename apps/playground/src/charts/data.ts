@@ -121,6 +121,7 @@ export const STATS = [
   {
     label: 'Net revenue',
     value: '€214,380',
+    money: true,
     change: 0.084,
     better: 'up' as const,
     data: [162, 171, 168, 180, 176, 189, 194, 201, 198, 207, 211, 214],
