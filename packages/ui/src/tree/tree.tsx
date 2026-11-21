@@ -1,3 +1,5 @@
+'use client';
+
 import { CaretRightIcon, CircleNotchIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import {
   useCallback,
