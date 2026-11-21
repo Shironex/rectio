@@ -542,3 +542,17 @@ export {
   type AlertDialogProps,
   type AlertDialogTone,
 } from './alert-dialog/alert-dialog';
+export {
+  Drawer,
+  DrawerBody,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  type DrawerContentProps,
+  type DrawerProps,
+  type DrawerSide,
+} from './drawer/drawer';
