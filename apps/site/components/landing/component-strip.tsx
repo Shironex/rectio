@@ -119,7 +119,7 @@ function Cell({
     <li className={cn('flex min-w-0 flex-col gap-4 bg-surface p-4 sm:p-5', className)}>
       <Link
         href={`/docs/components/${slug}`}
-        className="self-start rounded-control font-mono text-sm text-fg-muted underline decoration-transparent underline-offset-4 transition-colors duration-fast ease-standard pointer-fine:hover:text-fg pointer-fine:hover:decoration-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        className="inline-flex items-center self-start rounded-control font-mono text-sm pointer-coarse:min-h-11 text-fg-muted underline decoration-transparent underline-offset-4 transition-colors duration-fast ease-standard pointer-fine:hover:text-fg pointer-fine:hover:decoration-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
         {name}
       </Link>
