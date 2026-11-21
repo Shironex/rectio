@@ -130,6 +130,14 @@ export {
 export type { DateRange } from '@daypicker/react';
 export { TimeField, type TimeFieldProps } from './time-field/time-field';
 export {
+  EventCard,
+  formatEventLength,
+  formatEventTime,
+  type EventCardProps,
+  type EventStatus,
+  type EventTone,
+} from './event-card/event-card';
+export {
   clampTime,
   dayPeriodNames,
   formatIsoTime,
