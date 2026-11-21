@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { MotionPreferenceProvider } from '../src/lib/mode';
 import { Switch, SwitchField } from '../src/switch/switch';
-import { ToggleGroup } from '../src/toggle/toggle';
+import { SegmentedControl, ToggleGroup } from '../src/toggle/toggle';
 
 /** Pretends to be a browser that can animate, with the system's reduced motion set or not. */
 function browser({ reduce }: { reduce: boolean }) {
@@ -100,5 +100,40 @@ describe('motioned ToggleGroup', () => {
     browser({ reduce: true });
     render(<Period />);
     expect(screen.getByRole('group', { name: 'Period' })).not.toHaveAttribute('data-glide');
+  });
+});
+
+describe('motioned SegmentedControl', () => {
+  const options = [
+    { value: 'day', label: 'Day' },
+    { value: 'week', label: 'Week' },
+    { value: 'month', label: 'Month' },
+  ];
+
+  it('glides one indicator to the chosen option and reports a single value', async () => {
+    browser({ reduce: false });
+    const onValueChange = vi.fn();
+    render(
+      <SegmentedControl
+        label="Period"
+        options={options}
+        defaultValue="week"
+        onValueChange={onValueChange}
+      />,
+    );
+    const group = screen.getByRole('group', { name: 'Period' });
+    expect(group).toHaveAttribute('data-glide');
+    expect(group.querySelectorAll('[data-part="indicator"]')).toHaveLength(1);
+    await userEvent.click(screen.getByRole('button', { name: 'Month' }));
+    expect(onValueChange).toHaveBeenLastCalledWith('month');
+    expect(screen.getAllByRole('button')).toHaveLength(3);
+  });
+
+  it('is the plain control under reduced motion', () => {
+    browser({ reduce: true });
+    render(<SegmentedControl label="Period" options={options} defaultValue="week" />);
+    const group = screen.getByRole('group', { name: 'Period' });
+    expect(group).not.toHaveAttribute('data-glide');
+    expect(group.querySelector('[data-part="indicator"]')).toBeNull();
   });
 });

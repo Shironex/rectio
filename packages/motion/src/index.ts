@@ -45,7 +45,12 @@ export { Banner, type BannerProps } from './banner/banner';
 export { LoadingOverlay, type LoadingOverlayProps } from './spinner/spinner';
 export { NumberField, type NumberFieldProps } from './number-field/number-field';
 export { Switch, SwitchField, type SwitchFieldProps, type SwitchProps } from './switch/switch';
-export { ToggleGroup, type ToggleGroupProps } from './toggle/toggle';
+export {
+  SegmentedControl,
+  ToggleGroup,
+  type SegmentedControlProps,
+  type ToggleGroupProps,
+} from './toggle/toggle';
 export {
   FileDropzone,
   FileItem,
