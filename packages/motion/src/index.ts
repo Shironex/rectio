@@ -19,6 +19,7 @@ export { AmountInput, type AmountInputProps } from './amount-input/amount-input'
 export { Money, type MoneyProps } from './money/money';
 export { Dialog, DialogContent, DialogTrigger, type DialogContentProps } from './dialog/dialog';
 export { AlertDialogContent, type AlertDialogContentProps } from './alert-dialog/alert-dialog';
+export { CopyButton, type CopyButtonProps } from './copy-button/copy-button';
 export {
   SelectContent,
   SelectItem,

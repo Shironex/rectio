@@ -10,7 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AlertDialogContent } from '../src/index';
+import { AlertDialogContent, CopyButton } from '../src/index';
 
 /** Pretends to be a browser that can animate, with the system's reduced motion set or not. */
 function browser({ reduce }: { reduce: boolean }) {
@@ -68,5 +68,27 @@ describe('motioned AlertDialogContent', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
     const dialog = await screen.findByRole('alertdialog');
     expect(dialog).not.toHaveAttribute('data-motion');
+  });
+});
+
+describe('motioned CopyButton', () => {
+  it('copies and springs the check in, saying Copied', async () => {
+    browser({ reduce: false });
+    const writeText = vi.fn(() => Promise.resolve());
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    render(<CopyButton value="INV-2041" label="Copy reference" />);
+    const button = screen.getByRole('button', { name: 'Copy reference' });
+    expect(button).toHaveAttribute('data-motion');
+    await userEvent.click(button);
+    expect(writeText).toHaveBeenCalledWith('INV-2041');
+    expect(screen.getByRole('status')).toHaveTextContent('Copied');
+    expect(button.querySelector('[data-part="icons"]')).not.toBeNull();
+    Reflect.deleteProperty(navigator, 'clipboard');
+  });
+
+  it('is the plain button under reduced motion', () => {
+    browser({ reduce: true });
+    render(<CopyButton value="INV-2041" />);
+    expect(screen.getByRole('button', { name: 'Copy' })).not.toHaveAttribute('data-motion');
   });
 });
