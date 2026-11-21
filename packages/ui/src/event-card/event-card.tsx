@@ -29,7 +29,7 @@ export interface EventCardProps extends Omit<ComponentProps<'article'>, 'title' 
   /**
    * `range` (default) writes the start and the end; `start` writes the start alone, for a compact
    * card too narrow for both. A tentative or cancelled compact card writes its status word and the
-   * start alone. The whole range is still read out.
+   * start, or on a start-only card the word alone. The whole range is still read out.
    */
   timeDisplay?: 'range' | 'start';
   /** BCP 47 tag for the times and the attendee names. */
@@ -169,7 +169,7 @@ export function EventCard({
 
   const heading =
     onSelect === undefined ? (
-      <span className={titleClass}>
+      <span className={titleClass} title={compact ? title : undefined}>
         {compactIcon}
         {title}
       </span>
@@ -177,6 +177,7 @@ export function EventCard({
       <button
         type="button"
         aria-describedby={metaId}
+        title={compact ? title : undefined}
         {...triggerProps}
         onClick={onSelect}
         className={cn(
@@ -228,17 +229,24 @@ export function EventCard({
         <>
           {heading}
           <p id={metaId} className={cn('truncate text-xs numeric', colours.ink)}>
+            {/* A status word comes first; on a start-only card it takes the time's place. */}
             {statusWord !== null && (
               <>
-                <span className={cn('font-medium', timeDisplay === 'start' && 'sr-only')}>
-                  {statusWord},
+                <span className="font-medium">
+                  {statusWord}
+                  {timeDisplay === 'start' ? '' : ','}
                 </span>{' '}
               </>
             )}
             {(timeDisplay === 'start' || statusWord !== null) && !allDay ? (
               <>
-                <span aria-hidden>{formatEventStart(start, locale)}</span>
-                <span className="sr-only">{when}</span>
+                {!(timeDisplay === 'start' && statusWord !== null) && (
+                  <span aria-hidden>{formatEventStart(start, locale)}</span>
+                )}
+                <span className="sr-only">
+                  {timeDisplay === 'start' && statusWord !== null ? ', ' : ''}
+                  {when}
+                </span>
               </>
             ) : (
               when
