@@ -76,6 +76,10 @@ const popupBySide: Record<SheetSide, string> = {
   ),
 };
 
+/** Where a bottom sheet rests at a snap point, measured by Base UI; nothing without snap points. */
+const SNAP_OFFSET = 'translateY(var(--drawer-snap-point-offset, 0px))';
+const SNAP_PADDING = 'calc(env(safe-area-inset-bottom) + var(--drawer-snap-point-offset, 0px))';
+
 export type SheetSize = 'sm' | 'md' | 'lg' | 'full';
 
 /** The width of a side sheet; a top or bottom sheet spans the screen. */
@@ -109,6 +113,7 @@ export function SheetContent({
   closeLabel = 'Close',
   showClose = true,
   size = 'md',
+  style,
   ...props
 }: SheetContentProps) {
   const side = use(SideContext);
@@ -122,6 +127,9 @@ export function SheetContent({
           'transition-opacity duration-base ease-enter data-swiping:transition-none',
           'data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-fast data-ending-style:ease-exit',
         )}
+        // The scrim thins out as the sheet is dragged away, so the page shows what a release
+        // returns to. A filter, so it multiplies with the opacity that fades the scrim in and out.
+        style={{ filter: 'opacity(calc(1 - var(--drawer-swipe-progress, 0)))' }}
       />
       <Drawer.Viewport className="fixed inset-0 z-50">
         <Drawer.Popup
@@ -129,7 +137,7 @@ export function SheetContent({
           data-side={side}
           className={cn(
             'fixed flex flex-col overflow-hidden border-line bg-surface-overlay text-fg shadow-(--rx-sheet-shadow) outline-none',
-            'transition-[translate,opacity] duration-base ease-enter',
+            'transition-[translate,transform,opacity] duration-base ease-enter',
             // Under reduced motion the sheet fades in place instead of travelling across the screen.
             'motion-reduce:data-starting-style:translate-0 motion-reduce:data-ending-style:translate-0',
             'motion-reduce:data-starting-style:opacity-0 motion-reduce:data-ending-style:opacity-0',
@@ -140,6 +148,15 @@ export function SheetContent({
             className,
           )}
           {...props}
+          // A bottom sheet with snap points rests part way down: Base UI measures the offset.
+          style={
+            side === 'bottom'
+              ? (state) => ({
+                  transform: SNAP_OFFSET,
+                  ...(typeof style === 'function' ? style(state) : style),
+                })
+              : style
+          }
         >
           {side === 'bottom' && (
             // A handle says the sheet can be dragged down. Decorative: Escape and the button close it.
@@ -150,8 +167,9 @@ export function SheetContent({
           )}
           <Drawer.Content
             className={cn('flex min-h-0 flex-1 flex-col', vertical && 'overflow-y-auto')}
-            // Clears the home indicator on phones without a design value: the inset comes from the device.
-            style={side === 'bottom' ? { paddingBottom: 'env(safe-area-inset-bottom)' } : undefined}
+            // Clears the home indicator on phones without a design value: the inset comes from the
+            // device. A sheet resting at a snap point also keeps its last rows above the screen edge.
+            style={side === 'bottom' ? { paddingBottom: SNAP_PADDING } : undefined}
           >
             <FullContext value={size === 'full'}>{children}</FullContext>
           </Drawer.Content>
