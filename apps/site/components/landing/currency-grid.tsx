@@ -6,6 +6,8 @@ import { useId, useMemo, useState, type ReactNode } from 'react';
 
 /** Rows shown before "See all": divisible by one, two and three columns, so it ends on a full row. */
 const FOLDED = 24;
+/** On a phone the one column folds sooner, so the list stays a sample, not a scroll. */
+const FOLDED_PHONE = 12;
 const SAMPLE = 1234.5;
 
 const CONTROL =
@@ -96,8 +98,14 @@ export function CurrencyGrid({
       </div>
       <div className="flex min-w-0 flex-col gap-6 lg:col-span-8">
         <ul id={listId} className="grid gap-x-10 sm:grid-cols-2">
-          {shown.map((code) => (
-            <li key={code} className="flex items-baseline gap-3 py-2">
+          {shown.map((code, i) => (
+            <li
+              key={code}
+              className={cn(
+                'flex items-baseline gap-3 py-2',
+                folded && i >= FOLDED_PHONE && 'max-sm:hidden',
+              )}
+            >
               <span className="w-12 shrink-0 font-mono text-sm font-strong text-fg">{code}</span>
               <span className="min-w-0 flex-1 text-sm text-pretty text-fg-muted">
                 {names[code]}
