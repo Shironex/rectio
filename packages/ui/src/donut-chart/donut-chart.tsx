@@ -259,7 +259,15 @@ export function DonutChart({
               aria-hidden
               className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center"
             >
-              <span className="text-2xl font-strong tracking-tight text-fg numeric">{middle}</span>
+              <span
+                className={cn(
+                  'font-strong tracking-tight text-fg numeric',
+                  // A long figure steps down a size so it keeps clear of the ring.
+                  typeof middle === 'string' && middle.length > 6 ? 'text-xl' : 'text-2xl',
+                )}
+              >
+                {middle}
+              </span>
               <span className="text-xs text-fg-muted">{centerLabel ?? m.total}</span>
             </div>
           )}

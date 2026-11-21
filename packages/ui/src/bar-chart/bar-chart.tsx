@@ -98,8 +98,8 @@ export interface BarChartProps<T extends object> {
 }
 
 /** The focused group's bars get an outline in the text colour, so the group stands out. */
-// The active bar, by pointer or keyboard, is outlined in the text colour, apart from every series.
-const ACTIVE_BAR = { stroke: 'var(--rx-text)', strokeWidth: 2 };
+// The active bar, by pointer or keyboard, is outlined in the focus colour, visible on every series.
+const ACTIVE_BAR = { stroke: 'var(--rx-focus)', strokeWidth: 2 };
 
 const ROW_HEIGHT: Record<number, string> = {
   1: 'h-20',

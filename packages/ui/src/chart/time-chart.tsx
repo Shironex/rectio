@@ -371,6 +371,8 @@ export function TimeChart({
           {references.map((reference) => (
             <ReferenceLine
               key={reference.label}
+              // Above the series, so its halo keeps the words readable where a line crosses them.
+              zIndex={1000}
               y={reference.value}
               stroke="var(--rx-chart-reference)"
               strokeDasharray="4 4"
@@ -382,7 +384,7 @@ export function TimeChart({
           <Tooltip
             content={tooltip}
             cursor={{ stroke: 'var(--rx-chart-reference)', strokeWidth: 1 }}
-            // One line above the plot, over the legend, so it never covers the line it reads.
+            // One line on the top edge of the plot, in the headroom the rounded axis leaves.
             position={{ y: TOOLTIP_TOP }}
             allowEscapeViewBox={{ x: false, y: true }}
             offset={16}
@@ -390,6 +392,8 @@ export function TimeChart({
           />
           {keyed.map((s) => {
             const color = chartColor(s.tone);
+            const lastIndex = (key: string) =>
+              rows.findLastIndex((row) => typeof row.values[key] === 'number');
             const shared = {
               dataKey: s.key,
               name: s.label,
@@ -399,7 +403,25 @@ export function TimeChart({
               ...(s.dashed ? { strokeDasharray: '5 4' } : {}),
               dot: markers
                 ? { r: 2.5, fill: color, stroke: 'var(--rx-chart-halo)', strokeWidth: 1.5 }
-                : false,
+                : variant === 'line'
+                  ? // Without markers, a line still ends in a dot on its latest figure.
+                    (props: { cx?: number; cy?: number; index?: number }) =>
+                      props.index === lastIndex(s.key) &&
+                      props.cx !== undefined &&
+                      props.cy !== undefined ? (
+                        <circle
+                          key={`${s.key}-end`}
+                          cx={props.cx}
+                          cy={props.cy}
+                          r={3}
+                          fill={color}
+                          stroke="var(--rx-chart-halo)"
+                          strokeWidth={2}
+                        />
+                      ) : (
+                        <g key={`${s.key}-${String(props.index)}`} />
+                      )
+                  : false,
               activeDot: { r: 4, fill: color, stroke: 'var(--rx-chart-halo)', strokeWidth: 2 },
               connectNulls: connectGaps,
               ...animation,
