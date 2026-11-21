@@ -71,8 +71,15 @@ export function TimeSeriesChart({
 }: TimeSeriesChartProps) {
   const m = mergeMessages(TIME_SERIES_CHART_MESSAGES, messages);
   const locale = resolveLocale(chart.locale);
-  const write = (value: number) =>
+  const written = (value: number) =>
     formatValue(value, chart.format, { locale, currency: chart.currency });
+  // Money takes the skin's money face (a serif under editorial), like every other amount.
+  const write = (value: number) =>
+    chart.format === 'currency' ? (
+      <span className="font-(family-name:--rx-money-family)">{written(value)}</span>
+    ) : (
+      written(value)
+    );
   const scale = chart.scale ?? inferTimeScale(mergeSeries(chart.series));
   const range = seriesRange(chart.series);
   const items = chart.loading === true ? [] : seriesFigures(chart.series);
