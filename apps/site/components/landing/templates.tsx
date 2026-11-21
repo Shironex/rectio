@@ -1,7 +1,7 @@
 import { readTemplates } from '@/lib/templates';
 
 import { Section, SectionIntro } from './section';
-import { TemplateGallery } from './template-gallery';
+import { TemplateGallery } from './parts';
 
 /**
  * The templates showcase: every template.json in the repo, read at build time, so a new template

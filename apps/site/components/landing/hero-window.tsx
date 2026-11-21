@@ -8,8 +8,7 @@ import {
 } from '@phosphor-icons/react/dist/ssr';
 import { Badge, Money } from '@rectio/ui';
 
-import ExpenseApprovalDemo from '@/demos/expense-approval';
-import InvoiceListDemo from '@/demos/invoice-list';
+import { HeroApprovals, HeroInvoiceList } from './parts';
 
 const NAV = [
   { label: 'Overview', icon: ChartLineIcon },
@@ -53,10 +52,10 @@ export function HeroWindow() {
           </nav>
           <div className="grid min-w-0 flex-1 items-start gap-4 p-3 sm:p-5 xl:grid-cols-12">
             <div className="min-w-0 xl:col-span-8">
-              <InvoiceListDemo />
+              <HeroInvoiceList />
             </div>
             <div className="hidden min-w-0 xl:col-span-4 xl:block">
-              <ExpenseApprovalDemo />
+              <HeroApprovals />
             </div>
           </div>
         </div>

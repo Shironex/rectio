@@ -1,20 +1,22 @@
 import Link from 'next/link';
 
-import { Bench } from '@/components/landing/bench';
 import { ClosingBand } from '@/components/landing/closing-band';
-import { CloseBooks } from '@/components/landing/close-books';
-import { ComponentStrip } from '@/components/landing/component-strip';
-import { CurrencyGrid } from '@/components/landing/currency-grid';
 import { currencies } from '@/components/landing/currencies';
 import { Faq } from '@/components/landing/faq';
 import { Footer } from '@/components/landing/footer';
 import { Hero } from '@/components/landing/hero';
 import { kitFacts } from '@/components/landing/kit-facts';
-import { PlainVsMotion } from '@/components/landing/plain-vs-motion';
-import { RegistryDemo } from '@/components/landing/registry-demo';
+import {
+  Bench,
+  CloseBooks,
+  ComponentStrip,
+  CurrencyGrid,
+  PlainVsMotion,
+  RegistryDemo,
+  ThemeCurtain,
+} from '@/components/landing/parts';
 import { StatRow } from '@/components/landing/stat-row';
 import { Section, SectionIntro } from '@/components/landing/section';
-import { ThemeCurtain } from '@/components/landing/theme-curtain';
 import { ThemePacks } from '@/components/landing/theme-packs';
 import { Templates } from '@/components/landing/templates';
 import { readoutValues } from '@/components/landing/theme-tokens';
