@@ -48,7 +48,8 @@ export function ThemePacks({ intro }: { intro: ReactNode }) {
           ))}
         </ul>
       </div>
-      {/* The second swatch overlaps the first's bottom padding, offset in, so both read as a pair. */}
+      {/* From sm up the second swatch overlaps the first's bottom padding, offset in, so both read as
+          a pair; on a phone, where the offset is small, they stack apart instead. */}
       <div className="flex flex-col lg:col-span-7">
         <article
           aria-labelledby="pack-default"
@@ -66,7 +67,7 @@ export function ThemePacks({ intro }: { intro: ReactNode }) {
               <Badge tone="positive">Shipped</Badge>
             </div>
             <Money
-              amount={-61}
+              amount={-412.8}
               currency="EUR"
               locale="en-IE"
               tone="auto"
@@ -80,7 +81,7 @@ export function ThemePacks({ intro }: { intro: ReactNode }) {
         </article>
         <article
           aria-labelledby="pack-yours"
-          className="site-reveal site-step-1 relative -mt-6 w-11/12 self-end overflow-hidden rounded-panel border border-dashed border-line-strong bg-surface shadow-overlay sm:w-4/5"
+          className="site-reveal site-step-1 relative mt-4 w-11/12 sm:-mt-6 self-end overflow-hidden rounded-panel border border-dashed border-line-strong bg-surface shadow-overlay sm:w-4/5"
         >
           <div className="flex h-full flex-col gap-5 p-6 sm:p-8">
             <div className="flex items-center justify-between gap-3">
