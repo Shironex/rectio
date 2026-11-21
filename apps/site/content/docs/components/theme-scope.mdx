@@ -1,6 +1,6 @@
 ---
 title: ThemeScope
-description: A theme, a mode and a density for one part of the page.
+description: A theme, a mode, a density and a skin for one part of the page.
 ---
 
 <Preview name="theme-scope" plain={<Demo name="theme-scope" />} />
@@ -21,7 +21,7 @@ import { ThemeScope } from '@/components/ui/theme-scope';
 </ThemeScope>;
 ```
 
-`ThemeScope` sets `data-theme`, `data-mode` and `data-density` on a `div`, with the canvas
+`ThemeScope` sets `data-theme`, `data-mode`, `data-density` and `data-skin` on a `div`, with the canvas
 background, the theme's sans face and its text colour. Every token below it follows.
 
 Popups opened inside it (select lists, dialogs, date picker popups, toasts) portal into the scope
@@ -49,6 +49,11 @@ Every prop of a `div` is accepted as well.
     density: {
       type: "'comfortable' | 'compact'",
       description: 'compact sets data-density="compact"; comfortable is the default spacing.',
+    },
+    skin: {
+      type: 'string',
+      description:
+        'A skin id such as dense or editorial (installed with rectio add skin-<id>). Leave unset for the theme as it is.',
     },
   }}
 />

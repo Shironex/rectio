@@ -1,6 +1,6 @@
 ---
 title: Theming
-description: Tokens, the default theme, light and dark, density and reduced motion.
+description: Tokens, the default theme, light and dark, skins, density and reduced motion.
 ---
 
 Every visual decision in rectio is a token: a CSS variable that starts with `--rx-`. Components read
@@ -81,6 +81,7 @@ Themes apply through attributes on any element. Everything inside follows.
 | `data-theme="default"`        | The theme. `:root` without `data-theme` uses `default`.               |
 | `data-mode="light" \| "dark"` | The mode. Without `data-mode`, the system colour scheme decides.      |
 | `data-density="compact"`      | Smaller controls, rows and calendar days, and a tighter spacing unit. |
+| `data-skin="dense"`           | A skin: type, corners, rhythm and controls on top of the theme.       |
 
 Set them on the root for the whole app: `<html data-theme="default" data-mode="dark">`.
 
@@ -99,6 +100,12 @@ tokens. Use it for a preview, a tenant's own theme, or a dark panel in a light p
   <Ledger />
 </ThemeScope>
 ```
+
+### Skins
+
+A [skin](/docs/theming/skins) restyles type, corners, border width, rhythm and control sizes on top
+of any theme, in both modes: `dense` for data-heavy apps, `editorial` for serif headings and
+hairlines. Add one with `rectio add skin-dense` and set `data-skin="dense"`.
 
 ### Compact density
 

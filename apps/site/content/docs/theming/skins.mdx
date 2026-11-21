@@ -1,0 +1,105 @@
+---
+title: Skins
+description: Dense and editorial looks on top of any theme, light or dark, through data-skin.
+---
+
+A skin changes how the interface is set, not what colour it is: the type scale, line heights,
+heading face, corners, border width, spacing and control sizes. It is a set of token overrides
+applied with `data-skin` on any element, so every component, block and template follows with no
+code of its own. Colour stays with the theme, so a skin works in light and dark and with any theme,
+including one from the [theme generator](/docs/theming/generator).
+
+<Preview name="skins" plain={<Demo name="skins" />} />
+
+## The skins
+
+| Skin        | For                                         | What it sets                                                                                                  |
+| ----------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `dense`     | Data-heavy apps: ledgers, admin, monitoring | 13px body text, tighter line heights, 3px controls and 6px panels, a smaller spacing unit, 32px controls      |
+| `editorial` | Reading surfaces, reports, marketing pages  | IBM Plex Serif headings, hairline borders, 2px controls and 4px panels, looser line heights, a roomier rhythm |
+
+Each ships as its own registry item. Install one, then set the attribute:
+
+```sh
+pnpm dlx @rectio/cli add skin-editorial
+```
+
+```html
+<html data-theme="default" data-mode="dark" data-skin="editorial"></html>
+```
+
+`rectio init --skin <id>` adds a skin while setting up a project. The CLI imports a skin after your
+themes and before the base styles.
+
+## Where it applies
+
+`data-skin` works like the other theming attributes: on `<html>` for the whole app, or on any
+element for one part of the page. [`ThemeScope`](/docs/components/theme-scope) takes it as a prop,
+and popups opened inside the scope keep it.
+
+```tsx
+<ThemeScope skin="dense">
+  <Ledger />
+</ThemeScope>
+```
+
+It composes with everything else:
+
+- **Light and dark.** A skin sets no colour, so `data-mode` and the system colour scheme keep
+  working, and every contrast check the theme passes still holds. The token tests run the full
+  contrast and colour vision suite for each skin in both modes anyway.
+- **A theme inside it.** A skin wins over a theme on the same element and over any `data-theme`
+  inside it.
+- **Compact density.** `data-density="compact"` applies on top of a skin, inside it or around it.
+- **Reduced motion.** Motion belongs to the theme and to reduced motion, never to a skin.
+- **Touch.** Controls keep their 44px hit area on touch screens in every skin.
+
+## Dense or compact
+
+Both make a screen tighter, at different scales:
+
+|               | `data-density="compact"`                    | `data-skin="dense"`                                        |
+| ------------- | ------------------------------------------- | ---------------------------------------------------------- |
+| Changes       | Spacing unit, control, row and header sizes | Type scale and line heights, corners, spacing and controls |
+| Typical scope | One region: a table, a side panel           | The whole app                                              |
+| Together      | Compact inside a dense app tightens further | Dense leaves room for compact below it                     |
+
+Reach for compact when one working area needs more rows on screen; reach for dense when the whole
+product is a tool people read numbers in all day.
+
+## The skin contract
+
+A skin may override these token groups and nothing else. The token build fails on anything outside
+them, and on a token the theme does not define.
+
+| Group               | Tokens                                                                        |
+| ------------------- | ----------------------------------------------------------------------------- |
+| Type                | `--rx-font-family-*`, `-size-*`, `-line-height-*`, `-weight-*`, `-tracking-*` |
+| Shape               | `--rx-radius-*`, `--rx-border-width`                                          |
+| Rhythm and controls | `--rx-space-unit`, `--rx-control-height-*`, `--rx-control-padding-x-*`        |
+| Component           | Non-colour component tokens, such as `--rx-emphasis-style`                    |
+
+Colour, shadow and motion are never part of a skin.
+
+## Your own skin
+
+A skin is one CSS rule. Copy `styles/rectio/skins/dense.css` after adding it, rename the id in its
+selectors and change the values. Keep the three selectors (the skin, the skin on a theme, and a
+theme inside the skin) so it beats the theme, and import the file after your themes.
+
+```css
+[data-skin='roomy'],
+[data-skin='roomy'][data-theme],
+[data-skin='roomy'] [data-theme] {
+  --rx-space-unit: 0.3rem;
+  --rx-radius-panel: 0.75rem;
+  --rx-popover-radius: var(--rx-radius-panel);
+  --rx-dialog-radius: var(--rx-radius-panel);
+}
+```
+
+A component token that reads a token you change (such as `--rx-button-radius`, which reads
+`--rx-radius-control`) has to be declared in the rule again, as the shipped skins do: a CSS variable
+keeps the value it had where it was declared.
+
+The [theme generator](/docs/theming/generator) previews any theme under each skin.

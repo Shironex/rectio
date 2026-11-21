@@ -123,6 +123,7 @@ const DEMOS = {
   'tag-input': dynamic(() => import('./tag-input')),
   textarea: dynamic(() => import('./textarea')),
   'theme-scope': dynamic(() => import('./theme-scope')),
+  skins: dynamic(() => import('./skins')),
   timeline: dynamic(() => import('./timeline')),
   'timeline.motion': dynamic(() => import('./timeline.motion')),
   toast: dynamic(() => import('./toast')),
