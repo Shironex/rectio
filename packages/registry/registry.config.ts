@@ -716,7 +716,7 @@ export default defineRegistry({
     {
       name: 'tabs',
       type: 'component',
-      version: '0.1.2',
+      version: '0.1.3',
       title: 'Tabs',
       description: 'Line and segmented tabs with an indicator measured by Base UI.',
       categories: ['navigation'],

@@ -77,7 +77,7 @@ export function ScrollArea({
         {...(focusableViewport ? {} : { tabIndex: -1 })}
         className={cn(
           'min-h-0 flex-1 overscroll-contain outline-none',
-          'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+          'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-focus',
           fade && [
             'data-overflow-y-start:mask-t-from-85% data-overflow-y-end:mask-b-from-85%',
             'data-overflow-x-start:mask-l-from-90% data-overflow-x-end:mask-r-from-90%',

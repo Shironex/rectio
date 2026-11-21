@@ -107,7 +107,7 @@ export function TabsPanel({ className, ...props }: TabsPanelProps) {
     <BaseTabs.Panel
       data-slot="tabs-panel"
       className={cn(
-        'pt-4 outline-none focus-visible:rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+        'pt-4 outline-none focus-visible:rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-focus',
         className,
       )}
       {...props}
