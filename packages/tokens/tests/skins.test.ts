@@ -7,7 +7,13 @@ import { SKINS, skinViolation } from '../scripts/naming.ts';
 interface Built {
   contract: { name: string; type: string }[];
   themes: Record<string, Record<string, Record<string, string>>>;
-  skins: Record<string, { tokens: Record<string, string> }>;
+  skins: Record<
+    string,
+    {
+      tokens: Record<string, string>;
+      themes: Record<string, Record<string, Record<string, string>>>;
+    }
+  >;
 }
 
 const built = JSON.parse(
@@ -64,8 +70,27 @@ describe('skin contract', () => {
     expect(skinViolation(['component', 'emphasis', 'style'], 'other')).toBeUndefined();
   });
 
-  it.each(SKINS)('%s keeps the touch target', (skin) => {
-    expect(built.skins[skin]?.tokens['--rx-control-height-touch']).toBeUndefined();
+  it.each(SKINS)('%s keeps every touch target', (skin) => {
+    const touch = Object.keys(built.skins[skin]?.tokens ?? {}).filter((n) => n.includes('touch'));
+    expect(touch).toEqual([]);
+  });
+
+  it('rejects touch heights, allows layout measures', () => {
+    expect(skinViolation(['control', 'height', 'touch'], 'dimension')).toBeDefined();
+    expect(skinViolation(['component', 'button', 'height', 'touch'], 'dimension')).toBeDefined();
+    expect(skinViolation(['component', 'tree', 'row-height-touch'], 'dimension')).toBeDefined();
+    expect(skinViolation(['component', 'tree', 'row-height'], 'dimension')).toBeUndefined();
+    expect(skinViolation(['component', 'tree', 'indent'], 'dimension')).toBeUndefined();
+    expect(skinViolation(['component', 'alert-dialog', 'width'], 'dimension')).toBeUndefined();
+    expect(skinViolation(['component', 'sheet', 'measure'], 'dimension')).toBeUndefined();
+  });
+
+  // Tokens that alias a control height follow a skin with no entry of their own.
+  it.each(SKINS)('%s carries the tree row height through the control height', (skin) => {
+    const light = built.skins[skin]?.themes.default?.light ?? {};
+    expect(light['--rx-tree-row-height']).toBe('var(--rx-control-height-sm)');
+    const own = built.skins[skin]?.tokens['--rx-control-height-sm'];
+    expect(light['--rx-control-height-sm']).toBe(own ?? base['--rx-control-height-sm']);
   });
 });
 
@@ -93,6 +118,7 @@ describe('skin css', () => {
     const block = /\[data-skin="dense"\] \[data-theme\] \{([^}]*)\}/.exec(css)?.[1] ?? '';
     expect(block).toContain('--rx-button-height-md: var(--rx-control-height-md);');
     expect(block).toContain('--rx-field-radius: var(--rx-radius-control);');
+    expect(block).toContain('--rx-tree-row-height: var(--rx-control-height-sm);');
   });
 });
 

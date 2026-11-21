@@ -16,7 +16,9 @@ export const SKINS: readonly string[] = ['dense', 'editorial'];
  * The skin contract: the token groups a skin may override. Type, corners, border width, rhythm and
  * control sizes, plus non-colour component tokens. Colour, shadow and motion belong to the theme
  * and its modes (and to reduced motion), so a skin composes with any theme, light or dark, and
- * never changes a contrast pair. A skin may set any subset of these; it never adds a token.
+ * never changes a contrast pair. A skin may set any subset of these; it never adds a token, and it
+ * never sets a touch height. Layout measures such as the alert dialog width, the sheet measure and
+ * the tree indent are component dimensions, so a skin may set them.
  */
 export const SKIN_GROUPS: readonly (readonly string[])[] = [
   ['font', 'size'],
@@ -33,6 +35,9 @@ const SKIN_COMPONENT_TYPES = new Set(['dimension', 'fontWeight', 'fontFamily', '
 
 /** Why a token may not be in a skin, or undefined when the skin contract allows it. */
 export function skinViolation(path: readonly string[], type: string): string | undefined {
+  // Touch heights hold the 44px target on coarse pointers in every skin: `control.height.touch`,
+  // `button.height.touch`, `tree.row-height-touch` and any later one named the same way.
+  if (path.some((part) => part === 'touch' || part.endsWith('-touch'))) return 'a touch target';
   if (path[0] === 'component')
     return SKIN_COMPONENT_TYPES.has(type) ? undefined : `a ${type} component token`;
   const allowed = SKIN_GROUPS.some((group) => group.every((part, i) => path[i] === part));
