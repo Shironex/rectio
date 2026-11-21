@@ -381,6 +381,7 @@ describe('the rectio registry', () => {
       'motion-reset-password',
       'motion-saas-core',
       'motion-select',
+      'motion-sessions',
       'motion-sign-in',
       'motion-sign-up',
       'motion-skeleton',
@@ -424,6 +425,7 @@ describe('the rectio registry', () => {
       'search-input',
       'select',
       'separator',
+      'sessions',
       'sheet',
       'sidebar',
       'sign-in',
@@ -602,6 +604,7 @@ describe('the rectio registry', () => {
       'comment-thread',
       'file-manager',
       'time-series-chart',
+      'sessions',
     ];
     for (const name of blocks) {
       for (const item of [byName.get(name), byName.get(`motion-${name}`)]) {

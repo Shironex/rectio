@@ -1415,6 +1415,11 @@ export default defineRegistry({
           'Time series chart',
           'Figures over time as a line or an area, dates in the reader language, a summary, empty and loading states and a table fallback.',
         ),
+        ...saasItems(
+          'sessions',
+          'Sessions',
+          'Where the account is signed in: device, browser, place and last activity, this device marked, sign out one or all others.',
+        ),
       ],
     },
     {
