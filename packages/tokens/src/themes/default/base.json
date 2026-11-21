@@ -131,6 +131,16 @@
       "$value": "{size.full}"
     }
   },
+  "border": {
+    "width": {
+      "$type": "dimension",
+      "$value": {
+        "value": 1,
+        "unit": "px"
+      },
+      "$description": "Width of every plain border and divider (the `border` and `divide` utilities). A skin may thin it to a hairline."
+    }
+  },
   "space": {
     "$type": "dimension",
     "unit": {

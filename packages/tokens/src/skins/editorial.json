@@ -1,0 +1,72 @@
+{
+  "$description": "Editorial skin, applied with data-skin=\"editorial\". Serif display headings, hairline borders, restrained corners and a more generous rhythm: calm and exact, for reading surfaces, reports and marketing pages.",
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "display": { "$value": "{font-family.plex-serif}" }
+    },
+    "size": {
+      "$type": "dimension",
+      "xl": { "$value": "{font-size.22}" },
+      "2xl": { "$value": "{font-size.28}" },
+      "3xl": { "$value": "{font-size.32}" },
+      "4xl": { "$value": "{font-size.44}" },
+      "5xl": { "$value": "{font-size.64}" }
+    },
+    "line-height": {
+      "$type": "number",
+      "xs": { "$value": 1.5 },
+      "sm": { "$value": 1.615 },
+      "base": { "$value": 1.571 },
+      "lg": { "$value": 1.625 },
+      "xl": { "$value": 1.364 },
+      "2xl": { "$value": 1.286 },
+      "3xl": { "$value": 1.25 },
+      "4xl": { "$value": 1.136 },
+      "5xl": { "$value": 1.06 }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "heading": {
+        "$value": "{font-weight.medium}",
+        "$description": "Serif headings carry their own contrast: a medium weight reads as firm without shouting."
+      }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "tight": { "$value": { "value": -0.005, "unit": "rem" } },
+      "caps": { "$value": { "value": 0.08, "unit": "rem" } }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "control": { "$value": "{size.2}" },
+    "panel": { "$value": "{size.4}" },
+    "badge": { "$value": "{size.1}" }
+  },
+  "border": {
+    "width": {
+      "$type": "dimension",
+      "$value": { "value": 0.5, "unit": "px" },
+      "$description": "A hairline: one device pixel on a high density screen, one pixel elsewhere."
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "unit": { "$value": { "value": 0.275, "unit": "rem" } }
+  },
+  "control": {
+    "$type": "dimension",
+    "padding-x": {
+      "sm": { "$value": "{size.12}" },
+      "md": { "$value": "{size.16}" },
+      "lg": { "$value": "{size.20}" }
+    }
+  },
+  "component": {
+    "emphasis": {
+      "weight": { "$type": "fontWeight", "$value": "{font.weight.regular}" },
+      "style": { "$type": "other", "$value": "italic" }
+    }
+  }
+}

@@ -6,6 +6,39 @@ export const MODES = ['light', 'dark'] as const;
 export type Theme = string;
 export type Mode = (typeof MODES)[number];
 
+/**
+ * Shipped skins. A skin is a file in src/skins: token overrides applied with `data-skin="<id>"` on
+ * any element, on top of whichever theme, mode and density are in force there.
+ */
+export const SKINS: readonly string[] = ['dense', 'editorial'];
+
+/**
+ * The skin contract: the token groups a skin may override. Type, corners, border width, rhythm and
+ * control sizes, plus non-colour component tokens. Colour, shadow and motion belong to the theme
+ * and its modes (and to reduced motion), so a skin composes with any theme, light or dark, and
+ * never changes a contrast pair. A skin may set any subset of these; it never adds a token.
+ */
+export const SKIN_GROUPS: readonly (readonly string[])[] = [
+  ['font', 'size'],
+  ['font', 'line-height'],
+  ['font', 'weight'],
+  ['font', 'tracking'],
+  ['font', 'family'],
+  ['radius'],
+  ['border', 'width'],
+  ['space'],
+  ['control'],
+];
+const SKIN_COMPONENT_TYPES = new Set(['dimension', 'fontWeight', 'fontFamily', 'number', 'other']);
+
+/** Why a token may not be in a skin, or undefined when the skin contract allows it. */
+export function skinViolation(path: readonly string[], type: string): string | undefined {
+  if (path[0] === 'component')
+    return SKIN_COMPONENT_TYPES.has(type) ? undefined : `a ${type} component token`;
+  const allowed = SKIN_GROUPS.some((group) => group.every((part, i) => path[i] === part));
+  return allowed ? undefined : 'outside the skin groups';
+}
+
 /** Tier 1 groups. They feed the semantic tier and are never emitted as CSS. */
 export const PRIMITIVE_GROUPS = new Set([
   'palette',

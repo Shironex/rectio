@@ -12,18 +12,29 @@ import {
 import { derivePairs, evaluate } from '../scripts/contrast.ts';
 import { build, GRAPHITE } from '../scripts/derive.ts';
 
+type ThemeModes = Record<string, Record<string, Record<string, string>>>;
+
 interface Built {
   contract: { name: string; type: string }[];
-  themes: Record<string, Record<string, Record<string, string>>>;
+  themes: ThemeModes;
+  skins: Record<string, { tokens: Record<string, string>; themes: ThemeModes }>;
 }
 
 const built = JSON.parse(
   readFileSync(new URL('../dist/tokens.json', import.meta.url), 'utf8'),
 ) as Built;
 
-const themeModes = Object.entries(built.themes).flatMap(([theme, modes]) =>
-  Object.entries(modes).map(([mode, tokens]) => ({ key: `${theme}/${mode}`, tokens })),
-);
+const modesOf = (themes: ThemeModes, suffix = '') =>
+  Object.entries(themes).flatMap(([theme, modes]) =>
+    Object.entries(modes).map(([mode, tokens]) => ({ key: `${theme}/${mode}${suffix}`, tokens })),
+  );
+
+// Every theme and mode, and each of them under every skin: a skin is held to the same contrast,
+// colour vision and contract checks as the theme it sits on.
+const themeModes = [
+  ...modesOf(built.themes),
+  ...Object.entries(built.skins).flatMap(([skin, { themes }]) => modesOf(themes, ` + ${skin}`)),
+];
 
 function parse(value: string | undefined): Oklch {
   const m = /^oklch\(([\d.]+)% ([\d.]+) ([\d.]+)(?: \/ ([\d.]+))?\)$/.exec(value ?? '');
@@ -181,7 +192,7 @@ describe('code colours', () => {
 });
 
 describe('dark elevation', () => {
-  const darkModes = themeModes.filter(({ key }) => key.endsWith('/dark'));
+  const darkModes = themeModes.filter(({ key }) => key.split(' ')[0]?.endsWith('/dark'));
 
   // Popovers, menus and toasts float: the overlay is clearly above a card, and a hovered row still
   // shows inside a menu.
@@ -194,7 +205,7 @@ describe('dark elevation', () => {
 });
 
 describe('selected fill', () => {
-  const darkModes = themeModes.filter(({ key }) => key.endsWith('/dark'));
+  const darkModes = themeModes.filter(({ key }) => key.split(' ')[0]?.endsWith('/dark'));
 
   // The selected fill is a tint, never a saturated block.
   it.each(darkModes)('$key selected fill is a quiet tint', ({ tokens }) => {

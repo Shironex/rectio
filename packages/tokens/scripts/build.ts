@@ -16,8 +16,10 @@ import {
   COLOR_GROUPS,
   MODES,
   PRIMITIVE_GROUPS,
+  SKINS,
   THEMES,
   cssVarName,
+  skinViolation,
   tailwindColorName,
   type Mode,
   type Theme,
@@ -37,8 +39,14 @@ StyleDictionary.registerTransform({
 
 type TokenMap = Map<string, { value: string; type: string }>;
 const emptyTokens = (): TokenMap => new Map<string, { value: string; type: string }>();
+const plain = (tokens: TokenMap) =>
+  Object.fromEntries([...tokens].map(([name, { value }]) => [name, value]));
 
-async function resolve(sources: string[], onlyFrom?: string): Promise<TokenMap> {
+async function resolve(
+  sources: string[],
+  onlyFrom?: string,
+  check?: (path: string[], type: string) => void,
+): Promise<TokenMap> {
   const sd = new StyleDictionary({
     source: sources,
     usesDtcg: true,
@@ -52,6 +60,7 @@ async function resolve(sources: string[], onlyFrom?: string): Promise<TokenMap> 
     if (onlyFrom !== undefined && token.filePath !== onlyFrom) continue;
     const type = token.$type;
     if (type === undefined) throw new Error(`${token.path.join('.')} has no $type`);
+    check?.(token.path, type);
     out.set(cssVarName(token.path), { value: componentValue(token) ?? String(token.$value), type });
   }
   return out;
@@ -76,6 +85,24 @@ function themeSources(theme: Theme, mode: Mode): string[] {
     src('components.json'),
     ...(existsSync(optional) ? [optional] : []),
   ];
+}
+
+function skinSources(theme: Theme, mode: Mode, skin: string): string[] {
+  return [...themeSources(theme, mode), src(`skins/${skin}.json`)];
+}
+
+/** A skin's own tokens, each checked against the skin contract in naming.ts. */
+async function resolveSkin(skin: string): Promise<TokenMap> {
+  const file = src(`skins/${skin}.json`);
+  const problems: string[] = [];
+  const tokens = await resolve(skinSources('default', 'light', skin), file, (path, type) => {
+    const why = skinViolation(path, type);
+    if (why !== undefined) problems.push(`${path.join('.')} (${why})`);
+  });
+  if (problems.length > 0)
+    throw new Error(`skin "${skin}" breaks the skin contract:\n  ${problems.join('\n  ')}`);
+  if (tokens.size === 0) throw new Error(`skin "${skin}" overrides nothing`);
+  return tokens;
 }
 
 /** Every theme and mode must define exactly the token set of default/light: it is the contract. */
@@ -113,7 +140,41 @@ function selectorsFor(theme: Theme) {
   };
 }
 
-function themesCss(resolved: Map<string, TokenMap>, compact: TokenMap, reduced: TokenMap): string {
+/**
+ * Selectors of a skin. A skin beats a theme on the same element and on any theme inside it, and is
+ * written after the themes so it also beats `:root`.
+ */
+const skinSelectors = (skin: string) => [
+  `[data-skin="${skin}"]`,
+  `[data-skin="${skin}"][data-theme]`,
+  `[data-skin="${skin}"] [data-theme]`,
+];
+
+/** Compact density, written after the skins: it applies on top of any skin, inside or around it. */
+const DENSITY_SELECTORS = [
+  '[data-density="compact"]',
+  '[data-density="compact"][data-theme]',
+  '[data-density="compact"][data-skin]',
+  '[data-density="compact"] [data-theme]',
+  '[data-density="compact"] [data-skin]',
+];
+
+/** Component tokens that alias one of `names`: a scope that changes those must redeclare them. */
+function aliasesOf(base: TokenMap, names: ReadonlySet<string>): TokenMap {
+  return new Map(
+    [...base].filter(([name, { value }]) => {
+      const target = /^var\((--rx-[a-z0-9-]+)\)$/.exec(value)?.[1];
+      return target !== undefined && names.has(target) && !names.has(name);
+    }),
+  );
+}
+
+function themesCss(
+  resolved: Map<string, TokenMap>,
+  skins: Map<string, TokenMap>,
+  compact: TokenMap,
+  reduced: TokenMap,
+): string {
   const parts: string[] = [];
   // A density scope nested inside a theme must redeclare the component tokens that read a density
   // token: a custom property inherits its resolved value, so the theme's sizes would otherwise win.
@@ -136,12 +197,16 @@ function themesCss(resolved: Map<string, TokenMap>, compact: TokenMap, reduced: 
   parts.push(
     `/* No data-mode: follow the system. */\n@media (prefers-color-scheme: dark) {\n${auto.join('\n')}\n}`,
   );
-  parts.push(
-    block(
-      ['[data-density="compact"]', '[data-density="compact"] [data-theme]'],
-      [...declarations(compact), ...declarations(componentRefs)],
-    ),
-  );
+  for (const [skin, tokens] of skins) {
+    const refs = aliasesOf(base, new Set(tokens.keys()));
+    parts.push(
+      `/* Skin "${skin}": data-skin="${skin}" on any element. */\n${block(skinSelectors(skin), [
+        ...declarations(tokens),
+        ...declarations(refs),
+      ])}`,
+    );
+  }
+  parts.push(block(DENSITY_SELECTORS, [...declarations(compact), ...declarations(componentRefs)]));
   parts.push(
     `@media (prefers-reduced-motion: reduce) {\n${block([':root', '[data-theme]'], declarations(reduced), '  ')}\n}`,
   );
@@ -195,6 +260,9 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   for (const ease of ['standard', 'enter', 'exit'])
     add(`--ease-${ease}`, `--rx-motion-easing-${ease}`);
   add('--spacing', '--rx-space-unit');
+  // `border` and `divide` without a width read this. The fallback keeps a theme file written
+  // before the token existed at one pixel.
+  map.push('--default-border-width: var(--rx-border-width, 1px);');
 
   // Looping indicators. Each cycle is a multiple of a token, so a theme with slower motion slows
   // every loader together. Components switch to `animate-breathe` (a fade in place) under reduced
@@ -396,31 +464,53 @@ async function main() {
     src('modes/reduced-motion.json'),
   );
 
+  const skins = new Map<string, TokenMap>();
+  const skinned = new Map<string, TokenMap>();
+  for (const skin of SKINS) {
+    skins.set(skin, await resolveSkin(skin));
+    for (const theme of THEMES)
+      for (const mode of MODES)
+        skinned.set(`${theme}/${mode}/${skin}`, await resolve(skinSources(theme, mode, skin)));
+  }
+  // A skin never adds a token: every skinned theme mode holds exactly the contract.
+  checkContract(
+    new Map([['default/light', resolved.get('default/light') ?? emptyTokens()], ...skinned]),
+  );
+
   const contractTypes: TokenMap = resolved.get('default/light') ?? emptyTokens();
   mkdirSync(dist, { recursive: true });
-  writeFileSync(join(dist, 'themes.css'), themesCss(resolved, compact, reduced));
+  writeFileSync(join(dist, 'themes.css'), themesCss(resolved, skins, compact, reduced));
   writeFileSync(join(dist, 'tailwind.css'), tailwindCss(contract, contractTypes));
   copyFileSync(src('fonts.css'), join(dist, 'fonts.css'));
 
-  const json = {
-    contract: contract.map((name) => ({ name, type: contractTypes.get(name)?.type })),
-    themes: Object.fromEntries(
+  /** Theme, then mode, then token: the resolved maps under `key(theme, mode)`. */
+  const byThemeMode = (maps: Map<string, TokenMap>, key: (theme: string, mode: Mode) => string) =>
+    Object.fromEntries(
       THEMES.map((theme) => [
         theme,
         Object.fromEntries(
-          MODES.map((mode) => {
-            const tokens: TokenMap = resolved.get(`${theme}/${mode}`) ?? emptyTokens();
-            return [
-              mode,
-              Object.fromEntries([...tokens].map(([name, { value }]) => [name, value])),
-            ];
-          }),
+          MODES.map((mode) => [mode, plain(maps.get(key(theme, mode)) ?? emptyTokens())]),
         ),
+      ]),
+    );
+  const json = {
+    contract: contract.map((name) => ({ name, type: contractTypes.get(name)?.type })),
+    themes: byThemeMode(resolved, (theme, mode) => `${theme}/${mode}`),
+    // Each skin's own overrides, and every theme and mode as it resolves under the skin.
+    skins: Object.fromEntries(
+      SKINS.map((skin) => [
+        skin,
+        {
+          tokens: plain(skins.get(skin) ?? emptyTokens()),
+          themes: byThemeMode(skinned, (theme, mode) => `${theme}/${mode}/${skin}`),
+        },
       ]),
     ),
   };
   writeFileSync(join(dist, 'tokens.json'), `${JSON.stringify(json, null, 2)}\n`);
-  console.log(`tokens: ${contract.length} tokens x ${resolved.size} theme modes -> dist/`);
+  console.log(
+    `tokens: ${contract.length} tokens x ${resolved.size} theme modes, ${skins.size} skins -> dist/`,
+  );
 }
 
 await main();

@@ -18,6 +18,12 @@
         "unit": "rem"
       }
     },
+    "3": {
+      "$value": {
+        "value": 0.1875,
+        "unit": "rem"
+      }
+    },
     "4": {
       "$value": {
         "value": 0.25,
@@ -78,6 +84,12 @@
         "unit": "rem"
       }
     },
+    "26": {
+      "$value": {
+        "value": 1.625,
+        "unit": "rem"
+      }
+    },
     "28": {
       "$value": {
         "value": 1.75,
@@ -99,6 +111,12 @@
     "36": {
       "$value": {
         "value": 2.25,
+        "unit": "rem"
+      }
+    },
+    "38": {
+      "$value": {
+        "value": 2.375,
         "unit": "rem"
       }
     },
@@ -198,9 +216,19 @@
     "plex-mono": {
       "$value": ["IBM Plex Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       "$description": "IBM Plex Mono, SIL OFL 1.1."
+    },
+    "plex-serif": {
+      "$value": ["IBM Plex Serif", "ui-serif", "Georgia", "serif"],
+      "$description": "IBM Plex Serif, SIL OFL 1.1. The serif of the Plex superfamily, drawn to sit beside Plex Sans."
     }
   },
   "font-size": {
+    "11": {
+      "$value": {
+        "value": 0.6875,
+        "unit": "rem"
+      }
+    },
     "12": {
       "$value": {
         "value": 0.75,
@@ -282,6 +310,12 @@
     "40": {
       "$value": {
         "value": 2.5,
+        "unit": "rem"
+      }
+    },
+    "44": {
+      "$value": {
+        "value": 2.75,
         "unit": "rem"
       }
     },
