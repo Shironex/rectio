@@ -2,7 +2,7 @@ import {
   CalendarBlankIcon,
   CaretLeftIcon,
   CaretRightIcon,
-  ListIcon,
+  CaretDownIcon,
   PlusIcon,
 } from '@phosphor-icons/react';
 import { cn, EventCard } from '@rectio/ui';
@@ -37,6 +37,7 @@ import {
   agendaStep,
   agendaStops,
   agendaWeekStart,
+  AGENDA_MIN_MINUTES,
   collapseColumns,
   formatAgendaRange,
   isSameDay,
@@ -127,10 +128,13 @@ const KEYS: Record<string, AgendaMove> = {
   End: 'last',
 };
 
-/** Where the narrow list takes over from the grid: a week needs more room than a day. */
+/**
+ * Where the list takes over from the grid: a week needs more room than a day. A touch screen always
+ * gets the list, whose rows are full size, since a half-hour event in the grid is too small a target.
+ */
 const BREAK = {
-  week: { grid: 'hidden @3xl:block', list: '@3xl:hidden' },
-  day: { grid: 'hidden @lg:block', list: '@lg:hidden' },
+  week: { grid: 'hidden @3xl:pointer-fine:block', list: '@3xl:pointer-fine:hidden' },
+  day: { grid: 'hidden @lg:pointer-fine:block', list: '@lg:pointer-fine:hidden' },
 } as const;
 
 /**
@@ -343,14 +347,12 @@ function AgendaGrid({
   const grid = useRef<HTMLDivElement>(null);
   const hintId = useId();
   const labels = agendaHourLabels(hours, locale);
-  const windowMinutes = (hours.end - hours.start) * 60;
   // The one event in the tab order; arrow keys move it.
   const [active, setActive] = useState<string | null>(null);
   const tabStop =
     active !== null && layout.stops.some((stop) => stop.key === active)
       ? active
       : (layout.stops[0]?.key ?? null);
-  const [hover, setHover] = useState<{ day: number; start: number } | null>(null);
   const [openMore, setOpenMore] = useState<string | null>(null);
   const columns = {
     gridTemplateColumns: `var(--rx-agenda-gutter-width) repeat(${String(days.length)}, minmax(0, 1fr))`,
@@ -385,12 +387,6 @@ function AgendaGrid({
             },
           },
         };
-
-  const slotFromPointer = (event: { clientY: number; currentTarget: HTMLElement }) => {
-    const box = event.currentTarget.getBoundingClientRect();
-    const ratio = Math.min(Math.max((event.clientY - box.top) / box.height, 0), 0.9999);
-    return Math.floor((hours.start * 60 + ratio * windowMinutes) / slotMinutes) * slotMinutes;
-  };
 
   const allDayRows = layout.allDay.reduce((rows, bar) => Math.max(rows, bar.row + 1), 0);
   const todayShown = days.find((day) => isSameDay(day, now));
@@ -451,7 +447,7 @@ function AgendaGrid({
                   className={cn(
                     'relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-control text-fg-subtle',
                     'hover:bg-surface-hover hover:text-fg',
-                    'transition-[opacity,background-color,color] duration-fast ease-standard',
+                    'transition-opacity duration-fast ease-standard',
                     'pointer-fine:opacity-0 pointer-fine:group-hover/day:opacity-100 pointer-fine:focus-visible:opacity-100',
                     focusRing,
                     touchTarget,
@@ -546,13 +542,12 @@ function AgendaGrid({
           const nowAt = agendaNowOffset(now, day, hours);
           const today = isSameDay(day, now);
           const weekend = day.getDay() === 0 || day.getDay() === 6;
-          const hovered = hover?.day === dayIndex ? hover.start : null;
           return (
             <div
               key={day.getTime()}
               className={cn(
                 'relative min-w-0 border-s border-line',
-                weekend && variant === 'week' && 'bg-surface-sunken/30',
+                weekend && variant === 'week' && 'bg-surface-sunken/50',
                 today && variant === 'week' && 'bg-accent-subtle/40',
               )}
             >
@@ -573,32 +568,13 @@ function AgendaGrid({
 
               {/* Empty slots: a press anywhere starts an event there. */}
               {onSlotClick !== undefined && (
-                <div
-                  aria-hidden
-                  data-slot="week-agenda-slots"
-                  className="absolute inset-0 cursor-cell"
-                  onPointerMove={(event) => {
-                    if (event.pointerType !== 'mouse') return;
-                    const start = slotFromPointer(event);
-                    if (hovered !== start) setHover({ day: dayIndex, start });
-                  }}
-                  onPointerLeave={() => {
-                    setHover(null);
-                  }}
-                  onClick={(event) => {
-                    onSlotClick(agendaSlot(day, slotFromPointer(event), slotMinutes));
-                  }}
-                >
-                  {hovered !== null && (
-                    <div
-                      className="pointer-events-none absolute inset-x-1 flex items-start gap-1 rounded-badge border border-dashed border-accent-strong/40 bg-accent-subtle/60 px-1.5 py-0.5 text-xs text-accent-strong numeric"
-                      style={{ top: span(hovered - hours.start * 60), height: span(slotMinutes) }}
-                    >
-                      <PlusIcon aria-hidden weight="bold" className="mt-0.5 size-3 shrink-0" />
-                      {names.time.format(agendaSlot(day, hovered, slotMinutes).start)}
-                    </div>
-                  )}
-                </div>
+                <SlotLayer
+                  day={day}
+                  hours={hours}
+                  slotMinutes={slotMinutes}
+                  time={names.time}
+                  onSlotClick={onSlotClick}
+                />
               )}
 
               <ol className="pointer-events-none absolute inset-0">
@@ -607,7 +583,7 @@ function AgendaGrid({
                   const short = minutes < 45;
                   // A third of a week column has room for a word or two, not the time as well.
                   const share = slice.span / slice.columns;
-                  const narrow = variant === 'week' ? share <= 0.5 : share < 0.34;
+                  const narrow = variant === 'week' ? share <= 0.5 : share < 0.25;
                   return (
                     <li
                       key={slice.key}
@@ -636,8 +612,7 @@ function AgendaGrid({
                           // Short: the title alone on one line; the time is still read out.
                           short && 'justify-center py-0 [&>:first-child]:truncate [&_p]:sr-only',
                           // Narrow: a smaller title that may wrap, and the start time alone.
-                          narrow &&
-                            'px-1.5 [&>:first-child]:text-xs [&>:first-child]:break-words [&>:first-child]:hyphens-auto',
+                          narrow && 'px-1.5 [&>:first-child]:text-xs [&>:first-child]:break-words',
                           slice.continuesBefore && 'rounded-t-none border-t-0',
                           slice.continuesAfter && 'rounded-b-none border-b-0',
                         )}
@@ -656,7 +631,7 @@ function AgendaGrid({
                     className="pointer-events-auto absolute z-10 px-0.5 pb-px"
                     style={{
                       top: span(chip.start - hours.start * 60),
-                      height: span(Math.max(chip.end - chip.start, 24)),
+                      height: span(Math.max(chip.end - chip.start, AGENDA_MIN_MINUTES)),
                       left: `${String((chip.column / chip.columns) * 100)}%`,
                       width: `${String((1 / chip.columns) * 100)}%`,
                     }}
@@ -709,15 +684,75 @@ function AgendaGrid({
           );
         })}
         {empty && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
-            <p className="flex max-w-72 flex-col items-center gap-1.5 rounded-control border border-line bg-surface-raised px-4 py-3 text-center text-sm text-fg-muted shadow-raised">
+          <div className="pointer-events-none absolute inset-0 z-30 flex items-start justify-center p-6 pt-16">
+            <div className="pointer-events-auto flex max-w-80 flex-col items-center gap-1.5 rounded-control border border-line bg-surface-raised px-5 py-4 text-center text-sm text-fg-muted shadow-raised">
               <CalendarBlankIcon aria-hidden weight="duotone" className="size-6 text-fg-subtle" />
-              <span className="font-medium text-fg">Nothing scheduled</span>
-              {onSlotClick !== undefined && <span>Press an empty slot to add an event there.</span>}
-            </p>
+              <span className="font-medium text-fg">Nothing scheduled this {variant}</span>
+              <span>Events you add for these days show up here.</span>
+              {onSlotClick !== undefined && days[0] !== undefined && (
+                <AddButton
+                  label="Add event"
+                  onClick={() => {
+                    const first = days.find((day) => isSameDay(day, now)) ?? days[0] ?? now;
+                    onSlotClick(addSlot(first, now, hours, slotMinutes));
+                  }}
+                />
+              )}
+            </div>
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/** The press layer of one day: a hover shows the slot a press would start, at its time. */
+function SlotLayer({
+  day,
+  hours,
+  slotMinutes,
+  time,
+  onSlotClick,
+}: {
+  day: Date;
+  hours: AgendaHours;
+  slotMinutes: number;
+  time: Intl.DateTimeFormat;
+  onSlotClick: (slot: { start: Date; end: Date }) => void;
+}) {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const fromPointer = (event: { clientY: number; currentTarget: HTMLElement }) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    const ratio = Math.min(Math.max((event.clientY - box.top) / box.height, 0), 0.9999);
+    const minutes = hours.start * 60 + ratio * (hours.end - hours.start) * 60;
+    return Math.floor(minutes / slotMinutes) * slotMinutes;
+  };
+  return (
+    <div
+      aria-hidden
+      data-slot="week-agenda-slots"
+      className="absolute inset-0 cursor-cell"
+      onPointerMove={(event) => {
+        if (event.pointerType !== 'mouse') return;
+        const start = fromPointer(event);
+        if (hovered !== start) setHovered(start);
+      }}
+      onPointerLeave={() => {
+        setHovered(null);
+      }}
+      onClick={(event) => {
+        onSlotClick(agendaSlot(day, fromPointer(event), slotMinutes));
+      }}
+    >
+      {hovered !== null && (
+        <div
+          className="pointer-events-none absolute inset-x-1 flex items-start gap-1 rounded-badge border border-dashed border-accent-strong/40 bg-accent-subtle/60 px-1.5 py-0.5 text-xs text-accent-strong numeric"
+          style={{ top: span(hovered - hours.start * 60), height: span(slotMinutes) }}
+        >
+          <PlusIcon aria-hidden weight="bold" className="mt-0.5 size-3 shrink-0" />
+          {time.format(agendaSlot(day, hovered, slotMinutes).start)}
+        </div>
+      )}
     </div>
   );
 }
@@ -757,18 +792,18 @@ function MoreEvents({
           type="button"
           aria-label={`${String(count)} more events from ${from}, ${dayLabel}`}
           className={cn(
-            'flex size-full cursor-pointer flex-col items-start rounded-badge border border-dashed border-fg/20 bg-surface px-1.5 py-0.5 text-start',
-            'text-xs font-medium text-fg-muted hover:border-line-strong hover:text-fg',
-            'transition-[border-color,color,scale] duration-fast ease-standard active:scale-99 motion-reduce:active:scale-100',
+            'flex size-full cursor-pointer flex-col items-start rounded-badge border border-line-strong bg-surface-hover px-1.5 py-0.5 text-start shadow-raised',
+            'text-xs font-medium text-fg hover:border-fg-subtle',
+            'transition-transform duration-fast ease-standard active:scale-99 motion-reduce:active:scale-100',
             focusRing,
           )}
           {...triggerProps}
         >
           <span className="flex items-center gap-1">
-            <ListIcon aria-hidden weight="bold" className="size-3 shrink-0" />
             {count} more
+            <CaretDownIcon aria-hidden weight="bold" className="size-3 shrink-0" />
           </span>
-          <span className="font-regular text-fg-subtle numeric">{from}</span>
+          <span className="font-regular text-fg-muted numeric">from {from}</span>
         </button>
       }
     >
