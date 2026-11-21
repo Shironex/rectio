@@ -147,6 +147,8 @@ export const chartSurface = cn(
   '[&_.recharts-cartesian-grid_line]:stroke-chart-grid',
   // The accessibility layer makes the plot focusable; arrows then step through the points.
   '[&_.recharts-surface]:outline-none [&_.recharts-wrapper]:rounded-control',
+  // While the motion add-on draws a line in, its end dot waits for the drawing edge.
+  'in-data-drawing:[&_.rx-end-dot]:opacity-0',
   // A quiet ring around the plot says where focus is; the active mark carries the strong one.
   '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-1',
   '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-offset-4',

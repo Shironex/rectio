@@ -15,8 +15,7 @@ import { readMotionTokens, type Bezier } from '../lib/tokens';
  * Recharts' own transitions: no animation library. Reduced motion renders the plain charts.
  */
 
-// The end dot is listed on its own: Recharts may draw dots outside the line's group.
-const LINES = '.recharts-line, .recharts-line-dots, .recharts-area, .rx-end-dot';
+const LINES = '.recharts-line, .recharts-line-dots, .recharts-area';
 const BARS = '.recharts-bar-rectangle path, .recharts-bar-rectangle rect';
 const SECTORS = '.recharts-pie-sector';
 /** Bars arrive one after another, but the whole set lands within this many steps of the first. */
@@ -150,53 +149,63 @@ function leadingTips(
   width: number,
   clip: Animation,
 ): (() => void)[] {
-  return [...root.querySelectorAll<SVGPathElement>('.recharts-line-curve, .recharts-area-curve')]
-    .filter((path) => typeof path.getTotalLength === 'function')
-    .map((path) => {
-      let total = 0;
-      try {
-        total = path.getTotalLength();
-      } catch {
-        return () => undefined;
-      }
-      const tip = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      tip.setAttribute('r', '3.5');
-      tip.setAttribute('fill', path.getAttribute('stroke') ?? 'currentColor');
-      tip.setAttribute('stroke', 'var(--rx-chart-halo)');
-      tip.setAttribute('stroke-width', '2');
-      tip.setAttribute('aria-hidden', 'true');
-      // On the surface itself, outside the clipped marks, so the edge never cuts the dot in half.
-      (path.ownerSVGElement ?? path.parentNode)?.append(tip);
-      // The point on the path at a given x: the path runs left to right, so search by length.
-      const at = (x: number) => {
-        let low = 0;
-        let high = total;
-        for (let i = 0; i < 18; i += 1) {
-          const mid = (low + high) / 2;
-          if (path.getPointAtLength(mid).x < x) low = mid;
-          else high = mid;
+  // The end dot waits for the edge. Recharts redraws it as a new node, so a stylesheet rule on
+  // [data-drawing] hides it rather than a style on the node.
+  root.dataset.drawing = '';
+  const showEnds = () => {
+    delete root.dataset.drawing;
+  };
+  void clip.finished.then(showEnds, showEnds);
+  return [
+    showEnds,
+    ...[...root.querySelectorAll<SVGPathElement>('.recharts-line-curve, .recharts-area-curve')]
+      .filter((path) => typeof path.getTotalLength === 'function')
+      .map((path) => {
+        let total = 0;
+        try {
+          total = path.getTotalLength();
+        } catch {
+          return () => undefined;
         }
-        return path.getPointAtLength(high);
-      };
-      let frame = 0;
-      // Read the clip's own eased progress, so the dot sits exactly on the edge the line is cut at.
-      const step = () => {
-        const progress = clip.effect?.getComputedTiming().progress;
-        if (clip.playState === 'finished' || progress === null || progress === undefined) {
-          tip.remove();
-          return;
-        }
-        const point = at(left + progress * (width - left));
-        tip.setAttribute('cx', String(point.x));
-        tip.setAttribute('cy', String(point.y));
+        const tip = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        tip.setAttribute('r', '3.5');
+        tip.setAttribute('fill', path.getAttribute('stroke') ?? 'currentColor');
+        tip.setAttribute('stroke', 'var(--rx-chart-halo)');
+        tip.setAttribute('stroke-width', '2');
+        tip.setAttribute('aria-hidden', 'true');
+        // On the surface itself, outside the clipped marks, so the edge never cuts the dot in half.
+        (path.ownerSVGElement ?? path.parentNode)?.append(tip);
+        // The point on the path at a given x: the path runs left to right, so search by length.
+        const at = (x: number) => {
+          let low = 0;
+          let high = total;
+          for (let i = 0; i < 18; i += 1) {
+            const mid = (low + high) / 2;
+            if (path.getPointAtLength(mid).x < x) low = mid;
+            else high = mid;
+          }
+          return path.getPointAtLength(high);
+        };
+        let frame = 0;
+        // Read the clip's own eased progress, so the dot sits exactly on the edge the line is cut at.
+        const step = () => {
+          const progress = clip.effect?.getComputedTiming().progress;
+          if (clip.playState === 'finished' || progress === null || progress === undefined) {
+            tip.remove();
+            return;
+          }
+          const point = at(left + progress * (width - left));
+          tip.setAttribute('cx', String(point.x));
+          tip.setAttribute('cy', String(point.y));
+          frame = requestAnimationFrame(step);
+        };
         frame = requestAnimationFrame(step);
-      };
-      frame = requestAnimationFrame(step);
-      return () => {
-        cancelAnimationFrame(frame);
-        tip.remove();
-      };
-    });
+        return () => {
+          cancelAnimationFrame(frame);
+          tip.remove();
+        };
+      }),
+  ];
 }
 
 /** A cubic Bézier easing as a function of progress, for Recharts' transitions. */
