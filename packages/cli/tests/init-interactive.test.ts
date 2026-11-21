@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -107,6 +108,11 @@ describe('interactive init: a new app from a template', () => {
     expect(screen).toContain('✓ Initialise git?           yes');
     expect(screen).toMatch(/\[6\/6\] Creating git repo .*first commit made/);
     expect(existsSync(join(cwd, 'books', '.git'))).toBe(true);
+    // The template has no .gitignore, so a default one keeps node_modules out of the commit.
+    expect(read(join(cwd, 'books'), '.gitignore')).toContain('node_modules');
+    const tracked = spawnSync('git', ['ls-files'], { cwd: join(cwd, 'books'), encoding: 'utf8' });
+    expect(tracked.stdout).toContain('.gitignore');
+    expect(tracked.stdout).toContain('rectio.json');
   });
 
   it('skips every question a flag answers', async () => {
