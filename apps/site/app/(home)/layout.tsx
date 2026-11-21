@@ -1,10 +1,8 @@
-import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import type { ReactNode } from 'react';
 
-import { baseOptions } from '@/lib/layout.shared';
+import { SiteHeader } from '@/components/site-header/site-header';
 
 export default function Layout({ children }: { children: ReactNode }) {
-  const base = baseOptions();
   return (
     <>
       <a
@@ -13,7 +11,10 @@ export default function Layout({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      <HomeLayout {...base}>{children}</HomeLayout>
+      <SiteHeader />
+      <main id="nd-home-layout" className="flex flex-1 flex-col">
+        {children}
+      </main>
     </>
   );
 }
