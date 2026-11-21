@@ -119,6 +119,21 @@ try {
       await phone.close();
     }
   }
+  // The two shipped skins: dense (12px captions and chart labels) and editorial (serif money).
+  const dense = await shoot(browser, base, 'desktop-light-dense', 'mode=light&skin=dense');
+  await dense?.close();
+  const editorial = await shoot(
+    browser,
+    base,
+    'desktop-dark-editorial',
+    'mode=dark&skin=editorial',
+  );
+  await editorial?.close();
+  const densePhone = await shoot(browser, base, 'phone-light-dense', 'mode=light&skin=dense', {
+    phone: true,
+  });
+  await densePhone?.close();
+
   const moving = await shoot(browser, base, 'desktop-motion', 'motion=on');
   await moving?.close();
   const calm = await shoot(browser, base, 'desktop-reduced-motion', 'motion=on', {
