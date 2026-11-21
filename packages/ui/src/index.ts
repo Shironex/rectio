@@ -526,3 +526,19 @@ export {
   type LinkRenderProps,
 } from './link/link';
 export { isExternalHref, isHashHref } from './link/href';
+export {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  type AlertDialogActionProps,
+  type AlertDialogCancelProps,
+  type AlertDialogContentProps,
+  type AlertDialogProps,
+  type AlertDialogTone,
+} from './alert-dialog/alert-dialog';
