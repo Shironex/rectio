@@ -16,6 +16,18 @@ describe('ThemeScope', () => {
     expect(scope).toHaveAttribute('data-theme', 'acme');
     expect(scope).toHaveAttribute('data-mode', 'dark');
     expect(scope).toHaveAttribute('data-density', 'compact');
+    expect(scope).not.toHaveAttribute('data-skin');
+  });
+
+  it('sets a skin beside the theme', () => {
+    render(
+      <ThemeScope skin="editorial" mode="light" data-testid="scope">
+        x
+      </ThemeScope>,
+    );
+    const scope = screen.getByTestId('scope');
+    expect(scope).toHaveAttribute('data-skin', 'editorial');
+    expect(scope).toHaveAttribute('data-theme', 'default');
   });
 
   it('renders popups inside the scope so they inherit its tokens', async () => {

@@ -20,16 +20,22 @@ export interface ThemeScopeProps extends ComponentProps<'div'> {
   /** Leave unset to follow the system colour scheme. */
   mode?: 'light' | 'dark';
   density?: 'comfortable' | 'compact';
+  /**
+   * A skin id: `dense`, `editorial`, or one of your own. Changes type, corners, rhythm and control
+   * sizes on top of the theme, in either mode. Leave unset for the theme as it is.
+   */
+  skin?: string;
 }
 
 /**
- * Applies a theme to a subtree. Popups (select lists, dialogs) opened inside it portal into the
+ * Applies a theme (and optionally a skin) to a subtree. Popups (select lists, dialogs) opened inside it portal into the
  * scope, so they keep its tokens: one page can show several themes, or one theme per tenant.
  */
 export function ThemeScope({
   theme = 'default',
   mode,
   density,
+  skin,
   className,
   children,
   ...props
@@ -40,6 +46,7 @@ export function ThemeScope({
       data-theme={theme}
       data-mode={mode}
       data-density={density === 'compact' ? 'compact' : undefined}
+      data-skin={skin}
       className={cn('bg-surface-canvas font-sans text-base text-fg', className)}
       {...props}
     >
