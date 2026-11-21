@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import {
   Bar,
   CartesianGrid,
@@ -25,6 +25,7 @@ import {
   chartColor,
   mergeMessages,
   niceRangeTicks,
+  CHART_PALETTE,
   paletteColor,
   useMarkAnimation,
   type ChartColor,
@@ -101,7 +102,6 @@ export interface BarChartProps<T extends object> {
   className?: string | undefined;
 }
 
-/** The focused group's bars get an outline in the text colour, so the group stands out. */
 /**
  * The active bar, by pointer or keyboard: a focus ring inside a halo, so the ring keeps its contrast over a pale segment
  * as well as over the card.
@@ -173,7 +173,14 @@ export function BarChart<T extends object>({
     const value = datum[key];
     return typeof value === 'number' && Number.isFinite(value) ? value : null;
   };
-  const keyed = series.map((s, index) => ({ ...s, tone: s.color ?? paletteColor(index) }));
+  const patternId = useId().replace(/:/g, '');
+  // Past the palette, colours repeat: a repeat is hatched, so it stays apart without colour.
+  const keyed = series.map((s, index) => ({
+    ...s,
+    tone: s.color ?? paletteColor(index),
+    hatched: s.color === undefined && index >= CHART_PALETTE.length,
+  }));
+  const shape = (s: { hatched: boolean }) => (s.hatched ? ('hatched' as const) : ('bar' as const));
   const total = (datum: T) => keyed.reduce((sum, s) => sum + (figure(datum, s.key) ?? 0), 0);
   const rows = data.map((datum, index) => ({ datum, index, label: name(datum) }));
 
@@ -226,7 +233,12 @@ export function BarChart<T extends object>({
         rows={[
           ...keyed.map((s) => {
             const value = figure(row.datum, s.key);
-            return { label: s.label, value: value === null ? '' : write(value), color: s.tone };
+            return {
+              label: s.label,
+              value: value === null ? '' : write(value),
+              color: s.tone,
+              shape: shape(s),
+            };
           }),
           ...(stacked && keyed.length > 1
             ? [{ label: m.total, value: write(total(row.datum)), strong: true }]
@@ -258,6 +270,7 @@ export function BarChart<T extends object>({
   return (
     <ChartFrame
       kind="bar"
+      quietRing
       horizontal={horizontal}
       loading={loading}
       empty={rows.length === 0}
@@ -265,7 +278,7 @@ export function BarChart<T extends object>({
       summary={summary ?? [...summaries, m.keyboardHint].join(' ')}
       legend={
         (legend ?? keyed.length > 1)
-          ? keyed.map((s) => ({ label: s.label, color: s.tone }))
+          ? keyed.map((s) => ({ label: s.label, color: s.tone, shape: shape(s) }))
           : undefined
       }
       tableToggle={tableToggle}
@@ -304,6 +317,25 @@ export function BarChart<T extends object>({
         margin={{ top: 8, right: labels && horizontal ? 56 : 8, bottom: 0, left: 4 }}
         style={{ width: '100%', height: '100%' }}
       >
+        {keyed.some((s) => s.hatched) && (
+          <defs>
+            {keyed
+              .filter((s) => s.hatched)
+              .map((s) => (
+                <pattern
+                  key={s.key}
+                  id={`${patternId}-${s.key}`}
+                  width={4}
+                  height={4}
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(135)"
+                >
+                  <rect width={4} height={4} fill={chartColor(s.tone)} />
+                  <line x1={0} y1={0} x2={0} y2={4} stroke="var(--rx-surface)" strokeWidth={2} />
+                </pattern>
+              ))}
+          </defs>
+        )}
         {/* Labelled bars drop the value axis, and its gridlines with it. */}
         {!labels && <CartesianGrid vertical={horizontal} horizontal={!horizontal} />}
         {horizontal ? (
@@ -344,7 +376,7 @@ export function BarChart<T extends object>({
               key={s.key}
               dataKey={s.key}
               name={s.label}
-              fill={chartColor(s.tone)}
+              fill={s.hatched ? `url(#${patternId}-${s.key})` : chartColor(s.tone)}
               radius={radius}
               maxBarSize={horizontal ? 20 : 32}
               activeBar={ACTIVE_BAR}

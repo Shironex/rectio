@@ -71,6 +71,39 @@ describe('BarChart', () => {
     expect(screen.getByText('€4,200')).toBeInTheDocument();
   });
 
+  it('hatches a fourth series, whose colour repeats the first, in the legend too', () => {
+    const wide = data.map((row) => ({ ...row, a: 1, b: 2 }));
+    const { container } = render(
+      <BarChart
+        data={wide}
+        category="team"
+        series={[
+          { key: 'open', label: 'Open' },
+          { key: 'closed', label: 'Closed' },
+          { key: 'a', label: 'A' },
+          { key: 'b', label: 'B' },
+        ]}
+        locale="en-GB"
+      />,
+    );
+    const keys = [...container.querySelectorAll('[data-slot="chart-legend"] li span[aria-hidden]')];
+    expect(keys).toHaveLength(4);
+    expect((keys[3] as HTMLElement).style.backgroundImage).toContain('repeating-linear-gradient');
+    expect((keys[0] as HTMLElement).style.backgroundImage).toBe('');
+  });
+
+  it('steps the plot ring back, since the active bar carries the strong ring', () => {
+    const { container } = render(
+      <BarChart data={data} category="team" series={[{ key: 'open', label: 'Open' }]} />,
+    );
+    const ring = '[&_.recharts-wrapper:has(.recharts-surface:focus-visible)]:outline-';
+    const stage = [...container.querySelectorAll<HTMLElement>('[class]')].find((el) =>
+      el.className.includes(ring),
+    );
+    expect(stage?.className).toContain(`${ring}1`);
+    expect(stage?.className).not.toContain(`${ring}2`);
+  });
+
   it('shows the empty state with no data', () => {
     render(<BarChart data={[]} category="team" series={[{ key: 'open', label: 'Open' }]} />);
     expect(screen.getByText('Nothing to plot yet')).toBeInTheDocument();
