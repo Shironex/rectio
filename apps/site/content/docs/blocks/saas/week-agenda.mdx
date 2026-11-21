@@ -1,0 +1,100 @@
+---
+title: Week agenda
+description: 'A day or week of events on a time grid: overlaps side by side, an all-day row, the current time and slot presses.'
+---
+
+import WeekAgendaDemo from '@/demos/week-agenda';
+import WeekAgendaMotionDemo from '@/demos/week-agenda.motion';
+
+<Preview
+  name="week-agenda"
+  plain={<WeekAgendaDemo />}
+  motion={<WeekAgendaMotionDemo />}
+  importLine="import { WeekAgenda } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add week-agenda
+```
+
+The motion variant is `motion-week-agenda`. It installs the plain block too; a new week or day
+slides in from the side you stepped to.
+
+## Usage
+
+Pass the events and the day to show; `variant` picks a `week` of seven columns or a single `day`.
+The block holds no events itself: `onEventClick` opens one, and `onSlotClick` gets the start and
+end of the empty slot that was pressed, or of a day's Add event button.
+
+```tsx
+<WeekAgenda
+  events={events}
+  date={date}
+  onDateChange={setDate}
+  variant={variant}
+  onVariantChange={setVariant}
+  onEventClick={(event) => openEvent(event.id)}
+  onSlotClick={({ start, end }) => startEvent(start, end)}
+/>
+```
+
+Events that overlap sit side by side and widen into free columns. When more than two meet in a
+week column (four in a day), the rest gather behind one "N more" button that lists them. Events
+that last a whole day or longer run along the all-day row. The grid shows `hours` (8:00 to 19:00
+by default) and grows to whole hours for an earlier or later event, so none is cropped. A line
+marks the current time, with the time itself in the gutter.
+
+Below a container width, and always on touch screens where a half-hour block is too small to
+press, the grid becomes a list of days, each with its events in order and an Add button. The week starts on the locale's first day unless `weekStartsOn` says otherwise.
+
+## Props
+
+<TypeTable
+  type={{
+    events: {
+      type: 'readonly AgendaEvent[]',
+      required: true,
+      description:
+        'id, title, start, end, and optional allDay, location, attendees, tone and status.',
+    },
+    date: { type: 'Date', required: true, description: 'The day shown, or a day in the week.' },
+    variant: { type: "'week' | 'day'", default: "'week'" },
+    onVariantChange: { type: '(variant) => void', description: 'Shows a Day and Week switch.' },
+    onDateChange: { type: '(date: Date) => void', description: 'Shows Today, previous and next.' },
+    onEventClick: { type: '(event: AgendaEvent) => void', description: 'Events become buttons.' },
+    onSlotClick: { type: '(slot: { start: Date; end: Date }) => void' },
+    hours: { type: '{ start: number; end: number }', default: '{ start: 8, end: 19 }' },
+    slotMinutes: { type: 'number', default: '30' },
+    weekStartsOn: { type: 'number', description: '0 for Sunday. Defaults to the locale.' },
+    now: { type: 'Date', description: 'The current time; pass it to render on the server.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: {
+      type: 'string',
+      description: 'Defaults to the days shown, such as 16 to 22 March 2026.',
+    },
+    description: { type: 'string', description: 'Defaults to the number of events.' },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+The layout is plain functions, tested on their own: `layoutDayEvents` (columns for overlaps),
+`collapseColumns` (the "N more" groups), `layoutAllDay` (rows for multi-day events),
+`agendaFitHours`, `agendaStops` and `agendaNeighbor` (keyboard order), `agendaWeekStart`,
+`agendaSlot` and `formatAgendaRange`.
+
+## Accessibility
+
+- The grid is one tab stop: arrow keys move between events, Up and Down in time and Left and Right
+  by day, Home and End to the first and last. A hidden hint says so.
+- Each event button reads its title and day, and is described by its time, status and place.
+- Slot presses are a pointer shortcut; each day's Add event button is the keyboard way in. It
+  starts at the next slot, so open a form with a time field from `onSlotClick` to pick another.
+- Status is written in words with an icon, never by colour alone, and the current time is read out.
+- Works in light and dark and down to phone width, where the list has 44px targets.
+- The motion variant moves only transform and opacity, and renders the plain block under reduced
+  motion.
