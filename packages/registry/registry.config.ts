@@ -1607,6 +1607,11 @@ export default defineRegistry({
           'A discussion with one level of replies, edit and delete for your own comments, mentions and a resolved state.',
         ),
         ...saasItems(
+          'time-series-chart',
+          'Time series chart',
+          'A chart card over time from the kit charts: the latest figure and change of each series, the date range, a line or area, and a table twin.',
+        ),
+        ...saasItems(
           'file-manager',
           'File manager',
           'One folder of files with a path, sorting, rename in place, bulk delete and storage use.',
