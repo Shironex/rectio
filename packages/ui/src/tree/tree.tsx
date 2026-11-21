@@ -456,7 +456,7 @@ export function Tree<Data = unknown>({
                 paddingInlineStart: `calc(${String(row.level - 1)} * var(--rx-tree-indent))`,
               }}
               className={cn(
-                'group/row relative flex min-h-(--rx-tree-row-height) cursor-pointer items-center gap-1.5 pe-2',
+                'group/row relative flex min-h-(--rx-tree-row-height) cursor-pointer scroll-my-8 items-center gap-1.5 pe-2',
                 'pointer-coarse:min-h-(--rx-tree-row-height-touch)',
                 'rounded-control text-sm text-fg outline-none select-none',
                 'transition-[background-color] duration-fast ease-standard',
