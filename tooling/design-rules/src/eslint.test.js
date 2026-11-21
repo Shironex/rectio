@@ -33,3 +33,29 @@ new RuleTester({ languageOptions: { ecmaVersion: 'latest', sourceType: 'module' 
     ],
   },
 );
+
+const ring = plugin.rules?.['no-invisible-focus-ring'];
+if (ring === undefined || typeof ring === 'function') throw new Error('rule missing');
+
+new RuleTester({
+  languageOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    parserOptions: { ecmaFeatures: { jsx: true } },
+  },
+}).run('no-invisible-focus-ring', ring, {
+  valid: [
+    '<div className="outline-none focus-visible:outline-2 focus-visible:outline-solid" />;',
+    // Without outline-none the outline style keeps its default, solid.
+    '<div className="focus-visible:outline-2 focus-visible:outline-focus" />;',
+    "cn('outline-none', 'focus-visible:outline-2', open && 'focus-visible:outline-solid');",
+    // Separate elements in a record of class lists.
+    "const PARTS = { a: 'outline-none', b: 'focus-visible:outline-2' };",
+  ],
+  invalid: [
+    { code: '<div className="outline-none focus-visible:outline-2" />;', errors: 1 },
+    { code: "<div className={cn('outline-none', ['focus-visible:outline-2'])} />;", errors: 1 },
+    { code: "const ROW = ['outline-none', 'has-focus-visible:outline-2'];", errors: 1 },
+    { code: "cn('outline-none focus-visible:outline-(--w)');", errors: 1 },
+  ],
+});

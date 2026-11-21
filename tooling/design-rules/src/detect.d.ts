@@ -18,3 +18,9 @@ export function findDesignValueViolations(
   text: string,
   options?: { selector?: boolean },
 ): Violation[];
+
+/**
+ * Variants (such as `focus-visible:`) under which one element's classes set an outline width but
+ * no outline style next to a bare `outline-none`: in Tailwind v4 that ring draws nothing.
+ */
+export function findInvisibleOutlineVariants(classes: string[]): string[];

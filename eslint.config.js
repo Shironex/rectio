@@ -150,7 +150,10 @@ export default tseslint.config(
     ],
     ignores: ['**/*.test.{ts,tsx}'],
     plugins: { rectio: designRules },
-    rules: { 'rectio/no-hardcoded-design-values': 'error' },
+    rules: {
+      'rectio/no-hardcoded-design-values': 'error',
+      'rectio/no-invisible-focus-ring': 'error',
+    },
   },
 
   // Plain JS config and tooling files are not in a tsconfig project.

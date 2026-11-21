@@ -179,3 +179,35 @@ export function findDesignValueViolations(text, options = {}) {
   }
   return found.sort((a, b) => a.index - b.index);
 }
+
+/** The outline styles that make an outline width draw. */
+const OUTLINE_STYLES = new Set(['solid', 'dashed', 'dotted', 'double']);
+
+/**
+ * Variants under which a class list sets an outline width but no outline style, while the same
+ * list also has a bare `outline-none`. Tailwind v4's `outline-none` sets `--tw-outline-style: none`
+ * and a width utility draws `outline-style: var(--tw-outline-style)`, so `outline-none
+ * focus-visible:outline-2` draws no ring at all. Adding `focus-visible:outline-solid` fixes it.
+ *
+ * @param {string[]} classes One element's classes.
+ * @returns {string[]} The variants (such as `focus-visible:`) whose ring is invisible.
+ */
+export function findInvisibleOutlineVariants(classes) {
+  if (!classes.includes('outline-none')) return [];
+  /** @type {Set<string>} */
+  const widths = new Set();
+  /** @type {Set<string>} */
+  const styled = new Set();
+  for (const name of classes) {
+    const cut = name.lastIndexOf(':');
+    if (cut < 0) continue;
+    const variant = name.slice(0, cut + 1);
+    const utility = name.slice(cut + 1);
+    const match = /^outline-(.+)$/.exec(utility);
+    if (match === null) continue;
+    const value = match[1] ?? '';
+    if (/^(?:\d+|\(.+\)|\[.+\])$/.test(value) || value === '') widths.add(variant);
+    else if (OUTLINE_STYLES.has(value)) styled.add(variant);
+  }
+  return [...widths].filter((variant) => !styled.has(variant));
+}
