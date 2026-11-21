@@ -743,6 +743,16 @@ export default defineRegistry({
       files: ['link/link.tsx', 'link/href.ts'],
     },
     {
+      name: 'alert-dialog',
+      type: 'component',
+      version: '0.1.0',
+      title: 'Alert dialog',
+      description:
+        'A destructive or costly confirmation that opens on the safe answer and waits for an async action.',
+      categories: ['overlays'],
+      files: ['alert-dialog/alert-dialog.tsx'],
+    },
+    {
       name: 'breadcrumb',
       type: 'component',
       version: '0.1.2',
@@ -863,6 +873,12 @@ export default defineRegistry({
         motionItem('dialog', 'Motion Dialog', 'Dialog that springs out of its trigger and back.', [
           'dialog/dialog.tsx',
         ]),
+        motionItem(
+          'alert-dialog',
+          'Motion AlertDialog',
+          'Alert dialog that opens on the dialog spring and closes on a faster tween.',
+          ['alert-dialog/alert-dialog.tsx'],
+        ),
         motionItem(
           'select',
           'Motion Select',
