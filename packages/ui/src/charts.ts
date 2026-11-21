@@ -40,6 +40,7 @@ export {
   type SwatchShape,
 } from './chart/chart';
 export {
+  extent,
   formatDuration,
   formatValue,
   relativeChange,

@@ -1,5 +1,6 @@
 import type { ComponentProps } from 'react';
 
+import { extent } from '../chart/chart-format';
 import { cn } from '../lib/cn';
 
 /** The chart tokens a sparkline can take; the same names as the charts' colours. */
@@ -71,8 +72,7 @@ export interface SparklineProps extends Omit<ComponentProps<'span'>, 'children'>
 function layout(data: readonly (number | null)[], reference: number | undefined) {
   const known = data.filter((v): v is number => v !== null && Number.isFinite(v));
   const values = reference === undefined ? known : [...known, reference];
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  const { min, max } = extent(values);
   const span = max - min || 1;
   const x = (index: number) => (data.length <= 1 ? 50 : (index / (data.length - 1)) * 100);
   const y = (value: number) => 92 - ((value - min) / span) * 84;

@@ -31,7 +31,7 @@ import {
   type ChartColor,
   type ChartMessages,
 } from '../chart/chart';
-import { formatValue, type ValueFormat } from '../chart/chart-format';
+import { extent, formatValue, type ValueFormat } from '../chart/chart-format';
 import { cn } from '../lib/cn';
 
 type StringKey<T> = Extract<keyof T, string>;
@@ -195,7 +195,7 @@ export function BarChart<T extends object>({
       ? keyed.reduce((sum, s) => sum + Math.min(0, figure(datum, s.key) ?? 0), 0)
       : Math.min(0, ...keyed.map((s) => figure(datum, s.key) ?? 0)),
   );
-  const ticks = niceRangeTicks(Math.min(0, ...lows), Math.max(0, ...highs));
+  const ticks = niceRangeTicks(Math.min(0, extent(lows).min), Math.max(0, extent(highs).max));
   const negative = lows.some((low) => low < 0);
 
   const describe = (label: string, value: (datum: T) => number | null) => {

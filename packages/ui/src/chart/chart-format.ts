@@ -91,3 +91,18 @@ export function relativeChange(current: number, previous: number): number | null
   if (previous === 0 || !Number.isFinite(previous) || !Number.isFinite(current)) return null;
   return (current - previous) / Math.abs(previous);
 }
+
+/**
+ * The smallest and largest finite number, in one pass. A loop rather than `Math.min(...values)`,
+ * which overflows the call stack on long series. Infinity and -Infinity when there are none.
+ */
+export function extent(values: Iterable<number>): { min: number; max: number } {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const value of values) {
+    if (!Number.isFinite(value)) continue;
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  return { min, max };
+}
