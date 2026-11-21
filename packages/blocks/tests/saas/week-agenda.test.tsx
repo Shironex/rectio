@@ -60,7 +60,7 @@ describe('WeekAgenda', () => {
     const review = grid().getByRole('button', { name: 'Close review, Monday 16 March' });
     const cell = (button: HTMLElement) => button.closest('li') as HTMLElement;
     expect(cell(review).style.width).toBe('50%');
-    expect(cell(standup).style.left).toBe('50%');
+    expect(cell(standup).style.insetInlineStart).toBe('50%');
     expect(
       within(grid().getByRole('list', { name: 'All-day events' })).getByRole('button', {
         name: 'Offsite, Thursday 19 March',

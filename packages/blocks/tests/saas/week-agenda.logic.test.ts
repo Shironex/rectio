@@ -116,7 +116,7 @@ describe('layoutDayEvents', () => {
     const by = Object.fromEntries(placed.map((p) => [p.event.id, p]));
     expect(by.early).toMatchObject({ start: 480, end: 540, continuesBefore: true });
     expect(by.late).toMatchObject({ start: 1080, end: 1140, continuesAfter: true });
-    expect(by.blip).toMatchObject({ start: 720, end: 744 });
+    expect(by.blip).toMatchObject({ start: 720, end: 746 });
     expect(by.night).toMatchObject({ start: 480, continuesBefore: true, continuesAfter: false });
     expect(by.allday).toBeUndefined();
   });

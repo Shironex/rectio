@@ -241,7 +241,11 @@ export function WeekAgenda({
               variant="secondary"
               size="sm"
               disabled={days.some((day) => isSameDay(day, now))}
-              onClick={() => {
+              onClick={(event: { currentTarget: HTMLElement }) => {
+                // Today disables itself once pressed: hand focus to its neighbour first.
+                event.currentTarget.parentElement
+                  ?.querySelector<HTMLElement>('[data-agenda-next]')
+                  ?.focus();
                 go(startOfDay(now), now.getTime() < date.getTime() ? -1 : 1);
               }}
             >
@@ -263,6 +267,7 @@ export function WeekAgenda({
               size="sm"
               iconOnly
               aria-label={`Next ${unit}`}
+              data-agenda-next=""
               onClick={() => {
                 go(agendaStep(date, variant, 1), 1);
               }}
@@ -299,7 +304,7 @@ export function WeekAgenda({
       className={className}
       bodyClassName="gap-3"
     >
-      <div ref={frame} className="min-w-0">
+      <div ref={frame} className="min-w-0 overflow-x-clip">
         <Stage rangeKey={rangeKey} direction={direction}>
           <div className={BREAK[variant].grid}>
             <AgendaGrid {...shared} empty={inRange === 0} />
@@ -587,7 +592,7 @@ function AgendaGrid({
                 className={cn(
                   'relative block',
                   index > 0 ? '-top-2' : 'top-0.5',
-                  nowRow !== null && Math.abs(nowRow - index * 60) < 15 && 'invisible',
+                  nowRow !== null && Math.abs(nowRow - index * 60) < 25 && 'invisible',
                 )}
               >
                 {label}
@@ -614,7 +619,7 @@ function AgendaGrid({
               key={day.getTime()}
               className={cn(
                 'relative min-w-0 border-s border-line',
-                weekend && variant === 'week' && 'bg-surface-sunken/50',
+                weekend && variant === 'week' && 'bg-surface-sunken/30',
                 today && variant === 'week' && 'bg-accent-subtle/40',
               )}
             >
@@ -644,7 +649,10 @@ function AgendaGrid({
                 />
               )}
 
-              <ol className="pointer-events-none absolute inset-0">
+              <ol
+                aria-label={names.long.format(day)}
+                className="pointer-events-none absolute inset-0"
+              >
                 {placed.map((slice) => {
                   const minutes = slice.end - slice.start;
                   const short = minutes < 45;
@@ -658,7 +666,7 @@ function AgendaGrid({
                       style={{
                         top: span(slice.start - hours.start * 60),
                         height: span(minutes),
-                        left: `${String((slice.column / slice.columns) * 100)}%`,
+                        insetInlineStart: `${String((slice.column / slice.columns) * 100)}%`,
                         width: `${String((slice.span / slice.columns) * 100)}%`,
                       }}
                     >
@@ -677,9 +685,17 @@ function AgendaGrid({
                         className={cn(
                           'h-full shadow-raised has-focus-visible:outline-offset-0',
                           // Short: the title alone on one line; the time is still read out.
-                          short && 'justify-center py-0 [&>:first-child]:truncate [&_p]:sr-only',
+                          short &&
+                            (slice.event.status ?? 'confirmed') === 'confirmed' &&
+                            'justify-center py-0 [&>:first-child]:truncate [&_p]:sr-only',
+                          // A short tentative or cancelled event keeps its word beside the title.
+                          short &&
+                            (slice.event.status ?? 'confirmed') !== 'confirmed' &&
+                            'flex-row items-center gap-1.5 py-0 [&>:first-child]:truncate [&_p]:shrink-0',
                           // Narrow: a smaller title that may wrap, and the start time alone.
                           narrow && 'px-1.5 [&>:first-child]:text-xs [&>:first-child]:break-words',
+                          // A tall narrow card has room for a longer title.
+                          narrow && minutes >= 90 && '[&>:first-child]:line-clamp-4',
                           slice.continuesBefore && 'rounded-t-none border-t-0',
                           slice.continuesAfter && 'rounded-b-none border-b-0',
                         )}
@@ -699,7 +715,7 @@ function AgendaGrid({
                     style={{
                       top: span(chip.start - hours.start * 60),
                       height: span(Math.max(chip.end - chip.start, AGENDA_MIN_MINUTES)),
-                      left: `${String((chip.column / chip.columns) * 100)}%`,
+                      insetInlineStart: `${String((chip.column / chip.columns) * 100)}%`,
                       width: `${String((1 / chip.columns) * 100)}%`,
                     }}
                   >
@@ -738,12 +754,12 @@ function AgendaGrid({
               {nowAt !== null && (
                 <div
                   data-slot="week-agenda-now"
-                  // Over the events but a hairline, so it reads across a busy hour.
-                  className="pointer-events-none absolute inset-x-0 z-20 flex items-center"
+                  // Under the events, so it never strikes a title; the gutter carries the time.
+                  className="pointer-events-none absolute inset-x-0 flex items-center"
                   style={{ top: span(nowAt) }}
                 >
                   <span className="-ms-1 size-2 shrink-0 -translate-y-1/2 rounded-full bg-accent" />
-                  <span className="h-px flex-1 -translate-y-1/2 bg-accent" />
+                  <span className="h-0.5 flex-1 -translate-y-1/2 bg-accent" />
                   <span className="sr-only">Now, {names.time.format(now)}</span>
                 </div>
               )}
@@ -844,8 +860,8 @@ function MoreEvents({
           type="button"
           aria-label={`${String(count)} ${what} from ${from}, ${dayLabel}`}
           className={cn(
-            'flex size-full cursor-pointer flex-col items-start rounded-badge border border-line-strong bg-surface px-1.5 py-0.5 text-start',
-            'text-xs font-medium text-fg hover:bg-surface-hover',
+            'flex size-full cursor-pointer flex-col items-start rounded-badge border border-line bg-surface-raised px-1.5 py-0.5 text-start numeric',
+            'text-xs font-medium text-fg-muted hover:bg-surface-hover hover:text-fg',
             'transition-transform duration-fast ease-standard active:scale-99 motion-reduce:active:scale-100',
             focusRing,
           )}
@@ -903,6 +919,7 @@ function AgendaList({
   onSlotClick,
 }: ViewProps) {
   const names = useDayNames(locale);
+  const listId = useId();
   if (empty && variant === 'week') {
     return (
       <EmptyNote
@@ -937,7 +954,7 @@ function AgendaList({
           .sort((a, b) => a.start - b.start || a.column - b.column)
           .map((slice) => ({ key: slice.key, event: slice.event }));
         const items = [...allDay, ...timed];
-        const headingId = `${String(dayStart)}-${String(dayIndex)}`;
+        const headingId = `${listId}-${String(dayIndex)}`;
         return (
           <li key={dayStart} className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3 border-b border-line pb-1.5">

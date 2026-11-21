@@ -60,7 +60,7 @@ export interface PlacedAllDay {
 
 const DAY_MS = 86_400_000;
 /** The shortest an event is drawn, in minutes, so a five minute call still has a line of text. */
-export const AGENDA_MIN_MINUTES = 24;
+export const AGENDA_MIN_MINUTES = 26;
 
 export function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
