@@ -242,7 +242,7 @@ export default defineRegistry({
     {
       name: 'theme-scope',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'ThemeScope',
       description: 'Applies a theme, mode and density to a subtree; popups render inside it.',
       categories: ['theming'],
@@ -305,7 +305,7 @@ export default defineRegistry({
     {
       name: 'badge',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Badge',
       description: 'A record state in words, tinted neutral, positive, negative, warning or info.',
       categories: ['finance'],
@@ -620,7 +620,7 @@ export default defineRegistry({
     {
       name: 'toggle',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Toggle and toggle group',
       description: 'Pressed-state buttons and a segmented control, single or multiple.',
       categories: ['forms', 'actions'],
@@ -730,7 +730,7 @@ export default defineRegistry({
     {
       name: 'tabs',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Tabs',
       description: 'Line and segmented tabs with an indicator measured by Base UI.',
       categories: ['navigation'],
@@ -845,7 +845,7 @@ export default defineRegistry({
             'lib/anchored.tsx',
           ],
           'lib',
-          '0.4.0',
+          '0.4.1',
         ),
         motionItem(
           'button',
@@ -939,6 +939,8 @@ export default defineRegistry({
           'Motion ToggleGroup',
           'Segmented control whose chosen chip slides to the new choice.',
           ['toggle/toggle.tsx'],
+          'component',
+          '0.1.1',
         ),
         motionItem(
           'file-upload',
@@ -992,7 +994,7 @@ export default defineRegistry({
         {
           name: 'blocks-core',
           type: 'lib',
-          version: '0.1.2',
+          version: '0.1.3',
           title: 'Blocks core',
           description:
             'Money maths in minor units, the panel, chart theming with a table fallback, and the parts every finance block shares.',
