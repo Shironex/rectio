@@ -9,6 +9,13 @@
     },
     "size": {
       "$type": "dimension",
+      "lg": {
+        "$value": {
+          "value": 1.125,
+          "unit": "rem"
+        },
+        "$description": "18px: card and section titles carry the serif with presence."
+      },
       "xl": {
         "$value": "{font-size.22}"
       },

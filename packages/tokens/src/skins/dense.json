@@ -11,7 +11,11 @@
         "$description": "11.5px: captions and axis labels stay legible at the dense scale."
       },
       "sm": {
-        "$value": "{font-size.12}"
+        "$value": {
+          "value": 0.78125,
+          "unit": "rem"
+        },
+        "$description": "12.5px: tabs, labels and secondary text stay comfortable at the dense scale."
       },
       "base": {
         "$value": "{font-size.13}"
