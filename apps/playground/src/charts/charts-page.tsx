@@ -209,7 +209,6 @@ function Dashboard({ charts }: { charts: Charts }) {
           format="currency"
           currency="EUR"
           locale={LOCALE}
-          centerValue={null}
           plotClassName="h-44"
         />
       </ChartCard>

@@ -152,9 +152,49 @@ try {
     await page.keyboard.press('ArrowRight');
     await page.waitForTimeout(120);
     await bars.screenshot({ path: join(out, `state-keyboard-${mode}.png`) });
+    // The update glide: sample one bar's height in the page itself, so a busy machine cannot hide it.
+    const heights = bars.locator('.recharts-bar-rectangle path').first();
+    const before = await heights.getAttribute('d');
     await bars.getByRole('button', { name: 'Forecast' }).click();
-    await page.waitForTimeout(40);
-    await bars.screenshot({ path: join(out, `state-update-mid-${mode}.png`) });
+    const samples = await page.evaluate(
+      () =>
+        new Promise<string[]>((resolve) => {
+          const seen: string[] = [];
+          const start = performance.now();
+          const tick = () => {
+            const path = document
+              .querySelectorAll('[data-slot="chart-card"]')[2]
+              ?.querySelector('.recharts-bar-rectangle path');
+            seen.push(path?.getAttribute('d')?.split(' ').slice(0, 3).join(' ') ?? '');
+            if (performance.now() - start < 400) requestAnimationFrame(tick);
+            else resolve(seen);
+          };
+          tick();
+        }),
+    );
+    console.log(
+      `${mode} update glide: ${String(new Set(samples).size)} distinct frames over 400 ms (from ${before?.split(' ').slice(0, 3).join(' ') ?? ''})`,
+    );
+    // The mid-update still: the glide slowed to 3 s on a page of its own, so the shot lands inside it.
+    const slow = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    await slow.addInitScript(() => {
+      document.addEventListener('DOMContentLoaded', () => {
+        const style = document.createElement('style');
+        style.textContent = '[data-slot="chart-card"] { --rx-motion-duration-slow: 3s; }';
+        document.head.append(style);
+      });
+    });
+    await slow.goto(`${base}?view=charts&motion=on&mode=${mode}`);
+    await slow.waitForFunction(() => document.querySelectorAll('.recharts-surface').length > 0);
+    const slowBars = slow.locator('[data-slot="chart-card"]').nth(2);
+    await slowBars.scrollIntoViewIfNeeded();
+    // Let the slowed entrance finish before the update starts.
+    await slow.waitForTimeout(7000);
+    await slowBars.getByRole('button', { name: 'Forecast' }).click();
+    await slow.mouse.move(0, 0);
+    await slow.waitForTimeout(900);
+    await slowBars.screenshot({ path: join(out, `state-update-mid-${mode}.png`) });
+    await slow.close();
     await settle(page);
     await bars.getByRole('button', { name: 'Show table' }).click();
     await bars.screenshot({ path: join(out, `state-table-${mode}.png`) });
