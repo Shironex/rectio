@@ -11,14 +11,14 @@ package manager  npm
 [1/5] Checking project ... ok (0.0s) my-books is free
 [2/5] Fetching template ... ok (0.0s) books x.y.z, 4 files
 [3/5] Resolving items ... ok (0.0s) 6 kit items
-[4/5] Writing files ... ok (0.0s) 11 files
+[4/5] Writing files ... ok (0.0s) 12 files
 [5/5] Installing packages ... skipped (--no-install)
 
 my-books is ready
 
 Template  Books x.y.z, next
 Kit       2 components, 2 themes, 1 lib, 1 style
-Files     4 from the template, 6 kit files
+Files     4 from the template, 7 kit files
 Packages  8 packages in package.json, not installed yet
 
 Next

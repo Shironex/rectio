@@ -15,7 +15,7 @@ exit 0
 
   ✓ [1/4] Checking project     0.0s  vite, Tailwind ^x.y.z, src/index.css
   ✓ [2/4] Resolving items      0.0s  6 items
-  ✓ [3/4] Writing files        0.0s  7 files
+  ✓ [3/4] Writing files        0.0s  8 files
   - [4/4] Installing packages        --no-install
 
   ╭──────────────────────────────────────────────────────────────╮
@@ -25,7 +25,7 @@ exit 0
   │ Theme       default                                          │
   │ Tailwind    ^x.y.z                                           │
   │ Components  button, dialog                                   │
-  │ Files       src/components/ui         3 files                │
+  │ Files       src/components/ui         4 files                │
   │             src/lib                   1 file                 │
   │             src/styles/rectio         1 file                 │
   │             src/styles/rectio/themes  1 file                 │

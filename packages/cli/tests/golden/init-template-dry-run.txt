@@ -18,7 +18,7 @@ Dry run: nothing was written (shop from Books)
 
 Template  Books x.y.z, next
 Kit       2 components, 2 themes, 1 lib, 1 style
-Files     4 from the template, 6 kit files
+Files     4 from the template, 7 kit files
 Packages  8 packages to install
 
 Pages  /
