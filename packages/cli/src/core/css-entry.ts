@@ -14,16 +14,17 @@ const TAILWIND_LINE = /^\s*@import\s+['"]tailwindcss['"][^;]*;[^\n]*\n?/m;
 const DEFAULT_THEME_ITEM = 'theme-default';
 
 /**
- * CSS files to import, in cascade order: the default theme (it owns :root), other themes, then
- * styles, so the base layer's density and reduced-motion rules win at equal specificity.
+ * CSS files to import, in cascade order: the default theme (it owns :root), other themes, skins,
+ * then styles, so a skin wins over a theme and the base layer's density and reduced-motion rules
+ * win over both at equal specificity.
  */
 export function cssImports(lock: Lockfile): string[] {
   const rank = (item: string, type: string) =>
-    type === 'theme' ? (item === DEFAULT_THEME_ITEM ? 0 : 1) : 2;
+    type === 'theme' ? (item === DEFAULT_THEME_ITEM ? 0 : 1) : type === 'skin' ? 2 : 3;
   return Object.entries(lock.items)
     .flatMap(([item, locked]) =>
       locked.files
-        .filter((f) => f.type === 'theme' || f.type === 'style')
+        .filter((f) => f.type === 'theme' || f.type === 'skin' || f.type === 'style')
         .map((f) => ({ path: f.path, rank: rank(item, f.type) })),
     )
     .sort((a, b) => a.rank - b.rank || (a.path < b.path ? -1 : 1))

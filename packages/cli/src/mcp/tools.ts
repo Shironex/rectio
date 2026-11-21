@@ -283,7 +283,7 @@ const GENERAL_DOCS = [
   '',
   'Workflow: `rectio init` once (rectio.json, tokens, a theme, the cn helper), then `rectio add <items>`. Dependencies between items are installed with them. `rectio diff <item>` compares with upstream.',
   'Styling: components read semantic tokens only. Use Tailwind utilities such as bg-surface, text-fg, border-line, bg-accent; never hex or the default Tailwind palette (it is removed). get_tokens lists them with values.',
-  'Theming: data-theme="<id>" on <html> (or a ThemeScope component for a subtree) picks a theme; data-mode="dark" picks dark (without it the system setting decides); data-density="compact" tightens controls.',
+  'Theming: data-theme="<id>" on <html> (or a ThemeScope component for a subtree) picks a theme; data-mode="dark" picks dark (without it the system setting decides); data-density="compact" tightens controls; data-skin="<id>" (after `rectio add skin-<id>`, or skin on ThemeScope) restyles type, corners and rhythm on any theme: dense for data-heavy screens, editorial for serif headings and hairlines.',
   'Money and quantities: the `numeric` utility gives tabular lining figures.',
   'This MCP server is read-only: get_add_command returns the command, you run it.',
   'Per-item notes: call get_docs with an item name.',
@@ -336,6 +336,11 @@ export async function getDocs(
   if (item.theme !== undefined) {
     lines.push(
       `Theme "${item.theme.id}": modes ${item.theme.modes.join(', ')}; densities ${item.theme.densities.join(', ')}. See get_tokens.`,
+    );
+  }
+  if (item.skin !== undefined) {
+    lines.push(
+      `Skin "${item.skin.id}": set data-skin="${item.skin.id}" on <html> or skin="${item.skin.id}" on a ThemeScope. Works with every theme and mode. Sets ${item.skin.tokens.join(', ')}.`,
     );
   }
   if (item.registryDependencies.length > 0)

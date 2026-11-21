@@ -38,6 +38,8 @@ import { cliCommand } from '../core/runner.ts';
 export interface InitOptions extends InstallOptions, OutputOptions {
   registry?: string;
   theme?: string;
+  /** A skin id: adds `skin-<id>` beside the theme. */
+  skin?: string;
   css?: string;
   framework?: string;
   /** Rewrite rectio.json even if it exists. */
@@ -80,8 +82,10 @@ export async function runInit(ctx: CliContext, options: InitOptions = {}) {
 
   const writeConfigFile =
     existing === undefined || options.force === true || existing.theme !== final.theme;
-  const extra = (options.items ?? []).filter((name) => !baseItems(final.theme).includes(name));
-  const names = [...baseItems(final.theme), ...extra];
+  const skin = options.skin === undefined ? [] : [`skin-${options.skin}`];
+  const base = [...baseItems(final.theme), ...skin];
+  const extra = (options.items ?? []).filter((name) => !base.includes(name));
+  const names = [...base, ...extra];
   const report = await installSteps(steps, ctx, final, client, names, options, {
     itemsLabel: 'item',
     beforeWrite: () => {
@@ -96,6 +100,7 @@ export async function runInit(ctx: CliContext, options: InitOptions = {}) {
   const rows: Rows = [
     ['Config', `${CONFIG_FILE}${writeConfigFile ? '' : s.dim(' (kept)')}`],
     ['Theme', final.theme],
+    ...(options.skin === undefined ? [] : ([['Skin', options.skin]] satisfies Rows)),
     ['Tailwind', tailwind.version],
     ...(extra.length === 0 ? [] : ([['Components', extra.join(', ')]] satisfies Rows)),
     ...installRows(report, s, { manager: options.manager ?? managerFor(ctx) }),
@@ -194,6 +199,16 @@ async function checkProject(ctx: CliContext, options: InitOptions, step: StepHan
   if (!index.items.some((i) => i.name === `theme-${theme}` && i.type === 'theme')) {
     const themes = index.items.filter((i) => i.type === 'theme').map((i) => i.name.slice(6));
     throw new CliError(`unknown theme "${theme}"`, `Available: ${themes.join(', ')}.`);
+  }
+  if (
+    options.skin !== undefined &&
+    !index.items.some((i) => i.name === `skin-${options.skin ?? ''}` && i.type === 'skin')
+  ) {
+    const skins = index.items.filter((i) => i.type === 'skin').map((i) => i.name.slice(5));
+    throw new CliError(
+      `unknown skin "${options.skin}"`,
+      skins.length === 0 ? 'This registry has no skins.' : `Available: ${skins.join(', ')}.`,
+    );
   }
   step.note = `${framework}, Tailwind ${tailwind.version}, ${css}`;
   return { existing, framework, tailwind, client, config: { ...config, theme } };

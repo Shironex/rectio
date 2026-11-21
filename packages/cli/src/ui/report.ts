@@ -33,6 +33,7 @@ export function kindCounts(items: readonly RegistryItem[]): string[] {
     ['block', 'block'],
     ['motion', 'motion twin'],
     ['theme', 'theme'],
+    ['skin', 'skin'],
     ['lib', 'lib'],
     ['hook', 'hook'],
     ['style', 'style'],

@@ -105,6 +105,23 @@ describe('init', () => {
     expect(out.join('\n').match(/data-theme="ledger"/g)).toHaveLength(1);
   });
 
+  it('adds a skin beside the theme with --skin, imported after the themes', async () => {
+    const cwd = app();
+    const { ctx, out } = capture(cwd);
+    await runInit(ctx, { registry: registry.url, skin: 'editorial', ...noInstall });
+    expect(read(cwd, 'src/styles/rectio/skins/editorial.css')).toContain('[data-skin="editorial"]');
+    const css = read(cwd, 'src/index.css');
+    const order = ['themes/default.css', 'skins/editorial.css', 'tokens.css'].map((f) =>
+      css.indexOf(f),
+    );
+    expect(order.every((at) => at > 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(out.join('\n')).toContain('data-skin="editorial"');
+    await expect(
+      runInit(capture(app()).ctx, { registry: registry.url, skin: 'glossy' }),
+    ).rejects.toThrow('unknown skin "glossy"');
+  });
+
   it('is idempotent', async () => {
     const cwd = await initialised();
     const before = snapshot(cwd);
@@ -295,6 +312,8 @@ describe('diff, list, search and update', () => {
   it('lists with filters and marks installed items', async () => {
     const cwd = await initialised();
     const { ctx, out } = capture(cwd);
+    const skins = await runList(capture(cwd).ctx, { type: 'skin' });
+    expect(skins.map((t) => t.name)).toEqual(['skin-dense', 'skin-editorial']);
     const themes = await runList(ctx, { type: 'theme' });
     expect(themes.map((t) => t.name)).toEqual(['theme-default', 'theme-ledger']);
     expect(out).toContainEqual(expect.stringMatching(/^\+ theme-default\s/));

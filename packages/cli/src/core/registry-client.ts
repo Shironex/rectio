@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import {
   INDEX_PATH,
   itemPath,
+  itemTypeSchema,
   registryIndexSchema,
   registryItemSchema,
   verifyItem,
@@ -55,10 +56,30 @@ async function readRaw(base: string, path: string): Promise<string> {
   return response.text();
 }
 
-function parse<T>(schema: z.ZodType<T>, text: string, what: string): T {
+/**
+ * Drops index entries of an item type this CLI does not know, so a registry that gains a new
+ * kind of item keeps working with an older CLI (which simply does not offer it).
+ */
+export function knownEntries(raw: unknown): unknown {
+  if (typeof raw !== 'object' || raw === null || !('items' in raw) || !Array.isArray(raw.items))
+    return raw;
+  const known = (entry: unknown) =>
+    typeof entry !== 'object' ||
+    entry === null ||
+    !('type' in entry) ||
+    itemTypeSchema.safeParse(entry.type).success;
+  return { ...raw, items: (raw.items as unknown[]).filter(known) };
+}
+
+function parse<T>(
+  schema: z.ZodType<T>,
+  text: string,
+  what: string,
+  prepare: (raw: unknown) => unknown = (raw) => raw,
+): T {
   let raw: unknown;
   try {
-    raw = JSON.parse(text);
+    raw = prepare(JSON.parse(text));
   } catch {
     throw new CliError(`${what} is not valid JSON`);
   }
@@ -96,7 +117,7 @@ export function createRegistryClient(url: string): RegistryClient {
     url,
     index: () => {
       cached ??= readRaw(url, INDEX_PATH).then((text) =>
-        parse(registryIndexSchema, text, `${url}/${INDEX_PATH}`),
+        parse(registryIndexSchema, text, `${url}/${INDEX_PATH}`, knownEntries),
       );
       return cached;
     },

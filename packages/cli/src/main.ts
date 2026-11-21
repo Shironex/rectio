@@ -30,6 +30,7 @@ const COMMANDS: HelpRows = [
   ['init --template <name> [folder]', 'start a new project from a template'],
   ['add <items...>', 'add items and everything they depend on'],
   ['add <theme link>', 'add a theme made in the docs theme generator'],
+  ['add skin-<id>', 'add a skin (dense, editorial), then set data-skin="<id>"'],
   ['diff <item>', 'compare an installed item with the registry'],
   ['list', 'list registry items (--type, --templates)'],
   ['search <query>', 'search registry items'],
@@ -41,6 +42,7 @@ const FLAGS: HelpRows = [
   ['--cwd <dir>', 'project folder (default: the current folder)'],
   ['--registry <url>', 'registry URL or folder (also RECTIO_REGISTRY_URL)'],
   ['--theme <id>', 'init: theme id or theme generator link (default: default)'],
+  ['--skin <id>', 'init: also add a skin, such as dense or editorial'],
   ['--css <path>', 'init: CSS file that imports Tailwind'],
   ['--framework <name>', 'init: vite, next or tanstack-start, when detection fails'],
   ['--template <name>', 'init: create a new project from this template, in [folder]'],
@@ -53,7 +55,7 @@ const FLAGS: HelpRows = [
   ['--no-install', 'init, add: do not run the package manager'],
   ['--verbose', 'init, add: list every item, file and package'],
   ['-q, --quiet', 'init, add: print only the result line and errors'],
-  ['--type <type>', 'list: component, block, theme, lib, hook or style'],
+  ['--type <type>', 'list: component, block, theme, skin, lib, hook or style'],
   ['--templates', 'list: templates only'],
   ['-h, --help', 'show this help'],
   ['-v, --version', 'show the version'],
@@ -99,6 +101,7 @@ const OPTIONS = {
   cwd: { type: 'string' },
   registry: { type: 'string' },
   theme: { type: 'string' },
+  skin: { type: 'string' },
   css: { type: 'string' },
   framework: { type: 'string' },
   type: { type: 'string' },
@@ -205,6 +208,11 @@ async function runCommand(
               'init --template takes a registry theme, not a theme link',
               `Add the theme once the app exists: \`${cliCommand("add '<theme link>'")}\`.`,
             );
+          if (values.skin !== undefined)
+            throw new CliError(
+              'init --template takes no skin',
+              `Add the skin once the app exists: \`${cliCommand(`add skin-${values.skin}`)}\`.`,
+            );
           await runInitTemplate(ctx, values.template, {
             ...install,
             ...chosen,
@@ -232,6 +240,7 @@ async function runCommand(
           const flags: InitFlags = {
             ...shared,
             ...(values.theme === undefined ? {} : { theme: values.theme }),
+            ...(values.skin === undefined ? {} : { skin: values.skin }),
             ...(manager === undefined ? {} : { pm: manager }),
             ...(values['no-install'] === true ? { install: false } : {}),
             ...(git === undefined ? {} : { git }),
@@ -254,6 +263,7 @@ async function runCommand(
           ...chosen,
           force: values.force === true,
           ...(theme === undefined ? {} : { theme: theme.kind === 'url' ? 'default' : theme.id }),
+          ...(values.skin === undefined ? {} : { skin: values.skin }),
           ...(values.css === undefined ? {} : { css: values.css }),
           ...(values.framework === undefined ? {} : { framework: values.framework }),
         });

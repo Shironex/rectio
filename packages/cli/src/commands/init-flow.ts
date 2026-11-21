@@ -69,6 +69,8 @@ const FRAMEWORK_LABELS: Record<Framework, string> = {
 export interface InitFlags {
   registry?: string;
   theme?: string;
+  /** --skin: a skin to add beside the theme. Not asked: skins are opt-in. */
+  skin?: string;
   pm?: PackageManager;
   /** False for --no-install. */
   install?: boolean;
@@ -238,6 +240,11 @@ function recap(ui: Ui, parts: readonly string[]): void {
 }
 
 async function templateFlow(ctx: CliContext, flags: InitFlags, ask: Prompter, ui: Ui) {
+  if (flags.skin !== undefined)
+    throw new CliError(
+      'a new app from a template takes no skin',
+      `Add the skin once the app exists: \`${cliCommand(`add skin-${flags.skin}`)}\`.`,
+    );
   const client = createRegistryClient(registryUrl(ctx, flags.registry, undefined));
   const templates = (await client.index()).items.filter((e) => e.type === 'template');
   if (templates.length === 0) throw new CliError('the registry has no templates yet');
@@ -404,6 +411,10 @@ async function existingFlow(
     recapParts.push(FRAMEWORK_LABELS[framework], css, themeLabel(theme));
   }
   options.theme = themeId(theme);
+  if (flags.skin !== undefined) {
+    options.skin = flags.skin;
+    recapParts.push(`${flags.skin} skin`);
+  }
 
   const index = await createRegistryClient(registryUrl(ctx, flags.registry, existing)).index();
   const starters = STARTER_COMPONENTS.flatMap((name) => {

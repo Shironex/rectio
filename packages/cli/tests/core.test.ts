@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { CONFIG_SCHEMA_URL, DEFAULT_REGISTRY, registryUrl } from '../src/core/config.ts';
 
 import { cssImports, updateCssEntry } from '../src/core/css-entry.ts';
+import { knownEntries } from '../src/core/registry-client.ts';
 import { parseJsonc, readText } from '../src/core/fs.ts';
 import { installCommand, mergeDependencies } from '../src/core/install.ts';
 import type { Lockfile } from '../src/core/lockfile.ts';
@@ -214,7 +215,7 @@ describe('project detection', () => {
 });
 
 describe('the CSS entry block', () => {
-  const lock = (files: [string, string, 'theme' | 'style' | 'component'][]): Lockfile => ({
+  const lock = (files: [string, string, 'theme' | 'skin' | 'style' | 'component'][]): Lockfile => ({
     lockfileVersion: 1,
     items: Object.fromEntries(
       files.map(([item, path, type]) => [
@@ -242,6 +243,24 @@ describe('the CSS entry block', () => {
     ).toEqual([
       'src/styles/rectio/themes/default.css',
       'src/styles/rectio/themes/ledger.css',
+      'src/styles/rectio/tokens.css',
+    ]);
+  });
+
+  it('puts skins after every theme and before the base styles', () => {
+    expect(
+      cssImports(
+        lock([
+          ['tokens', 'src/styles/rectio/tokens.css', 'style'],
+          ['skin-editorial', 'src/styles/rectio/skins/editorial.css', 'skin'],
+          ['theme-acme', 'src/styles/rectio/themes/acme.css', 'theme'],
+          ['theme-default', 'src/styles/rectio/themes/default.css', 'theme'],
+        ]),
+      ),
+    ).toEqual([
+      'src/styles/rectio/themes/default.css',
+      'src/styles/rectio/themes/acme.css',
+      'src/styles/rectio/skins/editorial.css',
       'src/styles/rectio/tokens.css',
     ]);
   });
@@ -311,5 +330,18 @@ describe('installCommand', () => {
     });
     expect(installCommand('npm')).toEqual({ args: ['install'], env: {} });
     expect(installCommand('bun')).toEqual({ args: ['install'], env: {} });
+  });
+});
+
+describe('the registry index', () => {
+  it('drops entries of an item type this CLI does not know', () => {
+    const entry = (name: string, type: string) => ({ name, type });
+    expect(
+      knownEntries({ name: 'r', items: [entry('button', 'component'), entry('x', 'gadget')] }),
+    ).toEqual({ name: 'r', items: [entry('button', 'component')] });
+    expect(knownEntries({ items: [entry('skin-dense', 'skin')] })).toEqual({
+      items: [entry('skin-dense', 'skin')],
+    });
+    expect(knownEntries('not an index')).toBe('not an index');
   });
 });

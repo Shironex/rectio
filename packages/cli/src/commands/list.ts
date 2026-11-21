@@ -21,6 +21,7 @@ const KINDS: [string, string][] = [
   ['component', 'Components'],
   ['block', 'Blocks'],
   ['theme', 'Themes'],
+  ['skin', 'Skins'],
   ['lib', 'Libs'],
   ['hook', 'Hooks'],
   ['style', 'Styles'],
