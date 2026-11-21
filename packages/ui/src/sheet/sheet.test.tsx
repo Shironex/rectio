@@ -82,4 +82,29 @@ describe('Sheet', () => {
     const panel = await screen.findByRole('dialog');
     expect(panel.className).toContain('w-(--rx-sheet-width-lg)');
   });
+
+  it('fills the screen at full size, on a side edge and on the bottom edge', async () => {
+    const { unmount } = render(
+      <Sheet side="right" defaultOpen>
+        <SheetContent size="full">
+          <SheetTitle>Ticket</SheetTitle>
+        </SheetContent>
+      </Sheet>,
+    );
+    const side = await screen.findByRole('dialog');
+    expect(side.className).toContain('w-full');
+    expect(side.className).toContain('max-w-none');
+    unmount();
+    render(
+      <Sheet side="bottom" defaultOpen>
+        <SheetContent size="full">
+          <SheetTitle>Filters</SheetTitle>
+        </SheetContent>
+      </Sheet>,
+    );
+    const bottom = await screen.findByRole('dialog');
+    expect(bottom.className).toContain('h-full');
+    expect(bottom.className).toContain('max-h-none');
+    expect(bottom.className).not.toContain('max-h-5/6');
+  });
 });

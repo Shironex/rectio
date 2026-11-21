@@ -67,17 +67,25 @@ const popupBySide: Record<SheetSide, string> = {
   ),
 };
 
-export type SheetSize = 'sm' | 'md' | 'lg';
+export type SheetSize = 'sm' | 'md' | 'lg' | 'full';
 
 /** The width of a side sheet; a top or bottom sheet spans the screen. */
 const WIDTHS: Record<SheetSize, string> = {
   sm: 'w-(--rx-sheet-width-sm)',
   md: 'w-(--rx-sheet-width)',
   lg: 'w-(--rx-sheet-width-lg)',
+  // The whole screen: no edge left to tap, so close it with its button, Escape or a swipe.
+  full: 'w-full max-w-none border-0',
 };
 
+/** A full top or bottom sheet takes the whole height, square, without the gap above it. */
+const FULL_VERTICAL = 'h-full max-h-none rounded-none border-0';
+
 export type SheetContentProps = WithClassName<ComponentProps<typeof Drawer.Popup>> & {
-  /** Width of a sheet on the start or end edge: small for a short list, large for a full record. */
+  /**
+   * Width of a sheet on the start or end edge: small for a short list, large for a full record,
+   * `full` for the whole screen (on a top or bottom sheet, `full` takes the whole height).
+   */
   size?: SheetSize;
   /** Label of the corner close button. Hide it with `showClose={false}` if the footer has one. */
   closeLabel?: string;
@@ -119,7 +127,7 @@ export function SheetContent({
             'data-swiping:transition-none data-swiping:select-none',
             'data-ending-style:duration-fast data-ending-style:ease-exit',
             popupBySide[side],
-            !vertical && WIDTHS[size],
+            vertical ? size === 'full' && FULL_VERTICAL : WIDTHS[size],
             className,
           )}
           {...props}
