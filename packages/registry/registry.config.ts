@@ -242,7 +242,7 @@ export default defineRegistry({
     {
       name: 'theme-scope',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'ThemeScope',
       description: 'Applies a theme, mode and density to a subtree; popups render inside it.',
       categories: ['theming'],
@@ -251,25 +251,25 @@ export default defineRegistry({
     {
       name: 'button',
       type: 'component',
-      version: '0.2.1',
+      version: '0.2.2',
       title: 'Button',
       description: 'Primary, secondary, ghost and danger buttons with a loading state.',
       categories: ['actions'],
-      files: ['button/button.tsx'],
+      files: ['button/button.tsx', 'button/button-content.ts'],
     },
     {
       name: 'field',
       type: 'component',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'Field and Input',
       description: 'Label, description, error and text input wired for accessibility.',
       categories: ['forms'],
-      files: ['field/field.tsx'],
+      files: ['field/field.tsx', 'field/control-styles.ts'],
     },
     {
       name: 'amount-input',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'AmountInput',
       description: 'Locale-aware money entry with the currency symbol in place.',
       categories: ['forms', 'finance'],
@@ -278,16 +278,16 @@ export default defineRegistry({
     {
       name: 'select',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Select',
       description: 'A select with a styled popup that follows the theme scope.',
       categories: ['forms'],
-      files: ['select/select.tsx'],
+      files: ['select/select.tsx', 'select/popup-styles.ts'],
     },
     {
       name: 'dialog',
       type: 'component',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'Dialog',
       description: 'Modal dialog with header, body and footer, focus trapped and restored.',
       categories: ['overlays'],
@@ -314,7 +314,7 @@ export default defineRegistry({
     {
       name: 'checkbox',
       type: 'component',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'Checkbox',
       description: 'A checkbox with an indeterminate state for partial selections.',
       categories: ['forms'],
@@ -323,7 +323,7 @@ export default defineRegistry({
     {
       name: 'data-table',
       type: 'component',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'DataTable',
       description:
         'Composable table on TanStack Table: sorting (with a Sort by control for phones), row selection, sticky header, totals footer, loading, empty and pagination.',
@@ -338,7 +338,7 @@ export default defineRegistry({
     {
       name: 'calendar',
       type: 'component',
-      version: '0.2.1',
+      version: '0.2.2',
       title: 'Calendar',
       description:
         'A token-styled month grid on DayPicker (@daypicker/react) with locale week starts.',
@@ -348,17 +348,17 @@ export default defineRegistry({
     {
       name: 'date-picker',
       type: 'component',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'DatePicker',
       description:
         'A typed date field with a calendar popup, plus a date range picker. Pairs with Field.',
       categories: ['forms'],
-      files: ['date-picker/date-picker.tsx'],
+      files: ['date-picker/date-picker.tsx', 'date-picker/date-format.ts'],
     },
     {
       name: 'toast',
       type: 'component',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'Toast',
       description: 'Success, error and info toasts with an action such as Undo, on Base UI Toast.',
       categories: ['feedback'],
@@ -396,7 +396,7 @@ export default defineRegistry({
     {
       name: 'spinner',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Spinner and loaders',
       description:
         'Ring, dots, bars, pulse and orbit spinners, a loading overlay and a loading action hook for buttons.',
@@ -425,17 +425,17 @@ export default defineRegistry({
     {
       name: 'meter',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Meter',
       description:
         'A measurement in a known range as a gauge or a bar, with warning and critical thresholds.',
       categories: ['feedback'],
-      files: ['meter/meter.tsx'],
+      files: ['meter/meter.tsx', 'meter/meter-level.ts'],
     },
     {
       name: 'alert',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Alert',
       description:
         'Info, success, warning and danger messages with actions, dismissible, never colour alone.',
@@ -445,7 +445,7 @@ export default defineRegistry({
     {
       name: 'banner',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Banner',
       description: 'A page-level announcement across the top of the app, dismissible.',
       categories: ['feedback'],
@@ -454,7 +454,7 @@ export default defineRegistry({
     {
       name: 'card',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Card',
       description:
         'A frame for one unit with header, content and footer; interactive cards are one link target.',
@@ -464,7 +464,7 @@ export default defineRegistry({
     {
       name: 'accordion',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Accordion',
       description: 'Sections that open in place, plain or separated, with headings and arrow keys.',
       categories: ['disclosure'],
@@ -473,7 +473,7 @@ export default defineRegistry({
     {
       name: 'collapsible',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Collapsible',
       description: 'One section that shows and hides behind a quiet trigger.',
       categories: ['disclosure'],
@@ -491,12 +491,12 @@ export default defineRegistry({
     {
       name: 'kbd',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Kbd',
       description:
         'Keycaps, key combinations and platform-aware shortcuts: Command on Apple, Control elsewhere, plus a hook to bind them.',
       categories: ['typography'],
-      files: ['kbd/kbd.tsx', 'kbd/shortcut.ts'],
+      files: ['kbd/kbd.tsx', 'kbd/shortcut.ts', 'kbd/use-shortcut.ts'],
     },
     {
       name: 'empty-state',
@@ -519,7 +519,7 @@ export default defineRegistry({
     {
       name: 'stat',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Stat',
       description: 'A figure with its label and change in words, alone or in a hairline group.',
       categories: ['data'],
@@ -538,7 +538,7 @@ export default defineRegistry({
     {
       name: 'stepper',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Stepper',
       description: 'Steps of a flow, horizontal or vertical, with completed steps you can revisit.',
       categories: ['navigation'],
@@ -547,7 +547,7 @@ export default defineRegistry({
     {
       name: 'textarea',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Textarea',
       description: 'Multi-line text that grows with its content, with an optional character count.',
       categories: ['forms'],
@@ -556,7 +556,7 @@ export default defineRegistry({
     {
       name: 'input-group',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'InputGroup',
       description: 'An input with text, icon or button addons inside one border.',
       categories: ['forms'],
@@ -565,7 +565,7 @@ export default defineRegistry({
     {
       name: 'search-input',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'SearchInput',
       description: 'A search field with a clear button, Escape to clear and an optional shortcut.',
       categories: ['forms'],
@@ -574,7 +574,7 @@ export default defineRegistry({
     {
       name: 'number-field',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'NumberField',
       description: 'Number entry with a stepper and Intl formats such as percent and units.',
       categories: ['forms'],
@@ -583,7 +583,7 @@ export default defineRegistry({
     {
       name: 'otp-input',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'OtpInput',
       description: 'One-time code and PIN entry, one slot per character, paste fills all.',
       categories: ['forms'],
@@ -592,7 +592,7 @@ export default defineRegistry({
     {
       name: 'fieldset',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Fieldset and FormSection',
       description:
         'Legend-grouped controls and titled settings form sections that respond to their container.',
@@ -602,7 +602,7 @@ export default defineRegistry({
     {
       name: 'switch',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Switch',
       description: 'A switch for settings that apply at once, with a label-beside settings row.',
       categories: ['forms'],
@@ -611,7 +611,7 @@ export default defineRegistry({
     {
       name: 'radio-group',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Radio group',
       description: 'Radio options as a list or as cards, named by a legend.',
       categories: ['forms'],
@@ -620,7 +620,7 @@ export default defineRegistry({
     {
       name: 'toggle',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Toggle and toggle group',
       description: 'Pressed-state buttons and a segmented control, single or multiple.',
       categories: ['forms', 'actions'],
@@ -629,7 +629,7 @@ export default defineRegistry({
     {
       name: 'slider',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Slider',
       description: 'Single and range slider with Intl-formatted values and marks.',
       categories: ['forms'],
@@ -638,7 +638,7 @@ export default defineRegistry({
     {
       name: 'file-upload',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'File upload',
       description:
         'Dropzone or compact trigger with accept, size and count rules, and a list of uploads with progress, retry and remove.',
@@ -652,27 +652,27 @@ export default defineRegistry({
     {
       name: 'tag-input',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'TagInput',
       description:
         'Free text tags in a field, with paste splitting, duplicate and max checks, and a reusable Tag chip.',
       categories: ['forms'],
-      files: ['tag-input/tag-input.tsx'],
+      files: ['tag-input/tag-input.tsx', 'tag-input/tag-input-styles.ts'],
     },
     {
       name: 'combobox',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Combobox',
       description:
         'A filterable single choice with groups, an empty state, async loading and a Create option.',
       categories: ['forms'],
-      files: ['combobox/combobox.tsx'],
+      files: ['combobox/combobox.tsx', 'combobox/combobox-styles.ts'],
     },
     {
       name: 'multi-select',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'MultiSelect',
       description:
         'Several choices as removable chips, with search, Select all and a +N overflow chip.',
@@ -682,7 +682,7 @@ export default defineRegistry({
     {
       name: 'tooltip',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Tooltip',
       description:
         'Short labels for icon controls, with a shared delay group and an optional shortcut.',
@@ -692,17 +692,17 @@ export default defineRegistry({
     {
       name: 'popover',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Popover',
       description:
         'Anchored content opened on purpose, with a title, description and close button.',
       categories: ['overlays'],
-      files: ['popover/popover.tsx'],
+      files: ['popover/popover.tsx', 'popover/popover-surface.ts'],
     },
     {
       name: 'hover-card',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'HoverCard',
       description: 'A link that previews where it goes on hover or focus.',
       categories: ['overlays'],
@@ -711,17 +711,17 @@ export default defineRegistry({
     {
       name: 'menu',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Menu',
       description:
         'Dropdown menu with icons, shortcuts, checkbox and radio items, groups and submenus.',
       categories: ['overlays'],
-      files: ['menu/menu.tsx'],
+      files: ['menu/menu.tsx', 'menu/menu-styles.ts'],
     },
     {
       name: 'context-menu',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'ContextMenu',
       description: 'Right click and long press menu that reuses the menu parts.',
       categories: ['overlays'],
@@ -730,16 +730,16 @@ export default defineRegistry({
     {
       name: 'tabs',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Tabs',
       description: 'Line and segmented tabs with an indicator measured by Base UI.',
       categories: ['navigation'],
-      files: ['tabs/tabs.tsx'],
+      files: ['tabs/tabs.tsx', 'tabs/tabs-styles.ts'],
     },
     {
       name: 'sheet',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Sheet',
       description:
         'A panel that slides in from any edge, a bottom sheet on phones, swipe to close.',
@@ -768,16 +768,16 @@ export default defineRegistry({
     {
       name: 'pagination',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Pagination',
       description: 'Page numbers with stable gaps, and a compact phone variant.',
       categories: ['navigation'],
-      files: ['pagination/pagination-bar.tsx'],
+      files: ['pagination/pagination-bar.tsx', 'pagination/page-range.ts'],
     },
     {
       name: 'navigation-menu',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'NavigationMenu',
       description:
         'Top navigation with dropdown panels, and a navigation bar that folds into a sheet on phones.',
@@ -787,7 +787,7 @@ export default defineRegistry({
     {
       name: 'command-menu',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'CommandMenu',
       description:
         'A command palette in a dialog: groups, fuzzy filter, keyboard navigation, empty state and shortcut hints.',
@@ -801,7 +801,7 @@ export default defineRegistry({
     {
       name: 'sidebar',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Sidebar',
       description:
         'App sidebar: folds to an icon rail, groups, nested items, active state, an off-canvas sheet on phones and a toggle shortcut.',
@@ -1141,7 +1141,7 @@ export default defineRegistry({
         {
           name: 'marketing-core',
           type: 'lib',
-          version: '0.1.0',
+          version: '0.1.1',
           title: 'Marketing core',
           // Only the marquee and the parts context's client tree need the browser; the marquee
           // carries its own directive, the rest renders on the server.
@@ -1287,7 +1287,7 @@ export default defineRegistry({
         {
           name: 'saas-core',
           type: 'lib',
-          version: '0.1.0',
+          version: '0.1.1',
           title: 'SaaS blocks core',
           description:
             'Account form frame, password and email rules, relative time and sizes, focus helpers, and the avatar, menu and popover the SaaS blocks share, and the usage level tones for the kit Meter.',
@@ -1418,7 +1418,7 @@ export default defineRegistry({
         {
           name: 'docs-core',
           type: 'lib',
-          version: '0.1.0',
+          version: '0.1.1',
           title: 'Docs core',
           description:
             'The navigation tree helpers, the one link every docs block draws, badges, the copy button, the messages helpers and the parts the motion twins swap.',

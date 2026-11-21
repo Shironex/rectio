@@ -313,6 +313,7 @@ describe('the rectio registry', () => {
       'kpi-row',
       'ledger',
       'legal',
+      'link',
       'logo-strip',
       'marketing-core',
       'menu',
