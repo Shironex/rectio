@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { main } from '../src/main.ts';
+import { KEY, fakeTerminal } from './fake-terminal.ts';
 import { VITE_APP, buildTestRegistry, capture, read, tempDir, writeTree } from './helpers.ts';
 
 // Golden files of the rendered output, with color off so they read as plain text. Versions are
@@ -142,6 +143,41 @@ describe('rendered output', () => {
       golden('error-no-config'),
     );
     await expect(await render(cwd, ['launch'])).toMatchFileSnapshot(golden('error-command'));
+  });
+
+  it('interactive init: a template, then rectio in an existing app', async () => {
+    // The screen a terminal shows at the end, colors dropped: the answered questions, the recap,
+    // the steps and the box. Fake package managers keep the choice list the same on every machine.
+    const bin = folder({ pnpm: '', npm: '', 'pnpm.cmd': '', 'npm.cmd': '' });
+    const env = { PATH: bin, PATHEXT: '.CMD' };
+    const screen = async (cwd: string, args: string[], keys: string[][]) => {
+      const term = fakeTerminal(cwd, env);
+      const run = main([...args, '--registry', registry.dir], term.ctx);
+      for (const group of keys) await term.type(...group);
+      const code = await run;
+      const text = term
+        .screen()
+        .replaceAll(cwd, '<cwd>')
+        .replace(/\b\d+\.\d+\.\d+\b/g, 'x.y.z');
+      return `$ rectio ${args.join(' ')}\nexit ${String(code)}\n\n${text}\n`;
+    };
+    await expect(
+      await screen(
+        folder(),
+        ['init', '--no-install'],
+        [['bo', KEY.enter], ['my-books', KEY.enter], [KEY.enter], [KEY.enter]],
+      ),
+    ).toMatchFileSnapshot(golden('init-interactive-template'));
+    await expect(
+      await screen(
+        folder(VITE_APP),
+        ['init', '--no-install'],
+        [
+          [KEY.enter, KEY.enter, KEY.enter, 'y', KEY.enter],
+          [KEY.space, 'j', 'j', 'j', KEY.space, KEY.enter],
+        ],
+      ),
+    ).toMatchFileSnapshot(golden('init-interactive-existing'));
   });
 
   it('help', async () => {

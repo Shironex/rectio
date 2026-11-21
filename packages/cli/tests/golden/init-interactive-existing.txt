@@ -1,0 +1,40 @@
+$ rectio init --no-install
+exit 0
+
+
+  rectio init  x.y.z
+
+  ✓ What do you want to do?   Add rectio to this project
+  ✓ Framework                 Vite
+  ✓ CSS entry                 src/index.css
+  ✓ Keep these aliases?       yes
+  ✓ Theme                     default
+  ✓ Add components now?       button, dialog
+
+  → Vite, src/index.css, default theme, button + dialog
+
+  ✓ [1/4] Checking project     0.0s  vite, Tailwind ^x.y.z, src/index.css
+  ✓ [2/4] Resolving items      0.0s  6 items
+  ✓ [3/4] Writing files        0.0s  7 files
+  - [4/4] Installing packages        --no-install
+
+  ╭──────────────────────────────────────────────────────────────╮
+  │ Set up rectio for vite                                       │
+  │                                                              │
+  │ Config      rectio.json                                      │
+  │ Theme       default                                          │
+  │ Tailwind    ^x.y.z                                           │
+  │ Components  button, dialog                                   │
+  │ Files       src/components/ui         3 files                │
+  │             src/lib                   1 file                 │
+  │             src/styles/rectio         1 file                 │
+  │             src/styles/rectio/themes  1 file                 │
+  │ Packages    @fontsource-variable/ibm-plex-sans,              │
+  │             @fontsource/ibm-plex-mono, clsx, tailwind-merge, │
+  │             @base-ui/react, @phosphor-icons/react            │
+  │             added to package.json, run `npm install`         │
+  │                                                              │
+  │ Next                                                         │
+  │   rectio add button  add a component and what it needs       │
+  │   rectio list        browse every item                       │
+  ╰──────────────────────────────────────────────────────────────╯

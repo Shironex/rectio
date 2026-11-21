@@ -1,0 +1,40 @@
+$ rectio init --no-install
+exit 0
+
+
+  rectio init  x.y.z
+
+  No package.json in this folder, so rectio starts a new app here.
+
+  ✓ Template                  Books
+  ✓ Project folder            my-books
+  ✓ Theme                     default
+  ✓ Package manager           npm
+
+  → books into my-books, default theme, npm, no install, no git (not on PATH)
+
+  ✓ [1/5] Checking project     0.0s  my-books is free
+  ✓ [2/5] Fetching template    0.0s  books x.y.z, 4 files
+  ✓ [3/5] Resolving items      0.0s  6 kit items
+  ✓ [4/5] Writing files        0.0s  11 files
+  - [5/5] Installing packages        --no-install
+
+  ╭────────────────────────────────────────────────────────────────╮
+  │ my-books is ready                                              │
+  │                                                                │
+  │ Template  Books x.y.z, next                                    │
+  │ Kit       2 components, 2 themes, 1 lib, 1 style               │
+  │ Files     4 from the template, 6 kit files                     │
+  │ Packages  8 packages in package.json, not installed yet        │
+  │                                                                │
+  │ Next                                                           │
+  │   cd my-books        go to the new project                     │
+  │   npm install        install the packages                      │
+  │   npm run dev        start the dev server                      │
+  │   rectio add <item>  add a component or block                  │
+  │   rectio list        browse every item                         │
+  │                                                                │
+  │ Pages  /                                                       │
+  │                                                                │
+  │ Tip: switch themes with data-theme on <html> (default, ledger) │
+  ╰────────────────────────────────────────────────────────────────╯

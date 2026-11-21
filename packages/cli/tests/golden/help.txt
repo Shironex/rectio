@@ -4,7 +4,8 @@ Finance and back-office components, copied into your project.
 Usage: rectio <command> [options]
 
 Commands
-  init                             set up rectio: rectio.json, tokens, a theme and the cn helper
+  init                             in a terminal: asks whether to add rectio here or start a new app
+  init --yes                       set up rectio here with the defaults: rectio.json, tokens, theme, cn
   init --template <name> [folder]  start a new project from a template
   add <items...>                   add items and everything they depend on
   diff <item>                      compare an installed item with the registry
@@ -21,6 +22,9 @@ Options
   --framework <name>  init: vite, next or tanstack-start, when detection fails
   --template <name>   init: create a new project from this template, in [folder]
   --force             init: rewrite rectio.json, or use a folder that is not empty
+  -y, --yes           init: accept every default, ask nothing
+  --pm <name>         init: pnpm, npm, yarn or bun, instead of the detected one
+  --git, --no-git     init --template: create a git repo with a first commit, or not
   --overwrite         add: replace files you changed
   --dry-run           init, add: show the plan, write nothing
   --no-install        init, add: do not run the package manager

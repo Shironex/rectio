@@ -1,16 +1,21 @@
-import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 import { runAdd } from './commands/add.ts';
 import { runDiff } from './commands/diff.ts';
 import { runInit } from './commands/init.ts';
+import { promptIO, runInteractiveInit, type InitFlags } from './commands/init-flow.ts';
 import { runInitTemplate } from './commands/init-template.ts';
 import { runList, runSearch } from './commands/list.ts';
 import { runMcp } from './commands/mcp.ts';
 import { runUpdate } from './commands/update.ts';
 import { CliError, type CliContext } from './core/context.ts';
+import type { PackageManager } from './core/project.ts';
 import { startUpdateCheck, updateNotice } from './core/update-check.ts';
+import { Prompter } from './prompt/prompts.ts';
+import { PromptCancelled } from './prompt/session.ts';
 import { commandRows } from './ui/layout.ts';
 import { printError, Ui } from './ui/output.ts';
 import { CLI_VERSION } from './version.ts';
@@ -19,7 +24,8 @@ import { cliCommand, detectRunner, setRunner } from './core/runner.ts';
 type HelpRows = [string, string][];
 
 const COMMANDS: HelpRows = [
-  ['init', 'set up rectio: rectio.json, tokens, a theme and the cn helper'],
+  ['init', 'in a terminal: asks whether to add rectio here or start a new app'],
+  ['init --yes', 'set up rectio here with the defaults: rectio.json, tokens, theme, cn'],
   ['init --template <name> [folder]', 'start a new project from a template'],
   ['add <items...>', 'add items and everything they depend on'],
   ['diff <item>', 'compare an installed item with the registry'],
@@ -37,6 +43,9 @@ const FLAGS: HelpRows = [
   ['--framework <name>', 'init: vite, next or tanstack-start, when detection fails'],
   ['--template <name>', 'init: create a new project from this template, in [folder]'],
   ['--force', 'init: rewrite rectio.json, or use a folder that is not empty'],
+  ['-y, --yes', 'init: accept every default, ask nothing'],
+  ['--pm <name>', 'init: pnpm, npm, yarn or bun, instead of the detected one'],
+  ['--git, --no-git', 'init --template: create a git repo with a first commit, or not'],
   ['--overwrite', 'add: replace files you changed'],
   ['--dry-run', 'init, add: show the plan, write nothing'],
   ['--no-install', 'init, add: do not run the package manager'],
@@ -94,6 +103,10 @@ const OPTIONS = {
   template: { type: 'string' },
   templates: { type: 'boolean' },
   force: { type: 'boolean' },
+  yes: { type: 'boolean', short: 'y' },
+  pm: { type: 'string' },
+  git: { type: 'boolean' },
+  'no-git': { type: 'boolean' },
   overwrite: { type: 'boolean' },
   'dry-run': { type: 'boolean' },
   'no-install': { type: 'boolean' },
@@ -142,6 +155,17 @@ export async function main(argv: readonly string[], base: CliContext): Promise<n
   return code;
 }
 
+const MANAGERS: readonly PackageManager[] = ['pnpm', 'npm', 'yarn', 'bun'];
+
+function parseManager(value: string | undefined): PackageManager | undefined {
+  if (value === undefined) return undefined;
+  const found = MANAGERS.find((m) => m === value);
+  if (found === undefined) {
+    throw new CliError(`unknown package manager "${value}"`, `Use one of: ${MANAGERS.join(', ')}.`);
+  }
+  return found;
+}
+
 async function runCommand(
   command: string,
   rest: readonly string[],
@@ -161,11 +185,21 @@ async function runCommand(
   };
   try {
     switch (command) {
-      case 'init':
+      case 'init': {
+        const manager = parseManager(values.pm);
+        if (values.git === true && values['no-git'] === true) {
+          throw new CliError('pass --git or --no-git, not both');
+        }
+        const git = values['no-git'] === true ? false : values.git === true ? true : undefined;
+        const chosen = {
+          ...(manager === undefined ? {} : { manager }),
+        };
         if (values.template !== undefined) {
           if (rest.length > 1) throw new CliError('init --template takes one folder name');
           await runInitTemplate(ctx, values.template, {
             ...install,
+            ...chosen,
+            ...(git === undefined ? {} : { git }),
             force: values.force === true,
             ...(rest[0] === undefined ? {} : { dir: rest[0] }),
             ...(values.theme === undefined ? {} : { theme: values.theme }),
@@ -178,14 +212,44 @@ async function runCommand(
             'Run it in the project root, or pass --cwd <dir>.',
           );
         }
+        // --css and --framework decide the branch (this project), so they skip the questions too.
+        const decided = values.css !== undefined || values.framework !== undefined;
+        const ui = new Ui(ctx, output);
+        const io =
+          decided || values.yes === true || output.quiet
+            ? undefined
+            : promptIO(ctx, ui.term.columns);
+        if (io !== undefined) {
+          const flags: InitFlags = {
+            ...shared,
+            ...(values.theme === undefined ? {} : { theme: values.theme }),
+            ...(manager === undefined ? {} : { pm: manager }),
+            ...(values['no-install'] === true ? { install: false } : {}),
+            ...(git === undefined ? {} : { git }),
+            force: values.force === true,
+            dryRun: install.dryRun,
+            ...output,
+          };
+          const ask = new Prompter(io, ui.s, ui.g, ui.term.utf8, ui.indent);
+          await runInteractiveInit(ctx, flags, ask, ui);
+          return 0;
+        }
+        if (values.yes === true && !existsSync(join(ctx.cwd, 'package.json'))) {
+          throw new CliError(
+            `no package.json in ${ctx.cwd}, and --yes cannot pick a template`,
+            `Pass --template <name> to start a new app (see \`${cliCommand('list --templates')}\`).`,
+          );
+        }
         await runInit(ctx, {
           ...install,
+          ...chosen,
           force: values.force === true,
           ...(values.theme === undefined ? {} : { theme: values.theme }),
           ...(values.css === undefined ? {} : { css: values.css }),
           ...(values.framework === undefined ? {} : { framework: values.framework }),
         });
         return 0;
+      }
       case 'add':
         await runAdd(ctx, rest, { ...install, overwrite: values.overwrite === true });
         return 0;
@@ -212,6 +276,11 @@ async function runCommand(
         throw new CliError(`unknown command "${command}"`, usageHint());
     }
   } catch (error) {
+    if (error instanceof PromptCancelled) {
+      // Every question comes before the first write, so a cancel leaves the disk as it was.
+      base.warn(`${new Ui(base).indent}Cancelled, nothing was written.`);
+      return 130;
+    }
     if (error instanceof CliError) {
       printError(base, error);
       return 1;

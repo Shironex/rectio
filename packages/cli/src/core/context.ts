@@ -1,3 +1,4 @@
+import type { PromptInput } from '../prompt/session.ts';
 import type { Runner } from './runner.ts';
 
 /** Everything a command touches outside its arguments, so tests can run it in-process. */
@@ -11,6 +12,8 @@ export interface CliContext {
   warn: (line: string) => void;
   /** Raw text on stdout, for the spinner. Unset means no spinner. */
   write?: (text: string) => void;
+  /** The keyboard, for the interactive init. Unset (tests, embedders) means never ask. */
+  stdin?: PromptInput;
   /** Whether stdout is a terminal. Unset (in tests and embedders) counts as not a terminal. */
   stdoutIsTTY?: boolean;
   /** Width of the terminal; 80 when unset. */
@@ -38,6 +41,7 @@ export function processContext(cwd: string): CliContext {
   return {
     cwd,
     env: process.env,
+    stdin: process.stdin,
     stdoutIsTTY: process.stdout.isTTY,
     columns: process.stdout.columns,
     log: (line) => {
