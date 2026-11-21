@@ -127,6 +127,16 @@ import { Button } from '@/components/ui/button';
 </Step>
 </Steps>
 
+## Server components
+
+Every component imports from a React Server Component. Modules that hold state, effects, context or
+event handlers start with `'use client'`, so a server page can render `Badge`, `Card`, `Money` or a
+`Button` without a client wrapper, and the plain helpers (`cn`, `formatMoney`, `initials`,
+`meterLevel`, `parseDate`, the shared class strings) run on the server too. Props that are functions,
+such as `onClick` or a `render` callback, still need a client module of your own.
+
+To send the kit's links through your router, add a [`LinkProvider`](/docs/components/link) once.
+
 ## The lockfile
 
 `rectio.lock.json` records each item's version and integrity, and the sha256 of every file as

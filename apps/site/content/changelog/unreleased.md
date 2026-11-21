@@ -3,6 +3,20 @@ title: Coming next
 summary: Work that is merging into main now and ships with the next release.
 ---
 
+## Kit
+
+- `LinkProvider` sends every link the components and blocks draw through your router, so they
+  change pages on the client and follow its base path. `Anchor` is the same link for your own code.
+- Every component imports from a React Server Component: client modules say `'use client'`, and the
+  plain helpers and class strings run on the server.
+- The sign in, sign up and two-factor links reach 44px on touch screens.
+
+## Templates
+
+- Every template sends its links through the link provider, so the live previews under
+  `/preview/<name>/` follow their base path with no prefix in the data.
+- The SaaS admin template has a page for an address that does not exist.
+
 ## Themes
 
 - Graphite becomes the new default dark mode.

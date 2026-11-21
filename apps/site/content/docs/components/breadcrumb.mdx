@@ -35,7 +35,9 @@ and is marked as such. When there are more than `maxItems`, the first item and t
 `maxItems - 1` stay and the middle folds into a menu button, so the trail never wraps. Use 2 or 3 on
 a phone.
 
-Pass `renderLink` to draw links with your router. The levels folded into the menu are plain anchors.
+Links follow a [`LinkProvider`](/docs/components/link), so with one around the app they already go
+through your router. Pass `renderLink` to draw this trail's links another way; the levels folded
+into the menu use it too.
 
 ```tsx
 <Breadcrumb
@@ -71,7 +73,8 @@ Every `nav` prop is accepted as well, except `children`.
     },
     renderLink: {
       type: '(props: { href; className; children }) => ReactNode',
-      description: "Draws a visible link, for a router's link component. Defaults to an anchor.",
+      description:
+        "Draws a link, for a router's link component. Defaults to the kit's `Anchor`, which follows a `LinkProvider`.",
     },
     label: {
       type: 'string',

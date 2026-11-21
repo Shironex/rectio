@@ -75,4 +75,5 @@ unless you set `sticky={false}`.
 - Below the `md` breakpoint the links open as a sheet under the bar. It traps focus, closes on Escape or a link press and returns focus to its button.
 - The current page is marked with `aria-current="page"`, not only with colour.
 - Every link and button keeps a visible focus ring.
-- Links render through `Anchor`: swap it once for your router's link component.
+- Links render through the kit's `Anchor`, so a [`LinkProvider`](/docs/components/link) sends them
+  through your router.

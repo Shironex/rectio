@@ -1,0 +1,107 @@
+---
+title: Link
+description: One provider sends every link the kit draws through your router and its base path.
+---
+
+<Preview name="link" plain={<Demo name="link" />} align="start" />
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add link
+```
+
+Components that draw links (breadcrumb, menu, sidebar, navigation menu, pagination, card) and the
+blocks install it with them.
+
+## Usage
+
+Wrap the app once, in a client module, and pass your router's link component:
+
+```tsx
+'use client';
+
+import { LinkProvider } from '@/components/ui/link';
+import NextLink from 'next/link';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return <LinkProvider render={(props) => <NextLink {...props} />}>{children}</LinkProvider>;
+}
+```
+
+From then on every internal link the components and blocks draw goes through it: breadcrumb levels,
+menu rows with an `href`, sidebar items, navigation menu links, page links, card links, and the
+links inside blocks such as the site header, the footer, sign in and the notifications popover.
+They change pages on the client and follow the router's base path, so an app served from
+`/admin` needs no prefix in its data.
+
+Without a provider every link is a plain anchor. Links that leave the app (`https:`, `mailto:`,
+`tel:`) and links within the page (`#pricing`) always stay plain anchors.
+
+Draw a link of your own with `Anchor`, the same element the kit uses:
+
+```tsx
+import { Anchor } from '@/components/ui/link';
+
+<Anchor href="/billing">Billing</Anchor>
+<Anchor href="https://status.example.com" external>
+  Status
+</Anchor>
+```
+
+`external` opens the page in a new tab, sets `rel="noopener noreferrer"` and reads "(opens in a new
+tab)" after the label for screen readers; change the words with `newTabHint`. A component's own
+`render` or `renderLink` prop still wins over the provider for that one link.
+
+## Props
+
+### LinkProvider
+
+<TypeTable
+  type={{
+    render: {
+      type: '(props: LinkRenderProps) => ReactNode',
+      required: true,
+      description:
+        "Draws an internal link. Receives an anchor's props with `href`; spread them on your router's link.",
+    },
+    children: { type: 'ReactNode', required: true },
+  }}
+/>
+
+### Anchor
+
+Every prop of an `a` element is accepted as well.
+
+<TypeTable
+  type={{
+    href: { type: 'string', required: true, description: 'Where the link goes.' },
+    external: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Opens in a new tab, never through the router.',
+    },
+    newTabHint: {
+      type: 'string',
+      default: "' (opens in a new tab)'",
+      description: 'The hidden words read after an external link. Pass an empty string to drop it.',
+    },
+  }}
+/>
+
+`useLinkRender()` returns the provider's renderer, and `isExternalHref(href)` tells whether an
+address leaves the app; it is a plain function, so a server can call it too.
+
+## Server components
+
+`LinkProvider` and `Anchor` are client components, so a server page can render `Anchor` and pass it
+as the `render` of a `Button`, but the provider itself must sit in a client module because its
+`render` is a function.
+
+## Accessibility
+
+- A link stays a real `a` element with an `href`, so it opens in a new tab with a middle click and
+  shows its address on hover.
+- External links say that they open a new tab, in words, not only with an icon.
+
+<ComponentSource path="link/link.tsx" />

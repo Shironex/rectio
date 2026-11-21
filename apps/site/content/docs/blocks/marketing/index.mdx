@@ -39,8 +39,9 @@ are plain `{ label, href }` records, and a call to action is a link drawn as a b
 
 ## One place for links
 
-Every link in every block renders through `Anchor`. To use your router's link component, swap the
-`<a>` in that one component and every block follows.
+Every link in every block renders through the kit's [`Anchor`](/docs/components/link). Wrap your
+app in `LinkProvider` with your router's link component and every block follows it and its base
+path, with no prefix in your link data.
 
 ## Small internal pieces
 

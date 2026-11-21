@@ -60,9 +60,10 @@ and it shows in the foreground colour.
 
 ## One place for links
 
-Every link in every block goes through `DocsLink`. Wrap your app in `DocsLinkProvider` with your
-router's link component and every block follows; external links stay plain anchors that open in a
-new tab.
+Every link in every block goes through `DocsLink`, which draws the kit's
+[`Anchor`](/docs/components/link). Wrap your app in `LinkProvider` with your router's link component
+and every block follows, along with every component; external links stay plain anchors that open in
+a new tab. `DocsLinkProvider` is the same provider under its older name.
 
 ## The blocks
 

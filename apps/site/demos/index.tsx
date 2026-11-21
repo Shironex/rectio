@@ -28,6 +28,7 @@ const DEMOS = {
   banner: dynamic(() => import('./banner')),
   'banner.motion': dynamic(() => import('./banner.motion')),
   breadcrumb: dynamic(() => import('./breadcrumb')),
+  link: dynamic(() => import('./link')),
   'budget-vs-actual': dynamic(() => import('./budget-vs-actual')),
   'budget-vs-actual.motion': dynamic(() => import('./budget-vs-actual.motion')),
   'profit-and-loss': dynamic(() => import('./profit-and-loss')),

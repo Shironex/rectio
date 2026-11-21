@@ -67,7 +67,8 @@ ignored while typing in a field, where it may mean bold. Pass `shortcut` to chan
 bind nothing. The fold is not animated on purpose, because it would animate the width and push the
 page around. Save the choice with `onCollapsedChange` and start from it with `defaultCollapsed`.
 
-Mark the item of the current page with `active`. Pass `render` to use your router's link:
+Mark the item of the current page with `active`. An item with an `href` follows a
+[`LinkProvider`](/docs/components/link), or pass `render` for a link of your own:
 `render={<Link to="/invoices" />}`. Without `href` or `render`, an item is a button, for an action.
 
 `useSidebar()` returns `collapsed`, `toggle()`, `mobile` and `mobileOpen` anywhere inside the
