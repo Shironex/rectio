@@ -147,6 +147,9 @@ try {
     }
     await page.mouse.move(0, 0);
     const bars = page.locator('[data-slot="chart-card"]').nth(2);
+    // Let every entrance finish before the keyboard shot, so the bars stand at their figures.
+    await bars.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(1500);
     await bars.locator('.recharts-surface').focus();
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');

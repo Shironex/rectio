@@ -65,7 +65,8 @@ export const RESPONSE = [
   },
 ];
 
-const MONTHS = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
+// Written as the en-GB date axis writes them, so bars and lines name months alike.
+const MONTHS = ['Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov'];
 
 /** Monthly recurring revenue by plan, stacked into the month's total. */
 export const MRR = MONTHS.map((month, index) => ({
