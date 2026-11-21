@@ -1093,6 +1093,7 @@ export default defineRegistry({
     '@rectio/motion': join(motion, 'src', 'index.ts'),
     '@rectio/motion/navigation': join(motion, 'src', 'navigation.ts'),
     '@rectio/motion/charts': join(motion, 'src', 'charts.ts'),
+    '@rectio/motion/chat': join(motion, 'src', 'chat.ts'),
     '@rectio/blocks': join(blocks, 'src', 'index.ts'),
     '@rectio/blocks/motion': join(blocks, 'src', 'motion.ts'),
     '@rectio/blocks/marketing': join(blocks, 'src', 'marketing', 'index.ts'),
@@ -1311,6 +1312,12 @@ export default defineRegistry({
           'Motion Sparkline',
           'A sparkline that draws itself along time the first time it is seen.',
           ['sparkline/sparkline.tsx'],
+        ),
+        motionItem(
+          'chat',
+          'Motion chat',
+          'New messages that rise into place, typing dots that fade up and streamed text revealed at an even pace on whole words.',
+          ['chat/chat.tsx'],
         ),
         motionItem(
           'tabs',

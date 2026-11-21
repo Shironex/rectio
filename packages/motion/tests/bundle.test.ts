@@ -58,6 +58,18 @@ describe('bundle cost', () => {
     expect(added).toBeLessThan(5);
   }, 120_000);
 
+  it('keeps the chat entry separate and free of the Motion library', async () => {
+    const plain = await bundle('chat-plain-entry.ts');
+    const motion = await bundle('chat-motion-entry.ts');
+    // Entrances are element.animate calls and the text reveal is a frame loop: no Motion at all.
+    // Measured at 1.4 kB: the token reader, the reduced motion switch and four thin wrappers.
+    expect(motion.modules.filter((id) => MOTION.test(id))).toEqual([]);
+    expect(motion.modules.some((id) => /[\\/]src[\\/]dialog[\\/]/.test(id))).toBe(false);
+    const added = (motion.gzip - plain.gzip) / 1024;
+    console.info(`motion chat entry: +${added.toFixed(1)} kB gzip over the plain components`);
+    expect(added).toBeLessThan(3);
+  }, 120_000);
+
   it('keeps the navigation entry separate and light', async () => {
     const plain = await bundle('nav-plain-entry.ts');
     const motion = await bundle('nav-motion-entry.ts');
