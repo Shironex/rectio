@@ -97,6 +97,43 @@ const table = useDataTable({
 <DataTablePagination table={table} locale="en-IE" />;
 ```
 
+### Search and filters
+
+Put a `DataTableToolbar` above the table with a `DataTableSearch` and a `DataTableFacetFilter` per
+column worth narrowing. The search box looks through every column that holds text or numbers,
+ignoring case and accents, so "zurich" finds Zürich; a column opts out with `enableGlobalFilter:
+false`. A facet filter lists a column's values (yours, through `options`, or the distinct values it
+finds) with how many rows have each given the other filters, and keeps the rows with any value
+picked. While anything narrows the rows, the toolbar says how many are shown out of how many and
+offers Clear filters; when nothing matches, the body says so with the same button. Pass
+`emptyFiltered` to `DataTableBody` to say it your way.
+
+<Preview name="data-table-filters" plain={<Demo name="data-table-filters" />} align="start" />
+
+```tsx
+import { DataTableFacetFilter, DataTableSearch, DataTableToolbar } from '@/components/ui/filters';
+
+<DataTableToolbar table={table}>
+  <DataTableSearch table={table} label="Search expenses" />
+  <DataTableFacetFilter
+    table={table}
+    column="status"
+    label="Status"
+    options={[
+      { value: 'Draft', label: 'Draft' },
+      { value: 'Approved', label: 'Approved' },
+    ]}
+  />
+</DataTableToolbar>;
+```
+
+Filters are table state like sorting. Leave them to the table, start them with
+`initialState: { globalFilter: 'hotel', columnFilters: [{ id: 'status', value: ['Approved'] }] }`,
+or hold them yourself with `state.globalFilter` and `state.columnFilters` plus
+`onGlobalFilterChange` and `onColumnFiltersChange`, for example to keep them in the URL. Every
+column filters with `filterFn_match` unless it names another `filterFn`: a list keeps the rows whose
+value is in it, text keeps the rows that contain it, anything else must be equal.
+
 ### Table parts
 
 For a static table, use the parts the DataTable builds on: `Table`, `TableCaption`, `TableHeader`,
@@ -199,11 +236,65 @@ Every prop of a `table` is accepted as well, except `children`, which is require
       default: 'false',
       description: 'Skeleton rows in the shape of the table.',
     },
+    emptyFiltered: {
+      type: 'ReactNode',
+      default: 'a note with Clear filters',
+      description: 'Shown when the search or a filter hides every row.',
+    },
     loadingRows: { type: 'number', default: '5' },
     rowProps: {
       type: '(row) => ComponentProps<"tr">',
       description: 'Extra props per row, such as data-new to highlight a row just added.',
     },
+  }}
+/>
+
+### DataTableToolbar
+
+<TypeTable
+  type={{
+    table: { type: 'DataTableInstance<TData>', required: true },
+    children: { type: 'ReactNode', required: true, description: 'The search box and filters.' },
+    locale: { type: 'string', description: 'For the row count.' },
+    formatCount: {
+      type: '(shown: number, total: number) => string',
+      default: "'4 of 12 rows'",
+    },
+    clearLabel: { type: 'string', default: "'Clear filters'" },
+    label: { type: 'string', default: "'Table filters'", description: 'Names the group.' },
+    className: { type: 'string' },
+  }}
+/>
+
+### DataTableSearch
+
+<TypeTable
+  type={{
+    table: { type: 'DataTableInstance<TData>', required: true },
+    label: {
+      type: 'string',
+      default: "'Search rows'",
+      description: 'Names the field; also the placeholder unless you pass one.',
+    },
+  }}
+/>
+
+Every other SearchInput prop works, such as `shortcut` and `globalShortcut`.
+
+### DataTableFacetFilter
+
+<TypeTable
+  type={{
+    table: { type: 'DataTableInstance<TData>', required: true },
+    column: { type: 'string', required: true, description: 'The column id.' },
+    label: { type: 'string', required: true, description: 'The trigger words, such as Status.' },
+    options: {
+      type: 'readonly { value: unknown; label: ReactNode }[]',
+      default: 'the distinct values of the column',
+    },
+    locale: { type: 'string', description: 'For the counts.' },
+    clearLabel: { type: 'string', default: "'Clear filter'" },
+    className: { type: 'string' },
   }}
 />
 
@@ -284,6 +375,9 @@ Each part takes every prop of its HTML element. `TableHeader` adds `sticky`; `Ta
 - While loading, the body is marked `aria-busy` and says "Loading rows" to screen readers.
 - The pagination range is a live region, and the page buttons stay focusable at the first and last
   page so focus is not dropped.
+- The filters sit in a labelled group. The search box has a name and clears with Escape; a facet
+  filter is a menu of checkbox items that stays open while you pick, and its trigger says how many
+  values are on. The shown row count is read out politely as filters change.
 
 <ComponentSource path="data-table/data-table.tsx" />
 <ComponentSource path="data-table/table.tsx" />

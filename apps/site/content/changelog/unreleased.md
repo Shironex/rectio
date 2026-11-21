@@ -10,6 +10,13 @@ summary: Work that is merging into main now and ships with the next release.
 - Every component imports from a React Server Component: client modules say `'use client'`, and the
   plain helpers and class strings run on the server.
 - The sign in, sign up and two-factor links reach 44px on touch screens.
+- A sessions block: where the account is signed in, this device marked, sign out one session or all
+  the others.
+- The DataTable searches and filters: a search box, column filters with counts, a row count while
+  filtered and an empty state that clears the filters.
+- Sheet takes a `full` size for whole-screen panels.
+- The KPI row writes counts, durations and currency as well as money and percentages.
+- The FAQ block draws its questions with the kit Accordion.
 
 ## Templates
 

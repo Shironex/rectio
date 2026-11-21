@@ -19,6 +19,7 @@
     "users-table",
     "kanban-board",
     "comment-thread",
-    "file-manager"
+    "file-manager",
+    "sessions"
   ]
 }

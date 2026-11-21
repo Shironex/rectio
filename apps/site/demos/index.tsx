@@ -51,6 +51,7 @@ const DEMOS = {
   'context-menu': dynamic(() => import('./context-menu')),
   'data-table': dynamic(() => import('./data-table')),
   'data-table.motion': dynamic(() => import('./data-table.motion')),
+  'data-table-filters': dynamic(() => import('./data-table-filters')),
   'date-picker': dynamic(() => import('./date-picker')),
   dialog: dynamic(() => import('./dialog')),
   'dialog.motion': dynamic(() => import('./dialog.motion')),

@@ -1,0 +1,71 @@
+---
+title: Sessions
+description: 'Where the account is signed in: device, browser, place and last activity, this device marked, sign out one or all others.'
+---
+
+import SessionsDemo from '@/demos/sessions';
+import SessionsMotionDemo from '@/demos/sessions.motion';
+
+<Preview
+  name="sessions"
+  plain={<SessionsDemo />}
+  motion={<SessionsMotionDemo />}
+  importLine="import { Sessions } from '@rectio/blocks/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add sessions
+```
+
+The motion variant is `motion-sessions`. It installs the plain block too; a signed-out session leaves
+and the rows below close the gap.
+
+## Usage
+
+Pass the account's sessions with the one this page runs in marked `current`. It comes first with a
+This device badge and no sign out button: that session ends by signing out. The others follow, most
+recently active first, each with its device, browser and system, where it was last seen and its IP
+address when you have them, and "Active now" for anything seen in the last five minutes.
+
+`onRevoke` signs one session out at once, without a dialog: signing in again is cheap, and the
+button shows progress for any id you list in `revoking` until the session leaves the list.
+`onRevokeOthers` adds Sign out other sessions, which asks first. Pass `error` to say a sign out
+failed, and `passwordHref` to link the note under the list to your password page.
+
+## Props
+
+<TypeTable
+  type={{
+    sessions: {
+      type: 'readonly Session[]',
+      description:
+        "id, device ('desktop' | 'laptop' | 'phone' | 'tablet' | 'unknown'), client, signedInAt, lastActiveAt, optional os, location, ip, current.",
+    },
+    onRevoke: { type: '(sessionId: string) => void', description: 'Signs one session out.' },
+    onRevokeOthers: { type: '() => void', description: 'Asked to confirm first.' },
+    revoking: { type: 'readonly string[]', description: 'Sessions being signed out.' },
+    passwordHref: { type: 'string', description: 'Your change password page.' },
+    error: { type: 'ReactNode', description: 'Why the last sign out failed.' },
+    now: { type: 'Date', description: 'The moment "last active" is measured from.' },
+    locale: { type: 'string', default: 'the runtime locale' },
+    title: { type: 'string', default: "'Sessions'" },
+    className: { type: 'string' },
+  }}
+/>
+
+## Logic
+
+Exported and tested on their own: `sortSessions`, `isActiveNow`, `sessionName` and `otherSessions`.
+
+## Accessibility
+
+- The sessions are a labelled list; each sign out button names the session it ends.
+- The device kind is written for screen readers, not only drawn as an icon.
+- After a sign out, focus moves to the next session, else the previous one, never to the page.
+- The confirm dialog names how many sessions it ends; a failed sign out is an alert.
+- Works in light and dark and down to phone width with 44px touch targets.
+- The motion variant moves only transform and opacity and renders the plain block under reduced
+  motion.
