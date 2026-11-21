@@ -78,6 +78,22 @@ export function localDate(iso: string): Date {
 const dayNumber = (date: Date) =>
   Math.round(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / DAY);
 
+/**
+ * The smallest step between two rows in calendar days: 1 for daily figures, 7 for weekly ones,
+ * whatever the clock changes in between. Infinity with fewer than two rows.
+ */
+export function smallestDayStep(rows: readonly Pick<TimeRow, 'date'>[]): number {
+  let step = Infinity;
+  for (let index = 1; index < rows.length; index += 1) {
+    const current = rows[index];
+    const previous = rows[index - 1];
+    if (current === undefined || previous === undefined) continue;
+    const days = dayNumber(current.date) - dayNumber(previous.date);
+    if (days > 0 && days < step) step = days;
+  }
+  return step;
+}
+
 const monthIndex = (date: Date) => date.getFullYear() * 12 + date.getMonth();
 
 /**
@@ -89,15 +105,7 @@ export function fillGaps(rows: readonly TimeRow[], scale: TimeScale): TimeRow[] 
   const step = smallestStep(rows);
   if (!Number.isFinite(step) || step <= 0) return [...rows];
   // Daily rows are measured in calendar days, so a weekend across a clock change is not a gap.
-  const dayStep = Math.max(
-    1,
-    Math.min(
-      ...rows.slice(1).map((row, index) => {
-        const previous = rows[index];
-        return previous === undefined ? Infinity : dayNumber(row.date) - dayNumber(previous.date);
-      }),
-    ),
-  );
+  const dayStep = Math.max(1, smallestDayStep(rows));
   const out: TimeRow[] = [];
   rows.forEach((row, index) => {
     const previous = rows[index - 1];
@@ -290,7 +298,9 @@ function weekStart(date: Date): Date {
  * Daily rows as one row per week (weeks start on Monday), each series' value the mean of its days
  * that week. Every week from the first to the last has a row: a week with no figure for a series
  * is null for it, and a week with no figure at all is a gap row, so the line breaks there and a
- * missing month never draws as a straight slope. For a plot too narrow to show every day.
+ * missing month never draws as a straight slope. A shorter missing stretch (a gap row from
+ * `fillGaps`) still breaks the line after the week it starts in. For a plot too narrow to show
+ * every day.
  */
 export function weeklyMeans(rows: readonly TimeRow[]): TimeRow[] {
   const known = rows.filter((row) => row.gap !== true);
@@ -299,6 +309,11 @@ export function weeklyMeans(rows: readonly TimeRow[]): TimeRow[] {
   if (first === undefined || last === undefined) return [];
   const keys = Object.keys(first.values);
   const sums = new Map<number, Map<string, [number, number]>>();
+  // Weeks a missing stretch starts in: the line breaks after them, even when the stretch is a few
+  // days split over two weeks that both still have figures.
+  const breaks = new Set(
+    rows.filter((row) => row.gap === true).map((row) => weekStart(row.date).getTime()),
+  );
   for (const row of known) {
     const time = weekStart(row.date).getTime();
     const week = sums.get(time) ?? new Map<string, [number, number]>();
@@ -325,6 +340,15 @@ export function weeklyMeans(rows: readonly TimeRow[]): TimeRow[] {
     );
     const empty = Object.values(values).every((value) => value === null);
     out.push({ time: date.getTime(), date, values, ...(empty ? { gap: true } : {}) });
+    const next = new Date(date);
+    next.setDate(next.getDate() + 7);
+    // Only where the next week has figures: an empty next week is a gap row already.
+    if (!empty && breaks.has(date.getTime()) && sums.has(next.getTime())) {
+      // Half a week on, between this week's point and the next: the line stops there.
+      const time = date.getTime() + 3.5 * DAY;
+      const nulls = Object.fromEntries(keys.map((key) => [key, null]));
+      out.push({ time, date: new Date(time), values: nulls, gap: true });
+    }
   }
   return out;
 }

@@ -32,12 +32,13 @@ import {
   type ChartColor,
   type ChartMessages,
 } from './chart';
-import { formatValue, type ValueFormat } from './chart-format';
+import { extent, formatValue, type ValueFormat } from './chart-format';
 import {
   crossesYear,
   fillGaps,
   formatMoment,
   gapSpans,
+  smallestDayStep,
   hasGaps,
   formatTick,
   inferTimeScale,
@@ -205,11 +206,11 @@ function labelSide(rows: readonly TimeRow[], value: number): 'start' | 'end' {
   const span = Math.max(1, Math.ceil(points.length / 5));
   // How close the series come above the line within the label's span; Infinity when none do.
   const clearance = (part: readonly TimeRow[]) =>
-    Math.min(
-      ...part.flatMap((row) =>
+    extent(
+      part.flatMap((row) =>
         Object.values(row.values).flatMap((v) => (v !== null && v >= value ? [v - value] : [])),
       ),
-    );
+    ).min;
   const start = clearance(points.slice(0, span));
   const end = clearance(points.slice(-span));
   return start > end ? 'start' : 'end';
@@ -274,14 +275,24 @@ export function TimeChart({
   const scale = requestedScale ?? inferTimeScale(merged);
   const rows = connectGaps ? merged : fillGaps(merged, scale);
   // Too narrow for every day to be more than a comb: plot weekly means, keep the days in the table.
+  // Only daily figures: data already weekly (a 7 day step) is drawn as it is.
   const weekly =
-    scale === 'day' && !stacked && width > 0 && width / Math.max(1, merged.length) < MIN_PX_PER_DAY;
+    scale === 'day' &&
+    !stacked &&
+    width > 0 &&
+    width / Math.max(1, merged.length) < MIN_PX_PER_DAY &&
+    smallestDayStep(merged) === 1;
   const plotted = weekly ? weeklyMeans(rows) : rows;
   const gaps = gapSpans(plotted);
   const missing = hasGaps(connectGaps ? fillGaps(merged, scale) : rows);
+  // Told only when the mode changes, however often the listener itself is recreated.
+  const listener = useRef(onWeeklyChange);
   useEffect(() => {
-    onWeeklyChange?.(weekly);
-  }, [weekly, onWeeklyChange]);
+    listener.current = onWeeklyChange;
+  });
+  useEffect(() => {
+    listener.current?.(weekly);
+  }, [weekly]);
   const data: Datum[] = plotted.map((row) => ({
     time: row.time,
     gap: row.gap === true,
@@ -303,14 +314,19 @@ export function TimeChart({
   // The value axis: from zero by round steps, or Recharts' own fit when asked to zoom. It is sized
   // from what is drawn, so weekly averages fill the plot.
   const drawn = plotted.filter((row) => row.gap !== true);
-  const totals = drawn.map((row) =>
-    stacked
-      ? Object.values(row.values).reduce<number>((sum, v) => sum + (v ?? 0), 0)
-      : Math.max(...Object.values(row.values).map((v) => v ?? -Infinity)),
+  // Loops, not spreads: a long series would overflow the call stack.
+  const range = extent(
+    (function* () {
+      for (const row of drawn) {
+        const values = Object.values(row.values);
+        if (stacked) yield values.reduce<number>((sum, v) => sum + (v ?? 0), 0);
+        for (const value of values) if (value !== null) yield value;
+      }
+      for (const reference of references) yield reference.value;
+    })(),
   );
-  const lows = drawn.map((row) => Math.min(...Object.values(row.values).map((v) => v ?? Infinity)));
-  const max = Math.max(0, ...totals.filter(Number.isFinite), ...references.map((r) => r.value));
-  const min = Math.min(0, ...lows.filter(Number.isFinite), ...references.map((r) => r.value));
+  const max = Math.max(0, range.max);
+  const min = Math.min(0, range.min);
   const yTicks = baseline === 'zero' ? niceRangeTicks(min, max) : undefined;
 
   const summaries = keyed.flatMap((s) => {

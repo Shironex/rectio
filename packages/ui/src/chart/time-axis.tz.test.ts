@@ -7,6 +7,7 @@ import {
   inferTimeScale,
   localDate,
   mergeSeries,
+  smallestDayStep,
   timeTicks,
   weeklyMeans,
   type TimePoint,
@@ -115,6 +116,32 @@ describe('weekly averages over a missing month', () => {
     expect(empty.length).toBe(4);
     for (const week of empty) expect(week.values.a).toBeNull();
     expect(gapSpans(weeks)).toHaveLength(1);
+  });
+});
+
+describe('a few missing days split over two weeks', () => {
+  it('still breaks the weekly line, as the summary says', () => {
+    process.env.TZ = 'Europe/Warsaw';
+    // Thursday 5 Mar to Monday 9 Mar 2026 missing: both weeks keep some figures.
+    const points = days(
+      '2026-02-02',
+      '2026-03-29',
+      (d) => d >= localDate('2026-03-05') && d <= localDate('2026-03-09'),
+    );
+    const rows = fillGaps(rowsOf(points), 'day');
+    expect(rows.some((row) => row.gap === true)).toBe(true);
+    const weeks = weeklyMeans(rows);
+    expect(gapSpans(weeks)).toHaveLength(1);
+    const kept = weeks.filter((week) => week.gap !== true);
+    // Every week still has its average; the break sits between two of them.
+    expect(kept).toHaveLength(8);
+  });
+
+  it('measures the step in calendar days: 1 for daily figures, 7 for weekly ones', () => {
+    process.env.TZ = 'Europe/Warsaw';
+    expect(smallestDayStep(rowsOf(days('2026-03-20', '2026-04-05')))).toBe(1);
+    const weekly = days('2026-01-05', '2026-06-29').filter((point) => point.date.getDay() === 1);
+    expect(smallestDayStep(rowsOf(weekly))).toBe(7);
   });
 });
 

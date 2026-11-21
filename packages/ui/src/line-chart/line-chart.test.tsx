@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { AreaChart } from '../area-chart/area-chart';
 import { LineChart } from './line-chart';
@@ -91,5 +91,54 @@ describe('AreaChart', () => {
     expect(screen.getByRole('table', { name: 'Figures by date' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Show table' })).toBeNull();
     expect(screen.getByText(/Trials went from 40/)).toBeInTheDocument();
+  });
+});
+
+describe('weekly averages on a narrow plot', () => {
+  // 104 points on a 300px plot is under 4px each, which is narrow enough for weekly averages.
+  const narrow = () =>
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      width: 300,
+      height: 200,
+      x: 0,
+      y: 0,
+      top: 0,
+      left: 0,
+      right: 300,
+      bottom: 200,
+      toJSON: () => ({}),
+    });
+  const points = (stepDays: number) =>
+    Array.from({ length: 104 }, (_, index) => ({
+      date: new Date(2025, 0, 5 + index * stepDays),
+      value: 100 + index,
+    }));
+
+  it('averages daily figures by week and says so', () => {
+    narrow();
+    const onWeeklyChange = vi.fn();
+    render(
+      <LineChart
+        series={[{ id: 'daily', label: 'Daily', points: points(1) }]}
+        onWeeklyChange={onWeeklyChange}
+        locale="en-GB"
+      />,
+    );
+    expect(screen.getByText(/averaged by week/)).toBeInTheDocument();
+    expect(onWeeklyChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it('draws figures that are already weekly as they are', () => {
+    narrow();
+    const onWeeklyChange = vi.fn();
+    render(
+      <LineChart
+        series={[{ id: 'weekly', label: 'Weekly', points: points(7) }]}
+        onWeeklyChange={onWeeklyChange}
+        locale="en-GB"
+      />,
+    );
+    expect(screen.queryByText(/averaged by week/)).toBeNull();
+    expect(onWeeklyChange).not.toHaveBeenCalledWith(true);
   });
 });
