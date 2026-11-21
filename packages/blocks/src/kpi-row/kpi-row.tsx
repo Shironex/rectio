@@ -6,6 +6,7 @@ import { useBlockParts } from '../lib/block-parts';
 import { chartColor } from '../lib/chart';
 import { MINUS, formatPercent, resolveLocale } from '../lib/finance';
 import { mergeMessages } from '../lib/messages';
+import { formatValue } from '../lib/value-format';
 import { kpiDelta, type Kpi } from './kpi-row.logic';
 
 export interface KpiRowMessages {
@@ -34,6 +35,7 @@ export const KPI_ROW_MESSAGES: KpiRowMessages = {
 
 export interface KpiRowProps {
   kpis: readonly Kpi[];
+  /** The currency of `money` figures. */
   currency: string;
   locale?: string;
   /** What the change is measured against, such as "vs February". */
@@ -139,7 +141,7 @@ export function KpiRow({
                 <dt className="text-sm text-fg-muted">{kpi.label}</dt>
                 <dd className="flex items-end justify-between gap-3">
                   <span className="flex min-w-0 flex-col items-start gap-1">
-                    {kpi.format === 'money' ? (
+                    {kpi.format === 'money' || kpi.format === 'currency' ? (
                       <Money
                         amount={kpi.value}
                         currency={currency}
@@ -149,7 +151,7 @@ export function KpiRow({
                       />
                     ) : (
                       <span className="text-2xl font-strong tracking-tight numeric">
-                        {formatPercent(kpi.value, locale)}
+                        {formatValue(kpi.value, kpi.format, { locale })}
                       </span>
                     )}
                     <span className="flex flex-wrap items-center gap-x-1.5 text-sm">
