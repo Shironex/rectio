@@ -350,12 +350,16 @@ export default defineRegistry({
     {
       name: 'date-picker',
       type: 'component',
-      version: '0.2.1',
+      version: '0.3.0',
       title: 'DatePicker',
       description:
-        'A typed date field with a calendar popup, plus a date range picker. Pairs with Field.',
+        'A typed date field with a calendar popup, a date range picker and an inline range calendar with presets.',
       categories: ['forms'],
-      files: ['date-picker/date-picker.tsx', 'date-picker/date-format.ts'],
+      files: [
+        'date-picker/date-picker.tsx',
+        'date-picker/date-format.ts',
+        'date-picker/range-calendar.tsx',
+      ],
     },
     {
       name: 'time-field',
