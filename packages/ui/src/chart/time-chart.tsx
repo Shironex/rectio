@@ -353,7 +353,8 @@ export function TimeChart({
               strokeDasharray="4 4"
               label={{
                 value: reference.label,
-                position: 'insideTopLeft',
+                // Above the rule at its right end, clear of the axis labels.
+                position: 'insideBottomRight',
                 className: 'fill-chart-axis text-xs',
                 // A halo of the surface keeps the words readable where the line crosses them.
                 stroke: 'var(--rx-chart-halo)',

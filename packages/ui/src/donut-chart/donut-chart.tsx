@@ -241,7 +241,7 @@ export function DonutChart({
                     endAngle={props.endAngle}
                     cornerRadius={2}
                     stroke="var(--rx-chart-halo)"
-                    strokeWidth={1}
+                    strokeWidth={2}
                     fill={chartColor(parts[index]?.tone ?? 'reference')}
                     className={cn(
                       'transition-opacity duration-fast ease-standard',
