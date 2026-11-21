@@ -144,6 +144,21 @@ describe('chart colours', () => {
     expect(failures).toEqual([]);
   });
 
+  // A donut's Other slice is drawn in the reference colour beside the three series.
+  it.each(themeModes)('$key the Other slice stays apart from every series', ({ tokens }) => {
+    const failures = SERIES.flatMap((series) =>
+      VISIONS.flatMap((vision) => {
+        const gap = difference(
+          parse(tokens[`--rx-${series}`]),
+          parse(tokens['--rx-chart-reference']),
+          vision,
+        );
+        return gap >= SERIES_APART ? [] : [`${series} ${vision ?? 'typical'}: ${gap.toFixed(3)}`];
+      }),
+    );
+    expect(failures).toEqual([]);
+  });
+
   it.each(themeModes)('$key tooltip text is readable', ({ tokens }) => {
     for (const fg of ['text', 'text-muted']) {
       const ratio = contrast(parse(tokens[`--rx-${fg}`]), parse(tokens['--rx-chart-tooltip']));
