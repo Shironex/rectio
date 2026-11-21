@@ -50,7 +50,7 @@ const isPrintable = (text: string | undefined, key: Key): text is string =>
   text?.length === 1 && key.ctrl !== true && key.meta !== true && text >= ' ' && text !== '\u007f';
 
 /** Width the answered questions are padded to, so the answers line up. */
-const ANSWER_COLUMN = 24;
+const ANSWER_COLUMN = 19;
 
 const isUp = (key: Key) => key.name === 'up' || (key.ctrl === true && key.name === 'p');
 const isDown = (key: Key) => key.name === 'down' || (key.ctrl === true && key.name === 'n');
@@ -78,8 +78,11 @@ export class Prompter {
     return this.utf8 ? ' · ' : ' | ';
   }
 
-  private question(message: string, tail = ''): string {
-    return `${this.indent}${this.s.bold(this.s.cyan('?'))} ${this.s.bold(message)}${tail === '' ? '' : `  ${tail}`}`;
+  /** `? Message`, and a value beside it (text, confirm) in the same column as the answers. */
+  private question(message: string, tail?: string): string {
+    const mark = `${this.indent}${this.s.bold(this.s.cyan('?'))} `;
+    if (tail === undefined) return `${mark}${this.s.bold(message)}`;
+    return `${mark}${this.s.bold(pad(message, ANSWER_COLUMN))}  ${tail}`;
   }
 
   private help(parts: readonly string[]): string {
@@ -125,9 +128,13 @@ export class Prompter {
   private description(choice: Choice<unknown> | undefined): string[] {
     if (choice?.description === undefined) return [];
     const width = Math.max(30, Math.min(72, this.io.columns - 8));
-    return wrap(choice.description.split(' '), width, ' ').map(
-      (line) => `${this.indent}    ${this.s.dim(line)}`,
-    );
+    // Set apart from the list by a blank line, so it does not read as one more choice.
+    return [
+      '',
+      ...wrap(choice.description.split(' '), width, ' ').map(
+        (line) => `${this.indent}    ${this.s.dim(line)}`,
+      ),
+    ];
   }
 
   select<V>(options: SelectOptions<V>): Promise<V> {
@@ -273,14 +280,14 @@ export class Prompter {
     let error: string | undefined;
 
     const render = (): Frame => {
-      const head = this.question(message);
+      const head = this.question(message, '');
       const shown = value === '' ? this.s.dim(fallback) : value;
-      const lines = [`${head}  ${shown}`, ...this.notes(options.note)];
+      const lines = [`${head}${shown}`, ...this.notes(options.note)];
       if (error !== undefined) {
         lines.push(`${this.indent}  ${this.s.yellow(`${this.g.warn} ${error}`)}`);
       }
       lines.push(this.help([fallback === '' ? 'enter confirm' : 'enter accept', 'esc cancel']));
-      return { lines, cursor: { row: 0, col: visibleWidth(head) + 2 + cursor } };
+      return { lines, cursor: { row: 0, col: visibleWidth(head) + cursor } };
     };
 
     const key = (text: string | undefined, k: Key): KeyResult<string> => {

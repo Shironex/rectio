@@ -228,9 +228,6 @@ export async function runInitTemplate(
       `${String(files.length)} from the template, ${String(dryRun ? report.items.reduce((n, i) => n + i.files.length, 0) : report.files.length)} kit files`,
     ],
   ];
-  if (git !== undefined) {
-    rows.push(['Git', git.committed ? 'new repo, first commit made' : 'new repo, no commit yet']);
-  }
   const count = countDependencies(report.added);
   if (count > 0) {
     rows.push([
@@ -241,6 +238,9 @@ export async function runInitTemplate(
           ? `${plural(count, 'package')} installed with ${manager}`
           : `${plural(count, 'package')} in package.json, not installed yet`,
     ]);
+  }
+  if (git !== undefined) {
+    rows.push(['Git', git.committed ? 'new repo, first commit made' : 'new repo, no commit yet']);
   }
   const themes = template.registryDependencies
     .filter((d) => d.startsWith('theme-'))

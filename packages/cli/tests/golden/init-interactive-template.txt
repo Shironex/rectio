@@ -6,10 +6,10 @@ exit 0
 
   No package.json in this folder, so rectio starts a new app here.
 
-  ✓ Template                  Books
-  ✓ Project folder            my-books
-  ✓ Theme                     default
-  ✓ Package manager           npm
+  ✓ Template             Books
+  ✓ Project folder       my-books
+  ✓ Theme                default
+  ✓ Package manager      npm
 
   → books into my-books, default theme, npm, no install, no git (not on PATH)
 

@@ -4,12 +4,12 @@ exit 0
 
   rectio init  x.y.z
 
-  ✓ What do you want to do?   Add rectio to this project
-  ✓ Framework                 Vite
-  ✓ CSS entry                 src/index.css
-  ✓ Keep these aliases?       yes
-  ✓ Theme                     default
-  ✓ Add components now?       button, dialog
+  ✓ Get started          Add rectio to this project
+  ✓ Framework            Vite
+  ✓ CSS entry            src/index.css
+  ✓ Keep these aliases?  yes
+  ✓ Theme                default
+  ✓ Add components now?  button, dialog
 
   → Vite, src/index.css, default theme, button + dialog
 

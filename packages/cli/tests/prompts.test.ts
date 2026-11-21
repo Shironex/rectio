@@ -36,7 +36,7 @@ describe('select', () => {
     expect(term.screen()).toContain('The third one, with a description.');
     await term.type('j', 'j', KEY.up, 'k', KEY.down, KEY.enter); // Juliet, Alpha, Juliet, Charlie, Juliet
     expect(await answer).toBe('j');
-    expect(screenOf(term.raw()).at(-1)).toBe('  ✓ Pick                      Juliet');
+    expect(screenOf(term.raw()).at(-1)).toBe('  ✓ Pick                 Juliet');
   });
 
   it('filters as you type; j and k are letters once the filter has text', async () => {
@@ -106,7 +106,7 @@ describe('multiselect', () => {
     await term.type('a'); // all chosen: clear
     await term.type(KEY.space, 'j', 'j', KEY.space, KEY.enter);
     expect(await answer).toEqual(['x', 'z']);
-    expect(term.screen()).toContain('✓ Items                     x, z');
+    expect(term.screen()).toContain('✓ Items                x, z');
   });
 
   it('says none for an empty answer', async () => {
@@ -114,7 +114,7 @@ describe('multiselect', () => {
     const answer = ask.multiselect({ message: 'Items', choices: [{ value: 'x', label: 'x' }] });
     await term.type(KEY.enter);
     expect(await answer).toEqual([]);
-    expect(term.screen()).toContain('Items                     none');
+    expect(term.screen()).toContain('Items                none');
   });
 });
 
@@ -131,7 +131,7 @@ describe('text', () => {
 
     const second = prompter();
     const fallback = second.ask.text({ message: 'Name', initial: 'app' });
-    expect(second.term.screen()).toContain('Name  app');
+    expect(second.term.screen()).toMatch(/Name +app/);
     await second.term.type(KEY.enter);
     expect(await fallback).toBe('app');
 

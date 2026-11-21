@@ -111,6 +111,19 @@ export function freeFolder(cwd: string, name: string): string {
   }
 }
 
+const CATEGORY_NOUNS: Record<string, string> = {
+  app: 'app',
+  dashboard: 'dashboard',
+  marketing: 'marketing site',
+  docs: 'docs site',
+};
+
+/** `Next.js marketing site`: every template is a Next.js app (the registry schema allows only next). */
+export function stackOf(entry: Pick<IndexEntry, 'categories'>): string {
+  const category = entry.categories.find((c) => c !== 'template');
+  return `Next.js ${CATEGORY_NOUNS[category ?? 'app'] ?? category ?? 'app'}`;
+}
+
 /** The first clause of a description: `A finance back office with a sidebar and command menu`. */
 export function shortDescription(text: string): string {
   return (text.split(/[:.]/)[0] ?? text).trim();
@@ -163,7 +176,7 @@ export async function runInteractiveInit(
   }
   const found = detect(ctx);
   const mode = await ask.select({
-    message: 'What do you want to do?',
+    message: 'Get started',
     choices: [
       { value: 'existing', label: 'Add rectio to this project', hint: detectedHint(found) },
       { value: 'template', label: 'Start a new app from a template', hint: 'a whole Next.js app' },
@@ -223,7 +236,7 @@ async function templateFlow(ctx: CliContext, flags: InitFlags, ask: Prompter, ui
   const choices: Choice<string>[] = templates.map((entry: IndexEntry) => ({
     value: entry.name,
     label: entry.title,
-    hint: `${entry.name}${ui.term.utf8 ? ' · ' : ', '}Next.js ${entry.categories.find((c) => c !== 'template') ?? ''}`.trimEnd(),
+    hint: `${entry.name}${ui.term.utf8 ? ' · ' : ', '}${stackOf(entry)}`,
     description: shortDescription(entry.description),
   }));
   const name = await ask.select({
@@ -261,7 +274,7 @@ async function templateFlow(ctx: CliContext, flags: InitFlags, ask: Prompter, ui
   const install =
     flags.dryRun || flags.install === false
       ? false
-      : await ask.confirm({ message: 'Install dependencies?', initial: true });
+      : await ask.confirm({ message: 'Install packages?', initial: true });
 
   let git = flags.git ?? false;
   let gitNote: string | undefined;

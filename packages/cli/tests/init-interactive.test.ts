@@ -70,11 +70,11 @@ describe('interactive init: a new app from a template', () => {
 
     const screen = term.screen();
     expect(screen).toContain('No package.json in this folder');
-    expect(screen).toContain('✓ Template                  Books');
-    expect(screen).toContain('✓ Project folder            my-books');
-    expect(screen).toContain('✓ Theme                     default');
-    expect(screen).toContain('✓ Package manager           npm');
-    expect(screen).toContain('✓ Install dependencies?     no');
+    expect(screen).toContain('✓ Template             Books');
+    expect(screen).toContain('✓ Project folder       my-books');
+    expect(screen).toContain('✓ Theme                default');
+    expect(screen).toContain('✓ Package manager      npm');
+    expect(screen).toContain('✓ Install packages?    no');
     // git is not on this PATH, so it is not asked.
     expect(screen).not.toContain('Initialise git');
     expect(screen).toContain(
@@ -104,8 +104,8 @@ describe('interactive init: a new app from a template', () => {
     expect(await run).toBe(0);
     const screen = term.screen();
     expect(screen).not.toContain('Package manager');
-    expect(screen).not.toContain('Install dependencies');
-    expect(screen).toContain('✓ Initialise git?           yes');
+    expect(screen).not.toContain('Install packages');
+    expect(screen).toContain('✓ Initialise git?      yes');
     expect(screen).toMatch(/\[6\/6\] Creating git repo .*first commit made/);
     expect(existsSync(join(cwd, 'books', '.git'))).toBe(true);
     // The template has no .gitignore, so a default one keeps node_modules out of the commit.
@@ -130,7 +130,7 @@ describe('interactive init: a new app from a template', () => {
     await term.type(KEY.enter, KEY.enter); // template and folder are still asked
     expect(await run).toBe(0);
     const screen = term.screen();
-    for (const question of ['Theme', 'Package manager', 'Install dependencies', 'Initialise git']) {
+    for (const question of ['Theme', 'Package manager', 'Install packages', 'Initialise git']) {
       expect(screen).not.toContain(`? ${question}`);
       expect(screen).not.toContain(`✓ ${question}`);
     }
@@ -150,7 +150,7 @@ describe('interactive init: a new app from a template', () => {
     await term.type(...Array.from({ length: 5 }, () => KEY.backspace), KEY.enter);
     await term.type(KEY.enter, KEY.enter);
     expect(await run).toBe(0);
-    expect(term.screen()).toContain('✓ Project folder            books-2');
+    expect(term.screen()).toContain('✓ Project folder       books-2');
     expect(term.screen()).toContain('Dry run: nothing was written');
     expect(files(cwd)).toEqual(['books']);
   });
@@ -194,10 +194,10 @@ describe('interactive init: rectio in an existing app', () => {
     const screen = term.screen();
     // The detection shows beside the first choice while it is asked.
     expect(term.raw()).toMatch(/Add rectio to this project.*Vite, Tailwind \^4/);
-    expect(screen).toContain('✓ Framework                 Vite');
-    expect(screen).toContain('✓ CSS entry                 src/index.css');
-    expect(screen).toContain('✓ Keep these aliases?       yes');
-    expect(screen).toContain('✓ Add components now?       button, dialog');
+    expect(screen).toContain('✓ Framework            Vite');
+    expect(screen).toContain('✓ CSS entry            src/index.css');
+    expect(screen).toContain('✓ Keep these aliases?  yes');
+    expect(screen).toContain('✓ Add components now?  button, dialog');
     expect(screen).toContain('Vite, src/index.css, default theme, button + dialog');
     expect(screen).toContain('Set up rectio for vite');
     expect(screen).toContain('Components');
@@ -219,7 +219,7 @@ describe('interactive init: rectio in an existing app', () => {
     await term.type(KEY.enter); // no components
     expect(await run).toBe(0);
     expect(term.screen()).not.toContain('✓ Theme');
-    expect(term.screen()).toContain('Add components now?       none');
+    expect(term.screen()).toContain('Add components now?  none');
     expect(read(cwd, 'rectio.json')).toContain('"ui": "@/kit/ui"');
   });
 
@@ -248,7 +248,7 @@ describe('interactive init: rectio in an existing app', () => {
     await term.type(KEY.down, KEY.enter);
     await term.type(KEY.enter, KEY.enter, KEY.enter, KEY.enter);
     expect(await run).toBe(0);
-    expect(term.screen()).toContain('✓ What do you want to do?   Start a new app from a template');
+    expect(term.screen()).toContain('✓ Get started          Start a new app from a template');
     expect(term.screen()).toContain('Dry run: nothing was written (books from Books)');
   });
 });
@@ -269,7 +269,7 @@ describe('no questions', () => {
     const term = fakeTerminal(cwd, { ...MANAGERS_ONLY(), ...env }, tty);
     expect(await start(term, ['init', '--no-install', ...flags])).toBe(0);
     expect(term.input.listenerCount('keypress')).toBe(0);
-    expect(term.raw()).not.toContain('What do you want to do?');
+    expect(term.raw()).not.toContain('Get started');
     expect(read(cwd, 'rectio.json')).toContain('"theme": "default"');
   });
 
