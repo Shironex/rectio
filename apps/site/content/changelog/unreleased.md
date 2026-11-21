@@ -33,6 +33,16 @@ summary: Work that is merging into main now and ships with the next release.
 - `ScrollArea` takes `focusableViewport={false}` when its content holds the focus itself.
 - Focus rings show again on the scroll area viewport, tab panels and scrollable code blocks, and
   a lint rule catches a class list whose ring would draw nothing.
+- Charts on their own entry, `@rectio/ui/charts`, so an app that draws none never ships the chart
+  library: `LineChart` and `AreaChart` on a time axis with locale dates, ticks that fit the width,
+  hatched gaps for missing data and weekly means on a narrow plot; `BarChart` vertical, horizontal,
+  grouped or stacked; and `DonutChart` with the total in the middle and every part listed. Each has a
+  spoken summary, keyboard reading, a table twin, loading and empty states and the three colour
+  vision safe series colours.
+- `Sparkline`, `TrendChip` and `ChartCard` in the main entry, with no chart library.
+- Motion twins in `@rectio/motion/charts`: lines draw along time with a dot on the drawing edge, bars
+  grow from zero, the ring settles in, and new figures glide in.
+- A time series chart block: a chart card whose headline is each series' latest figure and change.
 
 ## Templates
 
@@ -63,3 +73,4 @@ summary: Work that is merging into main now and ships with the next release.
   link.
 - Docs pages for the alert dialog, drawer, copy button, rating, tree and resizable panels, and the
   segmented control on the toggle page.
+- A Charts section in the components docs, and a page for the time series chart block.
