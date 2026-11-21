@@ -163,14 +163,14 @@ export function Output({
       {skin === undefined ? null : (
         <section aria-labelledby="generator-skin" className="flex flex-col gap-3">
           <div className="flex flex-wrap items-end justify-between gap-3">
-            <div className="flex flex-col gap-1">
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
               <h2
                 id="generator-skin"
                 className="font-display text-xl font-heading tracking-tight text-fg"
               >
                 {skin.title}
               </h2>
-              <p className="text-sm text-fg-muted">
+              <p className="max-w-3xl text-sm text-fg-muted">
                 {skin.description} Import it after the theme and set{' '}
                 <code className="font-mono text-xs text-fg">data-skin=&quot;{skin.id}&quot;</code>{' '}
                 beside{' '}

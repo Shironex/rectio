@@ -67,6 +67,9 @@ Both make a screen tighter, at different scales:
 Reach for compact when one working area needs more rows on screen; reach for dense when the whole
 product is a tool people read numbers in all day.
 
+On touch screens both keep controls at their 44px hit area, so dense shows most on desktop,
+where a pointer allows smaller targets.
+
 ## The skin contract
 
 A skin may override these token groups and nothing else. The token build fails on anything outside
@@ -79,7 +82,8 @@ them, and on a token the theme does not define.
 | Rhythm and controls | `--rx-space-unit`, `--rx-control-height-*`, `--rx-control-padding-x-*`        |
 | Component           | Non-colour component tokens, such as `--rx-emphasis-style`                    |
 
-Colour, shadow and motion are never part of a skin.
+Colour, shadow and motion are never part of a skin. Figures and tables keep the theme's numeric face in every skin, so amounts stay tabular; editorial
+sets only headings in the serif.
 
 ## Your own skin
 

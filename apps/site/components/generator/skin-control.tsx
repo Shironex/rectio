@@ -39,10 +39,8 @@ export function SkinControl({
           }}
         />
         <p className="text-sm text-fg-muted">
-          Dense tightens type and controls for data-heavy apps; editorial sets serif headings and
-          hairlines. A skin changes no colour, so every contrast check above still holds. It
-          installs as its own item, beside the theme. Compact density is separate and still applies
-          inside a skin.
+          Type, corners and rhythm on top of the theme; colours and contrast stay as they are.
+          Installed as its own item, beside the theme.
         </p>
       </div>
     </ControlGroup>
