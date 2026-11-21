@@ -1626,6 +1626,11 @@ export default defineRegistry({
           'Work in columns with limits, cards with tags, due dates and assignees, moved by menu or keyboard.',
         ),
         ...saasItems(
+          'week-agenda',
+          'Week agenda',
+          'A day or week of events on a time grid: overlaps side by side, an all-day row, the current time and slot presses.',
+        ),
+        ...saasItems(
           'comment-thread',
           'Comment thread',
           'A discussion with one level of replies, edit and delete for your own comments, mentions and a resolved state.',
