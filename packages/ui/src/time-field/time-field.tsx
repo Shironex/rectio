@@ -2,7 +2,7 @@
 
 import { Field as BaseField } from '@base-ui/react/field';
 import { ClockIcon } from '@phosphor-icons/react';
-import { useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
 
 import { controlSurface } from '../field/control-styles';
 import { cn } from '../lib/cn';
@@ -63,7 +63,7 @@ const draftOf = (value: TimeValue | null, pm = false): Draft =>
 
 const segmentClass = cn(
   'h-full min-w-5 pointer-coarse:min-w-11 field-sizing-content rounded-badge bg-transparent px-0.5 text-center caret-transparent outline-none',
-  'focus:bg-surface-selected focus:text-fg',
+  'focus:bg-accent-subtle focus:text-accent-strong',
   'placeholder:text-fg-subtle data-disabled:cursor-not-allowed disabled:cursor-not-allowed',
 );
 
@@ -103,6 +103,26 @@ export function TimeField({
   const hourRef = useRef<HTMLInputElement>(null);
   const minuteRef = useRef<HTMLInputElement>(null);
   const periodRef = useRef<HTMLInputElement>(null);
+  const groupRef = useRef<HTMLDivElement>(null);
+  // The group shares the hour segment's name, which the FieldLabel gives it, so a screen reader
+  // entering the field hears what the whole time is for, not only the first segment.
+  // The label links itself to the segment after mount, so the group follows the attribute.
+  useEffect(() => {
+    const group = groupRef.current;
+    const hour = hourRef.current;
+    if (group === null || hour === null || ariaLabel !== undefined) return;
+    const sync = () => {
+      const labelledBy = hour.getAttribute('aria-labelledby');
+      if (labelledBy) group.setAttribute('aria-labelledby', labelledBy);
+      else group.removeAttribute('aria-labelledby');
+    };
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(hour, { attributes: true, attributeFilter: ['aria-labelledby'] });
+    return () => {
+      observer.disconnect();
+    };
+  }, [ariaLabel]);
 
   // Keep the segments in step when the value changes from outside (picked, reset, loaded).
   if (value?.hour !== shown?.hour || value?.minute !== shown?.minute) {
@@ -189,12 +209,17 @@ export function TimeField({
       event.preventDefault();
       buffer.current = '';
       const first = key === 'Home';
-      if (segment === 'hour') {
-        const hour = twelve ? fromTwelveHour(first ? 12 : 11, draft.pm) : first ? 0 : 23;
-        commit({ ...draft, hour });
-      } else if (segment === 'minute') {
-        commit({ ...draft, minute: first ? 0 : 60 - step });
+      if (segment === 'period') return;
+      let next: Draft =
+        segment === 'hour'
+          ? { ...draft, hour: twelve ? fromTwelveHour(first ? 12 : 11, draft.pm) : first ? 0 : 23 }
+          : { ...draft, minute: first ? 0 : 60 - step };
+      // Like the arrow keys, Home and End stop at the bounds.
+      if (next.hour !== null && next.minute !== null && (min !== undefined || max !== undefined)) {
+        const clamped = clampTime({ hour: next.hour, minute: next.minute }, min, max);
+        next = { ...next, ...clamped, pm: clamped.hour >= 12 };
       }
+      commit(next);
     } else if (key === 'Backspace' || key === 'Delete') {
       event.preventDefault();
       buffer.current = '';
@@ -263,7 +288,9 @@ export function TimeField({
 
   return (
     <div
+      ref={groupRef}
       role="group"
+      aria-label={ariaLabel}
       data-slot="time-field"
       data-disabled={disabled || undefined}
       data-invalid={outOfRange || undefined}

@@ -184,4 +184,30 @@ describe('TimeField', () => {
     expect(screen.getByRole('spinbutton', { name: 'End' })).toHaveValue('16');
     expect(screen.getByRole('spinbutton', { name: 'Minutes' })).toHaveValue('45');
   });
+
+  it('names the whole field from its label', async () => {
+    render(<Controlled initial={{ hour: 9, minute: 0 }} />);
+    expect(await screen.findByRole('group', { name: 'Start' })).toBeInTheDocument();
+  });
+
+  it('keeps Home and End inside the bounds', async () => {
+    const user = userEvent.setup();
+    render(
+      <Controlled
+        initial={{ hour: 12, minute: 30 }}
+        min={{ hour: 9, minute: 15 }}
+        max={{ hour: 17, minute: 45 }}
+      />,
+    );
+    const hour = screen.getByRole('spinbutton', { name: 'Start' });
+    await user.click(hour);
+    await user.keyboard('{Home}');
+    expect(hour).toHaveValue('09');
+    await user.keyboard('{End}');
+    expect(hour).toHaveValue('17');
+    await user.click(screen.getByRole('spinbutton', { name: 'Minutes' }));
+    await user.keyboard('{End}');
+    expect(hour).toHaveValue('17');
+    expect(screen.getByRole('spinbutton', { name: 'Minutes' })).toHaveValue('45');
+  });
 });
