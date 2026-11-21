@@ -575,3 +575,13 @@ export {
   type ResizablePanelGroupProps,
   type ResizablePanelProps,
 } from './resizable/resizable';
+export { Sparkline, type SparklineColor, type SparklineProps } from './sparkline/sparkline';
+export {
+  TREND_CHIP_LABELS,
+  TrendChip,
+  formatTrend,
+  type TrendChipLabels,
+  type TrendChipProps,
+  type TrendDirection,
+} from './trend-chip/trend-chip';
+export { ChartCard, type ChartCardProps } from './chart-card/chart-card';
