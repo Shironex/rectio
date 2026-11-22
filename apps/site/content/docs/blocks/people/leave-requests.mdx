@@ -1,0 +1,134 @@
+---
+title: Leave requests
+description: 'Leave by status with approve and decline behind a confirm, overlap warnings, a balance by type, and a request form with half days that counts working days only.'
+---
+
+import LeaveRequestsDemo from '@/demos/people-leave-requests';
+import LeaveRequestsMotionDemo from '@/demos/people-leave-requests.motion';
+import LeaveRequestFormDemo from '@/demos/people-leave-request-form';
+import LeaveRequestFormMotionDemo from '@/demos/people-leave-request-form.motion';
+
+<Preview
+  name="people-leave-requests"
+  plain={<LeaveRequestsDemo />}
+  motion={<LeaveRequestsMotionDemo />}
+  importLine="import { LeaveRequests } from '@rectio/blocks/people/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add leave-requests
+```
+
+The item ships the list and the request form. The motion variant is `motion-leave-requests`; it
+installs the plain block too.
+
+## Usage
+
+```tsx
+import { LeaveRequests } from '@/components/blocks/people/leave-requests/leave-requests';
+
+<LeaveRequests
+  requests={requests}
+  types={[
+    { id: 'annual', label: 'Annual leave', allowance: 25 },
+    { id: 'sick', label: 'Sick leave' },
+  ]}
+  holidays={holidays}
+  onApprove={approve}
+  onDecline={(request, reason) => decline(request, reason)}
+/>;
+```
+
+A request is `{ id, person, type, start, end, halfStart?, halfEnd?, status, note?, decision? }`,
+with `end` the day after the last day off. Its length counts working days only: weekends and
+`holidays` take nothing off, and a half first or last day takes half a day.
+
+Approving and declining both ask first; declining needs a reason. When a teammate is off on the
+same working days, the row says who, and the approve step says on how many days. Pass `team` to
+compare against requests other than the ones listed.
+
+For a person's own leave, pass `balanceFor` with their id and `showPerson={false}`: the block shows
+each type's balance (allowance, taken, waiting and left) above the list, and `onCancel` lets them
+withdraw a request that has not started.
+
+## Request form
+
+<Preview
+  name="people-leave-request-form"
+  plain={<LeaveRequestFormDemo />}
+  motion={<LeaveRequestFormMotionDemo />}
+  importLine="import { LeaveRequestForm } from '@rectio/blocks/people/motion';"
+  align="start"
+/>
+
+```tsx
+import { LeaveRequestForm } from '@/components/blocks/people/leave-requests/leave-request-form';
+
+<LeaveRequestForm
+  types={types}
+  personId={me.id}
+  requests={requests}
+  minDay={today}
+  onSubmit={(draft) => create(draft)}
+/>;
+```
+
+Pick a type and a range in the calendar; half day boxes appear for the first and last day. The
+preview says how many working days the range takes and what the balance will be after it, and
+warns when a teammate is off too. The draft you receive has an exclusive `end` and the length in
+`halves`. A range of weekend days, or one over the balance, is held back with the reason.
+
+## Props
+
+<TypeTable
+  type={{
+    requests: { type: 'readonly LeaveRequest[]', required: true },
+    types: {
+      type: 'readonly LeaveType[]',
+      required: true,
+      description: 'id, label and an allowance in days; no allowance means unlimited.',
+    },
+    onApprove: { type: '(request) => void' },
+    onDecline: { type: '(request, reason: string) => void' },
+    onCancel: { type: '(request, reason: string) => void' },
+    showPerson: { type: 'boolean', default: 'true' },
+    balanceFor: { type: 'string', description: 'A person id: shows their balance by type.' },
+    pageSize: {
+      type: 'number',
+      default: '50',
+      description: 'Rows drawn at first and per Show more; counts and totals cover all.',
+    },
+    team: {
+      type: 'readonly LeaveRequest[]',
+      description: 'What overlaps are found in; the requests when omitted.',
+    },
+    filter: { type: "'pending' | 'approved' | 'declined' | 'cancelled' | 'all'" },
+    defaultFilter: { type: 'LeaveFilter', default: "'pending'" },
+    onFilterChange: { type: '(filter) => void' },
+    weekend: { type: 'readonly number[]', default: '[0, 6]' },
+    holidays: { type: 'Record<IsoDay, string>' },
+    today: { type: 'IsoDay' },
+    locale: { type: 'string' },
+    messages: { type: 'Partial<LeaveRequestsMessages>' },
+  }}
+/>
+
+The form takes `types`, `personId`, `requests`, `onSubmit`, `onCancel`, `defaultType`, `minDay`,
+`weekend`, `holidays`, `numberOfMonths` (two by default), `defaultMonth`, `locale` and `messages`.
+
+## Logic
+
+`leaveHalves(span, calendar)`, `leaveBalances(types, requests, personId, calendar)`,
+`leaveOverlaps(span, team, options)`, `leaveProblem(span, balance)` and `spanFromPicked(from, to)`
+run on the server too.
+
+## Accessibility
+
+- Every action button names the person, the type and the dates, so a list of Approve buttons
+  reads apart.
+- The confirm dialogs put the focus on the safe answer; a missing reason is said aloud.
+- The form's preview is a polite live region, and the calendar's days are buttons named by their
+  full date. The half day boxes are labelled checkboxes.

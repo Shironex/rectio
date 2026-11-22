@@ -1,0 +1,112 @@
+---
+title: Timesheet
+description: 'A week of hours per project and day, with row and day totals, overtime and missing-day flags, notes, submit and approval, and a day list on a phone.'
+---
+
+import TimesheetDemo from '@/demos/people-timesheet';
+import TimesheetMotionDemo from '@/demos/people-timesheet.motion';
+
+<Preview
+  name="people-timesheet"
+  plain={<TimesheetDemo />}
+  motion={<TimesheetMotionDemo />}
+  importLine="import { Timesheet } from '@rectio/blocks/people/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add timesheet
+```
+
+The motion variant is `motion-timesheet`. It installs the plain block too.
+
+## Usage
+
+```tsx
+import { Timesheet } from '@/components/blocks/people/timesheet/timesheet';
+
+<Timesheet
+  weekStart="2026-11-23"
+  rows={rows}
+  status={status}
+  today={today}
+  holidays={{ '2026-12-25': 'Christmas Day' }}
+  onCellChange={(rowId, day, minutes) => save(rowId, day, minutes)}
+  onNoteChange={(rowId, day, note) => saveNote(rowId, day, note)}
+  onWeekChange={setWeekStart}
+  onSubmit={submit}
+  onRecall={recall}
+/>;
+```
+
+Each row holds minutes per day: `{ id, project, task?, minutes: { '2026-11-23': 450 }, notes? }`.
+A cell takes decimal hours (`7.5`, or `7,5` where the comma is the decimal mark), clock time
+(`7:30`) or units (`7h 30m`, `45m`) and hands you whole minutes, or null when it is cleared. With
+`entry="clock"` the cells are time fields with hours and minutes instead.
+
+Totals are added in minutes, so a week of 7.33 hour days never drifts. A past working day with no
+time is flagged missing; one under `dailyMinutes` (eight hours by default) is short, and any day
+over it, weekends included, is over. Weekends and the days in `holidays` expect nothing and are
+shaded.
+
+The status runs draft, submitted, then approved or rejected (shown as Changes requested, with the
+reason). Cells take input only in draft and rejected, and never in a `locked` week. Submitting asks
+first, and warns when days are missing. For an approver, pass `onApprove` and `onReject`: sending a
+week back needs a reason.
+
+On a phone the grid becomes a list of days: today starts open, the others show their totals and
+flags and open on demand.
+
+## Props
+
+<TypeTable
+  type={{
+    weekStart: { type: 'IsoDay', required: true, description: 'The first day of the week shown.' },
+    rows: { type: 'readonly TimesheetRow[]', required: true },
+    status: { type: "'draft' | 'submitted' | 'approved' | 'rejected'", default: "'draft'" },
+    locked: { type: 'boolean', description: 'A closed week: nothing takes input.' },
+    onCellChange: {
+      type: '(rowId, day, minutes: number | null) => void',
+      description: 'Without it the grid is read only.',
+    },
+    onNoteChange: { type: '(rowId, day, note: string) => void' },
+    onWeekChange: {
+      type: '(weekStart: IsoDay) => void',
+      description: 'Shows the previous and next week buttons.',
+    },
+    onSubmit: { type: '() => void' },
+    onRecall: { type: '() => void', description: 'Takes a submitted week back to draft.' },
+    onApprove: { type: '() => void' },
+    onReject: { type: '(reason: string) => void' },
+    onAddRow: { type: '() => void' },
+    review: {
+      type: '{ by: string; on?: IsoDay; reason?: string }',
+      description: 'Who submitted, approved or sent it back.',
+    },
+    entry: { type: "'decimal' | 'clock'", default: "'decimal'" },
+    dailyMinutes: { type: 'number', default: '480' },
+    weekend: { type: 'readonly number[]', default: '[0, 6]' },
+    holidays: { type: 'Record<IsoDay, string>' },
+    today: { type: 'IsoDay', description: 'The local date when omitted.' },
+    locale: { type: 'string' },
+    loading: { type: 'boolean' },
+    messages: { type: 'Partial<TimesheetMessages>' },
+  }}
+/>
+
+## Logic
+
+`timesheetTotals(rows, weekStart, options)` gives the day, row and week totals with every flag,
+`parseDuration(text)` reads what a person typed, and `formatDuration(minutes, locale, entry)`
+writes it back. All three run on the server.
+
+## Accessibility
+
+- The grid is a table with a caption, column headers for the days and row headers for the
+  projects. Each cell field is named by its project and its full date.
+- Up and Down move through a day, Enter saves and moves down, Escape puts back the saved value.
+  Text that is not a time is marked invalid and the reason is said aloud.
+- A flag is a word beside the total, with the difference read out, never colour alone.
+- Every control is at least 44px on touch screens.

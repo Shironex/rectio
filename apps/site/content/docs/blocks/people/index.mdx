@@ -1,0 +1,41 @@
+---
+title: People blocks
+description: 'Screens for the people side of a business: time, leave, the organisation and payroll.'
+---
+
+The people blocks cover the screens an HR or operations app keeps coming back to: a week of hours
+to fill in and approve, leave to request and decide, who reports to whom, and a payroll run to
+review, approve and pay. Every figure is an integer: minutes for time, half days for leave and
+minor units for money, so totals add up exactly. Calendar days are `YYYY-MM-DD` strings, so a clock
+change never moves a day.
+
+```tsx
+import { Timesheet } from '@rectio/blocks/people'; // plain
+import { Timesheet } from '@rectio/blocks/people/motion'; // rows and totals fade up on first view
+```
+
+They install under `@blocks/people/`, beside the shared `people-core` (day helpers, formatting,
+the confirm step with a reason field and the avatar). The blocks are client components; their
+logic, day helpers and words import from a React Server Component too, so a server can total a
+week, count leave or check a run before it renders.
+
+| Block                                                | What it answers                                         |
+| :--------------------------------------------------- | :------------------------------------------------------ |
+| [Timesheet](/docs/blocks/people/timesheet)           | How many hours went where this week, and is it complete |
+| [Leave requests](/docs/blocks/people/leave-requests) | Who is off when, how much is left, and what to decide   |
+| [Org chart](/docs/blocks/people/org-chart)           | Who someone reports to, and who reports to them         |
+| [Payroll run](/docs/blocks/people/payroll-run)       | Is this month's pay right, and can it go out            |
+
+## Days
+
+```tsx
+import { addDays, daysBetween, isWorkingDay, weekOf } from '@rectio/blocks/people';
+
+weekOf('2026-03-23'); // seven days, Monday to Sunday, across the clock change
+daysBetween('2026-12-04', '2026-12-09'); // the 4th to the 8th: the end is exclusive
+isWorkingDay('2026-12-25', { holidays: { '2026-12-25': 'Christmas Day' } }); // false
+```
+
+Ranges end on the day after the last one, as calendar events do, so a one-day leave is
+`{ start: '2026-12-04', end: '2026-12-05' }` and two ranges that touch never overlap. The words
+always show the last day itself: `4 Dec to 8 Dec 2026`.

@@ -1,0 +1,90 @@
+---
+title: Org chart
+description: 'An organisation as a tree with avatars and team sizes, search that reveals anyone, the picked person with their manager and reports, and a list to step through on a phone.'
+---
+
+import OrgChartDemo from '@/demos/people-org-chart';
+import OrgChartMotionDemo from '@/demos/people-org-chart.motion';
+
+<Preview
+  name="people-org-chart"
+  plain={<OrgChartDemo />}
+  motion={<OrgChartMotionDemo />}
+  importLine="import { OrgChart } from '@rectio/blocks/people/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add org-chart
+```
+
+The motion variant is `motion-org-chart`. It installs the plain block too.
+
+## Usage
+
+```tsx
+import { OrgChart } from '@/components/blocks/people/org-chart/org-chart';
+
+<OrgChart
+  people={[
+    { id: 'dana', name: 'Dana Whitfield', title: 'Chief Executive' },
+    { id: 'ines', name: 'Ines Carvalho', title: 'Engineer', managerId: 'dana' },
+  ]}
+  personHref={(person) => `/people/${person.id}`}
+/>;
+```
+
+Pass people as a flat list, each naming their manager. The tree is built once in linear time and
+only open branches are drawn, so an organisation of thousands opens at once. A manager missing
+from the list, or a loop of managers, never hides anyone: those people show at the top.
+
+Search matches names first, then titles and departments, ignoring accents. Picking a result opens
+every branch above that person, selects them and moves the focus to them. The panel beside the
+tree shows the picked person, their manager and their direct reports. Links go through the
+LinkProvider, so they use your router.
+
+On a phone the tree becomes a list: a person and their reports, a row for each report that opens
+their team, and a button back up to the manager.
+
+## Props
+
+<TypeTable
+  type={{
+    people: {
+      type: 'readonly OrgPerson[]',
+      required: true,
+      description:
+        'id, name, and optional title, managerId, avatar, department, location and email.',
+    },
+    selected: { type: 'string | null' },
+    defaultSelected: { type: 'string' },
+    onSelectedChange: { type: '(id: string | null) => void' },
+    personHref: { type: '(person) => string', description: 'Adds View profile links.' },
+    defaultDepth: { type: 'number', default: '1', description: 'Levels open at first.' },
+    reportsShown: {
+      type: 'number',
+      default: '6',
+      description: 'Direct reports listed in the panel before "and N more".',
+    },
+    description: { type: 'ReactNode' },
+    actions: { type: 'ReactNode' },
+    loading: { type: 'boolean' },
+    messages: { type: 'Partial<OrgChartMessages>' },
+  }}
+/>
+
+## Logic
+
+`buildOrg(people)` gives the roots, the reports by manager and every team size; `managerChain`
+lists the managers above someone and `searchOrg(model, query)` ranks matches. They run on the
+server too.
+
+## Accessibility
+
+- The tree is a tree view: arrows move, Right opens a branch, Left closes it or goes to the
+  manager, Home and End jump. Each row says the person's title and team size.
+- The search results are buttons the arrows move through, and how many match is said once typing
+  settles.
+- The phone list's buttons say whose team they open and how big it is, and the move is announced.

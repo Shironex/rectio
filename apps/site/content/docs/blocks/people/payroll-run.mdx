@@ -1,0 +1,98 @@
+---
+title: Payroll run
+description: 'A payroll run to review, approve and pay: gross, deductions, net and employer cost per person in minor units that reconcile, with exceptions that hold approval back.'
+---
+
+import PayrollRunDemo from '@/demos/people-payroll-run';
+import PayrollRunMotionDemo from '@/demos/people-payroll-run.motion';
+
+<Preview
+  name="people-payroll-run"
+  plain={<PayrollRunDemo />}
+  motion={<PayrollRunMotionDemo />}
+  importLine="import { PayrollRun } from '@rectio/blocks/people/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add payroll-run
+```
+
+The motion variant is `motion-payroll-run`. It installs the plain block too.
+
+## Usage
+
+```tsx
+import { PayrollRun } from '@/components/blocks/people/payroll-run/payroll-run';
+
+<PayrollRun
+  lines={lines}
+  currency="GBP"
+  period="November 2026"
+  payDate={payDate}
+  status={run.status}
+  onApprove={approve}
+  onPay={pay}
+  onReopen={reopen}
+/>;
+```
+
+The block does no payroll maths: your payroll system works out each line, and the block checks
+and presents it. A line is `{ id, person, role?, gross, deductions, net, employerCost, bankAccount? }`
+with every amount in minor units (pence, cents). Totals are added in integers, so they reconcile to
+the unit.
+
+A line blocks approval when its bank details are missing, its net pay is below zero, its net is
+not gross less deductions, or an amount is not a whole number of minor units. The run shows how
+many lines are flagged and why, and a filter lists only those. Approve stays disabled until every
+line is clean, with the reason beside it.
+
+The steps run review, approve, pay: approving and paying both ask first, and an approved run can
+go back to review. `payrollPayouts(lines, payDate, currency)` turns the net pay into payouts for
+the [Payouts](/docs/blocks/payouts) block.
+
+## Props
+
+<TypeTable
+  type={{
+    lines: { type: 'readonly PayrollLine[]', required: true },
+    currency: { type: 'string', required: true },
+    period: { type: 'string', required: true, description: 'Such as November 2026.' },
+    payDate: { type: 'Date', required: true },
+    status: { type: "'review' | 'approved' | 'paid'", default: "'review'" },
+    onApprove: { type: '() => void' },
+    onPay: { type: '() => void' },
+    onReopen: { type: '() => void' },
+    lineHref: {
+      type: '(line) => string',
+      description: 'Links each name through the LinkProvider.',
+    },
+    fixHref: {
+      type: '(line, issues) => string',
+      description: 'Adds a Fix link beside a flagged line, through the LinkProvider.',
+    },
+    pageSize: {
+      type: 'number',
+      default: '50',
+      description: 'Rows drawn at first and per Show more; counts and totals cover all.',
+    },
+    locale: { type: 'string' },
+    actions: { type: 'ReactNode' },
+    loading: { type: 'boolean' },
+    messages: { type: 'Partial<PayrollRunMessages>' },
+  }}
+/>
+
+## Logic
+
+`reviewPayroll(lines)` gives the totals, the issues per line and whether the run is ready;
+`issueCounts` and `payrollPayouts` run on the server too.
+
+## Accessibility
+
+- The disabled Approve button is described by the reason it waits, so a screen reader hears why.
+- Each flag is a word on the line, never colour alone; a negative net is written with its sign.
+- The steps are a list with the current step marked, and the confirm dialogs put the focus on the
+  safe answer.
