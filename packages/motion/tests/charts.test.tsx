@@ -12,7 +12,7 @@ import {
   RadialGauge,
   WaterfallChart,
 } from '../src/charts';
-import { bezier } from '../src/chart/chart';
+import { bezier, revealFrames } from '../src/chart/chart';
 import { Sparkline } from '../src/index';
 
 const day = (d: number) => new Date(2026, 2, d);
@@ -134,6 +134,12 @@ describe('motion charts', () => {
     expect(marks).toEqual(expect.arrayContaining(['grow-x', 'fade', 'reveal', 'sweep']));
     // The waterfall's bars wait for their entrance until Recharts has drawn them.
     expect(container.querySelector('[data-enter="waiting"]')).not.toBeNull();
+  });
+
+  it('uncover a reveal from the start edge, the right in a right-to-left page', () => {
+    expect(revealFrames('ltr')[0]).toEqual({ clipPath: 'inset(0 100% 0 0)' });
+    expect(revealFrames('rtl')[0]).toEqual({ clipPath: 'inset(0 0 0 100%)' });
+    expect(revealFrames('rtl')[1]).toEqual({ clipPath: 'inset(0 0 0 0)' });
   });
 
   it('render the new charts plain under reduced motion', () => {

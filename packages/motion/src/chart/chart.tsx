@@ -158,6 +158,14 @@ function enter(
  * one after another, faded parts come in after them, an arc draws along its length, and a grid is
  * uncovered from its start side in one sweep (one animation, however many cells it has).
  */
+/** A reveal uncovers from the start edge: the left in a left-to-right page, the right in a right-to-left one. */
+export function revealFrames(direction: string): Keyframe[] {
+  return [
+    { clipPath: direction === 'rtl' ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)' },
+    { clipPath: 'inset(0 0 0 0)' },
+  ];
+}
+
 function markEntrance(
   root: HTMLElement,
   tokens: MotionTokens,
@@ -205,7 +213,7 @@ function markEntrance(
       );
     } else if (kind === 'reveal') {
       animations.push(
-        mark.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], {
+        mark.animate(revealFrames(getComputedStyle(mark).direction), {
           duration: tokens.duration.count * 1000,
           easing: cssEasing(root, 'settle'),
           fill: 'backwards',
