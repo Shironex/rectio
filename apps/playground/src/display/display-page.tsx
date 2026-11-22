@@ -893,7 +893,7 @@ export function DisplayPage({
                     key={`${t.id}-${m}`}
                     href={`?view=display&theme=${t.id}&mode=${m}${motion ? '&motion=on' : ''}`}
                     aria-current={t.id === theme && m === mode ? 'page' : undefined}
-                    className="rounded-control px-2 py-1 text-fg-muted hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-focus aria-[current=page]:bg-surface-selected aria-[current=page]:text-fg"
+                    className="inline-flex items-center rounded-control px-2 py-1 text-fg-muted pointer-coarse:min-h-(--rx-control-height-touch) hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-focus aria-[current=page]:bg-surface-selected aria-[current=page]:text-fg"
                   >
                     {t.name} {m}
                   </a>

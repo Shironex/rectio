@@ -115,12 +115,8 @@ function Dashboard({ charts }: { charts: Charts }) {
               setRange(value[0] ?? '90');
             }}
           >
-            <Toggle value="30" className="pointer-coarse:min-w-11">
-              30d
-            </Toggle>
-            <Toggle value="90" className="pointer-coarse:min-w-11">
-              90d
-            </Toggle>
+            <Toggle value="30">30d</Toggle>
+            <Toggle value="90">90d</Toggle>
           </ToggleGroup>
         }
       >
@@ -322,7 +318,7 @@ export function ChartsPage({
                     key={`${t.id}-${m}`}
                     href={`?view=charts&theme=${t.id}&mode=${m}${motion ? '&motion=on' : ''}`}
                     aria-current={t.id === theme && m === mode ? 'page' : undefined}
-                    className="rounded-control px-2 py-1 text-fg-muted hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-focus aria-[current=page]:bg-surface-selected aria-[current=page]:text-fg"
+                    className="inline-flex items-center rounded-control px-2 py-1 text-fg-muted pointer-coarse:min-h-(--rx-control-height-touch) hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-focus aria-[current=page]:bg-surface-selected aria-[current=page]:text-fg"
                   >
                     {t.name} {m}
                   </a>

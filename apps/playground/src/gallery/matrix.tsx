@@ -31,7 +31,7 @@ export function Matrix() {
                 {/* Each panel links to the composition in its own theme, in that theme's accent. */}
                 <a
                   href={`?view=app&theme=${theme.id}&mode=${mode}`}
-                  className="ms-auto text-sm text-accent-strong underline decoration-line-strong underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                  className="ms-auto inline-flex items-center text-sm text-accent-strong underline pointer-coarse:min-h-(--rx-control-height-touch) decoration-line-strong underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 >
                   Expense report
                 </a>

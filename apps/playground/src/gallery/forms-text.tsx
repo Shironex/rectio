@@ -277,11 +277,11 @@ export function FieldsetSection() {
         <Fieldset className="w-72">
           <FieldsetLegend>Email notifications</FieldsetLegend>
           <FieldsetDescription>Sent to the address on your profile.</FieldsetDescription>
-          <label className="flex items-center gap-2.5 text-base">
+          <label className="flex items-center gap-2.5 text-base pointer-coarse:min-h-(--rx-control-height-touch)">
             <Checkbox defaultChecked />
             Weekly digest
           </label>
-          <label className="flex items-center gap-2.5 text-base">
+          <label className="flex items-center gap-2.5 text-base pointer-coarse:min-h-(--rx-control-height-touch)">
             <Checkbox />
             Approval requests
           </label>

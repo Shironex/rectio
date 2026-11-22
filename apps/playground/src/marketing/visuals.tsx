@@ -217,7 +217,7 @@ export function CloseChecklist() {
       <ul className="flex flex-col gap-2.5">
         {TASKS.map((task) => (
           <li key={task.id}>
-            <label className="flex items-center gap-3 text-base text-fg">
+            <label className="flex items-center gap-3 text-base text-fg pointer-coarse:min-h-(--rx-control-height-touch)">
               <Checkbox
                 checked={done.has(task.id)}
                 onCheckedChange={(checked) => {

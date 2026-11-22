@@ -29,6 +29,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
     "shoot": "node scripts/shoot.ts",
+    "audit:touch": "node scripts/audit-touch.ts",
     "shoot:motion": "node scripts/shoot-motion.ts",
     "shoot:blocks": "node scripts/shoot-blocks.ts",
     "shoot:display": "node scripts/shoot-display.ts",

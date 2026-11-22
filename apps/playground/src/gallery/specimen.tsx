@@ -37,7 +37,7 @@ export function Row({
     <div className="grid items-start gap-2 sm:grid-cols-6 sm:gap-4">
       <span className="text-sm text-fg-muted sm:col-span-1 sm:pt-2">{label}</span>
       <div
-        className={`flex flex-wrap gap-3 sm:col-span-5 ${center ? 'items-center' : 'items-start'}`}
+        className={`flex flex-wrap gap-3 pointer-coarse:gap-touch-gap sm:col-span-5 ${center ? 'items-center' : 'items-start'}`}
       >
         {children}
       </div>

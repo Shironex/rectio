@@ -274,7 +274,7 @@ function Report({ back }: { back: string | null }) {
     <div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10 sm:px-8">
       <a
         href={back ?? '?'}
-        className="inline-flex min-h-6 w-fit items-center gap-1.5 text-sm text-fg-muted underline decoration-line-strong underline-offset-4 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        className="inline-flex min-h-6 w-fit items-center gap-1.5 text-sm text-fg-muted pointer-coarse:min-h-(--rx-control-height-touch) underline decoration-line-strong underline-offset-4 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
         <ArrowLeftIcon aria-hidden weight="bold" className="size-3.5" />
         {back === null ? 'All components' : 'Motion add-on'}
