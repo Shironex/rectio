@@ -216,14 +216,14 @@ export default defineRegistry({
     skins: [
       {
         id: 'dense',
-        version: '0.1.0',
+        version: '0.1.1',
         title: 'Dense skin',
         description:
           'A smaller type scale, tighter line heights, smaller corners and controls for data-heavy apps. Works with any theme and with compact density.',
       },
       {
         id: 'editorial',
-        version: '0.1.0',
+        version: '0.1.1',
         title: 'Editorial skin',
         description:
           'IBM Plex Serif headings, hairline borders, restrained corners and a more generous rhythm. Works with any theme, light or dark.',
