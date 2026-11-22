@@ -519,6 +519,54 @@ describe('AssistantSidebar', () => {
     }
   });
 
+  it('closes its own phone sheet with the shortcut, but never opens under another dialog', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn((query: string) => ({
+        matches: query.includes('48rem'),
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    try {
+      render(
+        <>
+          <AssistantSidebar phoneTrigger={false} panel={<p>Ask me</p>}>
+            <p>Page</p>
+          </AssistantSidebar>
+          <AlertDialog>
+            <AlertDialogTrigger>Delete</AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogTitle>Delete this chat?</AlertDialogTitle>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>,
+      );
+      fireEvent.keyDown(document.body, { key: 'j', ctrlKey: true });
+      const panel = await screen.findByText('Ask me');
+      await waitFor(() => {
+        expect(panel.closest('[role="dialog"]')?.contains(document.activeElement)).toBe(true);
+      });
+      // Pressed inside its own sheet, the shortcut closes it.
+      fireEvent.keyDown(document.activeElement ?? document.body, { key: 'j', ctrlKey: true });
+      await waitFor(() => {
+        expect(screen.queryByText('Ask me')).not.toBeInTheDocument();
+      });
+      // Another dialog open: the shortcut leaves the sheet shut.
+      await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+      const dialog = await screen.findByRole('alertdialog', { name: 'Delete this chat?' });
+      fireEvent.keyDown(within(dialog).getByRole('button', { name: 'Cancel' }), {
+        key: 'j',
+        ctrlKey: true,
+      });
+      expect(screen.queryByText('Ask me')).not.toBeInTheDocument();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('renders the motion twin open', () => {
     render(
       <MotionAssistantSidebar defaultOpen panel={<p>Ask me</p>}>

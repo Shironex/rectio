@@ -164,8 +164,9 @@ export function AssistantSidebarProvider({
   useShortcut(
     shortcut,
     () => {
-      // Never behind a dialog the reader is in: the delete confirm, a sheet, the app's own.
-      if (isModalDialogOpen()) return;
+      // Never behind a dialog the reader is in: the delete confirm, a sheet, the app's own. On a
+      // phone the panel's own sheet is a modal dialog too, and the shortcut still closes that one.
+      if (isModalDialogOpen({ except: panel.current })) return;
       const inside = panel.current?.contains(document.activeElement) === true;
       const action = shortcutAction(latest.current.visible, inside);
       if (action === 'close') value.hide();
