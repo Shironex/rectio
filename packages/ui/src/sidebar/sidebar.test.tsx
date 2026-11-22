@@ -2,6 +2,8 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../dialog/dialog';
+
 import {
   Sidebar,
   SidebarContent,
@@ -123,6 +125,26 @@ describe('Sidebar on desktop', () => {
     screen.getByRole('textbox', { name: 'Memo' }).focus();
     await userEvent.keyboard('{Control>}b{/Control}');
     expect(onCollapsedChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not fold behind a modal dialog the user is in', async () => {
+    viewport(false);
+    const onCollapsedChange = vi.fn();
+    render(
+      <>
+        <App onCollapsedChange={onCollapsedChange} />
+        <Dialog>
+          <DialogTrigger>Settings</DialogTrigger>
+          <DialogContent>
+            <DialogTitle>Settings</DialogTitle>
+          </DialogContent>
+        </Dialog>
+      </>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    await screen.findByRole('dialog', { name: 'Settings' });
+    await userEvent.keyboard('{Control>}b{/Control}');
+    expect(onCollapsedChange).not.toHaveBeenCalled();
   });
 
   it('follows a controlled collapsed value', () => {

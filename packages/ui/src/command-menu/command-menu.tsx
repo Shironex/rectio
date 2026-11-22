@@ -17,6 +17,7 @@ import {
 import { Kbd, KbdShortcut } from '../kbd/kbd';
 import { ariaKeyShortcut } from '../kbd/shortcut';
 import { useIsMac, useShortcut } from '../kbd/use-shortcut';
+import { isModalDialogOpen } from '../lib/modal-dialog';
 import { cn } from '../lib/cn';
 import { usePortalContainer } from '../theme-scope/theme-scope';
 import { fuzzyScore } from './fuzzy';
@@ -180,11 +181,15 @@ export function CommandMenu({
     if (!next) setQuery('');
   };
 
-  useShortcut(shortcut, () => {
-    // Never stack the menu over another dialog or sheet the user is in.
-    if (!open && document.querySelector('[role="dialog"][aria-modal="true"]') !== null) return;
-    setOpen(!open);
-  });
+  useShortcut(
+    shortcut,
+    () => {
+      // Never stack the menu over another dialog or sheet the user is in.
+      if (!open && isModalDialogOpen()) return;
+      setOpen(!open);
+    },
+    { repeat: false },
+  );
 
   const results = useMemo(() => filterCommands(groups, query), [groups, query]);
   const resultCount = results.reduce((sum, group) => sum + group.items.length, 0);

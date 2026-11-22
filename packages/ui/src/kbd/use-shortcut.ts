@@ -33,6 +33,11 @@ export interface UseShortcutOptions {
    * editor also uses, such as `mod+b` for bold.
    */
   allowInFields?: boolean;
+  /**
+   * Whether a held key fires again as it repeats. Default true; pass false for a shortcut that
+   * toggles something, so holding it does not open and close it over and over.
+   */
+  repeat?: boolean;
 }
 
 /**
@@ -43,7 +48,7 @@ export interface UseShortcutOptions {
 export function useShortcut(
   shortcut: string | null | undefined,
   handler: (event: KeyboardEvent) => void,
-  { enabled = true, allowInFields }: UseShortcutOptions = {},
+  { enabled = true, allowInFields, repeat = true }: UseShortcutOptions = {},
 ): void {
   const latest = useRef(handler);
   useEffect(() => {
@@ -56,6 +61,11 @@ export function useShortcut(
     const inFields = allowInFields ?? (parsed.mod || parsed.ctrl || parsed.alt);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing) return;
+      if (!repeat && event.repeat) {
+        // Still the shortcut's key: keep the browser from acting on it while it is held.
+        if (matchesShortcut(event, shortcut, mac)) event.preventDefault();
+        return;
+      }
       if (!inFields && isEditable(event.target)) return;
       if (!matchesShortcut(event, shortcut, mac)) return;
       event.preventDefault();
@@ -65,5 +75,5 @@ export function useShortcut(
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [shortcut, enabled, allowInFields]);
+  }, [shortcut, enabled, allowInFields, repeat]);
 }

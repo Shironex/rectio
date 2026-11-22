@@ -393,6 +393,7 @@ export {
   type Shortcut,
 } from './kbd/shortcut';
 export { useIsMac, useShortcut, type UseShortcutOptions } from './kbd/use-shortcut';
+export { isModalDialogOpen } from './lib/modal-dialog';
 export {
   Tooltip,
   TooltipContent,

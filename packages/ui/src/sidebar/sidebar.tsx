@@ -21,6 +21,7 @@ import {
 
 import { ariaKeyShortcut } from '../kbd/shortcut';
 import { useIsMac, useShortcut } from '../kbd/use-shortcut';
+import { isModalDialogOpen } from '../lib/modal-dialog';
 import { cn, touchHitArea } from '../lib/cn';
 import { anchorRender } from '../link/link';
 import { Menu, MenuContent, MenuGroup, MenuLinkItem, MenuTrigger } from '../menu/menu';
@@ -127,10 +128,10 @@ export function SidebarProvider({
     shortcut,
     () => {
       // Never fold the rail behind, or open the sheet over, a dialog the user is in.
-      if (document.querySelector('[role="dialog"][aria-modal="true"]') !== null) return;
+      if (isModalDialogOpen()) return;
       value.toggle();
     },
-    { allowInFields: false },
+    { allowInFields: false, repeat: false },
   );
 
   return <SidebarContext value={value}>{children}</SidebarContext>;

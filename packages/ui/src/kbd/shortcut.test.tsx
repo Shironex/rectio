@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -54,8 +54,16 @@ describe('shortcuts', () => {
   });
 });
 
-function Listener({ shortcut, onPress }: { shortcut: string; onPress: () => void }) {
-  useShortcut(shortcut, onPress);
+function Listener({
+  shortcut,
+  onPress,
+  repeat,
+}: {
+  shortcut: string;
+  onPress: () => void;
+  repeat?: boolean;
+}) {
+  useShortcut(shortcut, onPress, repeat === undefined ? {} : { repeat });
   return <input aria-label="Memo" />;
 }
 
@@ -76,6 +84,23 @@ describe('useShortcut', () => {
     // jsdom reports no platform, so mod is Control here.
     await userEvent.keyboard('{Control>}k{/Control}');
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  it('fires on a held key unless told not to repeat', () => {
+    const held = { key: 'k', code: 'KeyK', ctrlKey: true };
+    const onRepeat = vi.fn();
+    const { unmount } = render(<Listener shortcut="mod+k" onPress={onRepeat} />);
+    fireEvent.keyDown(document, held);
+    fireEvent.keyDown(document, { ...held, repeat: true });
+    expect(onRepeat).toHaveBeenCalledTimes(2);
+    unmount();
+    const onToggle = vi.fn();
+    render(<Listener shortcut="mod+k" onPress={onToggle} repeat={false} />);
+    fireEvent.keyDown(document, held);
+    const repeated = fireEvent.keyDown(document, { ...held, repeat: true });
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    // The held key stays the shortcut's: the browser does not act on it either.
+    expect(repeated).toBe(false);
   });
 });
 

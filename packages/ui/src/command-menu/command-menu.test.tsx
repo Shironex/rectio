@@ -2,6 +2,13 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../alert-dialog/alert-dialog';
 import { CommandMenu, CommandMenuTrigger, filterCommands, type CommandGroup } from './command-menu';
 import { fuzzyMatch, fuzzyScore } from './fuzzy';
 
@@ -86,6 +93,25 @@ describe('CommandMenu', () => {
     });
     expect(within(dialog).getByRole('group', { name: 'Go to' })).toBeInTheDocument();
     expect(within(dialog).getAllByRole('option')).toHaveLength(5);
+  });
+
+  it('does not open over a modal dialog the user is in', async () => {
+    render(
+      <>
+        <CommandMenu groups={groups(vi.fn())} />
+        <AlertDialog>
+          <AlertDialogTrigger>Delete</AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogTitle>Delete invoice?</AlertDialogTitle>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    await screen.findByRole('alertdialog', { name: 'Delete invoice?' });
+    await userEvent.keyboard('{Control>}k{/Control}');
+    expect(screen.queryByRole('dialog', { name: 'Command menu' })).not.toBeInTheDocument();
   });
 
   it('opens with the shortcut, filters, and runs the highlighted command with Enter', async () => {
