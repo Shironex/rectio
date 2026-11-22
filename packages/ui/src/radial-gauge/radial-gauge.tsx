@@ -13,8 +13,14 @@ import {
 } from '../chart/chart';
 import { formatValue, type ValueFormat } from '../chart/chart-format';
 import { cn } from '../lib/cn';
+import { devWarn } from '../lib/dev-warn';
 
-/** A stretch of the scale with a name: `Behind` up to 60, `On track` up to 90, `Ahead` past it. */
+/**
+ * A stretch of the scale with a name: `Behind` up to 60, `On track` up to 90, `Ahead` past it.
+ * Bands are placed in order of `to` (an unsorted list is sorted), each from where the one before
+ * ends; a `to` outside the scale is clamped to it, and two bands that end at the same point (an
+ * overlap) leave the second one empty, with a warning in development.
+ */
 export interface GaugeBand {
   /** Where the band ends on the scale; the last band runs to `max` whatever it says. */
   to: number;
@@ -123,6 +129,30 @@ const STROKE: Record<string, string> = {
  * Band colours by default: the warm sequence from its most severe step, ending in the quiet
  * reference grey for the good band, so no band shares the value arc's colour.
  */
+/** Bands in order along the scale, each from the end of the one before, clamped to the scale. */
+function placeBands(
+  bands: readonly GaugeBand[],
+  min: number,
+  max: number,
+  better: 'higher' | 'lower',
+) {
+  const sorted = bands
+    .map((band, index) => ({ band, index, to: Number.isFinite(band.to) ? band.to : max }))
+    .sort((a, b) => a.to - b.to || a.index - b.index);
+  if (sorted.some((entry, i) => i > 0 && entry.to === sorted[i - 1]?.to))
+    devWarn('RadialGauge bands overlap: two bands end at the same point, so one draws nothing.');
+  else if (sorted.some((entry, i) => entry.index !== i))
+    devWarn('RadialGauge bands are not in order of `to`; they are sorted before drawing.');
+  const colors = bandColors(sorted.length, better);
+  let from = min;
+  return sorted.map(({ band, to }, index) => {
+    const end = index === sorted.length - 1 ? max : Math.min(max, Math.max(from, to));
+    const placed = { ...band, from, to: end, tone: band.color ?? colors[index] ?? 'reference' };
+    from = end;
+    return placed;
+  });
+}
+
 function bandColors(count: number, better: 'higher' | 'lower'): ChartColor[] {
   const ladder: ChartColor[] =
     count <= 2
@@ -143,8 +173,8 @@ function bandColors(count: number, better: 'higher' | 'lower'): ChartColor[] {
  */
 export function RadialGauge({
   value,
-  min = 0,
-  max,
+  min: requestedMin = 0,
+  max: requestedMax,
   target,
   marker,
   bands,
@@ -164,19 +194,19 @@ export function RadialGauge({
 }: RadialGaugeProps) {
   const m = mergeMessages(RADIAL_GAUGE_MESSAGES, messages);
   const glide = useMarkGlide();
-  const span = max - min || 1;
+  // A missing or reversed scale falls back to 0 to 1 past the minimum, so nothing draws as NaN.
+  const min = Number.isFinite(requestedMin) ? requestedMin : 0;
+  const max = Number.isFinite(requestedMax) && requestedMax > min ? requestedMax : min + 1;
+  const span = max - min;
   const share = (figure: number) => clamp((figure - min) / span);
   const write = (figure: number) => formatValue(figure, format, { locale, currency });
   const percent = (fraction: number) => formatValue(fraction, 'percent', { locale });
   const safe = Number.isFinite(value) ? value : min;
-  const colors = bandColors(bands?.length ?? 0, better);
-  const placed = (bands ?? []).map((band, index, all) => ({
-    ...band,
-    from: index === 0 ? min : (all[index - 1]?.to ?? min),
-    to: index === all.length - 1 ? max : band.to,
-    tone: band.color ?? colors[index] ?? 'reference',
-  }));
-  const current = placed.find((band) => safe <= band.to) ?? placed.at(-1);
+  const placed = placeBands(bands ?? [], min, max, better);
+  // The band the value falls in: below the scale is the first, past it the last.
+  // An empty band (one that overlaps the band before) is neither drawn nor listed.
+  const drawn = placed.filter((band) => band.to > band.from);
+  const current = drawn.find((band) => safe <= band.to) ?? drawn.at(-1);
   const valueText =
     summary ??
     m.summary({
@@ -215,14 +245,15 @@ export function RadialGauge({
           aria-label={label}
           aria-valuemin={min}
           aria-valuemax={max}
-          aria-valuenow={safe}
+          // The meter's value stays on its scale; the value text carries the real figure.
+          aria-valuenow={Math.min(max, Math.max(min, safe))}
           aria-valuetext={valueText}
           className={cn('relative aspect-square max-w-full', sizeClassName)}
         >
           <svg aria-hidden viewBox="0 0 100 100" fill="none" className="size-full overflow-visible">
-            {placed.map((band) => (
+            {drawn.map((band) => (
               <path
-                key={`${band.label}-${String(band.to)}`}
+                key={`${band.label}-${String(band.from)}`}
                 d={arc(share(band.from), share(band.to), BAND_R)}
                 strokeWidth={2}
                 className={cn('rx-mark', STROKE[band.tone])}
@@ -296,15 +327,15 @@ export function RadialGauge({
             )}
           </div>
         </div>
-        {(placed.length > 0 || target !== undefined || marker !== undefined) && (
+        {(drawn.length > 0 || target !== undefined || marker !== undefined) && (
           <ul
             aria-hidden
             data-slot="gauge-legend"
             className="m-0 flex list-none flex-wrap justify-center gap-x-4 gap-y-1 p-0 text-xs text-fg-muted"
           >
-            {placed.map((band) => (
+            {drawn.map((band) => (
               <li
-                key={`${band.label}-${String(band.to)}`}
+                key={`${band.label}-${String(band.from)}`}
                 className={cn(
                   'inline-flex items-center gap-1.5 numeric',
                   band === current && 'font-medium text-fg',
