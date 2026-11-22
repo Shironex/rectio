@@ -161,6 +161,11 @@
       "$type": "other",
       "$value": "none",
       "$description": "Backdrop filter behind a surface that floats over content. none in a theme, so no surface blurs or starts a stacking context."
+    },
+    "wash": {
+      "$type": "number",
+      "$value": 0,
+      "$description": "Strength of the colour wash a page canvas carries in its top corners (canvas-wash), from 0 to 1: a glow of the accent and info hues for translucent surfaces to pick up. 0 in a theme: the canvas is flat."
     }
   },
   "shadow": {

@@ -53,6 +53,9 @@ describe('token contract', () => {
     for (const name of colors) {
       const value = tokens[name] ?? '';
       if (value.startsWith('var(')) continue;
+      // A component colour mixed from theme tokens by a skin switch (the field edge leaning to
+      // ink): no literal colour of its own, only tokens.
+      if (value.startsWith('color-mix(') && !/oklch\(|#|rgb/.test(value)) continue;
       expect(() => parse(value), name).not.toThrow();
     }
   });

@@ -17,6 +17,14 @@ export const SKINS: readonly string[] = ['dense', 'editorial', 'glass', 'brutali
 /** `data-skin="none"` turns an outer skin off for a subtree, so no skin may take the id. */
 export const NO_SKIN = 'none';
 
+/**
+ * The canvas wash at full strength (`--rx-surface-wash: 1`): which tint each top corner glows with
+ * and how much of it the canvas takes there, in percent. The tints are the theme's own subtle fills,
+ * close to the canvas in lightness, so whatever sits on the canvas keeps its contrast; the
+ * `canvas-wash` utility fades them to nothing across the page.
+ */
+export const WASH = { 'accent-subtle': 100, 'info-subtle': 90 } as const;
+
 /** The suffix of a skin's translucent layer: `glass.translucent.json`. */
 export const TRANSLUCENT = 'translucent';
 
@@ -43,6 +51,7 @@ export const SKIN_GROUPS: readonly (readonly string[])[] = [
   ['space'],
   ['control'],
   ['surface', 'blur'],
+  ['surface', 'wash'],
   ['shadow', 'highlight'],
   ['shadow', 'offset', 'raised'],
   ['shadow', 'offset', 'overlay'],

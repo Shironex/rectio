@@ -4,7 +4,14 @@ import { describe, expect, it } from 'vitest';
 
 import { contrast } from '../scripts/color.ts';
 import { derivePairs, parseOklch, toSrgb } from '../scripts/contrast.ts';
-import { NO_SKIN, SKINS, TRANSLUCENT, isClearShadow, skinViolation } from '../scripts/naming.ts';
+import {
+  NO_SKIN,
+  SKINS,
+  TRANSLUCENT,
+  WASH,
+  isClearShadow,
+  skinViolation,
+} from '../scripts/naming.ts';
 
 interface Built {
   contract: { name: string; type: string }[];
@@ -271,6 +278,16 @@ describe('glass', () => {
   const modes = Object.entries(built.themes).flatMap(([theme, byMode]) =>
     Object.entries(byMode).map(([mode, tokens]) => ({ key: `${theme}/${mode}`, tokens })),
   );
+  const wash = Number(glass['--rx-surface-wash']);
+  /** The canvas where the wash is strongest: its corner, each hue at its full share. */
+  const washed = (tokens: Record<string, string>) =>
+    (['accent-subtle', 'info-subtle'] as const).map((hue) =>
+      over(rgb(tokens, hue), (wash * WASH[hue]) / 100, rgb(tokens, 'surface-canvas')),
+    );
+  const backdrops = (tokens: Record<string, string>) => [
+    ...PAGE.map((name) => ({ name, rgb: rgb(tokens, name) })),
+    ...washed(tokens).map((c, i) => ({ name: `washed canvas ${String(i)}`, rgb: c })),
+  ];
 
   it('is solid with rounder corners and an edge highlight, translucent only in its layer', () => {
     expect(px(glass['--rx-radius-panel'])).toBeGreaterThan(px(base['--rx-radius-panel']));
@@ -284,18 +301,41 @@ describe('glass', () => {
   // pair. On top of that, the translucent layer over its assumed backdrop:
   it.each(modes)('$key holds every pair on glass over each page surface', ({ tokens }) => {
     const failures = pairs.flatMap((p) =>
-      PAGE.flatMap((backdrop) => {
-        const bg = over(rgb(tokens, p.bg), opacity, rgb(tokens, backdrop));
+      backdrops(tokens).map(({ name: backdrop, rgb: under }) => {
+        const bg = over(rgb(tokens, p.bg), opacity, under);
         const fgColor = parseOklch(tokens[`--rx-${p.fg}`]);
-        if (fgColor === undefined) return [];
+        if (fgColor === undefined) return '';
         const a = p.fgAlpha * (fgColor.alpha ?? 1);
         const fg = a < 1 ? over(toSrgb(fgColor), a, bg) : toSrgb(fgColor);
         const r = ratio(fg, bg);
-        return r >= p.min ? [] : [`${p.fg} on ${p.bg} over ${backdrop}: ${r.toFixed(2)}`];
+        return r >= p.min ? '' : `${p.fg} on ${p.bg} over ${backdrop}: ${r.toFixed(2)}`;
       }),
     );
-    expect([...new Set(failures)]).toEqual([]);
+    expect([...new Set(failures)].filter(Boolean)).toEqual([]);
   });
+
+  // The wash tints the canvas itself, so whatever the kit draws straight on the canvas must hold
+  // there too, at the corner where the tint is strongest.
+  it.each(modes)(
+    '$key holds every pair drawn on the canvas where the wash is strongest',
+    ({ tokens }) => {
+      const onCanvas = derivePairs().filter(
+        (p) => p.gate !== 'info' && p.bgAlpha === 1 && p.bg === 'surface-canvas',
+      );
+      expect(wash).toBeGreaterThan(0);
+      const failures = onCanvas.flatMap((p) =>
+        washed(tokens).map((bg) => {
+          const fgColor = parseOklch(tokens[`--rx-${p.fg}`]);
+          if (fgColor === undefined) return '';
+          const a = p.fgAlpha * (fgColor.alpha ?? 1);
+          const fg = a < 1 ? over(toSrgb(fgColor), a, bg) : toSrgb(fgColor);
+          const r = ratio(fg, bg);
+          return r >= p.min ? '' : `${p.fg} on the washed canvas: ${r.toFixed(2)}`;
+        }),
+      );
+      expect([...new Set(failures)].filter(Boolean)).toEqual([]);
+    },
+  );
 
   // And over the worst backdrop there is, for the text people read.
   it.each(modes)('$key keeps body and muted text at 4.5:1 over black and white', ({ tokens }) => {

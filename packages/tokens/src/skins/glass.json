@@ -19,5 +19,12 @@
       "$value": "{size.1}",
       "$description": "A one pixel rim of light along the top edge, where light catches the pane."
     }
+  },
+  "surface": {
+    "wash": {
+      "$type": "number",
+      "$value": 1,
+      "$description": "A full wash of the accent and info hues in the canvas corners: the colour the panes pick up and blur."
+    }
   }
 }

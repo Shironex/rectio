@@ -68,7 +68,8 @@
       },
       "border": {
         "$type": "color",
-        "$value": "{border.strong}"
+        "$value": "color-mix(in oklab, var(--rx-text) calc(var(--rx-border-ink, 0) * 100%), var(--rx-border-strong))",
+        "$description": "A field's edge: the strong border, leaning toward the text colour as far as border.ink says (all the way under the brutalist skin)."
       }
     },
     "popover": {

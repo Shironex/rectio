@@ -20,6 +20,7 @@ import {
   SKINS,
   THEMES,
   TRANSLUCENT,
+  WASH,
   cssVarName,
   skinViolation,
   tailwindColorName,
@@ -441,6 +442,14 @@ function tailwindCss(contract: string[], types: TokenMap): string {
 
 /* A surface that floats over content (a card, a popup, a sticky header): it takes the skin's
    translucency and blurs what is behind it. Solid and unfiltered in a theme. */
+/* A page canvas (a theme scope, an app shell): a wash of the accent and info tints in its top
+   corners, as strong as the skin's surface wash says. Transparent in a theme. */
+@utility canvas-wash {
+  background-image:
+    radial-gradient(56rem 36rem at 0% 0%, color-mix(in oklab, var(--rx-accent-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['accent-subtle'])}%), transparent), transparent),
+    radial-gradient(48rem 32rem at 100% 0%, color-mix(in oklab, var(--rx-info-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['info-subtle'])}%), transparent), transparent);
+}
+
 @utility backdrop-surface {
   --rx-surface-alpha: var(--rx-surface-opacity, 1);
   -webkit-backdrop-filter: var(--rx-surface-backdrop, none);
