@@ -135,6 +135,7 @@ describe('WeekAgenda', () => {
       screen.getByRole('heading', { level: 2, name: '23 to 29 March 2026' }),
     ).toBeInTheDocument();
     expect(screen.getByText('1 event this week')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('23 to 29 March 2026, 1 event this week');
     await user.click(screen.getByRole('button', { name: 'Today' }));
     expect(
       screen.getByRole('heading', { level: 2, name: '16 to 22 March 2026' }),
@@ -160,8 +161,10 @@ describe('WeekAgenda', () => {
   it('says so when the week is empty', () => {
     render(<WeekAgenda events={[]} date={at(18, 12)} now={NOW} locale="en-GB" />);
     expect(screen.getAllByText('Nothing scheduled this week')).toHaveLength(2);
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'Events you add for these days show up here.',
+    const notes = screen.getAllByRole('status').map((note) => note.textContent);
+    expect(notes).toContain('16 to 22 March 2026, Nothing scheduled this week');
+    expect(notes.some((note) => note.includes('Events you add for these days show up here.'))).toBe(
+      true,
     );
   });
 

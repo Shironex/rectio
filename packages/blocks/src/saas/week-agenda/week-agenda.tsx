@@ -292,19 +292,25 @@ export function WeekAgenda({
     variant,
   };
 
+  const heading = title ?? formatAgendaRange(days, locale);
+  const summary =
+    description ??
+    (inRange === 0
+      ? `Nothing scheduled this ${unit}`
+      : `${countLabel(inRange, 'event')} this ${unit}`);
+
   return (
     <BlockPanel
-      title={title ?? formatAgendaRange(days, locale)}
-      description={
-        description ??
-        (inRange === 0
-          ? `Nothing scheduled this ${unit}`
-          : `${countLabel(inRange, 'event')} this ${unit}`)
-      }
+      title={heading}
+      description={summary}
       actions={actions}
       className={className}
       bodyClassName="gap-3"
     >
+      {/* Moving to another week or day swaps the title quietly; this says where you landed. */}
+      <p role="status" className="sr-only">
+        {`${heading}, ${summary}`}
+      </p>
       <div ref={frame} className="min-w-0 overflow-x-clip">
         <Stage rangeKey={rangeKey} direction={direction}>
           <div className={BREAK[variant].grid}>
@@ -620,7 +626,7 @@ function AgendaGrid({
               key={day.getTime()}
               className={cn(
                 'relative min-w-0 border-s border-line',
-                weekend && variant === 'week' && 'bg-surface-sunken/30',
+                weekend && variant === 'week' && 'bg-surface-sunken/60',
                 today && variant === 'week' && 'bg-accent-subtle/40',
               )}
             >
