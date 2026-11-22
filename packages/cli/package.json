@@ -1,6 +1,6 @@
 {
   "name": "@rectio/cli",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "The rectio CLI: set up a React project, add components, blocks and themes from the rectio registry, and diff them against upstream. Includes a read-only MCP server.",
   "keywords": [
     "rectio",
