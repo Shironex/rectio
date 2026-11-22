@@ -326,7 +326,8 @@ describe('parseMarkdown against hostile input', () => {
     const small = Math.min(run(0.25), run(0.25));
     const full = Math.min(run(1), run(1));
     expect(full / small).toBeLessThan(8);
-  });
+    // The ratio is the bound; the clock is not. A loaded gate runs this several times slower.
+  }, 60_000);
 });
 
 describe('stableBoundary', () => {
