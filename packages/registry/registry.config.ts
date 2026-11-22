@@ -87,6 +87,34 @@ const saasItems = (
   },
 ];
 
+/** An analytics block, installed under `@blocks/analytics/`, with its motioned twin beside it. */
+const analyticsItems = (
+  name: string,
+  title: string,
+  description: string,
+  motion: string,
+  { version = '0.1.0', motionVersion = '0.1.0' }: { version?: string; motionVersion?: string } = {},
+) => [
+  {
+    name,
+    type: 'block' as const,
+    version,
+    title,
+    description,
+    categories: ['analytics', 'blocks'],
+    files: [`${name}/${name}.tsx`, `${name}/${name}.logic.ts`],
+  },
+  {
+    name: `motion-${name}`,
+    type: 'block' as const,
+    version: motionVersion,
+    title: `Motion ${title}`,
+    description: `${title} where ${motion}.`,
+    categories: ['analytics', 'blocks', 'motion'],
+    files: [`${name}/${name}.motion.tsx`],
+  },
+];
+
 /**
  * A marketing block, installed under `@blocks/marketing/`. `logic` adds its logic file; `motion`
  * adds a `motion-<name>` twin for blocks with something to animate.
@@ -200,7 +228,7 @@ export default defineRegistry({
   tokens: {
     dir: tokens,
     item: {
-      version: '0.7.0',
+      version: '0.7.1',
       title: 'Tokens',
       description:
         'The Tailwind v4 theme mapped to rectio tokens, density and reduced motion. Installed by init.',
@@ -208,7 +236,7 @@ export default defineRegistry({
     themes: [
       {
         id: 'default',
-        version: '0.5.0',
+        version: '0.5.1',
         title: 'Default theme',
         description: 'Warm stone neutrals, cobalt accent, 4px controls, IBM Plex. Light and dark.',
       },
@@ -931,7 +959,7 @@ export default defineRegistry({
     {
       name: 'chart',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Chart core',
       description:
         'What every chart shares: the CVD-tested palette, legend, tooltip, table twin, loading and empty states, formatters and the time axis.',
@@ -981,6 +1009,46 @@ export default defineRegistry({
         'Parts of a whole as a ring with the total in the middle and every part listed by figure and share.',
       categories: ['charts'],
       files: ['donut-chart/donut-chart.tsx'],
+    },
+    {
+      name: 'funnel-chart',
+      type: 'component',
+      version: '0.1.0',
+      title: 'FunnelChart',
+      description:
+        'Stages of a journey as bars or columns, with what carried on and what dropped off between each, the biggest drop named and a table twin.',
+      categories: ['charts'],
+      files: ['funnel-chart/funnel-chart.tsx'],
+    },
+    {
+      name: 'heatmap',
+      type: 'component',
+      version: '0.1.0',
+      title: 'Heatmap',
+      description:
+        'A calendar of days or a matrix of two categories on a sequential scale, with a legend, missing cells drawn apart from zero, keyboard reading and a table twin.',
+      categories: ['charts'],
+      files: ['heatmap/heatmap.tsx'],
+    },
+    {
+      name: 'waterfall-chart',
+      type: 'component',
+      version: '0.1.0',
+      title: 'WaterfallChart',
+      description:
+        'A start, the changes that move it and the totals between, with decreases hatched, signed labels and rules carrying the running total.',
+      categories: ['charts'],
+      files: ['waterfall-chart/waterfall-chart.tsx'],
+    },
+    {
+      name: 'radial-gauge',
+      type: 'component',
+      version: '0.1.0',
+      title: 'RadialGauge',
+      description:
+        'One figure against its scale, a target, a pace marker and named bands, read as a meter with its band in words.',
+      categories: ['charts'],
+      files: ['radial-gauge/radial-gauge.tsx'],
     },
     {
       name: 'sparkline',
@@ -1124,6 +1192,8 @@ export default defineRegistry({
     '@rectio/blocks/docs/motion': join(blocks, 'src', 'docs', 'motion.ts'),
     '@rectio/blocks/ai': join(blocks, 'src', 'ai', 'index.ts'),
     '@rectio/blocks/ai/motion': join(blocks, 'src', 'ai', 'motion.ts'),
+    '@rectio/blocks/analytics': join(blocks, 'src', 'analytics', 'index.ts'),
+    '@rectio/blocks/analytics/motion': join(blocks, 'src', 'analytics', 'motion.ts'),
   },
   templates: { dir: join(packages, '..', 'templates') },
   addons: [
@@ -1306,6 +1376,7 @@ export default defineRegistry({
           "The charts' entrance on first view (lines drawn along time, bars grown from zero, a ring settling in) and token-timed glides between data updates, with no animation library.",
           ['chart/chart.tsx'],
           'lib',
+          '0.1.1',
         ),
         motionItem(
           'line-chart',
@@ -1330,6 +1401,30 @@ export default defineRegistry({
           'Motion DonutChart',
           'DonutChart whose parts settle in around the ring on first view.',
           ['donut-chart/donut-chart.tsx'],
+        ),
+        motionItem(
+          'funnel-chart',
+          'Motion FunnelChart',
+          'FunnelChart whose stages grow from the start edge one after another on first view.',
+          ['funnel-chart/funnel-chart.tsx'],
+        ),
+        motionItem(
+          'heatmap',
+          'Motion Heatmap',
+          'Heatmap whose cells are uncovered along the grid on first view.',
+          ['heatmap/heatmap.tsx'],
+        ),
+        motionItem(
+          'waterfall-chart',
+          'Motion WaterfallChart',
+          'WaterfallChart whose steps grow one after another, decreases from the running total down.',
+          ['waterfall-chart/waterfall-chart.tsx'],
+        ),
+        motionItem(
+          'radial-gauge',
+          'Motion RadialGauge',
+          'RadialGauge whose arc sweeps to its value on first view and glides to new figures.',
+          ['radial-gauge/radial-gauge.tsx'],
         ),
         motionItem(
           'sparkline',
@@ -1957,6 +2052,37 @@ export default defineRegistry({
           categories: ['ai', 'blocks', 'motion'],
           files: ['chat-thread/chat-thread.motion.tsx'],
         },
+      ],
+    },
+    {
+      sourceDir: join(blocks, 'src', 'analytics'),
+      targetFolder: 'analytics',
+      requireEveryFolder: true,
+      items: [
+        ...analyticsItems(
+          'metric-trend',
+          'Metric trend',
+          'One metric with its latest figure, change and the trend behind it, as a compact tile beside a sparkline or a card over a full chart.',
+          'the trend fades up on first view',
+        ),
+        ...analyticsItems(
+          'breakdown-table',
+          'Breakdown table',
+          'A total by its parts: each row with its figure, share, change and a bar, sortable, with the smallest rows gathered into others and a totals row.',
+          'the rows fade up on first view',
+        ),
+        ...analyticsItems(
+          'funnel-card',
+          'Funnel card',
+          'A conversion funnel in a card: the end to end conversion and its change in points, the biggest drop named, and every stage with its drop-off.',
+          'the stages grow one after another on first view',
+        ),
+        ...analyticsItems(
+          'goal-tracker',
+          'Goal tracker',
+          "A goal over a period on a gauge or a bar: the target and today's even pace marked, the state in words, the projection, days left and what each day needs.",
+          'the arc sweeps to its value on first view and glides to new figures',
+        ),
       ],
     },
   ],
