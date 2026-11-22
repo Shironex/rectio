@@ -10,7 +10,7 @@ describe('cn', () => {
     expect(cn('shadow-raised', 'shadow-indicator')).toBe('shadow-indicator');
     expect(cn('shadow-panel', 'shadow-raised')).toBe('shadow-raised');
     // A consumer's background image or backdrop filter replaces the skin hooks.
-    expect(cn('canvas-wash', 'bg-[url(/a.png)]')).toBe('bg-[url(/a.png)]');
+    expect(cn('canvas-wash', 'bg-radial')).toBe('bg-radial');
     expect(cn('canvas-wash', 'bg-linear-to-b')).toBe('bg-linear-to-b');
     expect(cn('canvas-wash', 'bg-none')).toBe('bg-none');
     expect(cn('backdrop-surface', 'backdrop-blur-[8px]')).toBe('backdrop-blur-[8px]');

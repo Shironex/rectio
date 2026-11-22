@@ -105,7 +105,7 @@ summary: Work that is merging into main now and ships with the next release.
   glass translucency through `translucent-surface`, with no backdrop blur; only popups, dialogs,
   sheets, toasts and the sticky app header blur. A surface inside another one stays solid
   (card 0.2.0, blocks-core 0.1.7, pricing-table 0.1.1).
-- `cn` knows the skin hooks: a background image class (`bg-[url()]`, `bg-linear-*`, `bg-none`)
+- `cn` knows the skin hooks: a background image class (an image, `bg-linear-*`, `bg-none`)
   replaces `canvas-wash`, and a backdrop filter class (`backdrop-blur-*`, `backdrop-saturate-*`,
   `backdrop-filter-none`) replaces `backdrop-surface`, so yours wins in any theme (cn 0.3.0).
 - Update order: these components read utilities that tokens 0.7.0 adds (`shadow-panel`,
