@@ -39,7 +39,7 @@ export function ChatSourceChip({
   const m = { ...CHAT_SOURCE_MESSAGES, ...messages };
   const href = source.url === undefined ? null : safeUrl(source.url);
   const classes = cn(
-    'relative ms-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-badge bg-accent-subtle px-1.5 align-baseline pointer-coarse:before:absolute pointer-coarse:before:-inset-2.5',
+    'relative ms-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-badge bg-accent-subtle px-1.5 align-baseline before:absolute before:-inset-1 pointer-coarse:before:-inset-2.5',
     'text-xs font-medium text-accent-strong numeric',
     href !== null && cn('hover:text-fg', linkFocus),
     className,

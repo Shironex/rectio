@@ -7,7 +7,14 @@ import {
   CircleNotchIcon,
   WarningCircleIcon,
 } from '@phosphor-icons/react';
-import { isValidElement, type ComponentProps, type ReactNode } from 'react';
+import {
+  isValidElement,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 
 import { disclosureCaret, disclosurePanelMotion } from '../accordion/accordion';
 import { cn } from '../lib/cn';
@@ -69,6 +76,34 @@ const codeBox = cn(
   'm-0 max-h-72 overflow-auto rounded-control bg-code-background px-3 py-2 font-mono text-sm text-code-foreground',
   'outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-focus',
 );
+
+/** Code in a box that takes a tab stop only when it scrolls, so a short value adds no stop. */
+function ScrollingPre({ label, children }: { label: string; children: string }) {
+  const box = useRef<HTMLPreElement>(null);
+  const [scrolls, setScrolls] = useState(false);
+  useLayoutEffect(() => {
+    const element = box.current;
+    if (element === null) return;
+    const check = () => {
+      setScrolls(
+        element.scrollWidth > element.clientWidth + 1 ||
+          element.scrollHeight > element.clientHeight + 1,
+      );
+    };
+    check();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(check);
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+    };
+  }, [children]);
+  return (
+    <pre ref={box} tabIndex={scrolls ? 0 : undefined} aria-label={label} className={codeBox}>
+      <code>{children}</code>
+    </pre>
+  );
+}
 
 /**
  * One call the assistant made to a tool, folded into a row: an icon and a word for its status
@@ -142,9 +177,7 @@ export function ToolCall({
           {title !== undefined && <p className="font-mono text-xs text-fg-subtle">{name}</p>}
           {hasArgs && (
             <DisclosureData label={m.input}>
-              <pre tabIndex={0} aria-label={`${m.input}: ${name}`} className={codeBox}>
-                <code>{formatToolValue(args)}</code>
-              </pre>
+              <ScrollingPre label={`${m.input}: ${name}`}>{formatToolValue(args)}</ScrollingPre>
             </DisclosureData>
           )}
           {status === 'failed' && error !== undefined && (
@@ -157,9 +190,9 @@ export function ToolCall({
               {isValidElement(result) ? (
                 <div className="min-w-0">{result}</div>
               ) : (
-                <pre tabIndex={0} aria-label={`${m.output}: ${name}`} className={codeBox}>
-                  <code>{formatToolValue(result)}</code>
-                </pre>
+                <ScrollingPre label={`${m.output}: ${name}`}>
+                  {formatToolValue(result)}
+                </ScrollingPre>
               )}
             </DisclosureData>
           )}

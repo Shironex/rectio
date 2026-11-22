@@ -454,19 +454,20 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
                   className="flex flex-col gap-1.5 px-3 py-2.5"
                 >
                   <span className="font-medium text-fg">{renderInline(row[0] ?? [], context)}</span>
-                  <dl className="grid grid-cols-2 gap-x-3 gap-y-1">
+                  <dl className="flex flex-col gap-1">
                     {block.head.slice(1).map((head, headIndex) => {
                       const align = block.align[headIndex + 1] ?? null;
                       return (
-                        <Fragment
+                        <div
                           // Columns are positional.
                           key={headIndex}
+                          className="flex items-baseline justify-between gap-3"
                         >
                           <dt className="text-fg-muted">{renderInline(head, context)}</dt>
-                          <dd className={cn('text-fg', align === 'right' && 'text-end numeric')}>
+                          <dd className={cn('text-end text-fg', align === 'right' && 'numeric')}>
                             {renderInline(row[headIndex + 1] ?? [], context)}
                           </dd>
-                        </Fragment>
+                        </div>
                       );
                     })}
                   </dl>

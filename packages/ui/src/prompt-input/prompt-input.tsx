@@ -3,6 +3,7 @@
 import { ArrowUpIcon, PaperclipIcon, StopIcon } from '@phosphor-icons/react';
 import {
   useEffect,
+  useId,
   useRef,
   useState,
   type ComponentProps,
@@ -143,6 +144,8 @@ export function PromptInput({
   const [draft, setDraft] = useState(defaultValue);
   const text = controlled ? value : draft;
   const field = useRef<HTMLTextAreaElement | null>(null);
+  const hintId = useId();
+  const hasHint = hint !== undefined && hint !== null;
 
   const busy = status !== 'idle';
   const files = attachments ?? [];
@@ -217,6 +220,8 @@ export function PromptInput({
           assignRef(textareaRef, node);
         }}
         aria-label={m.label}
+        // The note under the field is its description, so a reason such as being offline is read.
+        aria-describedby={hasHint ? hintId : undefined}
         placeholder={placeholder ?? m.placeholder}
         value={text}
         onValueChange={setText}
@@ -320,8 +325,10 @@ export function PromptInput({
   return (
     <div data-slot="prompt-input-root" className="flex w-full min-w-0 flex-col gap-1.5">
       {body}
-      {hint !== undefined && hint !== null && (
-        <p className="px-1 text-center text-xs text-fg-subtle text-pretty">{hint}</p>
+      {hasHint && (
+        <p id={hintId} className="px-1 text-center text-xs text-fg-subtle text-pretty">
+          {hint}
+        </p>
       )}
     </div>
   );

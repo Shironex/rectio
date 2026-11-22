@@ -75,7 +75,7 @@ export function ChatLoader({
       data-slot="chat-loader"
       data-variant="typing"
       className={cn(
-        'inline-flex h-8 w-fit items-center gap-1 rounded-panel bg-surface-sunken px-3 text-fg-subtle',
+        'inline-flex h-8 w-fit items-center gap-1 rounded-panel bg-surface-sunken px-3 text-fg-muted',
         className,
       )}
       {...props}

@@ -107,4 +107,9 @@ describe('PromptInput', () => {
     await userEvent.type(screen.getByRole('textbox'), 'x'.repeat(95));
     expect(screen.getByText('5 characters left')).toBeInTheDocument();
   });
+
+  it('describes the field with its hint', () => {
+    render(<PromptInput onSubmit={() => undefined} hint="You are offline." disabled />);
+    expect(screen.getByRole('textbox')).toHaveAccessibleDescription('You are offline.');
+  });
 });
