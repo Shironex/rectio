@@ -170,6 +170,8 @@ export function PromptInput({
   const busy = status !== 'idle';
   const files = attachments ?? [];
   const uploading = files.some((file) => file.status === 'queued' || file.status === 'uploading');
+  /** Send waits for the files: the toolbar says so. */
+  const waiting = uploading && !busy;
   const empty = text.trim() === '' && files.length === 0;
   const canSend = !disabled && !busy && !empty && !uploading && !submitDisabled;
   const canStop = busy && onStop !== undefined;
@@ -244,7 +246,11 @@ export function PromptInput({
         }}
         aria-label={m.label}
         // The note under the field is its description, so a reason such as being offline is read.
-        aria-describedby={hasHint ? hintId : undefined}
+        aria-describedby={
+          [hasHint ? hintId : undefined, textareaProps?.['aria-describedby']]
+            .filter(Boolean)
+            .join(' ') || undefined
+        }
         placeholder={placeholder ?? m.placeholder}
         value={text}
         onValueChange={setText}
@@ -260,7 +266,7 @@ export function PromptInput({
           textareaClassName,
         )}
       />
-      <div className="flex items-center gap-2 px-2 pb-2">
+      <div className="flex flex-wrap items-center gap-2 px-2 pb-2">
         {attaching && (
           <FileUploadTrigger
             variant="ghost"
@@ -274,10 +280,16 @@ export function PromptInput({
           </FileUploadTrigger>
         )}
         {tools}
-        <div className="ms-auto flex min-w-0 items-center gap-3">
-          {uploading && !busy && (
-            <span className="truncate text-sm text-fg-subtle">{m.waitingForUploads}</span>
-          )}
+        {waiting && (
+          // Beside Send on a wide screen; on a phone the toolbar has no room, so it takes its own
+          // line under it.
+          <span className="truncate text-sm text-fg-subtle max-sm:order-last max-sm:basis-full max-sm:px-1.5 sm:ms-auto">
+            {m.waitingForUploads}
+          </span>
+        )}
+        <div
+          className={cn('flex min-w-0 items-center gap-3', waiting ? 'max-sm:ms-auto' : 'ms-auto')}
+        >
           {meta}
           {near && (
             <span
@@ -291,8 +303,9 @@ export function PromptInput({
           )}
           {canStop ? (
             <Button
-              // The same footprint as Send, so the button under the thumb never jumps.
-              variant="ghost"
+              // The same footprint as Send, so the button under the thumb never jumps; outlined so
+              // it reads as a button while the reply arrives.
+              variant="secondary"
               iconOnly
               aria-label={m.stop}
               data-part="stop"

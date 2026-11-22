@@ -148,4 +148,20 @@ describe('PromptInput', () => {
     expect(onSubmit).not.toHaveBeenCalled();
     expect(screen.getByText('9 tokens over')).toBeInTheDocument();
   });
+
+  it('keeps its hint in the description beside one passed in textareaProps', () => {
+    render(
+      <>
+        <PromptInput
+          onSubmit={() => undefined}
+          hint="Replies can be wrong."
+          textareaProps={{ 'aria-describedby': 'extra' }}
+        />
+        <span id="extra">12 tokens</span>
+      </>,
+    );
+    expect(screen.getByRole('textbox')).toHaveAccessibleDescription(
+      'Replies can be wrong. 12 tokens',
+    );
+  });
 });
