@@ -217,8 +217,6 @@ export function MultiSelectInput({
       className={cn(
         comboboxSurface,
         'flex h-auto min-h-(--rx-field-height) cursor-text items-center gap-1 py-0.5 ps-1 pe-0.5',
-        // Room between the last chip and the end buttons, for the chip's remove hit area.
-        'pointer-coarse:gap-touch-gap',
         'pointer-coarse:h-auto pointer-coarse:min-h-(--rx-field-height-touch)',
         className,
       )}
@@ -237,7 +235,9 @@ export function MultiSelectInput({
           return (
             <BaseCombobox.Chips
               data-slot="multi-select-chips"
-              className="flex min-w-0 flex-1 flex-wrap items-center gap-1 pointer-coarse:gap-touch-gap"
+              // Rows of chips sit a touch gap apart; the end padding keeps the last remove button's hit area
+              // clear of the end buttons.
+              className="flex min-w-0 flex-1 flex-wrap items-center gap-1 pointer-coarse:gap-y-touch-gap pointer-coarse:pe-2"
             >
               {visible.map((item) => {
                 const label = labelOf(item);
@@ -276,6 +276,9 @@ export function MultiSelectInput({
                     // Level with the chips on touch screens, and as wide as its hit area, so the
                     // remove button of the chip before it keeps its whole area too.
                     'pointer-coarse:h-(--rx-control-height-sm) pointer-coarse:min-w-(--rx-control-height-touch) pointer-coarse:justify-center',
+                    // Chips sit close; the count is a target too, so it keeps a touch gap from
+                    // the remove button before it.
+                    'pointer-coarse:ms-touch-gap',
                     touchHitArea,
                   )}
                   // Keep focus off the chip itself: it disappears as the field takes focus.
@@ -315,9 +318,14 @@ export function MultiSelectInput({
 
 /**
  * The field grows with its chips, so `h-full` has no height to fill: the end buttons stretch to the
- * field's height instead, and the hit area reaches past the field's padding to its edge.
+ * field's first line instead, at the top as rows of chips are added, and the hit area reaches past
+ * the field's padding to its edge.
  */
-const iconSpan = cn('relative h-auto self-stretch', touchHitArea);
+const iconSpan = cn(
+  'relative h-auto max-h-(--rx-field-height) self-stretch',
+  'pointer-coarse:max-h-(--rx-field-height-touch)',
+  touchHitArea,
+);
 
 type ListChildren = ReactNode | ((item: never, index: number) => ReactNode);
 

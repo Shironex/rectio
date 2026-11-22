@@ -15,5 +15,6 @@ export const tagRemoveButton = cn(
   'focus-visible:outline-2 focus-visible:outline-focus',
   'in-data-disabled:hidden',
   // A 44px target on touch screens; tag rows are spaced so neighbours never share one.
+  'pointer-coarse:pointer-events-auto',
   touchHitArea,
 );

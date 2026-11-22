@@ -87,8 +87,15 @@ describe('touch targets', () => {
       expect(button).toHaveClass('self-stretch');
       expectHitArea(button);
     }
+    // Rows of chips sit a touch gap apart; beside each other a chip's body lets touches through.
     expect(document.querySelector('[data-slot="multi-select-chips"]')).toHaveClass(
-      'pointer-coarse:gap-touch-gap',
+      'pointer-coarse:gap-y-touch-gap',
+    );
+    expect(document.querySelector('[data-slot="multi-select-chip"]')).toHaveClass(
+      'pointer-coarse:pointer-events-none',
+    );
+    expect(screen.getByRole('button', { name: 'Remove Isla' })).toHaveClass(
+      'pointer-coarse:pointer-events-auto',
     );
   });
 
