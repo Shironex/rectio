@@ -3,9 +3,11 @@
  * `pnpm shoot:skins <round> [filter]`. Writes to .rounds/round-<n>/skins/ at the repo root
  * (gitignored). Starts its own Vite server and never touches the screen.
  *
- * Screens: the block dashboard, the settings form and the expense table, each with no skin and
- * with every shipped skin, in light and dark, at desktop (1440) and phone (390) width. The first
- * screen of each, plus browser checks per skin on the phone (horizontal overflow, touch targets).
+ * Screens: the block dashboard, the settings form, the expense table, the component gallery (the
+ * top of each mode's panel) and two single blocks (a SaaS pricing table and a finance invoice
+ * list), each with no skin and with every shipped skin, in light and dark, at desktop (1440) and
+ * phone (390) width. The first screen of each, plus browser checks per skin on the phone
+ * (horizontal overflow, touch targets).
  */
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -27,13 +29,25 @@ mkdirSync(out, { recursive: true });
 
 const MODES = ['light', 'dark'] as const;
 const LOOKS = ['default', ...SKINS] as const;
-const SCREENS = [
+interface Screen {
+  id: string;
+  query: string;
+  /** Shoot this element (from its top, at most `height` px) instead of the first screen. */
+  panel?: (mode: string) => string;
+}
+const SCREENS: readonly Screen[] = [
   { id: 'dashboard', query: 'view=blocks' },
   { id: 'form', query: 'view=forms' },
   { id: 'table', query: 'view=app' },
-] as const;
+  // The gallery shows both modes side by side: each shot is one mode's panel.
+  { id: 'gallery', query: 'view=matrix', panel: (mode) => `[data-panel="default-${mode}"]` },
+  { id: 'saas', query: 'view=blocks&block=pricing-table' },
+  { id: 'finance', query: 'view=blocks&block=invoice-list' },
+];
+/** The tallest slice of a gallery panel a shot keeps. */
+const PANEL_HEIGHT = { desktop: 1800, phone: 2400 } as const;
 /** The lane's port range starts here; Vite moves up if it is taken. */
-const PORT = 4380;
+const PORT = 4440;
 
 const wanted = (name: string) => only === undefined || name.includes(only);
 
@@ -87,7 +101,28 @@ try {
               await smallestTouchTarget(page),
             );
           }
-          await page.screenshot({ path: join(out, `${name}.png`) });
+          const panel = screen.panel?.(mode);
+          // The gallery shows a focus ring: the first button in the panel, reached by keyboard so
+          // the browser draws :focus-visible.
+          if (panel !== undefined) {
+            await page.keyboard.press('Tab');
+            await page.locator(`${panel} button`).first().focus();
+          }
+          const box = panel === undefined ? null : await page.locator(panel).boundingBox();
+          await page.screenshot({
+            path: join(out, `${name}.png`),
+            ...(box === null
+              ? {}
+              : {
+                  fullPage: true,
+                  clip: {
+                    x: box.x,
+                    y: box.y,
+                    width: box.width,
+                    height: Math.min(box.height, PANEL_HEIGHT[phone ? 'phone' : 'desktop']),
+                  },
+                }),
+          });
           await page.close();
         }
       }
