@@ -31,6 +31,7 @@ const SchedulingPage = lazy(() =>
   import('./scheduling/scheduling-page').then((m) => ({ default: m.SchedulingPage })),
 );
 const ChatPage = lazy(() => import('./chat/chat-page').then((m) => ({ default: m.ChatPage })));
+const VizPage = lazy(() => import('./viz/viz-page').then((m) => ({ default: m.VizPage })));
 const MotionPage = lazy(() =>
   import('./motion/motion-page').then((m) => ({ default: m.MotionPage })),
 );
@@ -69,6 +70,8 @@ export function App() {
         <SchedulingPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'chat' ? (
         <ChatPage theme={theme} mode={mode} motion={motion} />
+      ) : view === 'viz' ? (
+        <VizPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'motion' ? (
         <MotionPage theme={theme} mode={mode} />
       ) : (

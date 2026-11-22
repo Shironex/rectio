@@ -32,6 +32,7 @@ const VIEWS = [
   'charts',
   'scheduling',
   'chat',
+  'viz',
 ] as const;
 const onlyView = process.argv[2];
 const onlySkin = process.argv[3];

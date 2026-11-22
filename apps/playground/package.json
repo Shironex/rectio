@@ -41,6 +41,7 @@
     "shoot:primitives": "node scripts/shoot-primitives.ts",
     "shoot:skins": "node scripts/shoot-skins.ts",
     "shoot:charts": "node scripts/shoot-charts.ts",
+    "shoot:viz": "node scripts/shoot-viz.ts",
     "shoot:scheduling": "node scripts/shoot-scheduling.ts",
     "shoot:chat": "node scripts/shoot-chat.ts"
   }

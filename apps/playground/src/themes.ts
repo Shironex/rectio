@@ -45,6 +45,7 @@ export function readView(search: string) {
         'charts',
         'scheduling',
         'chat',
+        'viz',
       ] as const
     ).find((v) => v === params.get('view')) ?? 'matrix';
   const motion = params.get('motion') === 'on';
