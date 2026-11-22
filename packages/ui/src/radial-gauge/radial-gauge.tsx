@@ -205,7 +205,7 @@ export function RadialGauge({
       loading={loading}
       summary={valueText}
       tableToggle={false}
-      plotClassName={loading === true ? cn('aspect-square', sizeClassName) : 'h-auto'}
+      plotClassName={loading === true ? cn('mx-auto aspect-square', sizeClassName) : 'h-auto'}
       messages={m}
       className={className}
     >

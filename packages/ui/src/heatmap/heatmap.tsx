@@ -310,10 +310,26 @@ export function Heatmap(props: HeatmapProps) {
   const refs = useRef(new Map<string, HTMLDivElement>());
   const scroller = useRef<HTMLDivElement>(null);
 
+  // Whether more of the grid waits past the end edge, for the fade that says it scrolls.
+  const [more, setMore] = useState(false);
+  const measure = (element: HTMLElement) => {
+    // scrollLeft runs negative in a right-to-left page; either way, the distance left to scroll.
+    setMore(element.scrollWidth - element.clientWidth - Math.abs(element.scrollLeft) > 1);
+  };
+
   // A year of days is wider than a phone: the grid scrolls inside itself and opens on the latest week.
   useLayoutEffect(() => {
     const element = scroller.current;
-    if (element !== null && calendar) element.scrollLeft = element.scrollWidth;
+    if (element === null) return;
+    if (calendar) element.scrollLeft = element.scrollWidth;
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => {
+      measure(element);
+    });
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+    };
   }, [calendar, model.columns.length]);
 
   const columnCount = model.columns.length;
@@ -454,118 +470,134 @@ export function Heatmap(props: HeatmapProps) {
     >
       <div className="flex flex-col gap-3">
         {legend}
-        <div ref={scroller} className="-mx-1 overflow-x-auto px-1 pt-1 pb-2">
+        <div className="relative">
           <div
-            role="grid"
-            aria-readonly
-            aria-label={label ?? m.tableCaption}
-            aria-rowcount={model.rows.length + 1}
-            aria-colcount={columnCount + 1}
-            onKeyDown={onKeyDown}
-            onFocus={() => {
-              setFocused(true);
+            ref={scroller}
+            onScroll={(event) => {
+              measure(event.currentTarget);
             }}
-            onBlur={() => {
-              setFocused(false);
-            }}
-            onPointerLeave={() => {
-              setHover(null);
-            }}
-            data-chart-mark="reveal"
-            className={cn('rx-mark grid w-full', calendar ? 'gap-0.5' : 'gap-1')}
-            style={
-              calendar
-                ? {
-                    gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(0, 1fr))`,
-                    // Cells from 10px to 22px: past the least, the grid scrolls; past the most, it
-                    // stops growing rather than turning a year into a wall of tiles.
-                    minWidth: `calc(var(--spacing) * ${String(columnCount * 3 + 8)})`,
-                    maxWidth: `calc(var(--spacing) * ${String(columnCount * 6 + 10)})`,
-                  }
-                : {
-                    // Wide enough for a figure such as 72.2%; past that the grid scrolls sideways.
-                    gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(calc(var(--spacing) * 12), 1fr))`,
-                  }
-            }
+            className="-mx-1 overflow-x-auto px-1 pt-1 pb-2"
           >
-            <div role="row" className="contents">
-              <div role="columnheader" className="sticky -start-1 z-20 bg-surface" />
-              {model.columns.map((column) => (
-                <div
-                  key={column.id}
-                  role="columnheader"
-                  className={cn(
-                    'min-w-0 text-xs text-fg-muted',
-                    calendar
-                      ? 'overflow-visible pb-1 whitespace-nowrap'
-                      : 'self-end pb-1 text-center leading-tight text-balance',
-                  )}
-                >
-                  <span aria-hidden>{column.short}</span>
-                  <span className="sr-only">{column.label}</span>
+            <div
+              role="grid"
+              aria-readonly
+              aria-label={label ?? m.tableCaption}
+              aria-rowcount={model.rows.length + 1}
+              aria-colcount={columnCount + 1}
+              onKeyDown={onKeyDown}
+              onFocus={() => {
+                setFocused(true);
+              }}
+              onBlur={() => {
+                setFocused(false);
+              }}
+              onPointerLeave={() => {
+                setHover(null);
+              }}
+              data-chart-mark="reveal"
+              className={cn('rx-mark grid w-full', calendar ? 'gap-0.5' : 'gap-1')}
+              style={
+                calendar
+                  ? {
+                      gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(0, 1fr))`,
+                      // Cells from 10px to 22px: past the least, the grid scrolls; past the most, it
+                      // stops growing rather than turning a year into a wall of tiles.
+                      minWidth: `calc(var(--spacing) * ${String(columnCount * 3 + 8)})`,
+                      maxWidth: `calc(var(--spacing) * ${String(columnCount * 6 + 10)})`,
+                    }
+                  : {
+                      // Wide enough for a figure such as 72.2%; past that the grid scrolls sideways.
+                      gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(calc(var(--spacing) * 12), 1fr))`,
+                    }
+              }
+            >
+              <div role="row" className="contents">
+                <div role="columnheader" className="sticky -start-1 z-20 bg-surface" />
+                {model.columns.map((column) => (
+                  <div
+                    key={column.id}
+                    role="columnheader"
+                    className={cn(
+                      'min-w-0 text-xs text-fg-muted',
+                      calendar
+                        ? 'overflow-visible pb-1 whitespace-nowrap'
+                        : 'self-end pb-1 text-center leading-tight text-balance',
+                    )}
+                  >
+                    <span aria-hidden>{column.short}</span>
+                    <span className="sr-only">{column.label}</span>
+                  </div>
+                ))}
+              </div>
+              {model.rows.map((row, r) => (
+                <div key={row.id} role="row" className="contents">
+                  <div
+                    role="rowheader"
+                    className={cn(
+                      // Stays in view while a wide grid scrolls under it, flush with the scroller's edge.
+                      'sticky -start-1 z-20 flex items-center bg-surface pe-2 text-xs whitespace-nowrap text-fg-muted',
+                      calendar && 'leading-none',
+                    )}
+                  >
+                    <span aria-hidden>{row.short}</span>
+                    <span className="sr-only">{row.label}</span>
+                  </div>
+                  {model.columns.map((column, c) => {
+                    const cell = model.cells[r]?.[c];
+                    if (cell === undefined) return <div key={column.id} role="gridcell" />;
+                    const isCurrent = current[0] === r && current[1] === c;
+                    const isRead = read !== null && read[0] === r && read[1] === c;
+                    return (
+                      <div
+                        key={column.id}
+                        role="gridcell"
+                        ref={(element) => {
+                          const key = `${String(r)}-${String(c)}`;
+                          if (element === null) refs.current.delete(key);
+                          else refs.current.set(key, element);
+                        }}
+                        tabIndex={isCurrent ? 0 : -1}
+                        onFocus={() => {
+                          setActive([r, c]);
+                        }}
+                        onPointerEnter={() => {
+                          setHover([r, c]);
+                        }}
+                        className={cn(
+                          'relative flex items-center justify-center rounded-badge text-xs numeric',
+                          calendar ? 'aspect-square' : 'h-8 px-0.5',
+                          // A ring of the surface inside the focus ring keeps it 3:1 on every step.
+                          'outline-offset-2 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-focus focus-visible:ring-2 focus-visible:ring-surface',
+                          isRead &&
+                            'z-10 outline-2 outline-offset-2 outline-fg ring-2 ring-surface',
+                          stepClass(cell.value),
+                          glide,
+                        )}
+                        style={cell.value === null ? { backgroundImage: HATCH } : undefined}
+                      >
+                        <span className="sr-only">
+                          {calendar ? cell.title : `${row.label}, ${column.label}`}:{' '}
+                          {readValue(cell.value)}
+                        </span>
+                        {showValues && cell.value !== null && (
+                          <span aria-hidden className="truncate font-medium">
+                            {shortWrite(cell.value)}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ))}
             </div>
-            {model.rows.map((row, r) => (
-              <div key={row.id} role="row" className="contents">
-                <div
-                  role="rowheader"
-                  className={cn(
-                    // Stays in view while a wide grid scrolls under it, flush with the scroller's edge.
-                    'sticky -start-1 z-20 flex items-center bg-surface pe-2 text-xs whitespace-nowrap text-fg-muted',
-                    calendar && 'leading-none',
-                  )}
-                >
-                  <span aria-hidden>{row.short}</span>
-                  <span className="sr-only">{row.label}</span>
-                </div>
-                {model.columns.map((column, c) => {
-                  const cell = model.cells[r]?.[c];
-                  if (cell === undefined) return <div key={column.id} role="gridcell" />;
-                  const isCurrent = current[0] === r && current[1] === c;
-                  const isRead = read !== null && read[0] === r && read[1] === c;
-                  return (
-                    <div
-                      key={column.id}
-                      role="gridcell"
-                      ref={(element) => {
-                        const key = `${String(r)}-${String(c)}`;
-                        if (element === null) refs.current.delete(key);
-                        else refs.current.set(key, element);
-                      }}
-                      tabIndex={isCurrent ? 0 : -1}
-                      onFocus={() => {
-                        setActive([r, c]);
-                      }}
-                      onPointerEnter={() => {
-                        setHover([r, c]);
-                      }}
-                      className={cn(
-                        'relative flex items-center justify-center rounded-badge text-xs numeric',
-                        calendar ? 'aspect-square' : 'h-8 px-0.5',
-                        // A ring of the surface inside the focus ring keeps it 3:1 on every step.
-                        'outline-offset-2 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-focus focus-visible:ring-2 focus-visible:ring-surface',
-                        isRead && 'z-10 outline-2 outline-offset-2 outline-fg ring-2 ring-surface',
-                        stepClass(cell.value),
-                        glide,
-                      )}
-                      style={cell.value === null ? { backgroundImage: HATCH } : undefined}
-                    >
-                      <span className="sr-only">
-                        {calendar ? cell.title : `${row.label}, ${column.label}`}:{' '}
-                        {readValue(cell.value)}
-                      </span>
-                      {showValues && cell.value !== null && (
-                        <span aria-hidden className="truncate font-medium">
-                          {shortWrite(cell.value)}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
           </div>
+          {more && (
+            // More columns past the edge: a fade over the last one, so a sliced column reads as more.
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 -end-1 w-10 bg-linear-to-l from-surface to-transparent rtl:bg-linear-to-r"
+            />
+          )}
         </div>
         {/* The cell under the pointer or the keyboard, for sighted readers; a cell reads itself out. */}
         <p aria-hidden className="m-0 min-h-5 text-sm text-fg-muted numeric">
