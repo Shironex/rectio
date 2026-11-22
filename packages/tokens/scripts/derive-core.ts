@@ -262,7 +262,7 @@ export function derive(p: Preset, mode: Mode): TokenSet {
   set('scrim', o(0.08, 0.005, nh, 0.64));
   // A faint rim of light on dark glass; the offset shadow sits between the canvas and a focus ring
   // in lightness, so both the shadow and the ring read.
-  set('border-highlight', o(0.985, 0.006, nh, 0.14));
+  set('border-highlight', o(0.985, 0.006, nh, 0.22));
   set('shadow-offset-color', ink(0.45));
   // Series hold at least 0.1 of lightness apart, so they separate in greyscale and for every
   // colour vision type, not by hue alone.

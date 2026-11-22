@@ -23,7 +23,7 @@ export const NO_SKIN = 'none';
  * close to the canvas in lightness, so whatever sits on the canvas keeps its contrast; the
  * `canvas-wash` utility fades them to nothing across the page.
  */
-export const WASH = { 'accent-subtle': 100, 'info-subtle': 90 } as const;
+export const WASH = { 'surface-selected': 70, 'identity-4-subtle': 70 } as const;
 
 /** The suffix of a skin's translucent layer: `glass.translucent.json`. */
 export const TRANSLUCENT = 'translucent';

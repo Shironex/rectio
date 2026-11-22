@@ -310,10 +310,14 @@ const COMPOSITE_COLORS: Record<string, string> = {
  * and the theme's soft shadow. In a theme the first two are zero sized, so only the soft one shows;
  * a skin sizes them. Component shadow tokens (popover, dialog, sheet, toast) hold the same layers.
  */
-const elevation = (level: 'raised' | 'overlay') =>
+const elevation = (level: 'raised' | 'overlay', offset = true) =>
   [
     'inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent)',
-    `var(--rx-shadow-offset-${level}, 0px) var(--rx-shadow-offset-${level}, 0px) 0 0 var(--rx-shadow-offset-color, transparent)`,
+    ...(offset
+      ? [
+          `var(--rx-shadow-offset-${level}, 0px) var(--rx-shadow-offset-${level}, 0px) 0 0 var(--rx-shadow-offset-color, transparent)`,
+        ]
+      : []),
     `var(--rx-shadow-${level})`,
   ].join(', ');
 
@@ -367,6 +371,9 @@ function tailwindCss(contract: string[], types: TokenMap): string {
     add(`--radius-${radius}`, `--rx-radius-${radius}`);
   for (const shadow of ['raised', 'overlay'] as const)
     map.push(`--shadow-${shadow}: ${elevation(shadow)};`);
+  // A thumb or a selected indicator inside a track (a switch, a slider, a segmented control): the
+  // raised shadow and edge highlight with no offset layer, which would spill out of the track.
+  map.push(`--shadow-indicator: ${elevation('raised', false)};`);
   for (const ease of ['standard', 'enter', 'exit'])
     add(`--ease-${ease}`, `--rx-motion-easing-${ease}`);
   add('--spacing', '--rx-space-unit');
@@ -446,8 +453,8 @@ function tailwindCss(contract: string[], types: TokenMap): string {
    corners, as strong as the skin's surface wash says. Transparent in a theme. */
 @utility canvas-wash {
   background-image:
-    radial-gradient(56rem 36rem at 0% 0%, color-mix(in oklab, var(--rx-accent-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['accent-subtle'])}%), transparent), transparent),
-    radial-gradient(48rem 32rem at 100% 0%, color-mix(in oklab, var(--rx-info-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['info-subtle'])}%), transparent), transparent);
+    radial-gradient(72rem 48rem at 0% 0%, color-mix(in oklab, var(--rx-surface-selected) calc(var(--rx-surface-wash, 0) * ${String(WASH['surface-selected'])}%), transparent), transparent),
+    radial-gradient(64rem 44rem at 100% 0%, color-mix(in oklab, var(--rx-identity-4-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['identity-4-subtle'])}%), transparent), transparent);
 }
 
 @utility backdrop-surface {

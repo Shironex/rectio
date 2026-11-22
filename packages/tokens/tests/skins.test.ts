@@ -281,7 +281,7 @@ describe('glass', () => {
   const wash = Number(glass['--rx-surface-wash']);
   /** The canvas where the wash is strongest: its corner, each hue at its full share. */
   const washed = (tokens: Record<string, string>) =>
-    (['accent-subtle', 'info-subtle'] as const).map((hue) =>
+    (['surface-selected', 'identity-4-subtle'] as const).map((hue) =>
       over(rgb(tokens, hue), (wash * WASH[hue]) / 100, rgb(tokens, 'surface-canvas')),
     );
   const backdrops = (tokens: Record<string, string>) => [
@@ -443,6 +443,10 @@ describe('the switches a skin turns on', () => {
     );
     expect(tailwind).toContain(
       '--shadow-raised: inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-raised, 0px) var(--rx-shadow-offset-raised, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-raised);',
+    );
+    // A thumb or indicator inside a track never takes the offset layer.
+    expect(tailwind).toContain(
+      '--shadow-indicator: inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-raised);',
     );
     // Only the element that blurs its backdrop turns see-through; its children stay solid.
     expect(tailwind).toMatch(/@property --rx-surface-alpha \{[^}]*inherits: false;/);
