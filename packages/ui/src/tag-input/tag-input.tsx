@@ -306,7 +306,7 @@ export function TagInput({
           'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus',
           // The app marked the whole field invalid (a server error): show it on the surface.
           'has-data-invalid:border-negative has-data-invalid:ring-1 has-data-invalid:ring-negative has-data-invalid:ring-inset',
-          'has-data-disabled:cursor-not-allowed has-data-disabled:border-line has-data-disabled:bg-surface-sunken',
+          'has-data-disabled:cursor-not-allowed has-data-disabled:border-line-disabled has-data-disabled:bg-surface-sunken',
         )}
         onPointerDown={(event) => {
           // A press on the surface around the tags types into the field, as on any input.

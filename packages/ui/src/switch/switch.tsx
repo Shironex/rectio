@@ -29,7 +29,7 @@ export function Switch({ className, thumbClassName, ...props }: SwitchProps) {
         'data-checked:border-accent data-checked:bg-accent data-checked:hover:border-accent-hover data-checked:hover:bg-accent-hover',
         'data-invalid:border-negative data-invalid:ring-1 data-invalid:ring-negative',
         controlFocus,
-        'data-disabled:cursor-not-allowed data-disabled:border-line data-disabled:bg-surface-sunken',
+        'data-disabled:cursor-not-allowed data-disabled:border-line-disabled data-disabled:bg-surface-sunken',
         // A larger target than the drawn track: 36 by 28 to press with a mouse, the touch height
         // on touch screens.
         'after:absolute after:-inset-1',

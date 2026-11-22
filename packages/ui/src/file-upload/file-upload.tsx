@@ -362,7 +362,7 @@ export function FileDropzone({ className, children, onClick, ref, ...props }: Fi
         controlFocus,
         'data-dragging:border-solid data-dragging:border-accent data-dragging:bg-accent-subtle',
         'data-invalid:border-negative data-invalid:ring-1 data-invalid:ring-negative data-invalid:ring-inset',
-        'data-disabled:cursor-not-allowed data-disabled:border-line data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
+        'data-disabled:cursor-not-allowed data-disabled:border-line-disabled data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
         className,
       )}
     >

@@ -202,7 +202,7 @@ export function PromptInput({
         'transition-[border-color] duration-fast ease-standard hover:border-fg-subtle',
         // One focus ring for the whole box while the field inside holds focus.
         'has-[textarea:focus-visible]:border-fg-subtle has-[textarea:focus-visible]:outline-2 has-[textarea:focus-visible]:outline-offset-2 has-[textarea:focus-visible]:outline-focus',
-        'data-disabled:border-line data-disabled:bg-surface-sunken',
+        'data-disabled:border-line-disabled data-disabled:bg-surface-sunken',
         className,
       )}
       {...props}

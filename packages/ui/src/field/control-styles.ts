@@ -10,7 +10,7 @@ export const controlSurface = cn(
   'transition-[border-color,outline-color] duration-fast ease-standard',
   'outline-0 -outline-offset-1 outline-transparent hover:border-fg-subtle',
   'data-invalid:border-negative data-invalid:ring-1 data-invalid:ring-negative data-invalid:ring-inset',
-  'data-disabled:cursor-not-allowed data-disabled:border-line data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
+  'data-disabled:cursor-not-allowed data-disabled:border-line-disabled data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
 );
 
 /**

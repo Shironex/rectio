@@ -26,10 +26,10 @@ const VARIANTS: Record<ButtonVariant, string> = {
 
 /** Disabled recedes to the neutral surface in every variant, never a faded brand colour. */
 const DISABLED: Record<ButtonVariant, string> = {
-  primary: 'border border-line bg-surface-sunken text-fg-disabled shadow-none',
-  secondary: 'border border-line bg-surface-sunken text-fg-disabled shadow-none',
+  primary: 'border border-line-disabled bg-surface-sunken text-fg-disabled shadow-none',
+  secondary: 'border border-line-disabled bg-surface-sunken text-fg-disabled shadow-none',
   ghost: 'pointer-events-none text-fg-disabled',
-  danger: 'border border-line bg-surface-sunken text-fg-disabled shadow-none',
+  danger: 'border border-line-disabled bg-surface-sunken text-fg-disabled shadow-none',
 };
 
 /**

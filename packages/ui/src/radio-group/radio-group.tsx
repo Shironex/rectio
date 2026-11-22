@@ -61,7 +61,7 @@ function RadioControl({ className }: { className?: string }) {
         'transition-[background-color,border-color] duration-fast ease-standard',
         'group-data-checked/radio:border-accent group-data-checked/radio:bg-accent',
         'group-data-invalid/radio:border-negative',
-        'group-data-disabled/radio:border-line group-data-disabled/radio:bg-surface-sunken',
+        'group-data-disabled/radio:border-line-disabled group-data-disabled/radio:bg-surface-sunken',
         className,
       )}
     >
@@ -170,7 +170,7 @@ export function RadioCard({ title, description, meta, className, ...props }: Rad
         'data-checked:border-accent data-checked:bg-surface-selected data-checked:ring-1 data-checked:ring-accent data-checked:ring-inset',
         'data-invalid:border-negative',
         controlFocus,
-        'data-disabled:cursor-not-allowed data-disabled:border-line data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
+        'data-disabled:cursor-not-allowed data-disabled:border-line-disabled data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
         className,
       )}
     >

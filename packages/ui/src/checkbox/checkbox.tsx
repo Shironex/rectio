@@ -25,7 +25,7 @@ export function Checkbox({ className, ...props }: CheckboxProps) {
         'hover:border-fg-subtle',
         'data-checked:border-accent data-checked:bg-accent data-indeterminate:border-accent data-indeterminate:bg-accent',
         'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
-        'data-disabled:cursor-not-allowed data-disabled:border-line data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
+        'data-disabled:cursor-not-allowed data-disabled:border-line-disabled data-disabled:bg-surface-sunken data-disabled:text-fg-disabled',
         // A larger hit area than the drawn box, so a dense table row stays easy to tick.
         // 32px to press with a mouse, the touch height on touch screens at any density.
         'after:absolute after:-inset-2',

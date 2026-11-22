@@ -274,7 +274,7 @@ export default defineRegistry({
     {
       name: 'button',
       type: 'component',
-      version: '0.2.2',
+      version: '0.2.3',
       title: 'Button',
       description: 'Primary, secondary, ghost and danger buttons with a loading state.',
       categories: ['actions'],
@@ -283,7 +283,7 @@ export default defineRegistry({
     {
       name: 'field',
       type: 'component',
-      version: '0.2.1',
+      version: '0.2.2',
       title: 'Field and Input',
       description: 'Label, description, error and text input wired for accessibility.',
       categories: ['forms'],
@@ -328,7 +328,7 @@ export default defineRegistry({
     {
       name: 'badge',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Badge',
       description: 'A record state in words, tinted neutral, positive, negative, warning or info.',
       categories: ['finance'],
@@ -337,7 +337,7 @@ export default defineRegistry({
     {
       name: 'checkbox',
       type: 'component',
-      version: '0.2.1',
+      version: '0.2.2',
       title: 'Checkbox',
       description: 'A checkbox with an indeterminate state for partial selections.',
       categories: ['forms'],
@@ -606,7 +606,7 @@ export default defineRegistry({
     {
       name: 'input-group',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'InputGroup',
       description: 'An input with text, icon or button addons inside one border.',
       categories: ['forms'],
@@ -661,7 +661,7 @@ export default defineRegistry({
     {
       name: 'radio-group',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Radio group',
       description: 'Radio options as a list or as cards, named by a legend.',
       categories: ['forms'],
@@ -689,7 +689,7 @@ export default defineRegistry({
     {
       name: 'file-upload',
       type: 'component',
-      version: '0.1.3',
+      version: '0.1.4',
       title: 'File upload',
       description:
         'Dropzone or compact trigger with accept, size and count rules, and a list of uploads with progress, retry and remove.',
@@ -703,7 +703,7 @@ export default defineRegistry({
     {
       name: 'tag-input',
       type: 'component',
-      version: '0.1.2',
+      version: '0.1.3',
       title: 'TagInput',
       description:
         'Free text tags in a field, with paste splitting, duplicate and max checks, and a reusable Tag chip.',
@@ -1061,7 +1061,7 @@ export default defineRegistry({
     {
       name: 'prompt-input',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'PromptInput',
       description:
         'A message field that grows with the text, attachments, Send that turns into Stop, Enter to send and a character count near the limit.',

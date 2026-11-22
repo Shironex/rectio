@@ -8,10 +8,10 @@ const TONES: Record<BadgeTone, string> = {
   // A filled chip in both modes: the hover step is the sunken grey in light and a lift above the
   // row in dark, where a sunken fill read as an empty outline.
   neutral: 'border-line-strong bg-surface-hover text-fg-muted',
-  positive: 'border-positive-strong/25 bg-positive-subtle text-positive-strong',
-  negative: 'border-negative-strong/25 bg-negative-subtle text-negative-strong',
-  warning: 'border-warning-strong/25 bg-warning-subtle text-warning-strong',
-  info: 'border-info-strong/25 bg-info-subtle text-info-strong',
+  positive: 'border-positive-strong/(--rx-badge-edge) bg-positive-subtle text-positive-strong',
+  negative: 'border-negative-strong/(--rx-badge-edge) bg-negative-subtle text-negative-strong',
+  warning: 'border-warning-strong/(--rx-badge-edge) bg-warning-subtle text-warning-strong',
+  info: 'border-info-strong/(--rx-badge-edge) bg-info-subtle text-info-strong',
 };
 
 export interface BadgeProps extends ComponentProps<'span'> {

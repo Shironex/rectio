@@ -18,7 +18,7 @@ const groupSurface = cn(
   controlSurface,
   'flex items-center gap-2 px-(--rx-field-padding-x)',
   'has-data-invalid:border-negative has-data-invalid:ring-1 has-data-invalid:ring-negative has-data-invalid:ring-inset',
-  'has-[input:disabled]:cursor-not-allowed has-[input:disabled]:border-line has-[input:disabled]:bg-surface-sunken has-[input:disabled]:text-fg-disabled',
+  'has-[input:disabled]:cursor-not-allowed has-[input:disabled]:border-line-disabled has-[input:disabled]:bg-surface-sunken has-[input:disabled]:text-fg-disabled',
   'has-[input:disabled]:*:data-[slot=input-group-addon]:text-fg-disabled',
   // One ring for the whole group, drawn when the input has keyboard focus. An addon button keeps
   // its own ring, so focus never shows twice.
