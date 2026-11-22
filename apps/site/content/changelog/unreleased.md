@@ -76,8 +76,16 @@ summary: Work that is merging into main now and ships with the next release.
   with a limit.
 - `applyStreamEvent` folds a provider's stream into the conversation through one small event
   contract (start, text, reasoning, tool, source, done, stopped, error), with no SDK in the kit.
-- The AI chat thread takes `renderComposer` for a field of your own, and its words, logic and the
-  new stream helpers import from a React Server Component.
+  Only a reply still streaming takes events, so a chunk or an abort error that lands after Stop
+  changes nothing, and an event that changes nothing returns the same array.
+- The AI chat thread takes `renderComposer` for a field of your own (it is told when to hold the
+  field), and its words, logic and the new stream helpers import from a React Server Component.
+  The installed `chat-thread.tsx` no longer re-exports `announcedTurn`, `chatRows` and the other
+  logic: import them from `chat-thread.logic.ts`.
+- `isModalDialogOpen()` says whether the reader is in an open modal dialog, alert dialog, sheet or
+  drawer, as Base UI marks them. The sidebar, command menu and docs search shortcuts now stand
+  aside behind one (their old check looked for an attribute Base UI never sets), and no longer
+  open and close over and over while the keys are held: `useShortcut` takes `repeat: false`.
 - `PromptInput` takes `textareaProps` (its key handler runs first), a `meta` slot beside Send and
   `submitDisabled` for a limit the app counts.
 - The docs code block keeps room for its copy button at the end of the longest line.
