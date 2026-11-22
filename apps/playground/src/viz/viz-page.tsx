@@ -1,6 +1,6 @@
 import * as movingCharts from '@rectio/motion/charts';
 import * as moving from '@rectio/motion';
-import { Button, ChartCard, ThemeScope, Toggle, ToggleGroup } from '@rectio/ui';
+import { ChartCard, ThemeScope, Toggle, ToggleGroup } from '@rectio/ui';
 import * as plainCharts from '@rectio/ui/charts';
 import { useState, type ReactNode } from 'react';
 
@@ -41,7 +41,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 function Charts({ charts }: { charts: Charts }) {
   const { FunnelChart, Heatmap, RadialGauge, WaterfallChart } = charts;
   const [quarter, setQuarter] = useState('q3');
-  const [attainment, setAttainment] = useState(0.82);
+  const [week, setWeek] = useState('w9');
+  const attainment = { w5: 0.41, w9: 0.82, w13: 1.08 }[week] ?? 0.82;
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
       <ChartCard className="lg:col-span-7" title="Trial funnel" description="Last 30 days">
@@ -135,15 +136,18 @@ function Charts({ charts }: { charts: Charts }) {
         title="Quota attainment"
         description="Sales team, this quarter"
         actions={
-          <Button
+          <ToggleGroup
             size="sm"
-            variant="secondary"
-            onClick={() => {
-              setAttainment((value) => (value > 1 ? 0.64 : value + 0.21));
+            aria-label="Week of the quarter"
+            value={[week]}
+            onValueChange={(value) => {
+              setWeek(value[0] ?? 'w9');
             }}
           >
-            Next week
-          </Button>
+            <Toggle value="w5">Wk 5</Toggle>
+            <Toggle value="w9">Wk 9</Toggle>
+            <Toggle value="w13">Wk 13</Toggle>
+          </ToggleGroup>
         }
       >
         <RadialGauge
@@ -151,7 +155,7 @@ function Charts({ charts }: { charts: Charts }) {
           value={attainment}
           max={1.25}
           target={1}
-          marker={{ value: 0.74, label: 'Pace' }}
+          marker={{ value: { w5: 0.38, w9: 0.69, w13: 1 }[week] ?? 0.69, label: 'Pace' }}
           bands={QUOTA_BANDS}
           format="percent"
           locale={LOCALE}
@@ -191,9 +195,12 @@ function Charts({ charts }: { charts: Charts }) {
 function States({ charts }: { charts: Charts }) {
   const { FunnelChart, Heatmap, RadialGauge, WaterfallChart } = charts;
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       <ChartCard title="Funnel" description="Loading">
         <FunnelChart data={[]} loading />
+      </ChartCard>
+      <ChartCard title="Funnel" description="Empty">
+        <FunnelChart data={[]} />
       </ChartCard>
       <ChartCard title="Heatmap" description="Empty">
         <Heatmap rows={[]} columns={[]} data={[]} />
@@ -212,8 +219,14 @@ function States({ charts }: { charts: Charts }) {
           labels={false}
         />
       </ChartCard>
+      <ChartCard title="Waterfall" description="Loading">
+        <WaterfallChart data={[]} loading />
+      </ChartCard>
       <ChartCard title="Gauge" description="Loading">
         <RadialGauge label="Uptime" value={0} max={1} loading />
+      </ChartCard>
+      <ChartCard title="Gauge" description="Nothing yet">
+        <RadialGauge label="Uptime" value={0} max={1} target={0.999} format="percent" />
       </ChartCard>
     </div>
   );

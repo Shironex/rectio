@@ -36,8 +36,8 @@ const VIEWS = [
 ] as const;
 const onlyView = process.argv[2];
 const onlySkin = process.argv[3];
-/** The lane's port range starts here; Vite moves up if it is taken. */
-const PORT = 4430;
+/** The lane's port range starts here (AUDIT_PORT moves it); Vite moves up if it is taken. */
+const PORT = Number(process.env.AUDIT_PORT ?? 4430);
 const TARGET = 44;
 
 interface Finding {
