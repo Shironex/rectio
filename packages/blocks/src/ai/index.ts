@@ -69,3 +69,22 @@ export {
   type AiChatGroupKey,
   type AiChatSummary,
 } from './chat-workspace/chat-workspace.logic';
+export {
+  AssistantSidebar,
+  AssistantSidebarProvider,
+  AssistantSidebarTrigger,
+  useAssistantSidebar,
+  type AssistantSidebarProps,
+  type AssistantSidebarProviderProps,
+  type AssistantSidebarTriggerProps,
+} from './assistant-sidebar/assistant-sidebar';
+export {
+  ASSISTANT_SIDEBAR_MESSAGES,
+  type AssistantSidebarMessages,
+} from './assistant-sidebar/assistant-sidebar-messages';
+export {
+  assistantSizes,
+  shortcutAction,
+  type AssistantShortcutAction,
+  type AssistantSizes,
+} from './assistant-sidebar/assistant-sidebar.logic';
