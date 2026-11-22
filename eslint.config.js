@@ -120,6 +120,7 @@ export default tseslint.config(
       // `@rectio/blocks/docs` (and its `/motion`) is the declared entry of the docs group.
       // `@rectio/blocks/ai` (and its `/motion`) is the declared entry of the AI group.
       // `@rectio/blocks/analytics` (and its `/motion`) is the declared entry of the analytics group.
+      // `@rectio/blocks/people` (and its `/motion`) is the declared entry of the people group.
       // `@rectio/motion/navigation` is the motioned navigation, split to stay inside its bundle budget.
       // `@rectio/motion/chat` is the motioned chat, split so an app without a conversation never loads it.
       // `@rectio/tokens/generator` (and its `.json` data) is the theme generator core the docs page runs.
@@ -138,6 +139,8 @@ export default tseslint.config(
             'ai/motion',
             'analytics',
             'analytics/motion',
+            'people',
+            'people/motion',
             'navigation',
             'chat',
             'generator',
