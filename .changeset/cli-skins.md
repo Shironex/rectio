@@ -2,7 +2,7 @@
 '@rectio/cli': minor
 ---
 
-Skins: token overrides that restyle type, corners, rhythm and control sizes on top of any theme, in light and dark.
+Skins: token overrides that restyle type, corners, rhythm and control sizes on top of any theme, in light and dark. This release teaches the CLI to install them; the hosted registry starts listing the dense and editorial skins only after this CLI is on npm.
 
 - `rectio add skin-dense` or `rectio add skin-editorial` writes `styles/rectio/skins/<id>.css` and imports it after your themes and before the base styles, so a skin wins over a theme and compact density still applies on top. Set `data-skin="<id>"` on `<html>`, or `skin="<id>"` on a ThemeScope.
 - `rectio init --skin <id>` adds a skin beside the theme. A new app from a template takes no skin; add it once the app exists.
