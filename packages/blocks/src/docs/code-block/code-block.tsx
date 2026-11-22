@@ -211,7 +211,14 @@ export function CodeBlock({
                 {mark !== null && (
                   <span className="sr-only">{mark === 'inserted' ? m.added : m.removed}</span>
                 )}
-                <span className="min-w-0">
+                <span
+                  className={cn(
+                    'min-w-0',
+                    // A hanging indent: a wrapped line's continuation sits in from its start, so
+                    // it never reads as a line of its own.
+                    wrap ? 'ps-4 -indent-4' : 'max-sm:ps-4 max-sm:-indent-4',
+                  )}
+                >
                   {line.length === 0
                     ? ' '
                     : line.map((token, tokenIndex) => (
