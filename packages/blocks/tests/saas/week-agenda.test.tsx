@@ -158,6 +158,20 @@ describe('WeekAgenda', () => {
     expect(within(list).getByText('Payroll run')).toBeInTheDocument();
   });
 
+  it('lists every overlapping event, even those the grid gathers behind a more button', () => {
+    const crowded = [
+      { id: 'a', title: 'Design review', start: at(17, 10), end: at(17, 11) },
+      { id: 'b', title: 'Hiring sync', start: at(17, 10), end: at(17, 11) },
+      { id: 'c', title: 'Vendor call', start: at(17, 10, 30), end: at(17, 11, 30) },
+    ];
+    render(<WeekAgenda events={crowded} date={at(18, 12)} now={NOW} locale="en-GB" />);
+    expect(screen.getByRole('button', { name: /more/ })).toBeInTheDocument();
+    const list = screen.getAllByRole('list').find((el) => el.dataset.slot === 'week-agenda-list');
+    if (list === undefined) throw new Error('no list');
+    for (const title of ['Design review', 'Hiring sync', 'Vendor call'])
+      expect(within(list).getByText(title)).toBeInTheDocument();
+  });
+
   it('says so when the week is empty', () => {
     render(<WeekAgenda events={[]} date={at(18, 12)} now={NOW} locale="en-GB" />);
     expect(screen.getAllByText('Nothing scheduled this week')).toHaveLength(2);
@@ -197,7 +211,12 @@ describe('WeekAgenda', () => {
     await user.click(
       grid().getByRole('button', { name: '2 more events from 11:00, Wednesday 18 March' }),
     );
-    await user.click(await screen.findByRole('button', { name: /^Expenses/ }));
+    // The list below lists Expenses too; the one to press is in the popup.
+    const inPopup = (await screen.findAllByRole('button', { name: /^Expenses/ })).find(
+      (el) => el.closest('[data-slot="week-agenda-list"]') === null,
+    );
+    if (inPopup === undefined) throw new Error('no Expenses in the popup');
+    await user.click(inPopup);
     expect(onEventClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'c' }));
   });
 });

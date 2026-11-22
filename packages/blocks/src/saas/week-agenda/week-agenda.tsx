@@ -206,7 +206,8 @@ export function WeekAgenda({
       days: shown,
       shownHours: fitted,
       inRange: allDay.length + placed.reduce((sum, day) => sum + day.length, 0),
-      layout: { timed, more, allDay, stops: agendaStops(timed, allDay, more) },
+      // The list shows every event: it has no room problem, so nothing hides behind "N more".
+      layout: { timed, all: placed, more, allDay, stops: agendaStops(timed, allDay, more) },
     };
   }, [events, dayKey, variant, weekStartsOn, locale, hours.start, hours.end, maxColumns]);
   const rangeKey = `${variant}:${String(days[0]?.getTime() ?? 0)}`;
@@ -328,7 +329,10 @@ export function WeekAgenda({
 interface ViewProps {
   days: Date[];
   layout: {
+    /** What the grid draws: the events left after crowded ones gather behind "N more". */
     timed: PlacedEvent[][];
+    /** Every timed event of each day, for the list. */
+    all: PlacedEvent[][];
     more: AgendaMore[][];
     allDay: PlacedAllDay[];
     stops: ReturnType<typeof agendaStops>;
@@ -963,7 +967,7 @@ function AgendaList({
         const allDay = layout.allDay
           .filter((bar) => bar.first <= dayIndex && bar.last >= dayIndex)
           .map((bar) => ({ key: `${bar.key}:${String(dayIndex)}`, event: bar.event }));
-        const timed = (layout.timed[dayIndex] ?? [])
+        const timed = (layout.all[dayIndex] ?? [])
           .slice()
           .sort((a, b) => a.start - b.start || a.column - b.column)
           .map((slice) => ({ key: slice.key, event: slice.event }));
