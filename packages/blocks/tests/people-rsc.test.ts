@@ -2,6 +2,11 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { formatDayRange } from '../src/people/lib/format';
+import { leaveHalves } from '../src/people/leave-requests/leave-requests.logic';
+import { buildOrg } from '../src/people/org-chart/org-chart.logic';
+import { reviewPayroll } from '../src/people/payroll-run/payroll-run.logic';
+import { timesheetTotals } from '../src/people/timesheet/timesheet.logic';
 
 // The people blocks take input and hold state, so their components are client modules. Their
 // logic, the day helpers and their words must still be importable from a server component, which
@@ -107,14 +112,13 @@ describe('people blocks on the server', () => {
 });
 
 describe('people logic run on the server', () => {
-  it('totals, counts and checks without a DOM or React', async () => {
-    const people = await import('../src/people/index');
-    expect(people.timesheetTotals([], '2026-11-23', { today: '2026-11-23' }).week).toBe(0);
-    expect(people.leaveHalves({ start: '2026-11-23', end: '2026-11-28' })).toBe(10);
-    expect(people.buildOrg([{ id: 'a', name: 'A' }]).roots).toHaveLength(1);
-    expect(people.reviewPayroll([]).ready).toBe(false);
-    expect(people.formatDayRange('2026-11-23', '2026-11-28', 'en-GB')).toBe(
-      '23 Nov to 27 Nov 2026',
-    );
+  // The server-safe modules themselves, not the entry: the entry also loads the client blocks,
+  // which a server component reaches only as references.
+  it('totals, counts and checks without a DOM or React', () => {
+    expect(timesheetTotals([], '2026-11-23', { today: '2026-11-23' }).week).toBe(0);
+    expect(leaveHalves({ start: '2026-11-23', end: '2026-11-28' })).toBe(10);
+    expect(buildOrg([{ id: 'a', name: 'A' }]).roots).toHaveLength(1);
+    expect(reviewPayroll([]).ready).toBe(false);
+    expect(formatDayRange('2026-11-23', '2026-11-28', 'en-GB')).toBe('23 Nov to 27 Nov 2026');
   });
 });
