@@ -325,6 +325,24 @@
         "$description": "The most severe step, such as over 90 days past due: deepest in light mode, the most saturated in dark."
       }
     },
+    "on-sequence": {
+      "1": {
+        "$value": "{palette.stone.1000}",
+        "$description": "Text over each sequence step, such as a figure printed in a heatmap cell. Holds 4.5:1 against its step."
+      },
+      "2": {
+        "$value": "{palette.stone.1000}"
+      },
+      "3": {
+        "$value": "{palette.stone.0}"
+      },
+      "4": {
+        "$value": "{palette.stone.0}"
+      },
+      "5": {
+        "$value": "{palette.stone.0}"
+      }
+    },
     "grid": {
       "$value": "{palette.stone.150}",
       "$description": "Gridlines: quiet, behind the data."

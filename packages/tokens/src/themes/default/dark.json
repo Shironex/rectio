@@ -469,6 +469,39 @@
         "$description": "The most severe step, such as over 90 days past due: deepest in light mode, the most saturated in dark."
       }
     },
+    "on-sequence": {
+      "1": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.13, 0.006, 75]
+        },
+        "$description": "Text over each sequence step, such as a figure printed in a heatmap cell. Holds 4.5:1 against its step."
+      },
+      "2": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.13, 0.006, 75]
+        }
+      },
+      "3": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.13, 0.006, 75]
+        }
+      },
+      "4": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.13, 0.006, 75]
+        }
+      },
+      "5": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.13, 0.006, 75]
+        }
+      }
+    },
     "grid": {
       "$value": {
         "colorSpace": "oklch",

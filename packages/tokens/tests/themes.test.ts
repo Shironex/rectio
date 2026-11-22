@@ -136,6 +136,17 @@ describe('chart colours', () => {
     expect(failures).toEqual([]);
   });
 
+  it.each(themeModes)('$key text over each sequence step holds 4.5:1', ({ tokens }) => {
+    const failures = SEQUENCE.flatMap((step) => {
+      const ratio = contrast(
+        parse(tokens[`--rx-${step.replace('sequence', 'on-sequence')}`]),
+        parse(tokens[`--rx-${step}`]),
+      );
+      return ratio >= 4.5 ? [] : [`${step}: ${ratio.toFixed(2)}`];
+    });
+    expect(failures).toEqual([]);
+  });
+
   it.each(themeModes)('$key neighbouring sequence steps stay apart', ({ tokens }) => {
     const failures = SEQUENCE.slice(1).flatMap((b, i) => {
       const a = SEQUENCE[i] ?? '';

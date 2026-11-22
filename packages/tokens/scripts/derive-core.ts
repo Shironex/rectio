@@ -3,7 +3,7 @@
  * loop that moves lightness until every gated pair passes. No Node APIs, so the theme generator runs
  * it in the browser and the CLI bundles it; scripts/derive.ts adds the presets and the file output.
  */
-import { fitSrgb, formatOklch, type Oklch } from './color.ts';
+import { contrast, fitSrgb, formatOklch, type Oklch } from './color.ts';
 import { evaluate, type Pair } from './evaluate.ts';
 
 export interface Preset {
@@ -90,6 +90,21 @@ const SEQUENCE = [
   [340, 0.3, 0.13, 0.6, 0.19],
 ] as const;
 
+/**
+ * Text over each sequence step (a figure in a heatmap cell): the dark or the light ink, whichever
+ * holds more contrast against that step.
+ */
+function onSequence(t: TokenSet, dark: Oklch, light: Oklch) {
+  for (let step = 1; step <= 5; step += 1) {
+    const fill = t.get(`--rx-chart-sequence-${String(step)}`);
+    if (fill === undefined) continue;
+    t.set(
+      `--rx-chart-on-sequence-${String(step)}`,
+      contrast(dark, fill) >= contrast(light, fill) ? dark : light,
+    );
+  }
+}
+
 /** Every colour role for one mode, before correction. */
 export function derive(p: Preset, mode: Mode): TokenSet {
   const t: TokenSet = new Map();
@@ -163,6 +178,7 @@ export function derive(p: Preset, mode: Mode): TokenSet {
     set('chart-series-3', inkStyle ? o(0.53, 0.1082, 232) : ink(0.28));
     set('chart-sequence-1', inkStyle ? ink(0.62) : brand(0.62, 0.1623));
     SEQUENCE.forEach(([h, l, c], i) => set(`chart-sequence-${String(i + 2)}`, o(l, c, h)));
+    onSequence(t, ink(0.152), n(0.995));
     set('chart-grid', n(0.922));
     set('chart-axis', ink(0.53));
     set('chart-baseline', ink(0.62));
@@ -275,6 +291,7 @@ export function derive(p: Preset, mode: Mode): TokenSet {
   set('chart-series-3', ink(0.92));
   set('chart-sequence-1', brand(solidL - 0.02, 0.13));
   SEQUENCE.forEach(([h, , , l, c], i) => set(`chart-sequence-${String(i + 2)}`, o(l, c, h)));
+  onSequence(t, ink(0.13), n(0.995));
   set('chart-grid', n(D + s4 - 0.01));
   set('chart-axis', ink(text - 0.22));
   set('chart-baseline', ink(0.55));
