@@ -291,6 +291,15 @@ export default defineRegistry({
       files: ['lib/local-date.ts'],
     },
     {
+      name: 'dev-warn',
+      type: 'lib',
+      version: '0.1.0',
+      title: 'devWarn',
+      description:
+        'A console warning in development builds only, for a misuse a component can recover from.',
+      files: ['lib/dev-warn.ts'],
+    },
+    {
       name: 'theme-scope',
       type: 'component',
       version: '0.2.0',
@@ -1018,7 +1027,7 @@ export default defineRegistry({
       description:
         'Stages of a journey as bars or columns, with what carried on and what dropped off between each, the biggest drop named and a table twin.',
       categories: ['charts'],
-      files: ['funnel-chart/funnel-chart.tsx'],
+      files: ['funnel-chart/funnel-chart.tsx', 'funnel-chart/funnel-chart.logic.ts'],
     },
     {
       name: 'heatmap',
@@ -1028,7 +1037,7 @@ export default defineRegistry({
       description:
         'A calendar of days or a matrix of two categories on a sequential scale, with a legend, missing cells drawn apart from zero, keyboard reading and a table twin.',
       categories: ['charts'],
-      files: ['heatmap/heatmap.tsx'],
+      files: ['heatmap/heatmap.tsx', 'heatmap/heatmap.logic.ts'],
     },
     {
       name: 'waterfall-chart',
@@ -1038,7 +1047,7 @@ export default defineRegistry({
       description:
         'A start, the changes that move it and the totals between, with decreases hatched, signed labels and rules carrying the running total.',
       categories: ['charts'],
-      files: ['waterfall-chart/waterfall-chart.tsx'],
+      files: ['waterfall-chart/waterfall-chart.tsx', 'waterfall-chart/waterfall-chart.logic.ts'],
     },
     {
       name: 'radial-gauge',

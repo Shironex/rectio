@@ -291,6 +291,7 @@ describe('the rectio registry', () => {
       'cta-band',
       'data-table',
       'date-picker',
+      'dev-warn',
       'dialog',
       'docs',
       'docs-api-reference',
