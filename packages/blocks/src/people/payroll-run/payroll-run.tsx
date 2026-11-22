@@ -387,7 +387,10 @@ export function PayrollRun({
                                 {fixHref !== undefined && status === 'review' && (
                                   <Anchor
                                     href={fixHref(line, found)}
-                                    className={cn('relative text-sm font-medium', touchHitArea)}
+                                    className={cn(
+                                      'relative inline-flex items-center gap-1 text-sm font-medium whitespace-nowrap text-accent-strong underline underline-offset-2',
+                                      touchHitArea,
+                                    )}
                                     aria-label={m.fixLine(line.person.name)}
                                   >
                                     {m.fix}
