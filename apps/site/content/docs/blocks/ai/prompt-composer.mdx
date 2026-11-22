@@ -56,7 +56,8 @@ tokenizer as `countTokens` for an exact figure. `count="characters"` counts char
 `limit`, the count turns amber from 90% and red past it, and Send waits until the text fits.
 
 To use it as the field of an AI chat thread or chat workspace, render it from `renderComposer`,
-which hands over the status and the send and stop callbacks:
+which hands over the status, the send and stop callbacks and whether to hold the field (while a
+workspace loads its chat, say):
 
 ```tsx
 <AiChatThread
@@ -97,6 +98,6 @@ pass through.
 
 - The command list follows the field like a combobox: the field names the list and the highlighted
   command, so a screen reader reads each as the arrows move.
-- How many commands match, and how many tokens or characters are left or over, are said once typing
-  settles.
+- How many commands match is said once typing settles. The count is the field's description, and
+  is said aloud only as it crosses a line: near the limit, over it, back under it.
 - The model picker is named Model, and every control is at least 44px on touch screens.

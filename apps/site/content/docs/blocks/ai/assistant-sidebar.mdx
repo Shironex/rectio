@@ -42,7 +42,7 @@ import { AssistantSidebar } from '@/components/blocks/ai/assistant-sidebar';
 
 The panel docks at the end edge (the left in a right to left page). Drag or arrow its handle to
 resize it between `minSize` and `maxSize`, in percent of the width; pass `storageKey` to keep the
-size per browser. Closed, it folds to a rail with one button to open it again, or hides entirely
+size per browser (it also names the panels, so keep it unique on the page). Closed, it folds to a rail with one button to open it again, or hides entirely
 with `collapsed="hidden"`.
 
 Mod+J (Command on a Mac, Control elsewhere) opens it and moves focus to its field. Pressed with the
@@ -73,7 +73,9 @@ under the header:
 anywhere under the provider.
 
 On a phone, below 48rem, the assistant opens in a full height sheet over the page, with focus in
-its field. A floating button opens it; pass `phoneTrigger={false}` when a header trigger already
+its field. A panel open at load (`defaultOpen`, or `open` from a saved preference) docks on a wide
+screen, but on a phone the sheet waits until the reader opens it, so it never covers the page at
+load. A floating button opens it; pass `phoneTrigger={false}` when a header trigger already
 does.
 
 ## Props

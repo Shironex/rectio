@@ -32,6 +32,10 @@ hydration, so the markup never mismatches.
 user types in a field, so it never eats a letter. A shortcut with Command, Control or Alt fires in
 fields too; set `allowInFields: false` for one that an editor also uses, such as `mod+b`.
 
+A shortcut that opens a panel should stand aside while the reader is in a modal dialog: check
+`isModalDialogOpen()` in the handler. It sees an open Dialog, AlertDialog, Sheet or Drawer by the
+attributes Base UI sets, and ignores a popover.
+
 The same helpers are exported for your own use: `parseShortcut`, `shortcutKeys`, `shortcutLabel`,
 `ariaKeyShortcut`, `matchesShortcut` and `useIsMac`.
 
@@ -79,6 +83,12 @@ Every `kbd` prop is accepted as well, except `children`.
       type: 'boolean',
       description:
         'Whether it fires while focus is in a text field. Default: yes with Command, Control or Alt, no for a bare key.',
+    },
+    repeat: {
+      type: 'boolean',
+      default: 'true',
+      description:
+        'Whether a held key fires again as it repeats. Pass false for a shortcut that toggles something.',
     },
   }}
 />
