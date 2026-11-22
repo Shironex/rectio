@@ -79,7 +79,7 @@
       },
       "shadow": {
         "$type": "other",
-        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-overlay)",
+        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), 0 calc(var(--rx-shadow-ambient, 0px) * 2) calc(var(--rx-shadow-ambient, 0px) * 6) 0 color-mix(in oklab, var(--rx-scrim, transparent) 50%, transparent), var(--rx-shadow-overlay)",
         "$description": "The overlay elevation: the theme's soft shadow, plus the edge highlight and the hard offset shadow a skin may turn on."
       }
     },
@@ -90,7 +90,7 @@
       },
       "shadow": {
         "$type": "other",
-        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-overlay)",
+        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), 0 calc(var(--rx-shadow-ambient, 0px) * 2) calc(var(--rx-shadow-ambient, 0px) * 6) 0 color-mix(in oklab, var(--rx-scrim, transparent) 50%, transparent), var(--rx-shadow-overlay)",
         "$description": "The overlay elevation: the theme's soft shadow, plus the edge highlight and the hard offset shadow a skin may turn on."
       },
       "width": {
@@ -211,7 +211,7 @@
       },
       "shadow": {
         "$type": "other",
-        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-overlay)",
+        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), 0 calc(var(--rx-shadow-ambient, 0px) * 2) calc(var(--rx-shadow-ambient, 0px) * 6) 0 color-mix(in oklab, var(--rx-scrim, transparent) 50%, transparent), var(--rx-shadow-overlay)",
         "$description": "The overlay elevation: the theme's soft shadow, plus the edge highlight and the hard offset shadow a skin may turn on."
       }
     },
@@ -288,7 +288,7 @@
       },
       "shadow": {
         "$type": "other",
-        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-overlay)",
+        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), 0 calc(var(--rx-shadow-ambient, 0px) * 2) calc(var(--rx-shadow-ambient, 0px) * 6) 0 color-mix(in oklab, var(--rx-scrim, transparent) 50%, transparent), var(--rx-shadow-overlay)",
         "$description": "The overlay elevation: the theme's soft shadow, plus the edge highlight and the hard offset shadow a skin may turn on."
       }
     },

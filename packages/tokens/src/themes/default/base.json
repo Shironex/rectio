@@ -174,6 +174,11 @@
       "$value": "{size.0}",
       "$description": "Height of the light edge along the top of a raised or floating surface (border.highlight). 0 in a theme."
     },
+    "ambient": {
+      "$type": "dimension",
+      "$value": "{size.0}",
+      "$description": "Drop of the wide, soft ambient shadow under a panel, a raised surface (twice as far under a popup), in half the strength of the theme's scrim. 0 in a theme: only the theme's own soft shadow shows."
+    },
     "offset": {
       "raised": {
         "$type": "dimension",

@@ -1,5 +1,5 @@
 {
-  "$description": "Glass skin, applied with data-skin=\"glass\". Floating surfaces turn translucent over a blurred backdrop, with a light rim along their top edge and softer, rounder corners. The translucent layer (glass.translucent.json) applies only where the browser blurs the backdrop and the person has not asked for reduced transparency; elsewhere the same surfaces stay solid, with the rim and the corners.",
+  "$description": "Glass skin, applied with data-skin=\"glass\". Floating surfaces turn translucent over a blurred backdrop, with a light rim along their top edge, a wide soft shadow and softer, rounder corners. The translucent layer (glass.translucent.json) applies only where the browser blurs the backdrop and the person has not asked for reduced transparency; elsewhere the same surfaces stay solid, with the rim and the corners.",
   "radius": {
     "$type": "dimension",
     "control": {
@@ -18,13 +18,18 @@
       "$type": "dimension",
       "$value": "{size.1}",
       "$description": "A one pixel rim of light along the top edge, where light catches the pane."
+    },
+    "ambient": {
+      "$type": "dimension",
+      "$value": "{size.8}",
+      "$description": "A wide soft shadow under every pane, cards included, so the sheets float above the washed canvas."
     }
   },
   "surface": {
     "wash": {
       "$type": "number",
       "$value": 1,
-      "$description": "A full wash of the accent and info hues in the canvas corners: the colour the panes pick up and blur."
+      "$description": "A full wash of the blue and cyan identity tints in pools at the canvas corners and foot: the colour the panes pick up and blur."
     }
   }
 }

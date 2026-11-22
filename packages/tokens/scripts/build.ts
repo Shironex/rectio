@@ -310,14 +310,24 @@ const COMPOSITE_COLORS: Record<string, string> = {
  * and the theme's soft shadow. In a theme the first two are zero sized, so only the soft one shows;
  * a skin sizes them. Component shadow tokens (popover, dialog, sheet, toast) hold the same layers.
  */
-const elevation = (level: 'raised' | 'overlay', offset = true) =>
+const HIGHLIGHT =
+  'inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent)';
+/** The wide soft shadow a skin sizes with `shadow.ambient`, twice as far under a popup. */
+const ambient = (scale: 1 | 2) => {
+  const drop = `calc(var(--rx-shadow-ambient, 0px) * ${String(scale)})`;
+  const blur = `calc(var(--rx-shadow-ambient, 0px) * ${String(scale * 3)})`;
+  return `0 ${drop} ${blur} 0 color-mix(in oklab, var(--rx-scrim, transparent) 50%, transparent)`;
+};
+/** `inTrack`: a thumb or indicator inside a track, which takes neither the offset nor the ambient layer. */
+const elevation = (level: 'raised' | 'overlay', inTrack = false) =>
   [
-    'inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent)',
-    ...(offset
-      ? [
+    HIGHLIGHT,
+    ...(inTrack
+      ? []
+      : [
           `var(--rx-shadow-offset-${level}, 0px) var(--rx-shadow-offset-${level}, 0px) 0 0 var(--rx-shadow-offset-color, transparent)`,
-        ]
-      : []),
+          ambient(level === 'raised' ? 1 : 2),
+        ]),
     `var(--rx-shadow-${level})`,
   ].join(', ');
 
@@ -375,8 +385,11 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   for (const shadow of ['raised', 'overlay'] as const)
     map.push(`--shadow-${shadow}: ${elevation(shadow)};`);
   // A thumb or a selected indicator inside a track (a switch, a slider, a segmented control): the
-  // raised shadow and edge highlight with no offset layer, which would spill out of the track.
-  map.push(`--shadow-indicator: ${elevation('raised', false)};`);
+  // raised shadow and edge highlight with no offset or ambient layer, which would spill out of the track.
+  map.push(`--shadow-indicator: ${elevation('raised', true)};`);
+  // A flat panel (an outline card): no shadow in a theme; the edge highlight and the ambient shadow
+  // where a skin sizes them.
+  map.push(`--shadow-panel: ${HIGHLIGHT}, ${ambient(1)};`);
   for (const ease of ['standard', 'enter', 'exit'])
     add(`--ease-${ease}`, `--rx-motion-easing-${ease}`);
   add('--spacing', '--rx-space-unit');
@@ -456,9 +469,9 @@ function tailwindCss(contract: string[], types: TokenMap): string {
    corners, as strong as the skin's surface wash says. Transparent in a theme. */
 @utility canvas-wash {
   background-image:
-    radial-gradient(72rem 48rem at 0% 0%, color-mix(in oklab, var(--rx-surface-selected) calc(var(--rx-surface-wash, 0) * ${String(WASH['surface-selected'])}%), transparent), transparent),
+    radial-gradient(72rem 48rem at 0% 0%, color-mix(in oklab, var(--rx-identity-1-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['identity-1-subtle'])}%), transparent), transparent),
     radial-gradient(64rem 44rem at 100% 0%, color-mix(in oklab, var(--rx-identity-4-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['identity-4-subtle'])}%), transparent), transparent),
-    radial-gradient(80rem 40rem at 50% 100%, color-mix(in oklab, var(--rx-surface-selected) calc(var(--rx-surface-wash, 0) * ${String(WASH['surface-selected'])}%), transparent), transparent);
+    radial-gradient(80rem 40rem at 50% 100%, color-mix(in oklab, var(--rx-identity-1-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['identity-1-subtle'])}%), transparent), transparent);
 }
 
 @utility backdrop-surface {

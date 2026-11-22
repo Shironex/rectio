@@ -270,7 +270,7 @@ describe('glass', () => {
     'surface-overlay',
     'surface-hover',
     'surface-inset',
-    'surface-selected',
+    'identity-1-subtle',
   ];
   const pairs = derivePairs().filter(
     (p) => p.gate !== 'info' && p.bgAlpha === 1 && FLOATING.includes(p.bg),
@@ -281,7 +281,7 @@ describe('glass', () => {
   const wash = Number(glass['--rx-surface-wash']);
   /** The canvas where the wash is strongest: its corner, each hue at its full share. */
   const washed = (tokens: Record<string, string>) =>
-    (['surface-selected', 'identity-4-subtle'] as const).map((hue) =>
+    (['identity-1-subtle', 'identity-4-subtle'] as const).map((hue) =>
       over(rgb(tokens, hue), (wash * WASH[hue]) / 100, rgb(tokens, 'surface-canvas')),
     );
   const backdrops = (tokens: Record<string, string>) => [
@@ -442,7 +442,11 @@ describe('the switches a skin turns on', () => {
       '--color-line: color-mix(in oklab, var(--rx-text) calc(var(--rx-border-ink, 0) * 100%), var(--rx-border));',
     );
     expect(tailwind).toContain(
-      '--shadow-raised: inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-raised, 0px) var(--rx-shadow-offset-raised, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-raised);',
+      '--shadow-raised: inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-raised, 0px) var(--rx-shadow-offset-raised, 0px) 0 0 var(--rx-shadow-offset-color, transparent), 0 calc(var(--rx-shadow-ambient, 0px) * 1) calc(var(--rx-shadow-ambient, 0px) * 3) 0 color-mix(in oklab, var(--rx-scrim, transparent) 50%, transparent), var(--rx-shadow-raised);',
+    );
+    // An outline card: the rim and the ambient shadow only, nothing in a theme.
+    expect(tailwind).toContain(
+      '--shadow-panel: inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), 0 calc(var(--rx-shadow-ambient, 0px) * 1) calc(var(--rx-shadow-ambient, 0px) * 3) 0 color-mix(in oklab, var(--rx-scrim, transparent) 50%, transparent);',
     );
     // A disabled control keeps the plain border where a skin inks the others.
     expect(tailwind).toContain('--color-line-disabled: var(--rx-border);');

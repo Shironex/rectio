@@ -23,7 +23,7 @@ export const NO_SKIN = 'none';
  * close to the canvas in lightness, so whatever sits on the canvas keeps its contrast; the
  * `canvas-wash` utility fades them to nothing across the page.
  */
-export const WASH = { 'surface-selected': 70, 'identity-4-subtle': 70 } as const;
+export const WASH = { 'identity-1-subtle': 70, 'identity-4-subtle': 70 } as const;
 
 /** The suffix of a skin's translucent layer: `glass.translucent.json`. */
 export const TRANSLUCENT = 'translucent';
@@ -34,7 +34,7 @@ export const TRANSLUCENT = 'translucent';
  * Colour belongs to the theme and its modes, and motion to them and to reduced motion, so a skin
  * composes with any theme, light or dark, and never changes a contrast pair: the switches only turn
  * on what every theme defines in each of its modes (the edge highlight, the offset shadow colour,
- * the backdrop blur), and they are plain numbers and lengths, the same in light and dark. A skin may
+ * the scrim under the ambient shadow, the backdrop blur), and they are plain numbers and lengths, the same in light and dark. A skin may
  * clear the theme's soft shadows, never draw one of its own. A skin may set any subset of these; it
  * never adds a token, and it never sets a touch height. Layout measures such as the alert dialog
  * width, the sheet measure and the tree indent are component dimensions, so a skin may set them.
@@ -53,6 +53,7 @@ export const SKIN_GROUPS: readonly (readonly string[])[] = [
   ['surface', 'blur'],
   ['surface', 'wash'],
   ['shadow', 'highlight'],
+  ['shadow', 'ambient'],
   ['shadow', 'offset', 'raised'],
   ['shadow', 'offset', 'overlay'],
   ['shadow', 'raised'],
