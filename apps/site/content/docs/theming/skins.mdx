@@ -1,22 +1,28 @@
 ---
 title: Skins
-description: Dense and editorial looks on top of any theme, light or dark, through data-skin.
+description: Dense, editorial, glass and brutalist looks on top of any theme, light or dark, through data-skin.
 ---
 
 A skin changes how the interface is set, not what colour it is: the type scale, line heights,
-heading face, corners, border width, spacing and control sizes. It is a set of token overrides
-applied with `data-skin` on any element, so every component, block and template follows with no
-code of its own. Colour stays with the theme, so a skin works in light and dark and with any theme,
+heading face, corners, border width and weight, spacing and control sizes, and how surfaces float
+(translucency, an edge highlight, a hard offset shadow). It is a set of token overrides applied
+with `data-skin` on any element, so every component, block and template follows with no code of
+its own. Colour stays with the theme, so a skin works in light and dark and with any theme,
 including one from the [theme generator](/docs/theming/generator).
 
 <Preview name="skins" plain={<Demo name="skins" />} />
 
 ## The skins
 
-| Skin        | For                                         | What it sets                                                                                                                                                 |
-| ----------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `dense`     | Data-heavy apps: finance, admin, monitoring | 13px body text, tighter line heights, 3px controls and 6px panels, a 3.5px spacing unit, 24, 32 and 36px controls                                            |
-| `editorial` | Reading surfaces, reports, marketing pages  | IBM Plex Serif headings and amounts, hairline borders (0.5px: one device pixel on 2x screens, 1px on 1x), 2px corners, looser line heights, a roomier rhythm |
+| Skin        | For                                              | What it sets                                                                                                                                                                                                                       |
+| ----------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dense`     | Data-heavy apps: finance, admin, monitoring      | 13px body text, tighter line heights, 3px controls and 6px panels, a 3.5px spacing unit, 24, 32 and 36px controls                                                                                                                  |
+| `editorial` | Reading surfaces, reports, marketing pages       | IBM Plex Serif headings and amounts, hairline borders (0.5px: one device pixel on 2x screens, 1px on 1x), 2px corners, looser line heights, a roomier rhythm                                                                       |
+| `glass`     | Dashboards and consumer apps over rich backdrops | Cards, popups, dialogs, sheets, toasts and the app header at 85% opacity over a 20px backdrop blur, a 1px light edge along their top, 8px controls and 16px panels, a soft wash of the accent and info tints in the canvas corners |
+| `brutalist` | Tools and pages that want to look built          | Two pixel borders in the text colour, square corners, hard 4px offset shadows (6px for popups and dialogs) instead of soft ones, one step heavier type                                                                             |
+
+Glass and brutalist are opt-in looks: nothing in the kit, its docs previews or its templates turns
+them on unless you set the attribute.
 
 Each ships as its own registry item. Install one, then set the attribute:
 
@@ -59,6 +65,40 @@ It composes with everything else:
 - **Reduced motion.** Motion belongs to the theme and to reduced motion, never to a skin.
 - **Touch.** Controls keep their 44px hit area on touch screens in every skin.
 
+## Glass
+
+Glass makes the surfaces that float over content translucent: cards, popovers, menus, selects, date
+pickers, dialogs, the command menu, sheets, toasts and the app shell header. The page canvas behind
+them (a ThemeScope or an AppShell) picks up a soft wash of the theme's accent and info tints in its
+top corners, so the panes have colour to blur.
+
+- **Solid where it has to be.** The translucent layer applies only where the browser supports
+  `backdrop-filter` and the person has not set `prefers-reduced-transparency: reduce`. Everywhere
+  else the same surfaces stay solid, with the edge highlight and the rounder corners, so glass never
+  lets sharp text through a pane.
+- **Readable text.** The contrast and colour vision tests hold every pair on the solid fallback, the
+  same as any skin. On top of that, the translucent surfaces are tested against the backdrop glass
+  is made for: every text and mark pair holds AA over each page surface of its mode and over the
+  washed canvas, and body and muted text keep 4.5:1 over any backdrop at all, pure black and pure
+  white included.
+- **The assumption.** Over a photo, a video or a saturated fill, subtle text and small marks on a
+  pane can drop under AA. Put a scrim under the pane there, or turn the skin off for that region
+  with `skin="none"`.
+- **One element at a time.** Only the element that blurs its backdrop turns see-through; a sticky
+  row, a field or a nested card inside it stays solid on its own fill.
+
+## Brutalist
+
+Brutalist draws edges: every border and divider in the text colour at two pixels, square corners,
+and a hard offset shadow under raised and floating surfaces in place of the soft one. Body text is
+set one weight heavier.
+
+- **Focus stays visible.** A focus outline paints over the element's own shadow. Each theme draws
+  the offset shadow in its own colour, set apart from its focus colour: the tests hold the focus
+  ring at 3:1 against the shadow as well as against the canvas, in light and dark, and the theme
+  generator corrects a generated theme the same way.
+- **Fields follow.** Inputs and selects take the ink edge through `--rx-field-border`.
+
 ## Dense or compact
 
 Both make a screen tighter, at different scales:
@@ -80,14 +120,20 @@ where a pointer allows smaller targets.
 A skin may override these token groups and nothing else. The token build fails on anything outside
 them, and on a token the theme does not define.
 
-| Group               | Tokens                                                                           |
-| ------------------- | -------------------------------------------------------------------------------- |
-| Type                | `--rx-font-family-*`, `-size-*`, `-line-height-*`, `-weight-*`, `-tracking-*`    |
-| Shape               | `--rx-radius-*`, `--rx-border-width`                                             |
-| Rhythm and controls | `--rx-space-unit`, `--rx-control-height-*`, `--rx-control-padding-x-*`           |
-| Component           | Non-colour component tokens, such as `--rx-emphasis-style` or `--rx-tree-indent` |
+| Group               | Tokens                                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Type                | `--rx-font-family-*`, `-size-*`, `-line-height-*`, `-weight-*`, `-tracking-*`                                                              |
+| Shape               | `--rx-radius-*`, `--rx-border-width`, `--rx-border-ink`                                                                                    |
+| Rhythm and controls | `--rx-space-unit`, `--rx-control-height-*`, `--rx-control-padding-x-*`                                                                     |
+| Surfaces            | `--rx-surface-blur`, `--rx-surface-wash`; in a translucent layer only, `--rx-surface-opacity` and `--rx-surface-backdrop`                  |
+| Shadows             | `--rx-shadow-highlight`, `--rx-shadow-offset-raised`, `--rx-shadow-offset-overlay`; `--rx-shadow-raised` and `-overlay` only to clear them |
+| Component           | Non-colour component tokens, such as `--rx-emphasis-style` or `--rx-tree-indent`                                                           |
 
-Colour, shadow and motion are never part of a skin, and neither is a touch height
+The surface and shadow tokens are switches: plain numbers and lengths, the same in light and dark.
+What they turn on (the edge highlight colour `--rx-border-highlight`, the offset shadow colour
+`--rx-shadow-offset-color`, the tints of the wash) belongs to the theme and is defined in each of
+its modes, so a dark scope inside a light page keeps its own colours. Colour and motion are never
+part of a skin, a skin never draws a shadow of its own, and neither is a touch height
 (`--rx-control-height-touch` and every `*-touch` token): touch targets stay 44px in every skin.
 Amounts stay tabular in every skin. Editorial sets them in the serif through `--rx-money-family`,
 which keeps tabular lining figures, so columns still line up; other figures, such as chart axes,
@@ -121,5 +167,12 @@ that is what makes the nearest skin win when skins nest, so list every token of 
 A component token that reads a token you change (such as `--rx-button-radius`, which reads
 `--rx-radius-control`) has to be declared in the rule again, as the shipped skins do: a CSS variable
 keeps the value it had where it was declared. `none` is taken: it turns a skin off.
+
+Your own components follow a skin through the token utilities. Two utilities are the hooks the
+glass skin reaches: `backdrop-surface` on a surface that floats over content (it takes the skin's
+translucency and blurs what is behind it, and does nothing in a theme), and `canvas-wash` on a page
+canvas. A translucent skin of your own puts its opacity and backdrop in a third rule, inside
+`@supports (backdrop-filter: blur(1px))`, and sets them back to `1` and `none` under
+`@media (prefers-reduced-transparency: reduce)`, as `styles/rectio/skins/glass.css` does.
 
 The [theme generator](/docs/theming/generator) previews any theme under each skin.

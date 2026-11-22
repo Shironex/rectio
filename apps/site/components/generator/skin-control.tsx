@@ -39,9 +39,10 @@ export function SkinControl({
           }}
         />
         <p className="text-sm text-fg-muted">
-          Type, corners and rhythm on top of the theme; colours and contrast stay as they are.
-          Installed as its own item, beside the theme. Not the same as compact density, which only
-          tightens spacing and control heights and can be set on top of any skin.
+          Type, corners, borders and rhythm on top of the theme, and for glass and brutalist how
+          surfaces float; the theme's colours and contrast stay as they are. Installed as its own
+          item, beside the theme. Not the same as compact density, which only tightens spacing and
+          control heights and can be set on top of any skin.
         </p>
       </div>
     </ControlGroup>

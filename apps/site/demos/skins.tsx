@@ -17,13 +17,15 @@ const LOOKS = [
   { skin: undefined, label: 'Default' },
   { skin: 'dense', label: 'Dense' },
   { skin: 'editorial', label: 'Editorial' },
+  { skin: 'glass', label: 'Glass' },
+  { skin: 'brutalist', label: 'Brutalist' },
 ] as const;
 
 /** The same card under each skin, in the site's mode: only tokens change between them. */
 export default function SkinsDemo() {
   const mode = useSiteMode();
   return (
-    <div className="grid w-full items-start gap-3 lg:grid-cols-3">
+    <div className="grid w-full items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
       {LOOKS.map(({ skin, label }) => (
         <ThemeScope
           key={label}

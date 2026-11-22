@@ -23,20 +23,21 @@ tokens and nothing else, so a theme changes the whole interface by changing valu
 The Tailwind theme that `init` installs maps utilities onto the semantic tokens and clears
 Tailwind's own palette, radii, shadows and easings, so only tokens remain.
 
-| Utility                                                | Token                                                         |
-| ------------------------------------------------------ | ------------------------------------------------------------- |
-| `bg-surface`, `bg-surface-canvas`, `bg-surface-sunken` | `--rx-surface`, `--rx-surface-canvas`, `--rx-surface-sunken`  |
-| `text-fg`, `text-fg-muted`, `text-fg-subtle`           | `--rx-text`, `--rx-text-muted`, `--rx-text-subtle`            |
-| `border-line`, `border-line-strong`                    | `--rx-border`, `--rx-border-strong`                           |
-| `bg-accent`, `text-positive-strong`                    | `--rx-accent`, `--rx-positive-strong`                         |
-| `text-warning-mark`                                    | `--rx-warning-mark`, an amber mark that holds 3:1 on surfaces |
-| `pointer-coarse:gap-touch-gap`                         | `--rx-control-height-touch` less `--rx-control-height-sm`     |
-| `rounded-control`, `rounded-panel`                     | `--rx-radius-control`, `--rx-radius-panel`                    |
-| `shadow-raised`, `shadow-overlay`                      | `--rx-shadow-raised`, `--rx-shadow-overlay`                   |
-| `duration-fast`, `duration-base`, `duration-slow`      | `--rx-motion-duration-fast`, `-base`, `-slow`                 |
-| `ease-standard`, `ease-enter`, `ease-exit`             | `--rx-motion-easing-standard`, `-enter`, `-exit`              |
-| `font-sans`, `font-display`, `font-mono`               | `--rx-font-family-sans`, `-display`, `-mono`                  |
-| `numeric`                                              | `--rx-font-family-numeric`, with tabular, lining figures      |
+| Utility                                                | Token                                                                                                               |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `bg-surface`, `bg-surface-canvas`, `bg-surface-sunken` | `--rx-surface`, `--rx-surface-canvas`, `--rx-surface-sunken`                                                        |
+| `text-fg`, `text-fg-muted`, `text-fg-subtle`           | `--rx-text`, `--rx-text-muted`, `--rx-text-subtle`                                                                  |
+| `border-line`, `border-line-strong`                    | `--rx-border`, `--rx-border-strong`                                                                                 |
+| `bg-accent`, `text-positive-strong`                    | `--rx-accent`, `--rx-positive-strong`                                                                               |
+| `text-warning-mark`                                    | `--rx-warning-mark`, an amber mark that holds 3:1 on surfaces                                                       |
+| `pointer-coarse:gap-touch-gap`                         | `--rx-control-height-touch` less `--rx-control-height-sm`                                                           |
+| `rounded-control`, `rounded-panel`                     | `--rx-radius-control`, `--rx-radius-panel`                                                                          |
+| `shadow-raised`, `shadow-overlay`                      | `--rx-shadow-raised`, `--rx-shadow-overlay`, plus the edge highlight and offset shadow a skin can turn on           |
+| `backdrop-surface`, `canvas-wash`                      | `--rx-surface-opacity`, `--rx-surface-backdrop`, `--rx-surface-wash`: the hooks of the glass skin, inert in a theme |
+| `duration-fast`, `duration-base`, `duration-slow`      | `--rx-motion-duration-fast`, `-base`, `-slow`                                                                       |
+| `ease-standard`, `ease-enter`, `ease-exit`             | `--rx-motion-easing-standard`, `-enter`, `-exit`                                                                    |
+| `font-sans`, `font-display`, `font-mono`               | `--rx-font-family-sans`, `-display`, `-mono`                                                                        |
+| `numeric`                                              | `--rx-font-family-numeric`, with tabular, lining figures                                                            |
 
 A component token is used directly: `h-(--rx-button-height-md)`.
 
@@ -105,9 +106,11 @@ tokens. Use it for a preview, a tenant's own theme, or a dark panel in a light p
 
 ### Skins
 
-A [skin](/docs/theming/skins) restyles type, corners, border width, rhythm and control sizes on top
-of any theme, in both modes: `dense` for data-heavy apps, `editorial` for serif headings and
-hairlines. Add one with `rectio add skin-dense` and set `data-skin="dense"`.
+A [skin](/docs/theming/skins) restyles type, corners, borders, rhythm, control sizes and how
+surfaces float on top of any theme, in both modes: `dense` for data-heavy apps, `editorial` for
+serif headings and hairlines, and two opt-in looks, `glass` (translucent surfaces over a blurred
+backdrop) and `brutalist` (ink borders, square corners, hard offset shadows). Add one with
+`rectio add skin-dense` and set `data-skin="dense"`.
 
 ### Compact density
 
