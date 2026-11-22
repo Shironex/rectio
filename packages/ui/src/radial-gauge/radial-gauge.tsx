@@ -220,7 +220,7 @@ export function RadialGauge({
                 key={`${band.label}-${String(band.to)}`}
                 d={arc(share(band.from), share(band.to), BAND_R)}
                 strokeWidth={2}
-                className={STROKE[band.tone]}
+                className={cn('rx-mark', STROKE[band.tone])}
                 data-chart-mark="fade"
               />
             ))}
@@ -239,7 +239,7 @@ export function RadialGauge({
               // A zero value draws nothing rather than a round dot of the line cap.
               strokeOpacity={filled === 0 ? 0 : 1}
               data-chart-mark="sweep"
-              className={cn(STROKE[color], glide)}
+              className={cn('rx-mark', STROKE[color], glide)}
             />
             {marker !== undefined && (
               <line

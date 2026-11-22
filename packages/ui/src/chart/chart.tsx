@@ -306,7 +306,7 @@ export function mergeMessages<T extends object>(defaults: T, overrides?: Partial
 /**
  * What a chart draws, so its loading state takes the same shape and the motion add-on knows which
  * entrance to play. The SVG and HTML charts (funnel, heatmap, gauge) mark their moving parts with
- * `data-chart-mark`: `grow-x` and `grow-y` grow from their start edge, `fade` fades in, `sweep`
+ * the `rx-mark` class and say how with `data-chart-mark`: `grow-x` and `grow-y` grow from their start edge, `fade` fades in, `sweep`
  * draws an arc along its length, and `reveal` uncovers the whole mark from the start side.
  */
 export type ChartKind = 'line' | 'area' | 'bar' | 'donut' | 'funnel' | 'heatmap' | 'gauge';

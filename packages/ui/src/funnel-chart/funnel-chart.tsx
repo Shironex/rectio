@@ -222,7 +222,7 @@ export function FunnelChart({
     <span
       aria-hidden
       data-chart-mark="fade"
-      className={cn('absolute rounded-badge bg-chart-reference opacity-60', glide)}
+      className={cn('rx-mark absolute rounded-badge bg-chart-reference opacity-60', glide)}
       style={{
         backgroundImage: HATCH,
         ...(vertical
@@ -292,7 +292,7 @@ export function FunnelChart({
                 {dropOff && index > 0 && band(step.previousLength, step.length)}
                 <span
                   data-chart-mark="grow-y"
-                  className={cn('absolute inset-x-0 bottom-0 rounded-badge', bar, glide)}
+                  className={cn('rx-mark absolute inset-x-0 bottom-0 rounded-badge', bar, glide)}
                   style={{ height: percentOf(step.length) }}
                 />
               </div>
@@ -336,7 +336,7 @@ export function FunnelChart({
                   {dropOff && index > 0 && band(step.previousLength, step.length)}
                   <span
                     data-chart-mark="grow-x"
-                    className={cn('absolute inset-y-0 start-0 rounded-badge', bar, glide)}
+                    className={cn('rx-mark absolute inset-y-0 start-0 rounded-badge', bar, glide)}
                     style={{ width: percentOf(step.length) }}
                   />
                 </div>

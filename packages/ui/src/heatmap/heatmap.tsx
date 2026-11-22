@@ -468,7 +468,7 @@ export function Heatmap(props: HeatmapProps) {
               setHover(null);
             }}
             data-chart-mark="reveal"
-            className={cn('grid min-w-full', calendar ? 'w-max gap-0.5' : 'gap-1')}
+            className={cn('rx-mark grid min-w-full', calendar ? 'w-max gap-0.5' : 'gap-1')}
             style={{
               gridTemplateColumns: calendar
                 ? `auto repeat(${String(columnCount)}, minmax(calc(var(--spacing) * 2.5), 1fr))`
