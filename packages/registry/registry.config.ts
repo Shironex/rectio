@@ -248,7 +248,7 @@ export default defineRegistry({
     {
       name: 'cn',
       type: 'lib',
-      version: '0.2.1',
+      version: '0.3.0',
       title: 'cn',
       description: 'Class name merging that knows the rectio token utilities.',
       files: ['lib/cn.ts'],
@@ -652,7 +652,7 @@ export default defineRegistry({
     {
       name: 'switch',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Switch',
       description: 'A switch for settings that apply at once, with a label-beside settings row.',
       categories: ['forms'],
@@ -670,7 +670,7 @@ export default defineRegistry({
     {
       name: 'toggle',
       type: 'component',
-      version: '0.2.1',
+      version: '0.2.2',
       title: 'Toggle, toggle group and segmented control',
       description:
         'Pressed-state buttons, a toggle group for single or multiple choice, and a segmented control driven by options.',
@@ -680,7 +680,7 @@ export default defineRegistry({
     {
       name: 'slider',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Slider',
       description: 'Single and range slider with Intl-formatted values and marks.',
       categories: ['forms'],
@@ -781,7 +781,7 @@ export default defineRegistry({
     {
       name: 'tabs',
       type: 'component',
-      version: '0.1.4',
+      version: '0.1.5',
       title: 'Tabs',
       description: 'Line and segmented tabs with an indicator measured by Base UI.',
       categories: ['navigation'],
@@ -1262,7 +1262,7 @@ export default defineRegistry({
           'Segmented controls whose chosen chip slides to the new choice, across rows too.',
           ['toggle/toggle.tsx'],
           'component',
-          '0.2.0',
+          '0.2.1',
         ),
         motionItem(
           'file-upload',

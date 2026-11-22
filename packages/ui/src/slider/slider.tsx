@@ -125,7 +125,7 @@ export function Slider({
                 ? { 'aria-label': thumbLabels[index] }
                 : {})}
               className={cn(
-                'size-4 rounded-full border-2 border-accent bg-surface-raised shadow-raised select-none',
+                'size-4 rounded-full border-2 border-accent bg-surface-raised shadow-indicator select-none',
                 'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus',
                 'data-invalid:border-negative',
                 'data-disabled:border-fg-disabled data-disabled:shadow-none',

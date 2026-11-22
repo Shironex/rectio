@@ -7,6 +7,7 @@ describe('cn', () => {
     expect(cn('rounded-control', 'rounded-panel')).toBe('rounded-panel');
     expect(cn('duration-fast', 'duration-slow')).toBe('duration-slow');
     expect(cn('shadow-raised', 'shadow-overlay')).toBe('shadow-overlay');
+    expect(cn('shadow-raised', 'shadow-indicator')).toBe('shadow-indicator');
     expect(cn('font-medium', 'font-strong')).toBe('font-strong');
   });
 

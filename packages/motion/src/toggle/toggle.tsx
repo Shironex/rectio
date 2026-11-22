@@ -17,7 +17,7 @@ export type { SegmentedControlProps, ToggleGroupProps };
 /** The chip drawn for the whole group: the same raised surface and edge as a pressed segment. */
 const INDICATOR = cn(
   'pointer-events-none absolute top-0 left-0 rounded-(--rx-button-radius) opacity-0',
-  'bg-surface-overlay shadow-raised ring-1 ring-line-strong',
+  'bg-surface-overlay shadow-indicator ring-1 ring-line-strong',
 );
 
 /**

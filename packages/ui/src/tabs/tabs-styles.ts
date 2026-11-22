@@ -17,6 +17,6 @@ export const tabsIndicator: Record<TabsVariant, string> = {
   ),
   segmented: cn(
     'pointer-events-none absolute top-(--active-tab-top) left-0 -z-1 h-(--active-tab-height) w-(--active-tab-width) translate-x-(--active-tab-left)',
-    'rounded-control bg-surface-overlay shadow-raised ring-1 ring-line-strong',
+    'rounded-control bg-surface-overlay shadow-indicator ring-1 ring-line-strong',
   ),
 };
