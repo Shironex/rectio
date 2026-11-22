@@ -56,16 +56,24 @@ export interface MarkdownParseOptions {
 export const DEFAULT_PROTOCOLS: readonly string[] = ['http', 'https', 'mailto', 'tel'];
 
 /**
- * Every character a browser drops or ignores in an address: C0 and C1 controls, every Unicode
+ * What a browser drops at either end of an address: C0 and C1 controls, every Unicode
  * space (no-break, ideographic, line and paragraph separators) and invisible format characters
  * such as the byte order mark and zero-width joiners.
  */
+const URL_EDGE =
+  // eslint-disable-next-line no-control-regex -- control characters are exactly what is removed
+  /^[\u0000-\u0020\u007F-\u00A0\p{White_Space}\p{Cf}]+|[\u0000-\u0020\u007F-\u00A0\p{White_Space}\p{Cf}]+$/gu;
+/** Controls and invisible format characters inside an address: dropped, as browsers drop tabs. */
 // eslint-disable-next-line no-control-regex -- control characters are exactly what is removed
-const URL_INVISIBLE = /[\u0000-\u0020\u007F-\u00A0\p{White_Space}\p{Cf}]/gu;
+const URL_DROPPED = /[\u0000-\u001F\u007F-\u009F\p{Cf}]/gu;
+/** Spaces inside an address, such as a mail subject: kept, percent-encoded. */
+const URL_SPACE = /\p{White_Space}/gu;
 
 /**
- * The address if it is safe to put in an `href`, else null. Entities are decoded and every
- * invisible character removed first, and the scheme is read from exactly the string returned, so
+ * The address if it is safe to put in an `href`, else null. Entities are decoded, invisible
+ * characters at the ends and controls inside are removed, and spaces inside are percent-encoded
+ * (`?subject=Hello World` keeps its space as `%20`). The scheme is read from exactly the string
+ * returned, so
  * `java\tscript:`, `&#106;avascript:` and a no-break space before `javascript:` cannot slip
  * through. An address with a scheme outside `allowedProtocols` is refused.
  */
@@ -73,7 +81,10 @@ export function safeUrl(
   url: string,
   allowedProtocols: readonly string[] = DEFAULT_PROTOCOLS,
 ): string | null {
-  const cleaned = decodeEntities(url).replace(URL_INVISIBLE, '');
+  const cleaned = decodeEntities(url)
+    .replace(URL_EDGE, '')
+    .replace(URL_DROPPED, '')
+    .replace(URL_SPACE, (space) => encodeURIComponent(space));
   if (cleaned === '') return null;
   // A scheme is whatever comes before the first colon that precedes any path, query or fragment.
   const scheme = /^([^/?#\\]*?):/.exec(cleaned);
@@ -126,6 +137,8 @@ interface InlineContext {
   autoClose: boolean;
   /** How deep in emphasis and links this text sits. */
   depth?: number | undefined;
+  /** False scans for closers without memory: slower, for checking that the memory changes nothing. */
+  memo?: boolean | undefined;
 }
 
 /** Emphasis and links nest this deep at most; deeper markers stay as text. */
@@ -158,28 +171,35 @@ function bracketPairs(text: string): Map<number, number> {
 function readDestination(
   text: string,
   open: number,
+  closeOf: (open: number) => number,
 ): { url: string; title?: string; end: number } | { partial: true } | null {
   if (text[open] !== '(') return null;
-  let depth = 0;
-  for (let i = open; i < text.length; i += 1) {
+  const close = closeOf(open);
+  // No closing parenthesis anywhere after it: the address is still arriving, or never ends.
+  if (close === -1) return { partial: true };
+  const inner = text.slice(open + 1, close).trim();
+  const titled = /^(\S*)\s+(?:"([^"]*)"|'([^']*)')$/.exec(inner);
+  const url = (titled?.[1] ?? inner).replace(/^<(.*)>$/, '$1');
+  const title = titled?.[2] ?? titled?.[3];
+  return title === undefined ? { url, end: close + 1 } : { url, title, end: close + 1 };
+}
+
+/** Every `(` that is closed, mapped to its `)`, skipping escapes, found in one pass. */
+function parenPairs(text: string): Map<number, number> {
+  const pairs = new Map<number, number>();
+  const open: number[] = [];
+  for (let i = 0; i < text.length; i += 1) {
     const char = text[i];
     if (char === '\\') {
       i += 1;
-      continue;
-    }
-    if (char === '(') depth += 1;
-    if (char === ')') {
-      depth -= 1;
-      if (depth === 0) {
-        const inner = text.slice(open + 1, i).trim();
-        const titled = /^(\S*)\s+(?:"([^"]*)"|'([^']*)')$/.exec(inner);
-        const url = (titled?.[1] ?? inner).replace(/^<(.*)>$/, '$1');
-        const title = titled?.[2] ?? titled?.[3];
-        return title === undefined ? { url, end: i + 1 } : { url, title, end: i + 1 };
-      }
+    } else if (char === '(') {
+      open.push(i);
+    } else if (char === ')') {
+      const start = open.pop();
+      if (start !== undefined) pairs.set(start, i);
     }
   }
-  return { partial: true };
+  return pairs;
 }
 
 /** Whether a run of delimiters may open (or close) emphasis, by the characters around it. */
@@ -195,30 +215,36 @@ function flanking(text: string, start: number, end: number) {
   return { left, right, before, after };
 }
 
-/** Finds the closing run for an opener of `marker`, skipping code spans and escapes. */
-function findCloser(
-  text: string,
-  from: number,
-  marker: string,
-  failed: Map<string, number>,
-): number {
-  // A scan that found no closer from an earlier point finds none from a later one either: this
-  // keeps a long run of unclosed openers linear instead of quadratic.
-  const known = failed.get(marker);
-  if (known !== undefined && from >= known) return -1;
-  const found = scanCloser(text, from, marker, failed);
-  if (found === -1) failed.set(marker, Math.min(known ?? from, from));
-  return found;
-}
+/**
+ * Positions where a closer scan for each marker is known to fail, or null to scan without memory.
+ * A scan's path through the text depends only on where it stands, so once a later scan lands on a
+ * position an earlier failed scan passed through, it fails the same way (it can only reject more,
+ * never accept more). Marking those positions keeps a long run of unclosed openers linear and
+ * returns exactly what a scan without memory would.
+ */
+type DeadEnds = Map<string, Uint8Array> | null;
 
-function scanCloser(
-  text: string,
-  from: number,
-  marker: string,
-  failed: Map<string, number>,
-): number {
+/** Finds the closing run for an opener of `marker`, skipping code spans and escapes. */
+function findCloser(text: string, from: number, marker: string, dead: DeadEnds): number {
+  let marks: Uint8Array | undefined;
+  if (dead !== null) {
+    marks = dead.get(marker);
+    if (marks === undefined) {
+      marks = new Uint8Array(text.length + 1);
+      dead.set(marker, marks);
+    }
+  }
+  const path: number[] = [];
+  const fail = () => {
+    if (marks !== undefined) for (const at of path) marks[at] = 1;
+    return -1;
+  };
   const char = marker[0] ?? '';
   for (let i = from; i < text.length; i += 1) {
+    if (marks !== undefined) {
+      if (marks[i] === 1) return fail();
+      path.push(i);
+    }
     const c = text[i];
     if (c === '\\') {
       i += 1;
@@ -236,7 +262,7 @@ function scanCloser(
     const length = end - i;
     // A double run inside `*...*` is its own strong span, not two closers.
     if (marker.length === 1 && length === 2) {
-      const inner = findCloser(text, end, char + char, failed);
+      const inner = findCloser(text, end, char + char, dead);
       if (inner !== -1) {
         i = inner + 1;
         continue;
@@ -251,7 +277,7 @@ function scanCloser(
     }
     return at;
   }
-  return -1;
+  return fail();
 }
 
 export function parseInline(text: string, context: InlineContext): MarkdownInline[] {
@@ -260,11 +286,16 @@ export function parseInline(text: string, context: InlineContext): MarkdownInlin
   const nested = { ...context, depth: depth + 1 };
   // Past the depth cap, links and emphasis are read as plain text.
   const deep = depth >= MAX_INLINE_DEPTH;
-  const failed = new Map<string, number>();
+  const failed: DeadEnds = context.memo === false ? null : new Map<string, Uint8Array>();
   let pairs: Map<number, number> | null = null;
   const closingBracket = (open: number) => {
     pairs ??= bracketPairs(text);
     return pairs.get(open) ?? -1;
+  };
+  let parens: Map<number, number> | null = null;
+  const closingParen = (open: number) => {
+    parens ??= parenPairs(text);
+    return parens.get(open) ?? -1;
   };
   let buffer = '';
   const flush = () => {
@@ -325,7 +356,7 @@ export function parseInline(text: string, context: InlineContext): MarkdownInlin
 
     if (char === '!' && text[i + 1] === '[') {
       const close = closingBracket(i + 1);
-      const destination = close === -1 ? null : readDestination(text, close + 1);
+      const destination = close === -1 ? null : readDestination(text, close + 1, closingParen);
       if (destination !== null && !('partial' in destination)) {
         flush();
         out.push({
@@ -347,18 +378,19 @@ export function parseInline(text: string, context: InlineContext): MarkdownInlin
 
     if (char === '[' && !deep) {
       const close = closingBracket(i);
-      const destination = close === -1 ? null : readDestination(text, close + 1);
+      const destination = close === -1 ? null : readDestination(text, close + 1, closingParen);
       if (destination !== null) {
         const label = text.slice(i + 1, close);
-        flush();
         if ('partial' in destination) {
           if (context.autoClose) {
+            flush();
             // The address is still arriving: show the words, link them once it is complete.
             out.push({ type: 'link', href: null, children: parseInline(label, nested) });
             i = text.length;
             continue;
           }
         } else {
+          flush();
           out.push({
             type: 'link',
             href: safeUrl(destination.url, context.protocols),
@@ -771,7 +803,12 @@ function parseBlocks(lines: readonly string[], context: BlockContext): MarkdownB
  * only the rest as words arrive. 0 when there is no such line.
  */
 export function stableBoundary(source: string): number {
-  let boundary = 0;
+  return stableBoundaries(source).at(-1) ?? 0;
+}
+
+/** Every such boundary in order, so the finished part can be parsed block by block. */
+export function stableBoundaries(source: string): number[] {
+  const boundaries: number[] = [];
   let fence: string | null = null;
   let previousBlank = false;
   let offset = 0;
@@ -794,12 +831,12 @@ export function stableBoundary(source: string): number {
       !LIST_ITEM.test(line) &&
       !QUOTE.test(line)
     ) {
-      boundary = start;
+      boundaries.push(start);
     }
     if (opener !== null) fence = opener[2] ?? null;
     previousBlank = blank;
   }
-  return boundary;
+  return boundaries;
 }
 
 /** Parses Markdown into blocks. Tabs count as four spaces; Windows line ends are normalised. */

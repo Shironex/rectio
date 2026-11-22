@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { LinkProvider } from '../link/link';
 import { Markdown, markdownToText, parseMarkdown, safeUrl } from './markdown';
-import { stableBoundary, type MarkdownBlock } from './markdown-parse';
+import { parseInline, stableBoundary, type MarkdownBlock } from './markdown-parse';
 
 describe('parseMarkdown', () => {
   it('reads headings, paragraphs, rules and quotes', () => {
@@ -236,6 +236,15 @@ describe('safeUrl against hostile addresses', () => {
     expect(addresses('[a](< data:text/html,<script>alert(1)</script>>)')).toEqual([null]);
   });
 
+  it('keeps spaces inside an address, percent-encoded, and still refuses a spaced scheme', () => {
+    expect(safeUrl('mailto:ap@example.com?subject=Hello World')).toBe(
+      'mailto:ap@example.com?subject=Hello%20World',
+    );
+    expect(safeUrl('/files/q3 report.pdf')).toBe('/files/q3%20report.pdf');
+    expect(safeUrl('java script:alert(1)')).toBeNull();
+    expect(safeUrl('java\u3000script:alert(1)')).toBeNull();
+  });
+
   it('returns exactly the string it checked', () => {
     expect(safeUrl('\u00a0https://example.com/a\u3000')).toBe('https://example.com/a');
     expect(safeUrl(' /docs/cli ')).toBe('/docs/cli');
@@ -284,6 +293,9 @@ describe('parseMarkdown against hostile input', () => {
     parseMarkdown('*a '.repeat(20000));
     parseMarkdown('_a '.repeat(20000), { streaming: true });
     parseMarkdown('['.repeat(20000) + 'a');
+    parseMarkdown('[a]('.repeat(20000));
+    parseMarkdown('![a]('.repeat(20000));
+    markdownToText('[a]('.repeat(20000));
     parseMarkdown(Array.from({ length: 2000 }, (_, i) => '  '.repeat(i) + '- a').join('\n'));
     expect(performance.now() - started).toBeLessThan(3000);
   });
@@ -310,5 +322,57 @@ describe('stableBoundary', () => {
       ...parseMarkdown(text.slice(at), { streaming: true }),
     ];
     expect(parts).toEqual(parseMarkdown(text, { streaming: true }));
+  });
+});
+
+describe('emphasis closer memory', () => {
+  // A small seeded generator, so a failure always reproduces.
+  function random(seed: number) {
+    let state = seed;
+    return () => {
+      state = (state * 1103515245 + 12345) % 2147483648;
+      return state / 2147483648;
+    };
+  }
+
+  it('parses exactly as a scan without memory on thousands of generated strings', () => {
+    const next = random(20261122);
+    const alphabet = ['*', '*', '_', '~', '`', '\\', ' ', 'a', 'b', '[', ']', '(', ')'];
+    const differ: string[] = [];
+    for (let n = 0; n < 4000; n += 1) {
+      const length = 1 + Math.floor(next() * 24);
+      let text = '';
+      for (let i = 0; i < length; i += 1)
+        text += alphabet[Math.floor(next() * alphabet.length)] ?? '';
+      for (const autoClose of [false, true]) {
+        const base = { protocols: ['https'], autoClose };
+        const remembered = JSON.stringify(parseInline(text, base));
+        const plain = JSON.stringify(parseInline(text, { ...base, memo: false }));
+        if (remembered !== plain) differ.push(JSON.stringify(text));
+      }
+    }
+    expect(differ).toEqual([]);
+  });
+
+  it('agrees with a scan without memory on a case an earlier memory got wrong', () => {
+    const text = '\\**b**~~` *a** *';
+    expect(parseInline(text, { protocols: [], autoClose: false })).toEqual(
+      parseInline(text, { protocols: [], autoClose: false, memo: false }),
+    );
+  });
+});
+
+describe('Markdown while streaming', () => {
+  it('parses a finished hostile paragraph once, not again for every paragraph after it', () => {
+    const hostile = '[a]('.repeat(20000);
+    const { rerender } = render(<Markdown streaming>{hostile}</Markdown>);
+    const started = performance.now();
+    let text = hostile;
+    for (let n = 0; n < 5; n += 1) {
+      text += `\n\nParagraph ${String(n)} arrives`;
+      rerender(<Markdown streaming>{text}</Markdown>);
+    }
+    expect(performance.now() - started).toBeLessThan(2000);
+    expect(screen.getByText('Paragraph 4 arrives')).toBeInTheDocument();
   });
 });

@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { cn } from '../lib/cn';
 import {
   parseMarkdown,
-  stableBoundary,
+  stableBoundaries,
   type MarkdownAlign,
   type MarkdownBlock,
   type MarkdownInline,
@@ -489,6 +489,27 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
   });
 }
 
+/** Finished blocks of streaming replies, parsed once each; kept small, oldest dropped first. */
+const FINISHED = new Map<string, MarkdownBlock[]>();
+const FINISHED_LIMIT = 256;
+
+function parseFinished(
+  segment: string,
+  allowedProtocols: readonly string[] | undefined,
+): MarkdownBlock[] {
+  if (segment === '') return [];
+  const key = `${(allowedProtocols ?? []).join(',')}\u0000${segment}`;
+  const known = FINISHED.get(key);
+  if (known !== undefined) return known;
+  const blocks = parseMarkdown(segment, { allowedProtocols });
+  if (FINISHED.size >= FINISHED_LIMIT) {
+    const oldest = FINISHED.keys().next().value;
+    if (oldest !== undefined) FINISHED.delete(oldest);
+  }
+  FINISHED.set(key, blocks);
+  return blocks;
+}
+
 /**
  * Markdown as themed React elements: headings, paragraphs, emphasis, inline code, code blocks,
  * lists, quotes, tables and links. It never renders HTML from the text, so raw tags show as
@@ -511,12 +532,17 @@ export function Markdown({
 }: MarkdownProps) {
   // While text streams, the finished blocks are parsed once and only the part still arriving is
   // parsed again on each new word, so a long reply costs the same per word as a short one.
-  const split = streaming ? stableBoundary(children) : 0;
+  const cuts = useMemo(() => (streaming ? stableBoundaries(children) : []), [children, streaming]);
+  const split = cuts.at(-1) ?? 0;
   const head = children.slice(0, split);
   const tail = children.slice(split);
   const headBlocks = useMemo(
-    () => (head === '' ? [] : parseMarkdown(head, { allowedProtocols })),
-    [head, allowedProtocols],
+    () =>
+      // Each finished block is parsed once, however many more arrive after it.
+      cuts.flatMap((cut, index) =>
+        parseFinished(head.slice(index === 0 ? 0 : (cuts[index - 1] ?? 0), cut), allowedProtocols),
+      ),
+    [cuts, head, allowedProtocols],
   );
   const tailBlocks = useMemo(
     () => parseMarkdown(tail, { streaming, allowedProtocols }),
