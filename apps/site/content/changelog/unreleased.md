@@ -43,6 +43,20 @@ summary: Work that is merging into main now and ships with the next release.
 - Motion twins in `@rectio/motion/charts`: lines draw along time with a dot on the drawing edge, bars
   grow from zero, the ring settles in, and new figures glide in.
 - A time series chart block: a chart card whose headline is each series' latest figure and change.
+- `TimeField`: a segmented time of day with a 12 or 24 hour clock from the locale, minute steps,
+  bounds that arrows and Home and End stop at, and one name for the whole field.
+- `RangeCalendar`: two months inline with presets, a range previewed from the pointer and the keys,
+  and a spoken summary of the days picked. `DateRangePicker` opens it in its popup.
+- `EventCard`: an event in six tones, with tentative and cancelled said in words and an icon, full
+  and compact layouts, and all-day ends read as exclusive local dates.
+- A week agenda block for a day or a week: overlaps side by side, an all-day row, an "N more" button
+  for a crowded hour, the current time, slot presses and a list on phones and touch screens. Hours
+  follow the wall clock across a clock change.
+- Agenda hour height and gutter width tokens, in tokens 0.5.0.
+- `localDate('2026-03-16')` from the main entry builds a local calendar date for charts, events and
+  the agenda.
+- The SaaS blocks read the clock again every minute when no `now` is passed, so relative times and
+  the agenda time line keep up (saas-core 0.2.0).
 
 ## Templates
 
