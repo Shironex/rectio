@@ -15,6 +15,7 @@ export {
   ChartLegend,
   ChartMotionProvider,
   ChartTooltip,
+  HATCH,
   Swatch,
   TOOLTIP_LIFT,
   activeDatum,
@@ -27,6 +28,7 @@ export {
   useChartMotion,
   useElementWidth,
   useMarkAnimation,
+  useMarkGlide,
   type ChartColor,
   type ChartFrameProps,
   type ChartKind,
@@ -91,3 +93,41 @@ export {
   type DonutChartProps,
   type DonutSlice,
 } from './donut-chart/donut-chart';
+export {
+  FUNNEL_CHART_MESSAGES,
+  FunnelChart,
+  funnelSteps,
+  type FunnelChartMessages,
+  type FunnelChartProps,
+  type FunnelStage,
+  type FunnelStep,
+} from './funnel-chart/funnel-chart';
+export {
+  HEATMAP_MESSAGES,
+  Heatmap,
+  heatStep,
+  type HeatmapAxisItem,
+  type HeatmapCalendarProps,
+  type HeatmapCell,
+  type HeatmapDay,
+  type HeatmapMatrixProps,
+  type HeatmapMessages,
+  type HeatmapProps,
+} from './heatmap/heatmap';
+export {
+  WATERFALL_CHART_MESSAGES,
+  WaterfallChart,
+  waterfallBars,
+  type WaterfallBar,
+  type WaterfallChartMessages,
+  type WaterfallChartProps,
+  type WaterfallRole,
+  type WaterfallStep,
+} from './waterfall-chart/waterfall-chart';
+export {
+  RADIAL_GAUGE_MESSAGES,
+  RadialGauge,
+  type GaugeBand,
+  type RadialGaugeMessages,
+  type RadialGaugeProps,
+} from './radial-gauge/radial-gauge';

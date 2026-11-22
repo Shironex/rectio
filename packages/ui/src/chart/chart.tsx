@@ -64,6 +64,13 @@ const SWATCH: Record<ChartColor, string> = {
   reference: 'bg-chart-reference',
 };
 
+/**
+ * Diagonal stripes of the surface over a mark's colour: the second channel, beside colour, for a
+ * mark that must read apart without telling colours apart (a decrease, a drop-off, a repeat colour).
+ */
+export const HATCH =
+  'repeating-linear-gradient(135deg, transparent 0 2px, var(--rx-surface) 2px 3px)';
+
 /** How a legend key is drawn: a square for bars, a rule for lines, a broken rule for forecasts. */
 export type SwatchShape = 'bar' | 'hatched' | 'line' | 'dashed';
 
@@ -89,10 +96,7 @@ export function Swatch({
       <span
         aria-hidden
         className={cn('inline-block size-2.5 shrink-0 rounded-badge', SWATCH[color])}
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(135deg, transparent 0 2px, var(--rx-surface) 2px 3px)',
-        }}
+        style={{ backgroundImage: HATCH }}
       />
     );
   }
@@ -299,8 +303,13 @@ export function mergeMessages<T extends object>(defaults: T, overrides?: Partial
   return overrides === undefined ? defaults : { ...defaults, ...overrides };
 }
 
-/** What a chart draws, so its loading state takes the same shape. */
-export type ChartKind = 'line' | 'area' | 'bar' | 'donut';
+/**
+ * What a chart draws, so its loading state takes the same shape and the motion add-on knows which
+ * entrance to play. The SVG and HTML charts (funnel, heatmap, gauge) mark their moving parts with
+ * `data-chart-mark`: `grow-x` and `grow-y` grow from their start edge, `fade` fades in, `sweep`
+ * draws an arc along its length, and `reveal` uncovers the whole mark from the start side.
+ */
+export type ChartKind = 'line' | 'area' | 'bar' | 'donut' | 'funnel' | 'heatmap' | 'gauge';
 
 export interface ChartStageProps {
   kind: ChartKind;
@@ -346,6 +355,17 @@ export function ChartMotionProvider({
 
 export function useChartMotion(): ChartMotion {
   return use(ChartMotionContext);
+}
+
+/**
+ * The CSS transition for an HTML or SVG mark that changes size with the data: none in the plain
+ * charts, a token-timed glide in the motion ones (after their entrance), so new figures travel.
+ */
+export function useMarkGlide(): string | undefined {
+  const { animateUpdates } = useChartMotion();
+  return animateUpdates
+    ? 'transition-[width,height,stroke-dasharray,background-color] duration-slow ease-standard'
+    : undefined;
 }
 
 /** Recharts animation props for a mark: still in the plain charts, a short glide in the motion ones. */
@@ -440,10 +460,47 @@ export function ChartDataTable({ caption, headers, rows, footer }: ChartTableDat
 const SKELETON_BARS = [46, 62, 38, 71, 55, 84, 66, 49, 77];
 
 /** A chart on its way, in the plot's own size and shape, announced once. */
+const SKELETON_FUNNEL = [100, 72, 47, 31];
+
 function ChartLoading({ kind, label }: { kind: ChartKind; label: string }) {
+  if (kind === 'funnel' || kind === 'heatmap') {
+    return (
+      <div role="status" aria-label={label} className="relative size-full">
+        {kind === 'funnel' ? (
+          <div className="flex size-full flex-col justify-center gap-5">
+            {SKELETON_FUNNEL.map((width, index) => (
+              <div key={index} className="flex flex-col gap-2">
+                <Skeleton index={index} animation="pulse" className="h-3 w-24" />
+                <Skeleton
+                  index={index}
+                  animation="pulse"
+                  className="h-6"
+                  style={{ width: `${String(width)}%` }}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div
+            className="grid size-full gap-1"
+            style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}
+          >
+            {Array.from({ length: 16 * 7 }, (_, index) => (
+              <Skeleton
+                key={index}
+                index={index % 9}
+                animation="pulse"
+                className="min-h-2 rounded-badge"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
   return (
     <div role="status" aria-label={label} className="relative size-full">
-      {kind === 'donut' ? (
+      {kind === 'donut' || kind === 'gauge' ? (
         <div className="relative flex size-full items-center justify-center">
           <Skeleton animation="pulse" className="aspect-square h-4/5 max-h-48 rounded-full" />
           {/* The hole of the ring, in the surface colour. */}
