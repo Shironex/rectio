@@ -2170,9 +2170,15 @@ export default defineRegistry({
           version: '0.1.0',
           title: 'People core',
           description:
-            'Calendar days as plain strings that a clock change never moves, working days that skip weekends and holidays, day and range formatting, the confirm step with a reason field and the avatar the people blocks share.',
+            'Calendar days as plain strings that a clock change never moves, working days that skip weekends and holidays, day and range formatting, the confirm step with a reason field, the avatar and the Show more paging the people blocks share.',
           categories: ['people', 'blocks'],
-          files: ['lib/days.ts', 'lib/format.ts', 'lib/confirm.tsx', 'lib/person.tsx'],
+          files: [
+            'lib/days.ts',
+            'lib/format.ts',
+            'lib/confirm.tsx',
+            'lib/person.tsx',
+            'lib/more.tsx',
+          ],
         },
         {
           name: 'timesheet',
