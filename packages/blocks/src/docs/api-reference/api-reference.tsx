@@ -1,4 +1,4 @@
-import { Tabs, TabsPanel, TabsTab, cn } from '@rectio/ui';
+import { Tabs, TabsPanel, TabsTab, cn, touchHitArea } from '@rectio/ui';
 import type { ReactNode } from 'react';
 
 import { CodeBlock } from '../code-block/code-block';
@@ -255,7 +255,10 @@ export function SignatureCard({
         <Heading id={id} className="scroll-mt-24 font-mono text-lg font-strong text-fg">
           <a
             href={`#${id}`}
-            className="rounded-control outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus"
+            className={cn(
+              'relative rounded-control outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus',
+              touchHitArea,
+            )}
           >
             {name}
           </a>
@@ -452,7 +455,10 @@ export function Endpoint({
         <Heading id={id} className="scroll-mt-24 font-display text-xl font-heading text-fg">
           <a
             href={`#${id}`}
-            className="rounded-control outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus"
+            className={cn(
+              'relative rounded-control outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus',
+              touchHitArea,
+            )}
           >
             {title}
           </a>

@@ -268,6 +268,8 @@ export function DocsLayout({
                 <Collapsible.Trigger
                   className={cn(
                     'group/toc flex min-h-11 w-full cursor-pointer items-center gap-2 px-4 text-sm font-medium text-fg',
+                    // Spacing scales with density and skin; the touch height does not.
+                    'pointer-coarse:min-h-(--rx-control-height-touch)',
                     'rounded-panel outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
                   )}
                 >

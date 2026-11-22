@@ -330,7 +330,7 @@ export function TeamMembers({
                       />
                     </span>
                   )}
-                  <span className="hidden items-center gap-2 @xl:flex pointer-coarse:gap-5">
+                  <span className="hidden items-center gap-2 @xl:flex pointer-coarse:gap-touch-gap">
                     {onResendInvite !== undefined && (
                       <Button
                         data-row-focus

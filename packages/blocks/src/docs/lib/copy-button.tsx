@@ -1,5 +1,5 @@
 import { CheckIcon, CopyIcon } from '@phosphor-icons/react';
-import { cn } from '@rectio/ui';
+import { cn, touchHitArea } from '@rectio/ui';
 import { useEffect, useRef, useState } from 'react';
 
 import { mergeMessages } from './messages';
@@ -71,7 +71,7 @@ export function CopyButton({ value, label, copiedLabel, messages, className }: C
           'transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg',
           'data-copied:text-positive-strong active:scale-96 motion-reduce:active:scale-100',
           'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
-          'pointer-coarse:after:absolute pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-(--rx-button-height-touch) pointer-coarse:after:-translate-1/2',
+          touchHitArea,
           className,
         )}
       >

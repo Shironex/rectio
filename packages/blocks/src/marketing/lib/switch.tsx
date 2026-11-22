@@ -1,5 +1,5 @@
 import { Switch as BaseSwitch } from '@base-ui/react/switch';
-import { cn } from '@rectio/ui';
+import { cn, touchHitArea } from '@rectio/ui';
 import type { ComponentProps } from 'react';
 
 /**
@@ -18,7 +18,7 @@ export function Switch({
         'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         'data-checked:border-accent data-checked:bg-accent',
         'data-disabled:cursor-not-allowed data-disabled:opacity-60',
-        'pointer-coarse:after:absolute pointer-coarse:after:-inset-2.5',
+        touchHitArea,
         className,
       )}
       {...props}

@@ -14,7 +14,7 @@ import {
   UserFocusIcon,
   type Icon,
 } from '@phosphor-icons/react';
-import { Anchor, EmptyState, ScrollArea, cn } from '@rectio/ui';
+import { Anchor, EmptyState, ScrollArea, cn, touchHitArea } from '@rectio/ui';
 import { useState, type ReactNode } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
@@ -27,7 +27,7 @@ import { Popover } from '../lib/popover';
 import { useNow } from '../lib/focus';
 import { formatDateTime, isoDateTime, relativeTime } from '../lib/saas';
 import { useSaasParts } from '../lib/saas-parts';
-import { focusRing, touchTarget } from '../lib/styles';
+import { focusRing } from '../lib/styles';
 import {
   unreadBadgeText,
   unreadNotificationCount,
@@ -112,7 +112,7 @@ export function NotificationsCenter({
             'transition-colors duration-fast ease-standard hover:bg-surface-hover hover:text-fg',
             'data-popup-open:bg-surface-hover data-popup-open:text-fg',
             focusRing,
-            touchTarget,
+            touchHitArea,
           )}
         >
           <BellIcon aria-hidden weight="bold" className="size-5" />

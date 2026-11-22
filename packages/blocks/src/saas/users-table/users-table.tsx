@@ -570,7 +570,7 @@ export function UsersTable({
                   </span>
                 )}
               </p>
-              <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-5">
+              <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-touch-gap">
                 {onChangeRole !== undefined && (
                   <ActionMenu
                     label="Change role of the selected users"

@@ -1,5 +1,5 @@
 import { CalendarBlankIcon, CaretLeftIcon, CaretRightIcon, PlusIcon } from '@phosphor-icons/react';
-import { cn, EventCard } from '@rectio/ui';
+import { cn, EventCard, touchHitArea } from '@rectio/ui';
 import {
   createContext,
   use,
@@ -20,7 +20,7 @@ import { resolveLocale } from '../../lib/finance';
 import { Segmented } from '../../lib/segmented';
 import { countLabel } from '../lib/saas';
 import { useNow } from '../lib/focus';
-import { focusRing, touchTarget } from '../lib/styles';
+import { focusRing } from '../lib/styles';
 import { Popover } from '../lib/popover';
 import {
   agendaDays,
@@ -240,7 +240,11 @@ export function WeekAgenda({
           />
         )}
         {onDateChange !== undefined && (
-          <div role="group" aria-label={`Change ${unit}`} className="flex items-center gap-1">
+          <div
+            role="group"
+            aria-label={`Change ${unit}`}
+            className="flex items-center gap-1 pointer-coarse:gap-touch-gap"
+          >
             <Button
               variant="secondary"
               size="sm"
@@ -503,7 +507,7 @@ function AgendaGrid({
                     'transition-opacity duration-fast ease-standard',
                     'pointer-fine:opacity-0 pointer-fine:group-hover/day:opacity-100 pointer-fine:focus-visible:opacity-100',
                     focusRing,
-                    touchTarget,
+                    touchHitArea,
                   )}
                 >
                   <PlusIcon aria-hidden weight="bold" className="size-3.5" />

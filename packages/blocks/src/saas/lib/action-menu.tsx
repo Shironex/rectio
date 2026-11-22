@@ -1,8 +1,16 @@
 import { DotsThreeIcon, type Icon } from '@phosphor-icons/react';
-import { cn, Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '@rectio/ui';
+import {
+  cn,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuSeparator,
+  MenuTrigger,
+  touchHitArea,
+} from '@rectio/ui';
 import type { ReactNode } from 'react';
 
-import { focusRing, touchTarget } from './styles';
+import { focusRing } from './styles';
 
 export interface MenuAction {
   id: string;
@@ -46,7 +54,7 @@ export function ActionMenu({ label, actions, trigger, align = 'end', className }
           'text-sm text-fg-muted transition-colors duration-fast ease-standard',
           'hover:bg-surface-hover hover:text-fg data-popup-open:bg-surface-hover data-popup-open:text-fg',
           focusRing,
-          touchTarget,
+          touchHitArea,
           className,
         )}
       >

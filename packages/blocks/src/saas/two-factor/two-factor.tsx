@@ -8,13 +8,14 @@ import {
   OtpInput,
   cn,
   type OtpInputProps,
+  touchHitArea,
 } from '@rectio/ui';
 import { useEffect, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { AuthFrame, AuthLink, type LinkTarget } from '../lib/auth';
 import { focusFirstInvalid } from '../lib/focus';
-import { inlineLink, touchTarget } from '../lib/styles';
+import { inlineLink } from '../lib/styles';
 import {
   backupCodeError,
   formatTwoFactorWait,
@@ -295,7 +296,7 @@ function ResendButton({
       className={cn(
         inlineLink,
         'relative',
-        touchTarget,
+        touchHitArea,
         // The countdown stays readable: muted text, only the link's underline goes.
         'disabled:cursor-not-allowed disabled:font-regular disabled:text-fg-muted disabled:no-underline',
       )}

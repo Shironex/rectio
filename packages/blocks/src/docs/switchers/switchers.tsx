@@ -1,5 +1,5 @@
 import { CaretUpDownIcon, CheckIcon, GlobeSimpleIcon } from '@phosphor-icons/react';
-import { Menu, MenuContent, MenuLinkItem, MenuTrigger, cn } from '@rectio/ui';
+import { Menu, MenuContent, MenuLinkItem, MenuTrigger, cn, touchHitArea } from '@rectio/ui';
 import type { ReactNode } from 'react';
 
 import { mergeMessages } from '../lib/messages';
@@ -28,7 +28,10 @@ const TRIGGER = cn(
   'transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg',
   'data-popup-open:bg-surface-hover data-popup-open:text-fg',
   'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
+  // Touch height on touch screens; the compact trigger, an icon alone, reaches the width through
+  // the hit area.
   'pointer-coarse:h-(--rx-button-height-touch)',
+  touchHitArea,
 );
 
 function Choices<T extends { value: string; label: string; href: string }>({

@@ -486,7 +486,9 @@ export function ExpenseApproval({
                     }}
                   >
                     {pending.length > 0 && (
-                      <TableCell className="w-0 pe-0">
+                      // On touch screens a little room after the box, so its hit area stays clear
+                      // of the decision buttons in the next cell at the dense skin's spacing too.
+                      <TableCell className="w-0 pe-0 pointer-coarse:pe-1">
                         {open && (
                           <span className="flex items-center">
                             <Checkbox

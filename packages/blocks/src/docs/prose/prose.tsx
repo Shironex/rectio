@@ -1,5 +1,5 @@
 import { LinkSimpleIcon } from '@phosphor-icons/react';
-import { cn } from '@rectio/ui';
+import { cn, touchHitArea } from '@rectio/ui';
 import type { ComponentProps, ReactNode } from 'react';
 
 import { mergeMessages } from '../lib/messages';
@@ -79,7 +79,10 @@ export function DocsHeading({
     >
       <a
         href={`#${anchor}`}
-        className="inline-flex items-center gap-2 rounded-control text-inherit no-underline outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus"
+        className={cn(
+          'relative inline-flex items-center gap-2 rounded-control text-inherit no-underline outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus',
+          touchHitArea,
+        )}
       >
         {children}
         <LinkSimpleIcon

@@ -1,5 +1,5 @@
 import { ArrowRightIcon, XIcon } from '@phosphor-icons/react/ssr';
-import { cn } from '@rectio/ui';
+import { cn, touchHitArea } from '@rectio/ui';
 import type { ReactNode } from 'react';
 
 import { Anchor, linkFocus, type MarketingAction } from '../lib/action';
@@ -89,7 +89,7 @@ export function AnnouncementBar({
             className={cn(
               'relative inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-control',
               accent ? 'pointer-fine:hover:bg-accent-hover' : 'pointer-fine:hover:bg-surface-hover',
-              'pointer-coarse:after:absolute pointer-coarse:after:size-(--rx-button-height-touch)',
+              touchHitArea,
               'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
             )}
           >

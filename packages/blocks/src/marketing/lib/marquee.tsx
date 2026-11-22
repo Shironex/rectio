@@ -1,7 +1,7 @@
 'use client';
 
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react';
-import { cn } from '@rectio/ui';
+import { cn, touchHitArea } from '@rectio/ui';
 import { useState, type ReactNode } from 'react';
 
 /**
@@ -70,7 +70,7 @@ export function Marquee({
           'relative inline-flex size-(--rx-button-height-sm) shrink-0 cursor-pointer items-center justify-center rounded-full text-fg-subtle',
           'transition-colors duration-fast ease-standard pointer-fine:hover:bg-surface-hover pointer-fine:hover:text-fg',
           'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus motion-reduce:hidden',
-          'pointer-coarse:after:absolute pointer-coarse:after:size-(--rx-button-height-touch)',
+          touchHitArea,
         )}
       >
         {paused ? (

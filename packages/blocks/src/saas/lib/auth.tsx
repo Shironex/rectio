@@ -1,9 +1,9 @@
 import { EyeIcon, EyeSlashIcon, WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
-import { Anchor, Input, cn, type InputProps } from '@rectio/ui';
+import { Anchor, Input, cn, type InputProps, touchHitArea } from '@rectio/ui';
 import { useEffect, useId, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
-import { focusRing, inlineLink, touchTarget } from './styles';
+import { focusRing, inlineLink } from './styles';
 
 export interface AuthFrameProps extends Omit<ComponentProps<'section'>, 'title'> {
   /** Your mark or product name, above the heading. */
@@ -152,7 +152,7 @@ export function PasswordInput({
           'absolute inset-y-0 end-0 my-auto me-1 inline-flex size-(--rx-button-height-sm) cursor-pointer items-center justify-center rounded-control',
           'text-fg-subtle transition-colors duration-fast ease-standard hover:bg-surface-hover hover:text-fg',
           focusRing,
-          touchTarget,
+          touchHitArea,
         )}
       >
         <Icon aria-hidden weight="bold" className="size-4" />
@@ -228,7 +228,7 @@ export function AuthLink({
   children: ReactNode;
 }) {
   // A 44px hit area on touch screens, without moving the text around it.
-  const classes = cn(inlineLink, 'relative', touchTarget, className);
+  const classes = cn(inlineLink, 'relative', touchHitArea, className);
   if (typeof to === 'string') {
     return (
       <Anchor href={to} className={classes}>

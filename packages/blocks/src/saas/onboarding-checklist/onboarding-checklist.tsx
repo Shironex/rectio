@@ -7,13 +7,13 @@ import {
   ConfettiIcon,
   ListChecksIcon,
 } from '@phosphor-icons/react';
-import { Anchor, cn } from '@rectio/ui';
+import { Anchor, cn, touchHitArea } from '@rectio/ui';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 
 import { useBlockParts } from '../../lib/block-parts';
 import { BlockPanel } from '../../lib/block-panel';
 import { EmptyNote } from '../../lib/empty-note';
-import { focusRing, inlineLink, touchTarget } from '../lib/styles';
+import { focusRing, inlineLink } from '../lib/styles';
 import {
   onboardingProgress,
   onboardingSummary,
@@ -77,7 +77,7 @@ export function OnboardingChecklist({
               'relative inline-flex h-(--rx-button-height-sm) cursor-pointer items-center gap-1.5 rounded-(--rx-button-radius) px-2 text-sm text-fg-muted',
               'transition-colors duration-fast ease-standard hover:bg-surface-hover hover:text-fg',
               focusRing,
-              touchTarget,
+              touchHitArea,
             )}
           >
             {collapsed ? 'Show steps' : 'Hide steps'}
@@ -330,7 +330,7 @@ function StepAction({ action, primary }: { action: OnboardingAction; primary: bo
     const link = cn(
       inlineLink,
       'relative inline-flex items-center gap-1.5 text-sm font-medium',
-      touchTarget,
+      touchHitArea,
     );
     return action.href !== undefined ? (
       <Anchor href={action.href} onClick={action.onSelect} className={link}>

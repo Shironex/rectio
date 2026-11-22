@@ -227,7 +227,7 @@ export function ProfileSettings({
                   size="lg"
                   className="size-20 text-2xl"
                 />
-                <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-5">
+                <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-touch-gap">
                   {onAvatarChange !== undefined && (
                     <>
                       <Button
