@@ -1832,7 +1832,7 @@ export default defineRegistry({
           'Code block',
           'Highlighted tokens from any build-time highlighter, file name, line highlights, line numbers, diff marks and copy.',
           'code-block',
-          { logic: true, version: '0.1.1' },
+          { logic: true, version: '0.1.2' },
         ),
         ...docsItems(
           'docs-code-tabs',
