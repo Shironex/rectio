@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
   ariaKeyShortcut,
   cn,
+  isModalDialogOpen,
   touchHitArea,
   useIsMac,
   useIsMobileLayout,
@@ -40,6 +41,7 @@ import {
 import { assistantSizes, shortcutAction } from './assistant-sidebar.logic';
 
 interface AssistantState {
+  /** Whether the panel shows: docked on a wide screen, the sheet on a phone. */
   open: boolean;
   /** Opens the panel and puts the focus in it, remembering where the reader was. */
   show: () => void;
@@ -69,7 +71,10 @@ export function useAssistantSidebar(): AssistantState {
 export interface AssistantSidebarProviderProps {
   /** Controlled: whether the panel is open. */
   open?: boolean | undefined;
-  /** Where the panel starts when uncontrolled; read it from a saved preference. */
+  /**
+   * Where the panel starts when uncontrolled; read it from a saved preference. Open at load docks
+   * it on a wide screen; on a phone the sheet stays closed until the reader opens it.
+   */
   defaultOpen?: boolean | undefined;
   onOpenChange?: ((open: boolean) => void) | undefined;
   /**
@@ -94,14 +99,20 @@ export function AssistantSidebarProvider({
 }: AssistantSidebarProviderProps) {
   const [openState, setOpenState] = useState(defaultOpen);
   const open = openProp ?? openState;
+  // Open at load with nobody having asked (a saved `defaultOpen`, say) docks the panel on a wide
+  // screen, but on a phone the sheet would cover the page, so there it waits for the first show.
+  const [openedAtLoad, setOpenedAtLoad] = useState(open);
+  if (openedAtLoad && !open) setOpenedAtLoad(false);
+  const mobile = useIsMobileLayout();
+  const visible = open && !(mobile && openedAtLoad);
   const panelId = useId();
   const panel = useRef<HTMLElement | null>(null);
   const rail = useRef<HTMLButtonElement | null>(null);
   const request = useRef<'panel' | 'return' | null>(null);
   const returnTo = useRef<HTMLElement | null>(null);
-  const latest = useRef({ open, openProp, onOpenChange });
+  const latest = useRef({ open, visible, openProp, onOpenChange });
   useLayoutEffect(() => {
-    latest.current = { open, openProp, onOpenChange };
+    latest.current = { open, visible, openProp, onOpenChange };
   });
 
   const set = useCallback((next: boolean) => {
@@ -120,10 +131,13 @@ export function AssistantSidebarProvider({
     const show = () => {
       remember();
       request.current = 'panel';
-      if (latest.current.open) {
-        // Already open: nothing renders, so the focus moves now.
+      if (latest.current.visible) {
+        // Already showing: nothing renders, so the focus moves now.
         panelField(panel.current)?.focus();
         request.current = null;
+      } else if (latest.current.open) {
+        // Open but held on a phone since the load: let the sheet show.
+        setOpenedAtLoad(false);
       } else set(true);
     };
     const hide = () => {
@@ -131,11 +145,11 @@ export function AssistantSidebarProvider({
       set(false);
     };
     return {
-      open,
+      open: visible,
       show,
       hide,
       toggle: () => {
-        if (latest.current.open) hide();
+        if (latest.current.visible) hide();
         else show();
       },
       shortcut,
@@ -145,19 +159,20 @@ export function AssistantSidebarProvider({
       requestRef: request,
       returnToRef: returnTo,
     };
-  }, [open, shortcut, panelId, set, remember]);
+  }, [visible, shortcut, panelId, set, remember]);
 
   useShortcut(
     shortcut,
     () => {
-      // Never behind a dialog the reader is in.
-      if (document.querySelector('[role="dialog"][aria-modal="true"]') !== null) return;
+      // Never behind a dialog the reader is in: the delete confirm, a sheet, the app's own.
+      if (isModalDialogOpen()) return;
       const inside = panel.current?.contains(document.activeElement) === true;
-      const action = shortcutAction(latest.current.open, inside);
+      const action = shortcutAction(latest.current.visible, inside);
       if (action === 'close') value.hide();
       else value.show();
     },
-    { allowInFields: true },
+    // A toggle: holding the keys must not open and close it over and over.
+    { allowInFields: true, repeat: false },
   );
 
   return <AssistantContext value={value}>{children}</AssistantContext>;
@@ -251,7 +266,10 @@ export interface AssistantSidebarProps extends Omit<AssistantSidebarProviderProp
   minSize?: number | undefined;
   /** Default 50. */
   maxSize?: number | undefined;
-  /** Remembers the width the reader dragged to, in this browser, under this key. */
+  /**
+   * Remembers the width the reader dragged to, in this browser, under this key. It also names the
+   * panels, so keep it unique on the page.
+   */
   storageKey?: string | undefined;
   /**
    * On a phone the panel is a sheet. True (default) adds a floating button to open it; pass false
@@ -297,6 +315,9 @@ function AssistantBody({
   const m = { ...ASSISTANT_SIDEBAR_MESSAGES, ...overrides };
   const state = useAssistantSidebar();
   const { open, panelRef, railRef, requestRef, returnToRef, panelId, shortcut } = state;
+  // The saved width is kept by panel id, so with a storage key the ids are fixed: a generated id
+  // changes whenever the tree above changes, and the width the reader dragged to would be lost.
+  const panelKey = storageKey === undefined ? panelId : `rx-assistant-${storageKey}`;
   const { Enter } = useAiParts();
   const mobile = useIsMobileLayout();
   const mac = useIsMac();
@@ -307,7 +328,13 @@ function AssistantBody({
   // Carries out the focus move asked for by show or hide, once the panel or rail is drawn.
   useLayoutEffect(() => {
     const want = requestRef.current;
-    if (want === null || mobile) return;
+    if (want === null) return;
+    if (mobile) {
+      // The sheet moves the focus in and back itself; a request left over from the docked layout
+      // must not fire later, when the layout turns wide again.
+      requestRef.current = null;
+      return;
+    }
     requestRef.current = null;
     if (want === 'panel') {
       panelField(panelRef.current)?.focus();
@@ -421,7 +448,7 @@ function AssistantBody({
     <div data-slot="assistant-sidebar" className={cn('flex min-h-0 min-w-0', className)}>
       <ResizablePanelGroup className="flex-1" {...(storageKey === undefined ? {} : { storageKey })}>
         <ResizablePanel
-          id={`${panelId}-content`}
+          id={`${panelKey}-content`}
           minSize={100 - sizes.maxSize}
           maxSize={100}
           className={contentClassName}
@@ -431,7 +458,7 @@ function AssistantBody({
         {open && <ResizableHandle label={m.resize} />}
         {open && (
           <ResizablePanel
-            id={`${panelId}-assistant`}
+            id={`${panelKey}-assistant`}
             defaultSize={sizes.defaultSize}
             minSize={sizes.minSize}
             maxSize={sizes.maxSize}
