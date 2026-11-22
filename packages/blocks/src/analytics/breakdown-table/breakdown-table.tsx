@@ -336,9 +336,11 @@ export function BreakdownTable({
       </Reveal>
       {canExpand && (
         <div className="px-5">
+          {/* A ghost button: its label lines up with the names above, its padding hangs outside. */}
           <Button
             variant="ghost"
             size="sm"
+            className="-ms-(--rx-button-padding-x-sm)"
             aria-expanded={expanded}
             onClick={() => {
               setExpanded((open) => !open);

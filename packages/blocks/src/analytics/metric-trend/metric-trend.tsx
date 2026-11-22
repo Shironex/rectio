@@ -183,7 +183,7 @@ export function MetricTrend({
         ) : figures === null ? (
           <p className="text-sm text-fg-subtle">{m.empty}</p>
         ) : (
-          <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+          <div className="flex items-end justify-between gap-4">
             <div className="flex min-w-0 flex-col items-start gap-1.5">
               {figure(figures.latest, 'text-3xl')}
               {chip}
@@ -199,7 +199,7 @@ export function MetricTrend({
                     : 'series-2'
               }
               label={named}
-              className="h-12 w-full max-w-40 @xs:w-32"
+              className="h-12 w-20 shrink-0 @xs:w-28 @sm:w-32"
             />
           </div>
         )}
