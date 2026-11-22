@@ -1,13 +1,24 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 
 /**
- * The moment relative times are read from: your `now` when you pass one, otherwise the time the
- * block first rendered, held still so memoised work keeps. Pass `now` from your app when you
- * render on the server (so both renders agree) or want times that tick.
+ * The moment relative times and the agenda's time line are read from: your `now` when you pass
+ * one, otherwise the clock, read on the first render and again every minute (one interval, cleared
+ * on unmount), so a page left open does not freeze at the time it loaded. Pass `now` from your
+ * app when you render on the server (so both renders agree) or want to drive the clock yourself.
  */
 export function useNow(now?: Date): Date {
-  const [mounted] = useState(() => new Date());
-  return now ?? mounted;
+  const [clock, setClock] = useState(() => new Date());
+  const controlled = now !== undefined;
+  useEffect(() => {
+    if (controlled) return;
+    const timer = setInterval(() => {
+      setClock(new Date());
+    }, 60_000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [controlled]);
+  return now ?? clock;
 }
 
 /**
