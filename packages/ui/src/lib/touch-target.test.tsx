@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Banner } from '../banner/banner';
 import { Button } from '../button/button';
@@ -11,7 +12,7 @@ import { Pagination } from '../pagination/pagination-bar';
 import { Reasoning } from '../reasoning/reasoning';
 import { Stepper } from '../stepper/stepper';
 import { Tabs, TabsList, TabsTab } from '../tabs/tabs';
-import { Tag } from '../tag-input/tag-input';
+import { Tag, TagInput } from '../tag-input/tag-input';
 import { Toggle, ToggleGroup } from '../toggle/toggle';
 import { touchHitArea } from './cn';
 
@@ -95,6 +96,24 @@ describe('touch targets', () => {
       'pointer-coarse:pointer-events-none',
     );
     expect(screen.getByRole('button', { name: 'Remove Isla' })).toHaveClass(
+      'pointer-coarse:pointer-events-auto',
+    );
+  });
+
+  it('keeps the presses of a tag of your own, and lets touches through only tags in a field', async () => {
+    const onClick = vi.fn();
+    render(
+      <>
+        <Tag onClick={onClick}>Draft</Tag>
+        <TagInput aria-label="Labels" defaultValue={['saas']} />
+      </>,
+    );
+    const [own, inField] = document.querySelectorAll('[data-slot="tag"]');
+    expect(own).not.toHaveClass('pointer-coarse:pointer-events-none');
+    await userEvent.click(screen.getByText('Draft'));
+    expect(onClick).toHaveBeenCalledOnce();
+    expect(inField).toHaveClass('pointer-coarse:pointer-events-none');
+    expect(screen.getByRole('button', { name: 'Remove saas' })).toHaveClass(
       'pointer-coarse:pointer-events-auto',
     );
   });

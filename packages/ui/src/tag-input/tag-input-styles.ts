@@ -6,6 +6,13 @@ import { cn, touchHitArea } from '../lib/cn';
  * The remove button inside a Tag. Exported so a chip built on another primitive (the Multi select's
  * Base UI chip) draws the same button. Under a disabled field or tag it is hidden: nothing to press.
  */
+/**
+ * A tag inside a field (TagInput, MultiSelect): on touch screens its body takes no touches, so the
+ * remove button of the tag before it may reach over it and tags can sit close side by side; only
+ * rows of tags need the touch gap. A tag of your own keeps its presses.
+ */
+export const tagInField = 'pointer-coarse:pointer-events-none';
+
 export const tagRemoveButton = cn(
   'relative -me-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center',
   'rounded-(--rx-badge-radius) text-fg-subtle',

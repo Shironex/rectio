@@ -15,9 +15,9 @@ import {
 import { controlSurface } from '../field/control-styles';
 import { FieldError } from '../field/field';
 import { cn } from '../lib/cn';
-import { tagRemoveButton } from './tag-input-styles';
+import { tagInField, tagRemoveButton } from './tag-input-styles';
 
-export { tagRemoveButton } from './tag-input-styles';
+export { tagInField, tagRemoveButton } from './tag-input-styles';
 
 export type TagProps = Omit<ComponentProps<'span'>, 'className'> & {
   /** Undefined is accepted so a primitive's render props can be spread straight in. */
@@ -55,9 +55,8 @@ export function Tag({
       className={cn(
         'inline-flex h-6 max-w-full min-w-0 shrink-0 items-center gap-1 ps-1.5 pe-1',
         // On touch screens a tag is as tall as a small button, so rows of tags spaced by the touch
-        // gap give every remove button its whole hit area. Its body takes no touches, so a remove
-        // button's area may reach over the tag beside it: only rows need the extra space.
-        'pointer-coarse:h-(--rx-control-height-sm) pointer-coarse:pointer-events-none',
+        // gap give every remove button its whole hit area.
+        'pointer-coarse:h-(--rx-control-height-sm)',
         'rounded-(--rx-badge-radius) border border-line-strong bg-surface-sunken text-sm text-fg',
         'transition-colors duration-fast ease-standard select-none outline-none',
         // Selected by keyboard before Backspace removes it: filled like selected text, a change
@@ -320,6 +319,7 @@ export function TagInput({
         {tags.map((tag, index) => (
           <Tag
             key={key(tag)}
+            className={tagInField}
             ref={(node) => {
               tagRefs.current[index] = node;
             }}

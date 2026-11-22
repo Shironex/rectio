@@ -13,7 +13,7 @@ import { createContext, use, useRef, useState, type ComponentProps, type ReactNo
 import { comboboxIconButton, comboboxSurface } from '../combobox/combobox';
 import { cn, touchHitArea } from '../lib/cn';
 import { popupGroupLabel, popupItem, popupMotion, popupSurface } from '../select/select';
-import { Tag, tagRemoveButton } from '../tag-input/tag-input';
+import { Tag, tagInField, tagRemoveButton } from '../tag-input/tag-input';
 import { usePortalContainer } from '../theme-scope/theme-scope';
 
 type WithClassName<P> = Omit<P, 'className'> & { className?: string };
@@ -248,6 +248,7 @@ export function MultiSelectInput({
                     render={(chipProps) => (
                       <Tag
                         {...chipProps}
+                        className={cn(chipProps.className, tagInField)}
                         action={
                           <BaseCombobox.ChipRemove
                             aria-label={`Remove ${label}`}
