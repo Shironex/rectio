@@ -108,7 +108,12 @@ export function MessageAction({ label, children, className, ...props }: MessageA
             size="sm"
             iconOnly
             aria-label={label}
-            className={cn('text-fg-muted hover:text-fg', className)}
+            className={cn(
+              'relative text-fg-muted hover:text-fg',
+              // Small buttons keep their drawn size; on touch an invisible area reaches 44px.
+              'pointer-coarse:before:absolute pointer-coarse:before:-inset-2',
+              className,
+            )}
             {...props}
           />
         }
