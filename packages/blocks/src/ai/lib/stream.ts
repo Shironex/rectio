@@ -53,15 +53,20 @@ function settleTools(turn: AiChatTurn): AiChatTurn {
 }
 
 /**
- * The conversation with one stream event folded in. Pure: it returns a new array and never
- * changes the one it gets, so it fits a `setState` updater or a reducer. An event for a turn that
- * is not there (other than `start`) changes nothing, and a second `start` for the same id is
- * ignored, so a retried connection cannot add a reply twice.
+ * The conversation with one stream event folded in. Pure: it never changes the array it gets, and
+ * returns that same array when the event changes nothing, so it fits a `setState` updater or a
+ * reducer. Only a reply that is still streaming takes events: once it is done, stopped or failed,
+ * a late event for it changes nothing, and so does an event for a turn that is not there or that
+ * the reader wrote. A second `start` for the same id is ignored, so a retried connection cannot
+ * add a reply twice.
  */
 export function applyStreamEvent(turns: readonly AiChatTurn[], event: AiStreamEvent): AiChatTurn[] {
-  const present = turns.some((turn) => turn.id === event.id);
+  // Never changed in place: when an event changes nothing, the same array comes back, so React
+  // skips the render.
+  const unchanged = turns as AiChatTurn[];
+  const target = turns.find((turn) => turn.id === event.id);
   if (event.type === 'start') {
-    if (present) return [...turns];
+    if (target !== undefined) return unchanged;
     return [
       ...turns,
       {
@@ -74,7 +79,9 @@ export function applyStreamEvent(turns: readonly AiChatTurn[], event: AiStreamEv
       },
     ];
   }
-  if (!present) return [...turns];
+  // Only a reply still arriving takes events. A late chunk after it stopped, failed, finished or
+  // was deleted, or an event that names one of the reader's own turns, changes nothing.
+  if (target?.role !== 'assistant' || target.status !== 'streaming') return unchanged;
   switch (event.type) {
     case 'text':
       return patch(turns, event.id, (turn) => ({

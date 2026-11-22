@@ -17,6 +17,7 @@ import {
   type AiChatSummary,
   type AiChatTurn,
   type AiComposerCommand,
+  type AiStreamEvent,
 } from '../src/ai';
 
 const USER: AiChatTurn = { id: 'u1', role: 'user', content: 'Hi' };
@@ -61,8 +62,48 @@ describe('applyStreamEvent', () => {
     const turns: readonly AiChatTurn[] = Object.freeze([USER]);
     const started = applyStreamEvent(turns, { type: 'start', id: 'a1' });
     expect(turns).toHaveLength(1);
-    expect(applyStreamEvent(started, { type: 'start', id: 'a1' })).toHaveLength(2);
-    expect(applyStreamEvent(started, { type: 'text', id: 'nope', delta: 'x' })).toEqual(started);
+    // Nothing to change: the same array comes back, so a setState updater skips the render.
+    expect(applyStreamEvent(started, { type: 'start', id: 'a1' })).toBe(started);
+    expect(applyStreamEvent(started, { type: 'text', id: 'nope', delta: 'x' })).toBe(started);
+  });
+
+  it('ignores every late event once a reply is done, stopped or failed', () => {
+    const LATE: AiStreamEvent[] = [
+      { type: 'text', id: 'a1', delta: 'LATE' },
+      { type: 'reasoning', id: 'a1', delta: 'zzz' },
+      { type: 'reasoning-end', id: 'a1', duration: 9 },
+      { type: 'tool', id: 'a1', tool: { id: 'late', name: 'n', status: 'running' } },
+      { type: 'source', id: 'a1', source: { id: 'late', title: 'Late' } },
+      { type: 'done', id: 'a1' },
+      { type: 'stopped', id: 'a1' },
+      { type: 'error', id: 'a1', error: 'Late failure' },
+    ];
+    let live = applyStreamEvent([USER], { type: 'start', id: 'a1' });
+    live = applyStreamEvent(live, { type: 'text', id: 'a1', delta: 'Hel' });
+    const ends: AiStreamEvent[] = [
+      { type: 'done', id: 'a1' },
+      { type: 'stopped', id: 'a1' },
+      { type: 'error', id: 'a1', error: 'Rate limited' },
+    ];
+    for (const end of ends) {
+      const settled = applyStreamEvent(live, end);
+      for (const late of LATE) {
+        expect(applyStreamEvent(settled, late), `${late.type} after ${end.type}`).toBe(settled);
+      }
+    }
+  });
+
+  it("ignores reply events that name one of the reader's own turns", () => {
+    const turns: AiChatTurn[] = [USER];
+    expect(applyStreamEvent(turns, { type: 'text', id: USER.id, delta: ' injected' })).toBe(turns);
+    expect(
+      applyStreamEvent(turns, {
+        type: 'tool',
+        id: USER.id,
+        tool: { id: 't', name: 'x', status: 'running' },
+      }),
+    ).toBe(turns);
+    expect(applyStreamEvent(turns, { type: 'reasoning', id: USER.id, delta: 'x' })).toBe(turns);
   });
 
   it('settles running reasoning and tools when a reply stops or fails', () => {
