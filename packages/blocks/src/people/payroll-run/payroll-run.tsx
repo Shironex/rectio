@@ -354,7 +354,7 @@ export function PayrollRun({
                             ) : (
                               <Anchor
                                 href={lineHref(line)}
-                                className="w-fit font-medium"
+                                className={cn('relative w-fit font-medium', touchHitArea)}
                                 aria-label={m.openLine(line.person.name)}
                               >
                                 {line.person.name}
@@ -458,6 +458,7 @@ export function PayrollRun({
             left={shown.length - limit}
             pageSize={pageSize}
             label={m.more}
+            allShown={m.allShown(shown.length)}
             onMore={more}
           />
           {filter === 'issues' && shown.length === 0 && (

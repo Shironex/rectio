@@ -354,6 +354,7 @@ export function LeaveRequests({
             left={shown.length - limit}
             pageSize={pageSize}
             label={m.more}
+            allShown={m.allShown(shown.length)}
             onMore={more}
           />
         </>

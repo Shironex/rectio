@@ -343,6 +343,8 @@ describe('LeaveRequests', () => {
     expect(list().getAllByRole('listitem')).toHaveLength(4);
     await userEvent.click(screen.getByRole('button', { name: 'Show 1 more of 1' }));
     expect(screen.queryByRole('button', { name: /^Show \d+ more/ })).toBeNull();
+    // The button left with the last page: the focus lands on the line that replaced it.
+    expect(screen.getByText('All 5 shown')).toHaveFocus();
   });
 
   it('renders its motion twin', () => {

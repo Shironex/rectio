@@ -597,7 +597,7 @@ function HoursCell({
           // Decimal values sit at the end, so the mark takes the free start side; a clock field is
           // full, so the mark sits on its corner, clear of the digits.
           entry === 'clock' && editable
-            ? '-end-1 -top-1 rounded-full bg-surface'
+            ? '-end-1.5 -top-1.5 size-3.5 rounded-full bg-surface p-px ring-1 ring-line'
             : 'start-1.5 top-1/2 -translate-y-1/2',
         )}
       />

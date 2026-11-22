@@ -15,6 +15,8 @@ export interface LeaveRequestsMessages {
   filterLabel: string;
   /** Under a long list: `Show 50 more of 212`. */
   more: (count: number, left: number) => string;
+  /** Where the focus lands once the last page is drawn: `All 212 shown`. */
+  allShown: (count: number) => string;
   /** A filter in the narrow select, with its count: `Pending (3)`. */
   filterCount: (filter: string, count: number) => string;
   filters: Record<LeaveFilter, string>;
@@ -87,6 +89,7 @@ export const LEAVE_REQUESTS_MESSAGES: LeaveRequestsMessages = {
   days: dayWord,
   filterLabel: 'Status',
   more: (count, left) => `Show ${String(count)} more of ${String(left)}`,
+  allShown: (count) => `All ${String(count)} shown`,
   filterCount: (filter, count) => `${filter} (${String(count)})`,
   filters: {
     pending: 'Pending',

@@ -7,7 +7,15 @@ import {
   TreeStructureIcon,
   UserIcon,
 } from '@phosphor-icons/react';
-import { Anchor, SearchInput, SkeletonListItem, Tree, cn, type TreeNode } from '@rectio/ui';
+import {
+  Anchor,
+  SearchInput,
+  SkeletonListItem,
+  Tree,
+  cn,
+  touchHitArea,
+  type TreeNode,
+} from '@rectio/ui';
 import {
   useEffect,
   useId,
@@ -356,13 +364,19 @@ function PersonPanel({
       {(personHref !== undefined || person.email !== undefined) && (
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
           {personHref !== undefined && (
-            <Anchor href={personHref(person)} className="inline-flex items-center gap-1.5">
+            <Anchor
+              href={personHref(person)}
+              className={cn('relative inline-flex items-center gap-1.5', touchHitArea)}
+            >
               <UserIcon aria-hidden weight="bold" className="size-3.5" />
               {m.viewProfile}
             </Anchor>
           )}
           {person.email !== undefined && (
-            <Anchor href={`mailto:${person.email}`} className="inline-flex items-center gap-1.5">
+            <Anchor
+              href={`mailto:${person.email}`}
+              className={cn('relative inline-flex items-center gap-1.5', touchHitArea)}
+            >
               <EnvelopeSimpleIcon aria-hidden weight="bold" className="size-3.5" />
               {person.email}
             </Anchor>
@@ -501,7 +515,10 @@ function DrillList({
                 <p className="text-sm text-fg-muted">{current.title}</p>
               )}
               {personHref !== undefined && (
-                <Anchor href={personHref(current)} className="mt-1 w-fit text-sm">
+                <Anchor
+                  href={personHref(current)}
+                  className={cn('relative mt-1 w-fit text-sm', touchHitArea)}
+                >
                   {m.viewProfile}
                 </Anchor>
               )}
