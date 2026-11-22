@@ -171,8 +171,11 @@ export function layoutDayEvents(
     if (isAllDayEvent(event)) continue;
     const from = Math.max(event.start.getTime(), dayStart);
     const to = Math.min(event.end.getTime(), dayEnd);
-    // An event ending exactly at midnight does not spill an empty slice into the next day.
-    if (to <= from && !(from === to && event.start.getTime() === event.end.getTime())) continue;
+    // An event ending exactly at midnight does not spill an empty slice into the next day, and a
+    // zero-length one (a reminder) belongs to the day it starts in, midnight included, only.
+    const instant = event.start.getTime() === event.end.getTime();
+    if (instant ? event.start.getTime() < dayStart || event.start.getTime() >= dayEnd : to <= from)
+      continue;
     let start = wallMinutes(from, dayStart, dayEnd);
     let end = wallMinutes(to, dayStart, dayEnd);
     // In the hour the clocks go back, an event can end on an earlier wall time than it starts.

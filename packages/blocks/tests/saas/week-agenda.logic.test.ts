@@ -222,6 +222,34 @@ describe('now, slots and keyboard moves', () => {
   });
 });
 
+describe('all-day ends', () => {
+  it('are exclusive local dates, as the event card reads them', () => {
+    const days = agendaDays(new Date(2026, 2, 18), 'week', 1);
+    const bar = layoutAllDay(
+      [
+        {
+          id: 'a',
+          title: 'Offsite',
+          start: new Date(2026, 2, 16),
+          end: new Date(2026, 2, 18, 10),
+          allDay: true,
+        },
+      ],
+      days,
+    );
+    expect(bar[0]).toMatchObject({ first: 0, last: 1 });
+  });
+});
+
+describe('a zero-length event at midnight', () => {
+  it('is placed on its own day only', () => {
+    const midnight = new Date(2026, 2, 18, 0, 0);
+    const reminder = { id: 'r', title: 'Reminder', start: midnight, end: midnight };
+    expect(layoutDayEvents([reminder], new Date(2026, 2, 17))).toHaveLength(0);
+    expect(layoutDayEvents([reminder], new Date(2026, 2, 18))).toHaveLength(1);
+  });
+});
+
 // Node reads TZ on every date call, so the clock changes of one zone can be tested anywhere.
 describe('week agenda across a clock change', () => {
   const zone = process.env.TZ;
