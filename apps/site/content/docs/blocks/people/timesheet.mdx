@@ -43,7 +43,10 @@ import { Timesheet } from '@/components/blocks/people/timesheet/timesheet';
 
 Each row holds minutes per day: `{ id, project, task?, minutes: { '2026-11-23': 450 }, notes? }`.
 A cell takes decimal hours (`7.5`, or `7,5` where the comma is the decimal mark), clock time
-(`7:30`) or units (`7h 30m`, `45m`) and hands you whole minutes, or null when it is cleared. With
+(`7:30`) or units (`7h 30m`, `45m`) and hands you whole minutes, or null when it is cleared. A
+number that reads two ways (`1,000` is a thousand hours with a grouping comma and one hour with a
+decimal comma) and a value under a minute are refused in words rather than guessed, and a day
+holds 24 hours across all its rows: a cell that would pass that is refused with the time left. With
 `entry="clock"` the cells are time fields with hours and minutes instead.
 
 Totals are added in minutes, so a week of 7.33 hour days never drifts. A past working day with no
@@ -52,8 +55,10 @@ over it, weekends included, is over. Weekends and the days in `holidays` expect 
 shaded.
 
 The status runs draft, submitted, then approved or rejected (shown as Changes requested, with the
-reason). Cells take input only in draft and rejected, and never in a `locked` week. Submitting asks
-first, and warns when days are missing. For an approver, pass `onApprove` and `onReject`: sending a
+reason). Cells take input only in draft and rejected, and never in a `locked` week; when a week turns read
+only, anything typed and not yet saved is dropped. Submitting asks first, and warns when days are
+missing. While a cell still holds text that is not saved, Submit stays in reach but holds back,
+with the reason beside it. For an approver, pass `onApprove` and `onReject`: sending a
 week back needs a reason.
 
 On a phone the grid becomes a list of days: today starts open, the others show their totals and
@@ -76,10 +81,10 @@ flags and open on demand.
       type: '(weekStart: IsoDay) => void',
       description: 'Shows the previous and next week buttons.',
     },
-    onSubmit: { type: '() => void' },
+    onSubmit: { type: '() => unknown', description: 'May return a promise; see Confirming.' },
     onRecall: { type: '() => void', description: 'Takes a submitted week back to draft.' },
     onApprove: { type: '() => void' },
-    onReject: { type: '(reason: string) => void' },
+    onReject: { type: '(reason: string) => unknown' },
     onAddRow: { type: '() => void' },
     review: {
       type: '{ by: string; on?: IsoDay; reason?: string }',
@@ -89,8 +94,11 @@ flags and open on demand.
     dailyMinutes: { type: 'number', default: '480' },
     weekend: { type: 'readonly number[]', default: '[0, 6]' },
     holidays: { type: 'Record<IsoDay, string>' },
-    today: { type: 'IsoDay', description: 'The local date when omitted.' },
-    locale: { type: 'string' },
+    today: {
+      type: 'IsoDay',
+      description: 'The local date when omitted. Pass it when rendering on the server.',
+    },
+    locale: { type: 'string', description: 'Pass it when rendering on the server.' },
     loading: { type: 'boolean' },
     messages: { type: 'Partial<TimesheetMessages>' },
   }}
@@ -99,8 +107,10 @@ flags and open on demand.
 ## Logic
 
 `timesheetTotals(rows, weekStart, options)` gives the day, row and week totals with every flag,
-`parseDuration(text)` reads what a person typed, and `formatDuration(minutes, locale, entry)`
-writes it back. All three run on the server.
+`parseDuration(text)` reads what a person typed, `dayRoom(rows, rowId, day)` says how much of a
+day a cell may still take, and `formatDuration(minutes, locale, entry)` writes it back. All of them
+run on the server. See [Rendering on the server](/docs/blocks/people#rendering-on-the-server) and
+[Confirming](/docs/blocks/people#confirming).
 
 ## Accessibility
 

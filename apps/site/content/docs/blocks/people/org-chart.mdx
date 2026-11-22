@@ -56,7 +56,7 @@ their team, and a button back up to the manager.
       type: 'readonly OrgPerson[]',
       required: true,
       description:
-        'id, name, and optional title, managerId, avatar, department, location and email.',
+        'id, name, and optional title, managerId, avatar, department, location and email. Ids must be unique: of two people with one id, only the first is charted.',
     },
     selected: { type: 'string | null' },
     defaultSelected: { type: 'string' },
@@ -78,13 +78,14 @@ their team, and a button back up to the manager.
 ## Logic
 
 `buildOrg(people)` gives the roots, the reports by manager and every team size; `managerChain`
-lists the managers above someone and `searchOrg(model, query)` ranks matches. They run on the
+lists the managers above someone and `searchOrg(model, query, limit)` ranks matches (eight by
+default; pass `Infinity` to count them all). They run on the
 server too.
 
 ## Accessibility
 
 - The tree is a tree view: arrows move, Right opens a branch, Left closes it or goes to the
   manager, Home and End jump. Each row says the person's title and team size.
-- The search results are buttons the arrows move through, and how many match is said once typing
-  settles.
+- The search results are buttons the arrows move through, and how many match in all is said once
+  typing settles, with how many are listed when that is fewer.
 - The phone list's buttons say whose team they open and how big it is, and the move is announced.

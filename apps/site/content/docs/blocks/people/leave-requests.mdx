@@ -79,7 +79,10 @@ import { LeaveRequestForm } from '@/components/blocks/people/leave-requests/leav
 Pick a type and a range in the calendar; half day boxes appear for the first and last day. The
 preview says how many working days the range takes and what the balance will be after it, and
 warns when a teammate is off too. The draft you receive has an exclusive `end` and the length in
-`halves`. A range of weekend days, or one over the balance, is held back with the reason.
+`halves`. A range of weekend days, one over the balance, or one over the person's own pending or
+approved leave (which would take the same days from the balance twice) is held back with the
+reason, and the clash names the other request. A range must end after it starts: one that ends on
+or before its start takes no days and is refused.
 
 ## Props
 
@@ -91,9 +94,9 @@ warns when a teammate is off too. The draft you receive has an exclusive `end` a
       required: true,
       description: 'id, label and an allowance in days; no allowance means unlimited.',
     },
-    onApprove: { type: '(request) => void' },
-    onDecline: { type: '(request, reason: string) => void' },
-    onCancel: { type: '(request, reason: string) => void' },
+    onApprove: { type: '(request) => unknown', description: 'May return a promise.' },
+    onDecline: { type: '(request, reason: string) => unknown' },
+    onCancel: { type: '(request, reason: string) => unknown' },
     showPerson: { type: 'boolean', default: 'true' },
     balanceFor: { type: 'string', description: 'A person id: shows their balance by type.' },
     pageSize: {
@@ -110,8 +113,8 @@ warns when a teammate is off too. The draft you receive has an exclusive `end` a
     onFilterChange: { type: '(filter) => void' },
     weekend: { type: 'readonly number[]', default: '[0, 6]' },
     holidays: { type: 'Record<IsoDay, string>' },
-    today: { type: 'IsoDay' },
-    locale: { type: 'string' },
+    today: { type: 'IsoDay', description: 'Pass it when rendering on the server.' },
+    locale: { type: 'string', description: 'Pass it when rendering on the server.' },
     messages: { type: 'Partial<LeaveRequestsMessages>' },
   }}
 />
@@ -122,8 +125,13 @@ The form takes `types`, `personId`, `requests`, `onSubmit`, `onCancel`, `default
 ## Logic
 
 `leaveHalves(span, calendar)`, `leaveBalances(types, requests, personId, calendar)`,
-`leaveOverlaps(span, team, options)`, `leaveProblem(span, balance)` and `spanFromPicked(from, to)`
-run on the server too.
+`leaveOverlaps(span, team, options)`, `ownLeaveOverlaps(span, requests, personId)`,
+`leaveProblem(span, balance, calendar, own)` and `spanFromPicked(from, to)` run on the server too.
+
+A decision acts on the request as it is when you confirm. If it was decided or cancelled while the
+dialog was open, confirming closes the dialog without acting. See
+[Confirming](/docs/blocks/people#confirming) and
+[Rendering on the server](/docs/blocks/people#rendering-on-the-server).
 
 ## Accessibility
 

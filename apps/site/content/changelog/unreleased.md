@@ -177,7 +177,12 @@ summary: Work that is merging into main now and ships with the next release.
   details or a negative net holding approval back, a Fix link per flagged line and paging for long
   runs (people-core, timesheet, leave-requests, org-chart and payroll-run 0.1.0, with their motion
   twins). Their logic, day helpers and words live in modules without `'use client'`, so a server
-  component can total a week, count leave or check a run.
+  component can total a week, count leave or check a run. Every confirm checks the data again as it
+  is confirmed and closes without acting when it changed; a handler may return a promise, which
+  keeps the dialog busy so a slow payment cannot be sent twice. Pay holds back on a run that picked
+  up a flagged line, a draft typed before a week locks is dropped, Submit waits for every cell to
+  hold a time, a day holds 24 hours across its rows, ambiguous numbers such as `1,000` are refused,
+  and a leave request cannot book over the person's own leave.
 
 ## Templates
 

@@ -50,7 +50,11 @@ many lines are flagged and why, and a filter lists only those. Approve stays dis
 line is clean, with the reason beside it.
 
 The steps run review, approve, pay: approving and paying both ask first, and an approved run can
-go back to review. `payrollPayouts(lines, payDate, currency)` turns the net pay into payouts for
+go back to review. Both are checked again when you confirm, so a line flagged while the dialog was
+open stops it and shows the lines in the way. A flagged line shows in every status: Pay on an
+approved run that picked up an issue holds back the same way Approve does. Negative gross,
+deductions or employer cost, a line id used twice and totals past `Number.MAX_SAFE_INTEGER` (which
+cannot be added to the unit) all block the run. `payrollPayouts(lines, payDate, currency)` turns the net pay into payouts for
 the [Payouts](/docs/blocks/payouts) block.
 
 ## Props
@@ -62,8 +66,11 @@ the [Payouts](/docs/blocks/payouts) block.
     period: { type: 'string', required: true, description: 'Such as November 2026.' },
     payDate: { type: 'Date', required: true },
     status: { type: "'review' | 'approved' | 'paid'", default: "'review'" },
-    onApprove: { type: '() => void' },
-    onPay: { type: '() => void' },
+    onApprove: { type: '() => unknown', description: 'May return a promise; see Confirming.' },
+    onPay: {
+      type: '() => unknown',
+      description: 'May return a promise: the dialog stays busy so it cannot pay twice.',
+    },
     onReopen: { type: '() => void' },
     lineHref: {
       type: '(line) => string',
@@ -78,7 +85,7 @@ the [Payouts](/docs/blocks/payouts) block.
       default: '50',
       description: 'Rows drawn at first and per Show more; counts and totals cover all.',
     },
-    locale: { type: 'string' },
+    locale: { type: 'string', description: 'Pass it when rendering on the server.' },
     actions: { type: 'ReactNode' },
     loading: { type: 'boolean' },
     messages: { type: 'Partial<PayrollRunMessages>' },
@@ -88,11 +95,14 @@ the [Payouts](/docs/blocks/payouts) block.
 ## Logic
 
 `reviewPayroll(lines)` gives the totals, the issues per line and whether the run is ready;
-`issueCounts` and `payrollPayouts` run on the server too.
+`issueCounts` and `payrollPayouts` run on the server too. See
+[Rendering on the server](/docs/blocks/people#rendering-on-the-server) and
+[Confirming](/docs/blocks/people#confirming).
 
 ## Accessibility
 
-- The disabled Approve button is described by the reason it waits, so a screen reader hears why.
+- A held back Approve or Pay button is described by the reason it waits, so a screen reader hears
+  why.
 - Each flag is a word on the line, never colour alone; a negative net is written with its sign.
 - The steps are a list with the current step marked, and the confirm dialogs put the focus on the
   safe answer.

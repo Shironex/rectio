@@ -36,6 +36,31 @@ daysBetween('2026-12-04', '2026-12-09'); // the 4th to the 8th: the end is exclu
 isWorkingDay('2026-12-25', { holidays: { '2026-12-25': 'Christmas Day' } }); // false
 ```
 
+A string that is not a real day (`2026-02-30`, `2026-13-01`) counts as no day at all, never as
+the start of the next month.
+
 Ranges end on the day after the last one, as calendar events do, so a one-day leave is
 `{ start: '2026-12-04', end: '2026-12-05' }` and two ranges that touch never overlap. The words
 always show the last day itself: `4 Dec to 8 Dec 2026`.
+
+## Rendering on the server
+
+When the page renders on the server, pass `locale` and `today` to every people block. Without
+them a block reads the browser's language and the local date, and a server in another region or
+time zone can land on a different language or a different day than the browser that hydrates the
+page: dates and totals would change on load, and near midnight a day could flip between missing
+and still to come.
+
+```tsx
+<Timesheet weekStart={week} rows={rows} locale={user.locale} today={todayIn(user.timeZone)} />
+```
+
+## Confirming
+
+Every action that commits something (submit, approve, decline, cancel, pay) asks first, and the
+question is built from the data as it is when you confirm, not when the dialog opened. When the
+data changed under it (a line was flagged, the week was submitted elsewhere, a request was
+decided by someone else) confirming closes the dialog without acting. A handler may return a
+promise: the dialog's button shows that it is working and cannot be pressed again until the
+promise settles; it closes when it resolves and stays open when it rejects, so you can say what
+went wrong.
