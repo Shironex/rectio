@@ -225,8 +225,8 @@ function States({ charts }: { charts: Charts }) {
       <ChartCard title="Gauge" description="Loading">
         <RadialGauge label="Uptime" value={0} max={1} loading />
       </ChartCard>
-      <ChartCard title="Gauge" description="Nothing yet">
-        <RadialGauge label="Uptime" value={0} max={1} target={0.999} format="percent" />
+      <ChartCard title="Gauge" description="At zero, no checks yet">
+        <RadialGauge label="Uptime" value={0} max={1} format="percent" />
       </ChartCard>
     </div>
   );
