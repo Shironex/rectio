@@ -7,4 +7,5 @@
 export * from './index';
 export { AiChatThread } from './chat-thread/chat-thread.motion';
 export { PromptComposer } from './prompt-composer/prompt-composer.motion';
+export { ChatWorkspace } from './chat-workspace/chat-workspace.motion';
 export { AiMotionParts, MOTION_AI_PARTS } from './lib/motion-parts';

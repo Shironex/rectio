@@ -49,3 +49,23 @@ export {
   type ComposerCountTone,
   type SlashQuery,
 } from './prompt-composer/prompt-composer.logic';
+export {
+  AiChatList,
+  ChatWorkspace,
+  type AiChatListProps,
+  type ChatWorkspaceProps,
+} from './chat-workspace/chat-workspace';
+export {
+  CHAT_WORKSPACE_MESSAGES,
+  type ChatWorkspaceMessages,
+} from './chat-workspace/chat-workspace-messages';
+export {
+  MAX_CHAT_TITLE,
+  cleanTitle,
+  filterChats,
+  focusAfterRemoval,
+  groupChats,
+  type AiChatGroup,
+  type AiChatGroupKey,
+  type AiChatSummary,
+} from './chat-workspace/chat-workspace.logic';
