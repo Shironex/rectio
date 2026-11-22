@@ -114,6 +114,16 @@ try {
             .focus();
           await settle(page);
           await page.screenshot({ path: join(out, `timesheet-note-${name}.png`), fullPage: true });
+          // Text that is not a time: the cell turns red and the reason shows in words.
+          const cell = page
+            .getByRole('textbox', { name: /Internal, Hiring panel, Tuesday/ })
+            .locator('visible=true')
+            .first();
+          if (phone) await page.getByRole('button', { name: /^Tue 24 Nov/ }).click();
+          await cell.fill('lots');
+          await cell.press('Enter');
+          await settle(page);
+          await page.screenshot({ path: join(out, `timesheet-error-${name}.png`), fullPage: true });
         }
         await page.close();
       }
