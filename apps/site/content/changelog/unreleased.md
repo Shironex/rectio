@@ -95,6 +95,12 @@ summary: Work that is merging into main now and ships with the next release.
   row under a reply and the docs code block header take the touch height, and the tab indicator no
   longer takes a press meant for the tab under it.
 
+- Cards, popovers, selects, date pickers, dialogs, the command menu, sheets, toasts and the app
+  shell header take the glass skin's translucency and blur through `backdrop-surface`, and
+  ThemeScope and AppShell its canvas wash through `canvas-wash`. Both do nothing in a theme or any
+  other skin (card 0.2.0, popover 0.2.0, select 0.2.0, date-picker 0.4.0, dialog 0.3.0,
+  command-menu 0.2.0, sheet 0.3.0, toast 0.3.0, app-shell 0.2.0, theme-scope 0.2.0).
+
 ## Templates
 
 - Every template sends its links through the link provider, so the live previews under
@@ -109,6 +115,16 @@ summary: Work that is merging into main now and ships with the next release.
   it keep their file; for a new project, make the look from the ledger preset in the theme
   generator.
 
+- Two opt-in skins. `glass`: translucent cards, popups and headers over a blurred backdrop, a light
+  top edge, rounder corners and a soft tinted canvas, solid wherever the browser cannot blur or
+  transparency is reduced (`skin-glass`). `brutalist`: two pixel ink borders, square corners, hard
+  offset shadows and heavier type, with focus rings kept clear of the shadows (`skin-brutalist`).
+- Every theme defines the colours those skins turn on, in each mode: an edge highlight
+  (`--rx-border-highlight`) and an offset shadow colour (`--rx-shadow-offset-color`), plus the
+  switches a skin sets (surface opacity, blur, backdrop and wash, border ink, highlight and offset
+  sizes), all off in the theme (tokens 0.7.0, theme-default 0.5.0). Fields take their edge from
+  `--rx-field-border`, which follows the border ink.
+
 ## CLI
 
 - `rectio init` asks its questions interactively.
@@ -119,6 +135,9 @@ summary: Work that is merging into main now and ships with the next release.
 ## Docs and site
 
 - Pages for the chat components and the AI chat thread block, with demos fed by a fake stream.
+- The skins page covers glass and brutalist: the translucent layer and its solid fallback, the
+  backdrop the glass contrast tests assume, focus beside offset shadows, and the switches in the
+  skin contract. The theme generator previews a theme under both.
 
 - A theme generator page in the docs: a brand colour, neutral temperature, dark depth, radius,
   density and fonts, every colour derived in OKLCH and corrected until each pair the kit draws
