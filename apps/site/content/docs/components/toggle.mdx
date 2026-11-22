@@ -151,6 +151,7 @@ Every prop of `ToggleGroup` except `value`, `defaultValue`, `onValueChange`, `mu
 - A pressed toggle shows a raised chip in a group, or a filled surface with an edge alone, as well
   as the stronger text colour.
 - Icon only toggles need an `aria-label`.
-- A group grows to 44px on touch screens; a small toggle alone reaches it through its hit area.
+- A group grows to 44px on touch screens, and each segment is at least 44px wide. A toggle alone, of
+  any size, reaches 44 by 44 through its hit area, so a one-letter label still makes the width.
 
 <ComponentSource path="toggle/toggle.tsx" />

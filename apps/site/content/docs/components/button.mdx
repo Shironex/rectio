@@ -72,7 +72,8 @@ Every prop of Base UI's `Button` is accepted as well.
 ## Accessibility
 
 - A native `<button>`: Enter and Space press it, and it is in the tab order.
-- On touch screens every size grows to a 44px target.
+- On touch screens every size grows to a 44px target. Space small buttons in a row with
+  `pointer-coarse:gap-touch-gap`, so their hit areas stay apart at every density and skin.
 - An `iconOnly` button needs an `aria-label`; the icon is hidden from assistive technology.
 
 <ComponentSource path="button/button.tsx" />
