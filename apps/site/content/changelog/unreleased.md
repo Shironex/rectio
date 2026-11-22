@@ -101,8 +101,17 @@ summary: Work that is merging into main now and ships with the next release.
   other skin (card 0.2.0, popover 0.2.0, select 0.2.0, date-picker 0.4.0, dialog 0.3.0,
   command-menu 0.2.0, sheet 0.3.0, toast 0.3.0, app-shell 0.2.0, theme-scope 0.2.0).
 - Outline cards, block panels and the plan cards of the pricing table take `shadow-panel`: nothing
-  in a theme, the edge highlight and a wide soft shadow under glass. Block panels also take the
-  glass backdrop (card 0.2.0, blocks-core 0.1.7, pricing-table 0.1.1).
+  in a theme, the edge highlight and a wide soft shadow under glass. Cards and block panels take the
+  glass translucency through `translucent-surface`, with no backdrop blur; only popups, dialogs,
+  sheets, toasts and the sticky app header blur. A surface inside another one stays solid
+  (card 0.2.0, blocks-core 0.1.7, pricing-table 0.1.1).
+- `cn` knows the skin hooks: a background image class (`bg-[url()]`, `bg-linear-*`, `bg-none`)
+  replaces `canvas-wash`, and a backdrop filter class (`backdrop-blur-*`, `backdrop-saturate-*`,
+  `backdrop-filter-none`) replaces `backdrop-surface`, so yours wins in any theme (cn 0.3.0).
+- Update order: these components read utilities that tokens 0.7.0 adds (`shadow-panel`,
+  `shadow-indicator`, `border-line-disabled`, `translucent-surface`, `backdrop-surface`,
+  `canvas-wash`). The registry has no minimum version per item, so add tokens again first
+  (`rectio add tokens --overwrite`; `rectio update` lists what is behind), then the components.
 - Switch, slider and segmented control thumbs take `shadow-indicator`, so an offset or ambient
   shadow never spills out of the track (switch 0.1.2, slider 0.1.2, tabs 0.1.5, toggle 0.2.2,
   motion toggle 0.2.1, cn 0.3.0).
@@ -134,7 +143,8 @@ summary: Work that is merging into main now and ships with the next release.
   switches a skin sets (surface opacity, blur, backdrop and wash, border ink, highlight, ambient
   and offset sizes), all off in the theme (tokens 0.7.0, theme-default 0.5.0). Fields take their
   edge from `--rx-field-border`, which follows the border ink. Field and table touch heights grow
-  by any border wider than 1px, so their inner targets stay 44px.
+  by any border wider than 1px, and never shrink under a thinner one, so their inner targets stay
+  44px (skin-dense 0.1.1, skin-editorial 0.1.1).
 
 ## CLI
 
