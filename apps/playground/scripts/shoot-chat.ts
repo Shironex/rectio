@@ -103,6 +103,22 @@ try {
       }
     }
   }
+  // The same conversation in the dense and editorial skins: desktop light and phone dark.
+  for (const [skin, mode, phone] of [
+    ['dense', 'light', false],
+    ['editorial', 'dark', true],
+  ] as const) {
+    const name = `skin-${skin}-${phone ? 'phone' : 'desktop'}-${mode}`;
+    if (!wanted(name)) continue;
+    const page = await open(
+      browser,
+      base,
+      `view=chat&state=conversation&mode=${mode}&skin=${skin}`,
+      phone,
+    );
+    await page.screenshot({ path: join(out, `${name}.png`) });
+    await page.close();
+  }
   console.log(`screenshots in ${out}`);
 } finally {
   await browser.close();
