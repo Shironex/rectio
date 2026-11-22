@@ -124,11 +124,17 @@ export function RangeCalendar({
 }: RangeCalendarProps) {
   const dateLocale = dateLocaleProp ?? resolveDateLocale(locale);
   // The first day picked, kept here as well as sent up, so a parent that only stores whole
-  // ranges works too. It holds while the value is the one before the press or the one sent up; a
-  // range set from outside (a preset, a reset) ends it.
-  const [pending, setPending] = useState<{ start: Date; keys: readonly string[] } | null>(null);
+  // ranges works too. It holds while the value stays as it was or becomes the one sent up; any
+  // other change from outside (a preset, a reset to nothing) ends it.
+  const [pending, setPending] = useState<{ start: Date; sent: string } | null>(null);
   const [hovered, setHovered] = useState<Date | null>(null);
-  const start = pending?.keys.includes(rangeKey(value)) ? pending.start : null;
+  const valueKey = rangeKey(value);
+  const [seenKey, setSeenKey] = useState(valueKey);
+  if (valueKey !== seenKey) {
+    setSeenKey(valueKey);
+    if (pending !== null && valueKey !== pending.sent) setPending(null);
+  }
+  const start = pending?.start ?? null;
   const choosingEnd = start !== null;
   const from = start ?? value?.from;
   const to = start === null ? value?.to : undefined;
@@ -194,7 +200,7 @@ export function RangeCalendar({
             // The first press is always a fresh start, the second the end.
             if (start === null) {
               const started = { from: picked, to: undefined };
-              setPending({ start: picked, keys: [rangeKey(value), rangeKey(started)] });
+              setPending({ start: picked, sent: rangeKey(started) });
               onValueChange(started);
               return;
             }

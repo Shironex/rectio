@@ -141,4 +141,44 @@ describe('RangeCalendar', () => {
     });
     expect(summary()).toHaveTextContent('12 Mar to 18 Mar 2026, 7 days');
   });
+
+  it('ends the half-picked range when the app resets the value to nothing', async () => {
+    const user = userEvent.setup();
+    const onComplete = vi.fn();
+    function Resettable() {
+      const [value, setValue] = useState<DateRange | undefined>(undefined);
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() => {
+              setValue(undefined);
+            }}
+          >
+            Reset
+          </button>
+          <RangeCalendar
+            aria-label="Stay"
+            locale="en-GB"
+            value={value}
+            onValueChange={setValue}
+            onComplete={onComplete}
+            defaultMonth={MARCH}
+          />
+        </>
+      );
+    }
+    render(<Resettable />);
+    const first = day(/12 March 2026/);
+    if (first === undefined) throw new Error('no 12 March');
+    await user.click(first);
+    expect(summary()).toHaveTextContent('From 12 Mar 2026. Pick the last day');
+    await user.click(screen.getByRole('button', { name: 'Reset' }));
+    expect(summary()).toHaveTextContent('Pick the first day');
+    const next = day(/18 March 2026/);
+    if (next === undefined) throw new Error('no 18 March');
+    await user.click(next);
+    expect(onComplete).not.toHaveBeenCalled();
+    expect(summary()).toHaveTextContent('From 18 Mar 2026. Pick the last day');
+  });
 });
