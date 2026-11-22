@@ -275,7 +275,8 @@ export function PromptComposer({
                   className={cn(
                     'flex cursor-pointer items-baseline gap-3 rounded-control px-2.5 py-2 text-sm',
                     'pointer-coarse:min-h-(--rx-control-height-touch) pointer-coarse:items-center',
-                    'data-highlighted:bg-accent-subtle data-highlighted:text-accent-strong',
+                    // Fill, accent text and an inset edge: the pick reads without relying on one tone.
+                    'data-highlighted:bg-accent-subtle data-highlighted:text-accent-strong data-highlighted:inset-ring-1 data-highlighted:inset-ring-accent',
                   )}
                 >
                   <span className="shrink-0 font-mono font-medium">/{command.name}</span>
@@ -303,6 +304,8 @@ export function PromptComposer({
           assignRef(textareaRef, node);
         }}
         submitDisabled={tone === 'over'}
+        data-invalid={tone === 'over' || undefined}
+        className="data-invalid:border-negative-strong"
         textareaProps={{
           onKeyDown,
           onSelect: readCaret,

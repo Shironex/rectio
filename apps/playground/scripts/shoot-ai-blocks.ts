@@ -120,6 +120,7 @@ try {
     ['sidebar', 'glass', 'dark', false],
     ['sidebar', 'brutalist', 'light', false],
     ['composer', 'brutalist', 'light', false],
+    ['composer', 'glass', 'dark', false],
   ] as const) {
     const name = `skin-${skin}-${state}-${phone ? 'phone' : 'desktop'}-${mode}`;
     if (!wanted(name)) continue;
