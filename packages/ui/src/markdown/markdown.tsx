@@ -15,11 +15,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { cn } from '../lib/cn';
 import {
   parseMarkdown,
+  stableBoundary,
   type MarkdownAlign,
   type MarkdownBlock,
   type MarkdownInline,
 } from './markdown-parse';
 import { type MarkdownMessages, MARKDOWN_MESSAGES, streamingCaret } from './markdown-messages';
+import { isExternalHref } from '../link/href';
 import { Anchor } from '../link/link';
 
 export interface MarkdownCodeProps {
@@ -105,7 +107,11 @@ const ALIGN: Record<Exclude<MarkdownAlign, null>, 'start' | 'center' | 'end'> = 
   right: 'end',
 };
 
-const isExternal = (href: string) => /^(?:[a-z][a-z\d+.-]*:)?\/\//i.test(href);
+/**
+ * Whether a link leaves the app, read the way a browser reads it (so `/\\evil.com` counts). Mail
+ * and phone links leave too but open their own app, never a tab.
+ */
+const isExternal = (href: string) => isExternalHref(href) && !/^(?:mailto|tel):/i.test(href.trim());
 
 interface RenderContext {
   size: MarkdownSize;
@@ -503,10 +509,20 @@ export function Markdown({
   className,
   ...props
 }: MarkdownProps) {
-  const blocks = useMemo(
-    () => parseMarkdown(children, { streaming, allowedProtocols }),
-    [children, streaming, allowedProtocols],
+  // While text streams, the finished blocks are parsed once and only the part still arriving is
+  // parsed again on each new word, so a long reply costs the same per word as a short one.
+  const split = streaming ? stableBoundary(children) : 0;
+  const head = children.slice(0, split);
+  const tail = children.slice(split);
+  const headBlocks = useMemo(
+    () => (head === '' ? [] : parseMarkdown(head, { allowedProtocols })),
+    [head, allowedProtocols],
   );
+  const tailBlocks = useMemo(
+    () => parseMarkdown(tail, { streaming, allowedProtocols }),
+    [tail, streaming, allowedProtocols],
+  );
+  const blocks = useMemo(() => [...headBlocks, ...tailBlocks], [headBlocks, tailBlocks]);
   return (
     <div
       data-slot="markdown"
