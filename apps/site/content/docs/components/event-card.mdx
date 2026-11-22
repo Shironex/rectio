@@ -41,7 +41,7 @@ both days, and `allDay` reads "All day".
 
 All-day dates are local calendar dates and the end is exclusive: an event from 16 to 18 March
 covers the 16th and the 17th, and an end on the start day means that one day. Build them at local
-midnight, for example with `localDate('2026-03-16')` from `@rectio/ui/charts`, not with
+midnight, for example with `localDate('2026-03-16')` from `@rectio/ui`, not with
 `new Date('2026-03-16')`, which is UTC midnight and the evening before west of UTC.
 
 With `onSelect`, the title becomes a button that covers the card. `triggerProps` passes a roving

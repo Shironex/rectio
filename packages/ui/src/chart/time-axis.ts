@@ -67,12 +67,8 @@ export function inferTimeScale(rows: readonly Pick<TimeRow, 'time'>[]): TimeScal
   return 'month';
 }
 
-/** A local calendar date from 'YYYY-MM-DD', at local midnight; Invalid Date for anything else. */
-export function localDate(iso: string): Date {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  if (match === null) return new Date(Number.NaN);
-  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-}
+// Kept here for the charts entry, which has always exported it; it lives with the plain helpers.
+export { localDate } from '../lib/local-date';
 
 /** The calendar day a moment falls on, as a whole number that steps by one a day in any zone. */
 const dayNumber = (date: Date) =>

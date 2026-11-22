@@ -1,4 +1,5 @@
 export { cn } from './lib/cn';
+export { localDate } from './lib/local-date';
 export { ThemeScope, usePortalContainer, type ThemeScopeProps } from './theme-scope/theme-scope';
 export {
   Button,

@@ -240,6 +240,15 @@ export default defineRegistry({
       files: ['lib/cn.ts'],
     },
     {
+      name: 'local-date',
+      type: 'lib',
+      version: '0.1.0',
+      title: 'localDate',
+      description:
+        'A local calendar date from YYYY-MM-DD, for the days of charts, all-day events and agendas.',
+      files: ['lib/local-date.ts'],
+    },
+    {
       name: 'theme-scope',
       type: 'component',
       version: '0.1.3',
@@ -908,7 +917,7 @@ export default defineRegistry({
     {
       name: 'chart',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Chart core',
       description:
         'What every chart shares: the CVD-tested palette, legend, tooltip, table twin, loading and empty states, formatters and the time axis.',

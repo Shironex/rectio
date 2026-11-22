@@ -324,6 +324,7 @@ describe('the rectio registry', () => {
       'legal',
       'line-chart',
       'link',
+      'local-date',
       'logo-strip',
       'marketing-core',
       'menu',
