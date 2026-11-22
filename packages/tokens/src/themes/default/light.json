@@ -63,6 +63,14 @@
     "strong": {
       "$value": "{palette.stone.500}",
       "$description": "Edges that identify a control: at least 3:1 against surface."
+    },
+    "highlight": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [0.995, 0, 75],
+        "alpha": 0.72
+      },
+      "$description": "The light rim along the top edge of a translucent surface, drawn when a skin sets shadow.highlight."
     }
   },
   "accent": {
@@ -272,6 +280,13 @@
           }
         }
       ]
+    },
+    "offset": {
+      "color": {
+        "$type": "color",
+        "$value": "{palette.stone.950}",
+        "$description": "Colour of the hard offset shadow a skin draws with shadow.offset: clear of the canvas, and of a focus ring beside it."
+      }
     }
   },
   "chart": {

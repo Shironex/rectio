@@ -1,0 +1,127 @@
+{
+  "$description": "Brutalist skin, applied with data-skin=\"brutalist\". Heavy ink borders, square corners, hard offset shadows instead of soft ones and heavier type: blunt, structural and loud. Focus rings stay visible beside the offset shadows, which every theme draws in a colour set apart from its focus colour.",
+  "font": {
+    "weight": {
+      "$type": "fontWeight",
+      "regular": {
+        "$value": "{font-weight.medium}",
+        "$description": "Body copy one step heavier, so it holds its own against two pixel borders."
+      },
+      "medium": {
+        "$value": "{font-weight.semibold}"
+      },
+      "strong": {
+        "$value": "{font-weight.bold}"
+      },
+      "heading": {
+        "$value": "{font-weight.bold}"
+      }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "tight": {
+        "$value": {
+          "value": -0.025,
+          "unit": "rem"
+        }
+      },
+      "caps": {
+        "$value": {
+          "value": 0.08,
+          "unit": "rem"
+        }
+      }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "control": {
+      "$value": "{size.0}"
+    },
+    "panel": {
+      "$value": "{size.0}"
+    },
+    "badge": {
+      "$value": "{size.0}"
+    }
+  },
+  "border": {
+    "width": {
+      "$type": "dimension",
+      "$value": "{size.2}",
+      "$description": "Two pixel borders and dividers: edges are drawn, not hinted."
+    },
+    "ink": {
+      "$type": "number",
+      "$value": 1,
+      "$description": "Every border and divider in the text colour."
+    }
+  },
+  "shadow": {
+    "raised": {
+      "$type": "shadow",
+      "$value": {
+        "color": {
+          "colorSpace": "oklch",
+          "components": [0, 0, 0],
+          "alpha": 0
+        },
+        "offsetX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 0,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 0,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$description": "Cleared: the offset shadow carries the depth, with no soft blur around it."
+    },
+    "overlay": {
+      "$type": "shadow",
+      "$value": {
+        "color": {
+          "colorSpace": "oklch",
+          "components": [0, 0, 0],
+          "alpha": 0
+        },
+        "offsetX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 0,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 0,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    },
+    "offset": {
+      "raised": {
+        "$type": "dimension",
+        "$value": "{size.4}",
+        "$description": "Buttons and raised cards sit on a 4px block of shadow."
+      },
+      "overlay": {
+        "$type": "dimension",
+        "$value": "{size.6}",
+        "$description": "Popups, dialogs and toasts float a step higher, on 6px."
+      }
+    }
+  }
+}

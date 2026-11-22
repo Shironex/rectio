@@ -21,6 +21,9 @@ const built = JSON.parse(
 const base = built.themes.default?.light ?? {};
 const dense = built.skins.dense?.tokens ?? {};
 const editorial = built.skins.editorial?.tokens ?? {};
+const glass = built.skins.glass?.tokens ?? {};
+const brutalist = built.skins.brutalist?.tokens ?? {};
+const dark = built.themes.default?.dark ?? {};
 
 /** A skin of your own, written after the shipped ones the way the skins page shows. */
 const ROOMY = `[data-skin='roomy'],
@@ -87,11 +90,43 @@ describe('nested skins: the nearest one wins', () => {
   });
 });
 
+describe('glass and brutalist nest like the others', () => {
+  it('a glass scope inside a brutalist page, and the reverse', () => {
+    expect(read('brutalist', scope('glass'))).toBe(glass['--rx-radius-panel']);
+    expect(read('glass', scope('brutalist'))).toBe(brutalist['--rx-radius-panel']);
+    expect(read('glass', scope('brutalist'), '--rx-shadow-offset-overlay')).toBe(
+      brutalist['--rx-shadow-offset-overlay'],
+    );
+  });
+
+  it('a theme scope inside brutalist inside glass takes the nearest switches', () => {
+    const html = `<div data-skin="brutalist">${scope()}</div>`;
+    expect(read('glass', html, '--rx-border-ink')).toBe(brutalist['--rx-border-ink']);
+    // Glass's own switch, which brutalist leaves alone, still reaches it.
+    expect(read('glass', html, '--rx-shadow-highlight')).toBe(glass['--rx-shadow-highlight']);
+  });
+
+  // A switch is the same in light and dark, so it carries into a scope of the other mode, while
+  // the colours it turns on stay that scope's own.
+  it('a dark scope inside a light brutalist page keeps dark colours', () => {
+    const html = '<div data-theme="default" data-mode="dark"><span id="t"></span></div>';
+    expect(read('brutalist', html, '--rx-shadow-offset-raised')).toBe(
+      brutalist['--rx-shadow-offset-raised'],
+    );
+    expect(read('brutalist', html, '--rx-shadow-offset-color')).toBe(
+      dark['--rx-shadow-offset-color'],
+    );
+    expect(read('glass', html, '--rx-border-highlight')).toBe(dark['--rx-border-highlight']);
+  });
+});
+
 describe('data-skin="none"', () => {
   it('turns an outer skin off for a theme scope and the themes inside it', () => {
     expect(read('dense', scope('none'))).toBe(base['--rx-radius-panel']);
     expect(read('editorial', scope('none', scope()))).toBe(base['--rx-radius-panel']);
     expect(read('roomy', scope('none'))).toBe(base['--rx-radius-panel']);
+    expect(read('glass', scope('none'))).toBe(base['--rx-radius-panel']);
+    expect(read('brutalist', scope('none'), '--rx-border-ink')).toBe(base['--rx-border-ink']);
   });
 });
 

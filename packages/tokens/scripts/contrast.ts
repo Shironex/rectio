@@ -69,6 +69,9 @@ export const NESTED: [fg: string, bg: string, min: number][] = [
   ['focus', 'surface-sunken', 3],
   ['focus', 'surface-hover', 3],
   ['border-strong', 'surface-sunken', 3],
+  // A focus ring passes over the hard offset shadow a skin can turn on (brutalist): it must stand
+  // apart from it as well as from the surface.
+  ['focus', 'shadow-offset-color', 3],
   ...[1, 2, 3, 4, 5, 6].map((n): [string, string, number] => [
     `identity-${String(n)}-strong`,
     `identity-${String(n)}-subtle`,

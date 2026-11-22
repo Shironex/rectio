@@ -19,6 +19,7 @@ import {
   NO_SKIN,
   SKINS,
   THEMES,
+  TRANSLUCENT,
   cssVarName,
   skinViolation,
   tailwindColorName,
@@ -46,7 +47,7 @@ const plain = (tokens: TokenMap) =>
 async function resolve(
   sources: string[],
   onlyFrom?: string,
-  check?: (path: string[], type: string) => void,
+  check?: (path: string[], type: string, value: string) => void,
 ): Promise<TokenMap> {
   const sd = new StyleDictionary({
     source: sources,
@@ -61,8 +62,9 @@ async function resolve(
     if (onlyFrom !== undefined && token.filePath !== onlyFrom) continue;
     const type = token.$type;
     if (type === undefined) throw new Error(`${token.path.join('.')} has no $type`);
-    check?.(token.path, type);
-    out.set(cssVarName(token.path), { value: componentValue(token) ?? String(token.$value), type });
+    const value = componentValue(token) ?? String(token.$value);
+    check?.(token.path, type, value);
+    out.set(cssVarName(token.path), { value, type });
   }
   return out;
 }
@@ -92,18 +94,37 @@ function skinSources(theme: Theme, mode: Mode, skin: string): string[] {
   return [...themeSources(theme, mode), src(`skins/${skin}.json`)];
 }
 
+const translucentFile = (skin: string) => src(`skins/${skin}.${TRANSLUCENT}.json`);
+
+interface SkinTokens {
+  /** Applied wherever the skin is set: the solid look, and the fallback of a translucent skin. */
+  solid: TokenMap;
+  /** Applied on top where the backdrop can blur and transparency is not reduced. */
+  translucent: TokenMap;
+}
+
 /** A skin's own tokens, each checked against the skin contract in naming.ts. */
-async function resolveSkin(skin: string): Promise<TokenMap> {
+async function resolveSkin(skin: string): Promise<SkinTokens> {
   const file = src(`skins/${skin}.json`);
   const problems: string[] = [];
-  const tokens = await resolve(skinSources('default', 'light', skin), file, (path, type) => {
-    const why = skinViolation(path, type);
-    if (why !== undefined) problems.push(`${path.join('.')} (${why})`);
-  });
+  const checker =
+    (layer: 'solid' | 'translucent') => (path: string[], type: string, value: string) => {
+      const why = skinViolation(path, type, value, layer);
+      if (why !== undefined) problems.push(`${path.join('.')} (${why})`);
+    };
+  const solid = await resolve(skinSources('default', 'light', skin), file, checker('solid'));
+  const layer = translucentFile(skin);
+  const translucent = existsSync(layer)
+    ? await resolve(
+        [...skinSources('default', 'light', skin), layer],
+        layer,
+        checker('translucent'),
+      )
+    : emptyTokens();
   if (problems.length > 0)
     throw new Error(`skin "${skin}" breaks the skin contract:\n  ${problems.join('\n  ')}`);
-  if (tokens.size === 0) throw new Error(`skin "${skin}" overrides nothing`);
-  return tokens;
+  if (solid.size === 0) throw new Error(`skin "${skin}" overrides nothing`);
+  return { solid, translucent };
 }
 
 /** Every theme and mode must define exactly the token set of default/light: it is the contract. */
@@ -170,19 +191,35 @@ const DENSITY_SELECTORS = [
   '[data-density="compact"] [data-skin]',
 ];
 
-/** Component tokens that alias one of `names`: a scope that changes those must redeclare them. */
+/**
+ * Component tokens that read one of `names`, as an alias or inside a composite value (a shadow made
+ * of the offset and highlight switches): a scope that changes those must redeclare them.
+ */
 function aliasesOf(base: TokenMap, names: ReadonlySet<string>): TokenMap {
   return new Map(
     [...base].filter(([name, { value }]) => {
-      const target = /^var\((--rx-[a-z0-9-]+)\)$/.exec(value)?.[1];
-      return target !== undefined && names.has(target) && !names.has(name);
+      if (names.has(name)) return false;
+      const reads = [...value.matchAll(/var\((--rx-[a-z0-9-]+)[,)]/g)].map((m) => m[1] ?? '');
+      return reads.some((target) => names.has(target));
     }),
   );
 }
 
+/**
+ * Where a skin's translucent layer applies: the browser can blur what is behind a surface. Without
+ * that, a see-through surface would let the text behind it show sharp through its own text.
+ */
+const BACKDROP_SUPPORT =
+  '@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))';
+/**
+ * Where it is taken back: the person asked for less transparency. Written after the layer, at the
+ * same weight, so it wins; browsers that do not know the feature skip it and keep the layer.
+ */
+const REDUCED_TRANSPARENCY = '@media (prefers-reduced-transparency: reduce)';
+
 function themesCss(
   resolved: Map<string, TokenMap>,
-  skins: Map<string, TokenMap>,
+  skins: Map<string, SkinTokens>,
   compact: TokenMap,
   reduced: TokenMap,
 ): string {
@@ -208,8 +245,11 @@ function themesCss(
   parts.push(
     `/* No data-mode: follow the system. */\n@media (prefers-color-scheme: dark) {\n${auto.join('\n')}\n}`,
   );
-  for (const [skin, tokens] of skins) {
+  for (const [skin, { solid: tokens, translucent }] of skins) {
     const refs = aliasesOf(base, new Set(tokens.keys()));
+    // A theme inside takes back the skin's own tokens. Not the component tokens that read them:
+    // its theme rule declares those again, and they resolve there against the tokens it inherits
+    // and its own mode, so a dark scope inside a light skin keeps dark shadow colours.
     parts.push(
       `/* Skin "${skin}": data-skin="${skin}" on any element. */\n${block(skinSelectors(skin), [
         ...declarations(tokens),
@@ -217,9 +257,20 @@ function themesCss(
       ])}`,
       block(
         [skinInsideSelector(skin)],
-        [...tokens.keys(), ...refs.keys()].map((name) => `${name}: inherit;`),
+        [...tokens.keys(), ...translucent.keys()].map((name) => `${name}: inherit;`),
       ),
     );
+    if (translucent.size > 0) {
+      // Taken back to the solid layer's value where it sets one, else to the theme's.
+      const solidValue = (name: string) => tokens.get(name)?.value ?? base.get(name)?.value;
+      const restore = [...translucent.keys()].map(
+        (name) => `${name}: ${String(solidValue(name))};`,
+      );
+      parts.push(
+        `/* Skin "${skin}", translucent where the browser blurs the backdrop. */\n${BACKDROP_SUPPORT} {\n${block(skinSelectors(skin), declarations(translucent), '  ')}\n}`,
+        `/* Skin "${skin}", solid for anyone who asked for less transparency. */\n${REDUCED_TRANSPARENCY} {\n${block(skinSelectors(skin), restore, '  ')}\n}`,
+      );
+    }
   }
   parts.push(block(DENSITY_SELECTORS, [...declarations(compact), ...declarations(componentRefs)]));
   parts.push(
@@ -229,6 +280,41 @@ function themesCss(
 }
 
 const HEADER = '/* Generated by @rectio/tokens from the DTCG sources in src/. Do not edit. */';
+
+/**
+ * Colours that a skin's switches reach. They resolve where they are used (the map is inline), so
+ * they follow the mode of that element even inside a skin set further up. Every switch has a
+ * fallback that leaves the colour as the theme draws it, for a theme file written before it.
+ *
+ * Floating surfaces mix toward transparent by `--rx-surface-alpha`, which only `backdrop-surface`
+ * sets, on its own element (it does not inherit): a surface turns see-through only where its
+ * component also blurs what is behind it. Plain borders lean toward the text colour by
+ * `--rx-border-ink`.
+ */
+const surfaceMix = (name: string) =>
+  `color-mix(in oklab, var(${name}) calc(var(--rx-surface-alpha, 1) * 100%), transparent)`;
+const inkMix = (name: string) =>
+  `color-mix(in oklab, var(--rx-text) calc(var(--rx-border-ink, 0) * 100%), var(${name}))`;
+const COMPOSITE_COLORS: Record<string, string> = {
+  '--rx-surface': surfaceMix('--rx-surface'),
+  '--rx-surface-canvas': surfaceMix('--rx-surface-canvas'),
+  '--rx-surface-raised': surfaceMix('--rx-surface-raised'),
+  '--rx-surface-overlay': surfaceMix('--rx-surface-overlay'),
+  '--rx-border': inkMix('--rx-border'),
+  '--rx-border-strong': inkMix('--rx-border-strong'),
+};
+
+/**
+ * A raised or floating surface's shadow: the edge highlight along its top, the hard offset shadow
+ * and the theme's soft shadow. In a theme the first two are zero sized, so only the soft one shows;
+ * a skin sizes them. Component shadow tokens (popover, dialog, sheet, toast) hold the same layers.
+ */
+const elevation = (level: 'raised' | 'overlay') =>
+  [
+    'inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent)',
+    `var(--rx-shadow-offset-${level}, 0px) var(--rx-shadow-offset-${level}, 0px) 0 0 var(--rx-shadow-offset-color, transparent)`,
+    `var(--rx-shadow-${level})`,
+  ].join(', ');
 
 /** Tailwind v4 entry: resets the default theme, then maps every utility to a token. */
 function tailwindCss(contract: string[], types: TokenMap): string {
@@ -259,8 +345,11 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   for (const name of contract) {
     const path = name.slice('--rx-'.length).split('-');
     const type = types.get(name)?.type;
-    if (type === 'color' && COLOR_GROUPS.has(path[0] ?? ''))
-      add(`--color-${tailwindColorName(path)}`, name);
+    if (type !== 'color' || !COLOR_GROUPS.has(path[0] ?? '')) continue;
+    const key = `--color-${tailwindColorName(path)}`;
+    const composite = COMPOSITE_COLORS[name];
+    if (composite === undefined) add(key, name);
+    else map.push(`${key}: ${composite};`);
   }
   for (const role of ['sans', 'display', 'mono', 'numeric'])
     add(`--font-${role}`, `--rx-font-family-${role}`);
@@ -275,7 +364,8 @@ function tailwindCss(contract: string[], types: TokenMap): string {
     add(`--tracking-${tracking}`, `--rx-font-tracking-${tracking}`);
   for (const radius of ['control', 'panel', 'badge', 'full'])
     add(`--radius-${radius}`, `--rx-radius-${radius}`);
-  for (const shadow of ['raised', 'overlay']) add(`--shadow-${shadow}`, `--rx-shadow-${shadow}`);
+  for (const shadow of ['raised', 'overlay'] as const)
+    map.push(`--shadow-${shadow}: ${elevation(shadow)};`);
   for (const ease of ['standard', 'enter', 'exit'])
     add(`--ease-${ease}`, `--rx-motion-easing-${ease}`);
   add('--spacing', '--rx-space-unit');
@@ -339,6 +429,22 @@ function tailwindCss(contract: string[], types: TokenMap): string {
 /* The same, with the end kept clear of the close button in the corner. */
 @utility pe-sheet-close {
   padding-inline-end: max(calc(var(--spacing) * 14), calc((100% - var(--rx-sheet-measure)) / 2));
+}`;
+
+  const backdrop = `/* How see-through a floating surface is. Not inherited: only the element that blurs its backdrop
+   lets it through, never a sticky row or a field inside it. */
+@property --rx-surface-alpha {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
+/* A surface that floats over content (a card, a popup, a sticky header): it takes the skin's
+   translucency and blurs what is behind it. Solid and unfiltered in a theme. */
+@utility backdrop-surface {
+  --rx-surface-alpha: var(--rx-surface-opacity, 1);
+  -webkit-backdrop-filter: var(--rx-surface-backdrop, none);
+  backdrop-filter: var(--rx-surface-backdrop, none);
 }`;
 
   const scrollbar = `/* A row that scrolls sideways without a bar, such as filter tabs on a phone. */
@@ -471,6 +577,8 @@ ${numeric}
 
 ${sheet}
 
+${backdrop}
+
 ${scrollbar}
 `;
 }
@@ -489,7 +597,7 @@ async function main() {
     src('modes/reduced-motion.json'),
   );
 
-  const skins = new Map<string, TokenMap>();
+  const skins = new Map<string, SkinTokens>();
   const skinned = new Map<string, TokenMap>();
   for (const skin of SKINS) {
     if (skin === NO_SKIN) throw new Error(`"${NO_SKIN}" turns a skin off; no skin may use the id`);
@@ -522,12 +630,14 @@ async function main() {
   const json = {
     contract: contract.map((name) => ({ name, type: contractTypes.get(name)?.type })),
     themes: byThemeMode(resolved, (theme, mode) => `${theme}/${mode}`),
-    // Each skin's own overrides, and every theme and mode as it resolves under the skin.
+    // Each skin's own overrides, its translucent layer, and every theme and mode as it resolves
+    // under the skin's solid layer: the fallback, which the contrast and colour vision checks hold.
     skins: Object.fromEntries(
       SKINS.map((skin) => [
         skin,
         {
-          tokens: plain(skins.get(skin) ?? emptyTokens()),
+          tokens: plain(skins.get(skin)?.solid ?? emptyTokens()),
+          translucent: plain(skins.get(skin)?.translucent ?? emptyTokens()),
           themes: byThemeMode(skinned, (theme, mode) => `${theme}/${mode}/${skin}`),
         },
       ]),

@@ -154,6 +154,10 @@ export function derive(p: Preset, mode: Mode): TokenSet {
     set('warning-mark', o(0.635, 0.1329, 77));
     set('negative-hover', o(0.455, 0.1688, STATUS.negative));
     set('scrim', o(0.18, 0.008, nh, 0.36));
+    // Read only when a skin turns them on: the light rim along the top of a translucent surface,
+    // and the hard offset shadow, drawn in ink so a focus ring stays clear of it.
+    set('border-highlight', o(0.995, 0, nh, 0.72));
+    set('shadow-offset-color', ink(0.21));
     set('chart-series-1', inkStyle ? ink(0.375) : brand(0.53, bc));
     set('chart-series-2', o(0.62, 0.169, 48));
     set('chart-series-3', inkStyle ? o(0.53, 0.1082, 232) : ink(0.28));
@@ -256,6 +260,10 @@ export function derive(p: Preset, mode: Mode): TokenSet {
   set('warning-mark', o(solid.warning[0] ?? 0.8, solid.warning[1] ?? 0.15, STATUS.warning));
   set('negative-hover', o(0.76, 0.16, STATUS.negative));
   set('scrim', o(0.08, 0.005, nh, 0.64));
+  // A faint rim of light on dark glass; the offset shadow sits between the canvas and a focus ring
+  // in lightness, so both the shadow and the ring read.
+  set('border-highlight', o(0.985, 0.006, nh, 0.14));
+  set('shadow-offset-color', ink(0.45));
   // Series hold at least 0.1 of lightness apart, so they separate in greyscale and for every
   // colour vision type, not by hue alone.
   const series1 = p.seriesL ?? solidL - 0.04;

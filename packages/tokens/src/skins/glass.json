@@ -1,0 +1,23 @@
+{
+  "$description": "Glass skin, applied with data-skin=\"glass\". Floating surfaces turn translucent over a blurred backdrop, with a light rim along their top edge and softer, rounder corners. The translucent layer (glass.translucent.json) applies only where the browser blurs the backdrop and the person has not asked for reduced transparency; elsewhere the same surfaces stay solid, with the rim and the corners.",
+  "radius": {
+    "$type": "dimension",
+    "control": {
+      "$value": "{size.8}"
+    },
+    "panel": {
+      "$value": "{size.16}",
+      "$description": "16px: a pane of glass reads as one soft-edged sheet."
+    },
+    "badge": {
+      "$value": "{size.6}"
+    }
+  },
+  "shadow": {
+    "highlight": {
+      "$type": "dimension",
+      "$value": "{size.1}",
+      "$description": "A one pixel rim of light along the top edge, where light catches the pane."
+    }
+  }
+}

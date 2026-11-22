@@ -139,6 +139,47 @@
         "unit": "px"
       },
       "$description": "Width of every plain border and divider (the `border` and `divide` utilities). A skin may thin it to a hairline."
+    },
+    "ink": {
+      "$type": "number",
+      "$value": 0,
+      "$description": "How far plain borders lean toward the text colour: 0 keeps the theme's border colours, 1 draws every border and divider in ink. A skin may raise it for heavy, drawn edges."
+    }
+  },
+  "surface": {
+    "opacity": {
+      "$type": "number",
+      "$value": 1,
+      "$description": "Opacity of a surface that floats over content (a card, a popup, a sticky header) where its component allows a backdrop. 1 in a theme: every surface is solid. A skin may lower it only together with a backdrop blur, and the build keeps it at 1 where the browser cannot blur or the person asked for reduced transparency."
+    },
+    "blur": {
+      "$type": "dimension",
+      "$value": "{size.20}",
+      "$description": "Blur radius behind a translucent surface, read by a backdrop that a skin turns on."
+    },
+    "backdrop": {
+      "$type": "other",
+      "$value": "none",
+      "$description": "Backdrop filter behind a surface that floats over content. none in a theme, so no surface blurs or starts a stacking context."
+    }
+  },
+  "shadow": {
+    "highlight": {
+      "$type": "dimension",
+      "$value": "{size.0}",
+      "$description": "Height of the light edge along the top of a raised or floating surface (border.highlight). 0 in a theme."
+    },
+    "offset": {
+      "raised": {
+        "$type": "dimension",
+        "$value": "{size.0}",
+        "$description": "Distance of the hard offset shadow under a raised surface, down and to the end (shadow.offset.color). 0 in a theme: only the soft shadow shows."
+      },
+      "overlay": {
+        "$type": "dimension",
+        "$value": "{size.0}",
+        "$description": "Distance of the hard offset shadow under a popup, a dialog or a toast. 0 in a theme."
+      }
     }
   },
   "space": {

@@ -77,8 +77,9 @@
         "$value": "{radius.panel}"
       },
       "shadow": {
-        "$type": "shadow",
-        "$value": "{shadow.overlay}"
+        "$type": "other",
+        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-overlay)",
+        "$description": "The overlay elevation: the theme's soft shadow, plus the edge highlight and the hard offset shadow a skin may turn on."
       }
     },
     "dialog": {
@@ -87,8 +88,9 @@
         "$value": "{radius.panel}"
       },
       "shadow": {
-        "$type": "shadow",
-        "$value": "{shadow.overlay}"
+        "$type": "other",
+        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-overlay)",
+        "$description": "The overlay elevation: the theme's soft shadow, plus the edge highlight and the hard offset shadow a skin may turn on."
       },
       "width": {
         "$type": "dimension",
@@ -202,8 +204,9 @@
         "$value": "{radius.panel}"
       },
       "shadow": {
-        "$type": "shadow",
-        "$value": "{shadow.overlay}"
+        "$type": "other",
+        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-overlay)",
+        "$description": "The overlay elevation: the theme's soft shadow, plus the edge highlight and the hard offset shadow a skin may turn on."
       }
     },
     "emphasis": {
@@ -278,8 +281,9 @@
         "$value": "{radius.panel}"
       },
       "shadow": {
-        "$type": "shadow",
-        "$value": "{shadow.overlay}"
+        "$type": "other",
+        "$value": "inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-overlay, 0px) var(--rx-shadow-offset-overlay, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-overlay)",
+        "$description": "The overlay elevation: the theme's soft shadow, plus the edge highlight and the hard offset shadow a skin may turn on."
       }
     },
     "command": {

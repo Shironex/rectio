@@ -1,0 +1,15 @@
+{
+  "$description": "Translucent layer of the glass skin: applied only where the browser blurs the backdrop and transparency is not reduced. The assumption it is tested against: a pane floats over the app's own surfaces and the content on them, which the blur averages into a soft wash. Every text and mark pair holds AA over each page surface of its mode, and body and muted text hold 4.5:1 over any backdrop at all, pure black and pure white included. Over a photo or a saturated fill, subtle text and small marks can drop under AA: put a scrim under the pane there.",
+  "surface": {
+    "opacity": {
+      "$type": "number",
+      "$value": 0.85,
+      "$description": "85% opaque: the least that keeps body and muted text at 4.5:1 over any backdrop, black or white; enough of what is behind shows through the blur to read as glass."
+    },
+    "backdrop": {
+      "$type": "other",
+      "$value": "blur(var(--rx-surface-blur)) saturate(1.6)",
+      "$description": "Blur what is behind, and lift its colour so the pane picks up a tint instead of turning grey."
+    }
+  }
+}
