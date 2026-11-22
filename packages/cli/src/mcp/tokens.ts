@@ -81,23 +81,25 @@ function tokenNamed(key: string): string {
  * Tailwind utility keys from the `@theme inline` block of the tokens style item:
  * `--color-surface: var(--rx-surface)` maps `--rx-surface` to `color-surface`. A colour or shadow
  * that a skin's switches reach is a composite (`color-mix(in oklab, var(--rx-surface) ...)`, a
- * shadow with an edge highlight and an offset layer): it maps to the token it is named for.
+ * shadow with an edge highlight and an offset layer): it maps to the token it is named for. Named
+ * matches go first, so a second utility that reads the same token (`color-line-disabled` reads
+ * `--rx-border`) does not take its hint.
  */
 export function tailwindUtilities(css: string): Map<string, string> {
   const map = new Map<string, string>();
   const pattern =
     /--((?:color|font|text|radius|shadow|ease|tracking)-[\w-]+):\s*var\((--rx-[\w-]+)\);/g;
-  for (const match of css.matchAll(pattern)) {
-    const key = match[1] ?? '';
-    const token = match[2] ?? '';
-    if (!key.includes('--') && !map.has(token)) map.set(token, key);
-  }
   for (const match of css.matchAll(/--((?:color|shadow)-[\w-]+):\s*([^;]+);/g)) {
     const key = match[1] ?? '';
     const token = tokenNamed(key);
     if (key.includes('--') || map.has(token)) continue;
     if ((match[2] ?? '').includes(`var(${token})`) || (match[2] ?? '').includes(`var(${token},`))
       map.set(token, key);
+  }
+  for (const match of css.matchAll(pattern)) {
+    const key = match[1] ?? '';
+    const token = match[2] ?? '';
+    if (!key.includes('--') && !map.has(token)) map.set(token, key);
   }
   return map;
 }

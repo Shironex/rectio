@@ -356,11 +356,11 @@ describe('diff, list, search and update', () => {
     const lockFile = join(cwd, 'rectio.lock.json');
     writeFileSync(
       lockFile,
-      read(cwd, 'rectio.lock.json').replace('"version": "0.2.1"', '"version": "0.0.9"'),
+      read(cwd, 'rectio.lock.json').replace('"version": "0.3.0"', '"version": "0.0.9"'),
     );
     const { ctx, out } = capture(cwd);
     expect(await runUpdate(ctx)).toHaveLength(1);
-    expect(out).toContainEqual(expect.stringMatching(/^\S+\s+0\.0\.9 -> 0\.2\.1$/));
+    expect(out).toContainEqual(expect.stringMatching(/^\S+\s+0\.0\.9 -> 0\.3\.0$/));
 
     // list and add say so in one line, from the index they already fetched. theme-ledger does not
     // reinstall cn, the outdated item.
