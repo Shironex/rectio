@@ -6,6 +6,10 @@
  */
 
 export interface OrgPerson {
+  /**
+   * Unique across the list. When two people share an id, the first one is charted and the later
+   * ones are left out (a tree cannot hold one id in two places), so make ids unique upstream.
+   */
   id: string;
   name: string;
   /** Job title, such as `Head of Finance`. */
@@ -112,7 +116,7 @@ const fold = (text: string) =>
 /**
  * People whose name, title or department matches the query, best first: a name that starts with
  * it, then a word in the name, then anything else that holds it. Accents are ignored, so `zoe`
- * finds Zoë. At most `limit` results.
+ * finds Zoë. At most `limit` results; pass `Infinity` for all of them, to count them.
  */
 export function searchOrg(model: OrgModel, query: string, limit = 8): OrgPerson[] {
   const needle = fold(query.trim());

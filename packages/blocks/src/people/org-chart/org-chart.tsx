@@ -68,6 +68,9 @@ export interface OrgChartProps {
  * manager and reports sit beside the tree. On a phone the chart is a list that steps into a team
  * and back up. Only open branches are drawn, so an org of thousands stays quick.
  */
+/** Search matches listed at once; the count said out loud covers them all. */
+const SEARCH_SHOWN = 8;
+
 export function OrgChart({
   people,
   selected: selectedProp,
@@ -95,7 +98,8 @@ export function OrgChart({
   const [announcement, setAnnouncement] = useState('');
   const treeBox = useRef<HTMLDivElement>(null);
   const resultsId = useId();
-  const results = useMemo(() => searchOrg(model, query), [model, query]);
+  const found = useMemo(() => searchOrg(model, query, Number.POSITIVE_INFINITY), [model, query]);
+  const results = found.slice(0, SEARCH_SHOWN);
   const person = selected === null ? undefined : model.byId.get(selected);
 
   const select = (id: string | null) => {
@@ -143,7 +147,7 @@ export function OrgChart({
         }}
       />
       <p aria-live="polite" className="sr-only">
-        {query.trim() === '' ? announcement : m.results(results.length)}
+        {query.trim() === '' ? announcement : m.results(found.length, results.length)}
       </p>
       {query.trim() !== '' && (
         <div id={resultsId} data-slot="org-results">
@@ -189,6 +193,11 @@ export function OrgChart({
                 </li>
               ))}
             </ul>
+          )}
+          {found.length > results.length && (
+            <p aria-hidden className="px-1 pt-2 text-sm text-fg-muted">
+              {m.results(found.length, results.length)}
+            </p>
           )}
         </div>
       )}

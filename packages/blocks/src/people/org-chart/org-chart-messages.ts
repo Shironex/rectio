@@ -6,8 +6,8 @@ export interface OrgChartMessages {
   /** Names the tree. */
   tree: string;
   search: string;
-  /** Said as a search settles: `3 people found`. */
-  results: (count: number) => string;
+  /** Said as a search settles: `3 people found`, or `12 people found, first 8 shown`. */
+  results: (count: number, shown: number) => string;
   noResults: (query: string) => string;
   /** One search result: the name and what they do. */
   resultDetail: (title: string | undefined, department: string | undefined) => string;
@@ -45,7 +45,10 @@ export const ORG_CHART_MESSAGES: OrgChartMessages = {
   summary: people,
   tree: 'Organisation chart',
   search: 'Find a person',
-  results: (count) => (count === 1 ? '1 person found' : `${String(count)} people found`),
+  results: (count, shown) =>
+    `${count === 1 ? '1 person found' : `${String(count)} people found`}${
+      shown < count ? `, first ${String(shown)} shown` : ''
+    }`,
   noResults: (query) => `Nobody matches “${query}”.`,
   resultDetail: (title, department) => [title, department].filter(Boolean).join(', '),
   team: (count) => `${String(count)} in their team`,
