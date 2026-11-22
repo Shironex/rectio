@@ -41,6 +41,8 @@ export interface AiChatComposerSlot {
   status: AiChatStatus;
   onSubmit: PromptInputProps['onSubmit'];
   onStop: (() => void) | undefined;
+  /** The thread cannot take a message now (a workspace loading the chat, say): hold the field. */
+  disabled: boolean;
 }
 
 export interface AiChatThreadProps {
@@ -70,7 +72,8 @@ export interface AiChatThreadProps {
   composer?: Omit<PromptInputProps, 'onSubmit' | 'onStop' | 'status'> | undefined;
   /**
    * Draws a field of your own in place of the prompt input, such as the prompt composer block.
-   * It gets the status and the send and stop callbacks to wire up; `composer` is then unused.
+   * It gets the status, the send and stop callbacks and whether to hold the field (`composer.disabled`,
+   * or a workspace loading its chat); spread them onto the field. `composer` is otherwise unused.
    */
   renderComposer?: ((props: AiChatComposerSlot) => ReactNode) | undefined;
   /** Renders fenced code; the docs code block by default. */
@@ -169,7 +172,12 @@ export function AiChatThread({
             {renderComposer === undefined ? (
               <PromptInput {...composer} status={status} onSubmit={onSend} onStop={onStop} />
             ) : (
-              renderComposer({ status, onSubmit: onSend, onStop })
+              renderComposer({
+                status,
+                onSubmit: onSend,
+                onStop,
+                disabled: composer?.disabled === true,
+              })
             )}
           </div>
         }

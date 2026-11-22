@@ -41,6 +41,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type MouseEvent,
   type ReactNode,
 } from 'react';
 
@@ -224,7 +225,13 @@ function ChatRow({
     'data-current': active ? '' : undefined,
     'data-chat-id': chat.id,
     className: rowClass,
-    onClick: onOpen,
+    onClick: (event: MouseEvent) => {
+      // A link opened in a new tab or window leaves this page as it is: no select, no closing sheet.
+      const elsewhere =
+        event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
+      if (href !== undefined && elsewhere) return;
+      onOpen();
+    },
   };
   const label = <span className="min-w-0 flex-1 truncate text-start">{title}</span>;
   return (
