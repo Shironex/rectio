@@ -91,6 +91,20 @@ describe('StreamingText', () => {
     expect(shown()).toBe(REPLY);
   });
 
+  it('never stops between the two halves of an emoji', () => {
+    const clock = browser();
+    const text = '😀'.repeat(120);
+    const { container, rerender } = render(<StreamingText text="" streaming />);
+    rerender(<StreamingText text={text} streaming />);
+    const shown = () => container.querySelector('p')?.textContent ?? '';
+    for (let i = 0; i < 40; i += 1) {
+      clock.step(40);
+      const last = shown().charCodeAt(shown().length - 1);
+      expect(last >= 0xd800 && last <= 0xdbff).toBe(false);
+    }
+    expect(shown()).toBe(text);
+  });
+
   it('shows every chunk at once under reduced motion', () => {
     browser({ reduce: true });
     const { container, rerender } = render(<StreamingText text="" streaming />);

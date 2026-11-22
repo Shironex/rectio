@@ -176,6 +176,9 @@ export function useSmoothText(
       // Finish the word in hand rather than stopping inside it.
       const space = goal.slice(next).search(/\s/);
       if (step > 0 && space > 0 && space <= 12) next = Math.min(goal.length, next + space);
+      // Never stop between the two halves of a surrogate pair, such as an emoji.
+      const code = goal.charCodeAt(next - 1);
+      if (next < goal.length && code >= 0xd800 && code <= 0xdbff) next += 1;
       if (next !== count.current) {
         count.current = next;
         setShown(next);
@@ -188,7 +191,11 @@ export function useSmoothText(
     };
   }, [behind, host, text.length]);
 
-  return enabled ? text.slice(0, Math.min(shown, text.length)) : text;
+  if (!enabled) return text;
+  let end = Math.min(shown, text.length);
+  const code = text.charCodeAt(end - 1);
+  if (end < text.length && code >= 0xd800 && code <= 0xdbff) end += 1;
+  return text.slice(0, end);
 }
 
 /**
