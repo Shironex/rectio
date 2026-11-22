@@ -1515,7 +1515,7 @@ export default defineRegistry({
         {
           name: 'saas-core',
           type: 'lib',
-          version: '0.1.1',
+          version: '0.2.0',
           title: 'SaaS blocks core',
           description:
             'Account form frame, password and email rules, relative time and sizes, focus helpers, and the avatar, menu and popover the SaaS blocks share, and the usage level tones for the kit Meter.',
