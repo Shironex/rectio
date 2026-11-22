@@ -3,7 +3,12 @@ import { describe, expect, it } from 'vitest';
 
 import { LinkProvider } from '../link/link';
 import { Markdown, markdownToText, parseMarkdown, safeUrl } from './markdown';
-import { parseInline, stableBoundary, type MarkdownBlock } from './markdown-parse';
+import {
+  parseInline,
+  stableBoundaries,
+  stableBoundary,
+  type MarkdownBlock,
+} from './markdown-parse';
 
 describe('parseMarkdown', () => {
   it('reads headings, paragraphs, rules and quotes', () => {
@@ -327,6 +332,140 @@ describe('stableBoundary', () => {
       ...parseMarkdown(text.slice(at), { streaming: true }),
     ];
     expect(parts).toEqual(parseMarkdown(text, { streaming: true }));
+  });
+
+  /** What Markdown renders while streaming: each finished block parsed alone, then the rest. */
+  function streamed(text: string): MarkdownBlock[] {
+    const blocks: MarkdownBlock[] = [];
+    let from = 0;
+    for (const cut of stableBoundaries(text)) {
+      blocks.push(...parseMarkdown(text.slice(from, cut)));
+      from = cut;
+    }
+    return [...blocks, ...parseMarkdown(text.slice(from), { streaming: true })];
+  }
+
+  it('keeps an open marker in a quote that the text has moved past', () => {
+    const text = 'x*\n> q\n| a | b |\n*e\n\n===\n# h\n  - n';
+    expect(streamed(text)).toEqual(parseMarkdown(text, { streaming: true }));
+    // Only the block still arriving closes its markers, so the quote keeps its `*` as text.
+    const quote = parseMarkdown(text, { streaming: true })[1];
+    expect(quote?.type === 'blockquote' && JSON.stringify(quote.children)).toContain('*e');
+  });
+
+  it('closes a fence inside a list item with the list, not at the next fence line', () => {
+    const text = '1. Run it:\n   ```sh\n   pnpm gate\n   ```\n\nThen read it.\n\nDone.';
+    expect(text.slice(stableBoundary(text))).toBe('Done.');
+    expect(streamed(text)).toEqual(parseMarkdown(text, { streaming: true }));
+    // Here the indented fence opens at the top level, so nothing after it is finished.
+    expect(stableBoundaries('text\n   ```\na\n\nb')).toEqual([]);
+  });
+
+  it('parses every prefix of a seeded random text the same split as whole', () => {
+    // Lines that open, continue and close every kind of block, mixed by a seeded generator so a
+    // failure always reproduces: each prefix is a moment of a streaming reply.
+    const pieces = [
+      '',
+      '',
+      'text',
+      'x*',
+      '*e',
+      '**bold',
+      '`c',
+      '_u',
+      'w_',
+      '~~s',
+      '[l](https://x.test)',
+      '<b>',
+      '# h',
+      '## t ##',
+      '#',
+      '===',
+      '=',
+      '---',
+      '***',
+      '* * *',
+      '- - -',
+      '  ---',
+      '> q',
+      '>',
+      '> > deep',
+      '> ```',
+      '> - a',
+      '>  ',
+      '- a',
+      '* item',
+      '+ p',
+      '-',
+      '-   ',
+      '1. b',
+      '1.',
+      '2) c',
+      '10. t',
+      '  - n',
+      '  1. x',
+      '   b',
+      '  continued',
+      '    code',
+      '\tx',
+      '\t- t',
+      '\t```',
+      '   ',
+      '```',
+      '```js',
+      '```` x',
+      '````',
+      '``` a`b',
+      '``` |',
+      '~~~',
+      '~~~~',
+      '  ~~~',
+      '   ```',
+      '  ```',
+      ' ```',
+      '- ```',
+      '| a | b |',
+      '|---|---|',
+      '| c |',
+      ':--|',
+      '|-|',
+      '| x',
+      'a | b',
+      '\r',
+      'a\r',
+    ];
+    let state = 7;
+    const next = () => {
+      state = (state * 1664525 + 1013904223) >>> 0;
+      return state / 2 ** 32;
+    };
+    const failures: string[] = [];
+    for (let run = 0; run < 1500 && failures.length === 0; run += 1) {
+      const count = 2 + Math.floor(next() * 10);
+      const text = Array.from(
+        { length: count },
+        () => pieces[Math.floor(next() * pieces.length)] ?? '',
+      ).join('\n');
+      for (let end = 1; end <= text.length; end += 1) {
+        const prefix = text.slice(0, end);
+        try {
+          expect(streamed(prefix)).toEqual(parseMarkdown(prefix, { streaming: true }));
+        } catch {
+          failures.push(prefix);
+          break;
+        }
+      }
+    }
+    expect(failures).toEqual([]);
+  });
+
+  it('finds the boundaries of a long reply in one pass', () => {
+    const block = '- item\n   ```\n   code\n   ```\n\nA paragraph with **bold**.\n\n';
+    const text = block.repeat(4000);
+    const started = performance.now();
+    // One per paragraph: a list item never starts a finished block, the next item may join it.
+    expect(stableBoundaries(text)).toHaveLength(4000);
+    expect(performance.now() - started).toBeLessThan(1000);
   });
 });
 

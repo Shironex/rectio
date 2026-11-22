@@ -650,7 +650,11 @@ function parseBlocks(lines: readonly string[], context: BlockContext): MarkdownB
       }
       blocks.push({
         type: 'blockquote',
-        children: parseBlocks(inner, { ...context, depth: context.depth + 1 }),
+        children: parseBlocks(inner, {
+          depth: context.depth + 1,
+          // Only a quote that runs to the end of the text holds the words still arriving.
+          inline: { ...context.inline, autoClose: context.inline.autoClose && i > lastContentLine },
+        }),
       });
       continue;
     }
@@ -809,12 +813,49 @@ function parseBlocks(lines: readonly string[], context: BlockContext): MarkdownB
   return blocks;
 }
 
+/** Whether a line opens a code fence, and the line that closes it. */
+function fenceOf(line: string): RegExp | null {
+  const fence = FENCE.exec(line);
+  if (fence === null) return null;
+  const marker = fence[2] ?? '```';
+  if (marker.startsWith('`') && (fence[4] ?? '').includes('`')) return null;
+  return new RegExp(`^ {0,3}${marker.startsWith('`') ? '`' : '~'}{${String(marker.length)},}\\s*$`);
+}
+
+/** Where a list item's content starts, as the parser measures it. */
+function contentIndentOf(item: RegExpExecArray, line: string): number {
+  return item[0].length === line.length
+    ? (item[1]?.length ?? 0) + (item[2]?.length ?? 0) + 1
+    : item[0].length;
+}
+
+type Open =
+  | { kind: 'none' }
+  | { kind: 'paragraph' }
+  | { kind: 'quote'; lazy: boolean }
+  | { kind: 'table' }
+  | { kind: 'fence'; closing: RegExp }
+  | {
+      kind: 'list';
+      indent: number;
+      ordered: boolean;
+      delimiter: string;
+      /** A blank line inside the item: from then on a line that is not indented ends it. */
+      sawBlank: boolean;
+      /** The item's last line is empty (a marker with nothing after it yet). */
+      lastBlank: boolean;
+    };
+
 /**
  * Where a streaming text splits into blocks that are finished and the part still arriving: the
- * start of the last line that begins a new top-level block after a blank line, outside any code
- * fence, and that cannot belong to a list, quote or indented block before it. Everything before it
- * parses the same whether or not more text follows, so a renderer can parse it once and re-parse
- * only the rest as words arrive. 0 when there is no such line.
+ * start of each line that begins a new top-level block after a blank line and cannot belong to a
+ * code fence, list, quote or indented block before it. Everything before such a line parses the
+ * same whether or not more text follows, so a renderer can parse it once and re-parse only the
+ * rest as words arrive.
+ *
+ * It follows the top-level blocks the way the parser does, one pass over the lines, so it knows
+ * which fences are open: a fence indented inside a list item closes with the list, not at the
+ * next fence line, and a table row that looks like a fence is still a row.
  */
 export function stableBoundary(source: string): number {
   return stableBoundaries(source).at(-1) ?? 0;
@@ -823,31 +864,121 @@ export function stableBoundary(source: string): number {
 /** Every such boundary in order, so the finished part can be parsed block by block. */
 export function stableBoundaries(source: string): number[] {
   const boundaries: number[] = [];
-  let fence: string | null = null;
+  // Lines as the parser sees them (any line end, tabs as four spaces), with their offsets.
+  const raw: string[] = [];
+  const starts: number[] = [];
+  const ends = /\r\n?|\n/g;
+  let from = 0;
+  for (let m = ends.exec(source); m !== null; m = ends.exec(source)) {
+    raw.push(source.slice(from, m.index));
+    starts.push(from);
+    from = m.index + m[0].length;
+  }
+  raw.push(source.slice(from));
+  starts.push(from);
+  const lines = raw.map((line) => line.replace(/\t/g, '    '));
+
+  let open: Open = { kind: 'none' };
   let previousBlank = false;
-  let offset = 0;
-  for (const line of source.split('\n')) {
-    const start = offset;
-    offset += line.length + 1;
-    const opener = FENCE.exec(line);
-    if (fence !== null) {
-      if (opener !== null && opener[2]?.startsWith(fence) === true && opener[3] === '')
-        fence = null;
-      previousBlank = false;
-      continue;
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i] ?? '';
+    const blank = isBlank(line);
+    // Whether this line still belongs to the block already open; when not, it starts a new one.
+    let inside = false;
+    switch (open.kind) {
+      case 'fence':
+        if (open.closing.test(line)) open = { kind: 'none' };
+        inside = true;
+        break;
+      case 'paragraph':
+        if (blank) open = { kind: 'none' };
+        else if (/^ {0,3}(?:=+|-+)\s*$/.test(line)) {
+          // A setext underline ends the paragraph as a heading.
+          open = { kind: 'none' };
+          inside = true;
+        } else inside = !interruptsParagraph(lines, i);
+        break;
+      case 'quote':
+        if (QUOTE.test(line)) {
+          open = { kind: 'quote', lazy: !isBlank(line.replace(QUOTE, '')) };
+          inside = true;
+        } else inside = !blank && open.lazy && !interruptsParagraph(lines, i);
+        break;
+      case 'table':
+        inside = !blank && line.includes('|');
+        break;
+      case 'list': {
+        if (blank) {
+          inside = true;
+          break;
+        }
+        const indent = line.length - line.trimStart().length;
+        if (indent >= open.indent) {
+          // Indented content after a blank line keeps the item open but ends lazy lines for good.
+          if (previousBlank) open.sawBlank = true;
+          open.lastBlank = false;
+          inside = true;
+          break;
+        }
+        const item = LIST_ITEM.exec(line);
+        const sameKind =
+          item !== null &&
+          (open.ordered
+            ? (item[2] ?? '').endsWith(open.delimiter) && /\d/.test(item[2] ?? '')
+            : item[2] === open.delimiter);
+        if (item !== null && sameKind) {
+          open.indent = contentIndentOf(item, line);
+          open.sawBlank = false;
+          open.lastBlank = isBlank(line.slice(item[0].length));
+          inside = true;
+        } else
+          // A lazy continuation of the item's paragraph.
+          inside =
+            item === null &&
+            !previousBlank &&
+            !open.sawBlank &&
+            !open.lastBlank &&
+            !interruptsParagraph(lines, i);
+        break;
+      }
+      case 'none':
+        break;
     }
-    const blank = line.trim() === '';
-    if (
-      !blank &&
-      previousBlank &&
-      start > 0 &&
-      !/^\s/.test(line) &&
-      !LIST_ITEM.test(line) &&
-      !QUOTE.test(line)
-    ) {
-      boundaries.push(start);
+    if (!inside) {
+      open = { kind: 'none' };
+      if (!blank) {
+        const rawLine = raw[i] ?? '';
+        if (
+          previousBlank &&
+          i > 0 &&
+          !/^\s/.test(rawLine) &&
+          !LIST_ITEM.test(line) &&
+          !QUOTE.test(line)
+        )
+          boundaries.push(starts[i] ?? 0);
+        // The block this line starts, checked in the parser's order.
+        const closing = fenceOf(line);
+        const item = LIST_ITEM.exec(line);
+        if (closing !== null) open = { kind: 'fence', closing };
+        else if (HEADING.test(line) || RULE.test(line)) open = { kind: 'none' };
+        else if (QUOTE.test(line))
+          open = { kind: 'quote', lazy: !isBlank(line.replace(QUOTE, '')) };
+        else if (item !== null) {
+          const ordered = /\d/.test(item[2] ?? '');
+          open = {
+            kind: 'list',
+            indent: contentIndentOf(item, line),
+            ordered,
+            delimiter: ordered ? (item[2] ?? '').slice(-1) : (item[2] ?? '-'),
+            sawBlank: false,
+            lastBlank: isBlank(line.slice(item[0].length)),
+          };
+        } else if (isTableStart(lines, i)) {
+          open = { kind: 'table' };
+          i += 1;
+        } else open = { kind: 'paragraph' };
+      }
     }
-    if (opener !== null) fence = opener[2] ?? null;
     previousBlank = blank;
   }
   return boundaries;
