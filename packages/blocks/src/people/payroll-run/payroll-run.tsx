@@ -378,24 +378,34 @@ export function PayrollRun({
                             </span>
                             {found.length > 0 && (
                               <span className="flex flex-wrap gap-1.5 pt-1">
-                                {found.map((issue) => (
-                                  <Badge key={issue} tone="negative">
-                                    <WarningIcon aria-hidden weight="bold" />
-                                    {m.issue[issue]}
-                                  </Badge>
-                                ))}
-                                {fixHref !== undefined && status === 'review' && (
-                                  <Anchor
-                                    href={fixHref(line, found)}
-                                    className={cn(
-                                      'relative inline-flex items-center gap-1 text-sm font-medium whitespace-nowrap text-accent-strong underline underline-offset-2',
-                                      touchHitArea,
-                                    )}
-                                    aria-label={m.fixLine(line.person.name)}
-                                  >
-                                    {m.fix}
-                                  </Anchor>
-                                )}
+                                {found.map((issue, index) => {
+                                  const badge = (
+                                    <Badge key={issue} tone="negative">
+                                      <WarningIcon aria-hidden weight="bold" />
+                                      {m.issue[issue]}
+                                    </Badge>
+                                  );
+                                  const last = index === found.length - 1;
+                                  if (!last || fixHref === undefined || status !== 'review') {
+                                    return badge;
+                                  }
+                                  // The last badge and Fix wrap as one, so the link never sits alone.
+                                  return (
+                                    <span key={issue} className="inline-flex items-center gap-2">
+                                      {badge}
+                                      <Anchor
+                                        href={fixHref(line, found)}
+                                        className={cn(
+                                          'relative text-sm font-medium whitespace-nowrap text-accent-strong underline underline-offset-2',
+                                          touchHitArea,
+                                        )}
+                                        aria-label={m.fixLine(line.person.name)}
+                                      >
+                                        {m.fix}
+                                      </Anchor>
+                                    </span>
+                                  );
+                                })}
                               </span>
                             )}
                           </div>

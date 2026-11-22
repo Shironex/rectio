@@ -593,9 +593,12 @@ function HoursCell({
         aria-hidden
         weight="fill"
         className={cn(
-          'pointer-events-none absolute top-1/2 size-3 -translate-y-1/2 text-accent-strong',
-          // Decimal values sit at the end, clock fields start with their icon: the mark takes the free side.
-          entry === 'clock' && editable ? 'end-2' : 'start-1.5',
+          'pointer-events-none absolute size-3 text-accent-strong',
+          // Decimal values sit at the end, so the mark takes the free start side; a clock field is
+          // full, so the mark sits on its corner, clear of the digits.
+          entry === 'clock' && editable
+            ? '-end-1 -top-1 rounded-full bg-surface'
+            : 'start-1.5 top-1/2 -translate-y-1/2',
         )}
       />
       <span id={noteId} className="sr-only">
