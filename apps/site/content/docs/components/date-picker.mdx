@@ -75,9 +75,11 @@ import { RangeCalendar } from '@/components/ui/date-picker';
 ```
 
 The same two months and presets in place, for a filter panel or a page of its own. While the end
-is open, the days up to the pointer are shaded, and a line under the months says what is picked:
+is open, the days up to the pointer or the focused day are shaded, and a line under the months says what is picked:
 "Pick the first day", then "From 12 Mar 2026. Pick the last day", then "12 Mar to 18 Mar 2026, 7
-days". `formatDateRange` and `rangeLength` are exported for your own summaries.
+days". `formatDateRange` and `rangeLength` are exported for your own summaries. The first day
+is kept inside the calendar too, so a parent may store the half-picked range or only whole ones;
+setting a new range from outside ends the half-picked state.
 
 Both popups portal into the nearest `ThemeScope`. On phones the calendar opens as a sheet along the
 bottom edge, with its own close button.

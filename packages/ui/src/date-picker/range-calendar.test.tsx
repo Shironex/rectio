@@ -109,4 +109,36 @@ describe('RangeCalendar', () => {
     expect(cell(/14 March 2026/)).toContain('bg-accent-subtle');
     expect(cell(/15 March 2026/)).not.toContain('bg-accent-subtle');
   });
+
+  it('picks a whole range for a parent that only stores whole ranges', async () => {
+    const user = userEvent.setup();
+    const onComplete = vi.fn();
+    function WholeOnly() {
+      const [value, setValue] = useState<DateRange | undefined>(undefined);
+      return (
+        <RangeCalendar
+          aria-label="Stay"
+          locale="en-GB"
+          value={value}
+          onValueChange={(next) => {
+            if (next?.from !== undefined && next.to !== undefined) setValue(next);
+          }}
+          onComplete={onComplete}
+          defaultMonth={MARCH}
+        />
+      );
+    }
+    render(<WholeOnly />);
+    const start = day(/12 March 2026/);
+    const end = day(/18 March 2026/);
+    if (start === undefined || end === undefined) throw new Error('no days');
+    await user.click(start);
+    expect(summary()).toHaveTextContent('From 12 Mar 2026. Pick the last day');
+    await user.click(end);
+    expect(onComplete).toHaveBeenCalledWith({
+      from: new Date(2026, 2, 12),
+      to: new Date(2026, 2, 18),
+    });
+    expect(summary()).toHaveTextContent('12 Mar to 18 Mar 2026, 7 days');
+  });
 });

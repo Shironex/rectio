@@ -14,6 +14,10 @@ export interface DateRangePreset {
   range: { from: Date; to: Date };
 }
 
+/** A range as plain text, to tell whether the value moved since the first press. */
+const rangeKey = (range: DateRange | undefined) =>
+  `${String(range?.from?.getTime() ?? '')}:${String(range?.to?.getTime() ?? '')}`;
+
 const sameRange = (a: DateRange | undefined, b: DateRangePreset['range']) =>
   a?.from !== undefined && a.to !== undefined && isSameDay(a.from, b.from) && isSameDay(a.to, b.to);
 
@@ -119,18 +123,23 @@ export function RangeCalendar({
   'aria-label': ariaLabel,
 }: RangeCalendarProps) {
   const dateLocale = dateLocaleProp ?? resolveDateLocale(locale);
-  const [pickingEnd, setPickingEnd] = useState(false);
+  // The first day picked, kept here as well as sent up, so a parent that only stores whole
+  // ranges works too. It holds while the value is the one before the press or the one sent up; a
+  // range set from outside (a preset, a reset) ends it.
+  const [pending, setPending] = useState<{ start: Date; keys: readonly string[] } | null>(null);
   const [hovered, setHovered] = useState<Date | null>(null);
-  const from = value?.from;
-  const to = value?.to;
-  const firstMonth = defaultMonth ?? from;
-  // A range set from outside (a preset, a reset) ends the half-picked state on its own.
-  const choosingEnd = pickingEnd && from !== undefined && to === undefined;
+  const start = pending?.keys.includes(rangeKey(value)) ? pending.start : null;
+  const choosingEnd = start !== null;
+  const from = start ?? value?.from;
+  const to = start === null ? value?.to : undefined;
+  const firstMonth = defaultMonth ?? value?.from;
   const preview =
-    choosingEnd && hovered !== null && isAfter(hovered, from) ? { from, to: hovered } : undefined;
+    start !== null && hovered !== null && isAfter(hovered, start)
+      ? { from: start, to: hovered }
+      : undefined;
 
   const complete = (range: { from: Date; to: Date }) => {
-    setPickingEnd(false);
+    setPending(null);
     setHovered(null);
     onValueChange(range);
     onComplete?.(range);
@@ -161,7 +170,7 @@ export function RangeCalendar({
           numberOfMonths={numberOfMonths}
           // Side by side months would repeat the days where they meet.
           showOutsideDays={numberOfMonths === 1}
-          selected={value}
+          selected={start === null ? value : { from: start, to: undefined }}
           {...(firstMonth === undefined ? {} : { defaultMonth: firstMonth })}
           disabled={disabledDays}
           // Stacked on a phone, the months sit in the middle of the card instead of to one side.
@@ -181,18 +190,18 @@ export function RangeCalendar({
           onDayMouseLeave={() => {
             setHovered(null);
           }}
-          onSelect={(range, picked) => {
+          onSelect={(_range, picked) => {
             // The first press is always a fresh start, the second the end.
-            if (!choosingEnd) {
-              setPickingEnd(true);
-              onValueChange({ from: picked, to: undefined });
+            if (start === null) {
+              const started = { from: picked, to: undefined };
+              setPending({ start: picked, keys: [rangeKey(value), rangeKey(started)] });
+              onValueChange(started);
               return;
             }
-            const whole =
-              range?.from !== undefined && range.to !== undefined
-                ? { from: range.from, to: range.to }
-                : { from: picked, to: picked };
-            complete(whole);
+            // Either order works: a day before the start becomes the start.
+            complete(
+              isAfter(start, picked) ? { from: picked, to: start } : { from: start, to: picked },
+            );
           }}
         />
         {!hideSummary && (
