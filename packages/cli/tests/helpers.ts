@@ -109,6 +109,39 @@ export function templateItem(): RegistryItem {
   return { ...body, integrity: itemIntegrity(body) };
 }
 
+/**
+ * A skin item shaped like the ones the registry build makes, added to the built registry by
+ * hand until the registry publishes its own skins.
+ */
+export function skinItem(id: string): RegistryItem {
+  const content = `[data-skin="${id}"] {\n  --rx-radius-md: 2px;\n}\n`;
+  const body = {
+    schemaVersion: 1 as const,
+    name: `skin-${id}`,
+    version: '0.1.0',
+    type: 'skin' as const,
+    title: `${id} skin`,
+    description: `The ${id} skin.`,
+    categories: ['skin'],
+    dependencies: {},
+    devDependencies: {},
+    registryDependencies: ['tokens'],
+    requires: {},
+    files: [
+      {
+        path: `styles/skins/${id}.css`,
+        type: 'skin' as const,
+        target: `@styles/skins/${id}.css`,
+        content,
+        sha256: sha256Hex(content),
+      },
+    ],
+    skin: { id, tokens: ['--rx-radius-md'] },
+    docs: `Set data-skin="${id}" on <html> (or skin="${id}" on a ThemeScope) to use it.`,
+  };
+  return { ...body, integrity: itemIntegrity(body) };
+}
+
 /** Writes a hand-made item into a built registry folder: its body and its index entry. */
 function publish(dir: string, item: RegistryItem): void {
   for (const version of [undefined, item.version]) {
@@ -131,7 +164,10 @@ function publish(dir: string, item: RegistryItem): void {
   writeFileSync(indexFile, JSON.stringify(index));
 }
 
-/** The real rectio registry plus one block and one small template, written to a temp folder. */
+/**
+ * The real rectio registry plus one block, one small template and two skins, written to a temp
+ * folder.
+ */
 export function buildTestRegistry(): { dir: string; url: string; cleanup: () => void } {
   const temp = tempDir('rectio-cli-registry-');
   // The real templates are covered by the end-to-end test; command tests use the small one.
@@ -140,6 +176,8 @@ export function buildTestRegistry(): { dir: string; url: string; cleanup: () => 
   writeRegistry(temp.dir, buildRegistry(kit));
   publish(temp.dir, blockItem());
   publish(temp.dir, templateItem());
+  publish(temp.dir, skinItem('dense'));
+  publish(temp.dir, skinItem('editorial'));
   return { ...temp, url: pathToFileURL(temp.dir).href };
 }
 
