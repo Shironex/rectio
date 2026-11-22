@@ -83,7 +83,8 @@ summary: Work that is merging into main now and ships with the next release.
   The installed `chat-thread.tsx` no longer re-exports `announcedTurn`, `chatRows` and the other
   logic: import them from `chat-thread.logic.ts`.
 - `isModalDialogOpen()` says whether the reader is in an open modal dialog, alert dialog, sheet or
-  drawer, as Base UI marks them. The sidebar, command menu and docs search shortcuts now stand
+  drawer, as Base UI marks them; `{ except }` leaves out the dialog that holds the caller's own
+  element. The sidebar, command menu and docs search shortcuts now stand
   aside behind one (their old check looked for an attribute Base UI never sets), and no longer
   open and close over and over while the keys are held: `useShortcut` takes `repeat: false`.
 - `PromptInput` takes `textareaProps` (its key handler runs first), a `meta` slot beside Send and

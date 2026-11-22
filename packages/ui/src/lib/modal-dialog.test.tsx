@@ -67,6 +67,26 @@ describe('isModalDialogOpen', () => {
     expect(isModalDialogOpen()).toBe(true);
   });
 
+  it('does not count the dialog that holds the caller, but still counts any other', async () => {
+    render(
+      <>
+        <Sheet side="left">
+          <SheetTrigger>Chats</SheetTrigger>
+          <SheetContent>
+            <SheetTitle>Chats</SheetTitle>
+            <p>Own panel</p>
+          </SheetContent>
+        </Sheet>
+        <p>Outside</p>
+      </>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Chats' }));
+    await screen.findByRole('dialog', { name: 'Chats' });
+    expect(isModalDialogOpen({ except: screen.getByText('Own panel') })).toBe(false);
+    expect(isModalDialogOpen({ except: screen.getByText('Outside') })).toBe(true);
+    expect(isModalDialogOpen({ except: null })).toBe(true);
+  });
+
   it('ignores a popover, which is a dialog role but not modal', async () => {
     render(
       <Popover>

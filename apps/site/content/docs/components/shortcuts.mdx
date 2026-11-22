@@ -34,7 +34,9 @@ fields too; set `allowInFields: false` for one that an editor also uses, such as
 
 A shortcut that opens a panel should stand aside while the reader is in a modal dialog: check
 `isModalDialogOpen()` in the handler. It sees an open Dialog, AlertDialog, Sheet or Drawer by the
-attributes Base UI sets, and ignores a popover.
+attributes Base UI sets, and ignores a popover. A panel that is itself a sheet on a phone passes
+its own element, `isModalDialogOpen({ except: panel })`, so the shortcut still closes that sheet
+while any other dialog open over the page still blocks it.
 
 The same helpers are exported for your own use: `parseShortcut`, `shortcutKeys`, `shortcutLabel`,
 `ariaKeyShortcut`, `matchesShortcut` and `useIsMac`.

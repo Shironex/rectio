@@ -17,6 +17,7 @@ import {
   type ComponentProps,
   type ReactElement,
   type ReactNode,
+  type RefObject,
 } from 'react';
 
 import { ariaKeyShortcut } from '../kbd/shortcut';
@@ -64,6 +65,9 @@ const SidebarContext = createContext<SidebarState | null>(null);
 
 /** Rendering inside the phone sheet: never collapsed, and following a link closes the sheet. */
 const PlacementContext = createContext<'rail' | 'sheet'>('rail');
+
+/** The phone sheet's panel, so the shortcut can tell its own sheet from another open dialog. */
+const SheetRefContext = createContext<RefObject<HTMLDivElement | null> | null>(null);
 
 /** Inside a collapsed submenu's flyout: sub items render as menu rows. */
 const FlyoutContext = createContext(false);
@@ -114,6 +118,7 @@ export function SidebarProvider({
     if (latest.current.collapsedProp === undefined) setCollapsedState(next);
     latest.current.onCollapsedChange?.(next);
   }, []);
+  const sheet = useRef<HTMLDivElement | null>(null);
   const toggle = useCallback(() => {
     if (latest.current.mobile) setMobileOpen((open) => !open);
     else setCollapsed(!latest.current.collapsed);
@@ -127,14 +132,19 @@ export function SidebarProvider({
   useShortcut(
     shortcut,
     () => {
-      // Never fold the rail behind, or open the sheet over, a dialog the user is in.
-      if (isModalDialogOpen()) return;
+      // Never fold the rail behind, or open the sheet over, a dialog the user is in. Its own phone
+      // sheet is a modal dialog too, and the shortcut still closes that one.
+      if (isModalDialogOpen({ except: sheet.current })) return;
       value.toggle();
     },
     { allowInFields: false, repeat: false },
   );
 
-  return <SidebarContext value={value}>{children}</SidebarContext>;
+  return (
+    <SidebarContext value={value}>
+      <SheetRefContext value={sheet}>{children}</SheetRefContext>
+    </SidebarContext>
+  );
 }
 
 /** Collapsed as drawn here: the phone sheet always shows labels. */
@@ -155,12 +165,14 @@ export interface SidebarProps extends Omit<ComponentProps<'div'>, 'children'> {
  */
 export function Sidebar({ label = 'Main', className, children, ...props }: SidebarProps) {
   const { collapsed, mobile, mobileOpen, setMobileOpen } = useSidebar();
+  const sheet = use(SheetRefContext);
 
   if (mobile) {
     return (
       <PlacementContext value="sheet">
         <Sheet side="left" open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent
+            ref={sheet}
             className="w-(--rx-sidebar-width) bg-(--rx-sidebar-background)"
             closeLabel="Close navigation"
           >

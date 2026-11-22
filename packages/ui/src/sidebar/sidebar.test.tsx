@@ -171,4 +171,31 @@ describe('Sidebar on a phone', () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
   });
+
+  it('opens and closes its own sheet with the shortcut, but not under another dialog', async () => {
+    viewport(true);
+    render(
+      <>
+        <App />
+        <Dialog>
+          <DialogTrigger>Settings</DialogTrigger>
+          <DialogContent>
+            <DialogTitle>Settings</DialogTitle>
+          </DialogContent>
+        </Dialog>
+      </>,
+    );
+    await userEvent.keyboard('{Control>}b{/Control}');
+    await screen.findByRole('dialog', { name: 'Main' });
+    // Pressed inside its own sheet, the shortcut closes it.
+    await userEvent.keyboard('{Control>}b{/Control}');
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Main' })).not.toBeInTheDocument();
+    });
+    // Another dialog open: the shortcut leaves the sheet shut.
+    await userEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    await screen.findByRole('dialog', { name: 'Settings' });
+    await userEvent.keyboard('{Control>}b{/Control}');
+    expect(screen.queryByRole('dialog', { name: 'Main' })).not.toBeInTheDocument();
+  });
 });
