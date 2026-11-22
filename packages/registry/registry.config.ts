@@ -1138,10 +1138,10 @@ export default defineRegistry({
     {
       name: 'prompt-input',
       type: 'component',
-      version: '0.1.1',
+      version: '0.2.0',
       title: 'PromptInput',
       description:
-        'A message field that grows with the text, attachments, Send that turns into Stop, Enter to send and a character count near the limit.',
+        'A message field that grows with the text, attachments, Send that turns into Stop, Enter to send, a character count near the limit, a meta slot and props for the field.',
       categories: ['ai', 'forms'],
       files: ['prompt-input/prompt-input.tsx', 'prompt-input/prompt-input-messages.ts'],
     },
@@ -2034,32 +2034,117 @@ export default defineRegistry({
         {
           name: 'ai-core',
           type: 'lib',
-          version: '0.1.0',
+          version: '0.2.0',
           title: 'AI core',
           description:
-            'The parts the AI blocks draw, which the motion twins swap for moving ones, and the boundary that keeps one broken reply from taking down a thread.',
+            'The parts the AI blocks draw, which the motion twins swap for moving ones, the boundary that keeps one broken reply from taking down a thread, and the stream event contract that folds any provider stream into a conversation.',
           categories: ['ai', 'blocks'],
-          files: ['lib/parts.tsx', 'lib/reply-boundary.tsx'],
+          files: ['lib/parts.tsx', 'lib/reply-boundary.tsx', 'lib/stream.ts'],
+        },
+        {
+          name: 'motion-ai-core',
+          type: 'lib',
+          version: '0.1.0',
+          title: 'Motion AI core',
+          description:
+            'The moving parts the AI motion twins render with: messages that rise in, an even text reveal and boxes that fade in as they open.',
+          categories: ['ai', 'blocks', 'motion'],
+          files: ['lib/motion-parts.tsx'],
         },
         {
           name: 'ai-chat-thread',
           type: 'block',
-          version: '0.1.0',
+          version: '0.2.0',
           title: 'AI chat thread',
           description:
-            'A whole conversation: Markdown replies with code blocks, reasoning, tool calls, sources, copy, rate and regenerate, a field that sends and stops, and an empty state with suggestions.',
+            'A whole conversation: Markdown replies with code blocks, reasoning, tool calls, sources, copy, rate and regenerate, a field that sends and stops (or one of your own), and an empty state with suggestions.',
           categories: ['ai', 'blocks'],
-          files: ['chat-thread/chat-thread.tsx', 'chat-thread/chat-thread.logic.ts'],
+          files: [
+            'chat-thread/chat-thread.tsx',
+            'chat-thread/chat-thread.logic.ts',
+            'chat-thread/chat-thread-messages.ts',
+          ],
         },
         {
           name: 'motion-ai-chat-thread',
           type: 'block',
-          version: '0.1.0',
+          version: '0.1.1',
           title: 'Motion AI chat thread',
           description:
             'AI chat thread with new messages that rise into place, typing dots that fade up and an even text reveal.',
           categories: ['ai', 'blocks', 'motion'],
           files: ['chat-thread/chat-thread.motion.tsx'],
+        },
+        {
+          name: 'ai-prompt-composer',
+          type: 'block',
+          version: '0.1.0',
+          title: 'Prompt composer',
+          description:
+            'A richer field for an assistant: a model or mode picker, attachments, slash commands from your list, a running token or character count with a limit, and Send that turns into Stop.',
+          categories: ['ai', 'blocks', 'forms'],
+          files: [
+            'prompt-composer/prompt-composer.tsx',
+            'prompt-composer/prompt-composer.logic.ts',
+            'prompt-composer/prompt-composer-messages.ts',
+          ],
+        },
+        {
+          name: 'motion-ai-prompt-composer',
+          type: 'block',
+          version: '0.1.0',
+          title: 'Motion prompt composer',
+          description: 'Prompt composer with a command list that rises in above the field.',
+          categories: ['ai', 'blocks', 'motion'],
+          files: ['prompt-composer/prompt-composer.motion.tsx'],
+        },
+        {
+          name: 'ai-chat-workspace',
+          type: 'block',
+          version: '0.1.0',
+          title: 'Chat workspace',
+          description:
+            'A full chat page: a list of chats with search, new chat, pinned chats, rename and delete beside the open conversation, with a sheet for the list on a phone.',
+          categories: ['ai', 'blocks', 'layout'],
+          files: [
+            'chat-workspace/chat-workspace.tsx',
+            'chat-workspace/chat-workspace.logic.ts',
+            'chat-workspace/chat-workspace-messages.ts',
+          ],
+        },
+        {
+          name: 'motion-ai-chat-workspace',
+          type: 'block',
+          version: '0.1.0',
+          title: 'Motion chat workspace',
+          description:
+            'Chat workspace with new messages that rise into place and replies that reveal at an even pace.',
+          categories: ['ai', 'blocks', 'motion'],
+          files: ['chat-workspace/chat-workspace.motion.tsx'],
+        },
+        {
+          name: 'ai-assistant-sidebar',
+          type: 'block',
+          version: '0.1.0',
+          title: 'Assistant sidebar',
+          description:
+            'An assistant docked beside the app: resizable, folds to a rail, a shortcut that opens it and moves the focus in and out, a trigger for the header, and a sheet on a phone.',
+          categories: ['ai', 'blocks', 'layout'],
+          files: [
+            'assistant-sidebar/assistant-sidebar.tsx',
+            'assistant-sidebar/assistant-sidebar.logic.ts',
+            'assistant-sidebar/assistant-sidebar-messages.ts',
+          ],
+        },
+        {
+          name: 'motion-ai-assistant-sidebar',
+          type: 'block',
+          version: '0.1.0',
+          title: 'Motion assistant sidebar',
+          description:
+            'Assistant sidebar with a panel that slides in from the end edge as it opens.',
+          categories: ['ai', 'blocks', 'motion'],
+          files: ['assistant-sidebar/assistant-sidebar.motion.tsx'],
         },
       ],
     },
