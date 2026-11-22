@@ -48,6 +48,14 @@ export interface TimesheetMessages {
   noNote: string;
   invalid: (text: string) => string;
   tooLong: string;
+  /** A number that reads two ways, such as `1,000`. */
+  ambiguous: (text: string) => string;
+  /** A value under a minute, which would save as nothing. */
+  tooSmall: (text: string) => string;
+  /** More than the other rows leave free on that day. */
+  dayFull: (room: string) => string;
+  /** Why the week cannot be submitted yet: cells still hold text that is not saved. */
+  submitBlocked: (count: number) => string;
   /** How to type time, under an invalid cell: depends on the entry form. */
   entryHint: string;
   addRow: string;
@@ -115,6 +123,12 @@ export const TIMESHEET_MESSAGES: TimesheetMessages = {
   noNote: 'No note',
   invalid: (text) => `“${text}” is not a time.`,
   tooLong: 'A day has 24 hours at most.',
+  ambiguous: (text) =>
+    `“${text}” could be read two ways. Write it without a thousands separator, such as 1.5 or 1:30.`,
+  tooSmall: (text) => `“${text}” is less than a minute.`,
+  dayFull: (room) => `The day's rows would pass 24 hours: ${room} is left on this day.`,
+  submitBlocked: (count) =>
+    `Fix ${count === 1 ? 'the cell' : `the ${String(count)} cells`} in red before submitting.`,
   entryHint: 'Type hours such as 7.5, 7:30 or 7h 30m.',
   addRow: 'Add project',
   submit: 'Submit week',

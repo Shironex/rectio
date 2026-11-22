@@ -65,6 +65,18 @@ export function cellMinutes(value: number | undefined): number {
   return Math.min(MAX_DAY_MINUTES, Math.max(0, Math.round(value)));
 }
 
+/**
+ * Minutes still free on a day for one row: a day holds 24 hours across every row, so a cell may take
+ * no more than what the other rows leave.
+ */
+export function dayRoom(rows: readonly TimesheetRow[], rowId: string, day: IsoDay): number {
+  const others = rows.reduce(
+    (sum, row) => (row.id === rowId ? sum : sum + cellMinutes(row.minutes[day])),
+    0,
+  );
+  return Math.max(0, MAX_DAY_MINUTES - others);
+}
+
 /** Row, day and week totals with each day's flag. */
 export function timesheetTotals(
   rows: readonly TimesheetRow[],
@@ -124,13 +136,21 @@ export function isEditable(status: TimesheetStatus, locked = false): boolean {
 /** How a cell takes and shows time: decimal hours (7.5) or hours and minutes (7:30). */
 export type TimeEntry = 'decimal' | 'clock';
 
+/**
+ * Why typed time is refused: not a time, more than a day, written so it could be read two ways
+ * (`1,000` is a thousand hours with a grouping comma and one hour with a decimal comma), or so
+ * small it rounds to no minutes at all.
+ */
+export type DurationProblem = 'invalid' | 'too-long' | 'ambiguous' | 'too-small';
+
 export type DurationParse =
-  { ok: true; minutes: number | null } | { ok: false; reason: 'invalid' | 'too-long' };
+  { ok: true; minutes: number | null } | { ok: false; reason: DurationProblem };
 
 /**
  * Typed time to whole minutes. Takes decimal hours with a point or a comma (`7.5`, `7,5`), hours
  * and minutes (`7:30`), and units (`7h 30m`, `45m`, `2h`). Empty clears the cell (null). More than
- * a day, a negative or anything else is refused with the reason.
+ * a day, a negative, a value under a minute, a number that reads two ways (`1,000`, `1.000`) or
+ * anything else is refused with the reason.
  */
 export function parseDuration(text: string): DurationParse {
   const value = text.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -143,6 +163,9 @@ export function parseDuration(text: string): DurationParse {
   if (clock !== null) {
     const mins = Number(clock[2]);
     if (mins < 60) minutes = Number(clock[1]) * 60 + mins;
+  } else if (/^[1-9]\d{0,2}[.,]\d{3}$/.test(value)) {
+    // Three digits after one separator look like a thousands group as much as a fraction.
+    return { ok: false, reason: 'ambiguous' };
   } else if (/^\d*(?:[.,]\d+)?$/.test(value) && /\d/.test(value)) {
     minutes = Number(value.replace(',', '.')) * 60;
   } else if (units !== null && (units[1] !== undefined || units[2] !== undefined)) {
@@ -151,6 +174,7 @@ export function parseDuration(text: string): DurationParse {
   if (minutes === null || !Number.isFinite(minutes)) return { ok: false, reason: 'invalid' };
   const whole = Math.round(minutes);
   if (whole > MAX_DAY_MINUTES) return { ok: false, reason: 'too-long' };
+  if (whole === 0 && minutes > 0) return { ok: false, reason: 'too-small' };
   return { ok: true, minutes: whole };
 }
 

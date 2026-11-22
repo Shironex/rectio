@@ -37,7 +37,7 @@ import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { mergeMessages } from '../../lib/messages';
 import { ConfirmDialog, type ConfirmRequest } from '../lib/confirm';
-import { addDays, toIsoDay, type IsoDay } from '../lib/days';
+import { addDays, isIsoDay, startOfWeek, toIsoDay, type IsoDay } from '../lib/days';
 import {
   formatDay,
   formatDayLong,
@@ -48,11 +48,13 @@ import {
 import { TIMESHEET_MESSAGES, type TimesheetMessages } from './timesheet-messages';
 import {
   cellMinutes,
+  dayRoom,
   formatDuration,
   isEditable,
   parseDuration,
   timesheetTotals,
   type DayFlag,
+  type DurationProblem,
   type TimeEntry,
   type TimesheetDay,
   type TimesheetRow,
@@ -82,13 +84,13 @@ export interface TimesheetProps {
   /** Moves to another week; the arrows show only with this. */
   onWeekChange?: ((weekStart: IsoDay) => void) | undefined;
   /** Sends a draft or a sent back week for approval, after a confirm. */
-  onSubmit?: (() => void) | undefined;
+  onSubmit?: (() => unknown) | undefined;
   /** Takes a submitted week back to draft. */
   onRecall?: (() => void) | undefined;
   /** The approver's view: approve a submitted week. */
   onApprove?: (() => void) | undefined;
   /** The approver's view: send a submitted week back with a reason. */
-  onReject?: ((reason: string) => void) | undefined;
+  onReject?: ((reason: string) => unknown) | undefined;
   onAddRow?: (() => void) | undefined;
   /** Who last moved the week on, and the reason on a week sent back. */
   review?: TimesheetReview | undefined;
@@ -130,9 +132,30 @@ function without(drafts: Record<string, Draft>, key: string): Record<string, Dra
   return Object.fromEntries(Object.entries(drafts).filter(([k]) => k !== key));
 }
 
+/** Why a cell's text was not saved: the parse refused it, or the day has no room left. */
+type CellProblem = DurationProblem | 'day-full';
+
 interface Draft {
   text: string;
-  error: 'invalid' | 'too-long' | null;
+  error: CellProblem | null;
+  /** Minutes left on the day, for a `day-full` problem. */
+  room?: number | undefined;
+}
+
+/** A refused cell's problem in words. */
+function problemText(draft: Draft, m: TimesheetMessages, locale: string, entry: TimeEntry): string {
+  switch (draft.error) {
+    case 'too-long':
+      return m.tooLong;
+    case 'ambiguous':
+      return m.ambiguous(draft.text);
+    case 'too-small':
+      return m.tooSmall(draft.text);
+    case 'day-full':
+      return m.dayFull(m.hours(formatDuration(draft.room ?? 0, locale, entry, { zero: true })));
+    default:
+      return m.invalid(draft.text);
+  }
 }
 
 /**
@@ -142,7 +165,7 @@ interface Draft {
  * submitted and approved weeks are read only, and an approver can approve or send it back.
  */
 export function Timesheet({
-  weekStart,
+  weekStart: requestedWeek,
   rows,
   status = 'draft',
   locked = false,
@@ -170,7 +193,10 @@ export function Timesheet({
   const m = mergeMessages(TIMESHEET_MESSAGES, messages);
   const locale = resolveLocale(requestedLocale);
   const { Button } = useBlockParts();
-  const today = todayProp ?? toIsoDay(new Date());
+  const today = todayProp !== undefined && isIsoDay(todayProp) ? todayProp : toIsoDay(new Date());
+  // A week start that is not a real day (`2026-13-01`) falls back to this week rather than drawing
+  // an empty grid.
+  const weekStart = isIsoDay(requestedWeek) ? requestedWeek : startOfWeek(today);
   const totals = timesheetTotals(rows, weekStart, { dailyMinutes, weekend, holidays, today });
   const editable = isEditable(status, locked) && onCellChange !== undefined;
   const range = formatDayRange(weekStart, addDays(weekStart, 7), locale, m.range);
@@ -179,22 +205,42 @@ export function Timesheet({
 
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [active, setActive] = useState<{ rowId: string; day: IsoDay } | null>(null);
-  const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
+  const [asking, setAsking] = useState<'submit' | 'reject' | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const id = useId();
 
-  const commit = (rowId: string, day: IsoDay, text: string) => {
+  // Once the week turns read only (locked, submitted or approved) nothing typed before may still be
+  // saved: the drafts go with the change.
+  const [wasEditable, setWasEditable] = useState(editable);
+  if (wasEditable !== editable) {
+    setWasEditable(editable);
+    if (!editable) setDrafts({});
+  }
+
+  /** Saves a cell's minutes when the day has room for them, else keeps the text with the reason. */
+  const save = (rowId: string, day: IsoDay, minutes: number | null, text: string) => {
     const key = cellKey(rowId, day);
-    const parsed = parseDuration(text);
-    if (!parsed.ok) {
-      setDrafts((current) => ({ ...current, [key]: { text, error: parsed.reason } }));
+    const room = dayRoom(rows, rowId, day);
+    if ((minutes ?? 0) > room) {
+      setDrafts((current) => ({ ...current, [key]: { text, error: 'day-full', room } }));
       return false;
     }
     setDrafts((current) => without(current, key));
     const row = rows.find((r) => r.id === rowId);
     const before = row === undefined ? 0 : cellMinutes(row.minutes[day]);
-    if ((parsed.minutes ?? 0) !== before) onCellChange?.(rowId, day, parsed.minutes);
+    if ((minutes ?? 0) !== before) onCellChange?.(rowId, day, minutes);
     return true;
+  };
+
+  const commit = (rowId: string, day: IsoDay, text: string) => {
+    if (!editable) return false;
+    const parsed = parseDuration(text);
+    if (!parsed.ok) {
+      const key = cellKey(rowId, day);
+      setDrafts((current) => ({ ...current, [key]: { text, error: parsed.reason } }));
+      return false;
+    }
+    return save(rowId, day, parsed.minutes, text);
   };
 
   const cellProps = (row: TimesheetRow, day: TimesheetDay): CellProps => {
@@ -225,7 +271,8 @@ export function Timesheet({
       },
       onCommit: (text) => commit(row.id, day.day, text),
       onClockChange: (value) => {
-        if (value !== minutes) onCellChange?.(row.id, day.day, value);
+        if (!editable) return;
+        save(row.id, day.day, value, formatDuration(value ?? 0, locale, 'clock'));
       },
     };
   };
@@ -262,8 +309,7 @@ export function Timesheet({
     if (row === undefined) return [];
     const name = row.task === undefined ? row.project : `${row.project}, ${row.task}`;
     const where = m.cell(name, formatDay(day, locale));
-    const what = draft.error === 'too-long' ? m.tooLong : m.invalid(draft.text);
-    return [{ key, text: m.cellError(where, what) }];
+    return [{ key, text: m.cellError(where, problemText(draft, m, locale, entry)) }];
   });
   const errorList = (
     <div role="alert" className="empty:hidden">
@@ -289,26 +335,67 @@ export function Timesheet({
     </p>
   );
 
-  const submit = () => {
-    const missing = totals.missing.map((day) => formatDay(day, locale)).join(', ');
-    setConfirm({
-      title: m.submitTitle,
-      description:
-        totals.missing.length > 0
-          ? m.submitMissing(totals.missing.length, missing)
-          : m.submitNote(hours(totals.week)),
-      confirm: m.submitConfirm,
-      cancel: m.cancel,
-      tone: totals.missing.length > 0 ? 'warning' : 'neutral',
-      onConfirm: () => onSubmit?.(),
-    });
-  };
+  // Cells holding text that is not saved: refused, or typed and not yet left. The week cannot go
+  // for review while any of them would be lost.
+  const pending = Object.keys(drafts).length;
+  const canSubmit = !locked && isEditable(status) && onSubmit !== undefined && rows.length > 0;
+  const missing = totals.missing.map((day) => formatDay(day, locale)).join(', ');
+  // The questions are built from the week as it is now, so a week that changed while one was open
+  // is checked again on confirm and never acted on from an old picture.
+  const confirm: ConfirmRequest | null =
+    asking === 'submit'
+      ? {
+          id: 'submit',
+          title: m.submitTitle,
+          description:
+            totals.missing.length > 0
+              ? m.submitMissing(totals.missing.length, missing)
+              : m.submitNote(hours(totals.week)),
+          confirm: m.submitConfirm,
+          cancel: m.cancel,
+          tone: totals.missing.length > 0 ? 'warning' : 'neutral',
+          onConfirm: () => (canSubmit && pending === 0 ? onSubmit() : undefined),
+        }
+      : asking === 'reject'
+        ? {
+            id: 'reject',
+            title: m.rejectTitle,
+            description: m.rejectNote,
+            confirm: m.rejectConfirm,
+            cancel: m.cancel,
+            tone: 'warning',
+            reason: { label: m.reasonLabel, required: true, missing: m.reasonMissing },
+            onConfirm: (reason) =>
+              !locked && status === 'submitted' ? onReject?.(reason) : undefined,
+          }
+        : null;
 
+  const submitBlockedId = `${id}-submit-blocked`;
   const actions: ReactNode[] = [];
-  if (!locked && isEditable(status) && onSubmit !== undefined && rows.length > 0) {
+  if (canSubmit) {
+    if (pending > 0) {
+      actions.push(
+        <span key="blocked" id={submitBlockedId} className="text-sm text-negative-strong">
+          {m.submitBlocked(pending)}
+        </span>,
+      );
+    }
     actions.push(
-      <Button key="submit" size="sm" onClick={submit}>
-        <PaperPlaneTiltIcon aria-hidden weight="bold" className="size-3.5" />
+      <Button
+        key="submit"
+        size="sm"
+        variant={pending > 0 ? 'secondary' : 'primary'}
+        aria-disabled={pending > 0 || undefined}
+        aria-describedby={pending > 0 ? submitBlockedId : undefined}
+        onClick={() => {
+          if (pending === 0) setAsking('submit');
+        }}
+      >
+        {pending > 0 ? (
+          <LockSimpleIcon aria-hidden weight="bold" className="size-3.5" />
+        ) : (
+          <PaperPlaneTiltIcon aria-hidden weight="bold" className="size-3.5" />
+        )}
         {m.submit}
       </Button>,
     );
@@ -329,17 +416,7 @@ export function Timesheet({
           size="sm"
           variant="secondary"
           onClick={() => {
-            setConfirm({
-              title: m.rejectTitle,
-              description: m.rejectNote,
-              confirm: m.rejectConfirm,
-              cancel: m.cancel,
-              tone: 'warning',
-              reason: { label: m.reasonLabel, required: true, missing: m.reasonMissing },
-              onConfirm: (reason) => {
-                onReject(reason);
-              },
-            });
+            setAsking('reject');
           }}
         >
           {m.reject}
@@ -526,7 +603,7 @@ export function Timesheet({
       <ConfirmDialog
         request={confirm}
         onClose={() => {
-          setConfirm(null);
+          setAsking(null);
         }}
       />
     </BlockPanel>
@@ -608,7 +685,7 @@ function HoursCell({
   );
   const error = invalid && (
     <span id={errorId} className="sr-only">
-      {draft.error === 'too-long' ? m.tooLong : m.invalid(draft.text)} {m.entryHint}
+      {problemText(draft, m, locale, entry)} {m.entryHint}
     </span>
   );
   if (entry === 'clock' && editable) {

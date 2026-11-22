@@ -11,11 +11,22 @@ export type IsoDay = string;
 const DAY_MS = 86_400_000;
 const ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
 
-/** UTC midnight of a day string, or NaN when it is not one. */
+/**
+ * UTC midnight of a day string, or NaN when it is not one. A day that does not exist (`2026-02-30`,
+ * `2026-13-01`) is NaN too, never rolled over into the next month.
+ */
 function utc(day: IsoDay): number {
   const match = ISO.exec(day);
   if (match === null) return Number.NaN;
-  return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  const [year, month, date] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const ms = Date.UTC(year, month - 1, date);
+  const back = new Date(ms);
+  // Date.UTC also maps years 0 to 99 onto 1900 to 1999; the round trip catches that as well.
+  return back.getUTCFullYear() === year &&
+    back.getUTCMonth() === month - 1 &&
+    back.getUTCDate() === date
+    ? ms
+    : Number.NaN;
 }
 
 function fromUtc(ms: number): IsoDay {
