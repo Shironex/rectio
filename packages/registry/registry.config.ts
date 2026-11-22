@@ -1005,7 +1005,11 @@ export default defineRegistry({
       description:
         'Safe, themed Markdown for chat replies and docs: no raw HTML, safe links, tables, lists and code blocks you can swap for the docs code block.',
       categories: ['ai', 'typography'],
-      files: ['markdown/markdown.tsx', 'markdown/markdown-parse.ts'],
+      files: [
+        'markdown/markdown.tsx',
+        'markdown/markdown-parse.ts',
+        'markdown/markdown-messages.ts',
+      ],
     },
     {
       name: 'chat-message',
@@ -1015,7 +1019,11 @@ export default defineRegistry({
       description:
         'A user, assistant or system message with avatar, time, sending and stopped states, an error with Retry, edit in place and streaming text.',
       categories: ['ai'],
-      files: ['chat-message/chat-message.tsx', 'chat-message/streaming-text.tsx'],
+      files: [
+        'chat-message/chat-message.tsx',
+        'chat-message/chat-message-messages.ts',
+        'chat-message/streaming-text.tsx',
+      ],
     },
     {
       name: 'chat-thread',
@@ -1025,7 +1033,7 @@ export default defineRegistry({
       description:
         'A conversation that follows a streaming reply until the reader scrolls up, with Jump to latest, day separators and a quiet live announcer.',
       categories: ['ai'],
-      files: ['chat-thread/chat-thread.tsx'],
+      files: ['chat-thread/chat-thread.tsx', 'chat-thread/chat-thread-messages.ts'],
     },
     {
       name: 'message-actions',
@@ -1034,7 +1042,7 @@ export default defineRegistry({
       title: 'MessageActions',
       description: 'A toolbar of copy, regenerate, edit and thumbs up or down under a message.',
       categories: ['ai', 'actions'],
-      files: ['message-actions/message-actions.tsx'],
+      files: ['message-actions/message-actions.tsx', 'message-actions/message-actions-messages.ts'],
     },
     {
       name: 'prompt-input',
@@ -1044,7 +1052,7 @@ export default defineRegistry({
       description:
         'A message field that grows with the text, attachments, Send that turns into Stop, Enter to send and a character count near the limit.',
       categories: ['ai', 'forms'],
-      files: ['prompt-input/prompt-input.tsx'],
+      files: ['prompt-input/prompt-input.tsx', 'prompt-input/prompt-input-messages.ts'],
     },
     {
       name: 'chat-source',
@@ -1053,7 +1061,7 @@ export default defineRegistry({
       title: 'ChatSource',
       description: 'Citation chips inside a reply and the list of sources behind it.',
       categories: ['ai'],
-      files: ['chat-source/chat-source.tsx'],
+      files: ['chat-source/chat-source.tsx', 'chat-source/chat-source-messages.ts'],
     },
     {
       name: 'tool-call',
@@ -1063,7 +1071,7 @@ export default defineRegistry({
       description:
         'A tool the assistant called, running, done or failed, with its arguments and result folded underneath.',
       categories: ['ai', 'disclosure'],
-      files: ['tool-call/tool-call.tsx'],
+      files: ['tool-call/tool-call.tsx', 'tool-call/tool-call-messages.ts'],
     },
     {
       name: 'reasoning',
@@ -1073,7 +1081,7 @@ export default defineRegistry({
       description:
         'The reasoning behind a reply, open while the model thinks and folded to how long it took once done.',
       categories: ['ai', 'disclosure'],
-      files: ['reasoning/reasoning.tsx'],
+      files: ['reasoning/reasoning.tsx', 'reasoning/reasoning-messages.ts'],
     },
     {
       name: 'chat-loader',
