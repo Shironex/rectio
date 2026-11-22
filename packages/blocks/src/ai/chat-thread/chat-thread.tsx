@@ -21,6 +21,7 @@ import type { ReactNode } from 'react';
 
 import { CodeBlock } from '../../docs/code-block/code-block';
 import { useAiParts } from '../lib/parts';
+import { ReplyBoundary } from '../lib/reply-boundary';
 import {
   announcedTurn,
   awaitingReply,
@@ -42,8 +43,6 @@ export interface AiChatThreadMessages {
   emptyDescription: string;
   /** Names the group of suggestion chips. */
   suggestions: string;
-  /** Names a citation whose source has not arrived yet. */
-  source: (index: number) => string;
   /** Said by the typing dots before the first words of a reply. */
   typing: (assistant: string) => string;
 }
@@ -55,7 +54,6 @@ export const AI_CHAT_THREAD_MESSAGES: AiChatThreadMessages = {
   emptyDescription: 'Ask a question, or start from one of these.',
   suggestions: 'Suggestions',
   typing: (assistant) => `${assistant} is typing`,
-  source: (index) => `Source ${String(index)}`,
 };
 
 export interface AiChatThreadProps {
@@ -142,11 +140,9 @@ export function AiChatThread({
       const match = /^#source-(\d+)$/.exec(props.href);
       if (match === null) return undefined;
       const index = Number(match[1]);
-      // While a reply streams its sources may not have arrived: the chip shows, without a link.
-      const source = turn.sources?.[index - 1] ?? {
-        id: `pending-${String(index)}`,
-        title: m.source(index),
-      };
+      const source = turn.sources?.[index - 1];
+      // A number with no source behind it is only its words: no chip, no dead link.
+      if (source === undefined) return <>{props.children}</>;
       return <ChatSourceChip index={index} source={source} />;
     },
   });
@@ -312,13 +308,15 @@ export function AiChatThread({
                 </div>
               )}
               {turn.content !== '' && (
-                <StreamingText text={turn.content} streaming={streaming}>
-                  {(text, live) => (
-                    <Markdown streaming={live} components={citations(turn)}>
-                      {text}
-                    </Markdown>
-                  )}
-                </StreamingText>
+                <ReplyBoundary text={turn.content}>
+                  <StreamingText text={turn.content} streaming={streaming}>
+                    {(text, live) => (
+                      <Markdown streaming={live} components={citations(turn)}>
+                        {text}
+                      </Markdown>
+                    )}
+                  </StreamingText>
+                </ReplyBoundary>
               )}
               {turn.sources !== undefined && turn.sources.length > 0 && settled && (
                 <ChatSources sources={turn.sources} />

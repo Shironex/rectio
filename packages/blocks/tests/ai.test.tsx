@@ -107,9 +107,28 @@ describe('AiChatThread', () => {
       'href',
       'https://example.com/ap',
     );
-    // A number whose source has not arrived is a chip without a link.
+    // A number with no source behind it is only its words: no chip and no dead link.
     expect(screen.queryByRole('link', { name: /9/ })).not.toBeInTheDocument();
-    expect(screen.getByText(/^Source 9/)).toBeInTheDocument();
+    expect(screen.queryByText(/Source 9/)).not.toBeInTheDocument();
+    expect(screen.getByText(/one is still to come 9\./)).toBeInTheDocument();
+  });
+
+  it('falls back to the words of a reply that fails to draw, and keeps the rest of the thread', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    render(
+      <AiChatThread
+        conversation={[
+          QUESTION,
+          { id: 'a4', role: 'assistant', content: 'Here:\n\n```sql\nselect 1;\n```' },
+        ]}
+        code={() => {
+          throw new Error('broken renderer');
+        }}
+        onSend={vi.fn()}
+      />,
+    );
+    expect(screen.getByText(/select 1;/)).toBeInTheDocument();
+    expect(screen.getByText(QUESTION.content)).toBeInTheDocument();
   });
 
   it('renders the same thread from the motion entry', () => {
