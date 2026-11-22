@@ -29,6 +29,12 @@ export interface PayrollRunMessages {
   filterLabel: string;
   filterAll: string;
   filterIssues: string;
+  /** The button in the issues alert that lists only the flagged lines. */
+  showIssues: string;
+  /** The link beside a flagged line's issues. */
+  fix: string;
+  /** Names that link for a screen reader. */
+  fixLine: (name: string) => string;
   noBank: string;
   /** Under a name on a narrow screen. */
   lineDetail: (gross: string, deductions: string) => string;
@@ -105,6 +111,9 @@ export const PAYROLL_RUN_MESSAGES: PayrollRunMessages = {
   filterLabel: 'Lines',
   filterAll: 'All',
   filterIssues: 'Issues',
+  showIssues: 'Show these lines',
+  fix: 'Fix',
+  fixLine: (name) => `Fix ${name}'s line`,
   noBank: 'No bank details',
   lineDetail: (gross, deductions) => `Gross ${gross}, deductions ${deductions}`,
   approve: 'Approve run',

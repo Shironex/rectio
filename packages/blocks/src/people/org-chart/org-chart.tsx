@@ -190,7 +190,7 @@ export function OrgChart({
   return (
     <BlockPanel
       title={title ?? m.title}
-      description={description ?? m.summary(model.byId.size)}
+      description={description ?? (loading ? undefined : m.summary(model.byId.size))}
       actions={actions}
       headingLevel={headingLevel ?? 2}
       className={className}
@@ -221,7 +221,7 @@ export function OrgChart({
                 onSelectedChange={(ids) => {
                   select(ids[0] ?? null);
                 }}
-                className="h-112 rounded-panel border border-line"
+                className="max-h-112 rounded-panel border border-line"
               />
             </div>
             <div className="@2xl:col-span-2">
@@ -231,6 +231,7 @@ export function OrgChart({
                 </p>
               ) : (
                 <PersonPanel
+                  key={person.id}
                   person={person}
                   model={model}
                   messages={m}
@@ -332,6 +333,8 @@ function PersonPanel({
   const manager = managerId === null ? undefined : model.byId.get(managerId);
   const reports = model.reports.get(person.id) ?? [];
   const size = model.teamSize.get(person.id) ?? 0;
+  const [all, setAll] = useState(false);
+  const listed = all ? reports : reports.slice(0, reportsShown);
   return (
     <section
       aria-label={person.name}
@@ -385,16 +388,26 @@ function PersonPanel({
             </dt>
             <dd>
               <ul className="flex flex-col">
-                {reports.slice(0, reportsShown).map((report) => (
+                {listed.map((report) => (
                   <li key={report.id}>
                     <PersonButton person={report} onPick={onPick} />
                   </li>
                 ))}
               </ul>
-              {reports.length > reportsShown && (
-                <p className="px-2 pt-1 text-xs text-fg-muted">
-                  {m.moreReports(reports.length - reportsShown)}
-                </p>
+              {reports.length > listed.length && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAll(true);
+                  }}
+                  className={cn(
+                    '-mx-2 mt-1 flex min-h-(--rx-control-height-sm) cursor-pointer items-center rounded-control px-2 text-sm font-medium text-accent-strong',
+                    'pointer-coarse:min-h-(--rx-control-height-touch) hover:bg-surface-hover',
+                    'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-focus',
+                  )}
+                >
+                  {m.moreReports(reports.length - listed.length)}
+                </button>
               )}
             </dd>
           </div>

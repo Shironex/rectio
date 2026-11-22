@@ -13,6 +13,8 @@ export interface LeaveRequestsMessages {
   /** A count of days that can end in a half: `3.5 days`. */
   days: (count: string, halves: number) => string;
   filterLabel: string;
+  /** A filter in the narrow select, with its count: `Pending (3)`. */
+  filterCount: (filter: string, count: number) => string;
   filters: Record<LeaveFilter, string>;
   status: Record<LeaveStatus, string>;
   /** Names a request in buttons and dialogs: `Ada Lovelace, annual leave, 4 Dec to 8 Dec 2026`. */
@@ -82,6 +84,7 @@ export const LEAVE_REQUESTS_MESSAGES: LeaveRequestsMessages = {
   range: (first, last) => `${first} to ${last}`,
   days: dayWord,
   filterLabel: 'Status',
+  filterCount: (filter, count) => `${filter} (${String(count)})`,
   filters: {
     pending: 'Pending',
     approved: 'Approved',

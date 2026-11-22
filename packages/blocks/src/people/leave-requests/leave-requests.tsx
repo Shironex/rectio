@@ -19,6 +19,7 @@ import { useBlockParts } from '../../lib/block-parts';
 import { EmptyNote } from '../../lib/empty-note';
 import { resolveLocale } from '../../lib/finance';
 import { mergeMessages } from '../../lib/messages';
+import { ChoiceSelect } from '../../lib/choice-select';
 import { Segmented } from '../../lib/segmented';
 import { ConfirmDialog, type ConfirmRequest } from '../lib/confirm';
 import { toIsoDay, type IsoDay } from '../lib/days';
@@ -157,6 +158,11 @@ export function LeaveRequests({
     return m.overlapLong(people.map((p) => p.name).join(', '), people.length, days);
   };
 
+  const pick = (next: LeaveFilter) => {
+    if (filter === undefined) setFilterState(next);
+    onFilterChange?.(next);
+  };
+
   return (
     <BlockPanel
       title={title ?? m.title}
@@ -167,18 +173,28 @@ export function LeaveRequests({
       bodyClassName="gap-5"
     >
       {balances.length > 0 && <LeaveBalances balances={balances} locale={locale} messages={m} />}
-      <Segmented<LeaveFilter>
+      {/* Five filters fit a row on a wide block; a narrow one (a phone) picks from a select. */}
+      <div className="hidden @lg:block">
+        <Segmented<LeaveFilter>
+          label={m.filterLabel}
+          value={view}
+          onValueChange={pick}
+          options={LEAVE_FILTERS.map((value) => ({
+            value,
+            label: m.filters[value],
+            ...(loading ? {} : { hint: counts[value] }),
+          }))}
+        />
+      </div>
+      <ChoiceSelect<LeaveFilter>
         label={m.filterLabel}
         value={view}
-        onValueChange={(next) => {
-          if (filter === undefined) setFilterState(next);
-          onFilterChange?.(next);
-        }}
-        options={LEAVE_FILTERS.map((value) => ({
+        onValueChange={pick}
+        choices={LEAVE_FILTERS.map((value) => ({
           value,
-          label: m.filters[value],
-          hint: counts[value],
+          label: loading ? m.filters[value] : m.filterCount(m.filters[value], counts[value]),
         }))}
+        className="w-full @lg:hidden"
       />
       {loading ? (
         <div className="flex flex-col gap-3">
@@ -215,7 +231,13 @@ export function LeaveRequests({
                       <span className="font-medium">
                         {showPerson ? request.person.name : typeLabel(request.type)}
                       </span>
-                      <LeaveStatusBadge status={request.status} label={m.status[request.status]} />
+                      {/* In a single-status view every row has the same status: the filter says it. */}
+                      {view === 'all' && (
+                        <LeaveStatusBadge
+                          status={request.status}
+                          label={m.status[request.status]}
+                        />
+                      )}
                     </div>
                     <p className="text-sm text-fg-muted">
                       {showPerson && <>{typeLabel(request.type)}, </>}
@@ -255,6 +277,7 @@ export function LeaveRequests({
                   </div>
                 </div>
                 <RequestActions
+                  indent={showPerson}
                   request={request}
                   name={name}
                   messages={m}
@@ -333,12 +356,15 @@ export function LeaveRequests({
 }
 
 function RequestActions({
+  indent,
   name,
   messages: m,
   onApprove,
   onDecline,
   onCancel,
 }: {
+  /** Lines the buttons up under the text on a narrow block, past the avatar. */
+  indent: boolean;
   request: LeaveRequest;
   name: string;
   messages: LeaveRequestsMessages;
@@ -350,14 +376,20 @@ function RequestActions({
   const { Button } = useBlockParts();
   if (onApprove === undefined && onDecline === undefined && onCancel === undefined) return null;
   return (
-    <div className="flex shrink-0 flex-wrap items-center gap-2 ps-11 pointer-coarse:gap-touch-gap @xl:ps-0">
+    <div
+      className={cn(
+        'flex shrink-0 flex-wrap items-center gap-2 pointer-coarse:gap-touch-gap',
+        indent && 'ps-11 @xl:ps-0',
+      )}
+    >
       {onCancel !== undefined && (
         <Button
           size="sm"
-          variant="ghost"
+          variant="secondary"
           onClick={onCancel}
           aria-label={`${m.cancelRequest}: ${name}`}
         >
+          <ProhibitIcon aria-hidden weight="bold" className="size-3.5" />
           {m.cancelRequest}
         </Button>
       )}

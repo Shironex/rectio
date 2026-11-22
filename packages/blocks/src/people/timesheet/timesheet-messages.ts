@@ -40,6 +40,10 @@ export interface TimesheetMessages {
   noteFor: (row: string, day: string) => string;
   /** Before any cell has been picked. */
   noteHint: string;
+  /** The same hint when the week cannot be changed. */
+  noteHintRead: string;
+  /** A cell that holds text that is not a time: where it is, then what is wrong. */
+  cellError: (cell: string, problem: string) => string;
   notePlaceholder: string;
   noNote: string;
   invalid: (text: string) => string;
@@ -104,7 +108,9 @@ export const TIMESHEET_MESSAGES: TimesheetMessages = {
         ? `short by ${difference}`
         : 'no time logged',
   noteFor: (row, day) => `Note for ${row}, ${day}`,
-  noteHint: 'Pick a cell to read or add its note.',
+  noteHint: 'Marks a cell with a note. Pick a cell to read or add its note.',
+  noteHintRead: 'Marks a cell with a note. Pick a cell to read it.',
+  cellError: (cell, problem) => `${cell}: ${problem}`,
   notePlaceholder: 'What was done, or why the day ran long',
   noNote: 'No note',
   invalid: (text) => `“${text}” is not a time.`,

@@ -253,6 +253,42 @@ export function Timesheet({
       />
     ) : null;
 
+  // Every cell holding text that is not a time, said in words under the grid (and read out as it
+  // appears), so an invalid cell never rests on its red border alone.
+  const errors = Object.entries(drafts).flatMap(([key, draft]) => {
+    if (draft.error === null) return [];
+    const [rowId = '', day = ''] = key.split('|');
+    const row = rows.find((r) => r.id === rowId);
+    if (row === undefined) return [];
+    const name = row.task === undefined ? row.project : `${row.project}, ${row.task}`;
+    const where = m.cell(name, formatDay(day, locale));
+    const what = draft.error === 'too-long' ? m.tooLong : m.invalid(draft.text);
+    return [{ key, text: m.cellError(where, what) }];
+  });
+  const errorList = (
+    <div role="alert" className="empty:hidden">
+      {errors.length > 0 && (
+        <ul className="flex flex-col gap-1 text-sm text-negative-strong">
+          {errors.map((error) => (
+            <li key={error.key} className="flex items-start gap-1.5">
+              <WarningIcon aria-hidden weight="bold" className="mt-0.5 size-3.5 shrink-0" />
+              <span>{error.text}</span>
+            </li>
+          ))}
+          <li className="ps-5 text-fg-muted">{m.entryHint}</li>
+        </ul>
+      )}
+    </div>
+  );
+  const noteHint = (
+    <p className="flex flex-wrap items-center gap-x-1.5 text-sm text-fg-muted">
+      <NotePencilIcon aria-hidden weight="fill" className="size-3.5 text-accent-strong" />
+      <span>
+        {isEditable(status, locked) && onNoteChange !== undefined ? m.noteHint : m.noteHintRead}
+      </span>
+    </p>
+  );
+
   const submit = () => {
     const missing = totals.missing.map((day) => formatDay(day, locale)).join(', ');
     setConfirm({
@@ -451,7 +487,8 @@ export function Timesheet({
                 activeKey={active === null ? null : cellKey(active.rowId, active.day)}
                 footer={
                   <div className="flex flex-col gap-3 pt-1">
-                    {noteEditor ?? <p className="text-sm text-fg-muted">{m.noteHint}</p>}
+                    {errorList}
+                    {noteEditor ?? noteHint}
                   </div>
                 }
               />
@@ -466,6 +503,10 @@ export function Timesheet({
                 activeDay={active?.day ?? null}
                 noteEditor={noteEditor}
               />
+              <div className="flex flex-col gap-3 @2xl:hidden">
+                {errorList}
+                {noteEditor === null && noteHint}
+              </div>
               {onAddRow !== undefined && isEditable(status, locked) && (
                 <div>
                   <Button size="sm" variant="ghost" onClick={onAddRow}>
@@ -547,7 +588,11 @@ function HoursCell({
       <NotePencilIcon
         aria-hidden
         weight="fill"
-        className="pointer-events-none absolute end-1 top-1 size-2.5 text-accent-strong"
+        className={cn(
+          'pointer-events-none absolute top-1/2 size-3 -translate-y-1/2 text-accent-strong',
+          // Decimal values sit at the end, clock fields start with their icon: the mark takes the free side.
+          entry === 'clock' && editable ? 'end-2' : 'start-1.5',
+        )}
       />
       <span id={noteId} className="sr-only">
         {m.hasNote}
@@ -555,7 +600,7 @@ function HoursCell({
     </>
   );
   const error = invalid && (
-    <span id={errorId} role="alert" className="sr-only">
+    <span id={errorId} className="sr-only">
       {draft.error === 'too-long' ? m.tooLong : m.invalid(draft.text)} {m.entryHint}
     </span>
   );
@@ -643,7 +688,9 @@ function DayTotal({
   const difference = Math.abs(day.total - day.expected);
   return (
     <span className={cn('inline-flex flex-col items-end gap-0.5', className)}>
-      <span className="font-medium numeric">{hours(day.total)}</span>
+      <span className={cn('font-medium numeric', day.total === 0 && 'font-normal text-fg-subtle')}>
+        {hours(day.total)}
+      </span>
       {day.flag !== null && (
         <span
           className={cn('inline-flex items-center gap-1 text-xs font-medium', FLAG_TONE[day.flag])}
@@ -711,9 +758,7 @@ function WeekGrid({
                       >
                         {formatWeekday(day.day, locale)}
                       </span>
-                      <span
-                        className={cn('numeric', isToday && 'font-semibold text-accent-strong')}
-                      >
+                      <span className={cn('numeric', isToday && 'font-strong text-accent-strong')}>
                         {formatDayNumber(day.day, locale)}
                       </span>
                       <span className="max-w-20 truncate text-xs font-normal text-fg-subtle">
@@ -766,7 +811,7 @@ function WeekGrid({
                   <DayTotal day={day} hours={hours} messages={m} />
                 </TableCell>
               ))}
-              <TableCell align="end" className="align-top font-semibold numeric">
+              <TableCell align="end" className="align-top font-strong numeric">
                 {hours(weekTotal)}
               </TableCell>
             </TableRow>
@@ -801,10 +846,17 @@ function DayList({
   noteEditor: ReactNode;
 }) {
   const id = useId();
+  // A week is long on a phone: today (or the first day) starts open, the rest show their totals
+  // and open on demand. A day with the cell in focus stays open.
+  const [open, setOpen] = useState<ReadonlySet<IsoDay>>(
+    () => new Set([days.some((d) => d.day === today) ? today : (days[0]?.day ?? today)]),
+  );
   return (
-    <ol data-slot="timesheet-list" data-cells className="flex flex-col gap-3 @2xl:hidden">
+    <ol data-slot="timesheet-list" data-cells className="flex flex-col gap-2 @2xl:hidden">
       {days.map((day, col) => {
         const headingId = `${id}-${day.day}`;
+        const bodyId = `${id}-${day.day}-body`;
+        const expanded = open.has(day.day) || activeDay === day.day;
         return (
           <li
             key={day.day}
@@ -814,39 +866,75 @@ function DayList({
               day.off !== null && 'bg-surface-sunken',
             )}
           >
-            <div className="flex items-start justify-between gap-3 border-b border-line px-3 py-2.5">
-              <h3 id={headingId} className="flex flex-col text-sm font-medium">
-                <span>
-                  {formatDay(day.day, locale)}
-                  {day.day === today && (
-                    <span className="ms-2 text-xs font-medium text-accent-strong">{m.today}</span>
-                  )}
-                </span>
-                {day.off !== null && (
-                  <span className="text-xs font-normal text-fg-muted">
-                    {day.off === 'weekend' ? m.weekend : day.off}
-                  </span>
+            <h3 id={headingId} className="text-sm font-medium">
+              <button
+                type="button"
+                aria-expanded={expanded}
+                aria-controls={bodyId}
+                onClick={() => {
+                  setOpen((current) => {
+                    const next = new Set(current);
+                    if (expanded) next.delete(day.day);
+                    else next.add(day.day);
+                    return next;
+                  });
+                }}
+                className={cn(
+                  'flex min-h-(--rx-control-height-touch) w-full cursor-pointer items-center gap-3 rounded-panel px-3 py-2 text-start',
+                  'hover:bg-surface-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-focus',
                 )}
-              </h3>
-              <DayTotal day={day} hours={hours} messages={m} className="text-sm" />
-            </div>
-            <ul className="flex flex-col divide-y divide-line">
-              {rows.map((row, rowIndex) => (
-                <li key={row.id} className="flex items-center justify-between gap-3 px-3 py-1.5">
-                  <span className="min-w-0 text-sm">
-                    <span className="block truncate">{row.project}</span>
-                    {row.task !== undefined && (
-                      <span className="block truncate text-xs text-fg-muted">{row.task}</span>
+              >
+                <CaretRightIcon
+                  aria-hidden
+                  weight="bold"
+                  className={cn(
+                    'size-3.5 shrink-0 text-fg-muted transition-transform duration-fast ease-standard',
+                    expanded && 'rotate-90',
+                  )}
+                />
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span>
+                    {formatDay(day.day, locale)}
+                    {day.day === today && (
+                      <span className="ms-2 text-xs font-medium text-accent-strong">{m.today}</span>
                     )}
                   </span>
-                  <span data-cell={`${String(rowIndex)}:${String(col)}`} className="w-24 shrink-0">
-                    <HoursCell {...cellProps(row, day)} />
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {activeDay === day.day && noteEditor !== null && (
-              <div className="border-t border-line px-3 py-3">{noteEditor}</div>
+                  {day.off !== null && (
+                    <span className="text-xs font-normal text-fg-muted">
+                      {day.off === 'weekend' ? m.weekend : day.off}
+                    </span>
+                  )}
+                </span>
+                <DayTotal day={day} hours={hours} messages={m} className="text-sm" />
+              </button>
+            </h3>
+            {expanded && (
+              <div id={bodyId}>
+                <ul className="flex flex-col divide-y divide-line border-t border-line">
+                  {rows.map((row, rowIndex) => (
+                    <li
+                      key={row.id}
+                      className="flex items-center justify-between gap-3 px-3 py-1.5"
+                    >
+                      <span className="min-w-0 text-sm">
+                        <span className="block truncate">{row.project}</span>
+                        {row.task !== undefined && (
+                          <span className="block truncate text-xs text-fg-muted">{row.task}</span>
+                        )}
+                      </span>
+                      <span
+                        data-cell={`${String(rowIndex)}:${String(col)}`}
+                        className="w-24 shrink-0"
+                      >
+                        <HoursCell {...cellProps(row, day)} />
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {activeDay === day.day && noteEditor !== null && (
+                  <div className="border-t border-line px-3 py-3">{noteEditor}</div>
+                )}
+              </div>
             )}
           </li>
         );

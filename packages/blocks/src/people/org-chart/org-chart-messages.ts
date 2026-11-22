@@ -18,7 +18,7 @@ export interface OrgChartMessages {
   topOfOrg: string;
   directReports: (count: number) => string;
   teamSize: (count: number) => string;
-  /** Under the list of direct reports when it is cut short. */
+  /** The button under the list of direct reports when it is cut short. */
   moreReports: (count: number) => string;
   viewProfile: string;
   email: string;
@@ -53,7 +53,7 @@ export const ORG_CHART_MESSAGES: OrgChartMessages = {
   topOfOrg: 'Top of the organisation',
   directReports: (count) => (count === 1 ? '1 direct report' : `${String(count)} direct reports`),
   teamSize: (count) => `${people(count)} in their team`,
-  moreReports: (count) => `and ${String(count)} more`,
+  moreReports: (count) => `Show ${String(count)} more`,
   viewProfile: 'View profile',
   email: 'Email',
   upTo: (name) => `Up to ${name}`,

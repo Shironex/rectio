@@ -61,6 +61,11 @@ export interface PayrollRunProps {
   onReopen?: (() => void) | undefined;
   /** Links each name to the person's payslip, through the LinkProvider when there is one. */
   lineHref?: ((line: PayrollLine) => string) | undefined;
+  /**
+   * Where a flagged line is fixed (the person's record in your payroll system), through the
+   * LinkProvider: adds a Fix link beside the line's issues.
+   */
+  fixHref?: ((line: PayrollLine, issues: readonly PayrollIssue[]) => string) | undefined;
   locale?: string | undefined;
   title?: string | undefined;
   actions?: ReactNode;
@@ -95,6 +100,7 @@ export function PayrollRun({
   onPay,
   onReopen,
   lineHref,
+  fixHref,
   locale: requestedLocale,
   title,
   actions,
@@ -175,7 +181,9 @@ export function PayrollRun({
       className={className}
       bodyClassName="gap-5"
     >
-      <Stepper steps={steps} current={current} label={m.stepper} />
+      {!loading && lines.length > 0 && (
+        <Stepper steps={steps} current={current} label={m.stepper} />
+      )}
       {loading ? (
         <SkeletonTable rows={5} columns={5} />
       ) : lines.length === 0 ? (
@@ -223,7 +231,7 @@ export function PayrollRun({
                       setFilter('issues');
                     }}
                   >
-                    {m.filterIssues}
+                    {m.showIssues}
                   </Button>
                 ) : undefined
               }
@@ -246,18 +254,58 @@ export function PayrollRun({
             </Alert>
           )}
 
-          {review.flagged > 0 && (
-            <Segmented<LineFilter>
-              label={m.filterLabel}
-              value={filter}
-              onValueChange={setFilter}
-              options={[
-                { value: 'all', label: m.filterAll, hint: lines.length },
-                { value: 'issues', label: m.filterIssues, hint: review.flagged },
-              ]}
-              className="max-w-xs"
-            />
-          )}
+          <div className="flex flex-wrap items-center gap-3">
+            {review.flagged > 0 && (
+              <Segmented<LineFilter>
+                label={m.filterLabel}
+                value={filter}
+                onValueChange={setFilter}
+                options={[
+                  { value: 'all', label: m.filterAll, hint: lines.length },
+                  { value: 'issues', label: m.filterIssues, hint: review.flagged },
+                ]}
+              />
+            )}
+            {(status === 'review' && onApprove !== undefined) ||
+            (status === 'approved' && (onPay !== undefined || onReopen !== undefined)) ? (
+              <div className="ms-auto flex flex-wrap items-center justify-end gap-x-4 gap-y-2 pointer-coarse:gap-x-touch-gap">
+                {status === 'review' && onApprove !== undefined && (
+                  <>
+                    {!review.ready && (
+                      <span id={blockedId} className="text-sm text-negative-strong">
+                        {m.approveBlocked(review.flagged)}
+                      </span>
+                    )}
+                    <Button
+                      variant={review.ready ? 'primary' : 'secondary'}
+                      aria-disabled={review.ready ? undefined : true}
+                      aria-describedby={review.ready ? undefined : blockedId}
+                      onClick={() => {
+                        // Blocked, the button stays readable and in reach: a press lists the lines in the way.
+                        if (review.ready) approve();
+                        else if (review.flagged > 0) setFilter('issues');
+                      }}
+                    >
+                      <CheckIcon aria-hidden weight="bold" className="size-4" />
+                      {m.approve}
+                    </Button>
+                  </>
+                )}
+                {status === 'approved' && onReopen !== undefined && (
+                  <Button variant="secondary" onClick={onReopen}>
+                    <ArrowCounterClockwiseIcon aria-hidden weight="bold" className="size-4" />
+                    {m.reopen}
+                  </Button>
+                )}
+                {status === 'approved' && onPay !== undefined && (
+                  <Button onClick={pay}>
+                    <PaperPlaneTiltIcon aria-hidden weight="bold" className="size-4" />
+                    {m.pay(text(totals.net))}
+                  </Button>
+                )}
+              </div>
+            ) : null}
+          </div>
 
           <Table data-slot="payroll-lines">
             <TableCaption className="sr-only">{m.caption(currency)}</TableCaption>
@@ -325,6 +373,15 @@ export function PayrollRun({
                                     {m.issue[issue]}
                                   </Badge>
                                 ))}
+                                {fixHref !== undefined && status === 'review' && (
+                                  <Anchor
+                                    href={fixHref(line, found)}
+                                    className="text-sm font-medium"
+                                    aria-label={m.fixLine(line.person.name)}
+                                  >
+                                    {m.fix}
+                                  </Anchor>
+                                )}
                               </span>
                             )}
                           </div>
@@ -363,7 +420,7 @@ export function PayrollRun({
                   <TableCell align="end" className="hidden font-medium @2xl:table-cell">
                     {money(totals.deductions)}
                   </TableCell>
-                  <TableCell align="end" className="font-semibold">
+                  <TableCell align="end" className="font-strong">
                     {money(totals.net)}
                   </TableCell>
                   <TableCell align="end" className="hidden font-medium @3xl:table-cell">
@@ -376,41 +433,6 @@ export function PayrollRun({
           {filter === 'issues' && shown.length === 0 && (
             <p className="text-sm text-fg-muted">{m.emptyIssues}</p>
           )}
-
-          {(status === 'review' && onApprove !== undefined) ||
-          (status === 'approved' && (onPay !== undefined || onReopen !== undefined)) ? (
-            <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2 border-t border-line pt-4 pointer-coarse:gap-x-touch-gap">
-              {status === 'review' && onApprove !== undefined && (
-                <>
-                  {!review.ready && (
-                    <span id={blockedId} className="text-sm text-negative-strong">
-                      {m.approveBlocked(review.flagged)}
-                    </span>
-                  )}
-                  <Button
-                    disabled={!review.ready}
-                    aria-describedby={review.ready ? undefined : blockedId}
-                    onClick={approve}
-                  >
-                    <CheckIcon aria-hidden weight="bold" className="size-4" />
-                    {m.approve}
-                  </Button>
-                </>
-              )}
-              {status === 'approved' && onReopen !== undefined && (
-                <Button variant="secondary" onClick={onReopen}>
-                  <ArrowCounterClockwiseIcon aria-hidden weight="bold" className="size-4" />
-                  {m.reopen}
-                </Button>
-              )}
-              {status === 'approved' && onPay !== undefined && (
-                <Button onClick={pay}>
-                  <PaperPlaneTiltIcon aria-hidden weight="bold" className="size-4" />
-                  {m.pay(text(totals.net))}
-                </Button>
-              )}
-            </div>
-          ) : null}
         </>
       )}
       <ConfirmDialog

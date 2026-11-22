@@ -505,9 +505,11 @@ describe('PayrollRun', () => {
     expect(screen.getByText('1 line blocks approval')).toBeInTheDocument();
     expect(screen.getAllByText('No bank details').length).toBeGreaterThan(0);
     const approve = screen.getByRole('button', { name: 'Approve run' });
-    expect(approve).toBeDisabled();
+    expect(approve).toHaveAttribute('aria-disabled', 'true');
     expect(approve).toHaveAccessibleDescription('Fix 1 line first');
-    await userEvent.click(first(screen.getAllByRole('button', { name: /^Issues/ })));
+    // A press while blocked lists the lines in the way instead of approving.
+    await userEvent.click(approve);
+    expect(onApprove).not.toHaveBeenCalled();
     expect(screen.queryByText('Ada Okafor')).toBeNull();
   });
 
