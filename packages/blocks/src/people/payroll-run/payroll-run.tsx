@@ -248,7 +248,7 @@ export function PayrollRun({
                   <li key={issue}>{m.issueCount(issue, counts[issue])}</li>
                 ))}
               </ul>
-              <p className="mt-1">{m.issuesNote}</p>
+              <p className="mt-1">{fixHref === undefined ? m.issuesNote : m.issuesNoteLinked}</p>
             </Alert>
           )}
           {status === 'review' && review.flagged === 0 && !review.reconciled && (

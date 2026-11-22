@@ -22,6 +22,8 @@ export interface PayrollRunMessages {
   /** The alert over the table while issues block approval. */
   issuesTitle: (count: number) => string;
   issuesNote: string;
+  /** The same note when each flagged line carries a Fix link. */
+  issuesNoteLinked: string;
   /** One kind of issue in the alert: `2 without bank details`. */
   issueCount: (issue: PayrollIssue, count: number) => string;
   /** Totals do not reconcile though every line looks fine (a rounding upstream). */
@@ -101,6 +103,7 @@ export const PAYROLL_RUN_MESSAGES: PayrollRunMessages = {
   issuesTitle: (count) =>
     count === 1 ? '1 line blocks approval' : `${String(count)} lines block approval`,
   issuesNote: 'Fix these in the payroll system, then review again.',
+  issuesNoteLinked: 'Fix each line from its link, then review again.',
   issueCount: (issue, count) =>
     `${String(count)} ${
       issue === 'missing-bank'
