@@ -350,12 +350,18 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   ].map((name) => `${name}: initial;`);
 
   const map: string[] = [];
+  // Utilities whose value is no longer a plain `var()` (a composite, a fallback): named in a comment
+  // in the plain `--key: var(--token);` form, ahead of the theme block, so a tool that reads
+  // utility names from this file that way (the MCP server of earlier CLIs) keeps naming the right
+  // one, and a later utility that reads the same token (`color-line-disabled`) cannot take its name.
+  const hints: string[] = [];
   // Tokens added after themes were already being generated: a theme file written before one existed
   // falls back to the token it replaces, as `--default-border-width` does below.
   const FALLBACKS: Record<string, string> = { '--rx-warning-mark': '--rx-warning-strong' };
   const add = (key: string, varName: string) => {
     const fallback = FALLBACKS[varName];
     map.push(`${key}: var(${varName}${fallback === undefined ? '' : `, var(${fallback})`});`);
+    if (fallback !== undefined) hints.push(`${key}: var(${varName});`);
   };
   for (const name of contract) {
     const path = name.slice('--rx-'.length).split('-');
@@ -364,7 +370,10 @@ function tailwindCss(contract: string[], types: TokenMap): string {
     const key = `--color-${tailwindColorName(path)}`;
     const composite = COMPOSITE_COLORS[name];
     if (composite === undefined) add(key, name);
-    else map.push(`${key}: ${composite};`);
+    else {
+      map.push(`${key}: ${composite};`);
+      hints.push(`${key}: var(${name});`);
+    }
   }
   // A disabled control's edge stays the theme's plain border where a skin inks the others, so a
   // disabled control reads apart from an enabled one by its edge too, not by its text alone.
@@ -382,8 +391,10 @@ function tailwindCss(contract: string[], types: TokenMap): string {
     add(`--tracking-${tracking}`, `--rx-font-tracking-${tracking}`);
   for (const radius of ['control', 'panel', 'badge', 'full'])
     add(`--radius-${radius}`, `--rx-radius-${radius}`);
-  for (const shadow of ['raised', 'overlay'] as const)
+  for (const shadow of ['raised', 'overlay'] as const) {
     map.push(`--shadow-${shadow}: ${elevation(shadow)};`);
+    hints.push(`--shadow-${shadow}: var(--rx-shadow-${shadow});`);
+  }
   // A thumb or a selected indicator inside a track (a switch, a slider, a segmented control): the
   // raised shadow and edge highlight with no offset or ambient layer, which would spill out of the track.
   map.push(`--shadow-indicator: ${elevation('raised', true)};`);
@@ -490,6 +501,11 @@ function tailwindCss(contract: string[], types: TokenMap): string {
 
   return `${HEADER}
 @import './themes.css';
+
+/*
+ * Utilities a skin's switches compose, by the token each is named for:
+${hints.map((h) => ` *   ${h}`).join('\n')}
+ */
 
 /* dark: follows data-mode. Components never need it: dark is solved in the tokens. */
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));

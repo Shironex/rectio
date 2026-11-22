@@ -460,3 +460,32 @@ describe('the switches a skin turns on', () => {
     expect(tailwind).toContain('backdrop-filter: var(--rx-surface-backdrop, none);');
   });
 });
+
+describe('utility names for earlier readers', () => {
+  // The MCP server of CLI 0.3.1 reads utility names from this file with this exact pattern and keeps
+  // the first match per token. A composite or a second utility reading the same token must not
+  // change what it names.
+  const OLD =
+    /--((?:color|font|text|radius|shadow|ease|tracking)-[\w-]+):\s*var\((--rx-[\w-]+)\);/g;
+  const tailwind = readFileSync(new URL('../dist/tailwind.css', import.meta.url), 'utf8');
+  const named = new Map<string, string>();
+  for (const m of tailwind.matchAll(OLD)) {
+    const [, key = '', token = ''] = m;
+    if (!key.includes('--') && !named.has(token)) named.set(token, key);
+  }
+
+  it.each([
+    ['--rx-border', 'color-line'],
+    ['--rx-border-strong', 'color-line-strong'],
+    ['--rx-surface', 'color-surface'],
+    ['--rx-surface-canvas', 'color-surface-canvas'],
+    ['--rx-surface-raised', 'color-surface-raised'],
+    ['--rx-surface-overlay', 'color-surface-overlay'],
+    ['--rx-warning-mark', 'color-warning-mark'],
+    ['--rx-shadow-raised', 'shadow-raised'],
+    ['--rx-shadow-overlay', 'shadow-overlay'],
+    ['--rx-accent', 'color-accent'],
+  ])('%s stays %s', (token, key) => {
+    expect(named.get(token)).toBe(key);
+  });
+});
