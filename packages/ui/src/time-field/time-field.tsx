@@ -188,7 +188,12 @@ export function TimeField({
           : delta > 0
             ? 0
             : 60 - step;
-      commit({ ...draft, [segment]: start });
+      // A bound fills the hour on the 24 hour clock, so the period follows it: max 17:00 reads 5 PM.
+      commit(
+        segment === 'hour'
+          ? { ...draft, hour: start, pm: start >= 12 }
+          : { ...draft, minute: start },
+      );
       return;
     }
     const base = { hour: draft.hour ?? 0, minute: draft.minute ?? 0 };
@@ -333,7 +338,7 @@ export function TimeField({
         aria-label={ariaLabel}
         aria-valuemin={twelve ? 1 : 0}
         aria-valuemax={twelve ? 12 : 23}
-        aria-valuenow={draft.hour === null ? undefined : (twelveHour ?? draft.hour)}
+        aria-valuenow={twelve ? (twelveHour ?? undefined) : (draft.hour ?? undefined)}
         aria-valuetext={
           draft.hour === null
             ? 'Empty'

@@ -229,4 +229,35 @@ describe('TimeField', () => {
       screen.getByRole('spinbutton', { name: 'AM or PM', description: 'In 15 minute steps.' }),
     ).toBeInTheDocument();
   });
+
+  it('sets the period from a bound that fills an empty hour', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <Controlled
+        locale="en-US"
+        initial={null}
+        onChange={onChange}
+        min={{ hour: 13, minute: 0 }}
+        max={{ hour: 17, minute: 0 }}
+      />,
+    );
+    const hour = screen.getByRole('spinbutton', { name: 'Start' });
+    const period = screen.getByRole('spinbutton', { name: 'AM or PM' });
+    await user.click(hour);
+    await user.keyboard('{ArrowDown}');
+    expect(hour).toHaveValue('05');
+    expect(period).toHaveValue('PM');
+    await user.keyboard('{Backspace}{ArrowUp}');
+    expect(hour).toHaveValue('01');
+    expect(period).toHaveValue('PM');
+  });
+
+  it('reports the hour on the clock the field shows', () => {
+    render(<Controlled initial={{ hour: 15, minute: 0 }} />);
+    expect(screen.getByRole('spinbutton', { name: 'Start' })).toHaveAttribute(
+      'aria-valuenow',
+      '15',
+    );
+  });
 });
