@@ -77,6 +77,15 @@ summary: Work that is merging into main now and ships with the next release.
   control height, so neighbouring hit areas stay apart at compact density and in the dense skin,
   where a fixed gap fell short. Pagination, message actions, toasts, file items, the table pager,
   the week agenda and the SaaS blocks use it.
+- Dark mode hairlines sit further off the raised surfaces, so cards, the sign in panel and inputs
+  keep their edge, and skeletons read as shapes on cards. The raised shadow in dark lights the top
+  edge from inside instead of drawing a second ring, so a secondary button or card no longer shows
+  a doubled border.
+- `--rx-warning-mark`, an amber for marks drawn on a surface that holds 3:1 there. Rating stars
+  use it, so they are gold in light mode rather than brown. A theme made in the generator before
+  this release lacks it: make the theme again from its link, or add the token to it.
+- A tentative event draws its dashed edge in the tone's mark colour, at 3:1 on the surface, not in
+  the faint tint of a confirmed event.
 - On touch screens, sortable table headers, the chat reasoning, tool call and sources rows, the
   row under a reply and the docs code block header take the touch height, and the tab indicator no
   longer takes a press meant for the tab under it.

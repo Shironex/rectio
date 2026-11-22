@@ -208,7 +208,7 @@ export default defineRegistry({
     themes: [
       {
         id: 'default',
-        version: '0.3.2',
+        version: '0.4.0',
         title: 'Default theme',
         description: 'Warm stone neutrals, cobalt accent, 4px controls, IBM Plex. Light and dark.',
       },
@@ -384,7 +384,7 @@ export default defineRegistry({
     {
       name: 'event-card',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'EventCard',
       description:
         'One event with its time, length, place and attendees, coloured by kind, in full and compact variants.',
