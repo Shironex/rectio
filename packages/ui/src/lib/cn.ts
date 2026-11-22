@@ -5,6 +5,19 @@ import { extendTailwindMerge } from 'tailwind-merge';
  * tailwind-merge taught the token utilities, so a consumer's `rounded-panel` replaces a component's
  * `rounded-control` and `duration-slow` replaces `duration-fast` instead of both landing.
  */
+/** The backdrop filter parts Tailwind composes into one `backdrop-filter`. */
+const BACKDROP_PARTS = [
+  'blur',
+  'brightness',
+  'contrast',
+  'grayscale',
+  'hue-rotate',
+  'invert',
+  'opacity',
+  'saturate',
+  'sepia',
+] as const;
+
 const merge = extendTailwindMerge({
   extend: {
     theme: {
@@ -17,7 +30,14 @@ const merge = extendTailwindMerge({
     },
     classGroups: {
       duration: [{ duration: ['fast', 'base', 'slow'] }],
+      // The skin hooks: a consumer's background image or backdrop filter replaces them, so it wins in
+      // a theme too, where they paint nothing and filter nothing.
+      'bg-image': ['canvas-wash'],
+      'backdrop-filter': ['backdrop-surface'],
     },
+    conflictingClassGroups: Object.fromEntries(
+      BACKDROP_PARTS.map((part) => [`backdrop-${part}`, ['backdrop-filter']]),
+    ),
   },
 });
 

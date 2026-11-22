@@ -9,6 +9,18 @@ describe('cn', () => {
     expect(cn('shadow-raised', 'shadow-overlay')).toBe('shadow-overlay');
     expect(cn('shadow-raised', 'shadow-indicator')).toBe('shadow-indicator');
     expect(cn('shadow-panel', 'shadow-raised')).toBe('shadow-raised');
+    // A consumer's background image or backdrop filter replaces the skin hooks.
+    expect(cn('canvas-wash', 'bg-[url(/a.png)]')).toBe('bg-[url(/a.png)]');
+    expect(cn('canvas-wash', 'bg-linear-to-b')).toBe('bg-linear-to-b');
+    expect(cn('canvas-wash', 'bg-none')).toBe('bg-none');
+    expect(cn('backdrop-surface', 'backdrop-blur-[8px]')).toBe('backdrop-blur-[8px]');
+    expect(cn('backdrop-surface', 'backdrop-saturate-150')).toBe('backdrop-saturate-150');
+    expect(cn('backdrop-surface', 'backdrop-filter-none')).toBe('backdrop-filter-none');
+    // A colour, or a translucency without blur, keeps them.
+    expect(cn('canvas-wash', 'bg-surface')).toBe('canvas-wash bg-surface');
+    expect(cn('backdrop-surface', 'translucent-surface')).toBe(
+      'backdrop-surface translucent-surface',
+    );
     expect(cn('font-medium', 'font-strong')).toBe('font-strong');
   });
 
