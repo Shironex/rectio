@@ -5,6 +5,9 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "typegen": {
+      "outputs": [".next/types/**", "next-env.d.ts"]
+    },
     "typecheck": {
       "dependsOn": ["^build"],
       "outputs": [".next/types/**", "next-env.d.ts"]
