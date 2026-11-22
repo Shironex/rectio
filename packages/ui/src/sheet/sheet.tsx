@@ -140,7 +140,7 @@ export function SheetContent({
           data-slot="sheet"
           data-side={side}
           className={cn(
-            'fixed flex flex-col overflow-hidden border-line bg-surface-overlay text-fg shadow-(--rx-sheet-shadow) outline-none',
+            'fixed flex flex-col overflow-hidden border-line bg-surface-overlay text-fg shadow-(--rx-sheet-shadow) backdrop-surface outline-none',
             'transition-[translate,transform,opacity] duration-base ease-enter',
             // Under reduced motion the sheet fades in place instead of travelling across the screen.
             'motion-reduce:data-starting-style:translate-0 motion-reduce:data-ending-style:translate-0',

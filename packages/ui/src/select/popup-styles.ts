@@ -26,7 +26,7 @@ export const popupMotion = cn(
  * theme scope reads as the same object.
  */
 export const popupSurface = cn(
-  'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow)',
+  'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow) backdrop-surface',
   'outline-none',
 );
 

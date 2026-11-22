@@ -48,7 +48,7 @@ export function ThemeScope({
       data-mode={mode}
       data-density={density === 'compact' ? 'compact' : undefined}
       data-skin={skin}
-      className={cn('bg-surface-canvas font-sans text-base text-fg', className)}
+      className={cn('bg-surface-canvas canvas-wash font-sans text-base text-fg', className)}
       {...props}
     >
       <PortalContainerContext value={container}>{children}</PortalContainerContext>

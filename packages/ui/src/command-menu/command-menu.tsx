@@ -221,7 +221,7 @@ export function CommandMenu({
               data-slot="command-menu"
               className={cn(
                 'flex max-h-full w-(--rx-command-width) max-w-full flex-col overflow-hidden',
-                'rounded-(--rx-dialog-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-dialog-shadow)',
+                'rounded-(--rx-dialog-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-dialog-shadow) backdrop-surface',
                 'outline-none',
                 className,
               )}

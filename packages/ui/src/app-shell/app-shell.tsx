@@ -44,7 +44,7 @@ export function AppShell({
       <TooltipProvider>
         <div
           data-slot="app-shell"
-          className={cn('flex min-h-dvh bg-surface-canvas text-fg', className)}
+          className={cn('flex min-h-dvh bg-surface-canvas canvas-wash text-fg', className)}
         >
           <a
             href={`#${mainId}`}
@@ -90,7 +90,7 @@ export function AppShellHeader({
     <header
       data-slot="app-shell-header"
       className={cn(
-        'sticky top-0 z-40 flex h-(--rx-app-shell-header-height) shrink-0 items-center gap-2 border-b border-line bg-surface-canvas px-3 sm:px-4',
+        'sticky top-0 z-40 flex h-(--rx-app-shell-header-height) shrink-0 items-center gap-2 border-b border-line bg-surface-canvas backdrop-surface px-3 sm:px-4',
         className,
       )}
       {...props}

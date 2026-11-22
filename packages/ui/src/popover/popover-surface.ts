@@ -4,6 +4,6 @@ import { cn } from '../lib/cn';
 
 /** The panel every anchored overlay shares: hairline, overlay surface, the popover shadow. */
 export const popoverSurface = cn(
-  'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow)',
+  'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow) backdrop-surface',
   'outline-none',
 );

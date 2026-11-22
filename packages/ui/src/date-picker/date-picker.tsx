@@ -69,7 +69,7 @@ function CalendarPopup({
           initialFocus={() => dayToFocus(popupRef.current)}
           data-slot="date-picker-popup"
           className={cn(
-            'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow)',
+            'rounded-(--rx-popover-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-popover-shadow) backdrop-surface',
             'max-sm:flex max-sm:flex-col max-sm:items-center max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 max-sm:pb-6',
             'outline-none',
             popupMotion,

@@ -48,7 +48,7 @@ export function DialogContent({
           data-slot="dialog"
           className={cn(
             'relative flex w-full max-w-(--rx-dialog-width) flex-col',
-            'rounded-(--rx-dialog-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-dialog-shadow)',
+            'rounded-(--rx-dialog-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-dialog-shadow) backdrop-surface',
             'outline-none',
             'transition-[opacity,scale,translate] duration-slow ease-enter',
             'data-starting-style:translate-y-(--rx-motion-distance-shift) data-starting-style:scale-(--rx-motion-scale-from) data-starting-style:opacity-0',

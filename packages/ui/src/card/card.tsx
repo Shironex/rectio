@@ -6,8 +6,8 @@ import { Anchor } from '../link/link';
 export type CardVariant = 'outline' | 'raised' | 'sunken';
 
 const VARIANTS: Record<CardVariant, string> = {
-  outline: 'border border-line bg-surface',
-  raised: 'border border-line bg-surface-raised shadow-raised',
+  outline: 'border border-line bg-surface backdrop-surface',
+  raised: 'border border-line bg-surface-raised shadow-raised backdrop-surface',
   // A well inside a page or a panel: no edge, one step below the surface around it.
   sunken: 'bg-surface-sunken',
 };

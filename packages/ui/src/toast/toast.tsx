@@ -114,7 +114,7 @@ function ToastItem({
       data-slot="toast"
       className={cn(
         'relative flex items-start gap-3 py-3 ps-4 pe-2',
-        'rounded-(--rx-toast-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-toast-shadow)',
+        'rounded-(--rx-toast-radius) border border-line bg-surface-overlay text-fg shadow-(--rx-toast-shadow) backdrop-surface',
         'select-none',
         // Enters with a short rise and a fade; reduced motion keeps only the fade (the token
         // distance is zero there). Leaves as a fade, or along the swipe.
