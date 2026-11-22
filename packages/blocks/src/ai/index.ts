@@ -24,6 +24,7 @@ export {
   type AiChatToolCall,
   type AiChatTurn,
 } from './chat-thread/chat-thread.logic';
+export { applyStreamEvent, streamStatus, type AiStreamEvent } from './lib/stream';
 export {
   AiPartsProvider,
   PLAIN_AI_PARTS,
