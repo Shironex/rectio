@@ -1,4 +1,4 @@
-import type { AiChatStatus, AiChatTurn } from '@rectio/blocks/ai';
+import { applyStreamEvent, type AiChatStatus, type AiChatTurn } from '@rectio/blocks/ai';
 import { ChatSourceChip, type MarkdownComponents } from '@rectio/ui';
 import { createElement, useEffect, useRef, useState } from 'react';
 
@@ -118,8 +118,9 @@ export const HISTORY: AiChatTurn[] = [
 ];
 
 /**
- * A conversation driven by `fakeStream`: what an app does with its own model client. Sending adds
- * the user's turn, waits a beat, then streams the reply; Stop keeps what arrived.
+ * A conversation driven by `fakeStream` through `applyStreamEvent`: what an app does with its own
+ * model client. Sending adds the user's turn, waits a beat, then streams the reply; Stop keeps what
+ * arrived.
  */
 export function useDemoChat(initial: AiChatTurn[] = []) {
   const [turns, setTurns] = useState(initial);
@@ -127,6 +128,7 @@ export function useDemoChat(initial: AiChatTurn[] = []) {
   const stopStream = useRef<(() => void) | null>(null);
   const wait = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const count = useRef(0);
+  const streaming = useRef<string | null>(null);
   useEffect(
     () => () => {
       stopStream.current?.();
@@ -142,19 +144,22 @@ export function useDemoChat(initial: AiChatTurn[] = []) {
     setStatus('submitting');
     wait.current = setTimeout(() => {
       const replyId = id('a');
+      streaming.current = replyId;
       setStatus('streaming');
-      setTurns((all) => [
-        ...all,
-        { id: replyId, role: 'assistant', content: '', status: 'streaming', feedback: null },
-      ]);
+      // Each burst becomes a stream event, the way an app maps its provider's stream.
+      setTurns((all) => applyStreamEvent(all, { type: 'start', id: replyId }));
+      let sent = 0;
       stopStream.current = fakeStream(text, {
         onChunk: (received) => {
-          setTurns((all) => all.map((t) => (t.id === replyId ? { ...t, content: received } : t)));
+          const delta = received.slice(sent);
+          sent = received.length;
+          setTurns((all) => applyStreamEvent(all, { type: 'text', id: replyId, delta }));
         },
         onDone: () => {
-          setTurns((all) => all.map((t) => (t.id === replyId ? { ...t, status: undefined } : t)));
+          setTurns((all) => applyStreamEvent(all, { type: 'done', id: replyId }));
           setStatus('idle');
           stopStream.current = null;
+          streaming.current = null;
         },
       });
     }, 600);
@@ -170,9 +175,10 @@ export function useDemoChat(initial: AiChatTurn[] = []) {
       stopStream.current?.();
       stopStream.current = null;
       clearTimeout(wait.current);
-      setTurns((all) =>
-        all.map((t) => (t.status === 'streaming' ? { ...t, status: 'stopped' } : t)),
-      );
+      const replyId = streaming.current;
+      if (replyId !== null)
+        setTurns((all) => applyStreamEvent(all, { type: 'stopped', id: replyId }));
+      streaming.current = null;
       setStatus('idle');
     },
     onRegenerate: (turn: AiChatTurn) => {

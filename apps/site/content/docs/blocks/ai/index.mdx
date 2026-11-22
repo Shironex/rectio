@@ -13,31 +13,60 @@ import { AiChatThread } from '@rectio/blocks/ai'; // plain
 import { AiChatThread } from '@rectio/blocks/ai/motion'; // messages rise in, replies reveal evenly
 ```
 
-They install under `@blocks/ai/`, beside the shared `ai-core` (the parts the motion twin swaps).
+They install under `@blocks/ai/`, beside the shared `ai-core` (the parts the motion twins swap, the
+reply boundary and the stream contract). The blocks are client components; their words, logic and
+stream helpers import from a React Server Component too.
 
-| Block                                            | What it answers                                       |
-| :----------------------------------------------- | :---------------------------------------------------- |
-| [AI chat thread](/docs/blocks/ai/ai-chat-thread) | Ask an assistant, follow its reply, check its sources |
+| Block                                                  | What it answers                                         |
+| :----------------------------------------------------- | :------------------------------------------------------ |
+| [AI chat thread](/docs/blocks/ai/ai-chat-thread)       | Ask an assistant, follow its reply, check its sources   |
+| [Chat workspace](/docs/blocks/ai/chat-workspace)       | Find a past chat, start a new one, keep the useful ones |
+| [Assistant sidebar](/docs/blocks/ai/assistant-sidebar) | Ask about the page in front of you without leaving it   |
+| [Prompt composer](/docs/blocks/ai/prompt-composer)     | Pick a model, run a command, stay within the limit      |
 
 ## Feeding a stream
 
-Keep the conversation in your own state and update the last turn as chunks arrive:
+Keep the conversation in your own state and fold your provider's stream into it with
+`applyStreamEvent`. Map each event your SDK sends onto one of a few kinds; the helper is pure, so it
+fits a `setState` updater or a reducer, and runs on the server too.
 
 ```tsx
+import { applyStreamEvent, streamStatus, type AiChatTurn } from '@rectio/blocks/ai';
+
 const [turns, setTurns] = useState<AiChatTurn[]>([]);
-const [status, setStatus] = useState<AiChatStatus>('idle');
+const fold = (event: AiStreamEvent) => setTurns((all) => applyStreamEvent(all, event));
 
 async function send(text: string) {
+  setTurns((all) => [...all, { id: crypto.randomUUID(), role: 'user', content: text }]);
   const id = crypto.randomUUID();
-  setTurns((all) => [...all, { id: `${id}-q`, role: 'user', content: text }]);
-  setStatus('submitting');
-  let reply = '';
-  for await (const chunk of yourModel.stream(text)) {
-    reply += chunk;
-    setStatus('streaming');
-    setTurns((all) => upsert(all, { id, role: 'assistant', content: reply, status: 'streaming' }));
+  fold({ type: 'start', id });
+  try {
+    for await (const part of yourModel.stream(text)) {
+      if (part.kind === 'text') fold({ type: 'text', id, delta: part.text });
+      if (part.kind === 'thinking') fold({ type: 'reasoning', id, delta: part.text });
+      if (part.kind === 'tool') fold({ type: 'tool', id, tool: part.call });
+      if (part.kind === 'citation') fold({ type: 'source', id, source: part.source });
+    }
+    fold({ type: 'done', id });
+  } catch (error) {
+    fold({ type: 'error', id, error: 'The reply could not finish. Try again.' });
   }
-  setTurns((all) => upsert(all, { id, role: 'assistant', content: reply }));
-  setStatus('idle');
 }
+
+<AiChatThread conversation={turns} status={streamStatus(turns)} onSend={send} />;
 ```
+
+| Event           | What it does                                                           |
+| :-------------- | :--------------------------------------------------------------------- |
+| `start`         | Adds an empty assistant turn, streaming. A second start is ignored.    |
+| `text`          | Appends words; reasoning still running ends.                           |
+| `reasoning`     | Appends to the reasoning, shown as thinking.                           |
+| `reasoning-end` | Ends the reasoning, with its duration in seconds when known.           |
+| `tool`          | Adds a tool call, or updates the one with the same id.                 |
+| `source`        | Adds a source once.                                                    |
+| `done`          | The reply is complete.                                                 |
+| `stopped`       | The reader stopped it: what arrived stays, running tools end failed.   |
+| `error`         | Shows the reason beside Retry; running reasoning and tools end failed. |
+
+An event for a turn that is not in the conversation changes nothing, so a late chunk after a stop
+or a delete is harmless. `streamStatus` gives the thread its status from the turns.

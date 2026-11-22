@@ -1,0 +1,115 @@
+---
+title: Assistant sidebar
+description: 'An assistant docked beside the app: resizable, folds to a rail, opens with a shortcut and moves focus in and back, in a sheet on a phone.'
+---
+
+import AssistantSidebarDemo from '@/demos/ai-assistant-sidebar';
+import AssistantSidebarMotionDemo from '@/demos/ai-assistant-sidebar.motion';
+
+<Preview
+  name="ai-assistant-sidebar"
+  plain={<AssistantSidebarDemo />}
+  motion={<AssistantSidebarMotionDemo />}
+  importLine="import { AssistantSidebar } from '@rectio/blocks/ai/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add ai-assistant-sidebar
+```
+
+The motion variant is `motion-ai-assistant-sidebar`, with a panel that slides in from the end edge.
+It installs the plain block too.
+
+## Usage
+
+Wrap the page in the sidebar and pass the assistant as `panel`, usually an AI chat thread. The page
+stays mounted while the assistant opens and closes, so its state survives.
+
+```tsx
+import { AssistantSidebar } from '@/components/blocks/ai/assistant-sidebar';
+
+<AssistantSidebar
+  title="Assistant"
+  panel={<AiChatThread conversation={turns} status={status} onSend={send} onStop={stop} />}
+  className="h-dvh"
+>
+  <InvoicesPage />
+</AssistantSidebar>;
+```
+
+The panel docks at the end edge (the left in a right to left page). Drag or arrow its handle to
+resize it between `minSize` and `maxSize`, in percent of the width; pass `storageKey` to keep the
+size per browser. Closed, it folds to a rail with one button to open it again, or hides entirely
+with `collapsed="hidden"`.
+
+Mod+J (Command on a Mac, Control elsewhere) opens it and moves focus to its field. Pressed with the
+assistant open and focus elsewhere it moves focus back in; pressed inside, it closes and returns
+focus to where it was. Change it with `shortcut`, or pass `null` to bind none. The shortcut works
+from text fields too, and stands aside while a dialog is open.
+
+### In an app shell
+
+To put the trigger in a header outside the sidebar, wrap both in `AssistantSidebarProvider` and
+place `AssistantSidebarTrigger` where it belongs. Inside `AppShell`, size the sidebar to the space
+under the header:
+
+```tsx
+<AssistantSidebarProvider defaultOpen>
+  <AppShell sidebar={nav} header={<AppShellHeader actions={<AssistantSidebarTrigger />} />}>
+    <AssistantSidebar
+      panel={assistant}
+      className="h-[calc(100dvh-var(--rx-app-shell-header-height))]"
+    >
+      <Page />
+    </AssistantSidebar>
+  </AppShell>
+</AssistantSidebarProvider>
+```
+
+`useAssistantSidebar()` reads and drives the same state (`open`, `show`, `hide`, `toggle`) from
+anywhere under the provider.
+
+On a phone, below 48rem, the assistant opens in a full height sheet over the page, with focus in
+its field. A floating button opens it; pass `phoneTrigger={false}` when a header trigger already
+does.
+
+## Props
+
+<TypeTable
+  type={{
+    panel: { type: 'ReactNode', required: true, description: 'The assistant.' },
+    children: { type: 'ReactNode', required: true, description: 'The page beside it.' },
+    title: { type: 'ReactNode', default: "'Assistant'" },
+    icon: { type: 'ReactNode' },
+    headerActions: {
+      type: 'ReactNode',
+      description: 'Before the close button: new chat, history.',
+    },
+    open: { type: 'boolean' },
+    defaultOpen: { type: 'boolean', default: 'false' },
+    onOpenChange: { type: '(open: boolean) => void' },
+    shortcut: { type: 'string | null', default: "'mod+j'" },
+    collapsed: { type: "'rail' | 'hidden'", default: "'rail'" },
+    defaultSize: { type: 'number', default: '32' },
+    minSize: { type: 'number', default: '22' },
+    maxSize: { type: 'number', default: '50' },
+    storageKey: { type: 'string' },
+    phoneTrigger: { type: 'boolean', default: 'true' },
+    contentClassName: { type: 'string', description: 'On the page area.' },
+    messages: { type: 'Partial<AssistantSidebarMessages>' },
+  }}
+/>
+
+`AssistantSidebarProvider` takes `open`, `defaultOpen`, `onOpenChange` and `shortcut`; the sidebar
+inside it reads them from the provider.
+
+## Accessibility
+
+- The assistant is an `aside` named by its title, with the title as its heading.
+- Opening moves focus to the assistant's field (or its heading when it has none); closing returns
+  it to the control that opened it, or to the rail.
+- The trigger says whether the assistant is open and names its shortcut with `aria-keyshortcuts`.
+- The resize handle is a keyboard separator with its size spoken.

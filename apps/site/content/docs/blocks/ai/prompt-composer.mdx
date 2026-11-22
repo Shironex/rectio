@@ -1,0 +1,102 @@
+---
+title: Prompt composer
+description: 'A richer field for an assistant: a model picker, attachments, slash commands, a token or character count with a limit, and Send that turns into Stop.'
+---
+
+import PromptComposerDemo from '@/demos/ai-prompt-composer';
+import PromptComposerMotionDemo from '@/demos/ai-prompt-composer.motion';
+
+<Preview
+  name="ai-prompt-composer"
+  plain={<PromptComposerDemo />}
+  motion={<PromptComposerMotionDemo />}
+  importLine="import { PromptComposer } from '@rectio/blocks/ai/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add ai-prompt-composer
+```
+
+The motion variant is `motion-ai-prompt-composer`, with a command list that rises in. It installs
+the plain block too.
+
+## Usage
+
+The composer is the [prompt input](/docs/components/prompt-input) with more around it, and takes
+all of its props.
+
+```tsx
+import { PromptComposer } from '@/components/blocks/ai/prompt-composer';
+
+<PromptComposer
+  onSubmit={send}
+  onStop={stop}
+  status={status}
+  models={[
+    { id: 'fast', label: 'Fast', hint: 'Quick answers' },
+    { id: 'deep', label: 'Deep', hint: 'Long reports' },
+  ]}
+  onModelChange={setModel}
+  commands={[{ id: 'summarize', name: 'summarize', description: 'Summarise the thread' }]}
+  onCommand={(command) => track(command.id)}
+  count="tokens"
+  limit={8000}
+/>;
+```
+
+Typing `/` at the start of a word lists the commands that match, best match first: arrows move
+through them, Enter or Tab puts the command in the field, and Escape closes the list until the next
+`/`. The field keeps focus throughout. A command's `keywords` match too.
+
+`count="tokens"` shows a running estimate of about four characters a token; pass your model's
+tokenizer as `countTokens` for an exact figure. `count="characters"` counts characters. With a
+`limit`, the count turns amber from 90% and red past it, and Send waits until the text fits.
+
+To use it as the field of an AI chat thread or chat workspace, render it from `renderComposer`,
+which hands over the status and the send and stop callbacks:
+
+```tsx
+<AiChatThread
+  {...chat}
+  renderComposer={(slot) => <PromptComposer {...slot} models={models} commands={commands} />}
+/>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    onSubmit: { type: '(text, attachments) => unknown', required: true },
+    onStop: { type: '() => void' },
+    status: { type: "'idle' | 'submitting' | 'streaming'", default: "'idle'" },
+    models: { type: 'readonly AiComposerModel[]', description: 'id, label and optional hint.' },
+    model: { type: 'string' },
+    defaultModel: { type: 'string', description: 'The first model when omitted.' },
+    onModelChange: { type: '(model: string) => void' },
+    tools: { type: 'ReactNode', description: 'After the model picker.' },
+    commands: {
+      type: 'readonly AiComposerCommand[]',
+      description: 'id, name, and optional description and keywords.',
+    },
+    onCommand: { type: '(command) => void' },
+    count: { type: "'tokens' | 'characters'" },
+    limit: { type: 'number' },
+    countTokens: { type: '(text: string) => number' },
+    locale: { type: 'string', description: 'For the figures in the count.' },
+    messages: { type: 'Partial<PromptComposerMessages>' },
+  }}
+/>
+
+The prompt input's props (`value`, `attachments`, `onAttach`, `placeholder`, `hint` and the rest)
+pass through.
+
+## Accessibility
+
+- The command list follows the field like a combobox: the field names the list and the highlighted
+  command, so a screen reader reads each as the arrows move.
+- How many commands match, and how many tokens or characters are left or over, are said once typing
+  settles.
+- The model picker is named Model, and every control is at least 44px on touch screens.

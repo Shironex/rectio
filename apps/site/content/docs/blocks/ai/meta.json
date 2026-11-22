@@ -1,4 +1,4 @@
 {
   "title": "AI blocks",
-  "pages": ["index", "ai-chat-thread"]
+  "pages": ["index", "ai-chat-thread", "chat-workspace", "assistant-sidebar", "prompt-composer"]
 }

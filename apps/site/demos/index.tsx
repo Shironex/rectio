@@ -9,8 +9,14 @@ import dynamic from 'next/dynamic';
  */
 const DEMOS = {
   accordion: dynamic(() => import('./accordion')),
+  'ai-assistant-sidebar': dynamic(() => import('./ai-assistant-sidebar')),
+  'ai-assistant-sidebar.motion': dynamic(() => import('./ai-assistant-sidebar.motion')),
   'ai-chat-thread': dynamic(() => import('./ai-chat-thread')),
   'ai-chat-thread.motion': dynamic(() => import('./ai-chat-thread.motion')),
+  'ai-chat-workspace': dynamic(() => import('./ai-chat-workspace')),
+  'ai-chat-workspace.motion': dynamic(() => import('./ai-chat-workspace.motion')),
+  'ai-prompt-composer': dynamic(() => import('./ai-prompt-composer')),
+  'ai-prompt-composer.motion': dynamic(() => import('./ai-prompt-composer.motion')),
   'chat-loader': dynamic(() => import('./chat-loader')),
   'chat-loader.motion': dynamic(() => import('./chat-loader.motion')),
   'chat-message': dynamic(() => import('./chat-message')),

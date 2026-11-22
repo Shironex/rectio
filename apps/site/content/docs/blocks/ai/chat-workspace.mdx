@@ -1,0 +1,114 @@
+---
+title: Chat workspace
+description: 'A full chat page: a list of chats with search, new chat, pins, rename and delete beside the open conversation, in a sheet on a phone.'
+---
+
+import ChatWorkspaceDemo from '@/demos/ai-chat-workspace';
+import ChatWorkspaceMotionDemo from '@/demos/ai-chat-workspace.motion';
+
+<Preview
+  name="ai-chat-workspace"
+  plain={<ChatWorkspaceDemo />}
+  motion={<ChatWorkspaceMotionDemo />}
+  importLine="import { ChatWorkspace } from '@rectio/blocks/ai/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add ai-chat-workspace
+```
+
+The motion variant is `motion-ai-chat-workspace`. It installs the plain block too, and both bring
+the AI chat thread.
+
+## Usage
+
+Pass the chats and the open one, the open chat's conversation, and the callbacks. Give the block a
+height; the list and the thread each scroll on their own.
+
+```tsx
+import { ChatWorkspace } from '@/components/blocks/ai/chat-workspace';
+
+<ChatWorkspace
+  chats={chats}
+  activeId={chatId}
+  onSelect={(chat) => open(chat.id)}
+  onNewChat={startChat}
+  onRename={(chat, title) => rename(chat.id, title)}
+  onDelete={(chat) => remove(chat.id)}
+  onPinChange={(chat, pinned) => pin(chat.id, pinned)}
+  conversation={turns}
+  status={status}
+  onSend={send}
+  onStop={stop}
+  className="h-dvh"
+/>;
+```
+
+The list groups chats into Pinned, Today, Yesterday, Previous 7 days and Older, newest first, from
+`updatedAt` against `now` (the clock when omitted). Search keeps the chats whose title holds every
+word typed. Each row has a menu: Rename edits the title in place (Enter keeps it, Escape or an
+unchanged title drops it), Pin moves it to the top, and Delete asks first in an alert dialog that
+opens on Cancel. Leave out a callback and its action is not offered.
+
+Pass `chatHref` to make the rows links: they go through your router with `LinkProvider`, and the
+open chat carries `aria-current="page"`. Without it the rows are buttons that call `onSelect`.
+
+`chatsLoading` draws skeleton rows, and `threadLoading` a skeleton thread with the field held, for
+while a chat's messages load. With no chats the list says how to start one; a search with no
+matches offers to clear it. Every thread prop (`suggestions`, `onRegenerate`, `renderComposer`,
+`avatar` and the rest) passes through to the [AI chat thread](/docs/blocks/ai/ai-chat-thread), and
+`threadMessages` sets its words.
+
+On a phone, below 48rem, the list moves into a sheet from the start edge, opened by the button in
+the thread's header; picking a chat closes it and puts focus in the field. `AiChatList` is the list
+on its own, for a layout of your own.
+
+## Props
+
+<TypeTable
+  type={{
+    chats: {
+      type: 'readonly AiChatSummary[]',
+      required: true,
+      description:
+        'id, title, and optional updatedAt and pinned. An empty title reads Untitled chat.',
+    },
+    activeId: { type: 'string | null' },
+    onSelect: { type: '(chat) => void' },
+    chatHref: { type: '(chat) => string', description: 'Rows become links through LinkProvider.' },
+    onNewChat: { type: '() => void' },
+    onRename: {
+      type: '(chat, title) => void',
+      description: 'Titles are trimmed to 120 characters.',
+    },
+    onDelete: { type: '(chat) => void' },
+    onPinChange: { type: '(chat, pinned) => void' },
+    chatsLoading: { type: 'boolean' },
+    threadLoading: { type: 'boolean' },
+    title: {
+      type: 'ReactNode',
+      description: "The header title; the open chat's title by default.",
+    },
+    headerActions: { type: 'ReactNode' },
+    listFooter: { type: 'ReactNode', description: 'Under the list: an account, a settings link.' },
+    now: { type: 'Date' },
+    messages: { type: 'Partial<ChatWorkspaceMessages>' },
+    threadMessages: { type: 'Partial<AiChatThreadMessages>' },
+  }}
+/>
+
+The thread's own props are listed on the [AI chat thread](/docs/blocks/ai/ai-chat-thread) page.
+
+## Accessibility
+
+- The list is a `nav` named Chats, and the open chat is marked current, in words and colour.
+- Search says how many chats match once typing settles, not on every key.
+- Rename keeps focus in the title field and returns it to the row; after a delete, focus moves to
+  the next chat, or to New chat when none is left.
+- The thread keeps its own rules: one announcement when a reply starts and one when it ends, and
+  focus stays in the field after sending.
+- Every row action is a named control of at least 44px on touch screens, shown on hover and focus
+  with a mouse and always on touch.
