@@ -48,10 +48,11 @@ figure, and No data when any cell is missing.
 
 `calendar` builds the weeks from local dates, so a daylight saving change never shifts a day. The range runs from the earliest entry to the latest: days in it
 with no entry are missing, and days outside it get no cell. Months are labelled over the week that
-holds the 1st, and `weekStartsOn` (Monday by default) sets the first row. Cells stay between 10 and 18
+holds the 1st, and `weekStartsOn` (Monday by default) sets the first row. Cells stay between 10 and 22
 pixels: on a phone a year scrolls sideways, opened at the latest week, and on a wide screen it stops
-growing. A matrix prints each figure in its cell when the cells are wide enough, in a text token that
-holds 4.5:1 on every step.
+growing. A matrix prints each figure in its cell, in a text token that holds 4.5:1 on every step;
+its columns keep room for a figure, so on a phone it scrolls sideways too. While more columns wait
+past the edge, a fade says so, and the row labels stay in view.
 
 The motion variant uncovers the grid on first view.
 
@@ -81,7 +82,7 @@ The motion variant uncovers the grid on first view.
     max: { type: 'number', description: 'The top of the scale; the largest figure by default.' },
     showValues: {
       type: 'boolean',
-      description: 'Print figures in the cells. On for a matrix when they fit.',
+      description: 'Print figures in the cells. On for a matrix, off for a calendar.',
     },
     label: { type: 'string', description: 'Names the grid for assistive technology.' },
     format: {
