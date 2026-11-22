@@ -73,8 +73,8 @@ interface HeatmapCommonProps {
   format?: ValueFormat | undefined;
   currency?: string | undefined;
   locale?: string | undefined;
-  /** How many colour steps the figures fall into: 3, 4 or 5 (the default). */
-  steps?: 3 | 4 | 5 | undefined;
+  /** How many colour steps the figures above zero fall into: 3, or 4 (the default). */
+  steps?: 3 | 4 | undefined;
   /** The top of the scale; the largest figure by default. Pass it to compare heatmaps side by side. */
   max?: number | undefined;
   /**
@@ -222,11 +222,14 @@ function matrixModel(props: HeatmapMatrixProps): Model {
   return { rows, columns, cells };
 }
 
-/** The sequence tokens a heatmap with this many steps uses, spread so neighbours stay far apart. */
-const STEP_TOKENS: Record<3 | 4 | 5, readonly number[]> = {
-  3: [1, 3, 5],
-  4: [1, 2, 4, 5],
-  5: [1, 2, 3, 4, 5],
+/**
+ * The sequence tokens a heatmap with this many steps uses: the warm steps, from the palest to the
+ * deepest (in light mode), so more reads as hotter. The calm first step is for ordered states such as
+ * aging buckets, not for amounts, and is left out.
+ */
+const STEP_TOKENS: Record<3 | 4, readonly number[]> = {
+  3: [2, 4, 5],
+  4: [2, 3, 4, 5],
 };
 
 const STEP_CLASS: Record<number, string> = {
@@ -261,7 +264,7 @@ export function Heatmap(props: HeatmapProps) {
     format = 'number',
     currency,
     locale,
-    steps = 5,
+    steps = 4,
     label,
     summary,
     loading,
@@ -468,12 +471,20 @@ export function Heatmap(props: HeatmapProps) {
               setHover(null);
             }}
             data-chart-mark="reveal"
-            className={cn('rx-mark grid min-w-full', calendar ? 'w-max gap-0.5' : 'gap-1')}
-            style={{
-              gridTemplateColumns: calendar
-                ? `auto repeat(${String(columnCount)}, minmax(calc(var(--spacing) * 2.5), 1fr))`
-                : `auto repeat(${String(columnCount)}, minmax(calc(var(--spacing) * 6), 1fr))`,
-            }}
+            className={cn('rx-mark grid w-full', calendar ? 'gap-0.5' : 'gap-1')}
+            style={
+              calendar
+                ? {
+                    gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(0, 1fr))`,
+                    // Cells from 10px to 18px: past the least, the grid scrolls; past the most, it
+                    // stops growing rather than turning a year into a wall of tiles.
+                    minWidth: `calc(var(--spacing) * ${String(columnCount * 3 + 8)})`,
+                    maxWidth: `calc(var(--spacing) * ${String(columnCount * 5 + 10)})`,
+                  }
+                : {
+                    gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(calc(var(--spacing) * 6), 1fr))`,
+                  }
+            }
           >
             <div role="row" className="contents">
               <div role="columnheader" />

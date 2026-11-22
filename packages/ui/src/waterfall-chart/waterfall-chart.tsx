@@ -13,6 +13,9 @@ import {
   YAxis,
   type BarShapeProps,
   type TooltipContentProps,
+  usePlotArea,
+  useXAxisScale,
+  useYAxisScale,
 } from 'recharts';
 
 import {
@@ -59,6 +62,52 @@ export interface WaterfallBar {
   running: number;
   /** The bar's two ends on the value axis, low first. */
   range: [number, number];
+}
+
+/**
+ * The dashed rules that carry the running total from each bar to the next. Drawn from the plot area
+ * and the value scale, since a bar's own shape only knows its own box.
+ */
+function Connectors({
+  bars,
+  horizontal,
+  barGap,
+  maxBar,
+}: {
+  bars: readonly WaterfallBar[];
+  horizontal: boolean;
+  barGap: number;
+  maxBar: number;
+}) {
+  const plot = usePlotArea();
+  const xScale = useXAxisScale();
+  const yScale = useYAxisScale();
+  const scale = horizontal ? xScale : yScale;
+  if (plot === undefined || scale === undefined || bars.length < 2) return null;
+  const band = (horizontal ? plot.height : plot.width) / bars.length;
+  const size = Math.min(maxBar, band * (1 - barGap));
+  const start = horizontal ? plot.y : plot.x;
+  return (
+    <g aria-hidden className="rx-waterfall-rules">
+      {bars.slice(1).map((bar, index) => {
+        const level = scale(bars[index]?.running ?? 0);
+        if (level === undefined || !Number.isFinite(level)) return null;
+        const far = start + band * (index + 0.5) + size / 2;
+        const near = start + band * (index + 1.5) - size / 2;
+        return (
+          <line
+            key={bar.id}
+            {...(horizontal
+              ? { x1: level, x2: level, y1: far, y2: near }
+              : { x1: far, x2: near, y1: level, y2: level })}
+            stroke="var(--rx-chart-baseline)"
+            strokeWidth={1}
+            strokeDasharray="2 2"
+          />
+        );
+      })}
+    </g>
+  );
 }
 
 /** Lays the steps out on the value axis, keeping the running total. */
@@ -232,19 +281,8 @@ export function WaterfallChart({
     if (bar === undefined) return <g />;
     const fill =
       bar.role === 'decrease' ? `url(#${patternId}-decrease)` : chartColor(tone[bar.role]);
-    // Where the running total sits after this bar: the high end after an increase or a positive
-    // total, the low end after a decrease or a negative total.
-    const atHigh = bar.role === 'increase' || (bar.role === 'total' && bar.running >= 0);
+    // A decrease grows down from the running total before it, so its entrance starts at the top.
     const startsHigh = bar.role === 'decrease' || (bar.role === 'total' && bar.running >= 0);
-    const low = horizontal ? x : y + h;
-    const high = horizontal ? x + w : y;
-    const after = atHigh ? high : low;
-    const before = bar.role === 'total' ? after : startsHigh ? high : low;
-    // Bars sit centred in equal bands, so the gap before this bar ends at the bar before.
-    const band = props.background;
-    const gap = band === undefined ? undefined : horizontal ? band.height - h : band.width - w;
-    const near = horizontal ? y : x;
-    const previous = index > 0 && gap !== undefined && gap > 0 ? { far: near - gap } : undefined;
     const rect = {
       x,
       y,
@@ -253,18 +291,6 @@ export function WaterfallChart({
     };
     return (
       <g data-dir={horizontal ? undefined : startsHigh && bar.role !== 'total' ? 'down' : 'up'}>
-        {previous !== undefined && (
-          <line
-            aria-hidden
-            className="rx-waterfall-rule"
-            {...(horizontal
-              ? { x1: before, x2: before, y1: previous.far, y2: near }
-              : { x1: previous.far, x2: near, y1: before, y2: before })}
-            stroke="var(--rx-chart-baseline)"
-            strokeWidth={1}
-            strokeDasharray="2 2"
-          />
-        )}
         <Rectangle {...rect} radius={2} fill={fill} />
         {isActive && (
           <>
@@ -424,6 +450,12 @@ export function WaterfallChart({
             allowEscapeViewBox={{ x: false, y: true }}
             offset={16}
             isAnimationActive={false}
+          />
+          <Connectors
+            bars={bars}
+            horizontal={horizontal}
+            barGap={horizontal ? 0.24 : 0.2}
+            maxBar={horizontal ? 22 : 48}
           />
           <Bar
             dataKey="range"

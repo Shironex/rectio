@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDownIcon, ArrowRightIcon } from '@phosphor-icons/react/ssr';
+import { ArrowDownIcon } from '@phosphor-icons/react/ssr';
 import type { ReactNode } from 'react';
 
 import {
@@ -77,6 +77,8 @@ export interface FunnelChartMessages extends ChartMessages {
   reached: string;
   /** The legend key of the hatched band: those lost since the stage before. */
   droppedOff: string;
+  /** Under a column of the vertical funnel: its share of the stage before. */
+  kept: (share: string) => string;
   /** Between two stages: what carried on and how many left. */
   step: (info: { kept: string; dropped: string; droppedShare: string; grew: boolean }) => string;
   /** The summary, read before the plot. */
@@ -102,6 +104,7 @@ export const FUNNEL_CHART_MESSAGES: FunnelChartMessages = {
   reached: 'Reached',
   droppedOff: 'Dropped off',
   keyboardHint: 'Every stage is listed with its figures, or show the table.',
+  kept: (share) => `${share} of previous`,
   step: ({ kept, dropped, droppedShare, grew }) =>
     grew
       ? `${kept} carried on, ${dropped} joined`
@@ -222,7 +225,7 @@ export function FunnelChart({
     <span
       aria-hidden
       data-chart-mark="fade"
-      className={cn('rx-mark absolute rounded-badge bg-chart-reference opacity-60', glide)}
+      className={cn('rx-mark absolute rounded-badge bg-chart-reference opacity-45', glide)}
       style={{
         backgroundImage: HATCH,
         ...(vertical
@@ -299,11 +302,10 @@ export function FunnelChart({
               <p className="m-0 flex flex-col gap-0.5">
                 <span className="text-sm text-fg wrap-anywhere">{step.label}</span>
                 {index > 0 && (
-                  <span className="inline-flex items-center gap-1 text-xs text-fg-muted numeric">
-                    <ArrowRightIcon aria-hidden weight="bold" className="size-3 shrink-0" />
+                  <span className="text-xs text-fg-muted numeric">
                     <span className="sr-only">{between(step)}</span>
                     <span aria-hidden>
-                      {step.ofPrevious === null ? percent(0) : percent(step.ofPrevious)}
+                      {m.kept(step.ofPrevious === null ? percent(0) : percent(step.ofPrevious))}
                     </span>
                   </span>
                 )}
