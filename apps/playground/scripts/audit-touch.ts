@@ -41,6 +41,9 @@ const VIEWS = [
   'people&state=leave-form',
   'people&state=org',
   'people&state=payroll',
+  'people&state=payroll-approved',
+  'people&state=timesheet-clock',
+  'people&state=empty',
   'viz',
 ] as const;
 const onlyView = process.argv[2];
