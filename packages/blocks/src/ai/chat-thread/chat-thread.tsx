@@ -90,6 +90,15 @@ export interface AiChatThreadProps {
   className?: string | undefined;
 }
 
+/** A reply as plain words to copy; the raw text if it cannot be read as Markdown. */
+function plainText(text: string): string {
+  try {
+    return markdownToText(text);
+  } catch {
+    return text;
+  }
+}
+
 function DefaultCode({ code, lang, meta, closed }: MarkdownCodeProps) {
   return (
     <CodeBlock
@@ -262,7 +271,7 @@ export function AiChatThread({
               actions={
                 settled ? (
                   <MessageActions>
-                    <MessageCopyAction value={() => markdownToText(turn.content)} />
+                    <MessageCopyAction value={() => plainText(turn.content)} />
                     {onFeedback !== undefined && (
                       <MessageFeedback
                         value={turn.feedback ?? null}
@@ -286,9 +295,11 @@ export function AiChatThread({
             >
               {turn.reasoning !== undefined && (
                 <Reasoning status={turn.reasoning.status} duration={turn.reasoning.duration}>
-                  <Markdown size="sm" streaming={turn.reasoning.status === 'thinking'}>
-                    {turn.reasoning.text}
-                  </Markdown>
+                  <ReplyBoundary text={turn.reasoning.text}>
+                    <Markdown size="sm" streaming={turn.reasoning.status === 'thinking'}>
+                      {turn.reasoning.text}
+                    </Markdown>
+                  </ReplyBoundary>
                 </Reasoning>
               )}
               {turn.tools !== undefined && turn.tools.length > 0 && (
