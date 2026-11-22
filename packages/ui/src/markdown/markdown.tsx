@@ -392,9 +392,9 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
             {renderBlocks(block.children, { ...context, tight: false, caret })}
           </blockquote>
         );
-      case 'table':
-        return (
-          <TableFrame key={key} label={context.messages.table}>
+      case 'table': {
+        const table = (
+          <TableFrame label={context.messages.table}>
             <Table className="text-sm whitespace-nowrap [&_tbody_tr:last-child_td]:border-b-0">
               <TableHeader>
                 <TableRow>
@@ -437,6 +437,45 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
             </Table>
           </TableFrame>
         );
+        // Up to three columns fit a phone; wider tables turn into one card per row when the
+        // column is narrow, so the figures at the end are never hidden behind a scroll.
+        if (block.head.length <= 3) return <Fragment key={key}>{table}</Fragment>;
+        return (
+          <div key={key} data-slot="markdown-table" className="@container min-w-0">
+            <div className="@max-md:hidden">{table}</div>
+            <ul
+              aria-label={context.messages.table}
+              className="hidden flex-col divide-y divide-line rounded-panel border border-line text-sm @max-md:flex"
+            >
+              {block.rows.map((row, rowIndex) => (
+                <li
+                  // Rows are positional.
+                  key={rowIndex}
+                  className="flex flex-col gap-1.5 px-3 py-2.5"
+                >
+                  <span className="font-medium text-fg">{renderInline(row[0] ?? [], context)}</span>
+                  <dl className="grid grid-cols-2 gap-x-3 gap-y-1">
+                    {block.head.slice(1).map((head, headIndex) => {
+                      const align = block.align[headIndex + 1] ?? null;
+                      return (
+                        <Fragment
+                          // Columns are positional.
+                          key={headIndex}
+                        >
+                          <dt className="text-fg-muted">{renderInline(head, context)}</dt>
+                          <dd className={cn('text-fg', align === 'right' && 'text-end numeric')}>
+                            {renderInline(row[headIndex + 1] ?? [], context)}
+                          </dd>
+                        </Fragment>
+                      );
+                    })}
+                  </dl>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      }
       case 'hr':
         return <hr key={key} className="border-line" />;
     }

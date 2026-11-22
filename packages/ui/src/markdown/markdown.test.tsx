@@ -133,6 +133,20 @@ describe('Markdown', () => {
     expect(within(region).getByRole('cell', { name: '1,200' })).toHaveClass('text-end');
   });
 
+  it('gives a table wider than three columns a card per row for a narrow column', () => {
+    render(
+      <Markdown>
+        {
+          '| Customer | Invoice | Due | Amount |\n| --- | --- | --- | ---: |\n| Northwind | INV-1 | Oct 10 | $9,800.00 |'
+        }
+      </Markdown>,
+    );
+    const cards = screen.getByRole('list', { name: 'Table' });
+    expect(within(cards).getByText('Northwind')).toBeInTheDocument();
+    expect(within(cards).getByText('Amount').tagName).toBe('DT');
+    expect(within(cards).getByText('$9,800.00').tagName).toBe('DD');
+  });
+
   it('hands code blocks to components.code', () => {
     render(
       <Markdown
