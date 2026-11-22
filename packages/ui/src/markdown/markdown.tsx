@@ -14,6 +14,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../data-table/table';
 import { cn } from '../lib/cn';
 import {
+  DEFAULT_PROTOCOLS,
   parseMarkdown,
   stableBoundaries,
   type MarkdownAlign,
@@ -489,24 +490,40 @@ function renderBlocks(blocks: readonly MarkdownBlock[], context: RenderContext):
   });
 }
 
-/** Finished blocks of streaming replies, parsed once each; kept small, oldest dropped first. */
+/**
+ * Finished blocks of streaming replies, parsed once each and shared by every instance. Kept
+ * small by count and by characters, oldest dropped first; a block longer than the whole budget
+ * is parsed without being kept.
+ */
 const FINISHED = new Map<string, MarkdownBlock[]>();
 const FINISHED_LIMIT = 256;
+const FINISHED_CHARS = 1_000_000;
+let finishedChars = 0;
 
 function parseFinished(
   segment: string,
   allowedProtocols: readonly string[] | undefined,
 ): MarkdownBlock[] {
   if (segment === '') return [];
-  const key = `${(allowedProtocols ?? []).join(',')}\u0000${segment}`;
+  // Keyed by the protocols the parser really applies, so an unset list (the defaults) and an
+  // empty one (relative links only) never share an entry.
+  const protocols = [...new Set(allowedProtocols ?? DEFAULT_PROTOCOLS)].sort();
+  const key = `${JSON.stringify(protocols)}\u0000${segment}`;
   const known = FINISHED.get(key);
   if (known !== undefined) return known;
   const blocks = parseMarkdown(segment, { allowedProtocols });
-  if (FINISHED.size >= FINISHED_LIMIT) {
+  if (key.length > FINISHED_CHARS) return blocks;
+  while (
+    FINISHED.size > 0 &&
+    (FINISHED.size >= FINISHED_LIMIT || finishedChars + key.length > FINISHED_CHARS)
+  ) {
     const oldest = FINISHED.keys().next().value;
-    if (oldest !== undefined) FINISHED.delete(oldest);
+    if (oldest === undefined) break;
+    FINISHED.delete(oldest);
+    finishedChars -= oldest.length;
   }
   FINISHED.set(key, blocks);
+  finishedChars += key.length;
   return blocks;
 }
 

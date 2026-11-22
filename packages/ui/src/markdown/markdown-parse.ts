@@ -271,7 +271,14 @@ function findCloser(text: string, from: number, marker: string, dead: DeadEnds):
     // The closer takes the end of a longer run, so `***both***` closes strong outside em.
     const at = end - marker.length;
     const { right, after } = flanking(text, at, end);
-    if (!right || at <= from || (char === '_' && /[\p{L}\p{N}]/u.test(after))) {
+    const refused = !right || (char === '_' && /[\p{L}\p{N}]/u.test(after));
+    if (refused || at <= from) {
+      // Refused for its neighbours alone, the run refuses a scan that starts anywhere inside it
+      // too, so its positions go on the path; a single marker skips the spot where two remain,
+      // since a scan from there tries a strong span first.
+      if (refused && marks !== undefined) {
+        for (let j = i + 1; j < end; j += 1) if (marker.length === 2 || end - j !== 2) path.push(j);
+      }
       i = end - 1;
       continue;
     }
@@ -298,6 +305,8 @@ export function parseInline(text: string, context: InlineContext): MarkdownInlin
     return parens.get(open) ?? -1;
   };
   let buffer = '';
+  // End of the delimiter run the scan stands in, so a long run is measured once.
+  let runEnd = 0;
   const flush = () => {
     if (buffer !== '') out.push({ type: 'text', value: decodeEntities(buffer) });
     buffer = '';
@@ -444,7 +453,12 @@ export function parseInline(text: string, context: InlineContext): MarkdownInlin
     }
 
     if (char === '*' || char === '_' || char === '~') {
-      const run = new RegExp(`^\\${char}+`).exec(rest)?.[0] ?? char;
+      // One scan per run: later steps inside the same run reuse its end instead of rescanning.
+      if (i >= runEnd || text[runEnd - 1] !== char) {
+        runEnd = i + 1;
+        while (text[runEnd] === char) runEnd += 1;
+      }
+      const run = text.slice(i, runEnd);
       const { left, before } = flanking(text, i, i + run.length);
       const intraword = char === '_' && /[\p{L}\p{N}]/u.test(before);
       const marker =

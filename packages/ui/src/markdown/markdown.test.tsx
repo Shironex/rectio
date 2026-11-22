@@ -296,6 +296,11 @@ describe('parseMarkdown against hostile input', () => {
     parseMarkdown('[a]('.repeat(20000));
     parseMarkdown('![a]('.repeat(20000));
     markdownToText('[a]('.repeat(20000));
+    parseMarkdown('**'.repeat(40000) + 'a');
+    parseMarkdown('**'.repeat(80000) + 'a', { streaming: true });
+    parseMarkdown('__'.repeat(40000) + 'a');
+    parseMarkdown('*'.repeat(80000) + 'a');
+    parseMarkdown('a' + '**'.repeat(40000));
     parseMarkdown(Array.from({ length: 2000 }, (_, i) => '  '.repeat(i) + '- a').join('\n'));
     expect(performance.now() - started).toBeLessThan(3000);
   });
@@ -374,5 +379,25 @@ describe('Markdown while streaming', () => {
     }
     expect(performance.now() - started).toBeLessThan(2000);
     expect(screen.getByText('Paragraph 4 arrives')).toBeInTheDocument();
+  });
+
+  it('keeps the protocols of each instance apart when they share a finished paragraph', () => {
+    const text = 'Read [the guide](https://example.com/guide) first.\n\nStill arri';
+    const open = render(<Markdown streaming>{text}</Markdown>);
+    expect(open.container.querySelector('a[href="https://example.com/guide"]')).not.toBeNull();
+    const strict = render(
+      <Markdown streaming allowedProtocols={[]}>
+        {text}
+      </Markdown>,
+    );
+    expect(strict.container.querySelector('a[href^="https:"]')).toBeNull();
+    expect(strict.container).toHaveTextContent('the guide');
+    // The same list in another order is the same rule, so it may share the entry.
+    const reordered = render(
+      <Markdown streaming allowedProtocols={['tel', 'mailto', 'https', 'http']}>
+        {text}
+      </Markdown>,
+    );
+    expect(reordered.container.querySelector('a[href="https://example.com/guide"]')).not.toBeNull();
   });
 });
