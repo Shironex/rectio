@@ -293,21 +293,39 @@ describe('parseMarkdown against hostile input', () => {
   });
 
   it('parses unclosed emphasis, open brackets and deep lists in near linear time', () => {
-    // Quadratic parsing took seconds here; a generous bound still catches it.
-    const started = performance.now();
-    parseMarkdown('*a '.repeat(20000));
-    parseMarkdown('_a '.repeat(20000), { streaming: true });
-    parseMarkdown('['.repeat(20000) + 'a');
-    parseMarkdown('[a]('.repeat(20000));
-    parseMarkdown('![a]('.repeat(20000));
-    markdownToText('[a]('.repeat(20000));
-    parseMarkdown('**'.repeat(40000) + 'a');
-    parseMarkdown('**'.repeat(80000) + 'a', { streaming: true });
-    parseMarkdown('__'.repeat(40000) + 'a');
-    parseMarkdown('*'.repeat(80000) + 'a');
-    parseMarkdown('a' + '**'.repeat(40000));
-    parseMarkdown(Array.from({ length: 2000 }, (_, i) => '  '.repeat(i) + '- a').join('\n'));
-    expect(performance.now() - started).toBeLessThan(3000);
+    // Each hostile input at a quarter and at full size, in the same run, so a loaded machine slows
+    // both alike. Linear parsing takes about 4 times as long at 4 times the size (3.3 measured);
+    // the quadratic parsers this guards against took 14 to 16 times as long (and seconds in all).
+    const cases: ((scale: number) => unknown)[] = [
+      (s) => parseMarkdown('*a '.repeat(20000 * s)),
+      (s) => parseMarkdown('_a '.repeat(20000 * s), { streaming: true }),
+      (s) => parseMarkdown('['.repeat(20000 * s) + 'a'),
+      (s) => parseMarkdown('[a]('.repeat(20000 * s)),
+      (s) => parseMarkdown('![a]('.repeat(20000 * s)),
+      (s) => markdownToText('[a]('.repeat(20000 * s)),
+      (s) => parseMarkdown('**'.repeat(40000 * s) + 'a'),
+      (s) => parseMarkdown('**'.repeat(80000 * s) + 'a', { streaming: true }),
+      (s) => parseMarkdown('__'.repeat(40000 * s) + 'a'),
+      (s) => parseMarkdown('*'.repeat(80000 * s) + 'a'),
+      (s) => parseMarkdown('a' + '**'.repeat(40000 * s)),
+      // Lines indent by their index, so the text grows with the square of the lines: scale by the root.
+      (s) =>
+        parseMarkdown(
+          Array.from(
+            { length: Math.round(2000 * Math.sqrt(s)) },
+            (_, i) => '  '.repeat(i) + '- a',
+          ).join('\n'),
+        ),
+    ];
+    const run = (scale: number) => {
+      const started = performance.now();
+      for (const parse of cases) parse(scale);
+      return performance.now() - started;
+    };
+    run(0.25); // Warm up the parser, so the first timed run is not paying for compilation.
+    const small = Math.min(run(0.25), run(0.25));
+    const full = Math.min(run(1), run(1));
+    expect(full / small).toBeLessThan(8);
   });
 });
 
