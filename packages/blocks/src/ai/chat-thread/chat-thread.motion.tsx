@@ -1,11 +1,9 @@
-import { ChatLoader, ChatMessage, ChatThread, StreamingText } from '@rectio/motion/chat';
+'use client';
 
-import { AiPartsProvider, type AiParts } from '../lib/parts';
+import { AiMotionParts } from '../lib/motion-parts';
 import { AiChatThread as PlainAiChatThread, type AiChatThreadProps } from './chat-thread';
 
 export type { AiChatThreadProps };
-
-const MOTION_PARTS: AiParts = { ChatThread, ChatMessage, StreamingText, ChatLoader };
 
 /**
  * AiChatThread with the motion parts: new messages rise into place, the typing dots fade up and
@@ -13,8 +11,8 @@ const MOTION_PARTS: AiParts = { ChatThread, ChatMessage, StreamingText, ChatLoad
  */
 export function AiChatThread(props: AiChatThreadProps) {
   return (
-    <AiPartsProvider parts={MOTION_PARTS}>
+    <AiMotionParts>
       <PlainAiChatThread {...props} />
-    </AiPartsProvider>
+    </AiMotionParts>
   );
 }

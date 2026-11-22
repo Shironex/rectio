@@ -1,3 +1,5 @@
+'use client';
+
 import {
   ChatAnnouncer,
   ChatDaySeparator,
@@ -30,31 +32,16 @@ import {
   type AiChatSuggestion,
   type AiChatTurn,
 } from './chat-thread.logic';
+import { AI_CHAT_THREAD_MESSAGES, type AiChatThreadMessages } from './chat-thread-messages';
 
-export * from './chat-thread.logic';
+export type { AiChatThreadMessages };
 
-/** Every word the chat thread block says, for apps that translate or reword them. */
-export interface AiChatThreadMessages {
-  /** Names the conversation for assistive technology. */
-  label: string;
-  /** The assistant's name, on its replies and in announcements. */
-  assistant: string;
-  emptyTitle: string;
-  emptyDescription: string;
-  /** Names the group of suggestion chips. */
-  suggestions: string;
-  /** Said by the typing dots before the first words of a reply. */
-  typing: (assistant: string) => string;
+/** What a field of your own needs from the thread, given to `renderComposer`. */
+export interface AiChatComposerSlot {
+  status: AiChatStatus;
+  onSubmit: PromptInputProps['onSubmit'];
+  onStop: (() => void) | undefined;
 }
-
-export const AI_CHAT_THREAD_MESSAGES: AiChatThreadMessages = {
-  label: 'Conversation',
-  assistant: 'Assistant',
-  emptyTitle: 'What can I help with?',
-  emptyDescription: 'Ask a question, or start from one of these.',
-  suggestions: 'Suggestions',
-  typing: (assistant) => `${assistant} is typing`,
-};
 
 export interface AiChatThreadProps {
   /** The conversation so far, oldest first. */
@@ -81,6 +68,11 @@ export interface AiChatThreadProps {
   avatar?: ReactNode;
   /** Props for the message field: attachments, limits, placeholder, tools. */
   composer?: Omit<PromptInputProps, 'onSubmit' | 'onStop' | 'status'> | undefined;
+  /**
+   * Draws a field of your own in place of the prompt input, such as the prompt composer block.
+   * It gets the status and the send and stop callbacks to wire up; `composer` is then unused.
+   */
+  renderComposer?: ((props: AiChatComposerSlot) => ReactNode) | undefined;
   /** Renders fenced code; the docs code block by default. */
   code?: ((props: MarkdownCodeProps) => ReactNode) | undefined;
   locale?: string | undefined;
@@ -134,6 +126,7 @@ export function AiChatThread({
   header,
   avatar,
   composer,
+  renderComposer,
   code = DefaultCode,
   locale,
   now,
@@ -173,7 +166,11 @@ export function AiChatThread({
         contentClassName={cn('max-w-2xl', conversation.length === 0 && 'min-h-full')}
         footer={
           <div className="mx-auto w-full max-w-2xl px-4 pb-4">
-            <PromptInput {...composer} status={status} onSubmit={onSend} onStop={onStop} />
+            {renderComposer === undefined ? (
+              <PromptInput {...composer} status={status} onSubmit={onSend} onStop={onStop} />
+            ) : (
+              renderComposer({ status, onSubmit: onSend, onStop })
+            )}
           </div>
         }
       >
