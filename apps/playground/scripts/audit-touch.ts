@@ -32,6 +32,9 @@ const VIEWS = [
   'charts',
   'scheduling',
   'chat',
+  'ai-blocks',
+  'ai-blocks&state=sidebar',
+  'ai-blocks&state=composer',
   'viz',
 ] as const;
 const onlyView = process.argv[2];
