@@ -107,7 +107,9 @@ export function CodeBlock({
   className,
 }: CodeBlockProps) {
   const m = mergeMessages(CODE_BLOCK_MESSAGES, messages);
-  const parsed = parseCodeMeta(meta);
+  // Highlight ranges never reach past the code's own lines.
+  const lineCount = tokens?.length ?? (code ?? '').split('\n').length;
+  const parsed = parseCodeMeta(meta, lineCount);
   const heading = title ?? parsed.title;
   const isDiff = diff ?? (parsed.diff || lang === 'diff');
   const showNumbers = lineNumbers ?? parsed.lineNumbers;
@@ -116,7 +118,7 @@ export function CodeBlock({
     highlight === undefined
       ? parsed.highlight
       : typeof highlight === 'string'
-        ? parseLineRanges(highlight)
+        ? parseLineRanges(highlight, lineCount)
         : highlight,
   );
   const { lines, marks } = useMemo(() => {

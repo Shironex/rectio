@@ -28,16 +28,28 @@ export interface ParsedCodeMeta {
   startLine: number;
 }
 
-/** `{1,3-5}` or `1,3-5` to [1, 3, 4, 5]. Out of order and repeated numbers are tidied up. */
-export function parseLineRanges(value: string | undefined): number[] {
+/** No code block is longer than this; a range past it is cut back to it. */
+export const MAX_CODE_LINES = 10_000;
+
+/**
+ * `{1,3-5}` or `1,3-5` to [1, 3, 4, 5]. Out of order and repeated numbers are tidied up. Ranges
+ * are clamped to `lineCount`, so a model-written `{1-99999999999}` costs no more than the code.
+ */
+export function parseLineRanges(
+  value: string | undefined,
+  lineCount: number = MAX_CODE_LINES,
+): number[] {
   if (value === undefined) return [];
+  const last = Math.max(0, Math.min(lineCount, MAX_CODE_LINES));
   const lines = new Set<number>();
   for (const part of value.replace(/[{}\s]/g, '').split(',')) {
-    const match = /^(\d+)(?:-(\d+))?$/.exec(part);
+    const match = /^(\d{1,12})(?:-(\d{1,12}))?$/.exec(part);
     if (match === null) continue;
     const from = Number(match[1]);
     const to = match[2] === undefined ? from : Number(match[2]);
-    for (let line = Math.min(from, to); line <= Math.max(from, to); line += 1) lines.add(line);
+    const low = Math.max(1, Math.min(from, to));
+    const high = Math.min(last, Math.max(from, to));
+    for (let line = low; line <= high; line += 1) lines.add(line);
   }
   return [...lines].sort((a, b) => a - b);
 }
@@ -46,14 +58,17 @@ export function parseLineRanges(value: string | undefined): number[] {
  * The meta string after a fence's language, as most Markdown tools write it:
  * `title="queue.ts" {2,5-7} showLineNumbers diff`.
  */
-export function parseCodeMeta(meta: string | undefined): ParsedCodeMeta {
+export function parseCodeMeta(
+  meta: string | undefined,
+  lineCount: number = MAX_CODE_LINES,
+): ParsedCodeMeta {
   const source = meta ?? '';
   const title = /title=(?:"([^"]*)"|'([^']*)'|(\S+))/.exec(source);
   const ranges = /\{([\d,\s-]+)\}/.exec(source);
   const numbers = /\bshowLineNumbers(?:=(\d+))?/.exec(source);
   return {
     title: title === null ? undefined : (title[1] ?? title[2] ?? title[3]),
-    highlight: parseLineRanges(ranges?.[1]),
+    highlight: parseLineRanges(ranges?.[1], lineCount),
     lineNumbers: numbers !== null,
     diff: /(^|\s)diff(\s|$)/.test(source),
     startLine: numbers?.[1] === undefined ? 1 : Number(numbers[1]),

@@ -101,6 +101,16 @@ describe('code blocks', () => {
     expect(parseCodeMeta(undefined)).toMatchObject({ highlight: [], lineNumbers: false });
   });
 
+  it('clamps highlight ranges to the code instead of filling memory', () => {
+    const started = performance.now();
+    expect(parseLineRanges('{1-99999999999}', 3)).toEqual([1, 2, 3]);
+    expect(parseCodeMeta('{2-99999999999}', 4).highlight).toEqual([2, 3, 4]);
+    // Without a line count the range stops at the longest code block there is.
+    expect(parseLineRanges('{1-99999999999}')).toHaveLength(10_000);
+    expect(parseLineRanges('{0-2,999999999999999999}', 5)).toEqual([1, 2]);
+    expect(performance.now() - started).toBeLessThan(500);
+  });
+
   it('strips diff marks, keeps colours and copies the code after the change', () => {
     const lines = [
       [{ content: ' const a = 1;' }],
