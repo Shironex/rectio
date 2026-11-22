@@ -1,5 +1,6 @@
 import type { AiChatStatus, AiChatTurn } from '@rectio/blocks/ai';
-import { useEffect, useRef, useState } from 'react';
+import { ChatSourceChip, type MarkdownComponents } from '@rectio/ui';
+import { createElement, useEffect, useRef, useState } from 'react';
 
 /**
  * A stand-in for a model's streaming API, shared by the chat demos: it sends `text` in uneven
@@ -66,6 +67,16 @@ export const SOURCES = [
   },
   { id: 's3', title: 'Payment terms and late fees', url: 'https://example.com/terms' },
 ];
+
+/** Markdown parts that turn `[1](#source-1)` in a reply into the chip of that source. */
+export const CITATIONS: MarkdownComponents = {
+  link: (props) => {
+    const match = /^#source-(\d+)$/.exec(props.href);
+    const source = match === null ? undefined : SOURCES[Number(match[1]) - 1];
+    if (match === null || source === undefined) return undefined;
+    return createElement(ChatSourceChip, { index: Number(match[1]), source });
+  },
+};
 
 export const SUGGESTIONS = [
   { id: 'overdue', label: 'Which invoices are overdue?' },

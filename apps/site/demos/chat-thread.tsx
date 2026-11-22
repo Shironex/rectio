@@ -9,7 +9,7 @@ import {
   StreamingText,
 } from '@rectio/ui';
 
-import { HISTORY, useDemoChat } from './chat-data';
+import { CITATIONS, HISTORY, useDemoChat } from './chat-data';
 
 /** The thread follows the reply while it streams; scroll up and Jump to latest appears. */
 export default function ChatThreadDemo() {
@@ -36,7 +36,11 @@ export default function ChatThreadDemo() {
           ) : (
             <ChatMessage key={turn.id} from="assistant" status={turn.status}>
               <StreamingText text={turn.content} streaming={turn.status === 'streaming'}>
-                {(text, streaming) => <Markdown streaming={streaming}>{text}</Markdown>}
+                {(text, streaming) => (
+                  <Markdown streaming={streaming} components={CITATIONS}>
+                    {text}
+                  </Markdown>
+                )}
               </StreamingText>
             </ChatMessage>
           ),

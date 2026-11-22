@@ -3,7 +3,7 @@
 import { ChatMessage, ChatThread, StreamingText } from '@rectio/motion/chat';
 import { ChatAnnouncer, Markdown, PromptInput } from '@rectio/ui';
 
-import { HISTORY, useDemoChat } from './chat-data';
+import { CITATIONS, HISTORY, useDemoChat } from './chat-data';
 
 /** New messages rise in and the reply reveals at an even pace on whole words. */
 export default function ChatThreadMotionDemo() {
@@ -30,7 +30,11 @@ export default function ChatThreadMotionDemo() {
           ) : (
             <ChatMessage key={turn.id} from="assistant" status={turn.status}>
               <StreamingText text={turn.content} streaming={turn.status === 'streaming'}>
-                {(text, streaming) => <Markdown streaming={streaming}>{text}</Markdown>}
+                {(text, streaming) => (
+                  <Markdown streaming={streaming} components={CITATIONS}>
+                    {text}
+                  </Markdown>
+                )}
               </StreamingText>
             </ChatMessage>
           ),
