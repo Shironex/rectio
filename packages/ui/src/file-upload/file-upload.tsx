@@ -638,7 +638,7 @@ export function FileItem({
         </div>
       </div>
       {(onRetry !== undefined && file.status === 'error') || onRemove !== undefined ? (
-        <div className="flex shrink-0 items-center gap-1 pointer-coarse:gap-5">
+        <div className="flex shrink-0 items-center gap-1 pointer-coarse:gap-touch-gap">
           {onRetry !== undefined && file.status === 'error' && (
             <Button
               size="sm"

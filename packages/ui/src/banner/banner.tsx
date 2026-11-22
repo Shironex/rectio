@@ -82,7 +82,7 @@ export function Banner({
       className={cn('w-full text-sm', TONES[tone], className)}
       {...props}
     >
-      <div className="mx-auto flex min-h-11 w-full max-w-screen-xl items-center gap-3 px-4 py-2 sm:px-6">
+      <div className="mx-auto flex min-h-11 w-full max-w-screen-xl items-center gap-3 px-4 py-2 pointer-coarse:min-h-(--rx-control-height-touch) sm:px-6">
         {icon !== null && (
           <span className={cn('flex shrink-0 [&_svg]:size-4.5', ICON_TONE[tone])}>
             {icon ?? <Glyph aria-hidden weight="fill" />}
@@ -93,7 +93,13 @@ export function Banner({
           {action !== undefined && (
             <span
               data-slot="banner-action"
-              className="font-medium underline decoration-current/40 underline-offset-4 hover:decoration-current"
+              className={cn(
+                'font-medium underline decoration-current/40 underline-offset-4 hover:decoration-current',
+                // The action (a link or a button) is a touch-height row on touch screens. On a phone
+                // it wraps under the message, at the banner's edge, where a wider hit area would
+                // reach the page below.
+                'pointer-coarse:*:inline-flex pointer-coarse:*:min-h-(--rx-control-height-touch) pointer-coarse:*:items-center',
+              )}
             >
               {action}
             </span>

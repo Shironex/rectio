@@ -54,6 +54,9 @@ export function Tag({
       data-disabled={disabled || undefined}
       className={cn(
         'inline-flex h-6 max-w-full min-w-0 shrink-0 items-center gap-1 ps-1.5 pe-1',
+        // On touch screens a tag is as tall as a small button, so rows of tags spaced by the touch
+        // gap give every remove button its whole hit area.
+        'pointer-coarse:h-(--rx-control-height-sm)',
         'rounded-(--rx-badge-radius) border border-line-strong bg-surface-sunken text-sm text-fg',
         'transition-colors duration-fast ease-standard select-none outline-none',
         // Selected by keyboard before Backspace removes it: filled like selected text, a change
@@ -298,7 +301,7 @@ export function TagInput({
         className={cn(
           controlSurface,
           'flex h-auto min-h-(--rx-field-height) cursor-text flex-wrap items-center gap-1 px-1 py-0.5',
-          'pointer-coarse:h-auto pointer-coarse:min-h-(--rx-field-height-touch) pointer-coarse:gap-x-3',
+          'pointer-coarse:h-auto pointer-coarse:min-h-(--rx-field-height-touch) pointer-coarse:gap-touch-gap',
           // Focus is somewhere inside: on the input, or on a tag selected for removal.
           'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus',
           // The app marked the whole field invalid (a server error): show it on the surface.

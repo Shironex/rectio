@@ -83,7 +83,10 @@ export function TableHead({ className, align = 'start', scope = 'col', ...props 
       scope={scope}
       className={cn(
         'h-(--rx-table-header-height) px-(--rx-table-cell-padding-x) align-middle',
+        // On touch screens a header that holds a control (a select-all box, a sort button) is a
+        // full touch-height target.
         'pointer-coarse:has-data-[slot=checkbox]:h-(--rx-table-row-height-touch)',
+        'pointer-coarse:has-[button]:h-(--rx-table-row-height-touch)',
         'text-sm font-medium whitespace-nowrap text-fg-muted',
         'border-b border-line-strong bg-(--rx-table-header-background)',
         // In the footer, the label of a totals row sits on the strong rule above it.

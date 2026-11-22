@@ -5,7 +5,7 @@ import { CaretRightIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from 'react';
 
 import { disclosureCaret, disclosurePanelMotion } from '../accordion/accordion';
-import { cn } from '../lib/cn';
+import { cn, touchHitArea } from '../lib/cn';
 import { isExternalHref } from '../link/href';
 import { Anchor } from '../link/link';
 import { safeUrl } from '../markdown/markdown-parse';
@@ -39,7 +39,8 @@ export function ChatSourceChip({
   const m = { ...CHAT_SOURCE_MESSAGES, ...messages };
   const href = source.url === undefined ? null : safeUrl(source.url);
   const classes = cn(
-    'relative ms-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-badge bg-accent-subtle px-1.5 align-baseline before:absolute before:-inset-1 pointer-coarse:before:-inset-2.5',
+    'relative ms-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-badge bg-accent-subtle px-1.5 align-baseline before:absolute before:-inset-1',
+    touchHitArea,
     'text-xs font-medium text-accent-strong numeric',
     href !== null && cn('hover:text-fg', linkFocus),
     className,
@@ -96,7 +97,9 @@ export function ChatSources({ sources, messages, className, ...props }: ChatSour
       <BaseCollapsible.Trigger
         className={cn(
           'group/trigger inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-control py-1 text-sm font-medium text-fg-muted',
-          'relative pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 hover:text-fg',
+          // A full touch-height row on touch screens, as a Collapsible trigger: rows stacked in a reply
+          // then never share a target.
+          'pointer-coarse:min-h-(--rx-control-height-touch) hover:text-fg',
           linkFocus,
         )}
       >

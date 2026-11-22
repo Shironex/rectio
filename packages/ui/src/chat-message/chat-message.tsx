@@ -214,7 +214,9 @@ export function ChatMessage({
           <div
             data-part="actions"
             className={cn(
-              'flex',
+              // A touch-height row on touch screens, so the small buttons' hit areas stay inside it
+              // and never reach the sources or the reasoning above.
+              'flex pointer-coarse:min-h-(--rx-control-height-touch) pointer-coarse:items-center',
               actionsVisibility === 'hover' &&
                 cn(
                   'pointer-fine:opacity-0 pointer-fine:transition-opacity pointer-fine:duration-fast pointer-fine:ease-standard',

@@ -49,7 +49,7 @@ export function DataTablePagination<TData extends RowData>({
         {text}
       </p>
       {/* Wider apart on touch screens, so the two hit areas never overlap. */}
-      <div className="flex gap-1 pointer-coarse:gap-5">
+      <div className="flex gap-1 pointer-coarse:gap-touch-gap">
         <Button
           variant="secondary"
           size="sm"

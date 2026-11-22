@@ -29,7 +29,9 @@ const SIZES: Record<ToggleSize, string> = {
 
 /**
  * Heights of a toggle on its own, as Button: on touch screens medium grows to the touch height and
- * small reaches it through the hit area. In a group the segments fill the group's height instead.
+ * small reaches it through the hit area. A toggle with a short label is narrower than the touch
+ * height, so every standalone toggle carries the hit area, which also makes up the width. In a group
+ * the segments fill the group's height instead.
  */
 const HEIGHTS: Record<ToggleSize, string> = {
   sm: 'h-(--rx-button-height-sm)',
@@ -66,8 +68,10 @@ const SEGMENT = cn(
   'data-pressed:not-in-data-glide:ring-1 data-pressed:not-in-data-glide:ring-line-strong',
   'relative focus-visible:z-10',
   // The track's padding takes a few pixels off each segment; the hit area reaches the track's edge
-  // so a segment is still a 44px target on touch screens.
+  // so a segment is still a 44px target on touch screens. Segments sit side by side with no room
+  // for a wider area, so a short one (an icon, "30d") grows to the touch height instead.
   'pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1',
+  'pointer-coarse:min-w-(--rx-control-height-touch)',
 );
 
 export type ToggleProps = WithClassName<ComponentProps<typeof BaseToggle>> & {
@@ -98,7 +102,7 @@ export function Toggle({ size, iconOnly = false, className, ...props }: TogglePr
         group === null
           ? cn(STANDALONE, HEIGHTS[resolved], iconOnly && ICON_ONLY[resolved])
           : cn(SEGMENT, iconOnly && 'aspect-square px-0'),
-        group === null && resolved === 'sm' && cn('relative', touchHitArea),
+        group === null && cn('relative', touchHitArea),
         className,
       )}
       {...props}

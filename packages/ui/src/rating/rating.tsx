@@ -102,15 +102,17 @@ export function Rating({
   const stars = Array.from({ length: max }, (_, index) => index + 1);
   const step = allowHalf ? 0.5 : 1;
   const still = disabled === true || readOnly === true;
+  const pick = (picked: number) => {
+    setOwn(picked);
+    onValueChange?.(picked);
+  };
 
   return (
     <BaseRadioGroup
       data-slot="rating"
       value={chosen}
       onValueChange={(next) => {
-        const picked = Number(next);
-        setOwn(picked);
-        onValueChange?.(picked);
+        pick(Number(next));
       }}
       {...(disabled === undefined ? {} : { disabled })}
       {...(readOnly === undefined ? {} : { readOnly })}
@@ -126,6 +128,14 @@ export function Rating({
           <span
             key={star}
             data-slot="rating-star"
+            // With half stars on a touch screen, half a star is too narrow to aim at: the halves
+            // let presses through to the star, and a tap sets the whole star, a second tap on the
+            // same star its half. Keys and screen readers still reach every value on the radios.
+            onClick={(event) => {
+              if (!allowHalf || still) return;
+              if ((event.target as Element).closest('[data-slot="rating-item"]') !== null) return;
+              pick(chosen === star ? star - step : star);
+            }}
             className={cn(
               'relative inline-flex items-center justify-center rounded-control',
               'has-focus-visible:outline-2 has-focus-visible:outline-focus',
@@ -159,6 +169,7 @@ export function Rating({
                       : 'end-0 w-1/2'
                     : 'inset-x-0',
                   'data-disabled:cursor-not-allowed data-readonly:cursor-default',
+                  allowHalf && 'pointer-coarse:pointer-events-none',
                 )}
               />
             ))}

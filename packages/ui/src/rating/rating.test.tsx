@@ -53,6 +53,29 @@ describe('Rating', () => {
     expect(fills()).toEqual(['full', 'full', 'half']);
   });
 
+  it('sets a whole star on a tap and its half on a second tap, where halves let taps through', async () => {
+    const onValueChange = vi.fn();
+    render(<Rating aria-label="Score" allowHalf max={3} onValueChange={onValueChange} />);
+    // On a touch screen the half radios take no presses: a tap lands on the star cell.
+    for (const radio of screen.getAllByRole('radio'))
+      expect(radio).toHaveClass('pointer-coarse:pointer-events-none');
+    const third = document.querySelectorAll<HTMLElement>('[data-slot="rating-star"]')[2];
+    if (third === undefined) throw new Error('no third star');
+    await userEvent.click(third);
+    expect(onValueChange).toHaveBeenLastCalledWith(3);
+    expect(fills()).toEqual(['full', 'full', 'full']);
+    await userEvent.click(third);
+    expect(onValueChange).toHaveBeenLastCalledWith(2.5);
+    expect(fills()).toEqual(['full', 'full', 'half']);
+    expect(screen.getByRole('radio', { name: '2.5 stars' })).toBeChecked();
+  });
+
+  it('keeps whole-star radios pressable on touch screens', () => {
+    render(<Rating aria-label="Score" max={3} />);
+    for (const radio of screen.getAllByRole('radio'))
+      expect(radio).not.toHaveClass('pointer-coarse:pointer-events-none');
+  });
+
   it('previews the value under the mouse and goes back when it leaves', async () => {
     render(<Rating aria-label="Score" defaultValue={1} />);
     await userEvent.hover(screen.getByRole('radio', { name: '4 stars' }));

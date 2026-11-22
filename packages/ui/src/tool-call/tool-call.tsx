@@ -137,7 +137,9 @@ export function ToolCall({
       <BaseCollapsible.Trigger
         className={cn(
           'group/trigger flex w-fit max-w-full cursor-pointer items-center gap-2 rounded-control py-1 text-start text-sm text-fg-muted',
-          'relative pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 hover:text-fg',
+          // A full touch-height row on touch screens, as a Collapsible trigger: rows stacked in a reply
+          // then never share a target.
+          'pointer-coarse:min-h-(--rx-control-height-touch) hover:text-fg',
           'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         )}
       >

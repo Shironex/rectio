@@ -69,7 +69,9 @@ export function Reasoning({
       <BaseCollapsible.Trigger
         className={cn(
           'group/trigger inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-control py-1 text-sm font-medium text-fg-muted',
-          'relative pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 hover:text-fg',
+          // A full touch-height row on touch screens, as a Collapsible trigger: rows stacked in a reply
+          // then never share a target.
+          'pointer-coarse:min-h-(--rx-control-height-touch) hover:text-fg',
           'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
         )}
       >

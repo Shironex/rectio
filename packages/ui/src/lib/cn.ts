@@ -22,12 +22,15 @@ const merge = extendTailwindMerge({
 });
 
 /**
- * Hit area for a small pressable (icon buttons, small buttons, a checkbox) on touch screens: a
- * transparent box centred on the control, at least the touch height square, so a finger lands on it
- * while the drawn control keeps its size. Mouse and pen layouts are unchanged. The control must be
- * positioned (`relative` or `absolute`). Space neighbours so their areas never overlap: under
- * `pointer-coarse`, controls of height h need a gap of at least 44px minus h, so `gap-5` (20px)
- * between small and icon buttons, which are 28px, or 24px at compact density.
+ * Hit area for a small pressable (icon buttons, small buttons, a checkbox, a short toggle) on touch
+ * screens: a transparent box centred on the control, at least the touch height square, so a finger
+ * lands on it while the drawn control keeps its size. Mouse and pen layouts are unchanged, and it
+ * follows no density or skin: the touch height is fixed. The kit's one way to reach a touch target;
+ * the control must be positioned (`relative` or `absolute`).
+ *
+ * Space neighbours so their areas never overlap: `pointer-coarse:gap-touch-gap` between small
+ * controls (the touch height less the small control height, so it holds at compact density and in
+ * the dense skin, where a fixed gap falls short).
  */
 export const touchHitArea = cn(
   'pointer-coarse:after:absolute pointer-coarse:after:inset-auto pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2',

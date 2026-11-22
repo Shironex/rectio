@@ -75,7 +75,7 @@ export function MessageActions({
       role="toolbar"
       aria-label={label}
       data-slot="message-actions"
-      className={cn('flex items-center gap-0.5 pointer-coarse:gap-5', className)}
+      className={cn('flex items-center gap-0.5 pointer-coarse:gap-touch-gap', className)}
       onKeyDown={move}
       onFocus={(event) => {
         const buttons = [...(ref.current?.querySelectorAll<HTMLElement>('button') ?? [])];
@@ -108,12 +108,8 @@ export function MessageAction({ label, children, className, ...props }: MessageA
             size="sm"
             iconOnly
             aria-label={label}
-            className={cn(
-              'relative text-fg-muted hover:text-fg',
-              // Small buttons keep their drawn size; on touch an invisible area reaches 44px.
-              'pointer-coarse:before:absolute pointer-coarse:before:-inset-2',
-              className,
-            )}
+            // A small button keeps its drawn size; on touch its hit area reaches the touch height.
+            className={cn('text-fg-muted hover:text-fg', className)}
             {...props}
           />
         }

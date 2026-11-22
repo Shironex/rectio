@@ -11,7 +11,7 @@ import {
 import { createContext, use, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 
 import { comboboxIconButton, comboboxSurface } from '../combobox/combobox';
-import { cn } from '../lib/cn';
+import { cn, touchHitArea } from '../lib/cn';
 import { popupGroupLabel, popupItem, popupMotion, popupSurface } from '../select/select';
 import { Tag, tagRemoveButton } from '../tag-input/tag-input';
 import { usePortalContainer } from '../theme-scope/theme-scope';
@@ -217,6 +217,8 @@ export function MultiSelectInput({
       className={cn(
         comboboxSurface,
         'flex h-auto min-h-(--rx-field-height) cursor-text items-center gap-1 py-0.5 ps-1 pe-0.5',
+        // Room between the last chip and the end buttons, for the chip's remove hit area.
+        'pointer-coarse:gap-touch-gap',
         'pointer-coarse:h-auto pointer-coarse:min-h-(--rx-field-height-touch)',
         className,
       )}
@@ -235,7 +237,7 @@ export function MultiSelectInput({
           return (
             <BaseCombobox.Chips
               data-slot="multi-select-chips"
-              className="flex min-w-0 flex-1 flex-wrap items-center gap-1 pointer-coarse:gap-x-3"
+              className="flex min-w-0 flex-1 flex-wrap items-center gap-1 pointer-coarse:gap-touch-gap"
             >
               {visible.map((item) => {
                 const label = labelOf(item);
@@ -268,9 +270,13 @@ export function MultiSelectInput({
                   data-slot="multi-select-overflow"
                   aria-label={overflowLabel(hidden)}
                   className={cn(
-                    'inline-flex h-6 shrink-0 cursor-pointer items-center px-1.5 numeric',
+                    'relative inline-flex h-6 shrink-0 cursor-pointer items-center px-1.5 numeric',
                     'rounded-(--rx-badge-radius) border border-line bg-surface text-sm text-fg-muted',
                     'hover:border-line-strong hover:text-fg',
+                    // Level with the chips on touch screens, and as wide as its hit area, so the
+                    // remove button of the chip before it keeps its whole area too.
+                    'pointer-coarse:h-(--rx-control-height-sm) pointer-coarse:min-w-(--rx-control-height-touch) pointer-coarse:justify-center',
+                    touchHitArea,
                   )}
                   // Keep focus off the chip itself: it disappears as the field takes focus.
                   onMouseDown={(event) => {
@@ -296,16 +302,22 @@ export function MultiSelectInput({
         }}
       </BaseCombobox.Value>
       {showClear && (
-        <BaseCombobox.Clear aria-label={clearLabel} className={comboboxIconButton}>
+        <BaseCombobox.Clear aria-label={clearLabel} className={cn(comboboxIconButton, iconSpan)}>
           <XIcon aria-hidden weight="bold" className="size-3.5" />
         </BaseCombobox.Clear>
       )}
-      <BaseCombobox.Trigger aria-label={triggerLabel} className={comboboxIconButton}>
+      <BaseCombobox.Trigger aria-label={triggerLabel} className={cn(comboboxIconButton, iconSpan)}>
         <CaretUpDownIcon aria-hidden weight="bold" className="size-3.5" />
       </BaseCombobox.Trigger>
     </BaseCombobox.InputGroup>
   );
 }
+
+/**
+ * The field grows with its chips, so `h-full` has no height to fill: the end buttons stretch to the
+ * field's height instead, and the hit area reaches past the field's padding to its edge.
+ */
+const iconSpan = cn('relative h-auto self-stretch', touchHitArea);
 
 type ListChildren = ReactNode | ((item: never, index: number) => ReactNode);
 

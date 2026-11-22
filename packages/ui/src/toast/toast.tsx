@@ -140,7 +140,7 @@ function ToastItem({
         <Toast.Title className="text-sm font-medium wrap-break-word text-fg" />
         <Toast.Description className="text-sm wrap-break-word text-fg-muted" />
       </Toast.Content>
-      <div className="flex shrink-0 items-center gap-1 self-center pointer-coarse:gap-5">
+      <div className="flex shrink-0 items-center gap-1 self-center pointer-coarse:gap-touch-gap">
         {toast.actionProps !== undefined && (
           <Toast.Action
             className={cn(

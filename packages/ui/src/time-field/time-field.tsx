@@ -62,7 +62,7 @@ const draftOf = (value: TimeValue | null, pm = false): Draft =>
     : { hour: value.hour, minute: value.minute, pm: value.hour >= 12 };
 
 const segmentClass = cn(
-  'h-full min-w-5 pointer-coarse:min-w-11 field-sizing-content rounded-badge bg-transparent px-0.5 text-center caret-transparent outline-none',
+  'h-full min-w-5 pointer-coarse:min-w-(--rx-control-height-touch) field-sizing-content rounded-badge bg-transparent px-0.5 text-center caret-transparent outline-none',
   'focus:bg-accent focus:text-accent-contrast',
   'placeholder:text-fg-subtle data-disabled:cursor-not-allowed disabled:cursor-not-allowed',
 );

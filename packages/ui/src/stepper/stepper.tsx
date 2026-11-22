@@ -3,7 +3,7 @@
 import { CheckIcon, WarningIcon } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { cn } from '../lib/cn';
+import { cn, touchHitArea } from '../lib/cn';
 
 export type StepStatus = 'complete' | 'current' | 'upcoming' | 'error';
 
@@ -175,7 +175,9 @@ export function Stepper({
                     onStepSelect(i);
                   }}
                   className={cn(
-                    'flex min-w-0 cursor-pointer rounded-control text-start outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus',
+                    'relative flex min-w-0 cursor-pointer rounded-control text-start outline-offset-4 focus-visible:outline-2 focus-visible:outline-focus',
+                    // On a phone only the step's circle shows: it still takes a whole touch target.
+                    touchHitArea,
                     'group/step',
                     vertical ? 'gap-3' : 'flex-col items-center gap-2',
                   )}
