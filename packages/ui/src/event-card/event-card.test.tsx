@@ -16,6 +16,8 @@ describe('event time words', () => {
     );
     expect(formatEventTime(at(16, 0), at(17, 0), 'en-GB', true)).toBe('All day');
     expect(formatEventTime(at(16, 0), at(19, 0), 'en-GB', true)).toBe('Mon 16 Mar to Wed 18 Mar');
+    // Only the end date counts, and it is exclusive, as in the week agenda.
+    expect(formatEventTime(at(15, 0), at(17, 10), 'en-GB', true)).toBe('Sun 15 Mar to Mon 16 Mar');
   });
 
   it('writes how long it lasts', () => {

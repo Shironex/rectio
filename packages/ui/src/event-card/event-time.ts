@@ -51,9 +51,11 @@ const nextDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), da
  */
 export function formatEventTime(start: Date, end: Date, locale?: string, allDay = false): string {
   if (allDay) {
-    // An all-day end is exclusive or the same day; either way the last day is the one before it ends.
-    const last = new Date(end.getTime() - 1);
-    return end.getTime() <= nextDay(start).getTime() || sameDay(start, last)
+    // All-day ends are exclusive local dates, as in the week agenda: 16 to 18 March covers the 16th
+    // and the 17th. Only the date counts, and an end on the start day means that one day.
+    const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    const last = new Date(endDay.getFullYear(), endDay.getMonth(), endDay.getDate() - 1);
+    return endDay.getTime() <= nextDay(start).getTime() || last.getTime() <= start.getTime()
       ? 'All day'
       : `${dayFormat(locale).format(start)} to ${dayFormat(locale).format(last)}`;
   }

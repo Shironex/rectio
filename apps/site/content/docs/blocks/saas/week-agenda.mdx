@@ -43,7 +43,10 @@ end of the empty slot that was pressed, or of a day's Add event button.
 
 Events that overlap sit side by side and widen into free columns. When more than two meet in a
 week column (four in a day), the rest gather behind one "N more" button that lists them. Events
-that last a whole day or longer run along the all-day row. The grid shows `hours` (8:00 to 19:00
+that last a whole day or longer run along the all-day row. All-day events take local dates with an
+exclusive end, the same as the [event card](/docs/components/event-card): build them with
+`localDate` from `@rectio/ui/charts`. Times are laid out on the wall clock, so on the day the
+clocks change an event at 10:00 still sits on the 10:00 row. The grid shows `hours` (8:00 to 19:00
 by default) and grows to whole hours for an earlier or later event, so none is cropped. A line
 marks the current time, with the time itself in the gutter.
 
