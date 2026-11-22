@@ -1907,9 +1907,10 @@ export default defineRegistry({
           type: 'lib',
           version: '0.1.0',
           title: 'AI core',
-          description: 'The parts the AI blocks draw, which the motion twins swap for moving ones.',
+          description:
+            'The parts the AI blocks draw, which the motion twins swap for moving ones, and the boundary that keeps one broken reply from taking down a thread.',
           categories: ['ai', 'blocks'],
-          files: ['lib/parts.tsx'],
+          files: ['lib/parts.tsx', 'lib/reply-boundary.tsx'],
         },
         {
           name: 'ai-chat-thread',
