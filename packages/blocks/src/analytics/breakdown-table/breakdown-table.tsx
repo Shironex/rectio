@@ -73,7 +73,7 @@ export interface BreakdownTableProps {
   defaultSort?: BreakdownSort | undefined;
   /** Let the reader sort by each column. On by default. */
   sortable?: boolean | undefined;
-  /** Rows shown before the rest gather into one; a button shows them all. 8 by default. */
+  /** Rows shown before the rest gather into one; a button shows them all. 8 by default; below zero shows every row. */
   limit?: number | undefined;
   /** A totals row at the foot. On by default. */
   total?: boolean | undefined;

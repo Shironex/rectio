@@ -67,6 +67,18 @@ describe('breakdownModel', () => {
     expect(model.hidden).toBe(3);
   });
 
+  it('treats a limit below zero or not a number as no limit', () => {
+    for (const limit of [-1, Number.NaN]) {
+      const model = breakdownModel(items, {
+        sort: { key: 'value', ascending: false },
+        limit,
+        locale: 'en',
+      });
+      expect(model.rows).toHaveLength(5);
+      expect(model.hidden).toBe(0);
+    }
+  });
+
   it('shows one item rather than an other row of one', () => {
     const model = breakdownModel(items, {
       sort: { key: 'value', ascending: false },
@@ -103,6 +115,28 @@ describe('funnelInsight', () => {
     expect(insight.change).toBeCloseTo(0.01);
     expect(insight.biggestDrop).toMatchObject({ label: 'Sign-ups', from: 'Visits' });
     expect(insight.biggestDrop?.lost).toBeCloseTo(0.8);
+  });
+
+  it('reads an empty first stage as unknown, with no change, and counts negatives as zero', () => {
+    const before = [
+      { id: 'v', label: 'Visits', value: 100 },
+      { id: 'p', label: 'Paid', value: 10 },
+    ];
+    const empty = funnelInsight(
+      [
+        { id: 'v', label: 'Visits', value: 0 },
+        { id: 'p', label: 'Paid', value: 0 },
+      ],
+      before,
+    );
+    expect(empty.conversion).toBeNull();
+    expect(empty.change).toBeNull();
+    const negative = funnelInsight([
+      { id: 'v', label: 'Visits', value: 200 },
+      { id: 'p', label: 'Paid', value: -5 },
+    ]);
+    expect(negative.conversion).toBe(0);
+    expect(funnelInsight([], before).change).toBeNull();
   });
 });
 

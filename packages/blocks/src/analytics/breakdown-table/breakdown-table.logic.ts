@@ -92,9 +92,11 @@ export function breakdownModel(
     count: 1,
   });
   const byValue = [...clean].sort((a, b) => b.value - a.value);
-  // An other row of one item is no saving; show that item instead.
-  const limit =
-    options.limit === undefined || options.limit >= clean.length - 1 ? clean.length : options.limit;
+  // A limit below zero or not a number is no limit; an other row of one item is no saving, so
+  // that item shows instead.
+  const asked =
+    options.limit === undefined || !(options.limit >= 0) ? undefined : Math.floor(options.limit);
+  const limit = asked === undefined || asked >= clean.length - 1 ? clean.length : asked;
   const kept = byValue.slice(0, limit).map(row);
   const rest = byValue.slice(limit);
   const rows = kept.sort(compare(options.sort, options.locale));

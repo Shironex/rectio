@@ -79,18 +79,20 @@ export function FunnelCard({
   const insight = funnelInsight(stages, previous);
   const percent = (value: number) =>
     formatValue(value, 'percent', { locale, maximumFractionDigits: 1 });
-  const empty = loading === true || stages.length === 0 || (stages[0]?.value ?? 0) <= 0;
+  // No headline while loading, or with no first stage to convert from (unknown, not 0%).
+  const conversion = loading === true ? null : insight.conversion;
+  const empty = conversion === null;
   return (
     <ChartCard
       {...card}
       title={title ?? m.title}
       loading={loading}
-      {...(empty
+      {...(conversion === null
         ? {}
         : {
             value: (
               <span className="inline-flex items-baseline gap-2">
-                {percent(insight.conversion)}
+                {percent(conversion)}
                 <span className="text-sm font-normal text-fg-muted">{m.conversion}</span>
               </span>
             ),
