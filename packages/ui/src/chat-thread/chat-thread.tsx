@@ -234,6 +234,15 @@ export interface ChatAnnouncerProps {
   messages?: Partial<ChatAnnouncerMessages> | undefined;
 }
 
+/** The reply as plain words for the announcer; the raw text if it cannot be read as Markdown. */
+function spokenText(text: string): string {
+  try {
+    return markdownToText(text);
+  } catch {
+    return text;
+  }
+}
+
 /**
  * A polite live region for the newest assistant reply. It says once that a reply has started and
  * once, when it is complete, the whole reply as plain words: never each chunk of a stream, which
@@ -269,7 +278,7 @@ export function ChatAnnouncer({
       setSaid(m.writing(author));
     } else if (status === 'done' && current.streamed && !current.finished) {
       current.finished = true;
-      setSaid(m.done(author, markdownToText(text)));
+      setSaid(m.done(author, spokenText(text)));
     } else if (status === 'error' && current.streamed && !current.finished) {
       current.finished = true;
       setSaid(m.failed(author));
