@@ -14,6 +14,7 @@ import {
   cn,
   useIsMac,
   usePortalContainer,
+  isModalDialogOpen,
   useShortcut,
 } from '@rectio/ui';
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -185,10 +186,15 @@ export function DocsSearch({
     else setQuery('');
   };
 
-  useShortcut(shortcut, () => {
-    if (!open && document.querySelector('[role="dialog"][aria-modal="true"]') !== null) return;
-    setOpen(!open);
-  });
+  useShortcut(
+    shortcut,
+    () => {
+      // Never stack the search over another dialog or sheet the reader is in.
+      if (!open && isModalDialogOpen()) return;
+      setOpen(!open);
+    },
+    { repeat: false },
+  );
 
   const changeQuery = (next: string) => {
     setQuery(next);
