@@ -1,0 +1,89 @@
+---
+title: Funnel card
+description: 'A conversion funnel in a card: the end to end conversion, its change in points and the biggest drop named.'
+---
+
+<Preview
+  name="funnel-card"
+  plain={<Demo name="funnel-card" />}
+  motion={<Demo name="funnel-card.motion" />}
+  importLine="import { FunnelCard } from '@rectio/blocks/analytics/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add funnel-card
+```
+
+The motion variant is `motion-funnel-card`; the stages grow one after another on first view.
+
+## Usage
+
+```tsx
+import { FunnelCard } from '@rectio/blocks/analytics';
+
+<FunnelCard
+  title="Trial to paid"
+  description="Last 30 days"
+  stages={stages}
+  previous={stagesTheMonthBefore}
+  comparison="vs the 30 days before"
+/>;
+```
+
+A [ChartCard](/docs/components/chart-card) over a [FunnelChart](/docs/components/funnel-chart). The
+headline is the share of the first stage that reached the last, and with `previous` its change in
+percentage points. A line above the chart names the step that loses the largest share of the stage
+before it.
+
+`variant` sets the funnel's orientation: `horizontal` (the default) for long stage names and phones,
+`vertical` for a wide card with a few stages.
+
+## Props
+
+<TypeTable
+  type={{
+    stages: {
+      type: 'FunnelStage[]',
+      description: 'Each stage, in order: `id`, `label`, `value`. Required.',
+    },
+    previous: {
+      type: 'FunnelStage[]',
+      description: 'The stages in the period before, for the change.',
+    },
+    title: { type: 'string', default: "'Conversion funnel'", description: 'The card title.' },
+    description: { type: 'ReactNode', description: 'Under the title: the period.' },
+    comparison: { type: 'ReactNode', description: 'What the change is against.' },
+    variant: {
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Stages as rows or columns.',
+    },
+    format: {
+      type: "'number' | 'currency' | 'percent' | 'duration'",
+      default: "'number'",
+      description: 'How stage figures are written.',
+    },
+    currency: { type: 'string', description: 'The ISO 4217 code for `currency`.' },
+    locale: { type: 'string', description: 'The locale for figures.' },
+    actions: { type: 'ReactNode', description: 'Controls on the title row.' },
+    footer: { type: 'ReactNode', description: 'Meta or a link at the end.' },
+    loading: { type: 'boolean', description: 'Placeholders in place of the figures.' },
+    headingLevel: { type: '2 | 3 | 4', default: '3', description: 'The level of the title.' },
+    messages: { type: 'Partial<FunnelCardMessages>', description: 'The block words.' },
+    chartMessages: { type: 'Partial<FunnelChartMessages>', description: "The chart's words." },
+  }}
+/>
+
+## Logic
+
+`funnelInsight(stages, previous)` gives the conversion, the previous conversion, the change in points
+and the biggest drop.
+
+## Accessibility
+
+- A region named by its title; the conversion, its change and the biggest drop are text.
+- The funnel lists every stage with its figure, share and step in words, with a summary and a table
+  twin.

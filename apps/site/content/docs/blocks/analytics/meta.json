@@ -1,0 +1,4 @@
+{
+  "title": "Analytics blocks",
+  "pages": ["index", "metric-trend", "breakdown-table", "funnel-card", "goal-tracker"]
+}

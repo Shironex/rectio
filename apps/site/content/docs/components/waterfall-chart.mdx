@@ -1,0 +1,101 @@
+---
+title: WaterfallChart
+description: A start, the changes that move it and the totals between, from opening cash to closing cash.
+---
+
+<Preview
+  name="waterfall-chart"
+  plain={<Demo name="waterfall-chart" />}
+  motion={<Demo name="waterfall-chart.motion" />}
+  importLine="import { WaterfallChart } from '@rectio/motion/charts';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add waterfall-chart
+```
+
+## Usage
+
+```tsx
+import { WaterfallChart } from '@/components/ui/waterfall-chart';
+
+<WaterfallChart
+  data={[
+    { id: 'open', label: 'Opening cash', value: 412800, kind: 'start' },
+    { id: 'receipts', label: 'Customer receipts', value: 286400 },
+    { id: 'payroll', label: 'Payroll', value: -198300 },
+    { id: 'operating', label: 'After operations', kind: 'subtotal' },
+    { id: 'close', label: 'Closing cash', kind: 'end' },
+  ]}
+  format="currency"
+  currency="EUR"
+/>;
+```
+
+A `start` opens at its figure; each `delta` (the default kind) moves the running total by its
+figure; a `subtotal` or `end` stands from zero to the running total, so it needs no `value`. A dashed
+rule carries the running total from each bar to the next.
+
+Increases, decreases and totals take the three chart series colours, chosen to stay apart for every
+common colour vision type, and decreases are hatched as well. Each bar is labelled with its signed
+change (or its total), and the table twin lists every step with its change and the running total, so
+the direction never rests on colour. When the figures go below zero, a zero line is drawn.
+
+`orientation` is `auto` by default: columns while each step has room, rows when the chart is too
+narrow for its steps, as on a phone. Labels are on by default and the value axis steps back; pass
+`labels={false}` for an axis and grid instead.
+
+The motion variant grows the steps one after another on first view, decreases from the running total
+down, then glides to new figures.
+
+## Props
+
+<TypeTable
+  type={{
+    data: {
+      type: 'WaterfallStep[]',
+      description:
+        "Each step: `id`, `label`, `value`, and `kind` ('start' | 'delta' | 'subtotal' | 'end').",
+    },
+    orientation: {
+      type: "'auto' | 'vertical' | 'horizontal'",
+      default: "'auto'",
+      description: 'Columns, rows, or whichever fits the width.',
+    },
+    labels: { type: 'boolean', default: 'true', description: "Each step's figure at its bar." },
+    format: {
+      type: "'number' | 'currency' | 'percent' | 'duration'",
+      default: "'number'",
+      description: 'How figures are written.',
+    },
+    currency: { type: 'string', description: 'The ISO 4217 code for `currency`.' },
+    locale: { type: 'string', description: 'The locale for figures.' },
+    colors: {
+      type: 'Partial<Record<WaterfallRole, ChartColor>>',
+      description: 'The colour of totals, increases and decreases.',
+    },
+    summary: { type: 'string', description: 'Replaces the generated summary.' },
+    loading: { type: 'boolean', description: 'A still skeleton of bars.' },
+    emptyAction: { type: 'ReactNode', description: 'An action under the empty message.' },
+    tableToggle: { type: 'boolean', default: 'true', description: 'The Show table button.' },
+    plotClassName: { type: 'string', description: 'Height of the plot in columns.' },
+    messages: {
+      type: 'Partial<WaterfallChartMessages>',
+      description: 'Every word the chart prints.',
+    },
+  }}
+/>
+
+`waterfallBars(data)` places each step on the value axis with its role and the running total after
+it.
+
+## Accessibility
+
+- A summary read first: the start, the end, what was added and taken away, and the largest step.
+- The plot can be read with the arrow keys, one step at a time, with its change and running total.
+- The table twin lists every step with its change and the running total.
+- Decreases are hatched and every label is signed, so increases and decreases read without colour.
+
+<ComponentSource path="waterfall-chart/waterfall-chart.tsx" />

@@ -1,0 +1,26 @@
+---
+title: Analytics blocks
+description: 'Dashboard tiles built from the charts: a metric with its trend, a breakdown, a funnel and a goal with its pace.'
+---
+
+The analytics blocks are the tiles a product or finance dashboard is made of, each a thin layer over
+the [charts](/docs/components/chart-card) that works out its headline from the data. Every block
+writes its figures and changes as text and names its state in words, so the charts help the eye and
+never carry the meaning alone.
+
+```tsx
+import { MetricTrend } from '@rectio/blocks/analytics'; // plain
+import { MetricTrend } from '@rectio/blocks/analytics/motion'; // entrances on first view, glides after
+```
+
+They install under `@blocks/analytics/`, beside the shared blocks core.
+
+| Block                                                     | What it answers                                      |
+| :-------------------------------------------------------- | :--------------------------------------------------- |
+| [Metric trend](/docs/blocks/analytics/metric-trend)       | Where is this number, and which way is it going?     |
+| [Breakdown table](/docs/blocks/analytics/breakdown-table) | Which parts make up the total, and which are moving? |
+| [Funnel card](/docs/blocks/analytics/funnel-card)         | How many make it through, and where do they leave?   |
+| [Goal tracker](/docs/blocks/analytics/goal-tracker)       | Will we reach the target at this pace?               |
+
+Each block takes a `variant`: `inline` or `stacked` for the metric, `bars` or `compact` for the
+breakdown, `horizontal` or `vertical` for the funnel, `gauge` or `bar` for the goal.

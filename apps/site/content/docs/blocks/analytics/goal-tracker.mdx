@@ -1,0 +1,90 @@
+---
+title: Goal tracker
+description: "A goal over a period: the target and today's even pace marked, the state in words and what each day needs."
+---
+
+<Preview
+  name="goal-tracker"
+  plain={<Demo name="goal-tracker" />}
+  motion={<Demo name="goal-tracker.motion" />}
+  importLine="import { GoalTracker } from '@rectio/blocks/analytics/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add goal-tracker
+```
+
+The motion variant is `motion-goal-tracker`; the arc sweeps to its value on first view and glides to
+new figures.
+
+## Usage
+
+```tsx
+import { GoalTracker } from '@rectio/blocks/analytics';
+import { localDate } from '@/lib/local-date';
+
+<GoalTracker
+  label="New ARR this quarter"
+  value={412000}
+  target={600000}
+  start={localDate('2026-10-01')}
+  end={localDate('2026-12-31')}
+  format="currency"
+  currency="EUR"
+/>;
+```
+
+The pace is worked out from local calendar days, both ends counted. An even pace sets where the value
+should be today; within 5% of it either way is on pace, above is ahead and below is behind. The state
+is a badge with the words, and beside the gauge or bar three facts: where today's pace lands at the
+end, the days left, and what each remaining day needs to reach the target. Pass `today` for a server
+render or a fixed demo.
+
+`gauge` (the default) draws a [RadialGauge](/docs/components/radial-gauge) with the target as a solid
+tick and today's pace dashed; `bar` draws a straight track with the same marks, for a narrow column or
+a stack of goals.
+
+## Props
+
+<TypeTable
+  type={{
+    label: { type: 'string', description: 'What the goal counts; the title. Required.' },
+    value: { type: 'number', description: 'Where it stands. Required.' },
+    target: { type: 'number', description: 'The goal. Required.' },
+    start: { type: 'Date', description: 'The first day of the period. Required.' },
+    end: { type: 'Date', description: 'The last day of the period. Required.' },
+    today: { type: 'Date', default: 'new Date()', description: 'Today, for the pace.' },
+    variant: {
+      type: "'gauge' | 'bar'",
+      default: "'gauge'",
+      description: 'A radial gauge or a straight track.',
+    },
+    format: {
+      type: "'number' | 'currency' | 'percent' | 'duration'",
+      default: "'number'",
+      description: 'How figures are written; amounts and counts round to whole units.',
+    },
+    currency: { type: 'string', description: 'The ISO 4217 code for `currency`.' },
+    locale: { type: 'string', description: 'The locale for figures.' },
+    description: { type: 'ReactNode', description: 'Under the title: the period.' },
+    actions: { type: 'ReactNode', description: 'Controls on the title row.' },
+    loading: { type: 'boolean', description: 'Placeholders in place of the figures.' },
+    headingLevel: { type: '2 | 3 | 4', default: '3', description: 'The level of the title.' },
+    messages: { type: 'Partial<GoalTrackerMessages>', description: 'The block words.' },
+  }}
+/>
+
+## Logic
+
+`goalPace({ value, target, start, end, today })` gives the share of the period gone, the expected
+value today, the projection, the days left, the need per day and the state.
+
+## Accessibility
+
+- A meter named by the label, with its value text saying the figure, the target and the state.
+- The state is a word in a badge, never a colour alone.
+- The target and the pace are listed in text beside their marks; the target is solid and the pace
+  dashed.

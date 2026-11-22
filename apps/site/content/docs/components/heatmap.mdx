@@ -1,0 +1,113 @@
+---
+title: Heatmap
+description: A calendar of days or a matrix of two categories, each cell coloured by its figure on a sequential scale.
+---
+
+<Preview
+  name="heatmap"
+  plain={<Demo name="heatmap" />}
+  motion={<Demo name="heatmap.motion" />}
+  importLine="import { Heatmap } from '@rectio/motion/charts';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add heatmap
+```
+
+## Usage
+
+```tsx
+import { Heatmap } from '@/components/ui/heatmap';
+import { localDate } from '@/lib/local-date';
+
+// A year of days: weekdays down, weeks across.
+<Heatmap variant="calendar" data={[{ date: localDate('2026-03-02'), value: 4 }]} label="Deploys" />;
+
+// Two categories: rows by columns.
+<Heatmap
+  rows={[{ id: 'jun', label: 'Jun 2026' }]}
+  columns={[
+    { id: 'm0', label: 'Month 0' },
+    { id: 'm1', label: 'Month 1' },
+  ]}
+  data={[
+    { row: 'jun', column: 'm0', value: 1 },
+    { row: 'jun', column: 'm1', value: 0.71 },
+  ]}
+  format="percent"
+  rowHeader="Cohort"
+/>;
+```
+
+Figures above zero fall into even steps of the warm sequence tokens, palest to deepest, up to the
+largest figure (or `max`). Zero has its own quiet cell, and a cell with no figure (`null`) is hatched,
+so missing and zero never look alike. The legend shows the zero cell, the steps up to the largest
+figure, and No data when any cell is missing.
+
+`calendar` builds the weeks from local dates, so a daylight saving change never shifts a day. The range runs from the earliest entry to the latest: days in it
+with no entry are missing, and days outside it get no cell. Months are labelled over the week that
+holds the 1st, and `weekStartsOn` (Monday by default) sets the first row. Cells stay between 10 and 18
+pixels: on a phone a year scrolls sideways, opened at the latest week, and on a wide screen it stops
+growing. A matrix prints each figure in its cell when the cells are wide enough, in a text token that
+holds 4.5:1 on every step.
+
+The motion variant uncovers the grid on first view.
+
+## Props
+
+<TypeTable
+  type={{
+    variant: {
+      type: "'matrix' | 'calendar'",
+      default: "'matrix'",
+      description: 'Two categories, or days of the year.',
+    },
+    data: {
+      type: 'HeatmapCell[] | HeatmapDay[]',
+      description:
+        'Matrix: `row`, `column`, `value`. Calendar: `date`, `value`. A `null` value is missing.',
+    },
+    rows: { type: 'HeatmapAxisItem[]', description: 'Matrix rows: `id`, `label`.' },
+    columns: { type: 'HeatmapAxisItem[]', description: 'Matrix columns: `id`, `label`.' },
+    rowHeader: { type: 'string', description: 'What the rows are, for the table twin.' },
+    weekStartsOn: {
+      type: '0 | 1',
+      default: '1',
+      description: 'Calendar: Sunday or Monday on the first row.',
+    },
+    steps: { type: '3 | 4', default: '4', description: 'Colour steps above zero.' },
+    max: { type: 'number', description: 'The top of the scale; the largest figure by default.' },
+    showValues: {
+      type: 'boolean',
+      description: 'Print figures in the cells. On for a matrix when they fit.',
+    },
+    label: { type: 'string', description: 'Names the grid for assistive technology.' },
+    format: {
+      type: "'number' | 'currency' | 'percent' | 'duration'",
+      default: "'number'",
+      description: 'How figures are written.',
+    },
+    currency: { type: 'string', description: 'The ISO 4217 code for `currency`.' },
+    locale: { type: 'string', description: 'The locale for figures, dates and weekday names.' },
+    summary: { type: 'string', description: 'Replaces the generated summary.' },
+    loading: { type: 'boolean', description: 'A still skeleton grid.' },
+    tableToggle: { type: 'boolean', default: 'true', description: 'The Show table button.' },
+    messages: { type: 'Partial<HeatmapMessages>', description: 'Every word the chart prints.' },
+  }}
+/>
+
+`heatStep(value, max, steps)` gives the step of a figure: 0 for zero and below, then 1 to `steps`.
+
+## Accessibility
+
+- A read-only grid with row and column headers. One cell is in the tab order; the arrow keys move
+  between cells with figures, Home and End go to the ends of a row, and with Ctrl to the first and
+  last cell.
+- Every cell's name holds its row, column (or date) and figure, so nothing is read from colour.
+- A summary says how many cells there are, the highest and how many are missing, then the scale;
+  the table twin lists every figure.
+- Missing cells are hatched as well as tinted, and zero has an outlined cell of its own.
+
+<ComponentSource path="heatmap/heatmap.tsx" />

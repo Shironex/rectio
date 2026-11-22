@@ -1,0 +1,94 @@
+---
+title: Metric trend
+description: 'One metric with its latest figure, its change and the trend behind it, as a tile or a card.'
+---
+
+<Preview
+  name="metric-trend"
+  plain={<Demo name="metric-trend" />}
+  motion={<Demo name="metric-trend.motion" />}
+  importLine="import { MetricTrend } from '@rectio/blocks/analytics/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add metric-trend
+```
+
+The motion variant is `motion-metric-trend`. It installs the plain block too; the tile fades up on
+first view and the stacked chart draws along time.
+
+## Usage
+
+```tsx
+import { MetricTrend } from '@rectio/blocks/analytics';
+
+<MetricTrend
+  label="Monthly recurring revenue"
+  points={points}
+  previous={mrrFourWeeksAgo}
+  comparison="vs 4 weeks ago"
+  format="currency"
+  currency="EUR"
+/>;
+```
+
+The latest figure leads, with its change against `previous` (or against the first figure of the
+range without it) in a [TrendChip](/docs/components/trend-chip). `better="down"` makes a fall good
+news, for churn or costs.
+
+`inline` (the default) is a compact tile with a [Sparkline](/docs/components/sparkline) beside the
+figure, for a row of metrics; the line takes the second series colour when the trend goes the wrong
+way. `stacked` is a card
+with an [AreaChart](/docs/components/area-chart) and its time axis under the figure, an optional
+`reference` line such as a target, and the range's high and low in the footer.
+
+## Props
+
+<TypeTable
+  type={{
+    label: { type: 'string', description: 'What it measures; the heading. Required.' },
+    points: {
+      type: 'MetricPoint[]',
+      description: 'The figures over the range: `date`, `value`. Required.',
+    },
+    previous: { type: 'number | null', description: 'The figure the latest is compared with.' },
+    comparison: { type: 'ReactNode', description: 'What the change is against: `vs October`.' },
+    better: {
+      type: "'up' | 'down' | 'none'",
+      default: "'up'",
+      description: 'Which way is good news.',
+    },
+    variant: {
+      type: "'inline' | 'stacked'",
+      default: "'inline'",
+      description: 'A tile or a card over a chart.',
+    },
+    description: { type: 'ReactNode', description: 'Stacked: the period under the label.' },
+    reference: { type: 'ReferenceMark', description: 'Stacked: a line such as a target.' },
+    format: {
+      type: "'number' | 'currency' | 'percent' | 'duration'",
+      default: "'number'",
+      description: 'How figures are written.',
+    },
+    currency: { type: 'string', description: 'The ISO 4217 code for `currency`.' },
+    locale: { type: 'string', description: 'The locale for figures and dates.' },
+    loading: { type: 'boolean', description: 'Placeholders in place of the figures.' },
+    headingLevel: { type: '2 | 3 | 4', default: '3', description: 'The level of the heading.' },
+    messages: { type: 'Partial<MetricTrendMessages>', description: 'The block words.' },
+  }}
+/>
+
+## Logic
+
+`metricFigures(points, previous)` gives the latest and first figures, the change, the direction and
+the range's high and low; null when the range holds no figure.
+
+## Accessibility
+
+- A region named by its label; the figure and the change are text, and the change says its direction
+  and whether it is better in words.
+- The sparkline is named in words, such as "MRR, rising from €38,200 to €48,210".
+- The stacked chart keeps its summary, keyboard reading and table twin.

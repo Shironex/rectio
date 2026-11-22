@@ -1,0 +1,87 @@
+---
+title: FunnelChart
+description: Stages of a journey with what carried on and what dropped off between each, as bars or columns.
+---
+
+<Preview
+  name="funnel-chart"
+  plain={<Demo name="funnel-chart" />}
+  motion={<Demo name="funnel-chart.motion" />}
+  importLine="import { FunnelChart } from '@rectio/motion/charts';"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add funnel-chart
+```
+
+## Usage
+
+```tsx
+import { FunnelChart } from '@/components/ui/funnel-chart';
+
+<FunnelChart
+  data={[
+    { id: 'visits', label: 'Site visits', value: 48210 },
+    { id: 'signups', label: 'Sign-ups', value: 6120 },
+    { id: 'paid', label: 'Paid', value: 612 },
+  ]}
+/>;
+```
+
+Every stage writes its figure and its share of the first stage, and between two stages a line says
+what carried on and how many left. The bars are a picture of those words: each is as long as its
+stage against the largest, and what dropped off since the stage before is the hatched band beside
+it. The summary names the step that loses the most.
+
+`horizontal` (the default) lays the stages out as rows, which fits long stage names and phones.
+`vertical` lays them out as columns, for a wide card with a few stages; each column then writes its
+share of the stage before under its name. A stage larger than the one before (a re-entry) is drawn
+at its size, with no drop-off band.
+
+The motion variant grows the stages from the start edge one after another on first view, then
+glides to new figures.
+
+## Props
+
+<TypeTable
+  type={{
+    data: {
+      type: 'FunnelStage[]',
+      description: 'Each stage, in order: `id`, `label`, `value`. Negative figures count as zero.',
+    },
+    orientation: {
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Stages as rows or as columns.',
+    },
+    format: {
+      type: "'number' | 'currency' | 'percent' | 'duration'",
+      default: "'number'",
+      description: 'How figures are written.',
+    },
+    currency: { type: 'string', description: 'The ISO 4217 code for `currency`.' },
+    locale: { type: 'string', description: 'The locale for figures.' },
+    color: { type: 'ChartColor', default: "'series-1'", description: 'The colour of the bars.' },
+    dropOff: { type: 'boolean', default: 'true', description: 'The hatched drop-off bands.' },
+    summary: { type: 'string', description: 'Replaces the generated summary.' },
+    loading: { type: 'boolean', description: 'A still skeleton of bars.' },
+    emptyAction: { type: 'ReactNode', description: 'An action under the empty message.' },
+    tableToggle: { type: 'boolean', default: 'true', description: 'The Show table button.' },
+    messages: { type: 'Partial<FunnelChartMessages>', description: 'Every word the chart prints.' },
+  }}
+/>
+
+`funnelSteps(data)` gives each stage's share of the first and of the stage before, how many left and
+the lengths the bars are drawn at.
+
+## Accessibility
+
+- An ordered list of stages, each with its figure, share and the step from the stage before in
+  words, so nothing is read from bar lengths.
+- A summary read first: the first and last stage, the overall conversion and the biggest drop.
+- The table twin lists every stage with what it reached, kept and lost.
+- The drop-off is hatched as well as lighter, so it reads without colour.
+
+<ComponentSource path="funnel-chart/funnel-chart.tsx" />

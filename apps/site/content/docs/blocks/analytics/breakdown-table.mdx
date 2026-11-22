@@ -1,0 +1,115 @@
+---
+title: Breakdown table
+description: 'A total by its parts: each row with its figure, share, change and a bar, sortable, with a totals row.'
+---
+
+<Preview
+  name="breakdown-table"
+  plain={<Demo name="breakdown-table" />}
+  motion={<Demo name="breakdown-table.motion" />}
+  importLine="import { BreakdownTable } from '@rectio/blocks/analytics/motion';"
+  align="start"
+/>
+
+## Install
+
+```sh
+pnpm dlx @rectio/cli add breakdown-table
+```
+
+The motion variant is `motion-breakdown-table`; the rows fade up on first view.
+
+## Usage
+
+```tsx
+import { BreakdownTable } from '@rectio/blocks/analytics';
+
+<BreakdownTable
+  title="Revenue by channel"
+  items={[
+    { id: 'organic', label: 'Organic search', value: 42180, previous: 38940 },
+    { id: 'direct', label: 'Direct', value: 31260, previous: 32100 },
+  ]}
+  comparison="vs October"
+  format="currency"
+  currency="EUR"
+/>;
+```
+
+Each row writes its figure, its share of the total and, when it has a `previous` figure, its change.
+With `bars` (the default) a bar under the name shows the row against the largest one; `compact` drops
+the bars for a long list in tight rows. On a narrow card the share moves under the figure.
+
+Past `limit` (eight by default) the smallest items gather into one others row, which stays last
+whatever the order; **Show all** lists every row. The column headers sort by name, figure or change,
+and rows without a change sink to the end. A totals row closes the table; pass `total={false}` to
+leave it out.
+
+## Props
+
+<TypeTable
+  type={{
+    items: {
+      type: 'BreakdownItem[]',
+      description: 'Each part: `id`, `label`, `value`, and optionally `previous`. Required.',
+    },
+    title: {
+      type: 'ReactNode',
+      default: "'Breakdown'",
+      description: 'The heading; names the table.',
+    },
+    description: {
+      type: 'ReactNode',
+      description: 'Under the title: the period and what is counted.',
+    },
+    variant: {
+      type: "'bars' | 'compact'",
+      default: "'bars'",
+      description: 'With bars, or figures only.',
+    },
+    defaultSort: {
+      type: 'BreakdownSort',
+      default: "{ key: 'value', ascending: false }",
+      description: 'The order it opens in.',
+    },
+    sortable: { type: 'boolean', default: 'true', description: 'Sort buttons in the headers.' },
+    limit: {
+      type: 'number',
+      default: '8',
+      description: 'Rows shown before the rest gather into others.',
+    },
+    total: { type: 'boolean', default: 'true', description: 'The totals row.' },
+    comparison: {
+      type: 'string',
+      description: 'What the change is against, read with its header.',
+    },
+    better: {
+      type: "'up' | 'down' | 'none'",
+      default: "'up'",
+      description: 'Which way is good news.',
+    },
+    format: {
+      type: "'number' | 'currency' | 'percent' | 'duration'",
+      default: "'number'",
+      description: 'How figures are written.',
+    },
+    currency: { type: 'string', description: 'The ISO 4217 code for `currency`.' },
+    locale: { type: 'string', description: 'The locale for figures and the name sort.' },
+    actions: { type: 'ReactNode', description: 'Controls on the title row.' },
+    headingLevel: { type: '2 | 3 | 4', default: '3', description: 'The level of the heading.' },
+    messages: { type: 'Partial<BreakdownTableMessages>', description: 'The block words.' },
+  }}
+/>
+
+## Logic
+
+`breakdownModel(items, { sort, limit, locale })` gives the sorted rows with their shares, changes and
+bar lengths, the others row, the total and its change.
+
+## Accessibility
+
+- A region and a table named by the title, with real column headers.
+- Each sortable header is a button, and `aria-sort` says the current order.
+- Every figure, share and change is text; the bars are hidden from screen readers.
+- A change says its direction and whether it is better in words; a row without one says so.
+- **Show all** says whether the full list is open with `aria-expanded`.
