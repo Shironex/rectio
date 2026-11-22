@@ -20,7 +20,7 @@ export interface PayrollRunMessages {
   caption: (currency: string) => string;
   issue: Record<PayrollIssue, string>;
   /** The alert over the table while issues block approval. */
-  issuesTitle: (count: number) => string;
+  issuesTitle: (count: number, status: PayrollStatus) => string;
   issuesNote: string;
   /** The same note when each flagged line carries a Fix link. */
   issuesNoteLinked: string;
@@ -28,6 +28,8 @@ export interface PayrollRunMessages {
   issueCount: (issue: PayrollIssue, count: number) => string;
   /** Totals do not reconcile though every line looks fine (a rounding upstream). */
   unreconciled: string;
+  /** When a total passes the largest whole number a browser can add exactly. */
+  overflow: string;
   filterLabel: string;
   filterAll: string;
   filterIssues: string;
@@ -47,6 +49,8 @@ export interface PayrollRunMessages {
   approve: string;
   /** Beside the disabled approve button. */
   approveBlocked: (count: number) => string;
+  /** Beside the pay button when a line changed after approval and needs fixing first. */
+  payBlocked: (count: number) => string;
   approveTitle: (period: string) => string;
   approveNote: (people: number, net: string, cost: string) => string;
   approveConfirm: string;
@@ -99,9 +103,14 @@ export const PAYROLL_RUN_MESSAGES: PayrollRunMessages = {
     'negative-net': 'Negative net pay',
     mismatch: 'Does not add up',
     'invalid-amount': 'Amount not in minor units',
+    'negative-amount': 'Negative gross, deductions or cost',
+    'duplicate-id': 'Listed twice',
   },
-  issuesTitle: (count) =>
-    count === 1 ? '1 line blocks approval' : `${String(count)} lines block approval`,
+  issuesTitle: (count, status) => {
+    const lines = count === 1 ? '1 line' : `${String(count)} lines`;
+    if (status === 'paid') return `${lines} paid with an issue`;
+    return `${lines} ${count === 1 ? 'blocks' : 'block'} ${status === 'review' ? 'approval' : 'payment'}`;
+  },
   issuesNote: 'Fix these in the payroll system, then review again.',
   issuesNoteLinked: 'Fix each line from its link, then review again.',
   issueCount: (issue, count) =>
@@ -112,9 +121,14 @@ export const PAYROLL_RUN_MESSAGES: PayrollRunMessages = {
           ? 'with negative net pay'
           : issue === 'mismatch'
             ? 'where gross less deductions is not net'
-            : 'with an amount that is not a whole number of minor units'
+            : issue === 'negative-amount'
+              ? 'with a negative gross, deductions or employer cost'
+              : issue === 'duplicate-id'
+                ? 'listed more than once under the same id'
+                : 'with an amount that is not a whole number of minor units'
     }`,
   unreconciled: 'The totals do not reconcile: gross less deductions is not net pay.',
+  overflow: 'The totals are too large to add up exactly. Split the run.',
   filterLabel: 'Lines',
   filterAll: 'All',
   filterIssues: 'Issues',
@@ -130,6 +144,10 @@ export const PAYROLL_RUN_MESSAGES: PayrollRunMessages = {
     count === 0
       ? 'Totals must reconcile first'
       : `Fix ${count === 1 ? '1 line' : `${String(count)} lines`} first`,
+  payBlocked: (count) =>
+    count === 0
+      ? 'Totals must reconcile before paying'
+      : `Fix ${count === 1 ? '1 line' : `${String(count)} lines`} before paying`,
   approveTitle: (period) => `Approve payroll for ${period}?`,
   approveNote: (people, net, cost) =>
     `${peopleWord(people)}, ${net} net pay, ${cost} employer cost. Payment waits for the next step.`,

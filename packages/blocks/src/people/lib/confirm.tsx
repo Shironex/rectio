@@ -19,6 +19,11 @@ import { useState, type ReactNode } from 'react';
 
 /** What the dialog asks: open while `request` is set, closed when it is null. */
 export interface ConfirmRequest {
+  /**
+   * Names what is asked (`approve:42`). A request rebuilt from current values on every render keeps
+   * its id, so the dialog keeps the reason typed so far; a new id starts afresh.
+   */
+  id: string;
   title: string;
   description: ReactNode;
   confirm: string;
@@ -26,7 +31,11 @@ export interface ConfirmRequest {
   tone?: AlertDialogTone | undefined;
   /** Asks for a reason in a field; the action waits until it is written when `required`. */
   reason?: { label: string; required?: boolean | undefined; missing: string } | undefined;
-  onConfirm: (reason: string) => void;
+  /**
+   * Does the work. A promise keeps the dialog open with its action in a loading state (so it cannot
+   * be confirmed twice) until it resolves; a rejection leaves it open for the app to explain.
+   */
+  onConfirm: (reason: string) => unknown;
 }
 
 /**
@@ -45,11 +54,19 @@ export function ConfirmDialog({
   const [tried, setTried] = useState(false);
   // The last request stays drawn while the dialog animates out.
   const [shown, setShown] = useState(request);
-  if (request !== null && request !== shown) {
-    setShown(request);
-    setReason('');
-    setTried(false);
+  // The id of the question open now: a new question (or the same one asked again after closing)
+  // starts with an empty reason.
+  const [openId, setOpenId] = useState<string | null>(request?.id ?? null);
+  const nextId = request?.id ?? null;
+  if (nextId !== openId) {
+    setOpenId(nextId);
+    if (nextId !== null) {
+      setReason('');
+      setTried(false);
+    }
   }
+  if (request !== null && request !== shown) setShown(request);
+  // While open, the request as the caller builds it now: its words and action follow the data.
   const current = request ?? shown;
   const missing = current?.reason?.required === true && reason.trim() === '';
   return (
@@ -89,8 +106,13 @@ export function ConfirmDialog({
                 setTried(true);
                 return;
               }
-              current.onConfirm(reason.trim());
-              onClose();
+              const result = current.onConfirm(reason.trim());
+              if (!(result instanceof Promise)) {
+                onClose();
+                return undefined;
+              }
+              // The action shows its loading state while this runs and the dialog closes after.
+              return result.then(onClose);
             }}
           >
             {current?.confirm}

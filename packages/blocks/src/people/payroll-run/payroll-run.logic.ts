@@ -29,7 +29,13 @@ export interface PayrollLine {
 }
 
 /** Why a line stops the run from being approved. */
-export type PayrollIssue = 'missing-bank' | 'negative-net' | 'mismatch' | 'invalid-amount';
+export type PayrollIssue =
+  | 'missing-bank'
+  | 'negative-net'
+  | 'mismatch'
+  | 'invalid-amount'
+  | 'negative-amount'
+  | 'duplicate-id';
 
 export interface PayrollTotals {
   people: number;
@@ -47,6 +53,11 @@ export interface PayrollReview {
   flagged: number;
   /** True when gross less deductions is net for the whole run, as well as line by line. */
   reconciled: boolean;
+  /**
+   * True when a total passed Number.MAX_SAFE_INTEGER, so it cannot be trusted to the unit. Such a
+   * run is not reconciled.
+   */
+  overflow: boolean;
   /** True when nothing stops approval. */
   ready: boolean;
 }
@@ -63,26 +74,40 @@ export function reviewPayroll(lines: readonly PayrollLine[]): PayrollReview {
     employerCost: 0,
   };
   const issues = new Map<string, PayrollIssue[]>();
+  const seen = new Set<string>();
   for (const line of lines) {
-    const found: PayrollIssue[] = [];
-    if (AMOUNTS.some((key) => !Number.isSafeInteger(line[key]))) found.push('invalid-amount');
+    // Two lines under one id would share their issues and their row: both are flagged.
+    const found: PayrollIssue[] = issues.get(line.id) ?? [];
+    const add = (issue: PayrollIssue) => {
+      if (!found.includes(issue)) found.push(issue);
+    };
+    if (seen.has(line.id)) add('duplicate-id');
+    seen.add(line.id);
+    if (AMOUNTS.some((key) => !Number.isSafeInteger(line[key]))) add('invalid-amount');
     else {
       for (const key of AMOUNTS) totals[key] += line[key];
-      if (line.gross - line.deductions !== line.net) found.push('mismatch');
+      if (line.gross - line.deductions !== line.net) add('mismatch');
     }
-    if (Number.isFinite(line.net) && line.net < 0) found.push('negative-net');
-    if (line.bankAccount == null || line.bankAccount.trim() === '') found.push('missing-bank');
+    if (Number.isFinite(line.net) && line.net < 0) add('negative-net');
+    if ((['gross', 'deductions', 'employerCost'] as const).some((key) => line[key] < 0)) {
+      add('negative-amount');
+    }
+    if (line.bankAccount == null || line.bankAccount.trim() === '') add('missing-bank');
     if (found.length > 0) issues.set(line.id, found);
   }
+  const overflow = AMOUNTS.some((key) => !Number.isSafeInteger(totals[key]));
   const reconciled =
+    !overflow &&
     ![...issues.values()].some(
       (found) => found.includes('invalid-amount') || found.includes('mismatch'),
-    ) && totals.gross - totals.deductions === totals.net;
+    ) &&
+    totals.gross - totals.deductions === totals.net;
   return {
     totals,
     issues,
     flagged: issues.size,
     reconciled,
+    overflow,
     ready: lines.length > 0 && issues.size === 0 && reconciled,
   };
 }
@@ -94,6 +119,8 @@ export function issueCounts(review: PayrollReview): Record<PayrollIssue, number>
     'negative-net': 0,
     mismatch: 0,
     'invalid-amount': 0,
+    'negative-amount': 0,
+    'duplicate-id': 0,
   };
   for (const found of review.issues.values()) for (const issue of found) counts[issue] += 1;
   return counts;

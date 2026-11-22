@@ -57,9 +57,9 @@ export interface PayrollRunProps {
   payDate: Date;
   status?: PayrollStatus | undefined;
   /** Approves a reviewed run, after a confirm; only offered with no issue left. */
-  onApprove?: (() => void) | undefined;
+  onApprove?: (() => unknown) | undefined;
   /** Sends an approved run to the bank, after a confirm. */
-  onPay?: (() => void) | undefined;
+  onPay?: (() => unknown) | undefined;
   /** Takes an approved run back to review. */
   onReopen?: (() => void) | undefined;
   /** Links each name to the person's payslip, through the LinkProvider when there is one. */
@@ -121,7 +121,7 @@ export function PayrollRun({
   const review = reviewPayroll(lines);
   const counts = issueCounts(review);
   const [filter, setFilter] = useState<LineFilter>('all');
-  const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
+  const [asking, setAsking] = useState<'approve' | 'pay' | null>(null);
   const blockedId = useId();
   const payDay = formatShortDate(payDate, locale);
   const money = (minor: number, className?: string) => (
@@ -151,25 +151,50 @@ export function PayrollRun({
   const current = status === 'review' ? 0 : 2;
 
   const approve = () => {
-    setConfirm({
-      title: m.approveTitle(period),
-      description: m.approveNote(totals.people, text(totals.net), text(totals.employerCost)),
-      confirm: m.approveConfirm,
-      cancel: m.cancel,
-      tone: 'neutral',
-      onConfirm: () => onApprove?.(),
-    });
+    setAsking('approve');
   };
   const pay = () => {
-    setConfirm({
-      title: m.payTitle,
-      description: m.payNote(totals.people, text(totals.net), payDay),
-      confirm: m.payConfirm,
-      cancel: m.cancel,
-      tone: 'warning',
-      onConfirm: () => onPay?.(),
-    });
+    setAsking('pay');
   };
+  // The question is built from the run as it is now, never from when it opened: a line that turns
+  // up flagged while the dialog is open changes its figures, and confirming checks again.
+  const blocked = () => {
+    if (review.flagged > 0) setFilter('issues');
+  };
+  const confirm: ConfirmRequest | null =
+    asking === 'approve'
+      ? {
+          id: 'approve',
+          title: m.approveTitle(period),
+          description: m.approveNote(totals.people, text(totals.net), text(totals.employerCost)),
+          confirm: m.approveConfirm,
+          cancel: m.cancel,
+          tone: 'neutral',
+          onConfirm: () => {
+            if (status !== 'review' || !review.ready) {
+              blocked();
+              return undefined;
+            }
+            return onApprove?.();
+          },
+        }
+      : asking === 'pay'
+        ? {
+            id: 'pay',
+            title: m.payTitle,
+            description: m.payNote(totals.people, text(totals.net), payDay),
+            confirm: m.payConfirm,
+            cancel: m.cancel,
+            tone: 'warning',
+            onConfirm: () => {
+              if (status !== 'approved' || !review.ready) {
+                blocked();
+                return undefined;
+              }
+              return onPay?.();
+            },
+          }
+        : null;
 
   const figures: { term: string; value: ReactNode; lead?: boolean }[] = [
     { term: m.people, value: <span className="numeric">{totals.people}</span> },
@@ -225,10 +250,10 @@ export function PayrollRun({
             ))}
           </dl>
 
-          {status === 'review' && review.flagged > 0 && (
+          {review.flagged > 0 && (
             <Alert
               tone="danger"
-              title={m.issuesTitle(review.flagged)}
+              title={m.issuesTitle(review.flagged, status)}
               actions={
                 filter === 'all' ? (
                   <Button
@@ -251,10 +276,12 @@ export function PayrollRun({
               <p className="mt-1">{fixHref === undefined ? m.issuesNote : m.issuesNoteLinked}</p>
             </Alert>
           )}
-          {status === 'review' && review.flagged === 0 && !review.reconciled && (
-            <Alert tone="danger" title={m.unreconciled} />
+          {review.flagged === 0 && !review.reconciled && (
+            <Alert tone="danger" title={review.overflow ? m.overflow : m.unreconciled} />
           )}
-          {status === 'approved' && <Alert tone="info" title={m.approvedNote(payDay)} />}
+          {status === 'approved' && review.ready && (
+            <Alert tone="info" title={m.approvedNote(payDay)} />
+          )}
           {status === 'paid' && (
             <Alert tone="success" title={m.paidTitle(payDay)}>
               {m.paidNote(totals.people)}
@@ -276,13 +303,15 @@ export function PayrollRun({
             {(status === 'review' && onApprove !== undefined) ||
             (status === 'approved' && (onPay !== undefined || onReopen !== undefined)) ? (
               <div className="ms-auto flex flex-wrap items-center justify-end gap-x-4 gap-y-2 pointer-coarse:gap-x-touch-gap">
+                {(status === 'review' ? onApprove : onPay) !== undefined && !review.ready && (
+                  <span id={blockedId} className="text-sm text-negative-strong">
+                    {status === 'review'
+                      ? m.approveBlocked(review.flagged)
+                      : m.payBlocked(review.flagged)}
+                  </span>
+                )}
                 {status === 'review' && onApprove !== undefined && (
                   <>
-                    {!review.ready && (
-                      <span id={blockedId} className="text-sm text-negative-strong">
-                        {m.approveBlocked(review.flagged)}
-                      </span>
-                    )}
                     <Button
                       variant={review.ready ? 'primary' : 'secondary'}
                       aria-disabled={review.ready ? undefined : true}
@@ -290,7 +319,7 @@ export function PayrollRun({
                       onClick={() => {
                         // Blocked, the button stays readable and in reach: a press lists the lines in the way.
                         if (review.ready) approve();
-                        else if (review.flagged > 0) setFilter('issues');
+                        else blocked();
                       }}
                     >
                       {review.ready ? (
@@ -309,8 +338,20 @@ export function PayrollRun({
                   </Button>
                 )}
                 {status === 'approved' && onPay !== undefined && (
-                  <Button onClick={pay}>
-                    <PaperPlaneTiltIcon aria-hidden weight="bold" className="size-4" />
+                  <Button
+                    variant={review.ready ? 'primary' : 'secondary'}
+                    aria-disabled={review.ready ? undefined : true}
+                    aria-describedby={review.ready ? undefined : blockedId}
+                    onClick={() => {
+                      if (review.ready) pay();
+                      else blocked();
+                    }}
+                  >
+                    {review.ready ? (
+                      <PaperPlaneTiltIcon aria-hidden weight="bold" className="size-4" />
+                    ) : (
+                      <LockSimpleIcon aria-hidden weight="bold" className="size-4" />
+                    )}
                     {m.pay(text(totals.net))}
                   </Button>
                 )}
@@ -337,10 +378,17 @@ export function PayrollRun({
             </TableHeader>
             <TableBody>
               <Rows>
-                {shown.slice(0, limit).map((line) => {
+                {shown.slice(0, limit).map((line, index, page) => {
                   const found = review.issues.get(line.id) ?? [];
+                  // A repeated id (flagged as such) still gets its own row.
+                  const repeat = page
+                    .slice(0, index)
+                    .filter((other) => other.id === line.id).length;
                   return (
-                    <Row key={line.id} data-flagged={found.length > 0 || undefined}>
+                    <Row
+                      key={repeat === 0 ? line.id : `${line.id}~${String(repeat)}`}
+                      data-flagged={found.length > 0 || undefined}
+                    >
                       <TableCell>
                         <div className="flex items-start gap-3">
                           <PersonAvatar
@@ -469,7 +517,7 @@ export function PayrollRun({
       <ConfirmDialog
         request={confirm}
         onClose={() => {
-          setConfirm(null);
+          setAsking(null);
         }}
       />
     </BlockPanel>
