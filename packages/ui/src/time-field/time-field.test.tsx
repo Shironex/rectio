@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Field, FieldLabel } from '../field/field';
+import { Field, FieldDescription, FieldLabel } from '../field/field';
 import {
   clampTime,
   formatIsoTime,
@@ -209,5 +209,24 @@ describe('TimeField', () => {
     await user.keyboard('{End}');
     expect(hour).toHaveValue('17');
     expect(screen.getByRole('spinbutton', { name: 'Minutes' })).toHaveValue('45');
+  });
+
+  it('lets every segment read the field description', async () => {
+    render(
+      <Field>
+        <FieldLabel>Pickup</FieldLabel>
+        <TimeField locale="en-US" value={{ hour: 14, minute: 0 }} onValueChange={vi.fn()} />
+        <FieldDescription>In 15 minute steps.</FieldDescription>
+      </Field>,
+    );
+    expect(
+      await screen.findByRole('spinbutton', {
+        name: 'Minutes',
+        description: 'In 15 minute steps.',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('spinbutton', { name: 'AM or PM', description: 'In 15 minute steps.' }),
+    ).toBeInTheDocument();
   });
 });

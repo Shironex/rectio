@@ -110,19 +110,30 @@ export function TimeField({
   useEffect(() => {
     const group = groupRef.current;
     const hour = hourRef.current;
-    if (group === null || hour === null || ariaLabel !== undefined) return;
+    if (group === null || hour === null) return;
+    const copy = (target: Element | null, name: string) => {
+      const value = hour.getAttribute(name);
+      if (target === null) return;
+      if (value) target.setAttribute(name, value);
+      else target.removeAttribute(name);
+    };
     const sync = () => {
-      const labelledBy = hour.getAttribute('aria-labelledby');
-      if (labelledBy) group.setAttribute('aria-labelledby', labelledBy);
-      else group.removeAttribute('aria-labelledby');
+      if (ariaLabel === undefined) copy(group, 'aria-labelledby');
+      // The description and the error reach the hour through the Field; the other segments
+      // read them too, so the error is heard wherever focus lands.
+      copy(minuteRef.current, 'aria-describedby');
+      copy(periodRef.current, 'aria-describedby');
     };
     sync();
     const observer = new MutationObserver(sync);
-    observer.observe(hour, { attributes: true, attributeFilter: ['aria-labelledby'] });
+    observer.observe(hour, {
+      attributes: true,
+      attributeFilter: ['aria-labelledby', 'aria-describedby'],
+    });
     return () => {
       observer.disconnect();
     };
-  }, [ariaLabel]);
+  }, [ariaLabel, twelve]);
 
   // Keep the segments in step when the value changes from outside (picked, reset, loaded).
   if (value?.hour !== shown?.hour || value?.minute !== shown?.minute) {
