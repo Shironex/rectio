@@ -120,6 +120,17 @@ describe('skin contract', () => {
     expect(touch).toEqual([]);
   });
 
+  it('grows the touch heights a wider border would eat into, inside the skin', () => {
+    const brutalist = css.slice(css.indexOf('[data-skin="brutalist"]'));
+    const block = brutalist.slice(0, brutalist.indexOf('}'));
+    expect(block).toContain(
+      '--rx-field-height-touch: calc(2.75rem + 2 * (var(--rx-border-width, 1px) - 1px));',
+    );
+    expect(block).toContain(
+      '--rx-table-row-height-touch: calc(2.75rem + var(--rx-border-width, 1px) - 1px);',
+    );
+  });
+
   it('rejects touch heights, allows layout measures', () => {
     expect(skinViolation(['control', 'height', 'touch'], 'dimension')).toBeDefined();
     expect(skinViolation(['component', 'button', 'height', 'touch'], 'dimension')).toBeDefined();

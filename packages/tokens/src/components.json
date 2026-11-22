@@ -51,8 +51,8 @@
       },
       "height-touch": {
         "$type": "dimension",
-        "$value": "{control.height.touch}",
-        "$description": "Input, AmountInput and Select trigger height on touch screens."
+        "$value": "calc({control.height.touch} + 2 * (var(--rx-border-width, 1px) - 1px))",
+        "$description": "Input, AmountInput and Select trigger height on touch screens. Grows with a border wider than 1px, so the steppers and buttons inside the frame stay 44px targets."
       },
       "padding-x": {
         "$type": "dimension",
@@ -140,8 +140,8 @@
       },
       "row-height-touch": {
         "$type": "dimension",
-        "$value": "{control.height.touch}",
-        "$description": "Minimum height of header and body rows that hold a checkbox, and of headers that sort, on touch screens, so the 44px hit areas of checkboxes in adjacent rows never overlap and a sort header is a whole target. Never follows density."
+        "$value": "calc({control.height.touch} + var(--rx-border-width, 1px) - 1px)",
+        "$description": "Minimum height of header and body rows that hold a checkbox, and of headers that sort, on touch screens, so the 44px hit areas of checkboxes in adjacent rows never overlap and a sort header is a whole target. Grows with a border wider than 1px, which the row's rule takes from inside it. Never follows density."
       },
       "header-height": {
         "$type": "dimension",
