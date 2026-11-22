@@ -72,7 +72,8 @@ summary: Work that is merging into main now and ships with the next release.
   `touchHitArea`, now exported for your own controls: toggles with a short label, segments, the
   end buttons and overflow count of a multi select, step circles on a phone, the banner action,
   docs heading links and the compact language switcher. A half-star `Rating` takes a tap on the
-  whole star, and a second tap on the same star sets its half.
+  whole star, and a second tap on the same star sets its half. In the SaaS blocks, `touchTarget`
+  is now an alias of `touchHitArea`, deprecated and kept for one release.
 - `gap-touch-gap` spaces small controls on touch screens by the touch height less the small
   control height, so neighbouring hit areas stay apart at compact density and in the dense skin,
   where a fixed gap fell short. Pagination, message actions, toasts, file items, the table pager,
@@ -83,7 +84,8 @@ summary: Work that is merging into main now and ships with the next release.
   a doubled border.
 - `--rx-warning-mark`, an amber for marks drawn on a surface that holds 3:1 there. Rating stars
   use it, so they are gold in light mode rather than brown. A theme made in the generator before
-  this release lacks it: make the theme again from its link, or add the token to it.
+  this release lacks it and falls back to the stronger amber; make the theme again from its link,
+  or add the token to it, for the gold.
 - A tentative event draws its dashed edge twice as wide in the tone's mark colour, at 3:1 on the
   surface, not in the faint tint of a confirmed event.
 - A streaming `Markdown` reply renders the same as the finished text at every moment: a code fence

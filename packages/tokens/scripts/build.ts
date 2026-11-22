@@ -249,8 +249,12 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   ].map((name) => `${name}: initial;`);
 
   const map: string[] = [];
+  // Tokens added after themes were already being generated: a theme file written before one existed
+  // falls back to the token it replaces, as `--default-border-width` does below.
+  const FALLBACKS: Record<string, string> = { '--rx-warning-mark': '--rx-warning-strong' };
   const add = (key: string, varName: string) => {
-    map.push(`${key}: var(${varName});`);
+    const fallback = FALLBACKS[varName];
+    map.push(`${key}: var(${varName}${fallback === undefined ? '' : `, var(${fallback})`});`);
   };
   for (const name of contract) {
     const path = name.slice('--rx-'.length).split('-');
