@@ -13,6 +13,8 @@ import {
 } from '../chart/chart';
 import { extent, formatValue, type ValueFormat } from '../chart/chart-format';
 import { cn } from '../lib/cn';
+import { devWarn } from '../lib/dev-warn';
+import { MAX_CALENDAR_WEEKS, heatStep, heatValue } from './heatmap.logic';
 
 /** One cell of a matrix heatmap. `null` is a measurement that is missing, drawn hatched. */
 export interface HeatmapCell {
@@ -144,13 +146,24 @@ function calendarModel(
   locale: string | undefined,
   m: HeatmapMessages,
 ): Model {
-  const known = days.filter((day) => Number.isFinite(day.date.getTime()));
-  if (known.length === 0) return { rows: [], columns: [], cells: [] };
-  const { min, max } = extent(known.map((day) => day.date.getTime()));
-  const startDay = new Date(min);
-  const first = new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate());
-  const endDay = new Date(max);
+  const dated = days.filter((day) => Number.isFinite(day.date.getTime()));
+  if (dated.length === 0) return { rows: [], columns: [], cells: [] };
+  const endDay = new Date(extent(dated.map((day) => day.date.getTime())).max);
   const last = new Date(endDay.getFullYear(), endDay.getMonth(), endDay.getDate());
+  // One stray old date would stretch the grid over years of empty weeks: the calendar keeps the
+  // latest MAX_CALENDAR_WEEKS and leaves earlier days out.
+  const earliest = new Date(
+    last.getFullYear(),
+    last.getMonth(),
+    last.getDate() - MAX_CALENDAR_WEEKS * 7 + 1,
+  );
+  const known = dated.filter((day) => day.date >= earliest);
+  if (known.length < dated.length)
+    devWarn(
+      `Heatmap calendar shows the latest ${String(MAX_CALENDAR_WEEKS)} weeks; ${String(dated.length - known.length)} earlier days are left out.`,
+    );
+  const startDay = new Date(extent(known.map((day) => day.date.getTime())).min);
+  const first = new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate());
   // Back to the first day of its week; calendar days, so a clock change never shifts a column.
   const start = new Date(first);
   start.setDate(first.getDate() - ((first.getDay() - weekStartsOn + 7) % 7));
@@ -194,11 +207,7 @@ function calendarModel(
     columns.map((__, w) => {
       const date = at(w * 7 + d);
       if (date < first || date > last) return undefined;
-      const value = values.get(dayKey(date));
-      return {
-        title: full.format(date),
-        value: value === undefined || (value !== null && !Number.isFinite(value)) ? null : value,
-      };
+      return { title: full.format(date), value: heatValue(values.get(dayKey(date))) };
     }),
   );
   return { rows, columns, cells };
@@ -212,11 +221,7 @@ function matrixModel(props: HeatmapMatrixProps): Model {
     columns.map((column) => {
       const key = `${row.id}\u0000${column.id}`;
       if (!values.has(key)) return undefined;
-      const value = values.get(key) ?? null;
-      return {
-        title: `${row.label}, ${column.label}`,
-        value: value !== null && Number.isFinite(value) ? value : null,
-      };
+      return { title: `${row.label}, ${column.label}`, value: heatValue(values.get(key)) };
     }),
   );
   return { rows, columns, cells };
@@ -239,15 +244,6 @@ const STEP_CLASS: Record<number, string> = {
   4: 'bg-chart-sequence-4 text-chart-on-sequence-4',
   5: 'bg-chart-sequence-5 text-chart-on-sequence-5',
 };
-
-/**
- * The step of a figure: 0 for zero (and below), then 1 to `steps` in even bands up to `max`, so a
- * figure at the top of the scale takes the last step.
- */
-export function heatStep(value: number, max: number, steps: number): number {
-  if (!(value > 0) || !(max > 0)) return 0;
-  return Math.min(steps, Math.max(1, Math.ceil((value / max) * steps)));
-}
 
 const ZERO_CELL = 'bg-surface-sunken text-fg-muted inset-ring inset-ring-line';
 const MISSING_CELL = 'bg-chart-reference/40 text-fg-muted';
@@ -287,11 +283,16 @@ export function Heatmap(props: HeatmapProps) {
     row.filter((cell): cell is Cell => cell !== undefined),
   );
   const figures = present.flatMap((cell) => (cell.value === null ? [] : [cell.value]));
-  const max = props.max ?? Math.max(0, extent(figures).max);
+  const givenMax = props.max;
+  const validMax = givenMax !== undefined && Number.isFinite(givenMax) && givenMax > 0;
+  if (givenMax !== undefined && !validMax)
+    devWarn('Heatmap max must be a number above zero; the largest figure is used instead.');
+  const max = validMax ? givenMax : Math.max(0, figures.length === 0 ? 0 : extent(figures).max);
   const tokens = STEP_TOKENS[steps];
   const stepClass = (value: number | null) => {
     if (value === null) return MISSING_CELL;
     const step = heatStep(value, max, steps);
+    if (step === null) return MISSING_CELL;
     return step === 0 ? ZERO_CELL : (STEP_CLASS[tokens[step - 1] ?? 1] ?? '');
   };
   const readValue = (value: number | null) => (value === null ? m.noData : write(value));

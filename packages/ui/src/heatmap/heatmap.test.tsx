@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { Heatmap, heatStep } from './heatmap';
+import { Heatmap } from './heatmap';
+import { heatStep, heatValue } from './heatmap.logic';
 
 const rows = [
   { id: 'jan', label: 'Jan cohort' },
@@ -23,10 +24,22 @@ const data = [
 describe('heatStep', () => {
   it('puts zero apart and the top figure on the last step', () => {
     expect(heatStep(0, 10, 5)).toBe(0);
-    expect(heatStep(-3, 10, 5)).toBe(0);
     expect(heatStep(0.1, 10, 5)).toBe(1);
     expect(heatStep(10, 10, 5)).toBe(5);
     expect(heatStep(20, 10, 5)).toBe(5);
+  });
+
+  it('reads a figure below zero or not a number as missing, not zero', () => {
+    expect(heatStep(-3, 10, 5)).toBeNull();
+    expect(heatStep(Number.NaN, 10, 5)).toBeNull();
+    expect(heatValue(-0.5)).toBeNull();
+    expect(heatValue(undefined)).toBeNull();
+    expect(heatValue(0)).toBe(0);
+  });
+
+  it('puts every figure above zero on the last step when the max is not above zero', () => {
+    expect(heatStep(3, Number.NaN, 4)).toBe(4);
+    expect(heatStep(3, 0, 4)).toBe(4);
   });
 });
 
@@ -82,5 +95,46 @@ describe('Heatmap', () => {
         .map((h) => h.textContent),
     ).toEqual(['Week of 2 Mar', 'Week of 9 Mar']);
     expect(screen.getByText(/Highest: Tue, 10 Mar 2026 at 9\./)).toBeInTheDocument();
+  });
+
+  it('draws a negative figure as missing, apart from zero', () => {
+    render(
+      <Heatmap
+        rows={rows}
+        columns={columns}
+        data={[{ row: 'jan', column: 'm0', value: -4 }]}
+        locale="en-GB"
+      />,
+    );
+    expect(
+      within(screen.getByRole('grid')).getByText(/Jan cohort, Month 0: No data/),
+    ).toBeInTheDocument();
+  });
+
+  it('falls back to the largest figure when max is not a number', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    render(<Heatmap rows={rows} columns={columns} data={data} max={Number.NaN} locale="en-GB" />);
+    expect(screen.getAllByText(/even steps from zero up to 1\./).length).toBeGreaterThan(0);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('max'));
+    warn.mockRestore();
+  });
+
+  it('keeps a calendar to its latest weeks when a stray date lies years back', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    render(
+      <Heatmap
+        variant="calendar"
+        data={[
+          { date: new Date(2001, 0, 1), value: 1 },
+          { date: new Date(2026, 2, 2), value: 4 },
+          { date: new Date(2026, 2, 10), value: 9 },
+        ]}
+        locale="en-GB"
+      />,
+    );
+    const grid = screen.getByRole('grid');
+    expect(grid).toHaveAttribute('aria-colcount', '3');
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('earlier days are left out'));
+    warn.mockRestore();
   });
 });

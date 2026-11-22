@@ -1,7 +1,8 @@
 import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { FunnelChart, funnelSteps } from './funnel-chart';
+import { FunnelChart } from './funnel-chart';
+import { funnelSteps } from './funnel-chart.logic';
 
 const data = [
   { id: 'visits', label: 'Visits', value: 48210 },

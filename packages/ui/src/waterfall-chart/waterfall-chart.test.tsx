@@ -1,7 +1,8 @@
 import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { WaterfallChart, waterfallBars } from './waterfall-chart';
+import { WaterfallChart } from './waterfall-chart';
+import { waterfallBars } from './waterfall-chart.logic';
 
 const data = [
   { id: 'open', label: 'Opening cash', value: 120000, kind: 'start' as const },

@@ -96,16 +96,14 @@ export {
 export {
   FUNNEL_CHART_MESSAGES,
   FunnelChart,
-  funnelSteps,
   type FunnelChartMessages,
   type FunnelChartProps,
-  type FunnelStage,
-  type FunnelStep,
 } from './funnel-chart/funnel-chart';
+// Pure helpers from modules without 'use client', so a server component can call them.
+export { funnelSteps, type FunnelStage, type FunnelStep } from './funnel-chart/funnel-chart.logic';
 export {
   HEATMAP_MESSAGES,
   Heatmap,
-  heatStep,
   type HeatmapAxisItem,
   type HeatmapCalendarProps,
   type HeatmapCell,
@@ -114,16 +112,19 @@ export {
   type HeatmapMessages,
   type HeatmapProps,
 } from './heatmap/heatmap';
+export { MAX_CALENDAR_WEEKS, heatStep, heatValue } from './heatmap/heatmap.logic';
 export {
   WATERFALL_CHART_MESSAGES,
   WaterfallChart,
-  waterfallBars,
-  type WaterfallBar,
   type WaterfallChartMessages,
   type WaterfallChartProps,
+} from './waterfall-chart/waterfall-chart';
+export {
+  waterfallBars,
+  type WaterfallBar,
   type WaterfallRole,
   type WaterfallStep,
-} from './waterfall-chart/waterfall-chart';
+} from './waterfall-chart/waterfall-chart.logic';
 export {
   RADIAL_GAUGE_MESSAGES,
   RadialGauge,
