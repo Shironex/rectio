@@ -21,6 +21,7 @@ import { resolveLocale } from '../../lib/finance';
 import { mergeMessages } from '../../lib/messages';
 import { ChoiceSelect } from '../../lib/choice-select';
 import { Segmented } from '../../lib/segmented';
+import { MoreButton, useMore } from '../lib/more';
 import { ConfirmDialog, type ConfirmRequest } from '../lib/confirm';
 import { toIsoDay, type IsoDay } from '../lib/days';
 import { formatDate, formatDayRange, formatDays } from '../lib/format';
@@ -73,6 +74,8 @@ export interface LeaveRequestsProps {
   balanceFor?: string | undefined;
   /** Other leave to check overlaps against, such as the team's calendar; the list itself counts too. */
   team?: readonly LeaveRequest[] | undefined;
+  /** Requests drawn at first and per Show more; the filter counts cover them all. */
+  pageSize?: number | undefined;
   filter?: LeaveFilter | undefined;
   defaultFilter?: LeaveFilter | undefined;
   onFilterChange?: ((filter: LeaveFilter) => void) | undefined;
@@ -106,6 +109,7 @@ export function LeaveRequests({
   showPerson = true,
   balanceFor,
   team = [],
+  pageSize = 50,
   filter,
   defaultFilter = 'pending',
   onFilterChange,
@@ -129,6 +133,7 @@ export function LeaveRequests({
   const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
   const counts = leaveCounts(requests);
   const shown = leaveInView(requests, view);
+  const { limit, more } = useMore(pageSize, view);
   const everyone = [...requests, ...team.filter((t) => !requests.some((r) => r.id === t.id))];
   const typeLabel = (id: string) => types.find((type) => type.id === id)?.label ?? id;
   const daysText = (halves: number) => m.days(formatDays(halves, locale), halves);
@@ -207,143 +212,151 @@ export function LeaveRequests({
           {m.emptyNote}
         </EmptyNote>
       ) : (
-        <ul data-slot="leave-list" className="flex flex-col divide-y divide-line">
-          {shown.map((request) => {
-            const halves = leaveHalves(request, calendar);
-            const overlap = request.status === 'pending' ? overlapText(request, false) : null;
-            const canCancel =
-              onCancel !== undefined &&
-              (request.status === 'pending' ||
-                (request.status === 'approved' && request.start > today));
-            const name = nameOf(request);
-            return (
-              <li
-                key={request.id}
-                data-status={request.status}
-                className="flex flex-col gap-3 py-3.5 first:pt-0 last:pb-0 @xl:flex-row @xl:items-center @xl:gap-5"
-              >
-                <div className="flex min-w-0 flex-1 gap-3">
-                  {showPerson && (
-                    <PersonAvatar name={request.person.name} src={request.person.avatar} />
-                  )}
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span className="font-medium">
-                        {showPerson ? request.person.name : typeLabel(request.type)}
-                      </span>
-                      {/* In a single-status view every row has the same status: the filter says it. */}
-                      {view === 'all' && (
-                        <LeaveStatusBadge
-                          status={request.status}
-                          label={m.status[request.status]}
-                        />
+        <>
+          <ul data-slot="leave-list" className="flex flex-col divide-y divide-line">
+            {shown.slice(0, limit).map((request) => {
+              const halves = leaveHalves(request, calendar);
+              const overlap = request.status === 'pending' ? overlapText(request, false) : null;
+              const canCancel =
+                onCancel !== undefined &&
+                (request.status === 'pending' ||
+                  (request.status === 'approved' && request.start > today));
+              const name = nameOf(request);
+              return (
+                <li
+                  key={request.id}
+                  data-status={request.status}
+                  className="flex flex-col gap-3 py-3.5 first:pt-0 last:pb-0 @xl:flex-row @xl:items-center @xl:gap-5"
+                >
+                  <div className="flex min-w-0 flex-1 gap-3">
+                    {showPerson && (
+                      <PersonAvatar name={request.person.name} src={request.person.avatar} />
+                    )}
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="font-medium">
+                          {showPerson ? request.person.name : typeLabel(request.type)}
+                        </span>
+                        {/* In a single-status view every row has the same status: the filter says it. */}
+                        {view === 'all' && (
+                          <LeaveStatusBadge
+                            status={request.status}
+                            label={m.status[request.status]}
+                          />
+                        )}
+                      </div>
+                      <p className="text-sm text-fg-muted">
+                        {showPerson && <>{typeLabel(request.type)}, </>}
+                        <span className="numeric">
+                          {formatDayRange(request.start, request.end, locale, m.range)}
+                        </span>
+                        , <span className="font-medium text-fg numeric">{daysText(halves)}</span>
+                        {request.halfStart === true && <>, {m.halfStart.toLowerCase()}</>}
+                        {request.halfEnd === true && <>, {m.halfEnd.toLowerCase()}</>}
+                      </p>
+                      {request.note !== undefined && request.note !== '' && (
+                        <p className="text-sm text-fg-muted">“{request.note}”</p>
+                      )}
+                      {overlap !== null && (
+                        <p className="flex items-center gap-1.5 text-sm text-warning-strong">
+                          <UsersThreeIcon aria-hidden weight="bold" className="size-3.5 shrink-0" />
+                          {overlap}
+                        </p>
+                      )}
+                      {request.decision !== undefined && request.status !== 'pending' && (
+                        <p className="text-sm text-fg-muted">
+                          {request.decision.on !== undefined && (
+                            <span className="block">
+                              {m.decided(
+                                request.status,
+                                request.decision.by,
+                                formatDate(request.decision.on, locale),
+                              )}
+                            </span>
+                          )}
+                          {request.decision.reason !== undefined &&
+                            request.decision.reason !== '' && (
+                              <span className="block">{m.reason(request.decision.reason)}</span>
+                            )}
+                        </p>
                       )}
                     </div>
-                    <p className="text-sm text-fg-muted">
-                      {showPerson && <>{typeLabel(request.type)}, </>}
-                      <span className="numeric">
-                        {formatDayRange(request.start, request.end, locale, m.range)}
-                      </span>
-                      , <span className="font-medium text-fg numeric">{daysText(halves)}</span>
-                      {request.halfStart === true && <>, {m.halfStart.toLowerCase()}</>}
-                      {request.halfEnd === true && <>, {m.halfEnd.toLowerCase()}</>}
-                    </p>
-                    {request.note !== undefined && request.note !== '' && (
-                      <p className="text-sm text-fg-muted">“{request.note}”</p>
-                    )}
-                    {overlap !== null && (
-                      <p className="flex items-center gap-1.5 text-sm text-warning-strong">
-                        <UsersThreeIcon aria-hidden weight="bold" className="size-3.5 shrink-0" />
-                        {overlap}
-                      </p>
-                    )}
-                    {request.decision !== undefined && request.status !== 'pending' && (
-                      <p className="text-sm text-fg-muted">
-                        {request.decision.on !== undefined && (
-                          <span className="block">
-                            {m.decided(
-                              request.status,
-                              request.decision.by,
-                              formatDate(request.decision.on, locale),
-                            )}
-                          </span>
-                        )}
-                        {request.decision.reason !== undefined &&
-                          request.decision.reason !== '' && (
-                            <span className="block">{m.reason(request.decision.reason)}</span>
-                          )}
-                      </p>
-                    )}
                   </div>
-                </div>
-                <RequestActions
-                  indent={showPerson}
-                  request={request}
-                  name={name}
-                  messages={m}
-                  canCancel={canCancel}
-                  onApprove={
-                    request.status === 'pending' && onApprove !== undefined
-                      ? () => {
-                          setConfirm({
-                            title: m.approveTitle(request.person.name),
-                            description: m.approveNote(
-                              daysText(halves),
-                              overlapText(request, true),
-                            ),
-                            confirm: m.approveConfirm,
-                            cancel: m.back,
-                            tone: overlap === null ? 'neutral' : 'warning',
-                            onConfirm: () => {
-                              onApprove(request);
-                            },
-                          });
-                        }
-                      : undefined
-                  }
-                  onDecline={
-                    request.status === 'pending' && onDecline !== undefined
-                      ? () => {
-                          setConfirm({
-                            title: m.declineTitle(request.person.name),
-                            description: m.declineNote,
-                            confirm: m.declineConfirm,
-                            cancel: m.back,
-                            tone: 'danger',
-                            reason: {
-                              label: m.reasonLabel,
-                              required: true,
-                              missing: m.reasonMissing,
-                            },
-                            onConfirm: (reason) => {
-                              onDecline(request, reason);
-                            },
-                          });
-                        }
-                      : undefined
-                  }
-                  onCancel={
-                    canCancel
-                      ? () => {
-                          setConfirm({
-                            title: m.cancelTitle,
-                            description: m.cancelNote(daysText(halves)),
-                            confirm: m.cancelConfirm,
-                            cancel: m.keep,
-                            tone: 'danger',
-                            reason: { label: m.reasonOptional, missing: m.reasonMissing },
-                            onConfirm: (reason) => {
-                              onCancel(request, reason);
-                            },
-                          });
-                        }
-                      : undefined
-                  }
-                />
-              </li>
-            );
-          })}
-        </ul>
+                  <RequestActions
+                    indent={showPerson}
+                    request={request}
+                    name={name}
+                    messages={m}
+                    canCancel={canCancel}
+                    onApprove={
+                      request.status === 'pending' && onApprove !== undefined
+                        ? () => {
+                            setConfirm({
+                              title: m.approveTitle(request.person.name),
+                              description: m.approveNote(
+                                daysText(halves),
+                                overlapText(request, true),
+                              ),
+                              confirm: m.approveConfirm,
+                              cancel: m.back,
+                              tone: overlap === null ? 'neutral' : 'warning',
+                              onConfirm: () => {
+                                onApprove(request);
+                              },
+                            });
+                          }
+                        : undefined
+                    }
+                    onDecline={
+                      request.status === 'pending' && onDecline !== undefined
+                        ? () => {
+                            setConfirm({
+                              title: m.declineTitle(request.person.name),
+                              description: m.declineNote,
+                              confirm: m.declineConfirm,
+                              cancel: m.back,
+                              tone: 'danger',
+                              reason: {
+                                label: m.reasonLabel,
+                                required: true,
+                                missing: m.reasonMissing,
+                              },
+                              onConfirm: (reason) => {
+                                onDecline(request, reason);
+                              },
+                            });
+                          }
+                        : undefined
+                    }
+                    onCancel={
+                      canCancel
+                        ? () => {
+                            setConfirm({
+                              title: m.cancelTitle,
+                              description: m.cancelNote(daysText(halves)),
+                              confirm: m.cancelConfirm,
+                              cancel: m.keep,
+                              tone: 'danger',
+                              reason: { label: m.reasonOptional, missing: m.reasonMissing },
+                              onConfirm: (reason) => {
+                                onCancel(request, reason);
+                              },
+                            });
+                          }
+                        : undefined
+                    }
+                  />
+                </li>
+              );
+            })}
+          </ul>
+          <MoreButton
+            left={shown.length - limit}
+            pageSize={pageSize}
+            label={m.more}
+            onMore={more}
+          />
+        </>
       )}
       <ConfirmDialog
         request={confirm}

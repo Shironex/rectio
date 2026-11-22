@@ -326,6 +326,25 @@ describe('LeaveRequests', () => {
     expect(screen.getAllByRole('button', { name: /^Cancel request/ })).toHaveLength(2);
   });
 
+  it('draws a long list a page at a time', async () => {
+    const many: LeaveRequest[] = Array.from({ length: 5 }, (_, index) => ({
+      id: `m${String(index)}`,
+      person: { id: `p${String(index)}`, name: `Person ${String(index)}` },
+      type: 'annual',
+      start: '2026-12-07',
+      end: '2026-12-08',
+      status: 'pending',
+    }));
+    render(<LeaveRequests requests={many} types={TYPES} locale="en-GB" pageSize={2} />);
+    const list = () =>
+      within(first([document.querySelector<HTMLElement>('[data-slot="leave-list"]')]));
+    expect(list().getAllByRole('listitem')).toHaveLength(2);
+    await userEvent.click(screen.getByRole('button', { name: 'Show 2 more of 3' }));
+    expect(list().getAllByRole('listitem')).toHaveLength(4);
+    await userEvent.click(screen.getByRole('button', { name: 'Show 1 more of 1' }));
+    expect(screen.queryByRole('button', { name: /^Show \d+ more/ })).toBeNull();
+  });
+
   it('renders its motion twin', () => {
     render(<MotionLeaveRequests requests={[]} types={TYPES} />);
     expect(screen.getByText('No requests waiting')).toBeInTheDocument();

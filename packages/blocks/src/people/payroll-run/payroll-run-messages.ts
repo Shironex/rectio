@@ -31,6 +31,8 @@ export interface PayrollRunMessages {
   filterIssues: string;
   /** The button in the issues alert that lists only the flagged lines. */
   showIssues: string;
+  /** Under a long run: `Show 50 more of 212`. */
+  more: (count: number, left: number) => string;
   /** The link beside a flagged line's issues. */
   fix: string;
   /** Names that link for a screen reader. */
@@ -112,6 +114,7 @@ export const PAYROLL_RUN_MESSAGES: PayrollRunMessages = {
   filterAll: 'All',
   filterIssues: 'Issues',
   showIssues: 'Show these lines',
+  more: (count, left) => `Show ${String(count)} more of ${String(left)}`,
   fix: 'Fix',
   fixLine: (name) => `Fix ${name}'s line`,
   noBank: 'No bank details',

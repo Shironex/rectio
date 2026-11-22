@@ -4,6 +4,7 @@ import {
   ArrowCounterClockwiseIcon,
   BankIcon,
   CheckIcon,
+  LockSimpleIcon,
   PaperPlaneTiltIcon,
   UsersThreeIcon,
   WarningIcon,
@@ -23,6 +24,7 @@ import {
   TableHeader,
   TableRow,
   cn,
+  touchHitArea,
   type StepperStep,
 } from '@rectio/ui';
 import { useId, useState, type ReactNode } from 'react';
@@ -33,6 +35,7 @@ import { EmptyNote } from '../../lib/empty-note';
 import { formatShortDate, fromMinor, resolveLocale } from '../../lib/finance';
 import { mergeMessages } from '../../lib/messages';
 import { Segmented } from '../../lib/segmented';
+import { MoreButton, useMore } from '../lib/more';
 import { ConfirmDialog, type ConfirmRequest } from '../lib/confirm';
 import { PersonAvatar } from '../lib/person';
 import { PAYROLL_RUN_MESSAGES, type PayrollRunMessages } from './payroll-run-messages';
@@ -66,6 +69,8 @@ export interface PayrollRunProps {
    * LinkProvider: adds a Fix link beside the line's issues.
    */
   fixHref?: ((line: PayrollLine, issues: readonly PayrollIssue[]) => string) | undefined;
+  /** Lines drawn at first and per Show more; totals always cover every line. */
+  pageSize?: number | undefined;
   locale?: string | undefined;
   title?: string | undefined;
   actions?: ReactNode;
@@ -101,6 +106,7 @@ export function PayrollRun({
   onReopen,
   lineHref,
   fixHref,
+  pageSize = 50,
   locale: requestedLocale,
   title,
   actions,
@@ -131,6 +137,7 @@ export function PayrollRun({
       .format(fromMinor(minor, currency))
       .replace('-', '−');
   const shown = filter === 'issues' ? lines.filter((line) => review.issues.has(line.id)) : lines;
+  const { limit, more } = useMore(pageSize, filter);
   const { totals } = review;
 
   const steps: StepperStep[] = (['review', 'approve', 'pay'] as const).map((step) => ({
@@ -286,7 +293,11 @@ export function PayrollRun({
                         else if (review.flagged > 0) setFilter('issues');
                       }}
                     >
-                      <CheckIcon aria-hidden weight="bold" className="size-4" />
+                      {review.ready ? (
+                        <CheckIcon aria-hidden weight="bold" className="size-4" />
+                      ) : (
+                        <LockSimpleIcon aria-hidden weight="bold" className="size-4" />
+                      )}
                       {m.approve}
                     </Button>
                   </>
@@ -326,7 +337,7 @@ export function PayrollRun({
             </TableHeader>
             <TableBody>
               <Rows>
-                {shown.map((line) => {
+                {shown.slice(0, limit).map((line) => {
                   const found = review.issues.get(line.id) ?? [];
                   return (
                     <Row key={line.id} data-flagged={found.length > 0 || undefined}>
@@ -376,7 +387,7 @@ export function PayrollRun({
                                 {fixHref !== undefined && status === 'review' && (
                                   <Anchor
                                     href={fixHref(line, found)}
-                                    className="text-sm font-medium"
+                                    className={cn('relative text-sm font-medium', touchHitArea)}
                                     aria-label={m.fixLine(line.person.name)}
                                   >
                                     {m.fix}
@@ -430,6 +441,12 @@ export function PayrollRun({
               </TableFooter>
             )}
           </Table>
+          <MoreButton
+            left={shown.length - limit}
+            pageSize={pageSize}
+            label={m.more}
+            onMore={more}
+          />
           {filter === 'issues' && shown.length === 0 && (
             <p className="text-sm text-fg-muted">{m.emptyIssues}</p>
           )}

@@ -501,12 +501,16 @@ export function Timesheet({
                 messages={m}
                 cellProps={cellProps}
                 activeDay={active?.day ?? null}
-                noteEditor={noteEditor}
+                noteEditor={
+                  noteEditor === null ? null : (
+                    <div className="flex flex-col gap-3">
+                      {errorList}
+                      {noteEditor}
+                    </div>
+                  )
+                }
               />
-              <div className="flex flex-col gap-3 @2xl:hidden">
-                {errorList}
-                {noteEditor === null && noteHint}
-              </div>
+              {noteEditor === null && <div className="@2xl:hidden">{noteHint}</div>}
               {onAddRow !== undefined && isEditable(status, locked) && (
                 <div>
                   <Button size="sm" variant="ghost" onClick={onAddRow}>

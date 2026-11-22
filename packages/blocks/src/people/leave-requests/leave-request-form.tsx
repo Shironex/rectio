@@ -171,9 +171,11 @@ export function LeaveRequestForm({
 
         <fieldset className="flex min-w-0 flex-col gap-3">
           <legend className="mb-1.5 text-sm font-medium">{m.datesLabel}</legend>
-          <div className="w-fit max-w-full overflow-x-auto rounded-panel border border-line">
+          <div className="w-full overflow-x-auto rounded-panel border border-line">
             <RangeCalendar
               aria-label={m.datesLabel}
+              // The box spans the form; the months sit in its middle rather than against one side.
+              className="w-full items-center sm:justify-center"
               value={picked === undefined ? undefined : { from: picked.from, to: picked.to }}
               onValueChange={(next) => {
                 setPicked(next);

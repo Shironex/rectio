@@ -13,6 +13,8 @@ export interface LeaveRequestsMessages {
   /** A count of days that can end in a half: `3.5 days`. */
   days: (count: string, halves: number) => string;
   filterLabel: string;
+  /** Under a long list: `Show 50 more of 212`. */
+  more: (count: number, left: number) => string;
   /** A filter in the narrow select, with its count: `Pending (3)`. */
   filterCount: (filter: string, count: number) => string;
   filters: Record<LeaveFilter, string>;
@@ -84,6 +86,7 @@ export const LEAVE_REQUESTS_MESSAGES: LeaveRequestsMessages = {
   range: (first, last) => `${first} to ${last}`,
   days: dayWord,
   filterLabel: 'Status',
+  more: (count, left) => `Show ${String(count)} more of ${String(left)}`,
   filterCount: (filter, count) => `${filter} (${String(count)})`,
   filters: {
     pending: 'Pending',
