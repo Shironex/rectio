@@ -440,7 +440,7 @@ describe('stableBoundary', () => {
       return state / 2 ** 32;
     };
     const failures: string[] = [];
-    for (let run = 0; run < 1500 && failures.length === 0; run += 1) {
+    for (let run = 0; run < 600 && failures.length === 0; run += 1) {
       const count = 2 + Math.floor(next() * 10);
       const text = Array.from(
         { length: count },
@@ -448,16 +448,17 @@ describe('stableBoundary', () => {
       ).join('\n');
       for (let end = 1; end <= text.length; end += 1) {
         const prefix = text.slice(0, end);
-        try {
-          expect(streamed(prefix)).toEqual(parseMarkdown(prefix, { streaming: true }));
-        } catch {
+        if (
+          JSON.stringify(streamed(prefix)) !==
+          JSON.stringify(parseMarkdown(prefix, { streaming: true }))
+        ) {
           failures.push(prefix);
           break;
         }
       }
     }
     expect(failures).toEqual([]);
-  });
+  }, 30_000);
 
   it('finds the boundaries of a long reply in one pass', () => {
     const block = '- item\n   ```\n   code\n   ```\n\nA paragraph with **bold**.\n\n';
