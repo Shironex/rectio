@@ -248,6 +248,7 @@ export function EventCard({
               items={attendees}
               label="Attendees"
               size="sm"
+              spacing="spaced"
               max={3}
               names="always"
               locale={locale}
