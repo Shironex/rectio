@@ -232,8 +232,8 @@ const STEP_TOKENS: Record<3 | 4, readonly number[]> = {
   4: [2, 3, 4, 5],
 };
 
+// Step 1 is never used (see above), so no class pairs text with it: its contrast follows the brand.
 const STEP_CLASS: Record<number, string> = {
-  1: 'bg-chart-sequence-1 text-chart-on-sequence-1',
   2: 'bg-chart-sequence-2 text-chart-on-sequence-2',
   3: 'bg-chart-sequence-3 text-chart-on-sequence-3',
   4: 'bg-chart-sequence-4 text-chart-on-sequence-4',
