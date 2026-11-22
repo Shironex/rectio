@@ -164,6 +164,20 @@ summary: Work that is merging into main now and ships with the next release.
   bars, sortable, the smallest rows gathered into others), a funnel card (the conversion, its change
   in points and the biggest drop) and a goal tracker (a gauge or a bar with the target and today's
   pace, the state in words, the projection and what each day needs).
+- People blocks in `@rectio/blocks/people`, each with a motion twin. `Timesheet`: a week of hours
+  per project and day in decimal hours or clock time, totals added in whole minutes, overtime and
+  missing days flagged in words, a note per cell, submit, recall, approve or send back with a reason,
+  locked weeks, invalid entries listed in words, and a list of folding days on a phone.
+  `LeaveRequests` and `LeaveRequestForm`: leave by status with approve and decline behind a confirm,
+  teammates off on the same days, a balance by type, and a request with a range, half days and the
+  balance after it, counting working days only and ending on an exclusive day. `OrgChart`: a tree of
+  people with avatars and team sizes, search that opens the way to anyone, the picked person with
+  their manager and reports, a drill-down list on a phone, and thousands of people without a stall.
+  `PayrollRun`: review, approve and pay, with totals in minor units that reconcile and missing bank
+  details or a negative net holding approval back, a Fix link per flagged line and paging for long
+  runs (people-core, timesheet, leave-requests, org-chart and payroll-run 0.1.0, with their motion
+  twins). Their logic, day helpers and words live in modules without `'use client'`, so a server
+  component can total a week, count leave or check a run.
 
 ## Templates
 
@@ -221,3 +235,5 @@ summary: Work that is merging into main now and ships with the next release.
 - Docs pages for the alert dialog, drawer, copy button, rating, tree and resizable panels, and the
   segmented control on the toggle page.
 - A Charts section in the components docs, and a page for the time series chart block.
+- Pages for the people blocks (timesheet, leave requests, org chart and payroll run) with live
+  demos, and an overview of how they handle days.
