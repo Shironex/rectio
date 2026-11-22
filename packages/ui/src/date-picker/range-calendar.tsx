@@ -164,6 +164,8 @@ export function RangeCalendar({
           selected={value}
           {...(firstMonth === undefined ? {} : { defaultMonth: firstMonth })}
           disabled={disabledDays}
+          // Stacked on a phone, the months sit in the middle of the card instead of to one side.
+          classNames={{ root: 'relative w-fit self-center p-3 sm:self-auto' }}
           modifiers={preview === undefined ? {} : { preview }}
           modifiersClassNames={{
             preview:
