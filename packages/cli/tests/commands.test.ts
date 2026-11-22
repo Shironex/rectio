@@ -324,7 +324,12 @@ describe('diff, list, search and update', () => {
     const cwd = await initialised();
     const { ctx, out } = capture(cwd);
     const skins = await runList(capture(cwd).ctx, { type: 'skin' });
-    expect(skins.map((t) => t.name)).toEqual(['skin-dense', 'skin-editorial']);
+    expect(skins.map((t) => t.name)).toEqual([
+      'skin-brutalist',
+      'skin-dense',
+      'skin-editorial',
+      'skin-glass',
+    ]);
     const themes = await runList(ctx, { type: 'theme' });
     expect(themes.map((t) => t.name)).toEqual(['theme-default', 'theme-ledger']);
     expect(out).toContainEqual(expect.stringMatching(/^\+ theme-default\s/));

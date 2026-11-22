@@ -9,7 +9,7 @@ Commands
   init --template <name> [folder]  start a new project from a template
   add <items...>                   add items and everything they depend on
   add <theme link>                 add a theme made in the docs theme generator
-  add skin-<id>                    add a skin (dense, editorial), then set data-skin="<id>"
+  add skin-<id>                    add a skin (dense, editorial, glass, brutalist), then set data-skin="<id>"
   diff <item>                      compare an installed item with the registry
   list                             list registry items (--type, --templates)
   search <query>                   search registry items

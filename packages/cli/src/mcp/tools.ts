@@ -283,7 +283,7 @@ const GENERAL_DOCS = [
   '',
   'Workflow: `rectio init` once (rectio.json, tokens, a theme, the cn helper), then `rectio add <items>`. Dependencies between items are installed with them. `rectio diff <item>` compares with upstream.',
   'Styling: components read semantic tokens only. Use Tailwind utilities such as bg-surface, text-fg, border-line, bg-accent; never hex or the default Tailwind palette (it is removed). get_tokens lists them with values.',
-  'Theming: data-theme="<id>" on <html> (or a ThemeScope component for a subtree) picks a theme; data-mode="dark" picks dark (without it the system setting decides); data-density="compact" tightens controls; data-skin="<id>" (after `rectio add skin-<id>`, or skin on ThemeScope) restyles type, corners and rhythm on any theme: dense for data-heavy screens, editorial for serif headings and hairlines.',
+  'Theming: data-theme="<id>" on <html> (or a ThemeScope component for a subtree) picks a theme; data-mode="dark" picks dark (without it the system setting decides); data-density="compact" tightens controls; data-skin="<id>" (after `rectio add skin-<id>`, or skin on ThemeScope) restyles type, corners, borders, rhythm and how surfaces float on any theme: dense for data-heavy screens, editorial for serif headings and hairlines, glass for translucent surfaces over a blurred backdrop (solid where it cannot blur), brutalist for ink borders, square corners and hard offset shadows.',
   'Money and quantities: the `numeric` utility gives tabular lining figures.',
   'This MCP server is read-only: get_add_command returns the command, you run it.',
   'Per-item notes: call get_docs with an item name.',

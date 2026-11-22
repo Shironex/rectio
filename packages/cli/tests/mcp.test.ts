@@ -172,6 +172,11 @@ describe('get_tokens', () => {
     expect(text).toContain('Theme "default", light mode');
     expect(text).toMatch(/--rx-surface: oklch\(.*\[tailwind: color-surface\]/);
     expect(text).toContain('--rx-font-family-sans');
+    // Composites a skin's switches reach still name their utility.
+    expect(text).toMatch(/--rx-border: oklch\(.*\[tailwind: color-line\]/);
+    expect(text).toMatch(/--rx-surface-raised: oklch\(.*\[tailwind: color-surface-raised\]/);
+    expect(text).toMatch(/--rx-shadow-raised: .*\[tailwind: shadow-raised\]/);
+    expect(text).toMatch(/--rx-warning-mark: oklch\(.*\[tailwind: color-warning-mark\]/);
   });
 
   it('applies the dark overrides and filters by family', async () => {

@@ -67,9 +67,21 @@ export function themeValues(
   return values;
 }
 
+/** `color-line-strong` -> `--rx-border-strong`: the token a colour or shadow utility is named for. */
+function tokenNamed(key: string): string {
+  const [group = '', ...rest] = key.split('-');
+  const name = rest.join('-');
+  if (group !== 'color') return `--rx-${key}`;
+  if (name === 'fg' || name.startsWith('fg-')) return `--rx-text${name.slice(2)}`;
+  if (name === 'line' || name.startsWith('line-')) return `--rx-border${name.slice(4)}`;
+  return `--rx-${name}`;
+}
+
 /**
  * Tailwind utility keys from the `@theme inline` block of the tokens style item:
- * `--color-surface: var(--rx-surface)` maps `--rx-surface` to `color-surface`.
+ * `--color-surface: var(--rx-surface)` maps `--rx-surface` to `color-surface`. A colour or shadow
+ * that a skin's switches reach is a composite (`color-mix(in oklab, var(--rx-surface) ...)`, a
+ * shadow with an edge highlight and an offset layer): it maps to the token it is named for.
  */
 export function tailwindUtilities(css: string): Map<string, string> {
   const map = new Map<string, string>();
@@ -79,6 +91,13 @@ export function tailwindUtilities(css: string): Map<string, string> {
     const key = match[1] ?? '';
     const token = match[2] ?? '';
     if (!key.includes('--') && !map.has(token)) map.set(token, key);
+  }
+  for (const match of css.matchAll(/--((?:color|shadow)-[\w-]+):\s*([^;]+);/g)) {
+    const key = match[1] ?? '';
+    const token = tokenNamed(key);
+    if (key.includes('--') || map.has(token)) continue;
+    if ((match[2] ?? '').includes(`var(${token})`) || (match[2] ?? '').includes(`var(${token},`))
+      map.set(token, key);
   }
   return map;
 }
