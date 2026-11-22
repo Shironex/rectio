@@ -1,9 +1,17 @@
-import { cn, type ProgressTone } from '@rectio/ui';
+import { cn, touchHitArea, type ProgressTone } from '@rectio/ui';
 
 /**
  * Class strings the SaaS blocks' local pieces share, matching the ones @rectio/ui uses inside its
  * own components, so a block's own controls sit beside the shared ones without a seam.
  */
+
+/**
+ * A 44px hit area around a small pressable on touch screens; the drawn control keeps its size.
+ *
+ * @deprecated Use `touchHitArea` from `@rectio/ui`, the kit's one hit area. Kept for one release so
+ * blocks installed at older versions still compile after this file updates.
+ */
+export const touchTarget = touchHitArea;
 
 /** The one focus signal, outside the border. */
 export const focusRing = 'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus';
