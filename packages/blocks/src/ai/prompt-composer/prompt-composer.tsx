@@ -123,6 +123,7 @@ export function PromptComposer({
   const field = useRef<HTMLTextAreaElement | null>(null);
   const pendingCaret = useRef<number | null>(null);
   const listId = useId();
+  const countId = useId();
 
   const setText = (next: string) => {
     if (!controlled) setDraft(next);
@@ -191,6 +192,8 @@ export function PromptComposer({
     count === 'characters' ? text.length : count === 'tokens' ? countTokens(text) : 0;
   const tone = count === undefined ? 'quiet' : countTone(measured, limit);
   const format = (n: number) => new Intl.NumberFormat(locale).format(n);
+  // A phone has less room beside Send: the figures shorten (8K) and keep their unit.
+  const compact = (n: number) => new Intl.NumberFormat(locale, { notation: 'compact' }).format(n);
   const unit = count ?? 'tokens';
   const countAnnouncement =
     tone === 'over' && limit !== undefined
@@ -220,6 +223,7 @@ export function PromptComposer({
           className={cn(
             'relative h-(--rx-button-height-md) w-auto max-w-48 min-w-0 gap-1.5 border-transparent bg-transparent px-2.5 text-sm font-medium text-fg-muted shadow-none',
             'hover:border-transparent hover:bg-surface-hover hover:text-fg data-popup-open:border-transparent',
+            'data-disabled:border-transparent data-disabled:bg-transparent max-sm:max-w-36',
             touchHitArea,
           )}
         />
@@ -239,7 +243,7 @@ export function PromptComposer({
         <Enter
           data-part="commands"
           className={cn(
-            'absolute inset-x-0 bottom-full z-20 mb-2 overflow-hidden rounded-panel border border-line bg-surface-overlay shadow-overlay',
+            'absolute inset-x-0 bottom-full z-20 mb-2 overflow-hidden rounded-panel border border-line bg-surface-overlay shadow-overlay backdrop-surface',
           )}
         >
           {matches.length === 0 ? (
@@ -271,10 +275,10 @@ export function PromptComposer({
                   className={cn(
                     'flex cursor-pointer items-baseline gap-3 rounded-control px-2.5 py-2 text-sm',
                     'pointer-coarse:min-h-(--rx-control-height-touch) pointer-coarse:items-center',
-                    'data-highlighted:bg-surface-hover',
+                    'data-highlighted:bg-accent-subtle data-highlighted:text-accent-strong',
                   )}
                 >
-                  <span className="shrink-0 font-mono font-medium text-fg">/{command.name}</span>
+                  <span className="shrink-0 font-mono font-medium">/{command.name}</span>
                   {command.description !== undefined && (
                     <span className="min-w-0 truncate text-fg-muted">{command.description}</span>
                   )}
@@ -306,6 +310,8 @@ export function PromptComposer({
           'aria-autocomplete': commands.length > 0 ? 'list' : undefined,
           'aria-controls': open && matches.length > 0 ? listId : undefined,
           'aria-activedescendant': open && matches.length > 0 ? optionId(current) : undefined,
+          'aria-describedby': count === undefined ? undefined : countId,
+          'aria-invalid': tone === 'over' || undefined,
         }}
         tools={
           picker === null && tools === undefined ? undefined : (
@@ -317,17 +323,33 @@ export function PromptComposer({
         }
         meta={
           count === undefined ? undefined : (
+            // Read as the field's description, so the count is there on demand as well as said
+            // near and past the limit.
             <span
+              id={countId}
               aria-hidden
               data-part="count"
               data-tone={tone}
               className={cn(
                 'text-sm whitespace-nowrap text-fg-subtle numeric',
-                'data-[tone=near]:text-warning-strong data-[tone=over]:text-negative-strong',
+                'data-[tone=near]:text-warning-strong data-[tone=over]:font-medium data-[tone=over]:text-negative-strong',
               )}
             >
-              {limit === undefined ? format(measured) : `${format(measured)} / ${format(limit)}`}
-              <span className="max-sm:hidden"> {unit}</span>
+              <span className="max-sm:hidden">
+                {m.count(format(measured), limit === undefined ? undefined : format(limit), unit)}
+                {tone === 'over' &&
+                  limit !== undefined &&
+                  `, ${m.overBy(format(measured - limit))}`}
+              </span>
+              <span className="sm:hidden">
+                {tone === 'over' && limit !== undefined
+                  ? m.overBy(compact(measured - limit))
+                  : m.count(
+                      compact(measured),
+                      limit === undefined ? undefined : compact(limit),
+                      unit,
+                    )}
+              </span>
             </span>
           )
         }

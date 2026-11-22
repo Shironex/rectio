@@ -15,6 +15,8 @@ export interface PromptComposerMessages extends PromptInputMessages {
   /** Said near and past the limit. */
   countLeft: (left: string, unit: 'tokens' | 'characters') => string;
   countOver: (over: string, unit: 'tokens' | 'characters') => string;
+  /** Shown beside the count past the limit, such as `10 over`. */
+  overBy: (over: string) => string;
 }
 
 export const PROMPT_COMPOSER_MESSAGES: PromptComposerMessages = {
@@ -30,4 +32,5 @@ export const PROMPT_COMPOSER_MESSAGES: PromptComposerMessages = {
     limit === undefined ? `${count} ${unit}` : `${count} / ${limit} ${unit}`,
   countLeft: (left, unit) => `${left} ${unit} left`,
   countOver: (over, unit) => `${over} ${unit} over the limit, shorten to send`,
+  overBy: (over) => `${over} over`,
 };

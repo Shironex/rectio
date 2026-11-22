@@ -333,32 +333,30 @@ function AssistantBody({
       </h2>
       <div className="flex shrink-0 items-center gap-1 pointer-coarse:gap-touch-gap">
         {headerActions}
-        {!mobile && (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  aria-label={m.close}
-                  aria-keyshortcuts={keys}
-                  data-part="assistant-close"
-                  onClick={state.hide}
-                  className={cn(
-                    'relative inline-flex size-(--rx-button-height-md) cursor-pointer items-center justify-center rounded-(--rx-button-radius) text-fg-muted',
-                    'transition-colors duration-fast ease-standard hover:bg-surface-hover hover:text-fg',
-                    'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
-                    touchHitArea,
-                  )}
-                >
-                  <XIcon aria-hidden weight="bold" className="size-4" />
-                </button>
-              }
-            />
-            <TooltipContent side="bottom" {...(shortcut === null ? {} : { shortcut })}>
-              {m.close}
-            </TooltipContent>
-          </Tooltip>
-        )}
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                aria-label={m.close}
+                aria-keyshortcuts={keys}
+                data-part="assistant-close"
+                onClick={state.hide}
+                className={cn(
+                  'relative inline-flex size-(--rx-button-height-md) cursor-pointer items-center justify-center rounded-(--rx-button-radius) text-fg-muted',
+                  'transition-colors duration-fast ease-standard hover:bg-surface-hover hover:text-fg',
+                  'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
+                  touchHitArea,
+                )}
+              >
+                <XIcon aria-hidden weight="bold" className="size-4" />
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" {...(shortcut === null ? {} : { shortcut })}>
+            {m.close}
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );
@@ -399,7 +397,8 @@ function AssistantBody({
           <DrawerContent
             height="full"
             size="md"
-            closeLabel={m.close}
+            // The header carries the close button, beside its own actions.
+            showClose={false}
             initialFocus={() => panelField(panelRef.current) ?? true}
           >
             <DrawerTitle className="sr-only">{title ?? m.label}</DrawerTitle>
@@ -470,8 +469,8 @@ function AssistantBody({
                   aria-keyshortcuts={keys}
                   onClick={state.show}
                   className={cn(
-                    'relative inline-flex size-(--rx-button-height-md) cursor-pointer items-center justify-center rounded-(--rx-button-radius) text-accent-strong',
-                    'transition-colors duration-fast ease-standard hover:bg-surface-hover',
+                    'relative inline-flex size-(--rx-button-height-md) cursor-pointer items-center justify-center rounded-(--rx-button-radius) text-fg-muted',
+                    'transition-colors duration-fast ease-standard hover:bg-surface-hover hover:text-fg',
                     'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus',
                     touchHitArea,
                   )}

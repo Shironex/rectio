@@ -90,8 +90,13 @@ describe('PromptComposer', () => {
     const count = document.querySelector('[data-part="count"]');
     expect(count).toHaveTextContent('2 / 3 tokens');
     expect(count).toHaveAttribute('data-tone', 'quiet');
+    // The count is the field's description, so it can be read on demand.
+    expect(field.getAttribute('aria-describedby')).toContain(count?.id);
+    expect(field).not.toHaveAttribute('aria-invalid');
     await userEvent.type(field, ' three four');
     expect(count).toHaveAttribute('data-tone', 'over');
+    expect(count).toHaveTextContent('4 / 3 tokens, 1 over');
+    expect(field).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByRole('button', { name: 'Send' })).toHaveAttribute('aria-disabled', 'true');
     await userEvent.keyboard('{Enter}');
     expect(onSubmit).not.toHaveBeenCalled();
@@ -260,7 +265,10 @@ describe('ChatWorkspace', () => {
     await userEvent.click(screen.getByRole('button', { name: 'More for Q3 close checklist' }));
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Delete' }));
     const dialog = await screen.findByRole('alertdialog', { name: 'Delete this chat?' });
-    expect(within(dialog).getByRole('button', { name: 'Cancel' })).toHaveFocus();
+    // The dialog moves focus to the safe answer once it has opened.
+    await waitFor(() => {
+      expect(within(dialog).getByRole('button', { name: 'Cancel' })).toHaveFocus();
+    });
     await userEvent.click(within(dialog).getByRole('button', { name: 'Delete chat' }));
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: 'Q3 close checklist' })).not.toBeInTheDocument();

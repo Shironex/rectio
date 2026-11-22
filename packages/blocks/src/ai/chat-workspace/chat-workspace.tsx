@@ -363,13 +363,15 @@ export function AiChatList({
             {m.newChat}
           </Button>
         )}
-        <SearchInput
-          aria-label={m.search}
-          placeholder={m.search}
-          value={query}
-          onValueChange={setQuery}
-          clearLabel={m.clearSearch}
-        />
+        {(loading || chats.length > 0) && (
+          <SearchInput
+            aria-label={m.search}
+            placeholder={m.search}
+            value={query}
+            onValueChange={setQuery}
+            clearLabel={m.clearSearch}
+          />
+        )}
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 pt-1 pb-3">
         {loading ? (
