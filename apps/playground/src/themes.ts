@@ -46,6 +46,7 @@ export function readView(search: string) {
         'scheduling',
         'chat',
         'ai-blocks',
+        'people',
         'viz',
       ] as const
     ).find((v) => v === params.get('view')) ?? 'matrix';

@@ -34,6 +34,9 @@ const ChatPage = lazy(() => import('./chat/chat-page').then((m) => ({ default: m
 const AiBlocksPage = lazy(() =>
   import('./ai-blocks/ai-blocks-page').then((m) => ({ default: m.AiBlocksPage })),
 );
+const PeoplePage = lazy(() =>
+  import('./people/people-page').then((m) => ({ default: m.PeoplePage })),
+);
 const VizPage = lazy(() => import('./viz/viz-page').then((m) => ({ default: m.VizPage })));
 const MotionPage = lazy(() =>
   import('./motion/motion-page').then((m) => ({ default: m.MotionPage })),
@@ -75,6 +78,8 @@ export function App() {
         <ChatPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'ai-blocks' ? (
         <AiBlocksPage theme={theme} mode={mode} motion={motion} />
+      ) : view === 'people' ? (
+        <PeoplePage theme={theme} mode={mode} motion={motion} />
       ) : view === 'viz' ? (
         <VizPage theme={theme} mode={mode} motion={motion} />
       ) : view === 'motion' ? (

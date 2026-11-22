@@ -44,6 +44,7 @@
     "shoot:viz": "node scripts/shoot-viz.ts",
     "shoot:scheduling": "node scripts/shoot-scheduling.ts",
     "shoot:chat": "node scripts/shoot-chat.ts",
-    "shoot:ai-blocks": "node scripts/shoot-ai-blocks.ts"
+    "shoot:ai-blocks": "node scripts/shoot-ai-blocks.ts",
+    "shoot:people": "node scripts/shoot-people.ts"
   }
 }

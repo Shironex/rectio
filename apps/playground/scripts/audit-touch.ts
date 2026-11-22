@@ -35,6 +35,12 @@ const VIEWS = [
   'ai-blocks',
   'ai-blocks&state=sidebar',
   'ai-blocks&state=composer',
+  'people',
+  'people&state=timesheet-review',
+  'people&state=leave',
+  'people&state=leave-form',
+  'people&state=org',
+  'people&state=payroll',
   'viz',
 ] as const;
 const onlyView = process.argv[2];
