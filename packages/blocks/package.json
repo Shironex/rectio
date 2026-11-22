@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "type": "module",
-  "description": "rectio pro blocks composed from @rectio/ui, with motion variants on @rectio/motion: finance (invoices, ledger, cash flow, KPIs, approvals, aging, budget) and marketing (header, heroes, features, stats, testimonials, FAQ, CTA, newsletter, team, contact, blog, footer, legal pages, cookie consent, announcements) and docs (layout, navigation, table of contents, MDX components, code blocks, API reference, search, feedback, changelog).",
+  "description": "rectio pro blocks composed from @rectio/ui, with motion variants on @rectio/motion: finance (invoices, ledger, cash flow, KPIs, approvals, aging, budget) and marketing (header, heroes, features, stats, testimonials, FAQ, CTA, newsletter, team, contact, blog, footer, legal pages, cookie consent, announcements) and analytics (metric trend, breakdown table, funnel card, goal tracker) and docs (layout, navigation, table of contents, MDX components, code blocks, API reference, search, feedback, changelog).",
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
@@ -14,7 +14,9 @@
     "./docs": "./src/docs/index.ts",
     "./docs/motion": "./src/docs/motion.ts",
     "./ai": "./src/ai/index.ts",
-    "./ai/motion": "./src/ai/motion.ts"
+    "./ai/motion": "./src/ai/motion.ts",
+    "./analytics": "./src/analytics/index.ts",
+    "./analytics/motion": "./src/analytics/motion.ts"
   },
   "files": [
     "src"
