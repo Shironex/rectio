@@ -1,3 +1,5 @@
+'use client';
+
 import { Collapsible as BaseCollapsible } from '@base-ui/react/collapsible';
 import {
   CaretRightIcon,
@@ -9,27 +11,12 @@ import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
 import { disclosureCaret, disclosurePanelMotion } from '../accordion/accordion';
 import { cn } from '../lib/cn';
-
-export type ToolCallStatus = 'running' | 'done' | 'failed';
-
-/** Words the tool call says, for apps that translate or reword them. */
-export interface ToolCallMessages {
-  running: string;
-  done: string;
-  failed: string;
-  input: string;
-  output: string;
-  error: string;
-}
-
-export const TOOL_CALL_MESSAGES: ToolCallMessages = {
-  running: 'Running',
-  done: 'Done',
-  failed: 'Failed',
-  input: 'Input',
-  output: 'Output',
-  error: 'Error',
-};
+import {
+  type ToolCallStatus,
+  type ToolCallMessages,
+  TOOL_CALL_MESSAGES,
+  formatToolValue,
+} from './tool-call-messages';
 
 export interface ToolCallProps extends Omit<
   ComponentProps<typeof BaseCollapsible.Root>,
@@ -50,18 +37,6 @@ export interface ToolCallProps extends Omit<
   duration?: ReactNode;
   messages?: Partial<ToolCallMessages> | undefined;
   className?: string | undefined;
-}
-
-/** A value as indented JSON; something JSON cannot hold reads as its string form instead. */
-export function formatToolValue(value: unknown): string {
-  if (typeof value === 'string') return value;
-  try {
-    // `undefined` and functions stringify to nothing at all.
-    const json: unknown = JSON.stringify(value, null, 2);
-    return typeof json === 'string' ? json : String(value);
-  } catch {
-    return String(value);
-  }
 }
 
 const STATUS_ICON = {
@@ -92,7 +67,7 @@ export function DisclosureData({ label, children }: { label: string; children: R
 
 const codeBox = cn(
   'm-0 max-h-72 overflow-auto rounded-control bg-code-background px-3 py-2 font-mono text-sm text-code-foreground',
-  'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+  'outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-focus',
 );
 
 /**
@@ -193,3 +168,10 @@ export function ToolCall({
     </BaseCollapsible.Root>
   );
 }
+
+export {
+  type ToolCallStatus,
+  type ToolCallMessages,
+  TOOL_CALL_MESSAGES,
+  formatToolValue,
+} from './tool-call-messages';

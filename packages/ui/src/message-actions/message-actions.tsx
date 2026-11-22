@@ -1,3 +1,5 @@
+'use client';
+
 import {
   ArrowClockwiseIcon,
   CheckIcon,
@@ -16,30 +18,10 @@ import {
 } from 'react';
 
 import { Button, type ButtonProps } from '../button/button';
+import { copyToClipboard } from '../copy-button/clipboard';
 import { cn } from '../lib/cn';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip/tooltip';
-
-/** Every word the message actions say, for apps that translate or reword them. */
-export interface MessageActionsMessages {
-  /** Names the toolbar. */
-  toolbar: string;
-  copy: string;
-  copied: string;
-  regenerate: string;
-  edit: string;
-  good: string;
-  bad: string;
-}
-
-export const MESSAGE_ACTIONS_MESSAGES: MessageActionsMessages = {
-  toolbar: 'Message actions',
-  copy: 'Copy',
-  copied: 'Copied',
-  regenerate: 'Regenerate',
-  edit: 'Edit',
-  good: 'Good response',
-  bad: 'Bad response',
-};
+import { type MessageActionsMessages, MESSAGE_ACTIONS_MESSAGES } from './message-actions-messages';
 
 export interface MessageActionsProps extends ComponentProps<'div'> {
   /** Names the toolbar for assistive technology. Default "Message actions". */
@@ -171,7 +153,8 @@ export function MessageCopyAction({
   );
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(typeof value === 'function' ? value() : value);
+      // The kit's clipboard helper: the Clipboard API, or the copy command where it is blocked.
+      await copyToClipboard(typeof value === 'function' ? value() : value);
       setCopied(true);
       onCopied?.();
       clearTimeout(timer.current);
@@ -285,3 +268,5 @@ export function MessageFeedback({
     </>
   );
 }
+
+export { type MessageActionsMessages, MESSAGE_ACTIONS_MESSAGES } from './message-actions-messages';

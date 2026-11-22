@@ -1,3 +1,5 @@
+'use client';
+
 import {
   ArrowClockwiseIcon,
   CircleNotchIcon,
@@ -9,41 +11,10 @@ import { useId, useState, type ComponentProps, type KeyboardEvent, type ReactNod
 import { Button } from '../button/button';
 import { cn } from '../lib/cn';
 import { Textarea } from '../textarea/textarea';
+import { type ChatMessageMessages, CHAT_MESSAGE_MESSAGES } from './chat-message-messages';
 
 export type ChatMessageFrom = 'user' | 'assistant' | 'system';
 export type ChatMessageStatus = 'sending' | 'sent' | 'streaming' | 'stopped' | 'error';
-
-/** Every sentence a chat message says, for apps that translate or reword them. */
-export interface ChatMessageMessages {
-  /** The name read for the user's own messages when `author` is not given. */
-  you: string;
-  /** The name read for the assistant's messages when `author` is not given. */
-  assistant: string;
-  sending: string;
-  /** Beside the name while a reply streams. */
-  writing: string;
-  stopped: string;
-  /** Shown with `status: 'error'` when `error` is not given. */
-  failed: string;
-  retry: string;
-  save: string;
-  cancel: string;
-  /** Names the edit field. */
-  editLabel: string;
-}
-
-export const CHAT_MESSAGE_MESSAGES: ChatMessageMessages = {
-  you: 'You',
-  assistant: 'Assistant',
-  sending: 'Sending',
-  writing: 'Writing',
-  stopped: 'Stopped',
-  failed: 'The message could not be sent.',
-  retry: 'Retry',
-  save: 'Save and send',
-  cancel: 'Cancel',
-  editLabel: 'Edit message',
-};
 
 export interface ChatMessageProps extends Omit<ComponentProps<'article'>, 'children' | 'role'> {
   /** Who wrote it: the user's own words, the assistant's reply, or a note from the system. */
@@ -337,3 +308,5 @@ export function ChatMessageEditor({
 }
 
 export { StreamingText, type StreamingTextProps } from './streaming-text';
+
+export { type ChatMessageMessages, CHAT_MESSAGE_MESSAGES } from './chat-message-messages';

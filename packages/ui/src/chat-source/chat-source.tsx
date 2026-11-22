@@ -1,45 +1,20 @@
+'use client';
+
 import { Collapsible as BaseCollapsible } from '@base-ui/react/collapsible';
 import { CaretRightIcon } from '@phosphor-icons/react';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps } from 'react';
 
 import { disclosureCaret, disclosurePanelMotion } from '../accordion/accordion';
 import { cn } from '../lib/cn';
-import { safeUrl } from '../markdown/markdown';
-
-/** One document, page or record a reply drew on. */
-export interface ChatSourceItem {
-  id: string;
-  title: string;
-  /** Where it lives. Unsafe protocols are dropped and the source shows without a link. */
-  url?: string | undefined;
-  /** The site or system it came from. Derived from `url` when omitted. */
-  site?: string | undefined;
-  /** The passage the reply used, a sentence or two. */
-  excerpt?: ReactNode;
-}
-
-/** Words the sources say, for apps that translate or reword them. */
-export interface ChatSourceMessages {
-  /** The summary of the list: "3 sources". */
-  count: (count: number) => string;
-  /** The accessible name of a citation chip. */
-  cite: (index: number, title: string) => string;
-}
-
-export const CHAT_SOURCE_MESSAGES: ChatSourceMessages = {
-  count: (count) => `${String(count)} ${count === 1 ? 'source' : 'sources'}`,
-  cite: (index, title) => `Source ${String(index)}: ${title}`,
-};
-
-/** `https://www.example.com/a` to `example.com`; null for an address that is not one. */
-export function sourceSite(url: string | undefined): string | null {
-  if (url === undefined) return null;
-  try {
-    return new URL(url).hostname.replace(/^www\./, '');
-  } catch {
-    return null;
-  }
-}
+import { isExternalHref } from '../link/href';
+import { Anchor } from '../link/link';
+import { safeUrl } from '../markdown/markdown-parse';
+import {
+  type ChatSourceItem,
+  type ChatSourceMessages,
+  CHAT_SOURCE_MESSAGES,
+  sourceSite,
+} from './chat-source-messages';
 
 const linkFocus = 'outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus';
 
@@ -79,18 +54,18 @@ export function ChatSourceChip({
     );
   }
   return (
-    <a
+    <Anchor
       data-slot="chat-source-chip"
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+      external={isExternalHref(href)}
+      newTabHint=""
       aria-label={m.cite(index, source.title)}
       title={source.title}
       className={classes}
       {...props}
     >
       {content}
-    </a>
+    </Anchor>
   );
 }
 
@@ -155,17 +130,17 @@ export function ChatSources({ sources, messages, className, ...props }: ChatSour
                   {href === null ? (
                     <span className="text-sm font-medium text-fg">{source.title}</span>
                   ) : (
-                    <a
+                    <Anchor
                       href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      external={isExternalHref(href)}
+                      newTabHint={` ${m.newTab}`}
                       className={cn(
                         'w-fit rounded-control text-sm font-medium text-fg underline decoration-line-strong underline-offset-4 hover:decoration-fg',
                         linkFocus,
                       )}
                     >
                       {source.title}
-                    </a>
+                    </Anchor>
                   )}
                   {site !== null && <span className="text-xs text-fg-subtle">{site}</span>}
                   {source.excerpt !== undefined && (
@@ -182,3 +157,10 @@ export function ChatSources({ sources, messages, className, ...props }: ChatSour
     </BaseCollapsible.Root>
   );
 }
+
+export {
+  type ChatSourceItem,
+  type ChatSourceMessages,
+  CHAT_SOURCE_MESSAGES,
+  sourceSite,
+} from './chat-source-messages';

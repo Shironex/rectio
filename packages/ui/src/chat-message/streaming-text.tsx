@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
-import { streamingCaret } from '../markdown/markdown';
+import { streamingCaret } from '../markdown/markdown-messages';
 
 export interface StreamingTextProps {
   /** Everything received so far. */

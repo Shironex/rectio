@@ -31,7 +31,9 @@ describe('ChatSource', () => {
     const trigger = screen.getByRole('button', { name: '2 sources' });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(trigger);
-    expect(screen.getByRole('link', { name: 'Accounts payable policy' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /^Accounts payable policy\s*\(opens in a new tab\)$/ }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Invoices over 5,000 need two approvers.')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Vendor master' })).not.toBeInTheDocument();
     expect(screen.getByText('Vendor master')).toBeInTheDocument();

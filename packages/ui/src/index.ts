@@ -617,54 +617,61 @@ export {
 export { ChartCard, type ChartCardProps } from './chart-card/chart-card';
 // AI and chat.
 export {
-  DEFAULT_PROTOCOLS,
-  MARKDOWN_MESSAGES,
   Markdown,
   MarkdownCode,
-  markdownToText,
-  parseMarkdown,
-  safeUrl,
-  streamingCaret,
-  type MarkdownAlign,
-  type MarkdownBlock,
   type MarkdownCodeProps,
   type MarkdownComponents,
   type MarkdownImageProps,
-  type MarkdownInline,
   type MarkdownLinkProps,
-  type MarkdownMessages,
-  type MarkdownParseOptions,
   type MarkdownProps,
   type MarkdownSize,
 } from './markdown/markdown';
 export {
-  CHAT_MESSAGE_MESSAGES,
+  MARKDOWN_MESSAGES,
+  streamingCaret,
+  type MarkdownMessages,
+} from './markdown/markdown-messages';
+export {
+  DEFAULT_PROTOCOLS,
+  markdownToText,
+  parseMarkdown,
+  safeUrl,
+  type MarkdownAlign,
+  type MarkdownBlock,
+  type MarkdownInline,
+  type MarkdownParseOptions,
+} from './markdown/markdown-parse';
+export {
   ChatMessage,
   ChatMessageEditor,
   StreamingText,
   type ChatMessageEditorProps,
   type ChatMessageFrom,
-  type ChatMessageMessages,
   type ChatMessageProps,
   type ChatMessageStatus,
   type StreamingTextProps,
 } from './chat-message/chat-message';
 export {
-  CHAT_ANNOUNCER_MESSAGES,
-  CHAT_THREAD_MESSAGES,
+  CHAT_MESSAGE_MESSAGES,
+  type ChatMessageMessages,
+} from './chat-message/chat-message-messages';
+export {
   ChatAnnouncer,
   ChatDaySeparator,
   ChatThread,
-  chatDayLabel,
-  isSameDay,
-  type ChatAnnouncerMessages,
   type ChatAnnouncerProps,
   type ChatDaySeparatorProps,
-  type ChatThreadMessages,
   type ChatThreadProps,
 } from './chat-thread/chat-thread';
 export {
-  MESSAGE_ACTIONS_MESSAGES,
+  CHAT_ANNOUNCER_MESSAGES,
+  CHAT_THREAD_MESSAGES,
+  chatDayLabel,
+  isSameDay,
+  type ChatAnnouncerMessages,
+  type ChatThreadMessages,
+} from './chat-thread/chat-thread-messages';
+export {
   MessageAction,
   MessageActions,
   MessageCopyAction,
@@ -672,7 +679,6 @@ export {
   MessageFeedback,
   MessageRegenerateAction,
   type MessageActionProps,
-  type MessageActionsMessages,
   type MessageActionsProps,
   type MessageCopyActionProps,
   type MessageFeedbackProps,
@@ -680,37 +686,43 @@ export {
   type MessageRegenerateActionProps,
 } from './message-actions/message-actions';
 export {
-  PROMPT_INPUT_MESSAGES,
+  MESSAGE_ACTIONS_MESSAGES,
+  type MessageActionsMessages,
+} from './message-actions/message-actions-messages';
+export {
   PromptInput,
-  type PromptInputMessages,
   type PromptInputProps,
   type PromptInputStatus,
 } from './prompt-input/prompt-input';
 export {
-  CHAT_SOURCE_MESSAGES,
+  PROMPT_INPUT_MESSAGES,
+  type PromptInputMessages,
+} from './prompt-input/prompt-input-messages';
+export {
   ChatSourceChip,
   ChatSources,
-  sourceSite,
   type ChatSourceChipProps,
-  type ChatSourceItem,
-  type ChatSourceMessages,
   type ChatSourcesProps,
 } from './chat-source/chat-source';
 export {
+  CHAT_SOURCE_MESSAGES,
+  sourceSite,
+  type ChatSourceItem,
+  type ChatSourceMessages,
+} from './chat-source/chat-source-messages';
+export { ToolCall, type ToolCallProps } from './tool-call/tool-call';
+export {
   TOOL_CALL_MESSAGES,
-  ToolCall,
   formatToolValue,
   type ToolCallMessages,
-  type ToolCallProps,
   type ToolCallStatus,
-} from './tool-call/tool-call';
+} from './tool-call/tool-call-messages';
+export { Reasoning, type ReasoningProps } from './reasoning/reasoning';
 export {
   REASONING_MESSAGES,
-  Reasoning,
   type ReasoningMessages,
-  type ReasoningProps,
   type ReasoningStatus,
-} from './reasoning/reasoning';
+} from './reasoning/reasoning-messages';
 export {
   CHAT_LOADER_MESSAGES,
   ChatLoader,

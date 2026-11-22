@@ -1,3 +1,5 @@
+'use client';
+
 import { ArrowSquareOutIcon } from '@phosphor-icons/react';
 import {
   Fragment,
@@ -17,6 +19,8 @@ import {
   type MarkdownBlock,
   type MarkdownInline,
 } from './markdown-parse';
+import { type MarkdownMessages, MARKDOWN_MESSAGES, streamingCaret } from './markdown-messages';
+import { Anchor } from '../link/link';
 
 export interface MarkdownCodeProps {
   /** The code as text, without the fence. */
@@ -76,18 +80,6 @@ export interface MarkdownProps extends Omit<ComponentProps<'div'>, 'children'> {
   messages?: Partial<MarkdownMessages> | undefined;
 }
 
-/** Names the renderer gives its scrolling regions, for apps that translate them. */
-export interface MarkdownMessages {
-  /** Names a code block: "ts code", or "Code" without a language. */
-  code: (lang: string | undefined) => string;
-  table: string;
-}
-
-export const MARKDOWN_MESSAGES: MarkdownMessages = {
-  code: (lang) => (lang === undefined ? 'Code' : `${lang} code`),
-  table: 'Table',
-};
-
 const HEADING: Record<MarkdownSize, Record<1 | 2 | 3 | 4 | 5 | 6, string>> = {
   base: {
     1: 'text-xl font-heading tracking-tight',
@@ -112,15 +104,6 @@ const ALIGN: Record<Exclude<MarkdownAlign, null>, 'start' | 'center' | 'end'> = 
   center: 'center',
   right: 'end',
 };
-
-/**
- * The caret at the end of text that is still arriving, as classes for an `::after`: a short accent
- * bar that breathes. Breathing is a fade, so it stays under reduced motion.
- */
-export const streamingCaret = cn(
-  'after:ms-0.5 after:inline-block after:h-4 after:w-0.5 after:translate-y-0.5',
-  'after:rounded-badge after:bg-accent after:animate-breathe',
-);
 
 const isExternal = (href: string) => /^(?:[a-z][a-z\d+.-]*:)?\/\//i.test(href);
 
@@ -158,7 +141,7 @@ export function MarkdownCode({
         aria-label={label}
         className={cn(
           'm-0 overflow-x-auto px-3 py-2.5 font-mono text-sm',
-          'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+          'outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-focus',
         )}
       >
         <code>{code}</code>
@@ -177,10 +160,12 @@ function MarkdownLink({
 }: MarkdownLinkProps & { newTab: boolean; newTabLabel: string }) {
   const opensTab = external && newTab;
   return (
-    <a
+    // Through the kit's Anchor, so a link inside the app follows the app's router.
+    <Anchor
       href={href}
       title={title}
-      {...(opensTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      external={opensTab}
+      newTabHint={opensTab ? ` ${newTabLabel}` : ''}
       className={cn(
         'rounded-control font-medium text-accent-strong underline decoration-accent-strong/40 underline-offset-4',
         'hover:decoration-accent-strong',
@@ -189,16 +174,13 @@ function MarkdownLink({
     >
       {children}
       {opensTab && (
-        <>
-          <ArrowSquareOutIcon
-            aria-hidden
-            weight="bold"
-            className="ms-0.5 inline size-3 align-baseline"
-          />
-          <span className="sr-only"> {newTabLabel}</span>
-        </>
+        <ArrowSquareOutIcon
+          aria-hidden
+          weight="bold"
+          className="ms-0.5 inline size-3 align-baseline"
+        />
       )}
-    </a>
+    </Anchor>
   );
 }
 
@@ -236,7 +218,7 @@ function TableFrame({ label, children }: { label: string; children: ReactNode })
         aria-label={label}
         className={cn(
           'min-w-0 overflow-x-auto rounded-panel border border-line',
-          'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+          'outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-focus',
         )}
       >
         {children}
@@ -520,3 +502,5 @@ export {
   type MarkdownInline,
   type MarkdownParseOptions,
 } from './markdown-parse';
+
+export { type MarkdownMessages, MARKDOWN_MESSAGES, streamingCaret } from './markdown-messages';

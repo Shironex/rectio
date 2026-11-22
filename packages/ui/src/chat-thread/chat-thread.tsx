@@ -1,3 +1,5 @@
+'use client';
+
 import { ArrowDownIcon } from '@phosphor-icons/react';
 import {
   useCallback,
@@ -12,23 +14,18 @@ import {
 
 import { Button } from '../button/button';
 import { cn } from '../lib/cn';
-import { markdownToText } from '../markdown/markdown';
+import { markdownToText } from '../markdown/markdown-parse';
+import {
+  type ChatThreadMessages,
+  CHAT_THREAD_MESSAGES,
+  chatDayLabel,
+  startOfDay,
+  type ChatAnnouncerMessages,
+  CHAT_ANNOUNCER_MESSAGES,
+} from './chat-thread-messages';
 
 /** How close to the end, in pixels, still counts as reading the latest message. */
 const PIN_SLACK = 48;
-
-/** Words the thread says, for apps that translate or reword them. */
-export interface ChatThreadMessages {
-  /** Names the conversation. */
-  label: string;
-  /** The button that returns to the newest message. */
-  jumpToLatest: string;
-}
-
-export const CHAT_THREAD_MESSAGES: ChatThreadMessages = {
-  label: 'Conversation',
-  jumpToLatest: 'Jump to latest',
-};
 
 export interface ChatThreadProps extends Omit<ComponentProps<'div'>, 'children'> {
   /** The messages, day separators and loaders, oldest first. */
@@ -153,7 +150,7 @@ export function ChatThread({
           data-part="scroller"
           className={cn(
             'min-h-0 flex-1 overflow-y-auto overscroll-contain',
-            'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+            'outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-focus',
           )}
         >
           <div
@@ -193,40 +190,6 @@ export function ChatThread({
   );
 }
 
-const DAY = 24 * 60 * 60 * 1000;
-
-function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-/** True when two times fall on the same calendar day, in the browser's time zone. */
-export function isSameDay(a: Date, b: Date): boolean {
-  return startOfDay(a).getTime() === startOfDay(b).getTime();
-}
-
-/**
- * The words for a day in a conversation: "Today", "Yesterday", the weekday within the last week,
- * then the date, with the year only when it is not this year.
- */
-export function chatDayLabel(
-  date: Date,
-  { now = new Date(), locale }: { now?: Date | undefined; locale?: string | undefined } = {},
-): string {
-  const days = Math.round((startOfDay(now).getTime() - startOfDay(date).getTime()) / DAY);
-  if (days >= 0 && days <= 1) {
-    return new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
-      .format(-days, 'day')
-      .replace(/^\p{Ll}/u, (letter) => letter.toLocaleUpperCase(locale));
-  }
-  if (days > 1 && days < 7)
-    return new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(date);
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'long',
-    ...(date.getFullYear() === now.getFullYear() ? {} : { year: 'numeric' }),
-  }).format(date);
-}
-
 export interface ChatDaySeparatorProps extends Omit<ComponentProps<'div'>, 'children'> {
   date: Date;
   locale?: string | undefined;
@@ -259,22 +222,6 @@ export function ChatDaySeparator({
     </div>
   );
 }
-
-/** What the announcer says, for apps that translate or reword it. */
-export interface ChatAnnouncerMessages {
-  /** Said once when a reply starts. */
-  writing: (author: string) => string;
-  /** Said once when a reply is complete. */
-  done: (author: string, text: string) => string;
-  /** Said when a reply stops with an error. */
-  failed: (author: string) => string;
-}
-
-export const CHAT_ANNOUNCER_MESSAGES: ChatAnnouncerMessages = {
-  writing: (author) => `${author} is writing a reply.`,
-  done: (author, text) => `${author} said: ${text}`,
-  failed: (author) => `${author} could not finish the reply.`,
-};
 
 export interface ChatAnnouncerProps {
   /** The reply being announced. A new id starts a new announcement. */
@@ -335,3 +282,12 @@ export function ChatAnnouncer({
     </div>
   );
 }
+
+export {
+  type ChatThreadMessages,
+  CHAT_THREAD_MESSAGES,
+  isSameDay,
+  chatDayLabel,
+  type ChatAnnouncerMessages,
+  CHAT_ANNOUNCER_MESSAGES,
+} from './chat-thread-messages';

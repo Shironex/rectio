@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
+import { LinkProvider } from '../link/link';
 import { Markdown, markdownToText, parseMarkdown, safeUrl } from './markdown';
 
 describe('parseMarkdown', () => {
@@ -104,6 +105,16 @@ describe('Markdown', () => {
     expect(external).toHaveAttribute('rel', 'noopener noreferrer');
     const local = screen.getByRole('link', { name: 'the CLI' });
     expect(local).not.toHaveAttribute('target');
+  });
+
+  it('sends links inside the app through the LinkProvider and leaves others plain', () => {
+    render(
+      <LinkProvider render={(props) => <a data-router="" {...props} />}>
+        <Markdown>{'See [the close](/close) or [the policy](https://example.com/p).'}</Markdown>
+      </LinkProvider>,
+    );
+    expect(screen.getByRole('link', { name: 'the close' })).toHaveAttribute('data-router');
+    expect(screen.getByRole('link', { name: /the policy/ })).not.toHaveAttribute('data-router');
   });
 
   it('links bare addresses', () => {
