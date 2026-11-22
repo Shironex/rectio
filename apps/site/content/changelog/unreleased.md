@@ -84,8 +84,8 @@ summary: Work that is merging into main now and ships with the next release.
 - `--rx-warning-mark`, an amber for marks drawn on a surface that holds 3:1 there. Rating stars
   use it, so they are gold in light mode rather than brown. A theme made in the generator before
   this release lacks it: make the theme again from its link, or add the token to it.
-- A tentative event draws its dashed edge twice as wide in the tone's mark colour, at 3:1 on the surface, not in
-  the faint tint of a confirmed event.
+- A tentative event draws its dashed edge twice as wide in the tone's mark colour, at 3:1 on the
+  surface, not in the faint tint of a confirmed event.
 - A streaming `Markdown` reply renders the same as the finished text at every moment: a code fence
   indented inside a list item no longer hides the blocks after the list, a table row that looks
   like a fence stays a row, and an open `*` in a quote the reply has moved past stays as written.
