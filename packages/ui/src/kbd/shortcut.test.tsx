@@ -102,6 +102,17 @@ describe('useShortcut', () => {
     // The held key stays the shortcut's: the browser does not act on it either.
     expect(repeated).toBe(false);
   });
+
+  it('lets a held key type in a field where the shortcut does not apply', () => {
+    const onPress = vi.fn();
+    render(<Listener shortcut="g" onPress={onPress} repeat={false} />);
+    const field = screen.getByRole('textbox', { name: 'Memo' });
+    const pressed = fireEvent.keyDown(field, { key: 'g', code: 'KeyG' });
+    const held = fireEvent.keyDown(field, { key: 'g', code: 'KeyG', repeat: true });
+    expect(onPress).not.toHaveBeenCalled();
+    expect(pressed).toBe(true);
+    expect(held).toBe(true);
+  });
 });
 
 describe('KbdShortcut', () => {

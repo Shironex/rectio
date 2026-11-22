@@ -61,12 +61,13 @@ export function useShortcut(
     const inFields = allowInFields ?? (parsed.mod || parsed.ctrl || parsed.alt);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing) return;
+      // In a field where the shortcut does not apply, held keys type as usual too.
+      if (!inFields && isEditable(event.target)) return;
       if (!repeat && event.repeat) {
         // Still the shortcut's key: keep the browser from acting on it while it is held.
         if (matchesShortcut(event, shortcut, mac)) event.preventDefault();
         return;
       }
-      if (!inFields && isEditable(event.target)) return;
       if (!matchesShortcut(event, shortcut, mac)) return;
       event.preventDefault();
       latest.current(event);
