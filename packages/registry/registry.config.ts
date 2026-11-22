@@ -300,6 +300,15 @@ export default defineRegistry({
       files: ['lib/dev-warn.ts'],
     },
     {
+      name: 'modal-dialog',
+      type: 'lib',
+      version: '0.1.0',
+      title: 'isModalDialogOpen',
+      description:
+        'Whether the reader is inside an open modal dialog, alert dialog, sheet or drawer, so a page shortcut never acts behind one.',
+      files: ['lib/modal-dialog.ts'],
+    },
+    {
       name: 'theme-scope',
       type: 'component',
       version: '0.2.0',
@@ -578,7 +587,7 @@ export default defineRegistry({
     {
       name: 'kbd',
       type: 'component',
-      version: '0.1.1',
+      version: '0.2.0',
       title: 'Kbd',
       description:
         'Keycaps, key combinations and platform-aware shortcuts: Command on Apple, Control elsewhere, plus a hook to bind them.',
@@ -935,7 +944,7 @@ export default defineRegistry({
     {
       name: 'command-menu',
       type: 'component',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'CommandMenu',
       description:
         'A command palette in a dialog: groups, fuzzy filter, keyboard navigation, empty state and shortcut hints.',
@@ -949,7 +958,7 @@ export default defineRegistry({
     {
       name: 'sidebar',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Sidebar',
       description:
         'App sidebar: folds to an icon rail, groups, nested items, active state, an off-canvas sheet on phones and a toggle shortcut.',
@@ -1988,7 +1997,7 @@ export default defineRegistry({
           'Docs search',
           'A search dialog over any provider, grouped results with the query marked, recent searches and a local index provider.',
           'docs-search',
-          { logic: true },
+          { logic: true, version: '0.1.1' },
         ),
         ...docsItems(
           'docs-page-nav',

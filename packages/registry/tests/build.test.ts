@@ -347,6 +347,7 @@ describe('the rectio registry', () => {
       'message-actions',
       'meter',
       'metric-trend',
+      'modal-dialog',
       'money',
       'motion-activity-feed',
       'motion-ai-assistant-sidebar',
