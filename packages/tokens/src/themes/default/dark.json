@@ -111,7 +111,7 @@
       "$value": {
         "colorSpace": "oklch",
         "components": [0.985, 0.006, 75],
-        "alpha": 0.22
+        "alpha": 0.28
       },
       "$description": "The light rim along the top edge of a translucent surface, drawn when a skin sets shadow.highlight."
     }
