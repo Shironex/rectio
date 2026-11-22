@@ -67,6 +67,19 @@ summary: Work that is merging into main now and ships with the next release.
   revealed at an even pace on whole words, in a separate entry of 1.4 kB.
 - The AI chat thread block in `@rectio/blocks/ai`, with an empty state and suggestions, and its
   motion twin.
+- Three more AI blocks, each with a motion twin: `ChatWorkspace`, a full chat page with a list of
+  chats (search, new chat, pinned, rename in place, delete after a confirm, date groups) beside the
+  thread, the list in a sheet on a phone; `AssistantSidebar`, an assistant docked beside the app
+  that resizes, folds to a rail, opens with Command or Control J and moves the focus in and back,
+  with `AssistantSidebarTrigger` for a header and a sheet on a phone; and `PromptComposer`, a field
+  with a model picker, attachments, slash commands from your list and a token or character count
+  with a limit.
+- `applyStreamEvent` folds a provider's stream into the conversation through one small event
+  contract (start, text, reasoning, tool, source, done, stopped, error), with no SDK in the kit.
+- The AI chat thread takes `renderComposer` for a field of your own, and its words, logic and the
+  new stream helpers import from a React Server Component.
+- `PromptInput` takes `textareaProps` (its key handler runs first), a `meta` slot beside Send and
+  `submitDisabled` for a limit the app counts.
 - The docs code block keeps room for its copy button at the end of the longest line.
 - Every small control is a 44px target on touch screens through one shared hit area,
   `touchHitArea`, now exported for your own controls: toggles with a short label, segments, the
@@ -186,6 +199,8 @@ summary: Work that is merging into main now and ships with the next release.
 - Pages for the funnel chart, heatmap, waterfall chart and radial gauge, and an analytics blocks
   section with a page for each block, all with finance and SaaS demos.
 - Pages for the chat components and the AI chat thread block, with demos fed by a fake stream.
+- Pages for the chat workspace, assistant sidebar and prompt composer blocks, and a section on
+  feeding a stream with `applyStreamEvent`.
 - The skins page covers glass and brutalist: the translucent layer and its solid fallback, the
   backdrop the glass contrast tests assume, focus beside offset shadows, and the switches in the
   skin contract. The theme generator previews a theme under both.
