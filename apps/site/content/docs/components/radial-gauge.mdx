@@ -43,8 +43,10 @@ picture of the numbers rather than the only place they live.
 `target` is a solid tick across the arc; `marker` is a second, dashed one, such as where the value
 should be by now. `bands` are drawn as a thin outer ring and listed under the gauge with their ranges;
 by default they take the warm sequence steps, with the quiet reference grey for the good band, so
-no band shares the arc's colour; `better="lower"`
-turns that around for spend or latency. For a figure with no target or bands, a plain
+no band shares the arc's colour; `better="lower"` turns that around for spend or latency. Bands are
+placed in order of `to` (a list out of order is sorted), each starting where the one before ends,
+and the last always runs to `max`. A `to` outside the scale is clamped to it, and a band that ends
+where the one before it ends draws nothing; both warn in development. For a figure with no target or bands, a plain
 [Meter](/docs/components/meter) may be all you need.
 
 The motion variant sweeps the arc to its value on first view and glides to new figures.
@@ -55,7 +57,11 @@ The motion variant sweeps the arc to its value on first view and glides to new f
   type={{
     value: { type: 'number', description: 'The figure. Required.' },
     min: { type: 'number', default: '0', description: 'The start of the scale.' },
-    max: { type: 'number', description: 'The end of the scale. Required.' },
+    max: {
+      type: 'number',
+      description:
+        'The end of the scale. Required. A scale that is not a number, or ends before it starts, runs from `min` to `min + 1`.',
+    },
     target: { type: 'number', description: 'A solid tick, such as the goal.' },
     marker: {
       type: '{ value: number; label: string }',
@@ -97,7 +103,7 @@ The motion variant sweeps the arc to its value on first view and glides to new f
 ## Accessibility
 
 - A meter named by `label`, with its value text saying the figure, the scale, the target and the
-  band in words.
+  band in words. `aria-valuenow` stays on the scale; a figure past it is written in the value text.
 - The figure in the middle is hidden from screen readers, since the meter says it.
 - The list under the gauge names each band with its range, the target and the marker.
 - The target is solid with a halo and the marker dashed, so they read apart without colour.

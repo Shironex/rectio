@@ -80,7 +80,9 @@ before it.
 ## Logic
 
 `funnelInsight(stages, previous)` gives the conversion, the previous conversion, the change in points
-and the biggest drop.
+and the biggest drop, from the figures the chart draws (a negative figure counts as zero). With an
+empty first stage the conversion is unknown (`null`), not 0, and so is the change; the card then
+shows no headline. It runs in a server component too.
 
 ## Accessibility
 

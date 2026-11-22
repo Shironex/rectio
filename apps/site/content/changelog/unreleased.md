@@ -128,7 +128,12 @@ summary: Work that is merging into main now and ships with the next release.
   labels and rules carrying the running total, turning to rows on a narrow width. `RadialGauge`: one
   figure against its scale with a target, a pace marker and named bands, read as a meter with its band
   in words. Each has a spoken summary, loading and empty states, and a table twin where it has rows
-  (funnel-chart, heatmap, waterfall-chart and radial-gauge 0.1.0, chart 0.1.2).
+  (funnel-chart, heatmap, waterfall-chart and radial-gauge 0.1.0, chart 0.1.2). Their helpers
+  `funnelSteps`, `heatStep`, `heatValue` and `waterfallBars` live in modules without `'use client'`,
+  so a server component can call them; a heatmap draws figures below zero as missing and keeps a
+  calendar to its latest 106 weeks; gauge bands are sorted and clamped to the scale.
+- `devWarn`, a console warning in development builds only, for a misuse a component can recover
+  from (dev-warn 0.1.0).
 - Their motion twins in `@rectio/motion/charts`: funnel stages grow in turn, the heatmap is
   uncovered along the grid, waterfall steps grow from the running total and the gauge sweeps to its
   value, then each glides to new figures (motion-chart 0.1.1).
@@ -164,9 +169,10 @@ summary: Work that is merging into main now and ships with the next release.
   by any border wider than 1px, and never shrink under a thinner one, so their inner targets stay
   44px (skin-dense 0.1.1, skin-editorial 0.1.1).
 
-- Text tokens over each chart sequence step, `--rx-chart-on-sequence-1` to `-5`, holding 4.5:1 on
-  their step in every theme, mode and skin, for figures printed in heatmap cells. The theme
-  generator derives them too (tokens 0.7.1, theme-default 0.5.1).
+- Text tokens over chart sequence steps 2 to 5, `--rx-chart-on-sequence-2` to `-5`, holding 4.5:1
+  on their step in every theme, mode and skin, for figures printed in heatmap cells. Step 1 follows
+  the brand colour and gets none. The theme generator derives them too (tokens 0.7.1,
+  theme-default 0.5.1).
 
 ## CLI
 

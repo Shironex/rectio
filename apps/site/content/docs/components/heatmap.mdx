@@ -43,11 +43,16 @@ import { localDate } from '@/lib/local-date';
 
 Figures above zero fall into even steps of the warm sequence tokens, palest to deepest, up to the
 largest figure (or `max`). Zero has its own quiet cell, and a cell with no figure (`null`) is hatched,
-so missing and zero never look alike. The legend shows the zero cell, the steps up to the largest
-figure, and No data when any cell is missing.
+so missing and zero never look alike. A heatmap counts, so a figure below zero is drawn as missing
+too, not as zero. A `max` that is not a number above zero falls back to the largest figure, with a
+warning in development. The legend shows the zero cell, the steps up to the largest figure, and No
+data when any cell is missing.
 
-`calendar` builds the weeks from local dates, so a daylight saving change never shifts a day. The range runs from the earliest entry to the latest: days in it
-with no entry are missing, and days outside it get no cell. Months are labelled over the week that
+`calendar` builds the weeks from local dates, so a daylight saving change never shifts a day. The
+range runs from the earliest entry to the latest, up to `MAX_CALENDAR_WEEKS` (106, about two years)
+back from the latest, so one stray old date cannot stretch the grid over years of empty weeks; days
+before that are left out, with a warning in development. Days in the range with no entry are
+missing, and days outside it get no cell. Months are labelled over the week that
 holds the 1st, and `weekStartsOn` (Monday by default) sets the first row. Cells stay between 10 and 22
 pixels: on a phone a year scrolls sideways, opened at the latest week, and on a wide screen it stops
 growing. A matrix prints each figure in its cell, in a text token that holds 4.5:1 on every step;
@@ -99,7 +104,9 @@ The motion variant uncovers the grid on first view.
   }}
 />
 
-`heatStep(value, max, steps)` gives the step of a figure: 0 for zero and below, then 1 to `steps`.
+`heatStep(value, max, steps)` gives the step of a figure: 0 for zero, then 1 to `steps`, and null
+for a figure below zero or not a number (missing). `heatValue(value)` reads a figure the same way.
+Both come from a module without `'use client'`, so a server component can call them.
 
 ## Accessibility
 
