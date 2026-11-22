@@ -255,7 +255,14 @@ export function FunnelChart({
           : undefined
       }
       tableToggle={tableToggle}
-      plotClassName={loading === true || empty ? plotClassName : 'h-auto'}
+      plotClassName={
+        loading === true || empty
+          ? // The skeleton's rows need more room than a column plot.
+            orientation === 'horizontal'
+            ? 'h-60'
+            : plotClassName
+          : 'h-auto'
+      }
       messages={m}
       className={className}
       table={

@@ -467,7 +467,7 @@ function ChartLoading({ kind, label }: { kind: ChartKind; label: string }) {
     return (
       <div role="status" aria-label={label} className="relative size-full">
         {kind === 'funnel' ? (
-          <div className="flex size-full flex-col justify-center gap-5">
+          <div className="flex size-full flex-col justify-start gap-5 overflow-hidden">
             {SKELETON_FUNNEL.map((width, index) => (
               <div key={index} className="flex flex-col gap-2">
                 <Skeleton index={index} animation="pulse" className="h-3 w-24" />

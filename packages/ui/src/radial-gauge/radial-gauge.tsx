@@ -119,14 +119,17 @@ const STROKE: Record<string, string> = {
   reference: 'stroke-chart-reference',
 };
 
-/** Band colours by default: the sequence from its most severe step to its calm one. */
+/**
+ * Band colours by default: the warm sequence from its most severe step, ending in the quiet
+ * reference grey for the good band, so no band shares the value arc's colour.
+ */
 function bandColors(count: number, better: 'higher' | 'lower'): ChartColor[] {
   const ladder: ChartColor[] =
     count <= 2
-      ? ['sequence-4', 'sequence-1']
+      ? ['sequence-4', 'reference']
       : count === 3
-        ? ['sequence-4', 'sequence-2', 'sequence-1']
-        : (['sequence-5', 'sequence-4', 'sequence-3', 'sequence-2', 'sequence-1'].slice(
+        ? ['sequence-4', 'sequence-2', 'reference']
+        : (['sequence-5', 'sequence-4', 'sequence-3', 'sequence-2', 'reference'].slice(
             -count,
           ) as ChartColor[]);
   const colors = ladder.slice(0, count);
@@ -190,9 +193,11 @@ export function RadialGauge({
     return { x1: a.x, y1: a.y, x2: b.x, y2: b.y };
   };
   const filled = share(safe);
+  // The share of the target, unless it would repeat the figure (a percentage against a target of 100%).
+  const ofTarget = target === undefined || target === 0 ? undefined : percent(safe / target);
   const below =
     centerLabel ??
-    (target === undefined || target === 0 ? undefined : m.ofTarget(percent(safe / target)));
+    (ofTarget === undefined || ofTarget === write(safe) ? undefined : m.ofTarget(ofTarget));
 
   return (
     <ChartFrame
@@ -242,12 +247,19 @@ export function RadialGauge({
               className={cn('rx-mark', STROKE[color], glide)}
             />
             {marker !== undefined && (
-              <line
-                {...tick(marker.value, R - 7, R + 7)}
-                strokeWidth={1.5}
-                strokeDasharray="2 1.5"
-                className="stroke-fg-muted"
-              />
+              <>
+                <line
+                  {...tick(marker.value, R - 8, BAND_R + 3)}
+                  strokeWidth={4}
+                  className="stroke-chart-halo"
+                />
+                <line
+                  {...tick(marker.value, R - 8, BAND_R + 3)}
+                  strokeWidth={2}
+                  strokeDasharray="2.5 1.5"
+                  className="stroke-fg-muted"
+                />
+              </>
             )}
             {target !== undefined && (
               <>

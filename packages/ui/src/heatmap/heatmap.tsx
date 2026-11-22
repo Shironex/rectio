@@ -8,7 +8,6 @@ import {
   ChartFrame,
   HATCH,
   mergeMessages,
-  useElementWidth,
   useMarkGlide,
   type ChartMessages,
 } from '../chart/chart';
@@ -79,8 +78,8 @@ interface HeatmapCommonProps {
   /** The top of the scale; the largest figure by default. Pass it to compare heatmaps side by side. */
   max?: number | undefined;
   /**
-   * Print each figure in its cell. By default a matrix prints them when every column has room and a
-   * calendar never does; the readout, the summary and the table give every figure either way.
+   * Print each figure in its cell. By default a matrix does, scrolling sideways when its columns run
+   * out of room, and a calendar does not; the readout, the summary and the table give every figure.
    */
   showValues?: boolean | undefined;
   /** Names the grid for screen readers, such as `Commits by day`. */
@@ -310,7 +309,6 @@ export function Heatmap(props: HeatmapProps) {
   const current = active ?? firstCell;
   const refs = useRef(new Map<string, HTMLDivElement>());
   const scroller = useRef<HTMLDivElement>(null);
-  const width = useElementWidth(scroller);
 
   // A year of days is wider than a phone: the grid scrolls inside itself and opens on the latest week.
   useLayoutEffect(() => {
@@ -319,9 +317,9 @@ export function Heatmap(props: HeatmapProps) {
   }, [calendar, model.columns.length]);
 
   const columnCount = model.columns.length;
-  // Room to print a figure: about a short figure's width per column, after the row labels.
-  const showValues =
-    props.showValues ?? (!calendar && columnCount > 0 && (width - 96) / columnCount >= 40);
+  // A matrix's columns are always wide enough for a short figure (the grid scrolls past that), so it
+  // prints them by default.
+  const showValues = props.showValues ?? !calendar;
 
   const move = (r: number, c: number, dr: number, dc: number): readonly [number, number] | null => {
     let row = r + dr;
@@ -479,25 +477,28 @@ export function Heatmap(props: HeatmapProps) {
               calendar
                 ? {
                     gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(0, 1fr))`,
-                    // Cells from 10px to 18px: past the least, the grid scrolls; past the most, it
+                    // Cells from 10px to 22px: past the least, the grid scrolls; past the most, it
                     // stops growing rather than turning a year into a wall of tiles.
                     minWidth: `calc(var(--spacing) * ${String(columnCount * 3 + 8)})`,
-                    maxWidth: `calc(var(--spacing) * ${String(columnCount * 5 + 10)})`,
+                    maxWidth: `calc(var(--spacing) * ${String(columnCount * 6 + 10)})`,
                   }
                 : {
-                    gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(calc(var(--spacing) * 6), 1fr))`,
+                    // Wide enough for a figure such as 72.2%; past that the grid scrolls sideways.
+                    gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(calc(var(--spacing) * 11), 1fr))`,
                   }
             }
           >
             <div role="row" className="contents">
-              <div role="columnheader" />
+              <div role="columnheader" className="sticky start-0 z-20 bg-surface" />
               {model.columns.map((column) => (
                 <div
                   key={column.id}
                   role="columnheader"
                   className={cn(
-                    'min-w-0 text-xs whitespace-nowrap text-fg-muted',
-                    calendar ? 'overflow-visible pb-1' : 'truncate pb-1 text-center',
+                    'min-w-0 text-xs text-fg-muted',
+                    calendar
+                      ? 'overflow-visible pb-1 whitespace-nowrap'
+                      : 'self-end pb-1 text-center leading-tight text-balance',
                   )}
                 >
                   <span aria-hidden>{column.short}</span>
@@ -510,7 +511,8 @@ export function Heatmap(props: HeatmapProps) {
                 <div
                   role="rowheader"
                   className={cn(
-                    'flex items-center pe-2 text-xs whitespace-nowrap text-fg-muted',
+                    // Stays in view while a wide grid scrolls under it.
+                    'sticky start-0 z-20 flex items-center bg-surface pe-2 text-xs whitespace-nowrap text-fg-muted',
                     calendar && 'leading-none',
                   )}
                 >
@@ -541,8 +543,9 @@ export function Heatmap(props: HeatmapProps) {
                       className={cn(
                         'relative flex items-center justify-center rounded-badge text-xs numeric',
                         calendar ? 'aspect-square' : 'h-8 px-1',
-                        'outline-offset-1 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-focus',
-                        isRead && 'z-10 outline-2 outline-fg',
+                        // A ring of the surface inside the focus ring keeps it 3:1 on every step.
+                        'outline-offset-2 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-focus focus-visible:ring-2 focus-visible:ring-surface',
+                        isRead && 'z-10 outline-2 outline-offset-2 outline-fg ring-2 ring-surface',
                         stepClass(cell.value),
                         glide,
                       )}
