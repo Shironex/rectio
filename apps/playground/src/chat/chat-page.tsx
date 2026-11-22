@@ -191,7 +191,11 @@ export function ChatPage({ theme, mode, motion }: { theme: ThemeId; mode: Mode; 
               : 'Ask about invoices, cash or the close',
           maxLength: 4000,
           onAttach: () => undefined,
-          hint: 'Check figures before you send them on.',
+          // The hint describes the field, so the reason it is off is read as well as shown.
+          hint:
+            state === 'error'
+              ? 'You are offline. Sending comes back when you reconnect.'
+              : 'Check figures before you send them on.',
           disabled: state === 'error',
         }}
         header={
