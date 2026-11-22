@@ -133,8 +133,8 @@
       "$value": "{palette.amber.800}"
     },
     "mark": {
-      "$value": "{palette.amber.500}",
-      "$description": "A warning-hued mark drawn on a surface, such as a filled rating star: holds 3:1 there."
+      "$value": { "colorSpace": "oklch", "components": [0.635, 0.1329, 77] },
+      "$description": "A warning-hued mark drawn on a surface, such as a filled rating star: a gold at the edge of sRGB that holds 3:1 there."
     },
     "contrast": {
       "$value": "{palette.stone.975}"

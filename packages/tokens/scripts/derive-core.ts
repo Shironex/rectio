@@ -149,8 +149,9 @@ export function derive(p: Preset, mode: Mode): TokenSet {
       set(`${role}-contrast`, warn ? n(0.178) : n(0.995));
     }
     // The warning fill is light, for dark ink on it; a mark drawn on a surface (a rating star) needs
-    // a deeper amber that still reads as gold rather than the brown of the strong step.
-    set('warning-mark', o(0.62, 0.1351, 69.1));
+    // a deeper amber, turned toward yellow at the edge of sRGB so it reads as gold, not the brown of the
+    // strong step.
+    set('warning-mark', o(0.635, 0.1329, 77));
     set('negative-hover', o(0.455, 0.1688, STATUS.negative));
     set('scrim', o(0.18, 0.008, nh, 0.36));
     set('chart-series-1', inkStyle ? ink(0.375) : brand(0.53, bc));
