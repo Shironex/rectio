@@ -120,6 +120,24 @@ summary: Work that is merging into main now and ships with the next release.
   badge takes the ink edge in its tone (badge 0.1.2, button 0.2.3, checkbox 0.2.2, field 0.2.2,
   input-group 0.1.2, file-upload 0.1.4, prompt-input 0.1.1, radio-group 0.1.2, tag-input 0.1.3).
 
+- Four more charts in `@rectio/ui/charts`. `FunnelChart`: stages as rows or columns, what carried on
+  and what dropped off between each in words, the drop-off hatched and the biggest drop named.
+  `Heatmap`: a calendar of days or a matrix of two categories on the warm sequence steps, with zero
+  and missing cells drawn apart, a legend, figures printed in matrix cells and the arrow keys to read
+  each cell. `WaterfallChart`: a start, its changes and the totals between, decreases hatched, signed
+  labels and rules carrying the running total, turning to rows on a narrow width. `RadialGauge`: one
+  figure against its scale with a target, a pace marker and named bands, read as a meter with its band
+  in words. Each has a spoken summary, loading and empty states, and a table twin where it has rows
+  (funnel-chart, heatmap, waterfall-chart and radial-gauge 0.1.0, chart 0.1.2).
+- Their motion twins in `@rectio/motion/charts`: funnel stages grow in turn, the heatmap is
+  uncovered along the grid, waterfall steps grow from the running total and the gauge sweeps to its
+  value, then each glides to new figures (motion-chart 0.1.1).
+- Analytics blocks in `@rectio/blocks/analytics`, each with a motion twin and a `variant`: a metric
+  trend (a tile beside a sparkline, or a card over a chart), a breakdown table (shares, changes and
+  bars, sortable, the smallest rows gathered into others), a funnel card (the conversion, its change
+  in points and the biggest drop) and a goal tracker (a gauge or a bar with the target and today's
+  pace, the state in words, the projection and what each day needs).
+
 ## Templates
 
 - Every template sends its links through the link provider, so the live previews under
@@ -146,6 +164,10 @@ summary: Work that is merging into main now and ships with the next release.
   by any border wider than 1px, and never shrink under a thinner one, so their inner targets stay
   44px (skin-dense 0.1.1, skin-editorial 0.1.1).
 
+- Text tokens over each chart sequence step, `--rx-chart-on-sequence-1` to `-5`, holding 4.5:1 on
+  their step in every theme, mode and skin, for figures printed in heatmap cells. The theme
+  generator derives them too (tokens 0.7.1, theme-default 0.5.1).
+
 ## CLI
 
 - `rectio init` asks its questions interactively.
@@ -155,6 +177,8 @@ summary: Work that is merging into main now and ships with the next release.
 
 ## Docs and site
 
+- Pages for the funnel chart, heatmap, waterfall chart and radial gauge, and an analytics blocks
+  section with a page for each block, all with finance and SaaS demos.
 - Pages for the chat components and the AI chat thread block, with demos fed by a fake stream.
 - The skins page covers glass and brutalist: the translucent layer and its solid fallback, the
   backdrop the glass contrast tests assume, focus beside offset shadows, and the switches in the
