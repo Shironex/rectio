@@ -112,4 +112,40 @@ describe('PromptInput', () => {
     render(<PromptInput onSubmit={() => undefined} hint="You are offline." disabled />);
     expect(screen.getByRole('textbox')).toHaveAccessibleDescription('You are offline.');
   });
+
+  it('lets a key handler of the field run first and keep Enter from sending', () => {
+    const onSubmit = vi.fn();
+    render(
+      <PromptInput
+        onSubmit={onSubmit}
+        defaultValue="/sum"
+        textareaProps={{
+          'aria-autocomplete': 'list',
+          onKeyDown: (event) => {
+            if (event.key === 'Enter') event.preventDefault();
+          },
+        }}
+      />,
+    );
+    const field = screen.getByRole('textbox');
+    expect(field).toHaveAttribute('aria-autocomplete', 'list');
+    fireEvent.keyDown(field, { key: 'Enter' });
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('holds Send back while submitDisabled and shows meta beside it', () => {
+    const onSubmit = vi.fn();
+    render(
+      <PromptInput
+        onSubmit={onSubmit}
+        defaultValue="Long"
+        submitDisabled
+        meta={<span>9 tokens over</span>}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Send' })).toHaveAttribute('aria-disabled', 'true');
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' });
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByText('9 tokens over')).toBeInTheDocument();
+  });
 });

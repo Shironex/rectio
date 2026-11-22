@@ -22,7 +22,7 @@ import {
   type FileUploadEntry,
 } from '../file-upload/file-upload';
 import { cn } from '../lib/cn';
-import { Textarea } from '../textarea/textarea';
+import { Textarea, type TextareaProps } from '../textarea/textarea';
 import { type PromptInputMessages, PROMPT_INPUT_MESSAGES } from './prompt-input-messages';
 
 export type PromptInputStatus = 'idle' | 'submitting' | 'streaming';
@@ -74,6 +74,23 @@ export interface PromptInputProps extends Omit<ComponentProps<'form'>, 'onSubmit
   tools?: ReactNode;
   /** A short note under the field, such as what the assistant can see. */
   hint?: ReactNode;
+  /** Beside the send button, before it: a running count, a status. */
+  meta?: ReactNode;
+  /**
+   * Holds Send back for a reason the field does not know, such as a token limit the app counts.
+   * The field stays editable and Enter does nothing.
+   */
+  submitDisabled?: boolean | undefined;
+  /**
+   * More props for the text field, such as the ARIA attributes of a suggestion list. Its
+   * `onKeyDown` runs first; calling `preventDefault` there keeps Enter from sending.
+   */
+  textareaProps?:
+    | Omit<
+        TextareaProps,
+        'value' | 'defaultValue' | 'onValueChange' | 'ref' | 'disabled' | 'maxLength' | 'className'
+      >
+    | undefined;
   messages?: Partial<PromptInputMessages> | undefined;
   textareaRef?: Ref<HTMLTextAreaElement> | undefined;
   textareaClassName?: string | undefined;
@@ -133,6 +150,9 @@ export function PromptInput({
   maxFiles,
   tools,
   hint,
+  meta,
+  submitDisabled = false,
+  textareaProps,
   messages: overrides,
   textareaRef,
   textareaClassName,
@@ -151,7 +171,7 @@ export function PromptInput({
   const files = attachments ?? [];
   const uploading = files.some((file) => file.status === 'queued' || file.status === 'uploading');
   const empty = text.trim() === '' && files.length === 0;
-  const canSend = !disabled && !busy && !empty && !uploading;
+  const canSend = !disabled && !busy && !empty && !uploading && !submitDisabled;
   const canStop = busy && onStop !== undefined;
 
   const length = text.length;
@@ -174,6 +194,8 @@ export function PromptInput({
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    textareaProps?.onKeyDown?.(event);
+    if (event.defaultPrevented) return;
     if (event.key !== 'Enter' || event.nativeEvent.isComposing) return;
     const mod = event.metaKey || event.ctrlKey;
     const sends =
@@ -215,6 +237,7 @@ export function PromptInput({
         </FileList>
       )}
       <Textarea
+        {...textareaProps}
         ref={(node) => {
           field.current = node;
           assignRef(textareaRef, node);
@@ -255,6 +278,7 @@ export function PromptInput({
           {uploading && !busy && (
             <span className="truncate text-sm text-fg-subtle">{m.waitingForUploads}</span>
           )}
+          {meta}
           {near && (
             <span
               aria-hidden
