@@ -26,7 +26,9 @@ import { Rating, RatingDisplay } from '@/components/ui/rating';
 `Rating` is a radio group with one radio per value, so the arrow keys move the rating, the chosen
 value is announced, and with `name` it posts with a form. With `allowHalf` each star takes two
 values, its left half and the whole star. With a mouse, the stars preview the value under the
-pointer before the press; a finger sets it straight away.
+pointer before the press; a finger sets it straight away. Half a star is too narrow to aim at with
+a finger, so on a touch screen a tap sets the whole star and a second tap on the same star sets
+its half.
 
 `RatingDisplay` is for a rating that is only read, such as a vendor's score in a table: one image
 named by its reading ("4.6 out of 5 stars"), rounded to the nearest half star, smaller than the
@@ -96,6 +98,8 @@ Every prop of a `span`.
   `aria-label` or `aria-labelledby`.
 - Arrow keys move the rating; Tab enters on the chosen star and leaves the group.
 - The focused star draws the focus ring around its cell.
+- Every star cell is a 44px target on touch screens, half stars included: the star takes the tap,
+  not its halves, while the keys and screen readers still reach every half step on the radios.
 - `RatingDisplay` is one `img` with the reading as its name; the stars inside are hidden.
 
 <ComponentSource path="rating/rating.tsx" />

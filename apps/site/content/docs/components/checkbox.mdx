@@ -16,7 +16,7 @@ pnpm dlx @rectio/cli add checkbox
 ```tsx
 import { Checkbox } from '@/components/ui/checkbox';
 
-<label className="flex items-center gap-2">
+<label className="flex items-center gap-2 pointer-coarse:min-h-(--rx-control-height-touch)">
   <Checkbox checked={attach} onCheckedChange={setAttach} />
   Attach receipt
 </label>;
@@ -24,6 +24,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 Name the checkbox with a wrapping `label`, a `FieldLabel`, or `aria-label` when it stands alone in
 a table cell. `indeterminate` shows a bar, for a select all that covers only some rows.
+
+In a list of checkboxes, give each row the touch height on touch screens, as above: the box's 44px
+hit area then stays inside its own row and never covers the next one.
 
 ## Props
 

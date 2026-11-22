@@ -68,6 +68,18 @@ summary: Work that is merging into main now and ships with the next release.
 - The AI chat thread block in `@rectio/blocks/ai`, with an empty state and suggestions, and its
   motion twin.
 - The docs code block keeps room for its copy button at the end of the longest line.
+- Every small control is a 44px target on touch screens through one shared hit area,
+  `touchHitArea`, now exported for your own controls: toggles with a short label, segments, the
+  end buttons and overflow count of a multi select, step circles on a phone, the banner action,
+  docs heading links and the compact language switcher. A half-star `Rating` takes a tap on the
+  whole star, and a second tap on the same star sets its half.
+- `gap-touch-gap` spaces small controls on touch screens by the touch height less the small
+  control height, so neighbouring hit areas stay apart at compact density and in the dense skin,
+  where a fixed gap fell short. Pagination, message actions, toasts, file items, the table pager,
+  the week agenda and the SaaS blocks use it.
+- On touch screens, sortable table headers, the chat reasoning, tool call and sources rows, the
+  row under a reply and the docs code block header take the touch height, and the tab indicator no
+  longer takes a press meant for the tab under it.
 
 ## Templates
 

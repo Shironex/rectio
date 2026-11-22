@@ -200,7 +200,7 @@ export default defineRegistry({
   tokens: {
     dir: tokens,
     item: {
-      version: '0.5.0',
+      version: '0.6.0',
       title: 'Tokens',
       description:
         'The Tailwind v4 theme mapped to rectio tokens, density and reduced motion. Installed by init.',
@@ -234,7 +234,7 @@ export default defineRegistry({
     {
       name: 'cn',
       type: 'lib',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'cn',
       description: 'Class name merging that knows the rectio token utilities.',
       files: ['lib/cn.ts'],
@@ -332,7 +332,7 @@ export default defineRegistry({
     {
       name: 'data-table',
       type: 'component',
-      version: '0.3.0',
+      version: '0.3.1',
       title: 'DataTable',
       description:
         'Composable table on TanStack Table: sorting (with a Sort by control for phones), search and column filters with counts, row selection, sticky header, totals footer, loading, empty and pagination.',
@@ -374,7 +374,7 @@ export default defineRegistry({
     {
       name: 'time-field',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'TimeField',
       description:
         'A segmented time of day field: 12 or 24 hours by locale, minute steps, bounds and keyboard stepping.',
@@ -394,7 +394,7 @@ export default defineRegistry({
     {
       name: 'toast',
       type: 'component',
-      version: '0.2.1',
+      version: '0.2.2',
       title: 'Toast',
       description: 'Success, error and info toasts with an action such as Undo, on Base UI Toast.',
       categories: ['feedback'],
@@ -481,7 +481,7 @@ export default defineRegistry({
     {
       name: 'banner',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Banner',
       description: 'A page-level announcement across the top of the app, dismissible.',
       categories: ['feedback'],
@@ -574,7 +574,7 @@ export default defineRegistry({
     {
       name: 'stepper',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Stepper',
       description: 'Steps of a flow, horizontal or vertical, with completed steps you can revisit.',
       categories: ['navigation'],
@@ -656,7 +656,7 @@ export default defineRegistry({
     {
       name: 'toggle',
       type: 'component',
-      version: '0.2.0',
+      version: '0.2.1',
       title: 'Toggle, toggle group and segmented control',
       description:
         'Pressed-state buttons, a toggle group for single or multiple choice, and a segmented control driven by options.',
@@ -675,7 +675,7 @@ export default defineRegistry({
     {
       name: 'file-upload',
       type: 'component',
-      version: '0.1.2',
+      version: '0.1.3',
       title: 'File upload',
       description:
         'Dropzone or compact trigger with accept, size and count rules, and a list of uploads with progress, retry and remove.',
@@ -689,7 +689,7 @@ export default defineRegistry({
     {
       name: 'tag-input',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'TagInput',
       description:
         'Free text tags in a field, with paste splitting, duplicate and max checks, and a reusable Tag chip.',
@@ -709,7 +709,7 @@ export default defineRegistry({
     {
       name: 'multi-select',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'MultiSelect',
       description:
         'Several choices as removable chips, with search, Select all and a +N overflow chip.',
@@ -767,7 +767,7 @@ export default defineRegistry({
     {
       name: 'tabs',
       type: 'component',
-      version: '0.1.3',
+      version: '0.1.4',
       title: 'Tabs',
       description: 'Line and segmented tabs with an indicator measured by Base UI.',
       categories: ['navigation'],
@@ -826,7 +826,7 @@ export default defineRegistry({
     {
       name: 'rating',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Rating',
       description:
         'A star rating on radios with half steps and a pointer preview, and a read-only display.',
@@ -865,7 +865,7 @@ export default defineRegistry({
     {
       name: 'pagination',
       type: 'component',
-      version: '0.1.1',
+      version: '0.1.2',
       title: 'Pagination',
       description: 'Page numbers with stable gaps, and a compact phone variant.',
       categories: ['navigation'],
@@ -1014,7 +1014,7 @@ export default defineRegistry({
     {
       name: 'chat-message',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'ChatMessage',
       description:
         'A user, assistant or system message with avatar, time, sending and stopped states, an error with Retry, edit in place and streaming text.',
@@ -1038,7 +1038,7 @@ export default defineRegistry({
     {
       name: 'message-actions',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'MessageActions',
       description: 'A toolbar of copy, regenerate, edit and thumbs up or down under a message.',
       categories: ['ai', 'actions'],
@@ -1057,7 +1057,7 @@ export default defineRegistry({
     {
       name: 'chat-source',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'ChatSource',
       description: 'Citation chips inside a reply and the list of sources behind it.',
       categories: ['ai'],
@@ -1066,7 +1066,7 @@ export default defineRegistry({
     {
       name: 'tool-call',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'ToolCall',
       description:
         'A tool the assistant called, running, done or failed, with its arguments and result folded underneath.',
@@ -1076,7 +1076,7 @@ export default defineRegistry({
     {
       name: 'reasoning',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Reasoning',
       description:
         'The reasoning behind a reply, open while the model thinks and folded to how long it took once done.',
@@ -1416,6 +1416,7 @@ export default defineRegistry({
           'Pending expenses, approve or reject with a reason, bulk actions and an audit trail.',
           'expense-approval',
           'expense-approval',
+          '0.1.1',
         ),
         ...blockItems(
           'ar-aging',
@@ -1484,7 +1485,7 @@ export default defineRegistry({
         {
           name: 'marketing-core',
           type: 'lib',
-          version: '0.1.2',
+          version: '0.1.3',
           title: 'Marketing core',
           // Only the marquee and the parts context's client tree need the browser; the marquee
           // carries its own directive, the rest renders on the server.
@@ -1520,7 +1521,7 @@ export default defineRegistry({
           'Announcement bar',
           'A thin bar above the header for a release or changelog entry, with an optional close.',
           'announcement-bar',
-          { motion: false },
+          { motion: false, version: '0.1.1' },
         ),
         ...marketingItems(
           'site-header',
@@ -1630,7 +1631,7 @@ export default defineRegistry({
         {
           name: 'saas-core',
           type: 'lib',
-          version: '0.2.0',
+          version: '0.2.1',
           title: 'SaaS blocks core',
           description:
             'Account form frame, password and email rules, relative time and sizes, focus helpers, and the avatar, menu and popover the SaaS blocks share, and the usage level tones for the kit Meter.',
@@ -1666,7 +1667,7 @@ export default defineRegistry({
           'team-members',
           'Team members',
           'Members and roles, pending invites with resend and revoke, and an invite form.',
-          { version: '0.1.1' },
+          { version: '0.1.2' },
         ),
         ...saasItems(
           'sign-up',
@@ -1677,6 +1678,7 @@ export default defineRegistry({
           'two-factor',
           'Two-factor step',
           'A one-time code in slots that paste and autofill in one go, a resend that counts down, and backup codes.',
+          { version: '0.1.1' },
         ),
         ...saasItems(
           'reset-password',
@@ -1687,6 +1689,7 @@ export default defineRegistry({
           'profile-settings',
           'Profile settings',
           'Picture, name, email with its verification, job title and time zone, a save bar, and a danger zone.',
+          { version: '0.1.1' },
         ),
         ...saasItems(
           'billing',
@@ -1714,6 +1717,7 @@ export default defineRegistry({
           'onboarding-checklist',
           'Onboarding checklist',
           'Setup steps with their actions, the next one brought forward, and progress as a count and a bar.',
+          { version: '0.1.1' },
         ),
         ...saasItems(
           'activity-feed',
@@ -1724,7 +1728,7 @@ export default defineRegistry({
           'notifications-center',
           'Notifications center',
           'A bell with the unread count, and the list behind it with All and Unread and mark as read.',
-          { version: '0.1.2' },
+          { version: '0.1.3' },
         ),
         ...saasItems(
           'changelog',
@@ -1735,6 +1739,7 @@ export default defineRegistry({
           'users-table',
           'Users table',
           'Every user in a workspace with search, role and status filters, bulk role changes, suspend and remove.',
+          { version: '0.1.1' },
         ),
         ...saasItems(
           'kanban-board',
@@ -1745,6 +1750,7 @@ export default defineRegistry({
           'week-agenda',
           'Week agenda',
           'A day or week of events on a time grid: overlaps side by side, an all-day row, the current time and slot presses.',
+          { version: '0.1.1' },
         ),
         ...saasItems(
           'comment-thread',
@@ -1776,7 +1782,7 @@ export default defineRegistry({
         {
           name: 'docs-core',
           type: 'lib',
-          version: '0.1.1',
+          version: '0.1.2',
           title: 'Docs core',
           description:
             'The navigation tree helpers, the one link every docs block draws, badges, the copy button, the messages helpers and the parts the motion twins swap.',
@@ -1806,6 +1812,7 @@ export default defineRegistry({
           'Docs layout',
           'Header with search and switchers, navigation down the start edge, the page at a reading measure and the table of contents beside it.',
           'docs-layout',
+          { version: '0.1.1' },
         ),
         ...docsItems(
           'docs-sidebar',
@@ -1833,6 +1840,7 @@ export default defineRegistry({
               'prose/file-tree.tsx',
               'prose/mdx.tsx',
             ],
+            version: '0.1.1',
           },
         ),
         ...docsItems(
@@ -1840,7 +1848,7 @@ export default defineRegistry({
           'Code block',
           'Highlighted tokens from any build-time highlighter, file name, line highlights, line numbers, diff marks and copy.',
           'code-block',
-          { logic: true, version: '0.1.2' },
+          { logic: true, version: '0.1.3' },
         ),
         ...docsItems(
           'docs-code-tabs',
@@ -1854,6 +1862,7 @@ export default defineRegistry({
           'API reference',
           'A props table that stacks in narrow columns, signature cards and HTTP endpoints with parameters and example responses.',
           'api-reference',
+          { version: '0.1.1' },
         ),
         ...docsItems(
           'docs-search',
@@ -1873,6 +1882,7 @@ export default defineRegistry({
           'Version and language switchers',
           'Menus that link to other versions and languages, each language named in its own tongue.',
           'switchers',
+          { version: '0.1.1' },
         ),
         ...docsItems(
           'docs-feedback',
