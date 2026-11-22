@@ -1000,7 +1000,7 @@ export default defineRegistry({
     {
       name: 'markdown',
       type: 'component',
-      version: '0.1.0',
+      version: '0.1.1',
       title: 'Markdown',
       description:
         'Safe, themed Markdown for chat replies and docs: no raw HTML, safe links, tables, lists and code blocks you can swap for the docs code block.',

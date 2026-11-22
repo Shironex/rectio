@@ -86,6 +86,9 @@ summary: Work that is merging into main now and ships with the next release.
   this release lacks it: make the theme again from its link, or add the token to it.
 - A tentative event draws its dashed edge in the tone's mark colour, at 3:1 on the surface, not in
   the faint tint of a confirmed event.
+- A streaming `Markdown` reply renders the same as the finished text at every moment: a code fence
+  indented inside a list item no longer hides the blocks after the list, a table row that looks
+  like a fence stays a row, and an open `*` in a quote the reply has moved past stays as written.
 - On touch screens, sortable table headers, the chat reasoning, tool call and sources rows, the
   row under a reply and the docs code block header take the touch height, and the tab indicator no
   longer takes a press meant for the tab under it.

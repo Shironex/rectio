@@ -36,7 +36,10 @@ links open in a new tab and say so to a screen reader. Images are off unless you
 
 With `streaming`, text still arriving from a model renders cleanly: an open `**` or a code fence
 closes in place, a link whose address has not arrived shows its words, and a caret follows the last
-words. `markdownToText` gives the plain words, for copying or announcing.
+words. Only the block still arriving closes its markers; a quote or list the reply has moved past
+keeps them as written. Finished blocks are parsed once each, so a long reply costs the same per word
+as a short one, and the result is always the same as parsing the whole text again.
+`markdownToText` gives the plain words, for copying or announcing.
 
 Fenced code renders in a plain `pre` by default. Pass `components.code` to use your own, such as the
 docs `CodeBlock`; the AI chat thread block does exactly that. `size="sm"` suits chat and reasoning,
