@@ -145,3 +145,116 @@ describe('compact density with nested skins', () => {
     expect(read('dense', html, '--rx-space-unit')).toBe(compactUnit);
   });
 });
+
+/**
+ * A custom property resolved the way the browser computes it: every `var()` replaced from the
+ * cascade on the element (with its fallback when unset), then `calc()`, `max()` and `min()`
+ * evaluated in px (1rem = 16px).
+ */
+function resolvePx(el: Element, value: string, depth = 0): number {
+  if (depth > 20) throw new Error(`var() cycle in ${value}`);
+  let text = value;
+  // Innermost var() first, so a fallback that is itself a var() resolves too.
+  for (;;) {
+    const m = /var\((--[\w-]+)(?:,\s*([^()]*))?\)/.exec(text);
+    if (m === null) break;
+    const own = getComputedStyle(el)
+      .getPropertyValue(m[1] ?? '')
+      .trim();
+    const sub = own === '' ? (m[2] ?? '').trim() : own;
+    if (sub === '') throw new Error(`${m[1] ?? ''} is unset with no fallback`);
+    text = text.replace(m[0], `(${String(resolvePx(el, sub, depth + 1))}px)`);
+  }
+  const src = text
+    .replace(/(-?\d*\.?\d+)rem/g, (_, n: string) => String(Number(n) * 16))
+    .replace(/(\d*\.?\d+)px/g, '$1')
+    .replace(/calc\(/g, '(');
+  return evaluate(src);
+}
+
+/** Arithmetic over plain numbers: + - * /, parentheses, max() and min(). */
+function evaluate(src: string): number {
+  const tokens = src.match(/\d*\.?\d+|max|min|[-+*/(),]/g) ?? [];
+  let at = 0;
+  const peek = () => tokens[at];
+  const take = (want?: string) => {
+    const t = tokens[at++];
+    if (want !== undefined && t !== want) throw new Error(`expected ${want} in ${src}`);
+    return t ?? '';
+  };
+  const sum = (): number => {
+    let v = product();
+    while (peek() === '+' || peek() === '-') v = take() === '+' ? v + product() : v - product();
+    return v;
+  };
+  const product = (): number => {
+    let v = unary();
+    while (peek() === '*' || peek() === '/') v = take() === '*' ? v * unary() : v / unary();
+    return v;
+  };
+  const unary = (): number => {
+    if (peek() === '-') {
+      take();
+      return -unary();
+    }
+    const t = take();
+    if (t === '(') {
+      const v = sum();
+      take(')');
+      return v;
+    }
+    if (t === 'max' || t === 'min') {
+      take('(');
+      const args = [sum()];
+      while (peek() === ',') {
+        take();
+        args.push(sum());
+      }
+      take(')');
+      return t === 'max' ? Math.max(...args) : Math.min(...args);
+    }
+    const n = Number(t);
+    if (Number.isNaN(n)) throw new Error(`cannot evaluate ${src}`);
+    return n;
+  };
+  const v = sum();
+  if (at !== tokens.length) throw new Error(`cannot evaluate ${src}`);
+  return v;
+}
+
+describe('touch heights hold 44px in every skin, nested and compact', () => {
+  const TOUCH = [
+    '--rx-field-height-touch',
+    '--rx-table-row-height-touch',
+    '--rx-button-height-touch',
+  ];
+  const cases: [string, string | undefined, string][] = [
+    ['no skin', undefined, '<span id="t"></span>'],
+    ...(['dense', 'editorial', 'glass', 'brutalist'] as const).map(
+      (s) => [s, s, '<span id="t"></span>'] as [string, string, string],
+    ),
+    ['editorial inside brutalist', 'brutalist', scope('editorial')],
+    ['brutalist inside editorial', 'editorial', scope('brutalist')],
+    ['glass inside dense', 'dense', scope('glass')],
+    ['compact editorial', 'editorial', '<div data-density="compact"><span id="t"></span></div>'],
+    ['compact brutalist', 'brutalist', '<div data-density="compact"><span id="t"></span></div>'],
+    ['compact dense', 'dense', `<div data-density="compact">${scope('dense')}</div>`],
+  ];
+  it.each(cases)('%s', (_, skin, html) => {
+    read(skin, html);
+    const el = document.getElementById('t');
+    if (el === null) throw new Error('no #t');
+    for (const name of TOUCH) {
+      const declared = getComputedStyle(el).getPropertyValue(name).trim();
+      expect(resolvePx(el, declared), name).toBeGreaterThanOrEqual(44);
+    }
+  });
+
+  it('grows with a border wider than 1px', () => {
+    read('brutalist', '<span id="t"></span>');
+    const el = document.getElementById('t');
+    if (el === null) throw new Error('no #t');
+    const field = getComputedStyle(el).getPropertyValue('--rx-field-height-touch').trim();
+    expect(resolvePx(el, field)).toBe(46);
+  });
+});
