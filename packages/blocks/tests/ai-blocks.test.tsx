@@ -1,7 +1,14 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LinkProvider } from '@rectio/ui';
-import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  LinkProvider,
+} from '@rectio/ui';
+import { useId, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -90,16 +97,45 @@ describe('PromptComposer', () => {
     const count = document.querySelector('[data-part="count"]');
     expect(count).toHaveTextContent('2 / 3 tokens');
     expect(count).toHaveAttribute('data-tone', 'quiet');
-    // The count is the field's description, so it can be read on demand.
-    expect(field.getAttribute('aria-describedby')).toContain(count?.id);
+    // The figure is the field's description, said once whatever the width.
+    expect(field).toHaveAccessibleDescription('2 / 3 tokens');
     expect(field).not.toHaveAttribute('aria-invalid');
     await userEvent.type(field, ' three four');
     expect(count).toHaveAttribute('data-tone', 'over');
     expect(count).toHaveTextContent('4 / 3 tokens, 1 over');
     expect(field).toHaveAttribute('aria-invalid', 'true');
+    expect(field).toHaveAccessibleDescription('4 / 3 tokens, 1 over');
     expect(screen.getByRole('button', { name: 'Send' })).toHaveAttribute('aria-disabled', 'true');
     await userEvent.keyboard('{Enter}');
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('says the count when it crosses the limit, not on every figure', async () => {
+    render(
+      <PromptComposer
+        onSubmit={vi.fn()}
+        count="characters"
+        limit={10}
+        locale="en-US"
+        defaultValue="123456789"
+      />,
+    );
+    const field = screen.getByRole('textbox');
+    const said = () =>
+      [...document.querySelectorAll('[aria-live="polite"]')].map((n) => n.textContent).join('|');
+    await userEvent.type(field, 'ab');
+    await waitFor(() => {
+      expect(said()).toContain('1 characters over the limit, shorten to send');
+    });
+    // Further past the limit: the same note stands, nothing new is said.
+    await userEvent.type(field, 'cd');
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    expect(said()).toContain('1 characters over the limit');
+    expect(said()).not.toContain('3 characters over');
+    await userEvent.type(field, '{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}');
+    await waitFor(() => {
+      expect(said()).toContain('Within the limit again');
+    });
   });
 
   it('offers a named model picker that reports the choice', async () => {
@@ -125,6 +161,20 @@ describe('PromptComposer', () => {
     render(<MotionPromptComposer commands={COMMANDS} onSubmit={vi.fn()} />);
     await userEvent.type(screen.getByRole('textbox'), '/');
     expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+
+  it('is held while a workspace loads its chat, through the composer slot', () => {
+    render(
+      <ChatWorkspace
+        chats={[{ id: 'c1', title: 'Q3 close checklist' }]}
+        activeId="c1"
+        threadLoading
+        conversation={[]}
+        onSend={vi.fn()}
+        renderComposer={(slot) => <PromptComposer {...slot} />}
+      />,
+    );
+    expect(screen.getByRole('textbox', { name: 'Message' })).toBeDisabled();
   });
 
   it('can stand in for the thread field through renderComposer', async () => {
@@ -216,6 +266,13 @@ describe('ChatWorkspace', () => {
     await userEvent.click(link);
     expect(routed).toHaveBeenCalledWith('/chats/b');
     expect(onSelect).toHaveBeenCalledWith(CHATS[1]);
+    // Opened in a new tab or window: the page stays as it is.
+    onSelect.mockClear();
+    fireEvent.click(link, { metaKey: true });
+    fireEvent.click(link, { ctrlKey: true });
+    fireEvent.click(link, { shiftKey: true });
+    fireEvent.click(link, { button: 1 });
+    expect(onSelect).not.toHaveBeenCalled();
   });
 
   it('searches the list, says how many were found, and offers a way back from no match', async () => {
@@ -368,6 +425,98 @@ describe('AssistantSidebar', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await userEvent.click(trigger);
     expect(trigger).toHaveFocus();
+  });
+
+  it('ignores the shortcut behind a modal dialog, and while the keys are held', async () => {
+    render(
+      <>
+        <Docked />
+        <AlertDialog>
+          <AlertDialogTrigger>Delete</AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogTitle>Delete this chat?</AlertDialogTitle>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    const dialog = await screen.findByRole('alertdialog', { name: 'Delete this chat?' });
+    fireEvent.keyDown(within(dialog).getByRole('button', { name: 'Cancel' }), {
+      key: 'j',
+      ctrlKey: true,
+    });
+    expect(screen.queryByRole('textbox', { name: 'Message' })).not.toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
+    fireEvent.keyDown(document.body, { key: 'j', ctrlKey: true });
+    expect(await screen.findByRole('textbox', { name: 'Message' })).toBeInTheDocument();
+    // The held keys repeat: the panel stays open.
+    fireEvent.keyDown(document.body, { key: 'j', ctrlKey: true, repeat: true });
+    expect(screen.getByRole('textbox', { name: 'Message' })).toBeInTheDocument();
+  });
+
+  it('keeps the width under its storage key when the tree above it changes', async () => {
+    localStorage.clear();
+    const assistantShare = () =>
+      document.querySelector<HTMLElement>('[data-panel-id="rx-assistant-help-assistant"]')?.style
+        .flex;
+    const first = render(
+      <AssistantSidebar defaultOpen storageKey="help" panel={<p>Ask me</p>}>
+        <p>Page</p>
+      </AssistantSidebar>,
+    );
+    const before = assistantShare();
+    screen.getByRole('separator', { name: 'Resize the assistant' }).focus();
+    await userEvent.keyboard('{ArrowRight}');
+    const resized = assistantShare();
+    expect(resized).not.toBe(before);
+    first.unmount();
+    // A different tree above, with other generated ids before it.
+    function Other() {
+      return <span id={useId()}>Other</span>;
+    }
+    render(
+      <section>
+        <Other />
+        <Other />
+        <AssistantSidebar defaultOpen storageKey="help" panel={<p>Ask me</p>}>
+          <p>Page</p>
+        </AssistantSidebar>
+      </section>,
+    );
+    expect(assistantShare()).toBe(resized);
+  });
+
+  it('keeps a docked default closed on a phone until the reader opens it', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn((query: string) => ({
+        matches: query.includes('48rem'),
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    try {
+      render(
+        <AssistantSidebarProvider defaultOpen>
+          <AssistantSidebarTrigger />
+          <AssistantSidebar phoneTrigger={false} panel={<p>Ask me</p>}>
+            <p>Page</p>
+          </AssistantSidebar>
+        </AssistantSidebarProvider>,
+      );
+      expect(screen.queryByText('Ask me')).not.toBeInTheDocument();
+      const trigger = screen.getByRole('button', { name: 'Open assistant' });
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+      await userEvent.click(trigger);
+      expect(await screen.findByText('Ask me')).toBeInTheDocument();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('renders the motion twin open', () => {

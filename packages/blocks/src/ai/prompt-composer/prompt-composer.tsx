@@ -195,15 +195,32 @@ export function PromptComposer({
   // A phone has less room beside Send: the figures shorten (8K) and keep their unit.
   const compact = (n: number) => new Intl.NumberFormat(locale, { notation: 'compact' }).format(n);
   const unit = count ?? 'tokens';
-  const countAnnouncement =
-    tone === 'over' && limit !== undefined
-      ? m.countOver(format(measured - limit), unit)
-      : tone === 'near' && limit !== undefined
-        ? m.countLeft(format(limit - measured), unit)
-        : '';
-  const announcement = useSettled(
-    [open ? m.commandsFound(matches.length) : '', countAnnouncement].filter(Boolean).join('. '),
-  );
+  // The count is said when it crosses a line (near the limit, over it, back under it), not on every
+  // figure: the field's description holds the figure for whoever asks.
+  const [seenTone, setSeenTone] = useState(tone);
+  const [toneNote, setToneNote] = useState('');
+  if (tone !== seenTone) {
+    setSeenTone(tone);
+    const note =
+      limit === undefined
+        ? ''
+        : tone === 'over'
+          ? m.countOver(format(measured - limit), unit)
+          : seenTone === 'over'
+            ? m.countFits
+            : tone === 'near'
+              ? m.countLeft(format(limit - measured), unit)
+              : '';
+    // Falling back to quiet says nothing new: the last note stands rather than being cut off.
+    if (note !== '') setToneNote(note);
+  }
+  const commandNote = useSettled(open ? m.commandsFound(matches.length) : '');
+  const countNote = useSettled(toneNote);
+  const description =
+    count === undefined
+      ? ''
+      : m.count(format(measured), limit === undefined ? undefined : format(limit), unit) +
+        (tone === 'over' && limit !== undefined ? `, ${m.overBy(format(measured - limit))}` : '');
 
   const picker =
     models.length > 0 ? (
@@ -326,10 +343,8 @@ export function PromptComposer({
         }
         meta={
           count === undefined ? undefined : (
-            // Read as the field's description, so the count is there on demand as well as said
-            // near and past the limit.
+            // Drawn only: the field's description below says it once, at every width.
             <span
-              id={countId}
               aria-hidden
               data-part="count"
               data-tone={tone}
@@ -357,8 +372,16 @@ export function PromptComposer({
           )
         }
       />
+      {count !== undefined && (
+        <span id={countId} className="sr-only">
+          {description}
+        </span>
+      )}
       <span aria-live="polite" className="sr-only">
-        {announcement}
+        {commandNote}
+      </span>
+      <span aria-live="polite" className="sr-only">
+        {countNote}
       </span>
     </div>
   );
