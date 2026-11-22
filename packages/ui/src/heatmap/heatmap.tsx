@@ -484,12 +484,12 @@ export function Heatmap(props: HeatmapProps) {
                   }
                 : {
                     // Wide enough for a figure such as 72.2%; past that the grid scrolls sideways.
-                    gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(calc(var(--spacing) * 11), 1fr))`,
+                    gridTemplateColumns: `auto repeat(${String(columnCount)}, minmax(calc(var(--spacing) * 12), 1fr))`,
                   }
             }
           >
             <div role="row" className="contents">
-              <div role="columnheader" className="sticky start-0 z-20 bg-surface" />
+              <div role="columnheader" className="sticky -start-1 z-20 bg-surface" />
               {model.columns.map((column) => (
                 <div
                   key={column.id}
@@ -511,8 +511,8 @@ export function Heatmap(props: HeatmapProps) {
                 <div
                   role="rowheader"
                   className={cn(
-                    // Stays in view while a wide grid scrolls under it.
-                    'sticky start-0 z-20 flex items-center bg-surface pe-2 text-xs whitespace-nowrap text-fg-muted',
+                    // Stays in view while a wide grid scrolls under it, flush with the scroller's edge.
+                    'sticky -start-1 z-20 flex items-center bg-surface pe-2 text-xs whitespace-nowrap text-fg-muted',
                     calendar && 'leading-none',
                   )}
                 >
@@ -542,7 +542,7 @@ export function Heatmap(props: HeatmapProps) {
                       }}
                       className={cn(
                         'relative flex items-center justify-center rounded-badge text-xs numeric',
-                        calendar ? 'aspect-square' : 'h-8 px-1',
+                        calendar ? 'aspect-square' : 'h-8 px-0.5',
                         // A ring of the surface inside the focus ring keeps it 3:1 on every step.
                         'outline-offset-2 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-focus focus-visible:ring-2 focus-visible:ring-surface',
                         isRead && 'z-10 outline-2 outline-offset-2 outline-fg ring-2 ring-surface',
