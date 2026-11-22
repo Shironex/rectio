@@ -49,20 +49,38 @@ export interface EventCardProps extends Omit<ComponentProps<'article'>, 'title' 
  * Tint and border by tone, the same pairs a Badge uses, so an event reads as part of the kit. The
  * fill is quiet enough to put text on; the ink is the tone's strong step.
  */
-const TONES: Record<EventTone, { surface: string; ink: string }> = {
-  accent: { surface: 'border-accent-strong/25 bg-accent-subtle', ink: 'text-accent-strong' },
-  info: { surface: 'border-info-strong/25 bg-info-subtle', ink: 'text-info-strong' },
+const TONES: Record<EventTone, { surface: string; ink: string; tentative: string }> = {
+  accent: {
+    surface: 'border-accent-strong/25 bg-accent-subtle',
+    ink: 'text-accent-strong',
+    tentative: 'border-accent',
+  },
+  info: {
+    surface: 'border-info-strong/25 bg-info-subtle',
+    ink: 'text-info-strong',
+    tentative: 'border-info',
+  },
   positive: {
     surface: 'border-positive-strong/25 bg-positive-subtle',
     ink: 'text-positive-strong',
+    tentative: 'border-positive',
   },
-  warning: { surface: 'border-warning-strong/25 bg-warning-subtle', ink: 'text-warning-strong' },
+  warning: {
+    surface: 'border-warning-strong/25 bg-warning-subtle',
+    ink: 'text-warning-strong',
+    tentative: 'border-warning-mark',
+  },
   negative: {
     surface: 'border-negative-strong/25 bg-negative-subtle',
     ink: 'text-negative-strong',
+    tentative: 'border-negative',
   },
   // A tint of the ink, so it lifts off the surface in dark as well as light.
-  neutral: { surface: 'border-fg/15 bg-surface-hover', ink: 'text-fg-muted' },
+  neutral: {
+    surface: 'border-fg/15 bg-surface-hover',
+    ink: 'text-fg-muted',
+    tentative: 'border-line-strong',
+  },
 };
 
 const STATUS_WORDS: Record<Exclude<EventStatus, 'confirmed'>, string> = {
@@ -166,7 +184,9 @@ export function EventCard({
       className={cn(
         'group/event relative flex min-w-0 flex-col border text-fg',
         colours.surface,
-        status === 'tentative' && 'border-dashed bg-surface',
+        // The dashed edge says tentative, so it is drawn in the tone's mark colour, which holds
+        // 3:1 on the surface, not in the faint tint of a confirmed card.
+        status === 'tentative' && ['border-dashed bg-surface', colours.tentative],
         compact ? 'gap-0.5 overflow-hidden rounded-badge px-2 py-1' : 'gap-2 rounded-control p-3',
         onSelect !== undefined && [
           'transition-transform duration-fast ease-standard',
