@@ -458,10 +458,9 @@ export function ChartDataTable({ caption, headers, rows, footer }: ChartTableDat
 }
 
 const SKELETON_BARS = [46, 62, 38, 71, 55, 84, 66, 49, 77];
-
-/** A chart on its way, in the plot's own size and shape, announced once. */
 const SKELETON_FUNNEL = [100, 72, 47, 31];
 
+/** A chart on its way, in the plot's own size and shape, announced once. */
 function ChartLoading({ kind, label }: { kind: ChartKind; label: string }) {
   if (kind === 'funnel' || kind === 'heatmap') {
     return (
