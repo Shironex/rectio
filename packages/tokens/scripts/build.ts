@@ -275,6 +275,12 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   for (const ease of ['standard', 'enter', 'exit'])
     add(`--ease-${ease}`, `--rx-motion-easing-${ease}`);
   add('--spacing', '--rx-space-unit');
+  // `gap-touch-gap`: the gap between small pressables on touch screens, so their touch-height hit
+  // areas never overlap. Follows density and skin, which change the small control height and the
+  // spacing unit (a fixed `gap-5` falls short once the unit shrinks).
+  map.push(
+    '--spacing-touch-gap: calc(var(--rx-control-height-touch) - var(--rx-control-height-sm));',
+  );
   // `border` and `divide` without a width read this. The fallback keeps a theme file written
   // before the token existed at one pixel.
   map.push('--default-border-width: var(--rx-border-width, 1px);');

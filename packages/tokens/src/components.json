@@ -138,7 +138,7 @@
       "row-height-touch": {
         "$type": "dimension",
         "$value": "{control.height.touch}",
-        "$description": "Minimum height of header and body rows that hold a checkbox, on touch screens, so the 44px hit areas of checkboxes in adjacent rows never overlap. Never follows density."
+        "$description": "Minimum height of header and body rows that hold a checkbox, and of headers that sort, on touch screens, so the 44px hit areas of checkboxes in adjacent rows never overlap and a sort header is a whole target. Never follows density."
       },
       "header-height": {
         "$type": "dimension",
