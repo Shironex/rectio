@@ -200,7 +200,7 @@ export default defineRegistry({
   tokens: {
     dir: tokens,
     item: {
-      version: '0.6.0',
+      version: '0.7.0',
       title: 'Tokens',
       description:
         'The Tailwind v4 theme mapped to rectio tokens, density and reduced motion. Installed by init.',
@@ -208,7 +208,7 @@ export default defineRegistry({
     themes: [
       {
         id: 'default',
-        version: '0.4.0',
+        version: '0.5.0',
         title: 'Default theme',
         description: 'Warm stone neutrals, cobalt accent, 4px controls, IBM Plex. Light and dark.',
       },
@@ -227,6 +227,20 @@ export default defineRegistry({
         title: 'Editorial skin',
         description:
           'IBM Plex Serif headings, hairline borders, restrained corners and a more generous rhythm. Works with any theme, light or dark.',
+      },
+      {
+        id: 'glass',
+        version: '0.1.0',
+        title: 'Glass skin',
+        description:
+          'Translucent cards, popups and headers over a blurred backdrop, a light top edge, rounder corners and a soft tinted canvas. Solid where the browser cannot blur or transparency is reduced. Works with any theme, light or dark.',
+      },
+      {
+        id: 'brutalist',
+        version: '0.1.0',
+        title: 'Brutalist skin',
+        description:
+          'Two pixel ink borders, square corners, hard offset shadows and heavier type. Works with any theme, light or dark, and keeps focus rings clear of the shadows.',
       },
     ],
   },
@@ -251,7 +265,7 @@ export default defineRegistry({
     {
       name: 'theme-scope',
       type: 'component',
-      version: '0.1.3',
+      version: '0.2.0',
       title: 'ThemeScope',
       description: 'Applies a theme, mode, density and skin to a subtree; popups render inside it.',
       categories: ['theming'],
@@ -287,7 +301,7 @@ export default defineRegistry({
     {
       name: 'select',
       type: 'component',
-      version: '0.1.2',
+      version: '0.2.0',
       title: 'Select',
       description: 'A select with a styled popup that follows the theme scope.',
       categories: ['forms'],
@@ -296,7 +310,7 @@ export default defineRegistry({
     {
       name: 'dialog',
       type: 'component',
-      version: '0.2.1',
+      version: '0.3.0',
       title: 'Dialog',
       description: 'Modal dialog with header, body and footer, focus trapped and restored.',
       categories: ['overlays'],
@@ -359,7 +373,7 @@ export default defineRegistry({
     {
       name: 'date-picker',
       type: 'component',
-      version: '0.3.0',
+      version: '0.4.0',
       title: 'DatePicker',
       description:
         'A typed date field with a calendar popup, a date range picker and an inline range calendar with presets.',
@@ -394,7 +408,7 @@ export default defineRegistry({
     {
       name: 'toast',
       type: 'component',
-      version: '0.2.2',
+      version: '0.3.0',
       title: 'Toast',
       description: 'Success, error and info toasts with an action such as Undo, on Base UI Toast.',
       categories: ['feedback'],
@@ -490,7 +504,7 @@ export default defineRegistry({
     {
       name: 'card',
       type: 'component',
-      version: '0.1.1',
+      version: '0.2.0',
       title: 'Card',
       description:
         'A frame for one unit with header, content and footer; interactive cards are one link target.',
@@ -729,7 +743,7 @@ export default defineRegistry({
     {
       name: 'popover',
       type: 'component',
-      version: '0.1.1',
+      version: '0.2.0',
       title: 'Popover',
       description:
         'Anchored content opened on purpose, with a title, description and close button.',
@@ -776,7 +790,7 @@ export default defineRegistry({
     {
       name: 'sheet',
       type: 'component',
-      version: '0.2.0',
+      version: '0.3.0',
       title: 'Sheet',
       description:
         'A panel that slides in from any edge, a bottom sheet on phones, swipe to close.',
@@ -884,7 +898,7 @@ export default defineRegistry({
     {
       name: 'command-menu',
       type: 'component',
-      version: '0.1.1',
+      version: '0.2.0',
       title: 'CommandMenu',
       description:
         'A command palette in a dialog: groups, fuzzy filter, keyboard navigation, empty state and shortcut hints.',
@@ -908,7 +922,7 @@ export default defineRegistry({
     {
       name: 'app-shell',
       type: 'component',
-      version: '0.1.0',
+      version: '0.2.0',
       title: 'AppShell',
       description: 'Sidebar, sticky header and page wired together, with a skip link.',
       categories: ['navigation'],

@@ -9,7 +9,7 @@ export interface SplitTokens {
   tokensCss: string;
   /** Per theme id: its font imports and its light, dark and system-dark blocks. */
   themes: Map<string, { css: string; fontPackages: string[] }>;
-  /** Per skin id: its font imports, its one block, and the token names it sets. */
+  /** Per skin id: its font imports, its blocks, and the token names it sets. */
   skins: Map<string, { css: string; fontPackages: string[]; tokens: string[] }>;
   /** Token families with no font import, such as system stacks. Informational. */
   warnings: string[];
@@ -17,7 +17,7 @@ export interface SplitTokens {
 
 interface TokensJson {
   themes: Record<string, Record<string, Record<string, string>>>;
-  skins?: Record<string, { tokens: Record<string, string> }>;
+  skins?: Record<string, { tokens: Record<string, string>; translucent?: Record<string, string> }>;
 }
 
 const HEADER =
@@ -83,21 +83,36 @@ export function splitTokens(tokensDir: string): SplitTokens {
   for (const raw of splitBlocks(themesCss)) {
     // The generated-file banner is not part of any rule.
     const block = raw.comment.includes('Do not edit') ? { ...raw, comment: '' } : raw;
-    if (block.prelude.startsWith('@media')) {
+    if (block.prelude.startsWith('@media') || block.prelude.startsWith('@supports')) {
+      // A conditional group: its rules go to the theme or skin they name, wrapped in the same
+      // condition (a skin's translucent layer and its reduced transparency fallback are skin rules).
       const inner = splitBlocks(block.body);
-      const groups = new Map<string | undefined, CssBlock[]>();
+      const groups = new Map<
+        string,
+        { owner: 'theme' | 'skin' | 'shared'; id: string; rules: CssBlock[] }
+      >();
       for (const rule of inner) {
-        const theme = themeOf(rule.prelude);
-        groups.set(theme, [...(groups.get(theme) ?? []), rule]);
+        const skin = skinOf(rule.prelude);
+        if (skin !== undefined && themeOf(rule.prelude) !== undefined)
+          throw new Error(`a skin rule names a theme: ${rule.prelude}`);
+        const theme = skin === undefined ? themeOf(rule.prelude) : undefined;
+        const owner = skin !== undefined ? 'skin' : theme !== undefined ? 'theme' : 'shared';
+        const id = skin ?? theme ?? '';
+        const key = `${owner}:${id}`;
+        const group = groups.get(key) ?? { owner, id, rules: [] };
+        group.rules.push(rule);
+        groups.set(key, group);
       }
-      for (const [theme, rules] of groups) {
-        const text = printBlock({
-          comment: block.comment,
-          prelude: block.prelude,
-          body: `\n${rules.map((r) => printBlock(r, '  ')).join('\n')}`,
-        });
-        if (theme === undefined) shared.push(text);
-        else push(theme, text);
+      for (const { owner, id, rules } of groups.values()) {
+        const wrapped = (comment: string) =>
+          printBlock({
+            comment,
+            prelude: block.prelude,
+            body: `\n${rules.map((r) => printBlock(r, '  ')).join('\n')}`,
+          });
+        if (owner === 'shared') shared.push(wrapped(block.comment));
+        else if (owner === 'theme') push(id, wrapped(block.comment));
+        else perSkin.set(id, [...(perSkin.get(id) ?? []), wrapped(block.comment)]);
       }
       continue;
     }
@@ -167,7 +182,7 @@ export function splitTokens(tokensDir: string): SplitTokens {
     skins.set(id, {
       css: `${css}\n`,
       fontPackages: fonts.packages,
-      tokens: Object.keys(skin.tokens),
+      tokens: [...Object.keys(skin.tokens), ...Object.keys(skin.translucent ?? {})],
     });
   }
   for (const id of perSkin.keys()) {

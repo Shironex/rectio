@@ -467,8 +467,10 @@ describe('the rectio registry', () => {
       'site-footer',
       'site-header',
       'skeleton',
+      'skin-brutalist',
       'skin-dense',
       'skin-editorial',
+      'skin-glass',
       'slider',
       'sparkline',
       'spinner',
@@ -792,5 +794,34 @@ describe('the rectio registry', () => {
     expect(dense?.dependencies).toEqual({});
     expect(dense?.files[0]?.content).not.toContain('@import');
     expect(result.index.items.find((i) => i.name === 'skin-dense')?.type).toBe('skin');
+  });
+
+  // The translucent layer and its fallback are conditional groups: they travel with the skin, inside
+  // their conditions, and never land in the tokens file.
+  it('carries the glass translucent layer and its fallback in the glass item', () => {
+    const glass = byName.get('skin-glass');
+    const css = glass?.files[0]?.content ?? '';
+    expect(glass?.skin?.tokens).toEqual(
+      expect.arrayContaining([
+        '--rx-shadow-highlight',
+        '--rx-surface-opacity',
+        '--rx-surface-wash',
+      ]),
+    );
+    expect(css).toContain(
+      '@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {\n  [data-skin="glass"],',
+    );
+    expect(css).toContain(
+      '@media (prefers-reduced-transparency: reduce) {\n  [data-skin="glass"],',
+    );
+    expect(css).not.toContain('[data-skin="brutalist"]');
+    const tokens = byName.get('tokens')?.files[0]?.content ?? '';
+    expect(tokens).not.toContain('prefers-reduced-transparency');
+    expect(tokens).toContain('@utility backdrop-surface {');
+    expect(tokens).toContain('@utility canvas-wash {');
+
+    const brutalist = byName.get('skin-brutalist');
+    expect(brutalist?.files[0]?.content).toContain('--rx-shadow-offset-raised: 0.25rem;');
+    expect(brutalist?.files[0]?.content).not.toContain('@supports');
   });
 });
