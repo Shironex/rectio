@@ -33,3 +33,19 @@ export {
   type AiEnterProps,
   type AiParts,
 } from './lib/parts';
+export { PromptComposer, type PromptComposerProps } from './prompt-composer/prompt-composer';
+export {
+  PROMPT_COMPOSER_MESSAGES,
+  type PromptComposerMessages,
+} from './prompt-composer/prompt-composer-messages';
+export {
+  countTone,
+  estimateTokens,
+  insertCommand,
+  matchCommands,
+  slashQuery,
+  type AiComposerCommand,
+  type AiComposerModel,
+  type ComposerCountTone,
+  type SlashQuery,
+} from './prompt-composer/prompt-composer.logic';
