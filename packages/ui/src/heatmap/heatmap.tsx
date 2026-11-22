@@ -46,7 +46,8 @@ export interface HeatmapMessages extends ChartMessages {
   scale: (info: { steps: number; max: string }) => string;
   summary: (info: {
     count: number;
-    total: string;
+    /** The sum of every figure; undefined for shares, which do not add up. */
+    total?: string | undefined;
     highest?: { label: string; value: string } | undefined;
     missing: number;
   }) => string;
@@ -62,7 +63,7 @@ export const HEATMAP_MESSAGES: HeatmapMessages = {
     `Darker steps hold more, in ${String(steps)} even steps from zero up to ${max}.`,
   keyboardHint: 'Use the arrow keys in the grid to read each cell, or show the table.',
   summary: ({ count, total, highest, missing }) =>
-    `${String(count)} cells, ${total} in all.` +
+    `${String(count)} cells${total === undefined ? '' : `, ${total} in all`}.` +
     (highest === undefined ? '' : ` Highest: ${highest.label} at ${highest.value}.`) +
     (missing === 0
       ? ''
@@ -376,7 +377,9 @@ export function Heatmap(props: HeatmapProps) {
     [
       m.summary({
         count: present.length,
-        total: write(figures.reduce((sum, value) => sum + value, 0)),
+        // Shares do not add up to anything, so a percent heatmap leaves its total out.
+        total:
+          format === 'percent' ? undefined : write(figures.reduce((sum, value) => sum + value, 0)),
         highest:
           highest === undefined ? undefined : { label: highest.label, value: write(highest.value) },
         missing,
