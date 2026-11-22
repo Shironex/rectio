@@ -1,5 +1,13 @@
 # @rectio/cli
 
+## 0.3.2
+
+### Patch Changes
+
+- 3bab588: The help and the MCP theming notes name the glass and brutalist skins beside dense and editorial,
+  and the MCP token listing names the utility of a colour or shadow the skins mix (surfaces, borders,
+  shadows, the warning mark).
+
 ## 0.3.1
 
 ### Patch Changes
