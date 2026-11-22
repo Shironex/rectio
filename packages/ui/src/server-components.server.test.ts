@@ -69,6 +69,16 @@ describe('@rectio/ui in a React Server Component', { timeout: 30_000 }, () => {
     expect(Object.keys(kit).length).toBeGreaterThan(150);
   });
 
+  it('runs the chart logic helpers on the server', async () => {
+    const charts = await import('./charts');
+    expect(charts.funnelSteps([{ id: 'a', label: 'A', value: 10 }])[0]?.ofFirst).toBe(1);
+    expect(charts.heatStep(5, 10, 4)).toBe(2);
+    expect(charts.heatValue(-1)).toBeNull();
+    expect(
+      charts.waterfallBars([{ id: 's', label: 'S', value: 3, kind: 'start' }])[0]?.running,
+    ).toBe(3);
+  });
+
   it('runs the plain helpers on the server', async () => {
     const kit = await import('./index');
     expect(kit.cn('px-2', 'px-4')).toBe('px-4');
@@ -138,21 +148,26 @@ describe('@rectio/ui in a React Server Component', { timeout: 30_000 }, () => {
     expect(offenders).toEqual([]);
   });
 
-  it('exports every plain helper from a server-safe module', () => {
-    const index = byPath.get(join(ROOT, 'index.ts'));
-    const offenders = index === undefined ? ['index.ts'] : [];
-    for (const { target, names } of index === undefined ? [] : localImportsOfIndex(index.source)) {
-      if (target === undefined || !isClientModule(target.source)) continue;
-      const plain = names.filter((name) => !/^[A-Z]/.test(name) && !/^use[A-Z]/.test(name));
-      const allowed = CLIENT_HELPERS.get(target.name) ?? [];
-      offenders.push(
-        ...plain
-          .filter((name) => !allowed.includes(name))
-          .map((name) => `${name} (${target.name})`),
-      );
-    }
-    expect(offenders).toEqual([]);
-  });
+  it.each(['index.ts', 'charts.ts'])(
+    'exports every plain helper of %s from a server-safe module',
+    (entry) => {
+      const index = byPath.get(join(ROOT, entry));
+      const offenders = index === undefined ? [entry] : [];
+      for (const { target, names } of index === undefined
+        ? []
+        : localImportsOfIndex(index.source)) {
+        if (target === undefined || !isClientModule(target.source)) continue;
+        const plain = names.filter((name) => !/^[A-Z]/.test(name) && !/^use[A-Z]/.test(name));
+        const allowed = CLIENT_HELPERS.get(target.name) ?? [];
+        offenders.push(
+          ...plain
+            .filter((name) => !allowed.includes(name))
+            .map((name) => `${name} (${target.name})`),
+        );
+      }
+      expect(offenders).toEqual([]);
+    },
+  );
 
   it('reads export names the way the boundary does', () => {
     expect(
@@ -168,6 +183,21 @@ describe('@rectio/ui in a React Server Component', { timeout: 30_000 }, () => {
 const CLIENT_HELPERS = new Map<string, string[]>([
   ['data-table/data-table.tsx', ['dataTableFeatures', 'selectionColumn']],
   ['command-menu/command-menu.tsx', ['filterCommands']],
+  // The chart core's helpers predate the server check on the charts entry; moving them out of the
+  // client modules is a follow-up. New chart helpers live in *.logic.ts files instead.
+  [
+    'chart/chart.tsx',
+    [
+      'activeDatum',
+      'chartColor',
+      'chartSurface',
+      'mergeMessages',
+      'niceRangeTicks',
+      'niceTicks',
+      'paletteColor',
+    ],
+  ],
+  ['chart/time-chart.tsx', ['seriesStyle']],
 ]);
 
 function localImportsOfIndex(source: string) {
