@@ -193,6 +193,11 @@
       "radius": {
         "$type": "dimension",
         "$value": "{radius.badge}"
+      },
+      "edge": {
+        "$type": "other",
+        "$value": "calc(25% + var(--rx-border-ink, 0) * 75%)",
+        "$description": "Opacity of a tinted badge's edge in its tone: a quarter, up to the full tone where a skin inks its borders."
       }
     },
     "toast": {

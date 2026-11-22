@@ -356,6 +356,9 @@ function tailwindCss(contract: string[], types: TokenMap): string {
     if (composite === undefined) add(key, name);
     else map.push(`${key}: ${composite};`);
   }
+  // A disabled control's edge stays the theme's plain border where a skin inks the others, so a
+  // disabled control reads apart from an enabled one by its edge too, not by its text alone.
+  add('--color-line-disabled', '--rx-border');
   for (const role of ['sans', 'display', 'mono', 'numeric'])
     add(`--font-${role}`, `--rx-font-family-${role}`);
   for (const size of ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl']) {
@@ -454,7 +457,8 @@ function tailwindCss(contract: string[], types: TokenMap): string {
 @utility canvas-wash {
   background-image:
     radial-gradient(72rem 48rem at 0% 0%, color-mix(in oklab, var(--rx-surface-selected) calc(var(--rx-surface-wash, 0) * ${String(WASH['surface-selected'])}%), transparent), transparent),
-    radial-gradient(64rem 44rem at 100% 0%, color-mix(in oklab, var(--rx-identity-4-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['identity-4-subtle'])}%), transparent), transparent);
+    radial-gradient(64rem 44rem at 100% 0%, color-mix(in oklab, var(--rx-identity-4-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['identity-4-subtle'])}%), transparent), transparent),
+    radial-gradient(80rem 40rem at 50% 100%, color-mix(in oklab, var(--rx-surface-selected) calc(var(--rx-surface-wash, 0) * ${String(WASH['surface-selected'])}%), transparent), transparent);
 }
 
 @utility backdrop-surface {

@@ -444,6 +444,8 @@ describe('the switches a skin turns on', () => {
     expect(tailwind).toContain(
       '--shadow-raised: inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-offset-raised, 0px) var(--rx-shadow-offset-raised, 0px) 0 0 var(--rx-shadow-offset-color, transparent), var(--rx-shadow-raised);',
     );
+    // A disabled control keeps the plain border where a skin inks the others.
+    expect(tailwind).toContain('--color-line-disabled: var(--rx-border);');
     // A thumb or indicator inside a track never takes the offset layer.
     expect(tailwind).toContain(
       '--shadow-indicator: inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent), var(--rx-shadow-raised);',
