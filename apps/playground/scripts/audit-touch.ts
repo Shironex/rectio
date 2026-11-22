@@ -49,6 +49,39 @@ interface Finding {
   blocker: string;
 }
 
+/** Touch height tokens that resolve under `target` px here, plain and under compact density. */
+function touchTokens(target: number): string[] {
+  const names = new Set<string>();
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules: CSSRuleList;
+    try {
+      rules = sheet.cssRules;
+    } catch {
+      continue;
+    }
+    for (const rule of Array.from(rules))
+      for (const m of rule.cssText.matchAll(/(--rx-[\w-]*touch[\w-]*)\s*:/g))
+        if (m[1] !== undefined) names.add(m[1]);
+  }
+  const host = document.querySelector('[data-skin]') ?? document.body;
+  const short: string[] = [];
+  for (const compact of [false, true]) {
+    const wrap = document.createElement('div');
+    if (compact) wrap.dataset.density = 'compact';
+    host.append(wrap);
+    for (const name of names) {
+      const probe = document.createElement('div');
+      probe.style.height = `var(${name})`;
+      wrap.append(probe);
+      const h = probe.getBoundingClientRect().height;
+      if (h < target)
+        short.push(`${name}${compact ? ' (compact)' : ''} resolves to ${String(h)}px`);
+    }
+    wrap.remove();
+  }
+  return short;
+}
+
 async function settle(page: Page) {
   await page.waitForFunction(() => (document.getElementById('root')?.childElementCount ?? 0) > 0);
   await page.evaluate(() => document.fonts.ready);
@@ -250,6 +283,12 @@ try {
       await settle(page);
       const coarse = await page.evaluate(() => matchMedia('(pointer: coarse)').matches);
       if (!coarse) throw new Error('touch emulation did not match pointer: coarse');
+      // Every touch height token, resolved by the browser under this look (and with compact density
+      // on top), must reach the target exactly: the hit-area walk below allows a pixel of rounding,
+      // which would hide a token that comes out at 43.5px.
+      const short = await page.evaluate(touchTokens, TARGET);
+      for (const s of short) console.log(`  token ${s}`);
+      failures += short.length;
       const findings: Finding[] = [];
       const height = await page.evaluate(() => document.documentElement.scrollHeight);
       for (let y = 0; y < height; y += VIEWPORT - 400) {
