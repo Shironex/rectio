@@ -1359,7 +1359,7 @@ export default defineRegistry({
         {
           name: 'blocks-core',
           type: 'lib',
-          version: '0.1.6',
+          version: '0.1.7',
           title: 'Blocks core',
           description:
             'Money maths in minor units, the panel, chart theming with a table fallback, and the parts every finance block shares.',
@@ -1726,6 +1726,7 @@ export default defineRegistry({
           'pricing-table',
           'Pricing table',
           'Plans with a monthly and yearly switch showing the saving, a recommended and a current plan, and a feature comparison.',
+          { version: '0.1.1' },
         ),
         ...saasItems(
           'onboarding-checklist',

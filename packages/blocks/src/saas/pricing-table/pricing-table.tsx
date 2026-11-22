@@ -128,7 +128,7 @@ export function PricingTable({
                     'row-span-4 grid grid-rows-subgrid gap-5 rounded-panel border p-5',
                     recommended
                       ? 'border-accent bg-surface-raised shadow-raised ring-1 ring-accent'
-                      : 'border-line bg-surface',
+                      : 'border-line bg-surface shadow-panel',
                   )}
                 >
                   <div className="flex flex-col gap-1">

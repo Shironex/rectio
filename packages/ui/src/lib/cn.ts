@@ -9,7 +9,7 @@ const merge = extendTailwindMerge({
   extend: {
     theme: {
       radius: ['control', 'panel', 'badge'],
-      shadow: ['raised', 'overlay', 'indicator'],
+      shadow: ['raised', 'overlay', 'indicator', 'panel'],
       ease: ['standard', 'enter', 'exit'],
       tracking: ['tight', 'normal', 'caps'],
       'font-weight': ['regular', 'medium', 'strong', 'heading'],

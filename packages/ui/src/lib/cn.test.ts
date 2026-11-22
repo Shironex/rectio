@@ -8,6 +8,7 @@ describe('cn', () => {
     expect(cn('duration-fast', 'duration-slow')).toBe('duration-slow');
     expect(cn('shadow-raised', 'shadow-overlay')).toBe('shadow-overlay');
     expect(cn('shadow-raised', 'shadow-indicator')).toBe('shadow-indicator');
+    expect(cn('shadow-panel', 'shadow-raised')).toBe('shadow-raised');
     expect(cn('font-medium', 'font-strong')).toBe('font-strong');
   });
 

@@ -40,7 +40,7 @@ export function BlockPanel({
       data-slot="block"
       className={cn(
         '@container flex min-w-0 flex-col text-fg',
-        !bare && 'rounded-panel border border-line bg-surface',
+        !bare && 'rounded-panel border border-line bg-surface shadow-panel backdrop-surface',
         className,
       )}
       {...props}
