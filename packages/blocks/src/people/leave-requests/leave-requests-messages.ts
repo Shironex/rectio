@@ -75,6 +75,9 @@ export interface LeaveRequestsMessages {
   balanceAfter: (now: string, after: string) => string;
   noBalanceLimit: string;
   problem: Record<LeaveProblem, string>;
+  /** The alert naming the person's own leave a new request would book over. */
+  ownOverlapTitle: string;
+  ownOverlap: (requests: string) => string;
   submit: string;
   cancel: string;
 }
@@ -162,8 +165,12 @@ export const LEAVE_REQUESTS_MESSAGES: LeaveRequestsMessages = {
   problem: {
     'no-range': 'Pick the first and last day.',
     'no-working-days': 'These days are all weekends or holidays.',
+    'own-overlap': 'You already have leave on some of these days.',
     'over-balance': 'This is more than the balance left.',
   },
+  ownOverlapTitle: 'You are already off on these days',
+  ownOverlap: (requests) =>
+    `${requests}. Booking them again would take them from the balance twice: change the dates, or cancel the other request first.`,
   submit: 'Send request',
   cancel: 'Cancel',
 };

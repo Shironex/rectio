@@ -33,7 +33,10 @@ export interface LeaveDecision {
 /** The days a request covers, with its half days. */
 export interface LeaveSpan {
   start: IsoDay;
-  /** Exclusive: the first day back. */
+  /**
+   * Exclusive: the first day back. It must come after `start`; a span that ends on or before its
+   * start takes no days, and leaveProblem refuses it as `no-range`.
+   */
   end: IsoDay;
   /** The first day starts at midday: only its afternoon is off. */
   halfStart?: boolean | undefined;
@@ -155,17 +158,45 @@ export function overlapPeople(overlaps: readonly LeaveOverlap[]): LeavePerson[] 
   return [...seen.values()];
 }
 
-export type LeaveProblem = 'no-range' | 'no-working-days' | 'over-balance';
+/**
+ * The person's own approved or pending leave on the same working days as `span`, soonest first.
+ * Booking over it would charge the balance twice for one day, so the form refuses it.
+ */
+export function ownLeaveOverlaps(
+  span: LeaveSpan,
+  requests: readonly LeaveRequest[],
+  personId: string,
+  calendar: WorkCalendar = {},
+): LeaveOverlap[] {
+  const mine = new Set(workingDaysOf(span, calendar));
+  if (mine.size === 0) return [];
+  const overlaps: LeaveOverlap[] = [];
+  for (const request of requests) {
+    if (request.person.id !== personId) continue;
+    if (request.status !== 'approved' && request.status !== 'pending') continue;
+    if (request.end <= span.start || request.start >= span.end) continue;
+    const days = workingDaysOf(request, calendar).filter((day) => mine.has(day));
+    if (days.length > 0) overlaps.push({ request, days });
+  }
+  return overlaps.toSorted((a, b) => (a.days[0] ?? '').localeCompare(b.days[0] ?? ''));
+}
 
-/** What stops a request from being sent, or null when it can go. */
+export type LeaveProblem = 'no-range' | 'no-working-days' | 'own-overlap' | 'over-balance';
+
+/**
+ * What stops a request from being sent, or null when it can go. Pass the person's own overlapping
+ * leave (from ownLeaveOverlaps) to refuse a booking over days already asked for.
+ */
 export function leaveProblem(
   span: LeaveSpan | null,
   balance: LeaveBalance | undefined,
   calendar: WorkCalendar = {},
+  own: readonly LeaveOverlap[] = [],
 ): LeaveProblem | null {
   if (span === null || span.end <= span.start) return 'no-range';
   const halves = leaveHalves(span, calendar);
   if (halves === 0) return 'no-working-days';
+  if (own.length > 0) return 'own-overlap';
   if (balance?.left != null && halves > balance.left) return 'over-balance';
   return null;
 }

@@ -29,6 +29,7 @@ import {
   leaveOverlaps,
   leaveProblem,
   overlapPeople,
+  ownLeaveOverlaps,
   spanFromPicked,
   type LeaveRequest,
   type LeaveSpan,
@@ -116,7 +117,9 @@ export function LeaveRequestForm({
   const span: LeaveSpan | null =
     base === null ? null : { ...base, halfStart, halfEnd: single ? false : halfEnd };
   const halves = span === null ? 0 : leaveHalves(span, calendar);
-  const problem = leaveProblem(picked?.to === undefined ? null : span, balance, calendar);
+  const own = span === null ? [] : ownLeaveOverlaps(span, requests, personId, calendar);
+  const problem = leaveProblem(picked?.to === undefined ? null : span, balance, calendar, own);
+  const typeLabel = (id: string) => types.find((t) => t.id === id)?.label ?? id;
   const overlaps = span === null ? [] : leaveOverlaps(span, requests, { personId, calendar });
   const people = overlapPeople(overlaps);
   const overlapDays = new Set(overlaps.flatMap((o) => o.days)).size;
@@ -227,6 +230,21 @@ export function LeaveRequestForm({
             </>
           )}
         </div>
+
+        {own.length > 0 && picked?.to !== undefined && (
+          <Alert tone="danger" title={m.ownOverlapTitle}>
+            {m.ownOverlap(
+              own
+                .map(({ request }) =>
+                  m.preview(
+                    typeLabel(request.type),
+                    formatDayRange(request.start, request.end, locale, m.range),
+                  ),
+                )
+                .join('; '),
+            )}
+          </Alert>
+        )}
 
         {people.length > 0 && (
           <Alert

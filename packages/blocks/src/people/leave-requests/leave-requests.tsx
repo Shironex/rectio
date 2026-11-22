@@ -63,11 +63,11 @@ export interface LeaveRequestsProps {
   requests: readonly LeaveRequest[];
   types: readonly LeaveType[];
   /** The approver's view: approve a pending request, after a confirm that names any overlap. */
-  onApprove?: ((request: LeaveRequest) => void) | undefined;
+  onApprove?: ((request: LeaveRequest) => unknown) | undefined;
   /** The approver's view: decline a pending request with a reason. */
-  onDecline?: ((request: LeaveRequest, reason: string) => void) | undefined;
+  onDecline?: ((request: LeaveRequest, reason: string) => unknown) | undefined;
   /** The requester's view: cancel a pending request, or an approved one that has not started. */
-  onCancel?: ((request: LeaveRequest, reason: string) => void) | undefined;
+  onCancel?: ((request: LeaveRequest, reason: string) => unknown) | undefined;
   /** Shows each person's name and picture on the rows: on in the approver's view. */
   showPerson?: boolean | undefined;
   /** Shows this person's balance by type above the list. */
@@ -130,7 +130,11 @@ export function LeaveRequests({
   const calendar = { weekend, holidays };
   const [filterState, setFilterState] = useState<LeaveFilter>(defaultFilter);
   const view = filter ?? filterState;
-  const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
+  const [asking, setAsking] = useState<{
+    kind: 'approve' | 'decline' | 'cancel';
+    id: string;
+    status: LeaveStatus;
+  } | null>(null);
   const counts = leaveCounts(requests);
   const shown = leaveInView(requests, view);
   const { limit, more } = useMore(pageSize, view);
@@ -161,6 +165,60 @@ export function LeaveRequests({
     if (!long) return m.overlapShort(names, Math.max(0, people.length - 2));
     const days = new Set(overlaps.flatMap((o) => o.days)).size;
     return m.overlapLong(people.map((p) => p.name).join(', '), people.length, days);
+  };
+
+  const cancellable = (request: LeaveRequest) =>
+    onCancel !== undefined &&
+    (request.status === 'pending' || (request.status === 'approved' && request.start > today));
+
+  // The question is about the request as it is now: its words follow the current data, and if the
+  // request changed status (or left the list) while the dialog was open, confirming closes it
+  // without acting.
+  const asked = asking === null ? undefined : requests.find((request) => request.id === asking.id);
+  const unchanged = asked !== undefined && asked.status === asking?.status;
+  if (asking !== null && asked === undefined) setAsking(null);
+  const confirm: ConfirmRequest | null =
+    asking === null || asked === undefined
+      ? null
+      : asking.kind === 'approve'
+        ? {
+            id: `approve:${asked.id}`,
+            title: m.approveTitle(asked.person.name),
+            description: m.approveNote(
+              daysText(leaveHalves(asked, calendar)),
+              overlapText(asked, true),
+            ),
+            confirm: m.approveConfirm,
+            cancel: m.back,
+            tone: overlapText(asked, false) === null ? 'neutral' : 'warning',
+            onConfirm: () =>
+              unchanged && asked.status === 'pending' ? onApprove?.(asked) : undefined,
+          }
+        : asking.kind === 'decline'
+          ? {
+              id: `decline:${asked.id}`,
+              title: m.declineTitle(asked.person.name),
+              description: m.declineNote,
+              confirm: m.declineConfirm,
+              cancel: m.back,
+              tone: 'danger',
+              reason: { label: m.reasonLabel, required: true, missing: m.reasonMissing },
+              onConfirm: (reason) =>
+                unchanged && asked.status === 'pending' ? onDecline?.(asked, reason) : undefined,
+            }
+          : {
+              id: `cancel:${asked.id}`,
+              title: m.cancelTitle,
+              description: m.cancelNote(daysText(leaveHalves(asked, calendar))),
+              confirm: m.cancelConfirm,
+              cancel: m.keep,
+              tone: 'danger',
+              reason: { label: m.reasonOptional, missing: m.reasonMissing },
+              onConfirm: (reason) =>
+                unchanged && cancellable(asked) ? onCancel?.(asked, reason) : undefined,
+            };
+  const ask = (kind: 'approve' | 'decline' | 'cancel', request: LeaveRequest) => () => {
+    setAsking({ kind, id: request.id, status: request.status });
   };
 
   const pick = (next: LeaveFilter) => {
@@ -217,10 +275,7 @@ export function LeaveRequests({
             {shown.slice(0, limit).map((request) => {
               const halves = leaveHalves(request, calendar);
               const overlap = request.status === 'pending' ? overlapText(request, false) : null;
-              const canCancel =
-                onCancel !== undefined &&
-                (request.status === 'pending' ||
-                  (request.status === 'approved' && request.start > today));
+              const canCancel = cancellable(request);
               const name = nameOf(request);
               return (
                 <li
@@ -290,61 +345,15 @@ export function LeaveRequests({
                     canCancel={canCancel}
                     onApprove={
                       request.status === 'pending' && onApprove !== undefined
-                        ? () => {
-                            setConfirm({
-                              title: m.approveTitle(request.person.name),
-                              description: m.approveNote(
-                                daysText(halves),
-                                overlapText(request, true),
-                              ),
-                              confirm: m.approveConfirm,
-                              cancel: m.back,
-                              tone: overlap === null ? 'neutral' : 'warning',
-                              onConfirm: () => {
-                                onApprove(request);
-                              },
-                            });
-                          }
+                        ? ask('approve', request)
                         : undefined
                     }
                     onDecline={
                       request.status === 'pending' && onDecline !== undefined
-                        ? () => {
-                            setConfirm({
-                              title: m.declineTitle(request.person.name),
-                              description: m.declineNote,
-                              confirm: m.declineConfirm,
-                              cancel: m.back,
-                              tone: 'danger',
-                              reason: {
-                                label: m.reasonLabel,
-                                required: true,
-                                missing: m.reasonMissing,
-                              },
-                              onConfirm: (reason) => {
-                                onDecline(request, reason);
-                              },
-                            });
-                          }
+                        ? ask('decline', request)
                         : undefined
                     }
-                    onCancel={
-                      canCancel
-                        ? () => {
-                            setConfirm({
-                              title: m.cancelTitle,
-                              description: m.cancelNote(daysText(halves)),
-                              confirm: m.cancelConfirm,
-                              cancel: m.keep,
-                              tone: 'danger',
-                              reason: { label: m.reasonOptional, missing: m.reasonMissing },
-                              onConfirm: (reason) => {
-                                onCancel(request, reason);
-                              },
-                            });
-                          }
-                        : undefined
-                    }
+                    onCancel={canCancel ? ask('cancel', request) : undefined}
                   />
                 </li>
               );
@@ -362,7 +371,7 @@ export function LeaveRequests({
       <ConfirmDialog
         request={confirm}
         onClose={() => {
-          setConfirm(null);
+          setAsking(null);
         }}
       />
     </BlockPanel>
