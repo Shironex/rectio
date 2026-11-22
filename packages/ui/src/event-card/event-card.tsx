@@ -184,9 +184,9 @@ export function EventCard({
       className={cn(
         'group/event relative flex min-w-0 flex-col border text-fg',
         colours.surface,
-        // The dashed edge says tentative, so it is drawn in the tone's mark colour, which holds
-        // 3:1 on the surface, not in the faint tint of a confirmed card.
-        status === 'tentative' && ['border-dashed bg-surface', colours.tentative],
+        // The dashed edge says tentative, so it is drawn twice as wide and in the tone's mark
+        // colour, which holds 3:1 on the surface, not in the faint tint of a confirmed card.
+        status === 'tentative' && ['border-2 border-dashed bg-surface', colours.tentative],
         compact ? 'gap-0.5 overflow-hidden rounded-badge px-2 py-1' : 'gap-2 rounded-control p-3',
         onSelect !== undefined && [
           'transition-transform duration-fast ease-standard',
