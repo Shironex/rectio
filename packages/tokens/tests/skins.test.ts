@@ -458,6 +458,19 @@ describe('the switches a skin turns on', () => {
     expect(tailwind).toMatch(/@property --rx-surface-alpha \{[^}]*inherits: false;/);
     expect(tailwind).toContain('@utility backdrop-surface {');
     expect(tailwind).toContain('backdrop-filter: var(--rx-surface-backdrop, none);');
+    // A card or a block panel takes the translucency with no blur; anything inside a translucent
+    // surface is marked nested, and a nested surface comes out solid.
+    const block = (name: string) => {
+      const at = tailwind.indexOf(`@utility ${name} {`);
+      return tailwind.slice(at, tailwind.indexOf('\n}\n', at));
+    };
+    for (const name of ['translucent-surface', 'backdrop-surface']) {
+      expect(block(name)).toContain(
+        '--rx-surface-alpha: calc(var(--rx-surface-opacity, 1) + (1 - var(--rx-surface-opacity, 1)) * var(--rx-surface-nested, 0));',
+      );
+      expect(block(name)).toMatch(/& \* \{\s*--rx-surface-nested: 1;\s*\}/);
+    }
+    expect(block('translucent-surface')).not.toContain('backdrop-filter');
   });
 });
 

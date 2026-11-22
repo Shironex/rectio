@@ -310,6 +310,9 @@ const COMPOSITE_COLORS: Record<string, string> = {
  * and the theme's soft shadow. In a theme the first two are zero sized, so only the soft one shows;
  * a skin sizes them. Component shadow tokens (popover, dialog, sheet, toast) hold the same layers.
  */
+/** The skin's surface opacity, or fully solid inside another translucent surface. */
+const NESTED_ALPHA =
+  'calc(var(--rx-surface-opacity, 1) + (1 - var(--rx-surface-opacity, 1)) * var(--rx-surface-nested, 0))';
 const HIGHLIGHT =
   'inset 0 var(--rx-shadow-highlight, 0px) 0 0 var(--rx-border-highlight, transparent)';
 /** The wide soft shadow a skin sizes with `shadow.ambient`, twice as far under a popup. */
@@ -466,18 +469,16 @@ function tailwindCss(contract: string[], types: TokenMap): string {
   padding-inline-end: max(calc(var(--spacing) * 14), calc((100% - var(--rx-sheet-measure)) / 2));
 }`;
 
-  const backdrop = `/* How see-through a floating surface is. Not inherited: only the element that blurs its backdrop
-   lets it through, never a sticky row or a field inside it. */
+  const backdrop = `/* How see-through a surface is. Not inherited: only the element that takes the skin's
+   translucency lets it through, never a sticky row or a field inside it. */
 @property --rx-surface-alpha {
   syntax: '<number>';
   inherits: false;
   initial-value: 1;
 }
 
-/* A surface that floats over content (a card, a popup, a sticky header): it takes the skin's
-   translucency and blurs what is behind it. Solid and unfiltered in a theme. */
-/* A page canvas (a theme scope, an app shell): a wash of the accent and info tints in its top
-   corners, as strong as the skin's surface wash says. Transparent in a theme. */
+/* A page canvas (a theme scope, an app shell): pools of the blue and cyan identity tints at its top
+   corners and its foot, as strong as the skin's surface wash says. Transparent in a theme. */
 @utility canvas-wash {
   background-image:
     radial-gradient(72rem 48rem at 0% 0%, color-mix(in oklab, var(--rx-identity-1-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['identity-1-subtle'])}%), transparent), transparent),
@@ -485,10 +486,26 @@ function tailwindCss(contract: string[], types: TokenMap): string {
     radial-gradient(80rem 40rem at 50% 100%, color-mix(in oklab, var(--rx-identity-1-subtle) calc(var(--rx-surface-wash, 0) * ${String(WASH['identity-1-subtle'])}%), transparent), transparent);
 }
 
+/* A surface in the page (a card, a block panel): the skin's translucency over the washed canvas,
+   with no backdrop blur, so scrolling content never blurs. A surface inside another one (a nested
+   card, a card in a dialog) stays solid: the outer one marks everything in it. Solid in a theme. */
+@utility translucent-surface {
+  --rx-surface-alpha: ${NESTED_ALPHA};
+  & * {
+    --rx-surface-nested: 1;
+  }
+}
+
+/* A surface that floats over content (a popup, a dialog, a sheet, a toast, the sticky app header):
+   the same translucency, and it blurs what is behind it. Solid and unfiltered in a theme, and solid
+   inside another surface. */
 @utility backdrop-surface {
-  --rx-surface-alpha: var(--rx-surface-opacity, 1);
+  --rx-surface-alpha: ${NESTED_ALPHA};
   -webkit-backdrop-filter: var(--rx-surface-backdrop, none);
   backdrop-filter: var(--rx-surface-backdrop, none);
+  & * {
+    --rx-surface-nested: 1;
+  }
 }`;
 
   const scrollbar = `/* A row that scrolls sideways without a bar, such as filter tabs on a phone. */
