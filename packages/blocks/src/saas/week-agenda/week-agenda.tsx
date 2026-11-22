@@ -115,18 +115,20 @@ const MAX_COLUMNS = { week: 2, day: 4 } as const;
 /** The narrowest an event beside another may get before the group gathers behind one button. */
 const MIN_COLUMN_PX = 72;
 
-/** The hour gutter, from the gutter width token (3.5rem at the default 16px root). */
-const GUTTER_PX = 56;
-
-/** The width of an element, measured after layout; 0 until then (and on the server). */
-function useWidth() {
+/**
+ * The width the day columns share: the frame less the hour gutter, both measured after layout, so
+ * a skin or an app that changes the gutter token is followed. 0 until then (and on the server).
+ */
+function useDaysWidth() {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   useEffect(() => {
     const element = ref.current;
     if (element === null || typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver(([entry]) => {
-      if (entry !== undefined) setWidth(entry.contentRect.width);
+      if (entry === undefined) return;
+      const gutter = element.querySelector('[data-agenda-gutter]')?.getBoundingClientRect().width;
+      setWidth(Math.max(0, entry.contentRect.width - (gutter ?? 0)));
     });
     observer.observe(element);
     return () => {
@@ -184,9 +186,9 @@ export function WeekAgenda({
   const now = useNow(requestedNow);
   const { Button } = useBlockParts();
   const { Stage } = use(AgendaPartsContext);
-  const [frame, width] = useWidth();
+  const [frame, width] = useDaysWidth();
   // How many events fit side by side in a day column at this width: fewer when it is narrow.
-  const dayWidth = (width - GUTTER_PX) / (variant === 'week' ? 7 : 1);
+  const dayWidth = width / (variant === 'week' ? 7 : 1);
   const maxColumns =
     width === 0
       ? MAX_COLUMNS[variant]
@@ -458,7 +460,7 @@ function AgendaGrid({
       </p>
       {/* Day headings. */}
       <div className="grid border-b border-line" style={columns}>
-        <div aria-hidden />
+        <div aria-hidden data-agenda-gutter="" />
         {days.map((day) => {
           const today = isSameDay(day, now);
           const slot = addSlot(day, now, hours, slotMinutes);
