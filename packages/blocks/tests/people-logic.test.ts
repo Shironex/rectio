@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addDays,
   buildOrg,
+  dayRoom,
   daysBetween,
   formatDayRange,
   formatDuration,
@@ -12,6 +13,7 @@ import {
   leaveOverlaps,
   leaveProblem,
   managerChain,
+  ownLeaveOverlaps,
   parseDuration,
   payrollPayouts,
   reviewPayroll,
@@ -372,5 +374,102 @@ describe('payroll logic', () => {
     expect(payrollPayouts([line({ id: 'j', net: 41_255 })], new Date(), 'JPY')[0]?.amount).toBe(
       41_255,
     );
+  });
+});
+
+describe('people guards', () => {
+  it('treats a day that does not exist as no day, never the next month', () => {
+    expect(isIsoDay('2026-02-30')).toBe(false);
+    expect(isIsoDay('2026-13-01')).toBe(false);
+    expect(weekOf('2026-13-01')).toEqual([]);
+    expect(daysBetween('2026-02-30', '2026-03-05')).toEqual([]);
+  });
+
+  it('refuses a grouped number and one under a minute', () => {
+    expect(parseDuration('1,000')).toEqual({ ok: false, reason: 'ambiguous' });
+    expect(parseDuration('1.000')).toEqual({ ok: false, reason: 'ambiguous' });
+    expect(parseDuration('0.004')).toEqual({ ok: false, reason: 'too-small' });
+    expect(parseDuration('0.008')).toEqual({ ok: false, reason: 'too-small' });
+    // Fractions that are not a thousands group still read as hours.
+    expect(parseDuration('7,5')).toEqual({ ok: true, minutes: 450 });
+    expect(parseDuration('0.25')).toEqual({ ok: true, minutes: 15 });
+    expect(parseDuration('0')).toEqual({ ok: true, minutes: 0 });
+  });
+
+  it('leaves a cell only what the other rows leave of the day', () => {
+    const rows: TimesheetRow[] = [
+      { id: 'a', project: 'A', minutes: { '2026-11-23': 900 } },
+      { id: 'b', project: 'B', minutes: { '2026-11-23': 300 } },
+    ];
+    expect(dayRoom(rows, 'a', '2026-11-23')).toBe(1140);
+    expect(dayRoom(rows, 'b', '2026-11-23')).toBe(540);
+    expect(dayRoom(rows, 'c', '2026-11-23')).toBe(240);
+    expect(dayRoom(rows, 'b', '2026-11-24')).toBe(1440);
+  });
+
+  it('finds the person’s own leave on the same days and refuses booking over it', () => {
+    const own: LeaveRequest[] = [
+      {
+        id: '1',
+        person: { id: 'p', name: 'P' },
+        type: 'a',
+        status: 'pending',
+        start: '2026-12-07',
+        end: '2026-12-10',
+      },
+      {
+        id: '2',
+        person: { id: 'p', name: 'P' },
+        type: 'a',
+        status: 'declined',
+        start: '2026-12-14',
+        end: '2026-12-16',
+      },
+      {
+        id: '3',
+        person: { id: 'q', name: 'Q' },
+        type: 'a',
+        status: 'approved',
+        start: '2026-12-14',
+        end: '2026-12-16',
+      },
+    ];
+    const span = { start: '2026-12-09', end: '2026-12-15' };
+    const overlaps = ownLeaveOverlaps(span, own, 'p');
+    expect(overlaps.map((o) => [o.request.id, o.days])).toEqual([['1', ['2026-12-09']]]);
+    expect(leaveProblem(span, undefined, {}, overlaps)).toBe('own-overlap');
+    expect(ownLeaveOverlaps({ start: '2026-12-14', end: '2026-12-16' }, own, 'p')).toEqual([]);
+  });
+
+  it('refuses a span that ends on or before its start', () => {
+    const span = { start: '2026-12-04', end: '2026-12-04' };
+    expect(leaveHalves(span)).toBe(0);
+    expect(leaveProblem(span, undefined)).toBe('no-range');
+  });
+
+  it('flags negative gross or deductions, repeated ids and totals past exact sums', () => {
+    const line = (id: string, gross: number, deductions: number): PayrollLine => ({
+      id,
+      person: { name: id },
+      gross,
+      deductions,
+      net: gross - deductions,
+      employerCost: Math.max(gross, 0),
+      bankAccount: '•• 1',
+    });
+    const negative = reviewPayroll([line('a', -100, -30), line('b', 100, -50)]);
+    expect(negative.issues.get('a')).toContain('negative-amount');
+    expect(negative.issues.get('b')).toEqual(['negative-amount']);
+    expect(negative.ready).toBe(false);
+
+    const repeated = reviewPayroll([line('a', 100, 0), line('a', 100, 0)]);
+    expect(repeated.issues.get('a')).toEqual(['duplicate-id']);
+    expect(repeated.flagged).toBe(1);
+    expect(repeated.ready).toBe(false);
+
+    const huge = reviewPayroll([line('a', Number.MAX_SAFE_INTEGER, 0), line('b', 10, 0)]);
+    expect(huge.overflow).toBe(true);
+    expect(huge.reconciled).toBe(false);
+    expect(huge.ready).toBe(false);
   });
 });
