@@ -33,9 +33,12 @@ export const TRANSLUCENT = 'translucent';
  * rhythm and control sizes, the surface and shadow switches, plus non-colour component tokens.
  * Colour belongs to the theme and its modes, and motion to them and to reduced motion, so a skin
  * composes with any theme, light or dark, and never changes a contrast pair: the switches only turn
- * on what every theme defines in each of its modes (the edge highlight, the offset shadow colour,
- * the scrim under the ambient shadow, the backdrop blur), and they are plain numbers and lengths, the same in light and dark. A skin may
- * clear the theme's soft shadows, never draw one of its own. A skin may set any subset of these; it
+ * on colours every theme defines in each of its modes (two added for the skins, the edge highlight
+ * `border.highlight` and the offset shadow colour `shadow.offset.color`, plus the existing scrim
+ * under the ambient shadow). The switches are plain numbers and lengths, the same in light and dark;
+ * the one string is the translucent layer's `surface.backdrop`, a filter of `blur()` and
+ * `saturate()` only (see TRANSLUCENT_GROUPS). A skin may clear the theme's soft shadows, never draw
+ * one of its own. A skin may set any subset of these; it
  * never adds a token, and it never sets a touch height. Layout measures such as the alert dialog
  * width, the sheet measure and the tree indent are component dimensions, so a skin may set them.
  */
@@ -60,7 +63,11 @@ export const SKIN_GROUPS: readonly (readonly string[])[] = [
   ['shadow', 'overlay'],
 ];
 
-/** What a translucent layer may set: how see-through floating surfaces are, and their backdrop. */
+/**
+ * What a translucent layer may set: how see-through surfaces are (`surface.opacity`, a number), the
+ * filter floating ones apply to what is behind them (`surface.backdrop`, `blur()` and `saturate()`
+ * only, or `none`) and the blur radius (`surface.blur`, a length).
+ */
 export const TRANSLUCENT_GROUPS: readonly (readonly string[])[] = [
   ['surface', 'opacity'],
   ['surface', 'backdrop'],
@@ -73,6 +80,12 @@ const SKIN_COMPONENT_TYPES = new Set(['dimension', 'fontWeight', 'fontFamily', '
 export function isClearShadow(value: string): boolean {
   const colors = [...value.matchAll(/oklch\([^)]*\)|transparent/g)].map((m) => m[0]);
   return colors.length > 0 && colors.every((c) => c === 'transparent' || c.endsWith('/ 0)'));
+}
+
+/** `none`, or one or more `blur()` and `saturate()` functions (a `var()` inside them allowed). */
+export function isBackdropFilter(value: string): boolean {
+  const fn = String.raw`(?:blur|saturate)\((?:[^()]|\([^()]*\))*\)`;
+  return value.trim() === 'none' || new RegExp(String.raw`^\s*${fn}(?:\s+${fn})*\s*$`).test(value);
 }
 
 const inGroups = (groups: readonly (readonly string[])[], path: readonly string[]) =>
@@ -91,8 +104,12 @@ export function skinViolation(
   // Touch heights hold the 44px target on coarse pointers in every skin: `control.height.touch`,
   // `button.height.touch`, `tree.row-height-touch` and any later one named the same way.
   if (path.some((part) => part === 'touch' || part.endsWith('-touch'))) return 'a touch target';
-  if (layer === 'translucent')
-    return inGroups(TRANSLUCENT_GROUPS, path) ? undefined : 'outside the translucent layer';
+  if (layer === 'translucent') {
+    if (!inGroups(TRANSLUCENT_GROUPS, path)) return 'outside the translucent layer';
+    if (path[0] === 'surface' && path[1] === 'backdrop' && !isBackdropFilter(value))
+      return 'a backdrop filter other than blur() and saturate()';
+    return undefined;
+  }
   if (path[0] === 'component')
     return SKIN_COMPONENT_TYPES.has(type) ? undefined : `a ${type} component token`;
   if (!inGroups(SKIN_GROUPS, path)) return 'outside the skin groups';

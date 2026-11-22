@@ -120,6 +120,16 @@ describe('skin contract', () => {
     expect(touch).toEqual([]);
   });
 
+  it('takes only blur() and saturate() as a backdrop filter', () => {
+    const at = (value: string) =>
+      skinViolation(['surface', 'backdrop'], 'other', value, 'translucent');
+    expect(at('blur(var(--rx-surface-blur)) saturate(1.6)')).toBeUndefined();
+    expect(at('none')).toBeUndefined();
+    expect(at('blur(2px) drop-shadow(0 0 2px red)')).toBeDefined();
+    expect(at('url(#filter)')).toBeDefined();
+    expect(at('brightness(2)')).toBeDefined();
+  });
+
   it('rejects touch heights, allows layout measures', () => {
     expect(skinViolation(['control', 'height', 'touch'], 'dimension')).toBeDefined();
     expect(skinViolation(['component', 'button', 'height', 'touch'], 'dimension')).toBeDefined();
