@@ -65,6 +65,19 @@ describe('applyStreamEvent', () => {
     // Nothing to change: the same array comes back, so a setState updater skips the render.
     expect(applyStreamEvent(started, { type: 'start', id: 'a1' })).toBe(started);
     expect(applyStreamEvent(started, { type: 'text', id: 'nope', delta: 'x' })).toBe(started);
+    // An end with no reasoning to end, and a source it already has: the same array too.
+    expect(applyStreamEvent(started, { type: 'reasoning-end', id: 'a1', duration: 2 })).toBe(
+      started,
+    );
+    const sourced = applyStreamEvent(started, {
+      type: 'source',
+      id: 'a1',
+      source: { id: 's', title: 'AP' },
+    });
+    expect(sourced).not.toBe(started);
+    expect(
+      applyStreamEvent(sourced, { type: 'source', id: 'a1', source: { id: 's', title: 'AP' } }),
+    ).toBe(sourced);
   });
 
   it('ignores every late event once a reply is done, stopped or failed', () => {

@@ -32,7 +32,13 @@ function patch(
   id: string,
   change: (turn: AiChatTurn) => AiChatTurn,
 ): AiChatTurn[] {
-  return turns.map((turn) => (turn.id === id ? change(turn) : turn));
+  const index = turns.findIndex((turn) => turn.id === id);
+  const target = turns[index];
+  if (target === undefined) return turns as AiChatTurn[];
+  const next = change(target);
+  // Nothing changed (a duplicate source, say): the same array, so nothing renders again.
+  if (next === target) return turns as AiChatTurn[];
+  return turns.map((turn, at) => (at === index ? next : turn));
 }
 
 /** A reasoning still running ends when the words start, the reply ends or it fails. */
