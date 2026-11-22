@@ -50,7 +50,8 @@ hold the reply's place between sending and the first words. A failed turn shows 
 Retry. The empty thread offers suggestions; a chip sends its prompt.
 
 Write `[1](#source-1)` in a reply to cite its first source: the link becomes a numbered chip that
-opens that source. Pass `code` to render fenced code your own way, `composer` for the field's props (attachments,
+opens that source; a number with no source behind it shows as plain words. A reply that fails to
+draw falls back to its text without touching the rest of the thread. Pass `code` to render fenced code your own way, `composer` for the field's props (attachments,
 limits, placeholder, tools), `header` for a title bar, and `messages` for every word.
 
 ## Props
