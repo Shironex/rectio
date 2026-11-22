@@ -91,11 +91,12 @@ const SEQUENCE = [
 ] as const;
 
 /**
- * Text over each sequence step (a figure in a heatmap cell): the dark or the light ink, whichever
- * holds more contrast against that step.
+ * Text over sequence steps 2 to 5 (a figure in a heatmap cell): the dark or the light ink, whichever
+ * holds more contrast against that step. Step 1 is the brand at mid lightness, where neither ink
+ * reaches 4.5:1 for every brand, so it gets no text token and nothing prints on it.
  */
 function onSequence(t: TokenSet, dark: Oklch, light: Oklch) {
-  for (let step = 1; step <= 5; step += 1) {
+  for (let step = 2; step <= 5; step += 1) {
     const fill = t.get(`--rx-chart-sequence-${String(step)}`);
     if (fill === undefined) continue;
     t.set(

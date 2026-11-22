@@ -470,18 +470,12 @@
       }
     },
     "on-sequence": {
-      "1": {
-        "$value": {
-          "colorSpace": "oklch",
-          "components": [0.13, 0.006, 75]
-        },
-        "$description": "Text over each sequence step, such as a figure printed in a heatmap cell. Holds 4.5:1 against its step."
-      },
       "2": {
         "$value": {
           "colorSpace": "oklch",
           "components": [0.13, 0.006, 75]
-        }
+        },
+        "$description": "Text over sequence steps 2 to 5, such as a figure printed in a heatmap cell. Holds 4.5:1 against its step. Step 1 follows the brand colour, so no text token is made for it."
       },
       "3": {
         "$value": {

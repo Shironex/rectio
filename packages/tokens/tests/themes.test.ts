@@ -136,8 +136,8 @@ describe('chart colours', () => {
     expect(failures).toEqual([]);
   });
 
-  it.each(themeModes)('$key text over each sequence step holds 4.5:1', ({ tokens }) => {
-    const failures = SEQUENCE.flatMap((step) => {
+  it.each(themeModes)('$key text over sequence steps 2 to 5 holds 4.5:1', ({ tokens }) => {
+    const failures = SEQUENCE.slice(1).flatMap((step) => {
       const ratio = contrast(
         parse(tokens[`--rx-${step.replace('sequence', 'on-sequence')}`]),
         parse(tokens[`--rx-${step}`]),
@@ -145,6 +145,10 @@ describe('chart colours', () => {
       return ratio >= 4.5 ? [] : [`${step}: ${ratio.toFixed(2)}`];
     });
     expect(failures).toEqual([]);
+  });
+
+  it.each(themeModes)('$key makes no text token for the brand sequence step', ({ tokens }) => {
+    expect(tokens['--rx-chart-on-sequence-1']).toBeUndefined();
   });
 
   it.each(themeModes)('$key neighbouring sequence steps stay apart', ({ tokens }) => {
