@@ -148,6 +148,9 @@ export function derive(p: Preset, mode: Mode): TokenSet {
       set(`${role}-strong`, warn ? o(0.375, 0.0845, 64.7) : o(0.455, solidC[role] * 0.86, hue));
       set(`${role}-contrast`, warn ? n(0.178) : n(0.995));
     }
+    // The warning fill is light, for dark ink on it; a mark drawn on a surface (a rating star) needs
+    // a deeper amber that still reads as gold rather than the brown of the strong step.
+    set('warning-mark', o(0.62, 0.1351, 69.1));
     set('negative-hover', o(0.455, 0.1688, STATUS.negative));
     set('scrim', o(0.18, 0.008, nh, 0.36));
     set('chart-series-1', inkStyle ? ink(0.375) : brand(0.53, bc));
@@ -201,8 +204,9 @@ export function derive(p: Preset, mode: Mode): TokenSet {
   set('surface-hover', n(D + s4));
   set('surface-inset', n(D + s4 - 0.005));
   set('surface-selected', o(D + s4 + (p.selectedStep ?? 0.025), selC, bh));
-  set('surface-placeholder', n(D + s4 + 0.02));
-  set('surface-placeholder-shine', n(D + s4 + 0.13));
+  // A skeleton reads as a shape on raised surfaces too, about as far off them as in light mode.
+  set('surface-placeholder', n(D + s4 + 0.05));
+  set('surface-placeholder-shine', n(D + s4 + 0.15));
   set('text', ink(text));
   set('text-muted', ink(text - 0.13));
   set('text-subtle', ink(text - 0.22));
@@ -248,6 +252,7 @@ export function derive(p: Preset, mode: Mode): TokenSet {
     set(`${role}-strong`, o(warn ? 0.86 : 0.83, warn ? 0.12 : 0.09, hue));
     set(`${role}-contrast`, ink(0.19));
   }
+  set('warning-mark', o(solid.warning[0] ?? 0.8, solid.warning[1] ?? 0.15, STATUS.warning));
   set('negative-hover', o(0.76, 0.16, STATUS.negative));
   set('scrim', o(0.08, 0.005, nh, 0.64));
   // Series hold at least 0.1 of lightness apart, so they separate in greyscale and for every

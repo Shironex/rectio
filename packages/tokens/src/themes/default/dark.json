@@ -54,14 +54,14 @@
     "placeholder": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.295, 0.006, 75]
+        "components": [0.325, 0.006, 75]
       },
       "$description": "A skeleton shape or the empty track of a bar, ring or gauge: one step off the surface it sits on, lighter in dark mode, darker in light."
     },
     "placeholder-shine": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.405, 0.006, 75]
+        "components": [0.425, 0.006, 75]
       },
       "$description": "The light that sweeps across a skeleton shape."
     }
@@ -98,7 +98,7 @@
     "default": {
       "$value": {
         "colorSpace": "oklch",
-        "components": [0.305, 0.006, 75]
+        "components": [0.34, 0.006, 75]
       }
     },
     "strong": {
@@ -227,6 +227,13 @@
         "components": [0.86, 0.1128, 72]
       }
     },
+    "mark": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [0.8, 0.15, 72]
+      },
+      "$description": "A warning-hued mark drawn on a surface, such as a filled rating star: holds 3:1 there."
+    },
     "contrast": {
       "$value": {
         "colorSpace": "oklch",
@@ -318,7 +325,7 @@
             "unit": "px"
           },
           "offsetY": {
-            "value": 0,
+            "value": 1,
             "unit": "px"
           },
           "blur": {
@@ -326,9 +333,10 @@
             "unit": "px"
           },
           "spread": {
-            "value": 1,
+            "value": 0,
             "unit": "px"
-          }
+          },
+          "inset": true
         }
       ]
     },

@@ -35,7 +35,9 @@ const here = dirname(fileURLToPath(import.meta.url));
  * cobalt kept as a mid solid under near-white ink, as in light. Tuned after review: the overlay tier
  * sits a full step above raised so popovers, menus and toasts float; hover sits above it; the accent
  * tint is low in chroma so unread rows and highlighted options do not turn cool on warm surfaces;
- * the solid is a touch lighter so marks hold 3:1 on the lifted fills while white ink keeps 4.5:1.
+ * the solid is a touch lighter so marks hold 3:1 on the lifted fills while white ink keeps 4.5:1;
+ * hairlines and skeletons sit as far off the raised surface as in light, so cards and panels keep
+ * their edge.
  */
 export const GRAPHITE: Preset = {
   name: 'graphite',
@@ -50,7 +52,7 @@ export const GRAPHITE: Preset = {
   selectedChroma: 0.035,
   selectedStep: 0.005,
   subtleChroma: 0.022,
-  borderL: 0.305,
+  borderL: 0.34,
   seriesL: 0.62,
   seriesChroma: 0.145,
   flatHover: true,

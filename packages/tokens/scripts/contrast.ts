@@ -133,10 +133,13 @@ const UI_EDGES = new Set([
   'negative',
   'negative-strong',
   'positive',
+  'info',
   'warning-strong',
+  'warning-mark',
   'focus',
 ]);
-const SOLID_MARK = /^(accent|positive|negative|warning|info)$/;
+// warning-mark is a mark by name: an amber for stars and icons drawn on a surface.
+const SOLID_MARK = /^(accent|positive|negative|warning|info|warning-mark)$/;
 
 /** Ink that only ever sits on one fill. */
 function partners(token: string): string[] | undefined {
