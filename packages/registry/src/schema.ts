@@ -54,6 +54,7 @@ export const itemTypeSchema = z.enum([
   'component',
   'block',
   'theme',
+  'skin',
   'lib',
   'hook',
   'style',
@@ -62,8 +63,9 @@ export const itemTypeSchema = z.enum([
 export type ItemType = z.infer<typeof itemTypeSchema>;
 
 /**
- * `style` and `theme` files are CSS the CLI imports from the project's CSS entry: themes first,
- * then styles, so the base layer (density, reduced motion) wins over a theme at equal specificity.
+ * `style`, `theme` and `skin` files are CSS the CLI imports from the project's CSS entry: themes
+ * first, then skins, then styles, so a skin wins over a theme and the base layer (density, reduced
+ * motion) wins over both at equal specificity.
  * `template` files make up a new project and are written once, by `rectio init --template`.
  */
 export const fileTypeSchema = z.enum([
@@ -72,6 +74,7 @@ export const fileTypeSchema = z.enum([
   'lib',
   'hook',
   'theme',
+  'skin',
   'style',
   'template',
 ]);
@@ -155,6 +158,13 @@ export const themeMetaSchema = z.object({
   densities: z.array(z.string()),
 });
 
+export const skinMetaSchema = z.object({
+  /** The `data-skin` value. */
+  id: z.string().min(1),
+  /** Token names the skin sets, for docs and the MCP server. */
+  tokens: z.array(z.string()),
+});
+
 /**
  * One installable unit. A superset of the common registry item shape where the fields overlap
  * (name, type, title, description, dependencies, registryDependencies, files, cssVars, docs,
@@ -180,6 +190,7 @@ export const registryItemSchema = z
     /** Token additions: the CLI writes them as a generated style file. */
     cssVars: cssVarsSchema.optional(),
     theme: themeMetaSchema.optional(),
+    skin: skinMetaSchema.optional(),
     template: templateMetaSchema.optional(),
     /** Printed after install. */
     docs: z.string().optional(),
