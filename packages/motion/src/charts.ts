@@ -14,3 +14,7 @@ export { LineChart, type LineChartProps } from './line-chart/line-chart';
 export { AreaChart, type AreaChartProps } from './area-chart/area-chart';
 export { BarChart, type BarChartProps } from './bar-chart/bar-chart';
 export { DonutChart, type DonutChartProps } from './donut-chart/donut-chart';
+export { FunnelChart, type FunnelChartProps } from './funnel-chart/funnel-chart';
+export { Heatmap, type HeatmapProps } from './heatmap/heatmap';
+export { WaterfallChart, type WaterfallChartProps } from './waterfall-chart/waterfall-chart';
+export { RadialGauge, type RadialGaugeProps } from './radial-gauge/radial-gauge';

@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { cssEasing, useFirstView } from '../lib/first-view';
 import { usePlainMotion } from '../lib/mode';
-import { readMotionTokens, type Bezier } from '../lib/tokens';
+import { readMotionTokens, type Bezier, type MotionTokens } from '../lib/tokens';
 
 /**
  * The motion parts of the charts. The entrance plays once, the first time a chart is seen: lines
@@ -18,6 +18,8 @@ import { readMotionTokens, type Bezier } from '../lib/tokens';
 const LINES = '.recharts-line, .recharts-line-dots, .recharts-area';
 const BARS = '.recharts-bar-rectangle path, .recharts-bar-rectangle rect';
 const SECTORS = '.recharts-pie-sector';
+/** The moving parts of the SVG and HTML charts (funnel, heatmap, gauge), named by their entrance. */
+const MARKS = '.rx-mark';
 /** Bars arrive one after another, but the whole set lands within this many steps of the first. */
 const STAGGER_STEPS = 8;
 
@@ -34,7 +36,15 @@ function enter(
   let frame = 0;
   let tries = 0;
   const start = () => {
-    const marks = root.querySelectorAll(kind === 'donut' ? SECTORS : kind === 'bar' ? BARS : LINES);
+    const marks = root.querySelectorAll(
+      kind === 'donut'
+        ? SECTORS
+        : kind === 'bar'
+          ? BARS
+          : kind === 'line' || kind === 'area'
+            ? LINES
+            : MARKS,
+    );
     // A responsive chart draws after it has measured itself: wait a few frames for the marks.
     if (marks.length === 0 && tries < 30) {
       tries += 1;
@@ -77,11 +87,14 @@ function enter(
       [...root.querySelectorAll<SVGGraphicsElement>(BARS)].forEach((bar, index) => {
         const box = bar.getBBox();
         // Bars on the negative side grow away from the zero line too.
+        // A waterfall's decrease starts at its top and falls, so it grows down from there.
+        const falls = bar.closest('[data-dir]')?.getAttribute('data-dir') === 'down';
         const below =
-          zero !== undefined &&
-          (horizontal
-            ? box.x + box.width <= zero.x + 0.5 && box.width > 0
-            : box.y >= zero.y - 0.5 && box.height > 0);
+          falls ||
+          (zero !== undefined &&
+            (horizontal
+              ? box.x + box.width <= zero.x + 0.5 && box.width > 0
+              : box.y >= zero.y - 0.5 && box.height > 0));
         // Not animatable themselves: set on the bar so the scale grows from the zero line.
         bar.style.transformBox = 'fill-box';
         bar.style.transformOrigin = horizontal
@@ -103,6 +116,8 @@ function enter(
           ),
         );
       });
+    } else if (kind === 'funnel' || kind === 'heatmap' || kind === 'gauge') {
+      animations.push(...markEntrance(root, tokens, ease, step));
     } else {
       [...root.querySelectorAll<SVGGraphicsElement>(SECTORS)].forEach((sector, index) => {
         sector.style.transformBox = 'view-box';
@@ -136,6 +151,69 @@ function enter(
     for (const animation of animations) animation.cancel();
     for (const stop of tips) stop();
   };
+}
+
+/**
+ * The entrance of the marks a chart names with `data-chart-mark`: bars grow from their start edge
+ * one after another, faded parts come in after them, an arc draws along its length, and a grid is
+ * uncovered from its start side in one sweep (one animation, however many cells it has).
+ */
+function markEntrance(
+  root: HTMLElement,
+  tokens: MotionTokens,
+  ease: string,
+  step: number,
+): Animation[] {
+  const animations: Animation[] = [];
+  const slow = tokens.duration.slow * 1000;
+  let grown = 0;
+  for (const mark of root.querySelectorAll<HTMLElement | SVGElement>(MARKS)) {
+    const kind = mark.dataset.chartMark;
+    if (kind === 'grow-x' || kind === 'grow-y') {
+      mark.style.transformOrigin = kind === 'grow-x' ? 'left center' : 'center bottom';
+      if (getComputedStyle(mark).direction === 'rtl' && kind === 'grow-x')
+        mark.style.transformOrigin = 'right center';
+      animations.push(
+        mark.animate(
+          [{ transform: kind === 'grow-x' ? 'scaleX(0)' : 'scaleY(0)' }, { transform: 'none' }],
+          {
+            duration: slow,
+            easing: ease,
+            delay: Math.min(grown, STAGGER_STEPS) * step,
+            fill: 'backwards',
+          },
+        ),
+      );
+      grown += 1;
+    } else if (kind === 'fade') {
+      animations.push(
+        mark.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: slow,
+          easing: ease,
+          delay: Math.min(grown, STAGGER_STEPS) * step,
+          fill: 'backwards',
+        }),
+      );
+    } else if (kind === 'sweep') {
+      const to = mark.getAttribute('stroke-dasharray') ?? '0 100';
+      animations.push(
+        mark.animate([{ strokeDasharray: '0 100' }, { strokeDasharray: to }], {
+          duration: tokens.duration.count * 1000,
+          easing: cssEasing(root, 'settle'),
+          fill: 'backwards',
+        }),
+      );
+    } else if (kind === 'reveal') {
+      animations.push(
+        mark.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], {
+          duration: tokens.duration.count * 1000,
+          easing: cssEasing(root, 'settle'),
+          fill: 'backwards',
+        }),
+      );
+    }
+  }
+  return animations;
 }
 
 /**
@@ -261,6 +339,7 @@ export function ChartMotionParts({ children }: { children: ReactNode }) {
             'data-[enter=waiting]:[&_.recharts-area]:opacity-0',
             'data-[enter=waiting]:[&_.recharts-bar-rectangle]:opacity-0',
             'data-[enter=waiting]:[&_.recharts-pie-sector]:opacity-0',
+            'data-[enter=waiting]:[&_.rx-mark]:opacity-0',
             className,
           )}
         >

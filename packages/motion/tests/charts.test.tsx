@@ -5,8 +5,12 @@ import {
   AreaChart,
   BarChart,
   DonutChart,
+  FunnelChart,
+  Heatmap,
   LineChart,
   MotionPreferenceProvider,
+  RadialGauge,
+  WaterfallChart,
 } from '../src/charts';
 import { bezier } from '../src/chart/chart';
 import { Sparkline } from '../src/index';
@@ -95,5 +99,46 @@ describe('motion charts', () => {
     render(<Sparkline data={[1, 2, 3]} label="Trend" />);
     expect(screen.getByRole('img', { name: 'Trend' })).toBeInTheDocument();
     expect(animate).not.toHaveBeenCalled();
+  });
+
+  it('render the funnel, heatmap, waterfall and gauge with their figures and entrances', () => {
+    browser();
+    const { container } = render(
+      <>
+        <FunnelChart
+          data={[
+            { id: 'a', label: 'Visits', value: 100 },
+            { id: 'b', label: 'Paid', value: 20 },
+          ]}
+        />
+        <Heatmap
+          rows={[{ id: 'r', label: 'Mon' }]}
+          columns={[{ id: 'c', label: '9:00' }]}
+          data={[{ row: 'r', column: 'c', value: 4 }]}
+        />
+        <WaterfallChart
+          data={[
+            { id: 'o', label: 'Open', value: 10, kind: 'start' },
+            { id: 'e', label: 'Close', kind: 'end' },
+          ]}
+        />
+        <RadialGauge label="Quota" value={40} max={100} />
+      </>,
+    );
+    expect(screen.getAllByRole('table')).toHaveLength(3);
+    expect(screen.getByRole('meter', { name: 'Quota' })).toBeInTheDocument();
+    // Funnel bars and drop-off band, the heatmap grid and the gauge arc name their entrance.
+    const marks = [...container.querySelectorAll<HTMLElement>('.rx-mark')].map(
+      (mark) => mark.dataset.chartMark,
+    );
+    expect(marks).toEqual(expect.arrayContaining(['grow-x', 'fade', 'reveal', 'sweep']));
+    // The waterfall's bars wait for their entrance until Recharts has drawn them.
+    expect(container.querySelector('[data-enter="waiting"]')).not.toBeNull();
+  });
+
+  it('render the new charts plain under reduced motion', () => {
+    browser({ reduce: true });
+    const { container } = render(<RadialGauge label="Quota" value={40} max={100} />);
+    expect(container.querySelector('[data-enter]')).toBeNull();
   });
 });
