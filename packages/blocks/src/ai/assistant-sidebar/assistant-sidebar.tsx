@@ -220,7 +220,7 @@ export function AssistantSidebarTrigger({
           />
         }
       >
-        {children ?? <SparkleIcon aria-hidden weight="bold" className="size-4.5" />}
+        {children ?? <SparkleIcon aria-hidden weight="fill" className="size-4" />}
       </TooltipTrigger>
       <TooltipContent side="bottom" {...(shortcut === null ? {} : { shortcut })}>
         {label}
