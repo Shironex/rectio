@@ -100,6 +100,16 @@ summary: Work that is merging into main now and ships with the next release.
   ThemeScope and AppShell its canvas wash through `canvas-wash`. Both do nothing in a theme or any
   other skin (card 0.2.0, popover 0.2.0, select 0.2.0, date-picker 0.4.0, dialog 0.3.0,
   command-menu 0.2.0, sheet 0.3.0, toast 0.3.0, app-shell 0.2.0, theme-scope 0.2.0).
+- Outline cards, block panels and the plan cards of the pricing table take `shadow-panel`: nothing
+  in a theme, the edge highlight and a wide soft shadow under glass. Block panels also take the
+  glass backdrop (card 0.2.0, blocks-core 0.1.7, pricing-table 0.1.1).
+- Switch, slider and segmented control thumbs take `shadow-indicator`, so an offset or ambient
+  shadow never spills out of the track (switch 0.1.2, slider 0.1.2, tabs 0.1.5, toggle 0.2.2,
+  motion toggle 0.2.1, cn 0.3.0).
+- Disabled controls keep a plain edge through `border-line-disabled`, and tinted badges read their
+  edge from `--rx-badge-edge`, so under brutalist a disabled control reads apart by its edge and a
+  badge takes the ink edge in its tone (badge 0.1.2, button 0.2.3, checkbox 0.2.2, field 0.2.2,
+  input-group 0.1.2, file-upload 0.1.4, prompt-input 0.1.1, radio-group 0.1.2, tag-input 0.1.3).
 
 ## Templates
 
@@ -116,14 +126,15 @@ summary: Work that is merging into main now and ships with the next release.
   generator.
 
 - Two opt-in skins. `glass`: translucent cards, popups and headers over a blurred backdrop, a light
-  top edge, rounder corners and a soft tinted canvas, solid wherever the browser cannot blur or
+  top edge, a wide soft shadow, rounder corners and a tinted canvas, solid wherever the browser cannot blur or
   transparency is reduced (`skin-glass`). `brutalist`: two pixel ink borders, square corners, hard
   offset shadows and heavier type, with focus rings kept clear of the shadows (`skin-brutalist`).
 - Every theme defines the colours those skins turn on, in each mode: an edge highlight
   (`--rx-border-highlight`) and an offset shadow colour (`--rx-shadow-offset-color`), plus the
-  switches a skin sets (surface opacity, blur, backdrop and wash, border ink, highlight and offset
-  sizes), all off in the theme (tokens 0.7.0, theme-default 0.5.0). Fields take their edge from
-  `--rx-field-border`, which follows the border ink.
+  switches a skin sets (surface opacity, blur, backdrop and wash, border ink, highlight, ambient
+  and offset sizes), all off in the theme (tokens 0.7.0, theme-default 0.5.0). Fields take their
+  edge from `--rx-field-border`, which follows the border ink. Field and table touch heights grow
+  by any border wider than 1px, so their inner targets stay 44px.
 
 ## CLI
 
