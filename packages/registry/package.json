@@ -43,6 +43,6 @@
     "@rectio/tokens": "workspace:*",
     "@rectio/ui": "workspace:*",
     "@types/node": "^22.20.5",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.1"
   }
 }
